@@ -285,7 +285,7 @@ public class MigrationCreator
             data.WriteXml(file, XmlWriteMode.WriteSchema);
             data.Clear();
 
-            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file);
+            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, t => { });
         }
     }
 
@@ -382,7 +382,7 @@ public class MigrationCreator
                 {
                     var f = (BackupFileInfo)state;
                     using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
-                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream);
+                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, t => { });
                 }, file, 5);
             }
             Console.WriteLine($"end backup fileGroup: {group.Key}");
@@ -397,7 +397,7 @@ public class MigrationCreator
         using (var tmpFile = _tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => { });
         }
         Console.WriteLine($"end backup storage");
     }
