@@ -34,7 +34,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly CommonChunkedUploadSessionHolder _sessionHolder;
     private readonly SHA256 _sha;
     private Stream _fileStream;
-    protected const int TasksLimit = 10;
+    private const int TasksLimit = 10;
     private readonly List<Task> _tasks = new(TasksLimit);
     private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;

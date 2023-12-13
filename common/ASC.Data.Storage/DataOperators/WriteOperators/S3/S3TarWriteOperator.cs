@@ -135,23 +135,20 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async ValueTask DisposeAsync()
     {
-        if (_tasks.Count != 0)
+        try
         {
-            try
+            Task.WaitAll(_tasks.ToArray());
+            _tasks.Clear();
+        }
+        catch
+        {
+            for (var i = 1; i <= Limit; i++)
             {
-                Task.WaitAll(_tasks.ToArray());
-                _tasks.Clear();
+                await _store.DeleteAsync(_domain, _key + i);
             }
-            catch
-            {
-                for (var i = 1; i <= Limit; i++)
-                {
-                    await _store.DeleteAsync(_domain, _key + i);
-                }
-                var task = _tasks.First(t => t.Exception != null);
-                _cts.Cancel();
-                throw task.Exception;
-            }
+            var task = _tasks.First(t => t.Exception != null);
+            _cts.Cancel();
+            throw task.Exception;
         }
         
         for (var i = 1; i <= Limit; i++)
