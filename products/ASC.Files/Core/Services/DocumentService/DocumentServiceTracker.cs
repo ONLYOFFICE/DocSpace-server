@@ -322,9 +322,15 @@ public class DocumentServiceTrackerHelper
 
         await _socketManager.StartEditAsync(fileId);
 
-        if (file != null && fileData.Actions is { Count: > 0 })
+        if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {
+            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId))
+            {
+                await _securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+            }
+
             await _filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            _securityContext.Logout();
         }
     }
 
