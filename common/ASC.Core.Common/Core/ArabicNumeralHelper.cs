@@ -24,40 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
+namespace ASC.Core.Common;
 
-[Scope]
-public class BackupRestoreRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
-        ILogger logger,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        AuthManager authManager,
-        BackupWorker backupWorker)
-    : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
+public static class ArabicNumeralHelper
 {
-    public async Task Handle(BackupRestoreRequestIntegrationEvent @event)
+    public static string ConvertNumerals(this DateTime input, string format)
     {
-        CustomSynchronizationContext.CreateContext();
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
         {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
-            {
-                throw new IntegrationEventRejectExeption(@event.Id);
-            }
-
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-
-            await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
-                                            @event.StorageType,
-                                            @event.StorageParams,
-                                            @event.Notify,
-                                            @event.ServerBaseUri);
-
-            await Task.CompletedTask;
+            return input.ToString(format, CultureInfo.InvariantCulture);
         }
+        
+        var result = input.ToString(format, new CultureInfo("ar"));
+        return result
+            .Replace('0', '\u06f0')
+            .Replace('1', '\u06f1')
+            .Replace('2', '\u06f2')
+            .Replace('3', '\u06f3')
+            .Replace('4', '\u06f4')
+            .Replace('5', '\u06f5')
+            .Replace('6', '\u06f6')
+            .Replace('7', '\u06f7')
+            .Replace('8', '\u06f8')
+            .Replace('9', '\u06f9');
+
     }
 }

@@ -161,7 +161,15 @@ public class SettingsController(MessageService messageService,
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(configuration["plugins:upload"], out var pluginsUpload))
+            {
+                settings.Plugins.Upload = pluginsUpload;
+            }
+
+            if (bool.TryParse(configuration["plugins:delete"], out var pluginsDelete))
+            {
+                settings.Plugins.Delete = pluginsDelete;
+            }
 
             var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
@@ -296,9 +304,9 @@ public class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
