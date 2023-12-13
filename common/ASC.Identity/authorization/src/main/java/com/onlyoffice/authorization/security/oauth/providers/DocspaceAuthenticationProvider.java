@@ -16,11 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,52 +27,36 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class DocspaceAuthenticationProvider implements AuthenticationProvider {
-    private final String CLIENT_ID_COOKIE = "client_id";
-    private final String ASC_AUTH_COOKIE = "asc_auth_key";
     private final DocspaceClient docspaceClient;
     private final ClientPersistenceQueryUsecases queryUsecases;
 
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
         log.info("Trying to authenticate a user");
-        var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest();
+        var clientId = (String) authentication.getPrincipal();
+        var authCookie = (jakarta.servlet.http.Cookie) authentication.getCredentials();
 
-        var clientCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase(CLIENT_ID_COOKIE))
-                .findFirst();
-
-        if (clientCookie.isEmpty()) {
-            log.warn("Docspace client cookie is empty");
-            throw new BadCredentialsException("Docspace client cookie is empty");
-        }
-
-        MDC.put("client_id", clientCookie.get().getValue());
+        MDC.put("client_id", clientId);
         log.info("Trying to get client by client id");
         MDC.clear();
-        var client = queryUsecases.getClientByClientId(clientCookie.get().getValue());
 
-        var authCookie = Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
-                .findFirst();
+        var client = queryUsecases.getClientByClientId(clientId);
 
-        if (authCookie.isEmpty()) {
-            log.warn("Docspace authorization cookie is empty");
-            throw new BadCredentialsException("Docspace authorization cookie is empty");
-        }
-
-        MDC.put("cookie", authCookie.get().getValue());
-        log.debug("Trying to validate a Docspace authorization");
+        MDC.put("cookie", authCookie.getValue());
+        log.debug("Trying to validate an ASC authorization");
         MDC.clear();
 
-        var cookie = String.format("%s=%s", authCookie.get().getName(),
-                authCookie.get().getValue());
+        var cookie = String.format("%s=%s", authCookie.getName(),
+                authCookie.getValue());
 
         MDC.put("tenant_url", client.getTenantUrl());
         log.info("Trying to get current user profile");
         MDC.clear();
+
         var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie);
-        if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
-            throw new BadCredentialsException("Invalid docspace authorization");
+        if (me == null || me.getStatusCode() != HttpStatus.OK.value())
+            throw new BadCredentialsException("Invalid ASC authorization");
+
         var authenticationToken = new UsernamePasswordAuthenticationToken(me.getResponse()
                 .getEmail(), null, List.of(new TenantAuthority(client.getTenantUrl())));
         authenticationToken.setDetails(me.getResponse().getId());

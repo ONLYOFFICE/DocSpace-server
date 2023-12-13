@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.onlyoffice.authorization.security.crypto.jwks.JwksKeyPairGenerator;
+import com.onlyoffice.authorization.security.oauth.filters.AnonymousReplacerAuthenticationFilter;
 import com.onlyoffice.authorization.security.oauth.providers.DocspaceAuthenticationProvider;
 import jakarta.servlet.RequestDispatcher;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.security.NoSuchAlgorithmException;
@@ -54,6 +56,7 @@ public class AuthorizationServerConfiguration {
     private final DocspaceAuthenticationProvider authenticationProvider;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final AuthenticationFailureHandler authenticationFailureHandler;
+    private final AnonymousReplacerAuthenticationFilter authenticationFilter;
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -74,6 +77,7 @@ public class AuthorizationServerConfiguration {
             RequestDispatcher dispatcher = request.getRequestDispatcher(applicationConfiguration.getLogin());
             dispatcher.forward(request, response);
         }, new AntPathRequestMatcher(applicationConfiguration.getLogin())));
+        http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
         http.cors(c -> c.disable());
         http.csrf(c -> c.disable());
