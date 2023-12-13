@@ -1081,7 +1081,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 linkedFile.ParentId = folderIfNew.Id;
             }
 
-            linkedFile = serviceProvider.GetService<File<T>>();
             linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
             linkedFile.FileStatus = sourceFile.FileStatus;
             linkedFile.ConvertedType = sourceFile.ConvertedType;
