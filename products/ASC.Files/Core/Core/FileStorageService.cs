@@ -1075,6 +1075,7 @@ public class FileStorageService //: IFileStorageService
             if (file != null)
             {
                 await _filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
+                await _socketManager.UpdateFileAsync(file);
             }
 
             return file;
