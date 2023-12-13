@@ -31,12 +31,7 @@ using ResumableUploadSessionStatus = ASC.Files.Thirdparty.OneDrive.ResumableUplo
 namespace ASC.Files.Core.Core.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
-{
-    private readonly SetupInfo _setupInfo;
-    private readonly TempPath _tempPath;
-
-    public OneDriveFileDao(UserManager userManager,
+internal class OneDriveFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<Item, Item, Item> daoSelector,
         CrossDao crossDao,
@@ -44,15 +39,12 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
         IDaoBase<Item, Item, Item> dao,
         SetupInfo setupInfo,
         TempPath tempPath,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _setupInfo = setupInfo;
-        _tempPath = tempPath;
-    }
-
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<Item, Item, Item>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false };
         }
@@ -78,7 +70,7 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
         }
         else
         {
-            uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+            uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);

@@ -189,16 +189,13 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
 
         var locked = jsonFile.Value<JObject>("lock");
-        if (locked != null)
+        var lockedBy = locked?.Value<JObject>("created_by");
+        if (lockedBy != null)
         {
-            var lockedBy = locked.Value<JObject>("created_by");
-            if (lockedBy != null)
-            {
-                var lockedUserId = lockedBy.Value<string>("id");
-                _logger.DebugBoxAppLockedBy(lockedUserId);
+            var lockedUserId = lockedBy.Value<string>("id");
+            _logger.DebugBoxAppLockedBy(lockedUserId);
 
-                editable = await CurrentUserAsync(lockedUserId);
-            }
+            editable = await CurrentUserAsync(lockedUserId);
         }
 
         return (file, editable);
@@ -499,7 +496,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 FirstName = boxUserInfo.Value<string>("name"),
                 Email = email,
-                MobilePhone = boxUserInfo.Value<string>("phone"),
+                MobilePhone = boxUserInfo.Value<string>("phone")
             };
 
             var cultureName = boxUserInfo.Value<string>("language");

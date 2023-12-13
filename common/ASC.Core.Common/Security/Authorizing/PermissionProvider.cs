@@ -26,21 +26,14 @@
 
 namespace ASC.Core.Security.Authorizing;
 
-class PermissionProvider : IPermissionProvider
+class PermissionProvider(AuthorizationManager authorizationManager) : IPermissionProvider
 {
-    private readonly AuthorizationManager _authorizationManager;
-
-    public PermissionProvider(AuthorizationManager authorizationManager)
-    {
-        _authorizationManager = authorizationManager;
-    }
-
     public async Task<IEnumerable<Ace>> GetAclAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider secObjProvider)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(action);
 
-        return (await _authorizationManager
+        return (await authorizationManager
             .GetAcesWithInheritsAsync(subject.ID, action.ID, objectId, secObjProvider))
             .Select(r => new Ace(r.Action, r.AceType));
     }

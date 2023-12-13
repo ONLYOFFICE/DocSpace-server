@@ -66,7 +66,11 @@ public class EntryProperties
 /// <summary>
 /// </summary>
 [Transient]
-public class FormFillingProperties
+public class FormFillingProperties(UserManager userManager,
+    SecurityContext securityContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    TenantUtil tenantUtil,
+    CustomNamingPeople customNamingPeople)
 {
     public static readonly string DefaultTitleMask = "{0} - {1} ({2})";
 

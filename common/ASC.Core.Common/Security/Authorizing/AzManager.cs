@@ -108,7 +108,7 @@ public class AzManager
             };
         subjects.AddRange(
             (await _roleProvider.GetRolesAsync(subject))
-                .ConvertAll(r => { return (ISubject)r; })
+                .ConvertAll(r => (ISubject)r)
             );
         if (objectId != null)
         {

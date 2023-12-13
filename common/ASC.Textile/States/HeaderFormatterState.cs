@@ -26,14 +26,9 @@
 
 namespace Textile.States;
 
-[FormatterState(PatternBegin + @"pad[0-9]+" + PatternEnd)]
-public class PaddingFormatterState : SimpleBlockFormatterState
+[FormatterState(PatternBegin + "pad[0-9]+" + PatternEnd)]
+public class PaddingFormatterState(TextileFormatter formatter) : SimpleBlockFormatterState(formatter)
 {
-    public PaddingFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     public int HeaderLevel { get; private set; }
 
 
@@ -51,7 +46,7 @@ public class PaddingFormatterState : SimpleBlockFormatterState
 
     protected override void OnContextAcquired()
     {
-        var m = Regex.Match(Tag, @"^pad(?<lvl>[0-9]+)");
+        var m = Regex.Match(Tag, "^pad(?<lvl>[0-9]+)");
         HeaderLevel = int.Parse(m.Groups["lvl"].Value);
     }
 
@@ -74,15 +69,10 @@ public class PaddingFormatterState : SimpleBlockFormatterState
 /// <summary>
 /// Formatting state for headers and titles.
 /// </summary>
-[FormatterState(PatternBegin + @"h[0-9]+" + PatternEnd)]
-public class HeaderFormatterState : SimpleBlockFormatterState
+[FormatterState(PatternBegin + "h[0-9]+" + PatternEnd)]
+public class HeaderFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
     public int HeaderLevel { get; private set; }
-
-    public HeaderFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override void Enter()
     {
@@ -96,7 +86,7 @@ public class HeaderFormatterState : SimpleBlockFormatterState
 
     protected override void OnContextAcquired()
     {
-        var m = Regex.Match(Tag, @"^h(?<lvl>[0-9]+)");
+        var m = Regex.Match(Tag, "^h(?<lvl>[0-9]+)");
         HeaderLevel = int.Parse(m.Groups["lvl"].Value);
     }
 

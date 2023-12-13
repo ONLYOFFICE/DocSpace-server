@@ -27,29 +27,15 @@
 namespace ASC.Core;
 
 [Scope]
-public class RegionHelper
-{
-    private readonly TenantManager _tenantManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly GeolocationHelper _geolocationHelper;
-    private readonly UserManager _userManager;
-
-    public RegionHelper(
-        TenantManager tenantManager,
+public class RegionHelper(TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor,
         GeolocationHelper geolocationHelper,
         UserManager userManager)
     {
-        _tenantManager = tenantManager;
-        _httpContextAccessor = httpContextAccessor;
-        _geolocationHelper = geolocationHelper;
-        _userManager = userManager;
-    }
-
     public async Task<RegionInfo> GetCurrentRegionInfoAsync(IDictionary<string, Dictionary<string, decimal>> priceInfo = null)
     {
-        var geoInfo = await _geolocationHelper.GetIPGeolocationFromHttpContextAsync();
-        var countryCode = _httpContextAccessor.HttpContext?.Request.Query["country"];
+        var geoInfo = await geolocationHelper.GetIPGeolocationFromHttpContextAsync();
+        var countryCode = httpContextAccessor.HttpContext?.Request.Query["country"];
         var currentRegion = GetRegionInfo(countryCode);
 
         if (currentRegion == null && geoInfo != null)
@@ -59,10 +45,10 @@ public class RegionHelper
         
         if (currentRegion == null)
         {
-            var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+                var tenant = await tenantManager.GetCurrentTenantAsync(false);
             if (tenant != null)
             {
-                var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
+                    var owner = await userManager.GetUsersAsync(tenant.OwnerId);
                 var culture = string.IsNullOrEmpty(owner.CultureName) ? tenant.GetCulture() : owner.GetCulture();
                 currentRegion = GetRegionInfo(culture.Name);
             }
@@ -79,7 +65,7 @@ public class RegionHelper
             currentRegion = GetRegionInfo("ES");
         }
         
-        priceInfo ??= await _tenantManager.GetProductPriceInfoAsync();
+        priceInfo ??= await tenantManager.GetProductPriceInfoAsync();
         if (priceInfo.Values.Any(value => value.ContainsKey(currentRegion.ISOCurrencySymbol)))
         {
             return currentRegion;
@@ -96,7 +82,7 @@ public class RegionHelper
     public async Task<string> GetCurrencyFromRequestAsync()
     {
         var defaultRegion = GetDefaultRegionInfo();
-        var geoinfo = await _geolocationHelper.GetIPGeolocationFromHttpContextAsync();
+        var geoinfo = await geolocationHelper.GetIPGeolocationFromHttpContextAsync();
 
         if (!string.IsNullOrEmpty(geoinfo.Key))
         {
@@ -106,7 +92,7 @@ public class RegionHelper
 
                 if (!currentRegion.Name.Equals(defaultRegion.Name))
                 {
-                    var priceInfo = await _tenantManager.GetProductPriceInfoAsync();
+                    var priceInfo = await tenantManager.GetProductPriceInfoAsync();
 
                     if (priceInfo.Values.Any(value => value.ContainsKey(currentRegion.ISOCurrencySymbol)))
                     {

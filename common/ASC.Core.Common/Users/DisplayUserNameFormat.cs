@@ -30,5 +30,5 @@ public enum DisplayUserNameFormat
 {
     Default,
     FirstLast,
-    LastFirst,
+    LastFirst
 }

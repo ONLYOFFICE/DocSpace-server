@@ -27,27 +27,18 @@
 namespace ASC.Core.Common.EF;
 
 [Singleton]
-public class CreatorDbContext
+public class CreatorDbContext(IServiceProvider serviceProvider, ICache cache)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICache _cache;
-
-    public CreatorDbContext(IServiceProvider serviceProvider, ICache cache)
-    {
-        _serviceProvider = serviceProvider;
-        _cache = cache;
-    }
-
     public T CreateDbContext<T>(string region = "current", string nameConnectionString = "default") where T : DbContext
     {
-        var contextOptions = _cache.Get<DbContextOptionsBuilder<T>>($"context {typeof(T)} {region}");
+        var contextOptions = cache.Get<DbContextOptionsBuilder<T>>($"context {typeof(T)} {region}");
         if (contextOptions == null)
         {
             contextOptions = new DbContextOptionsBuilder<T>();
             var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
-            installerOptionsAction.OptionsAction(_serviceProvider, contextOptions);
+            installerOptionsAction.OptionsAction(serviceProvider, contextOptions);
             var key = $"context {region}:{nameConnectionString}";
-            _cache.Insert(key, contextOptions, TimeSpan.FromMinutes(15));
+            cache.Insert(key, contextOptions, TimeSpan.FromMinutes(15));
         }
         return (T)Activator.CreateInstance(typeof(T), contextOptions.Options);
     }

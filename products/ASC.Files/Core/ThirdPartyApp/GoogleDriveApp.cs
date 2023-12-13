@@ -176,7 +176,6 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var token = await _tokenHelper.GetTokenAsync(AppAttr);
         var driveFile = GetDriveFile(fileId, token);
-        var editable = false;
 
         if (driveFile == null)
         {
@@ -200,7 +199,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             file.CreateByString = owners[0]["displayName"].Value<string>();
         }
 
-        editable = jsonFile["capabilities"]["canEdit"].Value<bool>();
+        var editable = jsonFile["capabilities"]["canEdit"].Value<bool>();
 
         return (file, editable);
     }
@@ -495,7 +494,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             var contentLength = jsonFile.Value<string>("size");
             _logger.DebugGoogleDriveAppGetFileStreamcontentLength(contentLength);
-            context.Response.Headers.Add("Content-Length", contentLength);
+            context.Response.Headers.Append("Content-Length", contentLength);
 
             _logger.DebugGoogleDriveAppGetFileStreamDownloadUrl(downloadUrl);
             var request = new HttpRequestMessage

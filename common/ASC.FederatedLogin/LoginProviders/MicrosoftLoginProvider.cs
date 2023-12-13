@@ -69,7 +69,7 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var openidProfile = _requestHelper.PerformRequest(MicrosoftProfileUrl, headers: new Dictionary<string, string>() { { "Authorization", "Bearer " + accessToken } });
+        var openidProfile = _requestHelper.PerformRequest(MicrosoftProfileUrl, headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
         var loginProfile = ProfileFromMicrosoft(openidProfile);
         return loginProfile;
     }
@@ -77,7 +77,10 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
     internal LoginProfile ProfileFromMicrosoft(string openidProfile)
     {
         var jProfile = JObject.Parse(openidProfile);
-        if (jProfile == null) throw new Exception("Failed to correctly process the response");
+        if (jProfile == null)
+        {
+            throw new Exception("Failed to correctly process the response");
+        }
 
         var profile = new LoginProfile(Signature, InstanceCrypto)
         {

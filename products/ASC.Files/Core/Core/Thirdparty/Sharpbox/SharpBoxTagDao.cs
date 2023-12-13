@@ -27,9 +27,7 @@
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope]
-internal class SharpBoxTagDao : SharpBoxDaoBase, IThirdPartyTagDao
-{
-    public SharpBoxTagDao(IServiceProvider serviceProvider,
+internal class SharpBoxTagDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -38,12 +36,10 @@ internal class SharpBoxTagDao : SharpBoxDaoBase, IThirdPartyTagDao
         ILogger<SharpBoxDaoBase> monitor,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-    }
-
+    : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
+        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
+{
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);

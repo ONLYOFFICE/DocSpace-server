@@ -129,7 +129,8 @@ public class LicenseConverter : System.Text.Json.Serialization.JsonConverter<obj
                 }
                 return result;
             }
-            else if (reader.TokenType == JsonTokenType.Number)
+
+            if (reader.TokenType == JsonTokenType.Number)
             {
                 return reader.GetInt32();
             }

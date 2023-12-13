@@ -27,34 +27,25 @@
 namespace ASC.IPSecurity;
 
 [Scope]
-public class IPRestrictionsRepository
+public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager, IMapper mapper)
 {
-    private readonly IDbContextFactory<TenantDbContext> _dbContextManager;
-    private readonly IMapper _mapper;
-
-    public IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager, IMapper mapper)
-    {
-        _dbContextManager = dbContextManager;
-        _mapper = mapper;
-    }
-
     public async Task<List<IPRestriction>> GetAsync(int tenant)
     {
-        await using var tenantDbContext = await _dbContextManager.CreateDbContextAsync();
+        await using var tenantDbContext = await dbContextManager.CreateDbContextAsync();
         return await tenantDbContext.TenantIpRestrictions
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<IPRestriction>(_mapper.ConfigurationProvider)
+            .ProjectTo<IPRestriction>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
     public async Task<List<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
-        await using var tenantDbContext = await _dbContextManager.CreateDbContextAsync();
+        await using var tenantDbContext = await dbContextManager.CreateDbContextAsync();
         var strategy = tenantDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextManager.CreateDbContextAsync();
+            await using var filesDbContext = await dbContextManager.CreateDbContextAsync();
             await using var tr = await tenantDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteTenantIpRestrictionsAsync(tenantDbContext, tenant);

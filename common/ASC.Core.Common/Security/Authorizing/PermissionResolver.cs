@@ -29,14 +29,9 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Core.Security.Authorizing;
 
 [Scope]
-class PermissionResolver : IPermissionResolver
+class PermissionResolver(AzManager azManager) : IPermissionResolver
 {
-    private readonly AzManager _azManager;
-
-    public PermissionResolver(AzManager azManager)
-    {
-        _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
-    }
+    private readonly AzManager _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
 
     public async Task<bool> CheckAsync(ISubject subject, params IAction[] actions)
     {
@@ -71,10 +66,7 @@ class PermissionResolver : IPermissionResolver
     private async Task<DenyResult[]> GetDenyActionsAsync(ISubject subject, IAction[] actions, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         var denyActions = new List<DenyResult>();
-        if (actions == null)
-        {
-            actions = Array.Empty<IAction>();
-        }
+        actions ??= Array.Empty<IAction>();
 
         if (subject == null)
         {
@@ -100,17 +92,10 @@ class PermissionResolver : IPermissionResolver
         return denyActions.ToArray();
     }
 
-    private class DenyResult
+    private class DenyResult(IAction targetAction, ISubject denySubject, IAction denyAction)
     {
-        public readonly IAction _targetAction;
-        public readonly ISubject _denySubject;
-        public readonly IAction _denyAction;
-
-        public DenyResult(IAction targetAction, ISubject denySubject, IAction denyAction)
-        {
-            _targetAction = targetAction;
-            _denySubject = denySubject;
-            _denyAction = denyAction;
-        }
+        public readonly IAction _targetAction = targetAction;
+        public readonly ISubject _denySubject = denySubject;
+        public readonly IAction _denyAction = denyAction;
     }
 }

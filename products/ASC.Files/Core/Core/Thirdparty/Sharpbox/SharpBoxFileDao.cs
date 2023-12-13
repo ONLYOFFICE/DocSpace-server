@@ -30,15 +30,7 @@ using ResumableUploadSession = AppLimit.CloudComputing.SharpBox.StorageProvider.
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope]
-internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
-{
-    private readonly TempStream _tempStream;
-    private readonly CrossDao _crossDao;
-    private readonly SharpBoxDaoSelector _sharpBoxDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-
-    public SharpBoxFileDao(
-        IServiceProvider serviceProvider,
+internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         TempStream tempStream,
         UserManager userManager,
         TenantManager tenantManager,
@@ -51,16 +43,10 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         SharpBoxDaoSelector sharpBoxDaoSelector,
         IFileDao<int> fileDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-        _tempStream = tempStream;
-        _crossDao = crossDao;
-        _sharpBoxDaoSelector = sharpBoxDaoSelector;
-        _fileDao = fileDao;
-    }
-
+    : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
+        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
+{
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharpBoxProviderInfo.InvalidateStorageAsync();
@@ -98,7 +84,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        string extension, bool searchInContent, bool checkShared = false)
+        string[] extension, bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -117,8 +103,6 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                return AsyncEnumerable.Empty<File<string>>();
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -162,10 +146,10 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (!string.IsNullOrEmpty(extension))
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         return files;
@@ -182,7 +166,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -202,8 +186,6 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                yield break;
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -247,10 +229,10 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (!string.IsNullOrEmpty(extension))
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -261,7 +243,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             SortedByType.AZ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? files.OrderBy(x => x.ModifiedOn) : files.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? files.OrderBy(x => x.CreateOn) : files.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title)
         };
 
         //hack
@@ -293,7 +275,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             if (!fileStream.CanSeek)
             {
-                var tempBuffer = _tempStream.Create();
+                var tempBuffer = tempStream.Create();
 
                 await fileStream.CopyToAsync(tempBuffer);
                 await tempBuffer.FlushAsync();
@@ -348,7 +330,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(_tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {
@@ -356,12 +338,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             if (webException != null)
             {
                 var response = (HttpWebResponse)webException.Response;
-                if (response != null)
+                if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
-                    if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-                    {
-                        throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
-                    }
+                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
                 }
                 throw;
             }
@@ -396,12 +375,12 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteTagsAsync(filesDbContext);
-                await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+                await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+                await Queries.DeleteTagsAsync(dbContext);
+                await Queries.DeleteSecuritiesAsync(dbContext, _tenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
                 await tx.CommitAsync();
         });
 
@@ -452,9 +431,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
     public async Task<int> MoveFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharpBoxDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharpBoxDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             true)
             ;
 
@@ -508,9 +487,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharpBoxDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharpBoxDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             false)
             ;
 
@@ -687,7 +666,8 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
             return Task.FromResult(0);
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
+
+        if (uploadSession.Items.ContainsKey("TempPath"))
         {
             File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 

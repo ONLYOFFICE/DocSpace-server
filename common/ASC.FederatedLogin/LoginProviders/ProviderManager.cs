@@ -27,7 +27,7 @@
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
-public class ProviderManager
+public class ProviderManager(Signature signature, InstanceCrypto instanceCrypto, ConsumerFactory consumerFactory)
 {
     public bool IsNotEmpty
     {
@@ -53,23 +53,12 @@ public class ProviderManager
     public static readonly List<string> InviteExceptProviders = new()
     {
                 ProviderConstants.Twitter,
-                ProviderConstants.AppleId,
-            };
-
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly ConsumerFactory _consumerFactory;
-
-    public ProviderManager(Signature signature, InstanceCrypto instanceCrypto, ConsumerFactory consumerFactory)
-    {
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _consumerFactory = consumerFactory;
-    }
+                ProviderConstants.AppleId
+    };
 
     public ILoginProvider GetLoginProvider(string providerType)
     {
-        return _consumerFactory.GetByKey(providerType) as ILoginProvider;
+        return consumerFactory.GetByKey(providerType) as ILoginProvider;
     }
 
     public LoginProfile Process(string providerType, HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs = null)
@@ -95,7 +84,7 @@ public class ProviderManager
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(_signature, _instanceCrypto, ex);
+            return LoginProfile.FromError(signature, instanceCrypto, ex);
         }
     }
 }

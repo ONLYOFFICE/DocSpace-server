@@ -30,25 +30,13 @@ using AuthConst = ASC.Common.Security.Authorizing.Constants;
 namespace ASC.Core.Users;
 
 [Singleton]
-public sealed class Constants
+public sealed class Constants(IConfiguration configuration)
 {
-    public Constants(IConfiguration configuration)
-    {
-        _configuration = configuration;
-        NamingPoster = new UserInfo
-        {
-            Id = new Guid("{17097D73-2D1E-4B36-AA07-AEB34AF993CD}"),
-            FirstName = configuration["core:system:poster:name"] ?? "ONLYOFFICE Poster",
-            LastName = string.Empty,
-            ActivationStatus = EmployeeActivationStatus.Activated
-        };
-    }
-
     public int MaxEveryoneCount
     {
         get
         {
-            if (!int.TryParse(_configuration["core:users"], out var count))
+            if (!int.TryParse(configuration["core:users"], out var count))
             {
                 count = 10000;
             }
@@ -57,8 +45,6 @@ public sealed class Constants
         }
     }
 
-    private readonly IConfiguration _configuration;
-
     #region system group and category groups
 
     public static readonly Guid SysGroupCategoryId = new("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");
@@ -66,41 +52,40 @@ public sealed class Constants
     public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
         ID = AuthConst.Everyone.ID,
-        Name = AuthConst.Everyone.Name,
+        Name = AuthConst.Everyone.Name
     };
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
         ID = AuthConst.User.ID,
-        Name = AuthConst.User.Name,
+        Name = AuthConst.User.Name
     };
 
     public static readonly GroupInfo GroupManager = new(SysGroupCategoryId)
     {
         ID = AuthConst.RoomAdmin.ID,
-        Name = AuthConst.RoomAdmin.Name,
+        Name = AuthConst.RoomAdmin.Name
     };
 
     public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConst.DocSpaceAdmin.ID,
-        Name = AuthConst.DocSpaceAdmin.Name,
+        Name = AuthConst.DocSpaceAdmin.Name
     };
 
     public static readonly GroupInfo GroupCollaborator = new(SysGroupCategoryId)
     {
         ID = AuthConst.Collaborator.ID, 
-        Name = AuthConst.Collaborator.Name,
+        Name = AuthConst.Collaborator.Name
     };
 
-    public static readonly GroupInfo[] BuildinGroups = new[]
-    {
+    public static readonly GroupInfo[] BuildinGroups = {
             GroupEveryone,
             GroupUser,
             GroupManager,
             GroupAdmin,
-            GroupCollaborator,
-        };
+            GroupCollaborator
+    };
 
     public static readonly UserInfo LostUser = new()
     {
@@ -118,7 +103,13 @@ public sealed class Constants
         ActivationStatus = EmployeeActivationStatus.Activated
     };
 
-    public UserInfo NamingPoster { get; }
+    public UserInfo NamingPoster { get; } = new()
+    {
+        Id = new Guid("{17097D73-2D1E-4B36-AA07-AEB34AF993CD}"),
+        FirstName = configuration["core:system:poster:name"] ?? "ONLYOFFICE Poster",
+        LastName = string.Empty,
+        ActivationStatus = EmployeeActivationStatus.Activated
+    };
 
     public static readonly GroupInfo LostGroupInfo = new()
     {

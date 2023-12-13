@@ -25,13 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Notify;
-public class Startup : BaseWorkerStartup
+public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    : BaseWorkerStartup(configuration, hostEnvironment)
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
-    {
-
-    }
-
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);

@@ -99,10 +99,7 @@ public class Folder<T> : FileEntry<T>, IFolder
 
     public Folder(
         FileHelper fileHelper,
-        Global global,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global)
+        Global global) : base(fileHelper, global)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

@@ -199,8 +199,7 @@
     <value>قم بالسماح للتطبيق بالتحكم بملفات ومجلدات Box.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>قم بالسماح لهذا التطبيق بتوصيل حساب BOX الخاص بك بوحدة المستندات.
-ستتمكن من إدارة الملفات وتعديلها ومشاركتها من Box مع مستخدمين ONLYOFFICE. {0} سجل الدخول إلى حسابك في صفحة مطوري Box وأنشئ تطبيقاً جديداً لتكامل ONLYOFFICE. أدخل البيانات المستلمة في الأسفل:</value>
+    <value>قم بالسماح لهذا التطبيق بتوصيل حساب BOX الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من Box مع مستخدمين ONLYOFFICE. {0} سجل الدخول إلى حسابك في صفحة مطوري Box وأنشئ تطبيقاً جديداً لتكامل ONLYOFFICE. أدخل البيانات المستلمة في الأسفل:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -275,8 +274,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب فيسبوك.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام فيسبوك وربط حسابات زبائن الفيسبوك بوحدة الـ CRM.
-{0} انتقل إلى بوابة مطورين فيسبوك وأنشئ تكامل تطبيقاً جديداً ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام فيسبوك وربط حسابات زبائن الفيسبوك بوحدة الـ CRM. {0} انتقل إلى بوابة مطورين فيسبوك وأنشئ تكامل تطبيقاً جديداً ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -342,8 +340,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب لينكدان.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام حسابات لينكدان. {0} انتقل إلى موقع مطورين لينكدان وأنشئ تطبيق جديد لتكامل ONLYOFFICE.
-أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام حسابات لينكدان. {0} انتقل إلى موقع مطورين لينكدان وأنشئ تطبيق جديد لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>معرف لينكدان</value>

@@ -46,7 +46,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     {
         return new DarkThemeSettings
         {
-            Theme = DarkThemeSettingsType.System,
+            Theme = DarkThemeSettingsType.System
         };
     }
 }

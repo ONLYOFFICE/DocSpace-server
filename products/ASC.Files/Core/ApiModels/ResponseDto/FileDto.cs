@@ -140,18 +140,7 @@ public class FileDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FileDtoHelper : FileEntryDtoHelper
-{
-    private readonly AuthContext _authContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FileUtility _fileUtility;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-
-    public FileDtoHelper(
-        ApiDateTimeHelper apiDateTimeHelper,
+public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -164,27 +153,18 @@ public class FileDtoHelper : FileEntryDtoHelper
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
-        _authContext = authContext;
-        _daoFactory = daoFactory;
-        _globalFolderHelper = globalFolderHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _badgesSettingsHelper = badgesSettingsHelper;
-    }
-
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
         if (file.RootFolderType == FolderType.USER
-            && !Equals(file.RootCreateBy, _authContext.CurrentAccount.ID))
+            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
-            var folderDao = _daoFactory.GetFolderDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
 
             if (folders != null)
             {
@@ -204,7 +184,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
         }
 
-        result.ViewAccessibility = await _fileUtility.GetAccessibility(file);
+        result.ViewAccessibility = await fileUtility.GetAccessibility(file);
 
         return result;
     }
@@ -212,7 +192,7 @@ public class FileDtoHelper : FileEntryDtoHelper
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
-        var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+        var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
         var fileExst = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(fileExst);
@@ -243,21 +223,14 @@ public class FileDtoHelper : FileEntryDtoHelper
         if (file.Order != 0)
         {
             file.Order += foldersCount;
-            if (!string.IsNullOrEmpty(order))
-            {
-                result.Order = string.Join('.', order, file.Order);
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
             }
-            else
-            {
-                result.Order = file.Order.ToString();
-            }
-        }
 
         try
         {
-            result.ViewUrl = _commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
+            result.ViewUrl = commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
 
-            result.WebUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version));
+            result.WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version));
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -265,7 +238,7 @@ public class FileDtoHelper : FileEntryDtoHelper
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}";
+                result.ThumbnailUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}";
             }
         }
         catch (Exception)

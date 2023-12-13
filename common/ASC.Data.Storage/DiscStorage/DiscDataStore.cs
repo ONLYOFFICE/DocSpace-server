@@ -27,7 +27,19 @@
 namespace ASC.Data.Storage.DiscStorage;
 
 [Scope]
-public class DiscDataStore : BaseStorage
+public class DiscDataStore(TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger<DiscDataStore> logger,
+        EncryptionSettingsHelper encryptionSettingsHelper,
+        EncryptionFactory encryptionFactory,
+        IHttpClientFactory clientFactory,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
@@ -35,8 +47,6 @@ public class DiscDataStore : BaseStorage
 
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
-    private readonly EncryptionSettingsHelper _encryptionSettingsHelper;
-    private readonly EncryptionFactory _encryptionFactory;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
@@ -59,29 +69,10 @@ public class DiscDataStore : BaseStorage
                 ToDictionary(x => x.Name,
                              y => y.Expires);
         DomainsExpires.Add(string.Empty, moduleConfig.Expires);
-        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : _encryptionSettingsHelper.Load();
-        _crypt = _encryptionFactory.GetCrypt(moduleConfig.Name, settings);
+        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
+        _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
         DataStoreValidator = validator;
         return this;
-    }
-
-    public DiscDataStore(
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<DiscDataStore> logger,
-        EncryptionSettingsHelper encryptionSettingsHelper,
-        EncryptionFactory encryptionFactory,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _encryptionSettingsHelper = encryptionSettingsHelper;
-        _encryptionFactory = encryptionFactory;
     }
 
     public string GetPhysicalPath(string domain, string path)
@@ -541,7 +532,7 @@ public class DiscDataStore : BaseStorage
             var entries = Directory.GetDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
@@ -563,7 +554,7 @@ public class DiscDataStore : BaseStorage
             var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();

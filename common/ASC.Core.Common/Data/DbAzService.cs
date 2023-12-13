@@ -27,41 +27,32 @@
 namespace ASC.Core.Data;
 
 [Scope]
-class DbAzService : IAzService
+class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
+    : IAzService
 {
-    private readonly IDbContextFactory<UserDbContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-
-    public DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
-    {
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-    }
-
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(int tenant, DateTime from)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         // row with tenant = -1 - common for all tenants, but equal row with tenant != -1 escape common row for the portal
         var commonAces = await
             userDbContext.Acl
             .Where(r => r.TenantId == Tenant.DefaultTenant)
-            .ProjectTo<AzRecord>(_mapper.ConfigurationProvider)
+            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
             .ToDictionaryAsync(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object));
 
         var tenantAces = await
             userDbContext.Acl
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<AzRecord>(_mapper.ConfigurationProvider)
+            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
             .ToListAsync();
 
         // remove excaped rows
         foreach (var a in tenantAces)
         {
             var key = string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object);
-            if (commonAces.TryGetValue(key, out var common))
+            if (commonAces.Remove(key, out var common))
             {
-                commonAces.Remove(key);
                 if (common.AceType == a.AceType)
                 {
                     tenantAces.Remove(a);
@@ -108,13 +99,13 @@ class DbAzService : IAzService
 
     private async Task<bool> ExistEscapeRecordAsync(AzRecord r)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.AnyAclAsync(userDbContext, Tenant.DefaultTenant, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
     }
 
     private async Task DeleteRecordAsync(AzRecord r)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         var record = await Queries.AclAsync(userDbContext, r.TenantId, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
 
         if (record != null)
@@ -126,8 +117,8 @@ class DbAzService : IAzService
 
     private async Task InsertRecordAsync(AzRecord r)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await userDbContext.AddOrUpdateAsync(q => q.Acl, _mapper.Map<AzRecord, Acl>(r));
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.Acl, mapper.Map<AzRecord, Acl>(r));
         await userDbContext.SaveChangesAsync();
     }
 }
@@ -142,8 +133,7 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .Any());
+                    .Any(r => r.AceType == aceType));
 
     public static readonly Func<UserDbContext, int, Guid, Guid, string, AceType, Task<Acl>> AclAsync =
         EF.CompileAsyncQuery(
@@ -153,6 +143,5 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.AceType == aceType));
 }

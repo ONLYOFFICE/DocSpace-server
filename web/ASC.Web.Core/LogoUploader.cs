@@ -30,9 +30,8 @@ namespace ASC.Web.Studio.UserControls.CustomNavigation;
 
 public class LogoUploader
 {
-    public LogoUploader(RequestDelegate next)
+    public LogoUploader(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke
@@ -63,7 +62,7 @@ public class LogoUploader
                 var data = new byte[logo.Length];
 
                 var reader = new BinaryReader(logo.OpenReadStream());
-                reader.Read(data, 0, (int)logo.Length);
+                _ = reader.Read(data, 0, (int)logo.Length);
                 reader.Close();
 
                 if (logo.ContentType.Contains("image/x-icon"))

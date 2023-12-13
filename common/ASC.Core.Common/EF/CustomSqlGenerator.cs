@@ -67,13 +67,11 @@ public class CustomMySqlMigrationsSqlGenerator : MySqlMigrationsSqlGenerator
     }
 }
 
-public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
+public class CustomMigrationCommandListBuilder
+    (MigrationsSqlGeneratorDependencies dependencies) : MigrationCommandListBuilder(dependencies)
 {
     private string _operationContainer;
     private bool _isIndexOperation;
-
-    public CustomMigrationCommandListBuilder(MigrationsSqlGeneratorDependencies dependencies)
-    : base(dependencies) { }
 
     public override MigrationCommandListBuilder Append(string o)
     {

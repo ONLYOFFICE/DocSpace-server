@@ -54,45 +54,29 @@ public enum ManagementType
 }
 
 [Scope]
-public class CommonLinkUtility : BaseCommonLinkUtility
+public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
+        CoreBaseSettings coreBaseSettings,
+        CoreSettings coreSettings,
+        TenantManager tenantManager,
+        UserManager userManager,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        ILoggerProvider options)
+    : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
-    private static readonly Regex _regFilePathTrim = new("/[^/]*\\.aspx", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    public const string ParamName_ProductSysName = "product";
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
 
-    private readonly UserManager _userManager;
-    private readonly WebItemManagerSecurity _webItemManagerSecurity;
-    private readonly WebItemManager _webItemManager;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-
     public CommonLinkUtility(
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        WebItemManager webItemManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options) :
-        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, options)
+        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, emailValidationKeyProvider, options)
     {
     }
-
-    public CommonLinkUtility(
-        IHttpContextAccessor httpContextAccessor,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        TenantManager tenantManager,
-        UserManager userManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        WebItemManager webItemManager,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
-        base(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options) =>
-        (_userManager, _webItemManagerSecurity, _webItemManager, _emailValidationKeyProvider) = (userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider);
 
     public string Logout
     {
@@ -134,7 +118,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     public async Task<string> GetUserProfileAsync(Guid userId, bool absolute = true)
     {
-        if (!await _userManager.UserExistsAsync(userId))
+        if (!await userManager.UserExistsAsync(userId))
         {
             return GetEmployees();
         }
@@ -149,164 +133,15 @@ public class CommonLinkUtility : BaseCommonLinkUtility
     }
 
     #endregion
-    
-    public void GetLocationByRequest(out IProduct currentProduct, out IModule currentModule)
-    {
-        var currentURL = string.Empty;
-        if (_httpContextAccessor?.HttpContext?.Request != null)
-        {
-            currentURL = _httpContextAccessor.HttpContext.Request.Url().AbsoluteUri;
-
-            //TODO ?
-            // http://[hostname]/[virtualpath]/[AjaxPro.Utility.HandlerPath]/[assembly],[classname].ashx
-            //if (currentURL.Contains("/" + AjaxPro.Utility.HandlerPath + "/") && HttpContext.Current.Request.Headers["Referer"].FirstOrDefault() != null)
-            //{
-            //    currentURL = HttpContext.Current.Request.Headers["Referer"].FirstOrDefault().ToString();
-            //}
-        }
-
-        GetLocationByUrl(currentURL, out currentProduct, out currentModule);
-    }
-    
-
-    private void GetLocationByUrl(string currentURL, out IProduct currentProduct, out IModule currentModule)
-    {
-        currentProduct = null;
-        currentModule = null;
-
-        if (string.IsNullOrEmpty(currentURL))
-        {
-            return;
-        }
-
-        var urlParams = HttpUtility.ParseQueryString(new Uri(currentURL).Query);
-        var productByName = GetProductBySysName(urlParams[ParamName_ProductSysName]);
-        var pid = productByName?.ID ?? Guid.Empty;
-
-        if (pid == Guid.Empty && !string.IsNullOrEmpty(urlParams["pid"]))
-        {
-            try
-            {
-                pid = new Guid(urlParams["pid"]);
-            }
-            catch
-            {
-                pid = Guid.Empty;
-            }
-        }
-
-        var currentProductName = GetProductNameFromUrl(currentURL);
-        var currentModuleName = GetModuleNameFromUrl(currentURL);
-
-        if (!string.IsNullOrEmpty(currentProductName) || !string.IsNullOrEmpty(currentModuleName))
-        {
-            foreach (var product in _webItemManager.GetItemsAll<IProduct>())
-            {
-                var startProductName = GetProductNameFromUrl(product.StartURL);
-                if (string.IsNullOrEmpty(startProductName) || !string.Equals(currentProductName, startProductName, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
-
-                currentProduct = product;
-
-                if (!string.IsNullOrEmpty(currentModuleName))
-                {
-                    foreach (var module in _webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
-                    {
-                        var startModuleName = GetModuleNameFromUrl(module.StartURL);
-                        if (!string.IsNullOrEmpty(startModuleName) && string.Equals(currentModuleName, startModuleName, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            currentModule = module;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var module in _webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
-                    {
-                        if (!module.StartURL.Equals(product.StartURL) && currentURL.Contains(_regFilePathTrim.Replace(module.StartURL, string.Empty)))
-                        {
-                            currentModule = module;
-                            break;
-                        }
-                    }
-                }
-
-                break;
-            }
-        }
-
-        if (pid != Guid.Empty)
-        {
-            currentProduct = _webItemManager[pid] as IProduct;
-        }
-    }
-
-    private string GetProductNameFromUrl(string url)
-    {
-        try
-        {
-            var pos = url.IndexOf("/products/", StringComparison.InvariantCultureIgnoreCase);
-            if (0 <= pos)
-            {
-                url = url.Substring(pos + 10).ToLower();
-                pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
-            }
-        }
-        catch
-        {
-        }
-        return null;
-    }
-
-    private static string GetModuleNameFromUrl(string url)
-    {
-        try
-        {
-            var pos = url.IndexOf("/modules/", StringComparison.InvariantCultureIgnoreCase);
-            if (0 <= pos)
-            {
-                url = url.Substring(pos + 9).ToLower();
-                pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
-            }
-        }
-        catch
-        {
-        }
-        return null;
-    }
-
-    private IProduct GetProductBySysName(string sysName)
-    {
-        IProduct result = null;
-
-        if (!string.IsNullOrEmpty(sysName))
-        {
-            foreach (var product in _webItemManager.GetItemsAll<IProduct>())
-            {
-                if (string.Equals(sysName, product.GetSysName()))
-                {
-                    result = product;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
 
     private async Task<string> GetUserParamsPairAsync(Guid userID)
     {
-        return GetUserParamsPair(await _userManager.GetUsersAsync(userID));
+        return GetUserParamsPair(await userManager.GetUsersAsync(userID));
     }
 
     public string GetUserParamsPair(UserInfo user)
     {
-        if (user == null || string.IsNullOrEmpty(user.UserName) || !_userManager.UserExists(user))
+        if (user == null || string.IsNullOrEmpty(user.UserName) || !userManager.UserExists(user))
         {
             return "";
         }
@@ -406,7 +241,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var key = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
         return (url, key);
     }
 
@@ -454,7 +289,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        var validationKey = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
 
         var link = $"type={confirmType}&key={validationKey}";
 

@@ -34,14 +34,13 @@ public static class IdConverter
         {
             return (T)(object)i;
         }
-        else if(type == typeof(string))
+
+        if(type == typeof(string))
         {
             return (T)(object)i.ToString();
         }
-        else
-        {
-            throw new ArgumentException("id type must be int or string");
-        }
+
+        throw new ArgumentException("id type must be int or string");
     }
 
     public static T Convert<T>(string s)
@@ -51,13 +50,12 @@ public static class IdConverter
         {
             return (T)(object)s;
         }
-        else if (type == typeof(int))
+
+        if (type == typeof(int))
         {
             return (T)(object)System.Convert.ToInt32(s);
         }
-        else
-        {
-            throw new ArgumentException("id type must be int or string");
-        }
+
+        throw new ArgumentException("id type must be int or string");
     }
 }

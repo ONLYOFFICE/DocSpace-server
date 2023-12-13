@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,9 @@ public record BackupProgress
 
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
-
+    
+    [ProtoMember(7)]
+    public string TaskId { get; set; }
 }
 
 

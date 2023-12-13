@@ -27,39 +27,30 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-internal sealed class BackupCleanerService : BackgroundService
-{
-    private readonly ILogger<BackupCleanerService> _logger;
-    private readonly TimeSpan _backupCleanerPeriod;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public BackupCleanerService(
-        ConfigurationExtension configuration,
+internal sealed class BackupCleanerService(ConfigurationExtension configuration,
         ILogger<BackupCleanerService> logger,
         IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-        _logger = logger;
-        _backupCleanerPeriod = configuration.GetSetting<BackupSettings>("backup").Cleaner.Period;
-    }
+    : BackgroundService
+{
+    private readonly TimeSpan _backupCleanerPeriod = configuration.GetSetting<BackupSettings>("backup").Cleaner.Period;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.DebugBackupCleanerServiceStarting();
+        logger.DebugBackupCleanerServiceStarting();
 
-        stoppingToken.Register(() => _logger.DebugBackupCleanerServiceStopping());
+        stoppingToken.Register(logger.DebugBackupCleanerServiceStopping);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.DebugBackupCleanerServiceDoingWork();
+            logger.DebugBackupCleanerServiceDoingWork();
 
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
+            await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupCleanerService>>();
 
             if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<BackupCleanerService>.InstanceId))
             {
-                _logger.DebugBackupCleanerServiceIsNotActive(RegisterInstanceWorkerService<BackupCleanerService>.InstanceId);
+                logger.DebugBackupCleanerServiceIsNotActive(RegisterInstanceWorkerService<BackupCleanerService>.InstanceId);
 
                 await Task.Delay(1000, stoppingToken);
 
@@ -71,21 +62,21 @@ internal sealed class BackupCleanerService : BackgroundService
             await Task.Delay(_backupCleanerPeriod, stoppingToken);
         }
 
-        _logger.DebugBackupCleanerServiceStopping();
+        logger.DebugBackupCleanerServiceStopping();
     }
 
     private async Task ExecuteBackupCleanerAsync(CancellationToken stoppingToken)
     {
-        await using var serviceScope = _scopeFactory.CreateAsyncScope();
+        await using var serviceScope = scopeFactory.CreateAsyncScope();
 
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();
         var backupStorageFactory = serviceScope.ServiceProvider.GetRequiredService<BackupStorageFactory>();
 
-        _logger.DebugStartedClean();
+        logger.DebugStartedClean();
 
         var backupsToRemove = await backupRepository.GetExpiredBackupRecordsAsync();
 
-        _logger.DebugFoundBackups(backupsToRemove.Count);
+        logger.DebugFoundBackups(backupsToRemove.Count);
 
         foreach (var scheduledBackups in (await backupRepository.GetScheduledBackupRecordsAsync()).GroupBy(r => r.TenantId))
         {
@@ -101,7 +92,7 @@ internal sealed class BackupCleanerService : BackgroundService
                 var scheduledBackupsToRemove = scheduledBackups.OrderByDescending(r => r.CreatedOn).Skip(schedule.BackupsStored).ToList();
                 if (scheduledBackupsToRemove.Any())
                 {
-                    _logger.DebugOnlyLast(schedule.BackupsStored, schedule.TenantId, scheduledBackupsToRemove.Count);
+                    logger.DebugOnlyLast(schedule.BackupsStored, schedule.TenantId, scheduledBackupsToRemove.Count);
                     backupsToRemove.AddRange(scheduledBackupsToRemove);
                 }
             }
@@ -132,7 +123,7 @@ internal sealed class BackupCleanerService : BackgroundService
             }
             catch (ProviderInfoArgumentException error)
             {
-                _logger.WarningCanNotRemoveBackup(backupRecord.Id, error);
+                logger.WarningCanNotRemoveBackup(backupRecord.Id, error);
 
                 if (DateTime.UtcNow > backupRecord.CreatedOn.AddMonths(6))
                 {
@@ -141,7 +132,7 @@ internal sealed class BackupCleanerService : BackgroundService
             }
             catch (Exception error)
             {
-                _logger.WarningCanNotRemoveBackup(backupRecord.Id, error);
+                logger.WarningCanNotRemoveBackup(backupRecord.Id, error);
             }
         }
 

@@ -240,14 +240,7 @@ public class LoginProfile
 
         if (!string.IsNullOrEmpty(value))
         {
-            if (_fields.ContainsKey(name))
-            {
-                _fields[name] = value;
-            }
-            else
-            {
-                _fields.Add(name, value);
-            }
+            _fields[name] = value;
         }
         else
         {
@@ -281,7 +274,7 @@ public class LoginProfile
         return AppendQueryParam(uri, QueryCacheParamName, key);
     }
 
-    internal void ParseFromUrl(HttpContext context, Uri uri, IMemoryCache memoryCache)
+    internal void ParseFromUrl(Uri uri, IMemoryCache memoryCache)
     {
         var queryString = HttpUtility.ParseQueryString(uri.Query);
         if (!string.IsNullOrEmpty(queryString[QueryParamName]))

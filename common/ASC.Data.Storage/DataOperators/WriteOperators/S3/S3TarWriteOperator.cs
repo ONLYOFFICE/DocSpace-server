@@ -49,9 +49,8 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        if (store is S3Storage) 
+        if (store is S3Storage s3Store) 
         {
-            var s3Store = store as S3Storage;
             var fullPath = s3Store.MakePath(domain, path);
 
             await _store.ConcatFileAsync(fullPath, tarKey, _domain, _key);

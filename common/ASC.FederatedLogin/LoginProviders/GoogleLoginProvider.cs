@@ -45,7 +45,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public override string ClientSecret => this["googleClientSecret"];
     public override string Scopes => "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 
-    public static readonly string[] GoogleDriveExt = new[] { ".gdoc", ".gsheet", ".gslides", ".gdraw" };
+    public static readonly string[] GoogleDriveExt = { ".gdoc", ".gsheet", ".gslides", ".gdraw" };
     public static readonly string GoogleDriveMimeTypeFolder = "application/vnd.google-apps.folder";
     public static readonly string FilesFields = "id,name,mimeType,parents,createdTime,modifiedTime,owners/displayName,lastModifyingUser/displayName,capabilities/canEdit,size";
     public static readonly string ProfileFields = "emailAddresses,genders,names";
@@ -110,7 +110,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         var profile = new LoginProfile(Signature, InstanceCrypto)
         {
             Id = jProfile.Value<string>("resourceName").Replace("people/", ""),
-            Provider = ProviderConstants.Google,
+            Provider = ProviderConstants.Google
         };
 
         var emailsArr = jProfile.Value<JArray>("emailAddresses");

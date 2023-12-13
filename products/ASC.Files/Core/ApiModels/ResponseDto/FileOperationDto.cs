@@ -85,25 +85,11 @@ public class FileOperationDto
 }
 
 [Scope]
-public class FileOperationDtoHelper
+public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
+    FileDtoHelper filesWrapperHelper,
+    IDaoFactory daoFactory,
+    CommonLinkUtility commonLinkUtility)
 {
-    private readonly FolderDtoHelper _folderWrapperHelper;
-    private readonly FileDtoHelper _filesWrapperHelper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly CommonLinkUtility _commonLinkUtility;
-
-    public FileOperationDtoHelper(
-        FolderDtoHelper folderWrapperHelper,
-        FileDtoHelper filesWrapperHelper,
-        IDaoFactory daoFactory,
-        CommonLinkUtility commonLinkUtility)
-    {
-        _folderWrapperHelper = folderWrapperHelper;
-        _filesWrapperHelper = filesWrapperHelper;
-        _daoFactory = daoFactory;
-        _commonLinkUtility = commonLinkUtility;
-    }
-
     public async Task<FileOperationDto> GetAsync(FileOperationResult o)
     {
         var result = new FileOperationDto
@@ -125,7 +111,7 @@ public class FileOperationDtoHelper
             var arr = o.Result.Split(':');
             var folders = arr
                 .Where(s => s.StartsWith("folder_"))
-                .Select(s => s.Substring(7))
+                .Select(s => s[7..])
                 .ToList();
 
             if (folders.Count > 0)
@@ -157,7 +143,7 @@ public class FileOperationDtoHelper
 
             var files = arr
                 .Where(s => s.StartsWith("file_"))
-                .Select(s => s.Substring(5))
+                .Select(s => s[5..])
                 .ToList();
 
             if (files.Count > 0)
@@ -190,7 +176,7 @@ public class FileOperationDtoHelper
 
             if (result.OperationType == FileOperationType.Download)
             {
-                result.Url = _commonLinkUtility.GetFullAbsolutePath(o.Result);
+                result.Url = commonLinkUtility.GetFullAbsolutePath(o.Result);
             }
         }
 
@@ -198,21 +184,21 @@ public class FileOperationDtoHelper
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersAsync<T>(IEnumerable<T> folders)
         {
-            var folderDao = _daoFactory.GetFolderDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
 
             await foreach (var folder in folderDao.GetFoldersAsync(folders))
             {
-                yield return await _folderWrapperHelper.GetAsync(folder);
+                yield return await folderWrapperHelper.GetAsync(folder);
             }
         }
 
         async IAsyncEnumerable<FileEntryDto> GetFilesAsync<T>(IEnumerable<T> files)
         {
-            var fileDao = _daoFactory.GetFileDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
 
             await foreach (var file in fileDao.GetFilesAsync(files))
             {
-                yield return await _filesWrapperHelper.GetAsync(file);
+                yield return await filesWrapperHelper.GetAsync(file);
             }
         }
     }

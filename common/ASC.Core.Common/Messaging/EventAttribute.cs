@@ -27,14 +27,8 @@
 namespace ASC.AuditTrail;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class EventAttribute : Attribute
+public class EventAttribute(string resource, int order = 0) : Attribute
 {
-    public string Resource { get; private set; }
-    public int Order { get; private set; }
-
-    public EventAttribute(string resource, int order = 0)
-    {
-        Resource = resource;
-        Order = order;
-    }
+    public string Resource { get; private set; } = resource;
+    public int Order { get; private set; } = order;
 }

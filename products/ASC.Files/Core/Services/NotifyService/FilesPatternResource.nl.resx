@@ -61,7 +61,7 @@
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Alle ondertekenaars hebben ondertekend.
 
-Dit is een e-mailmelding om je te informeren dat alle ondertekenaars "$DocumentTitle":$DocumentURL" hebben voltooid.</value>
+Dit is een e-mailmelding om je te informeren dat alle ondertekenaars "$DocumentTitle":"$DocumentURL" hebben voltooid.</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1. $Message: $DocumentTitle

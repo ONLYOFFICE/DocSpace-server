@@ -35,7 +35,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
@@ -248,7 +248,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false,
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -354,7 +354,7 @@ internal abstract class ThirdPartyProviderDao
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
             FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.DEFAULT,
+            _ => FolderType.DEFAULT
         };
 
         return rooms.Where(f => f.FolderType == typeFilter);
@@ -394,27 +394,7 @@ internal abstract class ThirdPartyProviderDao
     #endregion
 }
 
-internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPartyProviderDao, IDisposable
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
-{
-    protected readonly int _tenantId;
-    protected readonly IServiceProvider _serviceProvider;
-    protected readonly UserManager _userManager;
-    protected readonly TenantUtil _tenantUtil;
-    protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    protected readonly SetupInfo _setupInfo;
-    protected readonly FileUtility _fileUtility;
-    protected readonly TempPath _tempPath;
-    internal RegexDaoSelectorBase<TFile, TFolder, TItem> DaoSelector { get; set; }
-    protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
-    protected string PathPrefix { get; set; }
-
-    protected string Id { get => ProviderInfo.Selector.Id; }
-
-    protected ThirdPartyProviderDao(
-        IServiceProvider serviceProvider,
+internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -423,17 +403,24 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         FileUtility fileUtility,
         TempPath tempPath,
         RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
+    : ThirdPartyProviderDao, IDisposable
+    where TFile : class, TItem
+    where TFolder : class, TItem
+    where TItem : class
     {
-        _serviceProvider = serviceProvider;
-        _userManager = userManager;
-        _tenantUtil = tenantUtil;
-        _dbContextFactory = dbContextFactory;
-        _setupInfo = setupInfo;
-        _fileUtility = fileUtility;
-        _tempPath = tempPath;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
-        DaoSelector = regexDaoSelectorBase;
-    }
+    protected readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
+    protected readonly UserManager _userManager = userManager;
+    protected readonly TenantUtil _tenantUtil = tenantUtil;
+    protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory = dbContextFactory;
+    protected readonly SetupInfo _setupInfo = setupInfo;
+    protected readonly FileUtility _fileUtility = fileUtility;
+    protected readonly TempPath _tempPath = tempPath;
+    internal RegexDaoSelectorBase<TFile, TFolder, TItem> DaoSelector { get; set; } = regexDaoSelectorBase;
+    protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
+    protected string PathPrefix { get; set; }
+
+    protected string Id { get => ProviderInfo.Selector.Id; }
 
     public async Task<string> MappingIDAsync(string id, bool saveIfNotExist = false)
     {
@@ -575,17 +562,11 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
     }
 }
 
-internal class ErrorEntry
+internal class ErrorEntry(string error, string errorId)
 {
-    public string Error { get; set; }
-    public string ErrorId { get; set; }
-
-    public ErrorEntry(string error, string errorId)
-    {
-        Error = error;
-        ErrorId = errorId;
+    public string Error { get; set; } = error;
+    public string ErrorId { get; set; } = errorId;
     }
-}
 
 static file class Queries
 {

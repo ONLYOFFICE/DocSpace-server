@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SerializationContext = Confluent.Kafka.SerializationContext;
+
 namespace ASC.Common.Caching;
 
 public class ProtobufSerializer<T> : ISerializer<T> where T : new()
 {
-    public byte[] Serialize(T data, Confluent.Kafka.SerializationContext context)
+    public byte[] Serialize(T data, SerializationContext context)
     {
         return BaseProtobufSerializer.Serialize(data);
     }
@@ -36,7 +38,7 @@ public class ProtobufSerializer<T> : ISerializer<T> where T : new()
 
 public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
 {
-    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, Confluent.Kafka.SerializationContext context)
+    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
     {
         return BaseProtobufSerializer.Deserialize<T>(data);
     }

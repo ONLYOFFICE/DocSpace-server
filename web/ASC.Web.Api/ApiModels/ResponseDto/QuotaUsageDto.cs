@@ -76,7 +76,7 @@ public class QuotaUsageManager
             UsersCount = _coreBaseSettings.Personal ? 0 : await _activeUsersStatistic.GetValueAsync(),
 
             StorageUsage = quotaRows
-                .Select(x => new QuotaUsage { Path = x.Path.TrimStart('/').TrimEnd('/'), Size = x.Counter, })
+                .Select(x => new QuotaUsage { Path = x.Path.TrimStart('/').TrimEnd('/'), Size = x.Counter })
                 .ToList()
         };
 

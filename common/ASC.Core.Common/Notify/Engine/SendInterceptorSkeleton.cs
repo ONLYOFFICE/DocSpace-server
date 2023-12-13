@@ -64,7 +64,10 @@ public class SendInterceptorSkeleton : ISendInterceptor
 
     public async Task<bool> PreventSend(NotifyRequest request, InterceptorPlace place, IServiceScope serviceScope)
     {
-        if (_method != null) return _method(request, place, serviceScope);
+        if (_method != null)
+        {
+            return _method(request, place, serviceScope);
+        }
 
         return await _methodAsync(request, place, serviceScope);
     }

@@ -30,13 +30,6 @@ namespace ASC.Core.Users;
 /// </summary>
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 {
-    public UserInfo()
-    {
-        Status = EmployeeStatus.Active;
-        ActivationStatus = EmployeeActivationStatus.NotActivated;
-        LastModified = DateTime.UtcNow;
-    }
-
     /// <summary>ID</summary>
     /// <type>System.Guid, System</type>
     public Guid Id { get; set; }
@@ -63,11 +56,11 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 
     /// <summary>Status</summary>
     /// <type>ASC.Core.Users.EmployeeStatus, ASC.Core.Common</type>
-    public EmployeeStatus Status { get; set; }
+    public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
     /// <summary>Activation status</summary>
     /// <type>ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common</type>
-    public EmployeeActivationStatus ActivationStatus { get; set; }
+    public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
     /// <summary>The date and time when the user account was terminated</summary>
     /// <type>System.Nullable{System.DateTime}, System</type>
@@ -117,7 +110,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 
     /// <summary>Last modified date</summary>
     /// <type>System.DateTime, System</type>
-    public DateTime LastModified { get; set; }
+    public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
     /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>

@@ -51,7 +51,7 @@ public static class DocSpaceHelper
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.FormRoom => RoomType.FormRoom,
-            _ => null,
+            _ => null
         };
     }
 

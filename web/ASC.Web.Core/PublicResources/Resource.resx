@@ -1095,4 +1095,7 @@
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
     <value>To many input files</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>The last full access space cannot be deleted</value>
+  </data>
 </root>

@@ -280,7 +280,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _subsManager.RemoveDynamicSubscription<TH>(eventName);
     }
 
-    private void PreProcessEvent(IntegrationEvent @event)
+    private static void PreProcessEvent(IntegrationEvent @event)
     {
         if (_rejectedEvents.Count == 0)
         {
@@ -308,8 +308,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             {
                 if (subscription.IsDynamic)
                 {
-                    var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                    if (handler == null)
+                    if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                     {
                         continue;
                     }
@@ -347,10 +346,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             consumer.Dispose();
         }
 
-        if (_consumerSession != null)
-        {
-            _consumerSession.Dispose();
-        }
+        _consumerSession?.Dispose();
 
         _subsManager.Clear();
     }

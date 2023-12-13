@@ -27,40 +27,33 @@
 namespace ASC.Files.Core.Data;
 
 [Scope]
-public class DaoFactory : IDaoFactory
+public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao) : IDaoFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-    public IProviderDao ProviderDao { get; }
-
-    public DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao)
-    {
-        _serviceProvider = serviceProvider;
-        ProviderDao = providerDao;
-    }
+    public IProviderDao ProviderDao { get; } = providerDao;
 
     public IFileDao<T> GetFileDao<T>()
     {
-        return _serviceProvider.GetService<IFileDao<T>>();
+        return serviceProvider.GetService<IFileDao<T>>();
     }
 
     public IFolderDao<T> GetFolderDao<T>()
     {
-        return _serviceProvider.GetService<IFolderDao<T>>();
+        return serviceProvider.GetService<IFolderDao<T>>();
     }
 
     public ITagDao<T> GetTagDao<T>()
     {
-        return _serviceProvider.GetService<ITagDao<T>>();
+        return serviceProvider.GetService<ITagDao<T>>();
     }
 
     public ISecurityDao<T> GetSecurityDao<T>()
     {
-        return _serviceProvider.GetService<ISecurityDao<T>>();
+        return serviceProvider.GetService<ISecurityDao<T>>();
     }
 
     public ILinkDao GetLinkDao()
     {
-        return _serviceProvider.GetService<ILinkDao>();
+        return serviceProvider.GetService<ILinkDao>();
     }
 }
 

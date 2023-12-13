@@ -30,15 +30,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
-{
-    private readonly CrossDao _crossDao;
-    private readonly SharePointDaoSelector _sharePointDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-    private readonly IFolderDao<int> _folderDao;
-
-    public SharePointFolderDao(
-        IServiceProvider serviceProvider,
+internal class SharePointFolderDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -50,16 +42,10 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
+        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
     {
-        _crossDao = crossDao;
-        _sharePointDaoSelector = sharePointDaoSelector;
-        _fileDao = fileDao;
-        _folderDao = folderDao;
-    }
-
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         return SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
@@ -158,7 +144,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
             SortedByType.AZ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? folders.OrderBy(x => x.ModifiedOn) : folders.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? folders.OrderBy(x => x.CreateOn) : folders.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title)
         };
 
         return folders;
@@ -248,26 +234,26 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-                var link = await Queries.TagLinksAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+            var link = await Queries.TagLinksAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.TagLink.RemoveRange(link);
-                await filesDbContext.SaveChangesAsync();
+            dbContext.TagLink.RemoveRange(link);
+            await dbContext.SaveChangesAsync();
 
-                var tagsToRemove = await Queries.TagsAsync(filesDbContext).ToListAsync();
+            var tagsToRemove = await Queries.TagsAsync(dbContext).ToListAsync();
 
-                filesDbContext.Tag.RemoveRange(tagsToRemove);
+            dbContext.Tag.RemoveRange(tagsToRemove);
 
-                var securityToDelete = await Queries.SecuritiesAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var securityToDelete = await Queries.SecuritiesAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.Security.RemoveRange(securityToDelete);
-                await filesDbContext.SaveChangesAsync();
+            dbContext.Security.RemoveRange(securityToDelete);
+            await dbContext.SaveChangesAsync();
 
-                var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
-                await filesDbContext.SaveChangesAsync();
+            dbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
+            await dbContext.SaveChangesAsync();
 
                 await tx.CommitAsync();
         });
@@ -293,9 +279,9 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
     public async Task<int> MoveFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
-        var moved = await _crossDao.PerformCrossDaoFolderCopyAsync(
-                folderId, this, _sharePointDaoSelector.GetFileDao(folderId), _sharePointDaoSelector.ConvertId,
-                toFolderId, _folderDao, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
+                folderId, this, sharePointDaoSelector.GetFileDao(folderId), sharePointDaoSelector.ConvertId,
+                toFolderId, folderDao, fileDao, r => r,
                 true, cancellationToken)
             ;
 
@@ -332,9 +318,9 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
     public async Task<Folder<int>> CopyFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
-        var moved = await _crossDao.PerformCrossDaoFolderCopyAsync(
-            folderId, this, _sharePointDaoSelector.GetFileDao(folderId), _sharePointDaoSelector.ConvertId,
-            toFolderId, _folderDao, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
+            folderId, this, sharePointDaoSelector.GetFileDao(folderId), sharePointDaoSelector.ConvertId,
+            toFolderId, folderDao, fileDao, r => r,
             false, cancellationToken)
             ;
 
@@ -460,14 +446,6 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> HashIdsAsync =
-        EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string idStart) =>
-                ctx.ThirdpartyIdMapping
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id.StartsWith(idStart))
-                    .Select(r => r.HashId));
-
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesTagLink>> TagLinksAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string idStart) =>

@@ -26,18 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T> : FileOperationData<T>
-{
-    public Dictionary<T, string> FilesDownload { get; }
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers,
+internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
+        IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool holdResult = true)
-        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
-    {
-        FilesDownload = files;
-        Headers = headers;
-    }
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+{
+    public Dictionary<T, string> FilesDownload { get; } = files;
+    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
@@ -89,9 +84,9 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
                     (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
+            }
+            else
+            {
                 fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
@@ -242,7 +237,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
                 title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+        }
 
         var entriesPathId = new ItemNameValueCollection<T>();
         entriesPathId.Add(path + title, file.Id);
@@ -315,7 +310,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, null, true));
 
             await foreach (var file in files)
             {
@@ -381,8 +376,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
                         newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                        }
                     }
+                }
 
                 if (0 < counter)
                 {
@@ -403,17 +398,18 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
+                            await fileConverter.ExecAsync(file, convertToExt) :
+                            await fileDao.GetFileStreamAsync(file);
+                        
+                        var t = Task.Run(async () => await compressTo.PutStream(readStream));
+                            
+                        while (!t.IsCompleted)
                         {
-                            //Take from converter
-                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
-                            await compressTo.PutStream(readStream);
+                            PublishChanges();
+                            await Task.Delay(100);
                         }
-                        else
-                        {
-                            await using var readStream = await fileDao.GetFileStreamAsync(file);
-                            await compressTo.PutStream(readStream);
-                        }
+                        
                         compressTo.CloseEntry();
                     }
                     catch (Exception ex)
@@ -460,7 +456,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path.Substring(path.LastIndexOf('/'));
+            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
             entriesPathId.Add(newtitle, ids);
         }
     }

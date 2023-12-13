@@ -26,14 +26,12 @@
 
 namespace ASC.Core.Common.EF;
 
-public class CoreDbContext : DbContext
+public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
 {
     public DbSet<DbTariff> Tariffs { get; set; }
     public DbSet<DbTariffRow> TariffRows { get; set; }
     public DbSet<DbQuota> Quotas { get; set; }
     public DbSet<DbQuotaRow> QuotaRows { get; set; }
-
-    public CoreDbContext(DbContextOptions<CoreDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

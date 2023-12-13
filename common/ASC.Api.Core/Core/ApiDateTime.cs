@@ -35,8 +35,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     public DateTime UtcTime { get; private set; }
     public TimeSpan TimeZoneOffset { get; private set; }
 
-    internal static readonly string[] Formats = new[]
-    {
+    internal static readonly string[] Formats = {
         "o",
         "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffffffK",
         "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffK",
@@ -103,10 +102,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
             if (!data.EndsWith("Z", true, CultureInfo.InvariantCulture))
             {
-                if (tz == null)
-                {
-                    tz = GetTimeZoneInfo(tenantManager, timeZoneConverter);
-                }
+                tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
 
                 tzOffset = tz.GetUtcOffset(dateTime);
                 dateTime = dateTime.Subtract(tzOffset);
@@ -124,10 +120,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = TimeSpan.Zero;
         UtcTime = DateTime.MinValue;
 
-        if (timeZone == null)
-        {
-            timeZone = GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
-        }
+        timeZone ??= GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
 
         //Hack
         if (timeZone.IsInvalidTime(new DateTime(value.Ticks, DateTimeKind.Unspecified)))
@@ -291,12 +284,12 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
             return true;
         }
 
-        if (obj is not ApiDateTime)
+        if (obj is not ApiDateTime time)
         {
             return false;
         }
 
-        return Equals((ApiDateTime)obj);
+        return Equals(time);
     }
 
     public bool Equals(ApiDateTime other)
@@ -400,19 +393,10 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
 }
 
 [Scope]
-public class ApiDateTimeHelper
+public class ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly TimeZoneConverter _timeZoneConverter;
-
-    public ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
-    {
-        _tenantManager = tenantManager;
-        _timeZoneConverter = timeZoneConverter;
-    }
-
     public ApiDateTime Get(DateTime? from)
     {
-        return ApiDateTime.FromDate(_tenantManager, _timeZoneConverter, from);
+        return ApiDateTime.FromDate(tenantManager, timeZoneConverter, from);
     }
 }

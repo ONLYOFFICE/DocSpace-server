@@ -28,21 +28,16 @@ using System.Globalization;
 
 namespace ASC.Feed.Aggregator.Modules;
 
-public abstract class FeedModule : IFeedModule
+public abstract class FeedModule(TenantManager tenantManager, WebItemSecurity webItemSecurity)
+    : IFeedModule
 {
     public abstract string Name { get; }
     public abstract string Product { get; }
     public abstract Guid ProductID { get; }
     protected abstract string DbId { get; }
 
-    protected readonly TenantManager _tenantManager;
-    protected readonly WebItemSecurity _webItemSecurity;
-
-    protected FeedModule(TenantManager tenantManager, WebItemSecurity webItemSecurity)
-    {
-        _tenantManager = tenantManager;
-        _webItemSecurity = webItemSecurity;
-    }
+    protected readonly TenantManager _tenantManager = tenantManager;
+    protected readonly WebItemSecurity _webItemSecurity = webItemSecurity;
 
     public abstract Task<IEnumerable<Tuple<Feed, object>>> GetFeeds(FeedFilter filter);
 

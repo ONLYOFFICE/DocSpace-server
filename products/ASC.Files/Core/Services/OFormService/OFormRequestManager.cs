@@ -27,36 +27,22 @@
 namespace ASC.Files.Core.Services.OFormService;
 
 [Singleton]
-public class OFormRequestManager
+public class OFormRequestManager(ILogger<OFormRequestManager> logger,
+    ConfigurationExtension configuration,
+    IHttpClientFactory httpClientFactory)
 {
-    private readonly OFormSettings _configuration;
-    private readonly ILogger<OFormRequestManager> _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly TempPath _tempPath;
-    private readonly JsonSerializerOptions _options;
+    private readonly OFormSettings _configuration = configuration.GetSetting<OFormSettings>("files:oform");
 
-    public OFormRequestManager(
-        ILogger<OFormRequestManager> logger,
-        ConfigurationExtension configuration,
-        IHttpClientFactory httpClientFactory,
-        TempPath tempPath)
+    private readonly JsonSerializerOptions _options = new()
     {
-        _configuration = configuration.GetSetting<OFormSettings>("files:oform");
-        _logger = logger;
-        _httpClientFactory = httpClientFactory;
-        _tempPath = tempPath;
-
-        _options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-    }
+        PropertyNameCaseInsensitive = true
+    };
 
     public async Task<Stream> Get(int id)
     {
         try
         {
-            using var httpClient = _httpClientFactory.CreateClient();
+            using var httpClient = httpClientFactory.CreateClient();
             using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={_configuration.Ext}");
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
             
@@ -66,7 +52,7 @@ public class OFormRequestManager
         }
         catch (Exception e)
         {
-            _logger.ErrorWithException(e);
+            logger.ErrorWithException(e);
             throw;
         }
     }

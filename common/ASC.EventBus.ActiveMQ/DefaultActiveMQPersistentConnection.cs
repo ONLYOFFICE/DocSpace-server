@@ -28,22 +28,15 @@ using Apache.NMS.AMQP;
 
 namespace ASC.EventBus.ActiveMQ;
 
-public class DefaultActiveMQPersistentConnection
+public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFactory,
+        ILogger<DefaultActiveMQPersistentConnection> logger, int retryCount = 5)
     : IActiveMQPersistentConnection
 {
-    private readonly IConnectionFactory _connectionFactory;
-    private readonly ILogger<DefaultActiveMQPersistentConnection> _logger;
-    private readonly int _retryCount;
+    private readonly IConnectionFactory _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+    private readonly ILogger<DefaultActiveMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
     readonly object sync_root = new();
-
-    public DefaultActiveMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultActiveMQPersistentConnection> logger, int retryCount = 5)
-    {
-        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _retryCount = retryCount;
-    }
 
     public bool IsConnected
     {
@@ -124,7 +117,7 @@ public class DefaultActiveMQPersistentConnection
         lock (sync_root)
         {
             var policy = Policy.Handle<SocketException>()
-                .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                 {
                     _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
                 }
@@ -143,9 +136,9 @@ public class DefaultActiveMQPersistentConnection
                 _connection.ConnectionInterruptedListener += OnConnectionInterruptedListener;
                 _connection.ConnectionResumedListener += OnConnectionResumedListener;
 
-                if (_connection is NmsConnection)
+                if (_connection is NmsConnection connection)
                 {
-                    var hostname = ((NmsConnection)_connection).ConnectionInfo.ConfiguredUri.Host;
+                    var hostname = connection.ConnectionInfo.ConfiguredUri.Host;
 
                     _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
 
@@ -154,12 +147,10 @@ public class DefaultActiveMQPersistentConnection
 
                 return true;
             }
-            else
-            {
-                _logger.CriticalActiveMQCouldNotBeCreated();
 
-                return false;
-            }
+            _logger.CriticalActiveMQCouldNotBeCreated();
+
+            return false;
         }
     }
 

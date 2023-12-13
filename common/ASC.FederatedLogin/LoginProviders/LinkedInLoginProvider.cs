@@ -83,7 +83,7 @@ public class LinkedInLoginProvider : BaseLoginProvider<LinkedInLoginProvider>
             FirstName = jProfile.Value<string>("localizedFirstName"),
             LastName = jProfile.Value<string>("localizedLastName"),
             EMail = jProfile.Value<string>("emailAddress"),
-            Provider = ProviderConstants.LinkedIn,
+            Provider = ProviderConstants.LinkedIn
         };
 
         return profile;

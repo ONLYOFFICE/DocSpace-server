@@ -27,20 +27,12 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Login} {Password} {Token} {Url}")]
-public class AuthData
+public class AuthData(string url = null, string login = null, string password = null, string token = null)
 {
-    public string Login { get; init; }
-    public string Password { get; init; }
-    public string Token { get; init; }
-    public string Url { get; set; }
-
-    public AuthData(string url = null, string login = null, string password = null, string token = null)
-    {
-        Url = url ?? string.Empty;
-        Login = login ?? string.Empty;
-        Password = password ?? string.Empty;
-        Token = token ?? string.Empty;
-    }
+    public string Login { get; init; } = login ?? string.Empty;
+    public string Password { get; init; } = password ?? string.Empty;
+    public string Token { get; init; } = token ?? string.Empty;
+    public string Url { get; set; } = url ?? string.Empty;
 
     public bool IsEmpty()
     {

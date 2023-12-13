@@ -51,7 +51,10 @@ public static class ISetupBuilderExtension
         {
             var awsTarget = conf.FindTargetByName<AWSTarget>(targetName);
 
-            if (awsTarget == null) continue;
+            if (awsTarget == null)
+            {
+                continue;
+            }
 
             //hack
             if (!string.IsNullOrEmpty(settings.Name))

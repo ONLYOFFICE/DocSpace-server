@@ -26,58 +26,49 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public class TenantsModuleSpecifics : ModuleSpecificsBase
+public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override string ConnectionStringName => "core";
     public override ModuleName ModuleName => ModuleName.Tenants;
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _tableRelations;
 
-    private readonly CoreSettings _coreSettings;
-
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("tenants_quota", "tenant"),
-            new TableInfo("tenants_tariff", "tenant", "id"),
-            new TableInfo("tenants_tenants", "id", "id")
+    private readonly TableInfo[] _tables = {
+            new("tenants_quota", "tenant"),
+            new("tenants_tariff", "tenant", "id"),
+            new("tenants_tenants", "id", "id")
             {
                 DateColumns = new Dictionary<string, bool> {{"creationdatetime", false}, {"statuschanged", false}, {"version_changed", false}}
             },
-            new TableInfo("tenants_tariffrow", "tenant") {InsertMethod = InsertMethod.Replace},
-            new TableInfo("tenants_quotarow", "tenant") {InsertMethod = InsertMethod.Replace},
-            new TableInfo("core_user", "tenant", "id", IdType.Guid)
+            new("tenants_tariffrow", "tenant") {InsertMethod = InsertMethod.Replace},
+            new("tenants_quotarow", "tenant") {InsertMethod = InsertMethod.Replace},
+            new("core_user", "tenant", "id", IdType.Guid)
             {
                 DateColumns = new Dictionary<string, bool> {{"workfromdate", false}, {"terminateddate", false}, {"last_modified", false}},
                 UserIDColumns = new[] { "id" }
             },
-            new TableInfo("core_group", "tenant", "id", IdType.Guid),
-            new TableInfo("tenants_iprestrictions", "tenant", "id")
+            new("core_group", "tenant", "id", IdType.Guid),
+            new("tenants_iprestrictions", "tenant", "id")
         };
 
-    private readonly RelationInfo[] _tableRelations = new[]
-    {
-            new RelationInfo("tenants_tenants", "id", "tenants_quota", "tenant"),
-            new RelationInfo("tenants_tenants", "id", "tenants_tariff", "tenant"),
-            new RelationInfo("tenants_tenants", "id", "tenants_tariff", "tariff"),
-            new RelationInfo("tenants_tariff", "id", "tenants_tariffrow", "tariff_id"),
-            new RelationInfo("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
+    private readonly RelationInfo[] _tableRelations = {
+            new("tenants_tenants", "id", "tenants_quota", "tenant"),
+            new("tenants_tenants", "id", "tenants_tariff", "tenant"),
+            new("tenants_tenants", "id", "tenants_tariff", "tariff"),
+            new("tenants_tariff", "id", "tenants_tariffrow", "tariff_id"),
+            new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
         };
 
-    public TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers)
-        : base(helpers)
-    {
-        _coreSettings = coreSettings;
-    }
-
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     {
         if (table.Name == "tenants_tenants" && string.IsNullOrEmpty(Convert.ToString(row["payment_id"])))
         {
             var oldTenantID = Convert.ToInt32(row["id"]);
-            columnMapper.SetMapping("tenants_tenants", "payment_id", row["payment_id"], _coreSettings.GetKey(oldTenantID));
+            columnMapper.SetMapping("tenants_tenants", "payment_id", row["payment_id"], await coreSettings.GetKeyAsync(oldTenantID));
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)

@@ -27,20 +27,13 @@
 namespace ASC.Web.Core.Sms;
 
 [Scope]
-public class SmsProviderManager
+public class SmsProviderManager(ConsumerFactory consumerFactory)
 {
-    private readonly ConsumerFactory _consumerFactory;
-
-    public SmscProvider SmscProvider { get => _consumerFactory.Get<SmscProvider>(); }
-    public ClickatellProvider ClickatellProvider { get => _consumerFactory.Get<ClickatellProvider>(); }
-    public TwilioProvider TwilioProvider { get => _consumerFactory.Get<TwilioProvider>(); }
-    public ClickatellProvider ClickatellUSAProvider { get => _consumerFactory.Get<ClickatellUSAProvider>(); }
-    public TwilioProvider TwilioSaaSProvider { get => _consumerFactory.Get<TwilioSaaSProvider>(); }
-
-    public SmsProviderManager(ConsumerFactory consumerFactory)
-    {
-        _consumerFactory = consumerFactory;
-    }
+    public SmscProvider SmscProvider { get => consumerFactory.Get<SmscProvider>(); }
+    public ClickatellProvider ClickatellProvider { get => consumerFactory.Get<ClickatellProvider>(); }
+    public TwilioProvider TwilioProvider { get => consumerFactory.Get<TwilioProvider>(); }
+    public ClickatellProvider ClickatellUSAProvider { get => consumerFactory.Get<ClickatellUSAProvider>(); }
+    public TwilioProvider TwilioSaaSProvider { get => consumerFactory.Get<TwilioSaaSProvider>(); }
 
     public bool Enabled()
     {
@@ -226,7 +219,7 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
 
     public async Task<string> GetBalanceAsync(Tenant tenant, bool eraseCache = false)
     {
-        var tenantCache = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        var tenantCache = tenant?.Id ?? Tenant.DefaultTenant;
 
         var key = "sms/smsc/" + tenantCache;
         if (eraseCache)
@@ -409,7 +402,7 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 
         try
         {
-            var smsMessage = MessageResource.Create(new PhoneNumber(number), body: message, @from: new PhoneNumber(Sender), client: twilioRestClient);
+            var smsMessage = MessageResource.Create(new PhoneNumber(number), body: message, from: new PhoneNumber(Sender), client: twilioRestClient);
             Log.InformationSmsWasSendTo(number, smsMessage.Status);
             if (!smsMessage.ErrorCode.HasValue)
             {
@@ -441,6 +434,4 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 }
 
 [Scope]
-public class TwilioSaaSProvider : TwilioProvider
-{
-}
+public class TwilioSaaSProvider : TwilioProvider;

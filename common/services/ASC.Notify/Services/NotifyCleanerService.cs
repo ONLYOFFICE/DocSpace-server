@@ -27,19 +27,13 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifyCleanerService : BackgroundService
+public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, IServiceScopeFactory serviceScopeFactory,
+        ILoggerProvider options)
+    : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly NotifyServiceCfg _notifyServiceCfg;
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger _logger = options.CreateLogger("ASC.NotifyCleaner");
+    private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
     private readonly TimeSpan _waitingPeriod = TimeSpan.FromHours(8);
-
-    public NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, IServiceScopeFactory serviceScopeFactory, ILoggerProvider options)
-    {
-        _logger = options.CreateLogger("ASC.NotifyCleaner");
-        _notifyServiceCfg = notifyServiceCfg.Value;
-        _scopeFactory = serviceScopeFactory;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -49,7 +43,7 @@ public class NotifyCleanerService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
+            await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifyCleanerService>>();
 
@@ -76,7 +70,7 @@ public class NotifyCleanerService : BackgroundService
         {
             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
-            using var scope = _scopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             await Queries.DeleteNotifyInfosAsync(dbContext, date);

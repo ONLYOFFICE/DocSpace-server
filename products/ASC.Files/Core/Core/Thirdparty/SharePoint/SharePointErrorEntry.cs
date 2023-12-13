@@ -29,24 +29,14 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
-public class SharePointFileErrorEntry : File
+public class SharePointFileErrorEntry(ClientRuntimeContext cc, ObjectPath op) : File(cc, op)
 {
-    public SharePointFileErrorEntry(ClientRuntimeContext cc, ObjectPath op)
-        : base(cc, op)
-    {
-    }
-
     public string Error { get; init; }
     public object ID { get; init; }
 }
 
-public class SharePointFolderErrorEntry : Folder
+public class SharePointFolderErrorEntry(ClientRuntimeContext cc, ObjectPath op) : Folder(cc, op)
 {
-    public SharePointFolderErrorEntry(ClientRuntimeContext cc, ObjectPath op)
-        : base(cc, op)
-    {
-    }
-
     public string Error { get; init; }
     public object ID { get; init; }
 }

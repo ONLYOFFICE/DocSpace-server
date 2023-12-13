@@ -27,21 +27,14 @@
 namespace ASC.Api.Core.Middleware;
 
 // problem: https://github.com/aspnet/Logging/issues/677
-public class UnhandledExceptionMiddleware
+public class UnhandledExceptionMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public UnhandledExceptionMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(HttpContext context,
                             ILogger<UnhandledExceptionMiddleware> logger)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (Exception ex) when (LogError(ex))
         {

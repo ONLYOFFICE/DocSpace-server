@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class TenantDbContext : DbContext
+public class TenantDbContext(DbContextOptions<TenantDbContext> options) : DbContext(options)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbTenantVersion> TenantVersion { get; set; }
@@ -34,8 +34,6 @@ public class TenantDbContext : DbContext
     public DbSet<DbTenantForbiden> TenantForbiden { get; set; }
     public DbSet<TenantIpRestrictions> TenantIpRestrictions { get; set; }
     public DbSet<DbCoreSettings> CoreSettings { get; set; }
-
-    public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

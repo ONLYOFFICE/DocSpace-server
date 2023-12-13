@@ -184,22 +184,13 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     }
 }
 
-abstract class FileOperationData<T>
+abstract class FileOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, ExternalShareData externalShareData, bool holdResult = true)
 {
-    public List<T> Folders { get; private set; }
-    public List<T> Files { get; private set; }
-    public Tenant Tenant { get; }
-    public ExternalShareData ExternalShareData { get; }
-    public bool HoldResult { get; set; }
-
-    protected FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, ExternalShareData externalShareData, bool holdResult = true)
-    {
-        Folders = folders?.ToList() ?? new List<T>();
-        Files = files?.ToList() ?? new List<T>();
-        Tenant = tenant;
-        ExternalShareData = externalShareData;
-        HoldResult = holdResult;
-    }
+    public List<T> Folders { get; private set; } = folders?.ToList() ?? new List<T>();
+    public List<T> Files { get; private set; } = files?.ToList() ?? new List<T>();
+    public Tenant Tenant { get; } = tenant;
+    public ExternalShareData ExternalShareData { get; } = externalShareData;
+    public bool HoldResult { get; set; } = holdResult;
 }
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
@@ -357,26 +348,8 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
 }
 
 [Scope]
-public class FileOperationScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly ILogger _options;
-
-    public FileOperationScope(TenantManager tenantManager, IDaoFactory daoFactory, FileSecurity fileSecurity, ILogger<FileOperationScope> options)
-    {
-        _tenantManager = tenantManager;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _options = options;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager, out IDaoFactory daoFactory, out FileSecurity fileSecurity, out ILogger optionsMonitor)
-    {
-        tenantManager = _tenantManager;
-        daoFactory = _daoFactory;
-        fileSecurity = _fileSecurity;
-        optionsMonitor = _options;
-    }
-}
+public record FileOperationScope(
+    TenantManager TenantManager, 
+    IDaoFactory DaoFactory, 
+    FileSecurity FileSecurity,
+    ILogger<FileOperationScope> Options);

@@ -27,29 +27,22 @@
 namespace ASC.Feed.Aggregator.Service;
 
 [Singleton]
-public class FeedAggregatorService : FeedBaseService
-{
-    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
-
-    public FeedAggregatorService(
-        FeedSettings feedSettings,
+public class FeedAggregatorService(FeedSettings feedSettings,
         IServiceScopeFactory serviceScopeFactory,
         ILoggerProvider optionsMonitor)
-        : base(feedSettings, serviceScopeFactory, optionsMonitor)
-    {
-    }
+    : FeedBaseService(feedSettings, serviceScopeFactory, optionsMonitor)
+{
+    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.InformationAggregatorServiceRunning();
 
-        var cfg = _feedSettings;
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            await AggregateFeedsAsync(cfg.AggregateInterval);
+            await AggregateFeedsAsync(_feedSettings.AggregateInterval);
 
-            await Task.Delay(cfg.AggregatePeriod, stoppingToken);
+            await Task.Delay(_feedSettings.AggregatePeriod, stoppingToken);
         }
 
         _logger.InformationAggregatorServiceStopping();
@@ -91,11 +84,10 @@ public class FeedAggregatorService : FeedBaseService
     {
         try
         {
-            var cfg = _feedSettings;
             await using var scope = _serviceScopeFactory.CreateAsyncScope();
             var cache = scope.ServiceProvider.GetService<ICache>();
             var baseCommonLinkUtility = scope.ServiceProvider.GetService<BaseCommonLinkUtility>();
-            baseCommonLinkUtility.Initialize(cfg.ServerRoot);
+            baseCommonLinkUtility.Initialize(_feedSettings.ServerRoot);
 
             var start = DateTime.UtcNow;
             _logger.DebugStartCollectiongFeeds();
@@ -170,7 +162,7 @@ public class FeedAggregatorService : FeedBaseService
                     }
                 }
 
-                await feedAggregateDataProvider.SaveFeedsAsync(result, module.GetType().Name, toTime, cfg.PortionSize);
+                await feedAggregateDataProvider.SaveFeedsAsync(result, module.GetType().Name, toTime, _feedSettings.PortionSize);
 
                 foreach (var res in result)
                 {

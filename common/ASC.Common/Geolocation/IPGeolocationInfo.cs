@@ -41,6 +41,6 @@ public class IPGeolocationInfo
     {
         Key = string.Empty,
         City = string.Empty,
-        TimezoneName = string.Empty,
+        TimezoneName = string.Empty
     };
 }

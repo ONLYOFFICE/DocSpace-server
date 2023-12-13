@@ -27,26 +27,12 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class ChunkedUploadSessionHolder
+public class ChunkedUploadSessionHolder(GlobalStore globalStore,
+    SetupInfo setupInfo,
+    TempPath tempPath,
+    FileHelper fileHelper)
 {
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
-
-    private readonly GlobalStore _globalStore;
-    private readonly SetupInfo _setupInfo;
-    private readonly TempPath _tempPath;
-    private readonly FileHelper _fileHelper;
-
-    public ChunkedUploadSessionHolder(
-        GlobalStore globalStore,
-        SetupInfo setupInfo,
-        TempPath tempPath,
-        FileHelper fileHelper)
-    {
-        _globalStore = globalStore;
-        _setupInfo = setupInfo;
-        _tempPath = tempPath;
-        _fileHelper = fileHelper;
-    }
 
     public async Task StoreSessionAsync<T>(ChunkedUploadSession<T> s)
     {
@@ -61,7 +47,7 @@ public class ChunkedUploadSessionHolder
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
         await using var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(sessionId);
-        var chunkedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
+        var chunkedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, fileHelper);
 
         return chunkedUploadSession;
     }
@@ -101,6 +87,6 @@ public class ChunkedUploadSessionHolder
 
     private async Task<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
     {
-        return new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+        return new CommonChunkedUploadSessionHolder(tempPath, await globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, setupInfo.ChunkUploadSize);
     }
 }

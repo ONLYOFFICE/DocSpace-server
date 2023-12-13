@@ -26,16 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class UploadControllerHelper : FilesHelperBase
-{
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
-    private readonly TenantManager _tenantManager;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly SecurityContext _securityContext;
-
-    public UploadControllerHelper(
-        FilesSettingsHelper filesSettingsHelper,
+public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
@@ -49,29 +40,21 @@ public class UploadControllerHelper : FilesHelperBase
         TenantManager tenantManager,
         IHttpClientFactory httpClientFactory,
         SecurityContext securityContext)
-        : base(
-            filesSettingsHelper,
-            fileUploader,
-            socketManager,
-            fileDtoHelper,
-            apiContext,
-            fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
-    {
-        _filesLinkUtility = filesLinkUtility;
-        _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
-        _tenantManager = tenantManager;
-        _httpClientFactory = httpClientFactory;
-        _securityContext = securityContext;
-    }
-
+    : FilesHelperBase(filesSettingsHelper,
+    fileUploader,
+    socketManager,
+    fileDtoHelper,
+    apiContext,
+    fileStorageService,
+    folderContentDtoHelper,
+    httpContextAccessor,
+    folderDtoHelper)
+{
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default(ApiDateTime), true);
+        return await CreateUploadSessionAsync(file, false, default, true);
     }
 
     public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
@@ -82,11 +65,11 @@ public class UploadControllerHelper : FilesHelperBase
 
     public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
-        if (_filesLinkUtility.IsLocalFileUploader)
+        if (filesLinkUtility.IsLocalFileUploader)
         {
             var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
-            var responseObject = await _chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
+            var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
 
             return new
             {
@@ -95,9 +78,9 @@ public class UploadControllerHelper : FilesHelperBase
             };
         }
 
-        var createSessionUrl = _filesLinkUtility.GetInitiateUploadSessionUrl(await _tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, _securityContext);
+        var createSessionUrl = filesLinkUtility.GetInitiateUploadSessionUrl(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
 
         var request = new HttpRequestMessage
         {

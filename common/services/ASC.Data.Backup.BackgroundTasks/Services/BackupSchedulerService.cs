@@ -29,74 +29,65 @@ using ASC.Core.Configuration;
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-public sealed class BackupSchedulerService : BackgroundService
-{
-    private readonly TimeSpan _backupSchedulerPeriod;
-    private readonly ILogger<BackupSchedulerService> _logger;
-
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IEventBus _eventBus;
-
-    public BackupSchedulerService(
-        ILogger<BackupSchedulerService> logger,
+public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logger,
         IServiceScopeFactory scopeFactory,
         ConfigurationExtension configuration,
         CoreBaseSettings coreBaseSettings,
         IEventBus eventBus)
-    {
-        _logger = logger;
-        _coreBaseSettings = coreBaseSettings;
-        _backupSchedulerPeriod = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
-        _scopeFactory = scopeFactory;
-        _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
-    }
+    : BackgroundService
+{
+    private readonly TimeSpan _backupSchedulerPeriod = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
+
+    private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.DebugBackupSchedulerServiceStarting();
+        logger.DebugBackupSchedulerServiceStarting();
 
-        stoppingToken.Register(() => _logger.DebugBackupSchedulerServiceStopping());
+        stoppingToken.Register(logger.DebugBackupSchedulerServiceStopping);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
+            await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupSchedulerService>>();
 
             if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId))
             {
-                _logger.DebugBackupSchedulerServiceIsNotActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId);
+                logger.DebugBackupSchedulerServiceIsNotActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId);
 
                 await Task.Delay(1000, stoppingToken);
 
                 continue;
             }
 
-            _logger.DebugBackupSchedulerServiceDoingWork();
+            logger.DebugBackupSchedulerServiceDoingWork();
 
             await ExecuteBackupSchedulerAsync(stoppingToken);
 
             await Task.Delay(_backupSchedulerPeriod, stoppingToken);
         }
 
-        _logger.DebugBackupSchedulerServiceStopping();
+        logger.DebugBackupSchedulerServiceStopping();
     }
 
     private async Task ExecuteBackupSchedulerAsync(CancellationToken stoppingToken)
     {
-        using var serviceScope = _scopeFactory.CreateScope();
+        using var serviceScope = scopeFactory.CreateScope();
 
         var tariffService = serviceScope.ServiceProvider.GetRequiredService<ITariffService>();
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
 
-        _logger.DebugStartedToSchedule();
+        logger.DebugStartedToSchedule();
 
-        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync()).ToAsyncEnumerable().WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule)).ToListAsync();
+        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync())
+            .ToAsyncEnumerable()
+            .WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule))
+            .ToListAsync(cancellationToken: stoppingToken);
 
-        _logger.DebugBackupsSchedule(backupsToSchedule.Count);
+        logger.DebugBackupsSchedule(backupsToSchedule.Count);
 
         foreach (var schedule in backupsToSchedule)
         {
@@ -107,7 +98,7 @@ public sealed class BackupSchedulerService : BackgroundService
 
             try
             {
-                if (_coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
+                if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
                 {
                     var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
 
@@ -117,7 +108,7 @@ public sealed class BackupSchedulerService : BackgroundService
 
                         await backupRepository.SaveBackupScheduleAsync(schedule);
 
-                        _logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
+                        logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
                         _eventBus.Publish(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
@@ -131,17 +122,17 @@ public sealed class BackupSchedulerService : BackgroundService
                     }
                     else
                     {
-                        _logger.DebugNotPaid(schedule.TenantId);
+                        logger.DebugNotPaid(schedule.TenantId);
                     }
                 }
                 else
                 {
-                    _logger.DebugHaveNotAccess(schedule.TenantId);
+                    logger.DebugHaveNotAccess(schedule.TenantId);
                 }
             }
             catch (Exception error)
             {
-                _logger.ErrorBackups(error);
+                logger.ErrorBackups(error);
             }
         }
     }

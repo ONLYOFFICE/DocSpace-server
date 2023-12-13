@@ -27,7 +27,7 @@
 namespace ASC.Core;
 
 [Singleton]
-public class CoreBaseSettings
+public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
     private string _basedomain;
@@ -36,23 +36,13 @@ public class CoreBaseSettings
     private bool? _disableDocSpace;
     private string _serverRoot;
 
-    private IConfiguration Configuration { get; }
-
-    public CoreBaseSettings(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
+    private IConfiguration Configuration { get; } = configuration;
 
     public string Basedomain
     {
         get
         {
-            if (_basedomain == null)
-            {
-                _basedomain = Configuration["core:base-domain"] ?? string.Empty;
-            }
-
-            return _basedomain;
+            return _basedomain ??= Configuration["core:base-domain"] ?? string.Empty;
         }
     }
 
@@ -60,12 +50,7 @@ public class CoreBaseSettings
     {
         get
         {
-            if (_serverRoot == null)
-            {
-                _serverRoot = Configuration["core:server-root"] ?? string.Empty;
-            }
-
-            return _serverRoot;
+            return _serverRoot ??= Configuration["core:server-root"] ?? string.Empty;
         }
     }
 
@@ -86,7 +71,7 @@ public class CoreBaseSettings
 /// <summary>
 /// </summary>
 [Scope]
-public class CoreSettings : IDisposable
+public class CoreSettings
 {
     /// <summary>Base domain</summary>
     /// <type>System.String, System</type>
@@ -115,22 +100,25 @@ public class CoreSettings : IDisposable
         }
     }
 
+    private const string LockKey = "core_settings";
+
     internal ITenantService TenantService { get; set; }
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal IConfiguration Configuration { get; set; }
-    internal SemaphoreSlim Semaphore { get; set; }
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public CoreSettings() { }
 
     public CoreSettings(
         ITenantService tenantService,
         CoreBaseSettings coreBaseSettings,
-        IConfiguration configuration)
+        IConfiguration configuration, 
+        IDistributedLockProvider distributedLockProvider)
     {
         TenantService = tenantService;
         CoreBaseSettings = coreBaseSettings;
         Configuration = configuration;
-        Semaphore = new SemaphoreSlim(1);
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public string GetBaseDomain(string hostedRegion)
@@ -200,23 +188,21 @@ public class CoreSettings : IDisposable
         if (CoreBaseSettings.Standalone)
         {
             var key = await GetSettingAsync("PortalId");
-            if (string.IsNullOrEmpty(key))
+            if (!string.IsNullOrEmpty(key))
             {
-                try
+                return key;
+            }
+
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+            {
+                key = await GetSettingAsync("PortalId");
+                if (!string.IsNullOrEmpty(key))
                 {
-                    await Semaphore.WaitAsync();
-                    // thread safe
-                    key = await GetSettingAsync("PortalId");
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        key = Guid.NewGuid().ToString();
-                        await SaveSettingAsync("PortalId", key);
-                    }
+                    return key;
                 }
-                finally
-                {
-                    Semaphore.Release();
-                }
+
+                key = Guid.NewGuid().ToString();
+                await SaveSettingAsync("PortalId", key);
             }
 
             return key;
@@ -230,60 +216,12 @@ public class CoreSettings : IDisposable
 
         return Configuration["core:payment:region"] + tenant;
     }
-
-    public string GetKey(int tenant)
-    {
-        if (CoreBaseSettings.Standalone)
-        {
-            var key = GetSetting("PortalId");
-            if (string.IsNullOrEmpty(key))
-            {
-                try
-                {
-                    Semaphore.Wait();
-                    // thread safe
-                    key = GetSetting("PortalId");
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        key = Guid.NewGuid().ToString();
-                        SaveSetting("PortalId", key);
-                    }
-                }
-                finally
-                {
-                    Semaphore.Release();
-                }
-            }
-
-            return key;
-        }
-
-        var t = TenantService.GetTenant(tenant);
-        if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
-        {
-            return t.PaymentId;
-        }
-
-        return Configuration["core:payment:region"] + tenant;
-    }
-
-    public void Dispose()
-    {
-        Semaphore.Dispose();
-    }
 }
 
 [Scope]
-public class CoreConfiguration
+public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
 {
     private long? _personalMaxSpace;
-
-    public CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
-    {
-        _coreSettings = coreSettings;
-        _tenantManager = tenantManager;
-        _configuration = configuration;
-    }
 
     public async Task<long> PersonalMaxSpaceAsync(SettingsManager settingsManager)
     {
@@ -299,7 +237,7 @@ public class CoreConfiguration
             return _personalMaxSpace.Value;
         }
 
-        if (!long.TryParse(_configuration["core:personal.maxspace"], out var value))
+        if (!long.TryParse(configuration["core:personal.maxspace"], out var value))
         {
             value = long.MaxValue;
         }
@@ -312,7 +250,7 @@ public class CoreConfiguration
     public async Task<SmtpSettings> GetDefaultSmtpSettingsAsync()
     {
         var isDefaultSettings = false;
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
 
         if (tenant != null)
         {
@@ -341,28 +279,24 @@ public class CoreConfiguration
 
     public async Task SetSmtpSettingsAsync(SmtpSettings value)
     {
-        await SaveSettingAsync("SmtpSettings", value?.Serialize(), await _tenantManager.GetCurrentTenantIdAsync());
+        await SaveSettingAsync("SmtpSettings", value?.Serialize(), await tenantManager.GetCurrentTenantIdAsync());
     }
-
-    private readonly CoreSettings _coreSettings;
-    private readonly TenantManager _tenantManager;
-    private readonly IConfiguration _configuration;
 
     #region Methods Get/Save Setting
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        await _coreSettings.SaveSettingAsync(key, value, tenant);
+        await coreSettings.SaveSettingAsync(key, value, tenant);
     }
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
-        return await _coreSettings.GetSettingAsync(key, tenant);
+        return await coreSettings.GetSettingAsync(key, tenant);
     }
 
     public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
     {
-        return _coreSettings.GetSetting(key, tenant);
+        return coreSettings.GetSetting(key, tenant);
     }
 
     #endregion
@@ -381,7 +315,7 @@ public class CoreConfiguration
 
     public async Task<T> GetSectionAsync<T>(string sectionName) where T : class
     {
-        return await GetSectionAsync<T>(await _tenantManager.GetCurrentTenantIdAsync(), sectionName);
+        return await GetSectionAsync<T>(await tenantManager.GetCurrentTenantIdAsync(), sectionName);
     }
 
     public async Task<T> GetSectionAsync<T>(int tenantId, string sectionName) where T : class
@@ -397,7 +331,7 @@ public class CoreConfiguration
 
     public async Task SaveSectionAsync<T>(string sectionName, T section) where T : class
     {
-        await SaveSectionAsync(await _tenantManager.GetCurrentTenantIdAsync(), sectionName, section);
+        await SaveSectionAsync(await tenantManager.GetCurrentTenantIdAsync(), sectionName, section);
     }
 
     public async Task SaveSectionAsync<T>(T section) where T : class

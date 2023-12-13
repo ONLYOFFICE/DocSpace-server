@@ -100,7 +100,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
                     { "method", "users.getInfo" },
                     { "secure", "1" },
                     { "session_key", accessToken },
-                    { "uids", uid },
+                    { "uids", uid }
                 };
 
         var sortedKeys = queryDictionary.Keys.ToList();
@@ -140,7 +140,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
             FirstName = mailRuProfiles[0].FirstName,
             LastName = mailRuProfiles[0].LastName,
 
-            Provider = ProviderConstants.MailRu,
+            Provider = ProviderConstants.MailRu
         };
 
         return profile;

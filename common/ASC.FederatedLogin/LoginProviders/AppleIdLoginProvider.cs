@@ -29,7 +29,7 @@ namespace ASC.FederatedLogin.LoginProviders;
 [Scope]
 public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 {
-    private const string _appleUrlKeys = "https://appleid.apple.com/auth/keys";
+    private const string AppleUrlKeys = "https://appleid.apple.com/auth/keys";
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly RequestHelper _requestHelper;
 
@@ -110,7 +110,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         {
             Id = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             EMail = claims.FindFirst(ClaimTypes.Email)?.Value,
-            Provider = ProviderConstants.AppleId,
+            Provider = ProviderConstants.AppleId
         };
     }
 
@@ -139,7 +139,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     private ClaimsPrincipal ValidateIdToken(string idToken)
     {
         var handler = new JwtSecurityTokenHandler();
-        var claims = handler.ValidateToken(idToken, new TokenValidationParameters()
+        var claims = handler.ValidateToken(idToken, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = GetApplePublicKeys(),
@@ -159,7 +159,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private IEnumerable<SecurityKey> GetApplePublicKeys()
     {
-        var applePublicKeys = _requestHelper.PerformRequest(_appleUrlKeys);
+        var applePublicKeys = _requestHelper.PerformRequest(AppleUrlKeys);
 
         var keys = new List<SecurityKey>();
         foreach (var webKey in JObject.Parse(applePublicKeys).Value<JArray>("keys"))

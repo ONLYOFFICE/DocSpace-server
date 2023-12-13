@@ -26,6 +26,7 @@
 
 using Flurl.Util;
 
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
@@ -40,9 +41,9 @@ public abstract class BaseStartup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
 
-    protected virtual bool AddControllersAsServices { get; }
+    protected bool AddControllersAsServices { get; }
     protected virtual bool ConfirmAddScheme { get; }
-    protected virtual bool AddAndUseSession { get; }
+    protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;
@@ -109,12 +110,8 @@ public abstract class BaseStartup
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                if (userId == null)
-                {
-                    userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                }
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var permitLimit = 1500;
 
@@ -133,10 +130,7 @@ public abstract class BaseStartup
                     string partitionKey;
                     int permitLimit;
 
-                    if (userId == null)
-                    {
-                        userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                    }
+                    userId ??= httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                     if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -159,12 +153,8 @@ public abstract class BaseStartup
                 }), 
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                    {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                       if (userId == null)
-                       {
-                           userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                       }
+                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
@@ -268,6 +258,7 @@ public abstract class BaseStartup
         services.AddEventBus(_configuration);
         services.AddDistributedTaskQueue();
         services.AddCacheNotify(_configuration);
+        services.AddDistributedLock(_configuration);
 
         services.RegisterFeature();
 
@@ -352,7 +343,7 @@ public abstract class BaseStartup
 
                     if (authorizationHeader.StartsWith("Bearer "))
                     {
-                        var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                        var token = authorizationHeader["Bearer ".Length..].Trim();
                         var jwtHandler = new JwtSecurityTokenHandler();
 
                         if (jwtHandler.CanReadToken(token))
@@ -425,11 +416,11 @@ public abstract class BaseStartup
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/ready", new HealthCheckOptions
             {

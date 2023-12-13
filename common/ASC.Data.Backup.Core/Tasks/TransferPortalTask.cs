@@ -27,26 +27,7 @@
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class TransferPortalTask : PortalTaskBase
-{
-    public const string DefaultDirectoryName = "backup";
-
-    public string BackupDirectory { get; set; }
-    public bool DeleteBackupFileAfterCompletion { get; set; }
-    public bool BlockOldPortalAfterStart { get; set; }
-    public bool DeleteOldPortalAfterCompletion { get; set; }
-    public string ToRegion { get; private set; }
-    public int ToTenantId { get; private set; }
-    public int Limit { get; private set; }
-
-    private readonly ILogger<TransferPortalTask> _logger;
-    private readonly TempStream _tempStream;
-    private readonly TempPath _tempPath;
-    private readonly IServiceProvider _serviceProvider;
-
-
-    public TransferPortalTask(
-        DbFactory dbFactory,
+public class TransferPortalTask(DbFactory dbFactory,
         IServiceProvider serviceProvider,
         ILogger<TransferPortalTask> options,
         StorageFactory storageFactory,
@@ -54,16 +35,18 @@ public class TransferPortalTask : PortalTaskBase
         ModuleProvider moduleProvider,
         TempStream tempStream,
         TempPath tempPath)
-        : base(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
-    {
-        DeleteBackupFileAfterCompletion = true;
-        BlockOldPortalAfterStart = true;
-        DeleteOldPortalAfterCompletion = true;
-        _logger = options;
-        _tempStream = tempStream;
-        _tempPath = tempPath;
-        _serviceProvider = serviceProvider;
-    }
+    : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
+{
+    public const string DefaultDirectoryName = "backup";
+
+    public string BackupDirectory { get; set; }
+    public bool DeleteBackupFileAfterCompletion { get; set; } = true;
+    public bool BlockOldPortalAfterStart { get; set; } = true;
+    public bool DeleteOldPortalAfterCompletion { get; set; } = true;
+    public string ToRegion { get; private set; }
+    public int ToTenantId { get; private set; }
+    public int Limit { get; private set; }
+
 
     public void Init(int tenantId, string toRegion, int limit, string backupDirectory)
     {
@@ -76,7 +59,7 @@ public class TransferPortalTask : PortalTaskBase
 
     public override async Task RunJob()
     {
-        _logger.DebugBeginTransfer(TenantId);
+        options.DebugBeginTransfer(TenantId);
         var fromDbFactory = new DbFactory(null, null);
         var toDbFactory = new DbFactory(null, null);
         var tenantAlias = GetTenantAlias(fromDbFactory);
@@ -95,8 +78,8 @@ public class TransferPortalTask : PortalTaskBase
             SetStepsCount(ProcessStorage ? 3 : 2);
 
             //save db data to temporary file
-            var backupTask = _serviceProvider.GetService<BackupPortalTask>();
-            backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(_tempStream, backupFilePath));
+            var backupTask = serviceProvider.GetService<BackupPortalTask>();
+            backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath), false);
             backupTask.ProcessStorage = false;
             backupTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
@@ -106,7 +89,7 @@ public class TransferPortalTask : PortalTaskBase
             await backupTask.RunJob();
 
             //restore db data from temporary file
-            var restoreTask = _serviceProvider.GetService<RestorePortalTask>();
+            var restoreTask = serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
             restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
@@ -149,20 +132,20 @@ public class TransferPortalTask : PortalTaskBase
             {
                 File.Delete(backupFilePath);
             }
-            _logger.DebugEndTransfer(TenantId);
+            options.DebugEndTransfer(TenantId);
         }
     }
 
     private async Task DoTransferStorageAsync(ColumnMapper columnMapper)
     {
-        _logger.DebugBeginTransferStorage();
+        options.DebugBeginTransferStorage();
         var fileGroups = (await GetFilesToProcess(TenantId)).GroupBy(file => file.Module).ToList();
         var groupsProcessed = 0;
         foreach (var group in fileGroups)
         {
             var baseStorage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
             var destStorage = await StorageFactory.GetStorageAsync(columnMapper.GetTenantMapping(), group.Key, ToRegion);
-            var utility = new CrossModuleTransferUtility(_logger, _tempStream, _tempPath, baseStorage, destStorage);
+            var utility = new CrossModuleTransferUtility(options, tempStream, tempPath, baseStorage, destStorage);
 
             foreach (var file in group)
             {
@@ -177,12 +160,12 @@ public class TransferPortalTask : PortalTaskBase
                     }
                     catch (Exception error)
                     {
-                        _logger.WarningCantCopyFile(file.Module, file.Path, error);
+                        options.WarningCantCopyFile(file.Module, file.Path, error);
                     }
                 }
                 else
                 {
-                    _logger.WarningCantAdjustFilePath(file.Path);
+                    options.WarningCantAdjustFilePath(file.Path);
                 }
             }
             SetCurrentStepProgress((int)(++groupsProcessed * 100 / (double)fileGroups.Count));
@@ -193,7 +176,7 @@ public class TransferPortalTask : PortalTaskBase
             SetStepCompleted();
         }
 
-        _logger.DebugEndTransferStorage();
+        options.DebugEndTransferStorage();
     }
 
     private void SaveTenant(DbFactory dbFactory, string alias, TenantStatus status, string newAlias = null, string whereCondition = null)
