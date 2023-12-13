@@ -133,6 +133,10 @@ public class SettingsDto
     /// <summary>Link to the help</summary>
     /// <type>System.String, System</type>
     public string HelpLink { get; set; }
+    
+    /// <summary>Link to the forum</summary>
+    /// <type>System.String, System</type>
+    public string ForumLink { get; set; }
 
     /// <summary>API documentation link</summary>
     /// <type>System.String, System</type>

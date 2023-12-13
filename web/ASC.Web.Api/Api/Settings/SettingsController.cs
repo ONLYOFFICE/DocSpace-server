@@ -171,6 +171,7 @@ public class SettingsController : BaseSettingsController
             LegalTerms = _setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = _userFormatter.UserNameRegex.ToString(),
+            ForumLink = await _commonLinkUtility.GetUserForumLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper)
         };
 
         if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() != default)
