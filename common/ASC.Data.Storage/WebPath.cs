@@ -124,7 +124,7 @@ public class WebPathSettings
     }
 }
 
-[Scope]
+[Scope(Additional = typeof(StaticUploaderExtension))]
 public class WebPath(WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
     SettingsManager settingsManager,
@@ -217,5 +217,13 @@ public class WebPath(WebPathSettings webPathSettings,
         {
             return false;
         }
+    }
+}
+
+public class StaticUploaderExtension
+{
+    public static void Register(DIHelper services)
+    {
+        services.TryAdd<StaticUploader>();
     }
 }
