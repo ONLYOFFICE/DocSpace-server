@@ -60,61 +60,48 @@ public class S3TarWriteOperator : IDataWriteOperator
     }
 
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
     {
-        if (_cts.IsCancellationRequested)
-        {
-            return;
-        }
-        if (_tasks.Count >= Limit * 3)
-        {
-            try
-            {
-                Task.WaitAll(_tasks.ToArray());
-                _tasks.Clear();
-            }
-            catch
-            {
-                var task = _tasks.First(t => t.Exception != null);
-                _cts.Cancel();
-                throw task.Exception;
-            }
-
-            foreach (var task in _tasks)
-            {
-                if(task.Exception != null)
-                {
-                    throw task.Exception;
-                }
-            }
-            _tasks.Clear();
-        }
         if (store is S3Storage s3Store) 
         {
-            var fullPath = s3Store.MakePath(domain, path);
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
             var task = new Task(() =>
             {
-                if (!_cts.Token.IsCancellationRequested)
+                if (_cts.Token.IsCancellationRequested)
                 {
-                    _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait();
+                    return;
+                }
+                try
+                {
+                    var fullPath = s3Store.MakePath(domain, path);
+                    _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue, _cts.Token).Wait();
+                }
+                catch
+                {
+                    _cts.Cancel();
+                    throw;
                 }
             });
+             _ = task.ContinueWith(action);
             _tasks.Add(task);
             task.Start(_scheduler);
         }
         else
         {
-            var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+            var fileStream = await store.GetReadStreamAsync(domain, path);
             
             if (fileStream != null)
             {
-                await WriteEntryAsync(tarKey, fileStream);
+                await WriteEntryAsync(tarKey, fileStream, action);
                 await fileStream.DisposeAsync();
             }
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
     {
         if (_cts.IsCancellationRequested)
         {
@@ -126,11 +113,22 @@ public class S3TarWriteOperator : IDataWriteOperator
         
         var task = new Task(() =>
         {
-            if (!_cts.Token.IsCancellationRequested)
+            if (_cts.Token.IsCancellationRequested)
             {
-                _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait();
+                return;
+            }
+            try
+            { 
+                _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue, _cts.Token).Wait();
+            }
+            catch
+            {
+                _cts.Cancel();
+                throw;
             }
         });
+        
+        _ = task.ContinueWith(action);
         _tasks.Add(task);
         task.Start(_scheduler);
     }

@@ -28,8 +28,8 @@ namespace ASC.Data.Storage.DataOperators;
 
 public interface IDataWriteOperator : IAsyncDisposable
 {
-    Task WriteEntryAsync(string tarKey, Stream stream);
-    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store);
+    Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action);
+    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action);
     bool NeedUpload { get; }
     string Hash { get; }
     string StoragePath { get; }

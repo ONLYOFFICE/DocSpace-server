@@ -1377,21 +1377,21 @@ public class S3Storage : BaseStorage
         }
     }
 
-    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue)
+    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
     {
         queue.TryDequeue(out var ext);
         destinationKey += ext;
-        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey).ConfigureAwait(false);;
+        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
 
         using var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
-        var blockSize = 512;
+        const int blockSize = 512;
 
         long prevFileSize = 0;
         try
         {
-            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath).ConfigureAwait(false);
+            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
         catch { }
@@ -1407,7 +1407,7 @@ public class S3Storage : BaseStorage
         ms.Write(header);
 
         stream.Position = 0;
-        await stream.CopyToAsync(ms);
+        await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
         stream = ms;
@@ -1421,7 +1421,7 @@ public class S3Storage : BaseStorage
             PartNumber = partNumber,
             InputStream = stream
         };
-        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest).ConfigureAwait(false)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
 
         var completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1430,7 +1430,7 @@ public class S3Storage : BaseStorage
             UploadId = uploadId,
             PartETags = eTags
         };
-        await s3.CompleteMultipartUploadAsync(completeRequest).ConfigureAwait(false);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
         await stream.DisposeAsync();
         queue.Enqueue(ext);
     }
@@ -1477,25 +1477,25 @@ public class S3Storage : BaseStorage
          await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue)
+    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
     {
         queue.TryDequeue(out var ext);
         destinationKey += ext;
-        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey).ConfigureAwait(false);;
+        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
         using var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
-        var blockSize = 512;
+        const int blockSize = 512;
 
         long prevFileSize = 0;
         try
         {
-            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath).ConfigureAwait(false);
+            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
         catch{}
 
-        var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile).ConfigureAwait(false);
+        var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile, token).ConfigureAwait(false);
         var header = BuilderHeaders.CreateHeader(tarKey, objFile.ContentLength);
 
         using var stream = new MemoryStream();
@@ -1517,7 +1517,7 @@ public class S3Storage : BaseStorage
             PartNumber = partNumber,
             InputStream = stream
         };
-        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest).ConfigureAwait(false)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
 
         var completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1527,10 +1527,10 @@ public class S3Storage : BaseStorage
             PartETags = eTags
         };
         
-        await s3.CompleteMultipartUploadAsync(completeRequest).ConfigureAwait(false);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
 
         /*******/
-        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey).ConfigureAwait(false);;
+        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);;
 
         var copyRequest = new CopyPartRequest
         {
@@ -1541,7 +1541,7 @@ public class S3Storage : BaseStorage
             UploadId = uploadId,
             PartNumber = partNumber
         };
-        eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest).ConfigureAwait(false)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest, token).ConfigureAwait(false)).ETag));
 
         completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1550,7 +1550,7 @@ public class S3Storage : BaseStorage
             UploadId = uploadId,
             PartETags = eTags
         };
-        await s3.CompleteMultipartUploadAsync(completeRequest).ConfigureAwait(false);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
 
         queue.Enqueue(ext);
     }
@@ -1619,7 +1619,7 @@ public class S3Storage : BaseStorage
         await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task<(string uploadId, List<PartETag> eTags, int partNumber)> InitiateConcatAsync(string domain, string key, bool removeFirstBlock = false, bool lastInit = false)
+    public async Task<(string uploadId, List<PartETag> eTags, int partNumber)> InitiateConcatAsync(string domain, string key, bool removeFirstBlock = false, bool lastInit = false, CancellationToken token = default)
     {
         using var s3 = GetClient();
 
@@ -1630,7 +1630,7 @@ public class S3Storage : BaseStorage
             BucketName = _bucket,
             Key = key
         };
-        var initResponse = await s3.InitiateMultipartUploadAsync(initiateRequest).ConfigureAwait(false);
+        var initResponse = await s3.InitiateMultipartUploadAsync(initiateRequest, token).ConfigureAwait(false);
 
         var eTags = new List<PartETag>();
         try
@@ -1638,7 +1638,7 @@ public class S3Storage : BaseStorage
             var mb5 = 5 * 1024 * 1024;
             long bytePosition = removeFirstBlock ? mb5 : 0;
 
-            var obj = await s3.GetObjectMetadataAsync(_bucket, key).ConfigureAwait(false);
+            var obj = await s3.GetObjectMetadataAsync(_bucket, key, token).ConfigureAwait(false);
             var objectSize = obj.ContentLength;
 
             var partSize = ChunkSize;
@@ -1665,7 +1665,7 @@ public class S3Storage : BaseStorage
                     copyRequest.LastByte = objectSize - 1;
                     bytePosition += partSize;
                 }
-                eTags.Add(new PartETag(i, (await s3.CopyPartAsync(copyRequest).ConfigureAwait(false)).ETag));
+                eTags.Add(new PartETag(i, (await s3.CopyPartAsync(copyRequest, token).ConfigureAwait(false)).ETag));
 
             }
             return (initResponse.UploadId, eTags, partNumber);
@@ -1685,7 +1685,7 @@ public class S3Storage : BaseStorage
                 PartNumber = 1,
                 InputStream = stream
             };
-            eTags.Add(new PartETag(1, (await s3.UploadPartAsync(uploadRequest).ConfigureAwait(false)).ETag));
+            eTags.Add(new PartETag(1, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
             return (initResponse.UploadId, eTags, 2);
         }
     }
