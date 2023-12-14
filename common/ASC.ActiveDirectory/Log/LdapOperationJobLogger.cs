@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapOperationJobLogger
+internal static partial class LdapOperationJobLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Can't save default LDAP settings.")]
     public static partial void ErrorSaveDefaultLdapSettings(this ILogger<LdapOperationJob> logger);

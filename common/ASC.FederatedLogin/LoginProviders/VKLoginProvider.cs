@@ -147,7 +147,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
             FirstName = vkProfiles[0].FirstName,
             LastName = vkProfiles[0].LastName,
 
-            Provider = ProviderConstants.VK,
+            Provider = ProviderConstants.VK
         };
 
         return profile;

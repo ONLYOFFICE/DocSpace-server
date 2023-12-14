@@ -29,7 +29,7 @@ namespace ASC.Web.Core.Utility.Settings;
 [Singleton]
 public class CustomColorThemesSettingsHelper(IConfiguration configuration)
 {
-    public int Limit { get; set; } = ConfigurationBinder.Get<int>(configuration.GetSection("core:themelimit"));
+    public int Limit { get; set; } = configuration.GetSection("core:themelimit").Get<int>();
 }
 
 public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
@@ -41,7 +41,7 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
     {
         Themes = CustomColorThemesSettingsItem.Default;
 
-        return new CustomColorThemesSettings()
+        return new CustomColorThemesSettings
         {
             Themes = Themes,
             Selected = Themes.Min(r => r.Id)

@@ -73,7 +73,10 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
     public void EncryptFile(string filePath)
     {
-        if (string.IsNullOrEmpty(Settings.Password)) return;
+        if (string.IsNullOrEmpty(Settings.Password))
+        {
+            return;
+        }
 
         var metadata = new Metadata(Configuration);
 
@@ -193,7 +196,10 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
             using (var fileStream = File.OpenRead(filePath))
             {
-                if (!metadata.TryReadFromStream(fileStream, Version)) return;
+                if (!metadata.TryReadFromStream(fileStream, Version))
+                {
+                    return;
+                }
 
                 metadata.ComputeAndValidateHmacHash(fileStream);
 
@@ -260,10 +266,8 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         {
             return metadata.GetFileSize();
         }
-        else
-        {
-            return new FileInfo(filePath).Length;
-        }
+
+        return new FileInfo(filePath).Length;
     }
 
 

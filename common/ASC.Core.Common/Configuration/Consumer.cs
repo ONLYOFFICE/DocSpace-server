@@ -146,7 +146,7 @@ public class Consumer() : IDictionary<string, string>
             this[providerProp.Key] = null;
         }
 
-        Cache.Publish(new ConsumerCacheItem() { Name = this.Name }, CacheNotifyAction.Remove);
+        Cache.Publish(new ConsumerCacheItem { Name = this.Name }, CacheNotifyAction.Remove);
     }
 
     public bool Contains(KeyValuePair<string, string> item)
@@ -214,14 +214,7 @@ public class Consumer() : IDictionary<string, string>
         
         if (!ManagedKeys.Contains(name))
         {
-            if (_additional.ContainsKey(name))
-            {
-                _additional[name] = value;
-            }
-            else
-            {
-                _additional.Add(name, value);
-            }
+            _additional[name] = value;
 
             return;
         }

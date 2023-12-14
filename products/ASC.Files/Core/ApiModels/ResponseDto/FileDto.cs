@@ -213,14 +213,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (file.Order != 0)
         {
             file.Order += foldersCount;
-            if (!string.IsNullOrEmpty(order))
-            {
-                result.Order = string.Join('.', order, file.Order);
-            }
-            else
-            {
-                result.Order = file.Order.ToString();
-            }
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
 
         try

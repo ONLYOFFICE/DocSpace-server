@@ -61,9 +61,9 @@ public class Startup : BaseStartup
             });
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddMemoryCache();
         DIHelper.TryAdd<Login>();
@@ -95,7 +95,7 @@ public class Startup : BaseStartup
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(settings.RepeatCount.HasValue ? settings.RepeatCount.Value : 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+                .WaitAndRetryAsync(settings.RepeatCount ?? 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         };
 
         services.AddHttpClient(WebhookSender.WEBHOOK)
@@ -107,7 +107,7 @@ public class Startup : BaseStartup
         .AddPolicyHandler(policyHandler)
         .ConfigurePrimaryHttpMessageHandler(_ =>
         {
-            return new HttpClientHandler()
+            return new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };

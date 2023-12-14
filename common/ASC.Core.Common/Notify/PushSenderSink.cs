@@ -95,7 +95,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var rootFolderType = message.Arguments.FirstOrDefault(x => x.Tag.Equals("FolderRootFolderType"));
 
 
-        var notifyData = new NotifyData()
+        var notifyData = new NotifyData
         {
             Email = user.Email,
             Portal = (await tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
@@ -105,7 +105,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
                 Id = folderId is { Value: not null } ? folderId.Value.ToString() : "",
                 ParentId = rootFolderId is { Value: not null } ? rootFolderId.Value.ToString() : "",
                 RootFolderType = rootFolderType is { Value: not null } ? (int)rootFolderType.Value : 0
-            },
+            }
         };
 
         var msg = (NoticeMessage)message;
@@ -115,9 +115,9 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
             var documentTitle = message.Arguments.FirstOrDefault(x => x.Tag.Equals("DocumentTitle"));
             var documentExtension = message.Arguments.FirstOrDefault(x => x.Tag.Equals("DocumentExtension"));
 
-            notifyData.File = new NotifyFileData()
+            notifyData.File = new NotifyFileData
             {
-                Id = msg.ObjectID.Substring(5),
+                Id = msg.ObjectID[5..],
                 Title = documentTitle is { Value: not null } ? documentTitle.Value.ToString() : "",
                 Extension = documentExtension is { Value: not null } ? documentExtension.Value.ToString() : ""
 

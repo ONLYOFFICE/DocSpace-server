@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class PeopleController(ILogger<PeopleController> option,
+public class PeopleController(
+        ILogger<PeopleController> option,
         HostedSolution hostedSolution,
         UserFormatter userFormatter,
         ICache cache,
@@ -71,7 +73,7 @@ public class PeopleController(ILogger<PeopleController> option,
             link = await GetUserProfileLinkAsync(user)
         }).ToListAsync();
 
-        option.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count(), userIds.Count(), sw.ElapsedMilliseconds);
+        option.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count, userIds.Count(), sw.ElapsedMilliseconds);
         sw.Stop();
 
         return Ok(new

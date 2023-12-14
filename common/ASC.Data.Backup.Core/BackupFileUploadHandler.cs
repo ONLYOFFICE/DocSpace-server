@@ -51,7 +51,7 @@ public class BackupFileUploadHandler
                 throw new ArgumentException("Access denied.");
             }
             var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
-            string path = "";
+            string path;
             try
             {
                 path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
@@ -134,7 +134,7 @@ public class BackupFileUploadHandler
             result = Error(error.Message);
         }
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions()
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }));

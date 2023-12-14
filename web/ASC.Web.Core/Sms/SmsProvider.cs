@@ -219,7 +219,7 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
 
     public async Task<string> GetBalanceAsync(Tenant tenant, bool eraseCache = false)
     {
-        var tenantCache = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        var tenantCache = tenant?.Id ?? Tenant.DefaultTenant;
 
         var key = "sms/smsc/" + tenantCache;
         if (eraseCache)
@@ -402,7 +402,7 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 
         try
         {
-            var smsMessage = MessageResource.Create(new PhoneNumber(number), body: message, @from: new PhoneNumber(Sender), client: twilioRestClient);
+            var smsMessage = MessageResource.Create(new PhoneNumber(number), body: message, from: new PhoneNumber(Sender), client: twilioRestClient);
             Log.InformationSmsWasSendTo(number, smsMessage.Status);
             if (!smsMessage.ErrorCode.HasValue)
             {
@@ -434,6 +434,4 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 }
 
 [Scope]
-public class TwilioSaaSProvider : TwilioProvider
-{
-}
+public class TwilioSaaSProvider : TwilioProvider;

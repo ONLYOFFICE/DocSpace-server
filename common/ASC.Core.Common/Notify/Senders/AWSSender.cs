@@ -157,8 +157,8 @@ public class AWSSender : SmtpSender, IDisposable
                 //This means that time passed from last send is less then message per second
                 _logger.DebugSendRate(_sendWindow);
                 Thread.Sleep(_sendWindow);
-            }
         }
+    }
 
     private async Task RefreshQuotaIfNeeded()
     {

@@ -53,7 +53,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
     var app = builder.Build();
 
@@ -77,5 +77,5 @@ finally
 public partial class Program
 {
     public static readonly string Namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }

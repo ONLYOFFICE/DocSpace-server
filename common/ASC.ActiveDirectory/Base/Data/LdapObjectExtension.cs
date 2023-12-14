@@ -97,23 +97,21 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             }
             return list;
         }
-        else
-        {
-            return GetAttributes(ldapUser, bindings[0]);
-        }
+
+        return GetAttributes(ldapUser, bindings[0]);
     }
 
-    private void PopulateContacts(List<string> Contacts, string type, List<string> values)
+    private void PopulateContacts(ICollection<string> contacts, string type, List<string> values)
     {
-        if (values == null || !values.Any())
+        if (values == null || values.Count == 0)
         {
             return;
         }
 
         foreach (var val in values)
         {
-            Contacts.Add(type);
-            Contacts.Add(val);
+            contacts.Add(type);
+            contacts.Add(val);
         }
     }
 
@@ -170,7 +168,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (!string.IsNullOrEmpty(firstName))
         {
             user.FirstName = firstName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? firstName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? firstName[..MAX_NUMBER_OF_SYMBOLS]
                 : firstName;
         }
         else
@@ -181,7 +179,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (!string.IsNullOrEmpty(secondName))
         {
             user.LastName = secondName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? secondName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? secondName[..MAX_NUMBER_OF_SYMBOLS]
                 : secondName;
         }
         else
@@ -191,8 +189,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
 
         if (!string.IsNullOrEmpty(birthDay))
         {
-            DateTime date;
-            if (DateTime.TryParse(birthDay, out date))
+            if (DateTime.TryParse(birthDay, out var date))
             {
                 user.BirthDate = date;
             }
@@ -200,8 +197,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
 
         if (!string.IsNullOrEmpty(gender))
         {
-            bool b;
-            if (bool.TryParse(gender, out b))
+            if (bool.TryParse(gender, out var b))
             {
                 user.Sex = b;
             }

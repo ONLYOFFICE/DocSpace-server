@@ -164,9 +164,9 @@ h3.Voor een snelle start, dit is wat u kunt doen in ONLYOFFICE:
 
 - Gebruik verschillende plugins om extra functionaliteiten toe te passen.
 
-- Gemakkelijk toegang tot uw Persoonlijke cloud via "Chrome-extensie":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Gemakkelijk toegang tot uw Persoonlijke cloud via "Chrome-extensie":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=nl".
 
-U kunt documenten ook offline bewerken met onze gratis "desktop editors":"https://www.onlyoffice.com/download-desktop.aspx" of een mobiel editing suite aanschaffen voor uw "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" of "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"-apparaat.
+U kunt documenten ook offline bewerken met onze gratis "desktop editors":"https://www.onlyoffice.com/download-desktop.aspx" of een mobiel editing suite aanschaffen voor uw "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" of "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
 $TrulyYours</value>
   </data>
@@ -195,7 +195,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>U heeft verzocht om beëindiging van uw account op personal.onlyoffice.com. Volg de link om de aanvraag te voltooien (de link is 7 dagen actief): 
 
-Accountbeëindiging bevestigen
+$OrangeButton
 
 *Let op*: Na de verwijdering worden uw account en alle bijbehorende gegevens definitief gewist in overeenstemming met onze "Privacyverklaring":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

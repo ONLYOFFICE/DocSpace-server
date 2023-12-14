@@ -112,7 +112,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpGet("file/{fileId}/checkconversion")]
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(T fileId, bool start)
     {
-        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>()
+        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
         {
             FileId = fileId,
             StartConvert = start
@@ -154,7 +154,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         {
             return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password);
         }
-        else if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
+
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
         {
             return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password);
         }
@@ -225,7 +226,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(T fileId, [FromBody] DeleteRequestDto inDto)
     {
-        foreach (var e in await fileStorageService.DeleteFileAsync("delete", fileId, false, inDto.DeleteAfter, inDto.Immediately))
+        var (tasks, _) = await fileStorageService.DeleteFileAsync("delete", fileId, false, inDto.DeleteAfter, inDto.Immediately);
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -355,10 +358,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
     {
-        if (inDto == null)
-        {
-            inDto = new CheckConversionRequestDto<T>();
-        }
+        inDto ??= new CheckConversionRequestDto<T>();
         inDto.FileId = fileId;
 
         return filesControllerHelper.StartConversionAsync(inDto);

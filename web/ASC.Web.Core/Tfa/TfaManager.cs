@@ -139,13 +139,11 @@ public class TfaManager(SettingsManager settingsManager,
 
         const string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_";
 
-        byte[] data;
-
         var list = new List<BackupCode>();
 
         for (var i = 0; i < count; i++)
         {
-            data = RandomNumberGenerator.GetBytes(length);
+            var data = RandomNumberGenerator.GetBytes(length);
 
             var result = new StringBuilder(length);
             foreach (var b in data)
@@ -173,6 +171,6 @@ public class TfaManager(SettingsManager settingsManager,
         var token = Convert.ToBase64String(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(userSalt + machineSalt)));
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        return encodedToken.Substring(0, 10);
+        return encodedToken[..10];
     }
 }

@@ -40,7 +40,7 @@ public class RadicaleClient(ILogger<RadicaleClient> logger)
     {
         davRequest.Method = "GET";
         var response = await RequestAsync(davRequest);
-        var davResponse = new DavResponse()
+        var davResponse = new DavResponse
         {
             StatusCode = (int)response.StatusCode
         };
@@ -118,22 +118,20 @@ public class RadicaleClient(ILogger<RadicaleClient> logger)
     {
         if (response.IsSuccessStatusCode)
         {
-            return new DavResponse()
+            return new DavResponse
             {
                 Completed = true,
-                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase,
+                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase
             };
 
         }
-        else
+
+        return new DavResponse
         {
-            return new DavResponse()
-            {
-                Completed = false,
-                StatusCode = (int)response.StatusCode,
-                Error = response.ReasonPhrase
-            };
-        }
+            Completed = false,
+            StatusCode = (int)response.StatusCode,
+            Error = response.ReasonPhrase
+        };
 
     }
 }

@@ -46,7 +46,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 
     public static TenantCookieSettings GetInstance()
     {
-        return new TenantCookieSettings()
+        return new TenantCookieSettings
         {
             LifeTime = 1440
         };

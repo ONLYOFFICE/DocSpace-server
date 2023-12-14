@@ -28,17 +28,14 @@ using ASC.Common.IntegrationEvents.Events;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction(string id, string name) : INotifyAction
+public class NotifyAction(string id, string name = null) : INotifyAction
 {
-    public string ID { get; private set; } = id ?? throw new ArgumentNullException(nameof(id));
-    public string Name { get; private set; } = name;
-
-    public NotifyAction(string id)
-        : this(id, null) { }
+    public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
+    public string Name { get; } = name;
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
-        return new NotifyActionItem() { Id = cache.ID };
+        return new NotifyActionItem { Id = cache.ID };
     }
 
     public static explicit operator NotifyAction(NotifyActionItem cache)

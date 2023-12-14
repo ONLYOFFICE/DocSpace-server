@@ -122,9 +122,9 @@ public interface IDataStore
     ///<summary>
     /// Saves the contents of the stream in the repository.
     ///</summary>
-    /// <param Name="domain"> </param>
-    /// <param Name="path"> </param>
-    /// <param Name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
+    /// <param name="domain"> </param>
+    /// <param name="path"> </param>
+    /// <param name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
     /// <returns> </returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream);
 
@@ -238,7 +238,6 @@ public interface IDataStore
     /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
     ///</summary>
     ///<param name="domain"></param>
-    ///<param name="assignedPath"></param>
     ///<param name="stream"></param>
     ///<returns></returns>
     Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);

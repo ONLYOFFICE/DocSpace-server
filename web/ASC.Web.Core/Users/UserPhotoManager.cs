@@ -69,12 +69,12 @@ public sealed class ResizeWorkerItem : DistributedTask
             return true;
         }
 
-        if (obj is not ResizeWorkerItem)
+        if (obj is not ResizeWorkerItem item)
         {
             return false;
         }
 
-        return Equals((ResizeWorkerItem)obj);
+        return Equals(item);
     }
 
     public bool Equals(ResizeWorkerItem other)
@@ -331,7 +331,7 @@ public class UserPhotoManager(UserManager userManager,
 
         try
         {
-            var sizePart = virtualPath.Substring(virtualPath.LastIndexOf('_'));
+            var sizePart = virtualPath[virtualPath.LastIndexOf('_')..];
             sizePart = sizePart.Trim('_');
             sizePart = sizePart.Remove(sizePart.LastIndexOf('.'));
             return new Size(int.Parse(sizePart.Split('-')[0]), int.Parse(sizePart.Split('-')[1]));
@@ -662,16 +662,14 @@ public class UserPhotoManager(UserManager userManager,
             await ResizeImage(resizeTask);
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
-        else
+
+        if (_resizeQueue.GetAllTasks<ResizeWorkerItem>().All(r => r["key"] != key))
         {
-            if (!_resizeQueue.GetAllTasks<ResizeWorkerItem>().Any(r => r["key"] == key))
-            {
-                //Add
-                _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
-            }
-            return GetDefaultPhotoAbsoluteWebPath(size);
-            //NOTE: return default photo here. Since task will update cache
+            //Add
+            _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
         }
+        return GetDefaultPhotoAbsoluteWebPath(size);
+        //NOTE: return default photo here. Since task will update cache
     }
 
     private async Task ResizeImage(ResizeWorkerItem item)
@@ -758,7 +756,7 @@ public class UserPhotoManager(UserManager userManager,
     public async Task RemoveTempPhotoAsync(string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName.Substring(0, index) : fileName;
+        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
         try
         {
             var store = await GetDataStoreAsync();

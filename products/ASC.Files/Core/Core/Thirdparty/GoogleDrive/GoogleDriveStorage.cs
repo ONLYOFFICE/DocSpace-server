@@ -438,8 +438,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         if (response == null || response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
-            var uplSession = googleDriveSession;
-            uplSession.BytesTransfered += chunkLength;
+            googleDriveSession.BytesTransfered += chunkLength;
 
             if (response != null)
             {
@@ -447,7 +446,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
                 if (locationHeader != null)
                 {
-                    uplSession.Location = locationHeader.ToString();
+                    googleDriveSession.Location = locationHeader.ToString();
                 }
             }
         }

@@ -45,7 +45,7 @@ public class TelegramServiceClient(IEventBus eventBus,
     public void RegisterUser(string userId, int tenantId, string token)
     {
         cache.Insert(GetCacheTokenKey(tenantId, userId), token, DateTime.MaxValue);
-        cacheRegisterUser.Publish(new RegisterUserProto()
+        cacheRegisterUser.Publish(new RegisterUserProto
         {
             UserId = userId,
             TenantId = tenantId,
@@ -55,7 +55,7 @@ public class TelegramServiceClient(IEventBus eventBus,
 
     public void CreateOrUpdateClient(int tenantId, string token, int tokenLifespan, string proxy)
     {
-        cacheCreateClient.Publish(new CreateClientProto()
+        cacheCreateClient.Publish(new CreateClientProto
         {
             TenantId = tenantId,
             Token = token,
@@ -66,7 +66,7 @@ public class TelegramServiceClient(IEventBus eventBus,
 
     public void DisableClient(int tenantId)
     {
-        cacheDisableClient.Publish(new DisableClientProto() { TenantId = tenantId }, CacheNotifyAction.Insert);
+        cacheDisableClient.Publish(new DisableClientProto { TenantId = tenantId }, CacheNotifyAction.Insert);
     }
 
     public string RegistrationToken(string userId, int tenantId)

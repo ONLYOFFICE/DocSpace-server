@@ -116,9 +116,9 @@ public class NotifyServiceCfgScheduler
 
     public void Init()
     {
-        var typeName = Register.Substring(0, Register.IndexOf(','));
-        var assemblyName = Register.Substring(Register.IndexOf(','));
+        var typeName = Register[..Register.IndexOf(',')];
+        var assemblyName = Register[Register.IndexOf(',')..];
         var type = Type.GetType(string.Concat(typeName.AsSpan(0, typeName.LastIndexOf('.')), assemblyName), true);
-        MethodInfo = type.GetMethod(typeName.Substring(typeName.LastIndexOf('.') + 1), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+        MethodInfo = type.GetMethod(typeName[(typeName.LastIndexOf('.') + 1)..], BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
     }
 }

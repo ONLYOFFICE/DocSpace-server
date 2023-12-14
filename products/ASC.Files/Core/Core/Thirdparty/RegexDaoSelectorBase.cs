@@ -120,8 +120,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             return info;
         }
 
-        var id = objectId;
-        var match = Selector.Match(id);
+        var match = Selector.Match(objectId);
         if (match.Success)
         {
             var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
@@ -153,7 +152,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         provider.FolderId = id;
     }
 
-    protected virtual IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
+    protected IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
     {
         var dbDao = daoFactory.ProviderDao;
         try

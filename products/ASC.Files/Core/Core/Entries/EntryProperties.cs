@@ -140,16 +140,8 @@ public class FormFillingProperties(UserManager userManager,
             mask = DefaultTitleMask;
         }
 
-        string userName;
         var userInfo = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        if (userInfo.Equals(Constants.LostUser))
-        {
-            userName = customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
-        }
-        else
-        {
-            userName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
-        }
+        var userName = userInfo.Equals(Constants.LostUser) ? customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved") : userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
         var title = mask
             .Replace("{0}", Path.GetFileNameWithoutExtension(sourceFileName))

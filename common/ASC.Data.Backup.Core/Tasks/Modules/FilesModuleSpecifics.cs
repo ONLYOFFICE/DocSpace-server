@@ -155,12 +155,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     { 
         if (row.TableName == "files_thirdparty_id_mapping")
         {
             //todo: think...
-            preparedRow = new Dictionary<string, object>();
+            var preparedRow = new Dictionary<string, object>();
 
             object folderId = null;
             var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
@@ -173,7 +174,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             if (folderId == null)
             {
-                return false;
+                return (false, null);
             }
 
             var hashBytes = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(sboxId));
@@ -185,10 +186,10 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             columnMapper.SetMapping("files_thirdparty_id_mapping", "hash_id", row["hash_id"], hashedId);
 
-            return true;
+            return (true, preparedRow);
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, IEnumerable<RelationInfo> relations, ref object value)
@@ -232,13 +233,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 return false;
             }
 
-            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, strValue.Substring(start.Length));
+            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, strValue[start.Length..]);
             if (entityId == null)
             {
                 return false;
             }
 
-            value = strValue.Substring(0, start.Length) + entityId;
+            value = strValue[..start.Length] + entityId;
 
             return true;
         }
@@ -299,8 +300,8 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
             {
                 UserIDColumns = new[] {"create_by"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
-            },
-        };
+            }
+    };
 
     private readonly RelationInfo[] _rels = {
             new("files_tag", "id", "files_tag_link", "tag_id", typeof(FilesModuleSpecifics)),
@@ -312,8 +313,8 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
                 x => Convert.ToInt32(x["entry_type"]) == 1 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
             new("files_thirdparty_id_mapping", "hash_id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
-                x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
-        };
+                x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"])))
+    };
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
@@ -325,12 +326,12 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
             {
                 return false;
             }
-            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, str.Substring(start.Length));
+            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, str[start.Length..]);
             if (entityId == null)
             {
                 return false;
             }
-            value = str.Substring(0, start.Length) + entityId;
+            value = str[..start.Length] + entityId;
 
             return true;
         }
@@ -340,7 +341,7 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
 
     private static string GetStart(string value)
     {
-        var allStarts = new[] { _tagStartMessage, _tagStartTask, _tagStartRelationshipEvent, _tagStartProject, };
+        var allStarts = new[] { _tagStartMessage, _tagStartTask, _tagStartRelationshipEvent, _tagStartProject };
 
         return allStarts.FirstOrDefault(value.StartsWith);
     }

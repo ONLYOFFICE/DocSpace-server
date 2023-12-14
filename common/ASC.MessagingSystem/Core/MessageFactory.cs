@@ -40,7 +40,7 @@ public class MessageFactory(AuthContext authContext,
             {
                 Ip = MessageSettings.GetIP(request),
                 Initiator = initiator,
-                Date = dateTime.HasValue ? dateTime.Value : DateTime.UtcNow,
+                Date = dateTime ?? DateTime.UtcNow,
                 TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 UserId = authContext.CurrentAccount.ID,
                 Page = MessageSettings.GetReferer(request),
@@ -125,8 +125,8 @@ public class MessageFactory(AuthContext authContext,
             var message = new EventMessage
             {
                 Date = DateTime.UtcNow,
-                TenantId = userData == null ? await tenantManager.GetCurrentTenantIdAsync() : userData.TenantId,
-                UserId = userData == null ? authContext.CurrentAccount.ID : userData.UserId,
+                TenantId = userData?.TenantId ?? await tenantManager.GetCurrentTenantIdAsync(),
+                UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
                 Action = action,
                 Active = true
             };

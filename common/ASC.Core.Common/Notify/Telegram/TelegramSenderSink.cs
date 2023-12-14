@@ -64,11 +64,11 @@ public class TelegramSenderSinkMessageCreator(TenantManager tenantManager) : Sin
             ContentType = message.ContentType,
             Content = message.Body,
             SenderType = senderName,
-            CreationDate = DateTime.UtcNow,
+            CreationDate = DateTime.UtcNow
         };
 
         var tenant = await tenantManager.GetCurrentTenantAsync(false);
-        m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
         return m;
     }

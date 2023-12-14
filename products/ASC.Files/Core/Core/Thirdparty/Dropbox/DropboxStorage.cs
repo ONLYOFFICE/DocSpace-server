@@ -135,7 +135,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         try
         {
             var path = new PathOrLink.Path(fileId);
-            var size = Convert(width, height);
+            var size = Convert(width);
             var arg = new ThumbnailV2Arg(path, size: size);
 
             var response = await _dropboxClient.Files.GetThumbnailV2Async(arg);
@@ -147,16 +147,14 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-    private ThumbnailSize Convert(int width, int height)
+    private ThumbnailSize Convert(int width)
     {
         if (width > 368)
         {
             return ThumbnailSize.W480h320.Instance;
         }
-        else
-        {
-            return ThumbnailSize.W256h256.Instance;
-        }
+
+        return ThumbnailSize.W256h256.Instance;
     }
 
     public async Task<Stream> DownloadStreamAsync(FileMetadata file, int offset = 0)
@@ -301,7 +299,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
         var pathLength = dropboxItem.PathDisplay.Length - dropboxItem.Name.Length;
 
-        return dropboxItem.PathDisplay.Substring(0, pathLength > 1 ? pathLength - 1 : 0);
+        return dropboxItem.PathDisplay[..(pathLength > 1 ? pathLength - 1 : 0)];
     }
 
     private bool IsRoot(FolderMetadata dropboxFolder)

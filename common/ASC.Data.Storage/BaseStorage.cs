@@ -371,7 +371,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var s = base.ToString();
             if (WorkContext.IsMono && s.StartsWith(UriSchemeFile + SchemeDelimiter))
             {
-                return s.Substring(7);
+                return s[7..];
             }
 
             return s;

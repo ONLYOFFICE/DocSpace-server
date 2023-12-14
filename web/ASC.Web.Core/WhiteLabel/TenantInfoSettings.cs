@@ -39,7 +39,7 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 
     public TenantInfoSettings GetDefault()
     {
-        return new TenantInfoSettings()
+        return new TenantInfoSettings
         {
             IsDefault = true
         };

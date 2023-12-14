@@ -78,7 +78,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
             checkKeyResult = EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
                 new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };
@@ -94,14 +94,9 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
                 }
                 else
                 {
-                    if (emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite)
-                    {
-                        userId = Constants.CoreSystem.ID;
-                    }
-                    else
-                    {
-                        userId = (await _userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
-                    }
+                    userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite ? 
+                        Constants.CoreSystem.ID : 
+                        (await _userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
                 }
             }
             else

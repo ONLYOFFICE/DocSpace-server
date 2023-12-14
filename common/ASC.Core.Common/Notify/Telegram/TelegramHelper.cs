@@ -63,10 +63,8 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     public async Task<RegStatus> UserIsConnectedAsync(Guid userId, int tenantId)
@@ -82,12 +80,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     public string CurrentRegistrationLink(Guid userId, int tenantId)
     {
         var token = GetCurrentToken(userId, tenantId);
-        if (token == null || token.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        return GetLink(token);
+        return string.IsNullOrEmpty(token) ? string.Empty : GetLink(token);
     }
 
     public void DisableClient(int tenantId)
@@ -126,7 +119,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     private string GetLink(string token)
     {
         var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
-        var botname = tgProvider == null ? default : tgProvider.TelegramBotName;
+        var botname = tgProvider?.TelegramBotName;
         if (string.IsNullOrEmpty(botname))
         {
             return null;

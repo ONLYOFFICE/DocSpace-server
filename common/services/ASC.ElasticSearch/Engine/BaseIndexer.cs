@@ -54,7 +54,7 @@ public class BaseIndexerHelper
 
     public void Clear<T>(T t) where T : class, ISearchItem
     {
-        _notify.Publish(new ClearIndexAction() { Id = t.IndexName }, CacheNotifyAction.Any);
+        _notify.Publish(new ClearIndexAction { Id = t.IndexName }, CacheNotifyAction.Any);
     }
 }
 
@@ -95,11 +95,11 @@ public class BaseIndexer<T>(Client client,
         var (count, max, min) = getCount(lastIndexed);
         _logger.DebugIndex(IndexName, count, max, min);
 
-        var ids = new List<int>() { min };
+        var ids = new List<int> { min };
         ids.AddRange(getIds(lastIndexed));
         ids.Add(max);
 
-        await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex()
+        await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
         {
             IndexName = Wrapper.IndexName,
             LastModified = now
@@ -148,9 +148,8 @@ public class BaseIndexer<T>(Client client,
                             continue;
                         }
 
-                        var charFilters = new List<string>() { nameof(CharFilter.io), c };
-                        var c1 = c;
-                        b.Custom(c1 + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
+                        var charFilters = new List<string> { nameof(CharFilter.io), c };
+                        b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
                     }
 
                     if (data is ISearchItemDocument)
@@ -282,7 +281,6 @@ public class BaseIndexer<T>(Client client,
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
-                        doc = null;
                     }
 
                     portionStart = i;
@@ -508,7 +506,7 @@ public class BaseIndexer<T>(Client client,
             {
                 if (newValue == default(T))
                 {
-                    source.Append($"ctx._source.remove('{sourceExprText.Substring(1)}');");
+                    source.Append($"ctx._source.remove('{sourceExprText[1..]}');");
                 }
                 else
                 {
@@ -643,7 +641,7 @@ static class CamelCaseExtension
 {
     internal static string ToLowerCamelCase(this string str)
     {
-        return str.ToLowerInvariant()[0] + str.Substring(1);
+        return str.ToLowerInvariant()[0] + str[1..];
     }
 }
 

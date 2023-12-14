@@ -85,32 +85,17 @@ public class AceShortWrapper
 
     public AceShortWrapper(AceWrapper aceWrapper)
     {
-        var permission = string.Empty;
-
-        switch (aceWrapper.Access)
+        var permission = aceWrapper.Access switch
         {
-            case FileShare.Read:
-                permission = FilesCommonResource.AceStatusEnum_Read;
-                break;
-            case FileShare.ReadWrite:
-                permission = FilesCommonResource.AceStatusEnum_ReadWrite;
-                break;
-            case FileShare.CustomFilter:
-                permission = FilesCommonResource.AceStatusEnum_CustomFilter;
-                break;
-            case FileShare.Review:
-                permission = FilesCommonResource.AceStatusEnum_Review;
-                break;
-            case FileShare.FillForms:
-                permission = FilesCommonResource.AceStatusEnum_FillForms;
-                break;
-            case FileShare.Comment:
-                permission = FilesCommonResource.AceStatusEnum_Comment;
-                break;
-            case FileShare.Restrict:
-                permission = FilesCommonResource.AceStatusEnum_Restrict;
-                break;
-        }
+            FileShare.Read => FilesCommonResource.AceStatusEnum_Read,
+            FileShare.ReadWrite => FilesCommonResource.AceStatusEnum_ReadWrite,
+            FileShare.CustomFilter => FilesCommonResource.AceStatusEnum_CustomFilter,
+            FileShare.Review => FilesCommonResource.AceStatusEnum_Review,
+            FileShare.FillForms => FilesCommonResource.AceStatusEnum_FillForms,
+            FileShare.Comment => FilesCommonResource.AceStatusEnum_Comment,
+            FileShare.Restrict => FilesCommonResource.AceStatusEnum_Restrict,
+            _ => string.Empty
+        };
 
         User = aceWrapper.SubjectName;
         if (aceWrapper.Id.Equals(FileConstant.ShareLinkId))

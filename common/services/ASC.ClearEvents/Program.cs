@@ -58,16 +58,16 @@ try
 
     builder.Services.AddClearEventsServices(builder.Configuration);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, false, false);
+        containerBuilder.Register(context.Configuration, false, false);
     });
 
     var app = builder.Build();
 
     app.UseRouting();
 
-    app.MapHealthChecks("/health", new HealthCheckOptions()
+    app.MapHealthChecks("/health", new HealthCheckOptions
     {
         Predicate = _ => true,
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
@@ -97,5 +97,5 @@ finally
 public partial class Program
 {
     public static readonly string Namespace = "ASC.ClearEvents";
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }

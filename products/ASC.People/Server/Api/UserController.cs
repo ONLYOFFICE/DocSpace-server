@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -66,10 +66,11 @@ public class UserController(ICache cache,
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon)
+        FileSecurityCommon fileSecurityCommon, 
+        IDistributedLockProvider distributedLockProvider)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
@@ -249,10 +250,10 @@ public class UserController(ICache cache,
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-            try
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
-                await _semaphore.WaitAsync();
                 if (success)
                 {
                     await usersInRoomChecker.CheckAppend();
@@ -263,10 +264,6 @@ public class UserController(ICache cache,
                     await usersInRoomChecker.CheckAppend();
                     await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 
@@ -336,7 +333,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{userid}/password")]
+    [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting("sensitive_api")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
@@ -432,7 +429,7 @@ public class UserController(ICache cache,
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
         await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
 
@@ -489,14 +486,11 @@ public class UserController(ICache cache,
             await _userManager.DeleteUserAsync(user.Id);
             await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
         }
-        else
-        {
+
             //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
             //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
-        }
-
         return await employeeFullDtoHelper.GetFullAsync(user);
-    }
+        }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
@@ -932,7 +926,7 @@ public class UserController(ICache cache,
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
         await messageService.SendAsync(MessageAction.UsersDeleted, messageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1288,7 +1282,7 @@ public class UserController(ICache cache,
     {
         var user = await GetUserInfoAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !Equals(user.Id, securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
@@ -1435,28 +1429,26 @@ public class UserController(ICache cache,
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            try
+            
+            if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
             {
-                await _semaphore.WaitAsync();
-                if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
                     await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-
-                if (!self && !isUser && await _userManager.IsUserAsync(user))
+            }
+            else if (!self && !isUser && await _userManager.IsUserAsync(user))
+            {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
                     await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 
@@ -1511,15 +1503,20 @@ public class UserController(ICache cache,
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
+                        IDistributedLockHandle lockHandle = null;
+                        
                         try
                         {
-                            await _semaphore.WaitAsync();
                             if (!await _userManager.IsUserAsync(user))
                             {
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                                
                                 await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
+                                
                                 await activeUsersChecker.CheckAppend();
                             }
 
@@ -1529,7 +1526,10 @@ public class UserController(ICache cache,
                         }
                         finally
                         {
-                            _semaphore.Release();
+                            if (lockHandle != null)
+                            {
+                                await lockHandle.ReleaseAsync();
+                            }
                         }
                     }
                     break;
@@ -1811,23 +1811,23 @@ public class UserController(ICache cache,
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
 
-        void FilterByUserType(EmployeeType employeeType, List<List<Guid>> includeGroups, List<Guid> excludeGroups)
+        void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
         {
-            switch (employeeType)
+            switch (eType)
             {
                 case EmployeeType.DocSpaceAdmin:
-                    includeGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
                     break;
                 case EmployeeType.RoomAdmin:
-                    excludeGroups.Add(Constants.GroupUser.ID);
-                    excludeGroups.Add(Constants.GroupAdmin.ID);
-                    excludeGroups.Add(Constants.GroupCollaborator.ID);
+                    eGroups.Add(Constants.GroupUser.ID);
+                    eGroups.Add(Constants.GroupAdmin.ID);
+                    eGroups.Add(Constants.GroupCollaborator.ID);
                     break;
                 case EmployeeType.Collaborator:
-                    includeGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
                     break;
                 case EmployeeType.User:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
                     break;
             }
         }

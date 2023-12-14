@@ -185,7 +185,7 @@ h3.ONLYOFFICE에서 다음과 같은 작업을 할 수 있습니다.
 
 - 다양한 플러그인을 사용하여 추가 기능을 적용할 수 있습니다.
 
-- "Chrome 확장 프로그램":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" 을 통해Personal 클라우드에 손쉽게 액세스할 수 있습니다.
+- "Chrome 확장 프로그램":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ko" 을 통해Personal 클라우드에 손쉽게 액세스할 수 있습니다.
 
 무료 "데스크탑 편집기":"https://www.onlyoffice.com/download-desktop.aspx" 를 이용해 오프라인으로 문서 작업을 하거나 "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" 또는 "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" 장치에 모바일 편집 앱을 다운로드할 수 있습니다.
 
@@ -216,7 +216,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>personal.onlyoffice.com에서 계정 해지를 요청하셨습니다. 다음 링크를 따라 요청 프로세스를 완료하세요(이 링크는 7일 동안만 유효합니다).
 
-계정 해지 확인
+$OrangeButton
 
 *알림*: 삭제 후에는 저희의 "개인 정보 보호 정책":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" 에 따라 고객님의 계정 및 모든 관련 데이터가 영구적으로 삭제됩니다.
 

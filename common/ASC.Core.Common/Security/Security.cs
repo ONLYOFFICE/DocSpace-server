@@ -40,21 +40,21 @@ public static class Security
                     Constants.User.ID, new HashSet<Rule>
                     {
                         new(UserConstants.Action_EditGroups.ID, Constants.User),
-                        new(UserConstants.Action_AddRemoveUser.ID),
+                        new(UserConstants.Action_AddRemoveUser.ID)
                     }
                 },
                 {
                     Constants.RoomAdmin.ID, new HashSet<Rule>
                     {
                         new(UserConstants.Action_EditGroups.ID, Constants.User),
-                        new(UserConstants.Action_AddRemoveUser.ID),
+                        new(UserConstants.Action_AddRemoveUser.ID)
                     }
                 },
                 {
                     Constants.Collaborator.ID, new HashSet<Rule>
                     {
                         new(UserConstants.Action_EditGroups.ID, Constants.Collaborator),
-                        new(UserConstants.Action_AddRemoveUser.ID),
+                        new(UserConstants.Action_AddRemoveUser.ID)
                     }
                 }
             }

@@ -102,10 +102,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
             if (!data.EndsWith("Z", true, CultureInfo.InvariantCulture))
             {
-                if (tz == null)
-                {
-                    tz = GetTimeZoneInfo(tenantManager, timeZoneConverter);
-                }
+                tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
 
                 tzOffset = tz.GetUtcOffset(dateTime);
                 dateTime = dateTime.Subtract(tzOffset);
@@ -123,10 +120,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = TimeSpan.Zero;
         UtcTime = DateTime.MinValue;
 
-        if (timeZone == null)
-        {
-            timeZone = GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
-        }
+        timeZone ??= GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
 
         //Hack
         if (timeZone.IsInvalidTime(new DateTime(value.Ticks, DateTimeKind.Unspecified)))
@@ -290,12 +284,12 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
             return true;
         }
 
-        if (obj is not ApiDateTime)
+        if (obj is not ApiDateTime time)
         {
             return false;
         }
 
-        return Equals((ApiDateTime)obj);
+        return Equals(time);
     }
 
     public bool Equals(ApiDateTime other)

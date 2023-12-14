@@ -192,7 +192,7 @@ public enum Accessibility
     WebComment,
     CoAuhtoring,
     CanConvert,
-    MustConvert,
+    MustConvert
 }
 
 [Scope]
@@ -231,7 +231,7 @@ public class FileUtility
             var position = fileName.LastIndexOf('.');
             if (0 <= position)
             {
-                extension = fileName.Substring(position).Trim().ToLower();
+                extension = fileName[position..].Trim().ToLower();
             }
         }
         return extension == null ? string.Empty : extension.Trim().ToLower();
@@ -240,9 +240,7 @@ public class FileUtility
     public string GetInternalExtension(string fileName)
     {
         var extension = GetFileExtension(fileName);
-        return InternalExtension.TryGetValue(GetFileTypeByExtention(extension), out var internalExtension)
-                   ? internalExtension
-                   : extension;
+        return InternalExtension.GetValueOrDefault(GetFileTypeByExtention(extension), extension);
     }
 
     public string GetGoogleDownloadableExtension(string googleExtension)
@@ -333,44 +331,21 @@ public class FileUtility
 
         foreach (var r in Enum.GetValues<Accessibility>())
         {
-            var val = false;
-
-            switch (r)
+            var val = r switch
             {
-                case Accessibility.ImageView:
-                    val = CanImageView(fileName);
-                    break;
-                case Accessibility.MediaView:
-                    val = CanMediaView(fileName);
-                    break;
-                case Accessibility.WebView:
-                    val = CanWebView(fileName);
-                    break;
-                case Accessibility.WebEdit:
-                    val = CanWebEdit(fileName);
-                    break;
-                case Accessibility.WebReview:
-                    val = CanWebReview(fileName);
-                    break;
-                case Accessibility.WebCustomFilterEditing:
-                    val = CanWebCustomFilterEditing(fileName);
-                    break;
-                case Accessibility.WebRestrictedEditing:
-                    val = CanWebRestrictedEditing(fileName);
-                    break;
-                case Accessibility.WebComment:
-                    val = CanWebComment(fileName);
-                    break;
-                case Accessibility.CoAuhtoring:
-                    val = CanCoAuthoring(fileName);
-                    break;
-                case Accessibility.CanConvert:
-                    val = await CanConvert(file);
-                    break;
-                case Accessibility.MustConvert:
-                    val = MustConvert(fileName);
-                    break;
-            }
+                Accessibility.ImageView => CanImageView(fileName),
+                Accessibility.MediaView => CanMediaView(fileName),
+                Accessibility.WebView => CanWebView(fileName),
+                Accessibility.WebEdit => CanWebEdit(fileName),
+                Accessibility.WebReview => CanWebReview(fileName),
+                Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
+                Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
+                Accessibility.WebComment => CanWebComment(fileName),
+                Accessibility.CoAuhtoring => CanCoAuthoring(fileName),
+                Accessibility.CanConvert => await CanConvert(file),
+                Accessibility.MustConvert => MustConvert(fileName),
+                _ => false
+            };
 
             result.Add(r, val);
         }
@@ -630,7 +605,7 @@ public class FileUtility
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly SetupInfo _setupInfo;
 
-    public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
+    public static readonly ImmutableList<string> ExtsArchive =  new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
@@ -639,7 +614,7 @@ public class FileUtility
                 ".z", ".zoo"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsVideo =  new List<string>()
+    public static readonly ImmutableList<string> ExtsVideo =  new List<string>
     {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
@@ -648,7 +623,7 @@ public class FileUtility
                 ".vob", ".webm", ".wmv"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsAudio =  new List<string>()
+    public static readonly ImmutableList<string> ExtsAudio =  new List<string>
     {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
@@ -657,7 +632,7 @@ public class FileUtility
                 ".raw", ".wav", ".wma"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsImage =  new List<string>()
+    public static readonly ImmutableList<string> ExtsImage =  new List<string>
     {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
@@ -665,7 +640,7 @@ public class FileUtility
                 ".svgt", ".svgy", ".gdraw", ".webp"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>()
+    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>
     {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
@@ -675,7 +650,7 @@ public class FileUtility
                 ".gsheet"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsPresentation = new List<string>()
+    public static readonly ImmutableList<string> ExtsPresentation = new List<string>
     {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
@@ -686,7 +661,7 @@ public class FileUtility
                 ".gslides"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsDocument = new List<string>()
+    public static readonly ImmutableList<string> ExtsDocument = new List<string>
     {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
@@ -698,23 +673,23 @@ public class FileUtility
                 ".gdoc"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
     {
                 ".docxf"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsOForm = new List<string>()
+    public static readonly ImmutableList<string> ExtsOForm = new List<string>
     {
                 ".oform"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsTemplate = new List<string>
     {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
-                ".pot", ".potm", ".potx",
-            }.ToImmutableList();
+                ".pot", ".potm", ".potx"
+    }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }
@@ -743,9 +718,6 @@ public class FileUtility
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, IEnumerable<FilesConverts>> Folders =
-        Microsoft.EntityFrameworkCore.EF.CompileQuery((FilesDbContext ctx) => ctx.FilesConverts);
-
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }

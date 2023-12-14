@@ -51,9 +51,8 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         foreach (var a in tenantAces)
         {
             var key = string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object);
-            if (commonAces.TryGetValue(key, out var common))
+            if (commonAces.Remove(key, out var common))
             {
-                commonAces.Remove(key);
                 if (common.AceType == a.AceType)
                 {
                     tenantAces.Remove(a);
@@ -134,8 +133,7 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .Any());
+                    .Any(r => r.AceType == aceType));
 
     public static readonly Func<UserDbContext, int, Guid, Guid, string, AceType, Task<Acl>> AclAsync =
         EF.CompileAsyncQuery(
@@ -145,6 +143,5 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.AceType == aceType));
 }

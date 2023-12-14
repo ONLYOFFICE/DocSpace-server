@@ -66,10 +66,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
     private async Task<DenyResult[]> GetDenyActionsAsync(ISubject subject, IAction[] actions, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         var denyActions = new List<DenyResult>();
-        if (actions == null)
-        {
-            actions = Array.Empty<IAction>();
-        }
+        actions ??= Array.Empty<IAction>();
 
         if (subject == null)
         {

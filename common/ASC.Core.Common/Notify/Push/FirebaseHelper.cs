@@ -44,7 +44,7 @@ public class FirebaseHelper(AuthContext authContext,
             try
             {
                 var credentials = JsonConvert.SerializeObject(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
-                FirebaseApp.Create(new AppOptions()
+                FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromJson(credentials)
                 });
@@ -75,13 +75,13 @@ public class FirebaseHelper(AuthContext authContext,
 
         foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {
-            var m = new FirebaseAdminMessaging.Message()
+            var m = new FirebaseAdminMessaging.Message
             {
                 Data = new Dictionary<string, string>{
                         { "data", msg.Data }
                     },
                 Token = fb.FirebaseDeviceToken,
-                Notification = new FirebaseAdminMessaging.Notification()
+                Notification = new FirebaseAdminMessaging.Notification
                 {
                     Body = msg.Content
                 }

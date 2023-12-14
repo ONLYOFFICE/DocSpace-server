@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,5 @@
 namespace ASC.Data.Storage.Encryption;
 
 [ProtoContract]
-public record EncryptionStop
-{
-}
+public record EncryptionStop;
 

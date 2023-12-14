@@ -137,10 +137,8 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
 {
     public bool IsDefault(AdditionalWhiteLabelSettings settings)
     {
-        if (settings.AdditionalWhiteLabelSettingsHelper == null)
-        {
-            settings.AdditionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelperInit;
-        }
+        settings.AdditionalWhiteLabelSettingsHelper ??= additionalWhiteLabelSettingsHelperInit;
+        
         var defaultSettings = settings.GetDefault();
 
         return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&

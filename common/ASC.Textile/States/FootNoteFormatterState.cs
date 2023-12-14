@@ -26,7 +26,7 @@
 
 namespace Textile.States;
 
-[FormatterState(PatternBegin + @"fn[0-9]+" + PatternEnd)]
+[FormatterState(PatternBegin + "fn[0-9]+" + PatternEnd)]
 public class FootNoteFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
     private int _noteID;
@@ -56,7 +56,7 @@ public class FootNoteFormatterState(TextileFormatter f) : SimpleBlockFormatterSt
     }
     protected override void OnContextAcquired()
     {
-        var m = Regex.Match(Tag, @"^fn(?<id>[0-9]+)");
+        var m = Regex.Match(Tag, "^fn(?<id>[0-9]+)");
         _noteID = int.Parse(m.Groups["id"].Value);
     }
 

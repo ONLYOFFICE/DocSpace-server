@@ -32,7 +32,7 @@ public class CompanyWhiteLabelSettingsConverter(CompanyWhiteLabelSettingsHelper 
 {
     public CompanyWhiteLabelSettingsDto Convert(CompanyWhiteLabelSettings source, CompanyWhiteLabelSettingsDto destination, ResolutionContext context)
     {
-        var result = new CompanyWhiteLabelSettingsDto()
+        var result = new CompanyWhiteLabelSettingsDto
         {
             Address = source.Address,
             CompanyName = source.CompanyName,

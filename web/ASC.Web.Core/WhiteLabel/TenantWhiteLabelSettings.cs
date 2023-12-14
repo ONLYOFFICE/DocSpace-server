@@ -117,7 +117,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.DocsEditorEmbed => LogoDocsEditorEmbedSize,
             WhiteLabelLogoType.LeftMenu => LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => LogoAboutPageSize,
-            _ => new Size(),
+            _ => new Size()
         };
     }
 
@@ -183,7 +183,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.LeftMenu => IsDefaultLogoLeftMenu,
             WhiteLabelLogoType.AboutPage => IsDefaultLogoAboutPage,
             WhiteLabelLogoType.Notification => IsDefaultLogoDark,
-            _ => true,
+            _ => true
         };
     }
 
@@ -227,7 +227,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.LeftMenu => dark ? DarkLogoLeftMenuExt : LogoLeftMenuExt,
             WhiteLabelLogoType.AboutPage => dark ? DarkLogoAboutPageExt : LogoAboutPageExt,
             WhiteLabelLogoType.Notification => "png",
-            _ => "",
+            _ => ""
         };
     }
 
@@ -484,16 +484,14 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             else
             {
                 ext = format.ext;
-                var xB64 = logo.Substring($"data:{format.mime};base64,".Length); // Get the Base64 string
+                var xB64 = logo[$"data:{format.mime};base64,".Length..]; // Get the Base64 string
                 data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
             }
 
             return (data, ext);
         }
-        else
-        {
-            return (null, ext);
-        }
+
+        return (null, ext);
     }
 
     private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
@@ -634,7 +632,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return null;
         }
 
-        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -686,7 +684,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return null;
         }
 
-        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -722,7 +720,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             WhiteLabelLogoType.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
             WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
-            _ => new Size(0, 0),
+            _ => new Size(0, 0)
         };
     }
 
@@ -803,7 +801,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             WhiteLabelLogoType.Favicon => false,
             WhiteLabelLogoType.DocsEditor => false,
             WhiteLabelLogoType.DocsEditorEmbed => false,
-            _ => true,
+            _ => true
         };
     }
 }

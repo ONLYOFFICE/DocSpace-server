@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,18 +27,20 @@
 namespace ASC.Data.Backup.Services;
 
 [Scope]
-public class BackupService(ILogger<BackupService> logger,
-    BackupStorageFactory backupStorageFactory,
-    BackupWorker backupWorker,
-    BackupRepository backupRepository)
-{
-    public void StartBackup(StartBackupRequest request)
+public class BackupService(
+        ILogger<BackupService> logger,
+        BackupStorageFactory backupStorageFactory,
+        BackupWorker backupWorker,
+        BackupRepository backupRepository)
     {
-        var progress = backupWorker.StartBackup(request);
+    public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
+    {
+        var progress = await backupWorker.StartBackupAsync(request, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
         }
+        return progress.TaskId;
     }
 
     public async Task DeleteBackupAsync(Guid backupId)
@@ -107,9 +109,9 @@ public class BackupService(ILogger<BackupService> logger,
         return backupHistory;
     }
 
-    public void StartTransfer(StartTransferRequest request)
+    public async Task StartTransferAsync(StartTransferRequest request)
     {
-        var progress = backupWorker.StartTransfer(request.TenantId, request.TargetRegion, request.NotifyUsers);
+        var progress = await backupWorker.StartTransferAsync(request.TenantId, request.TargetRegion, request.NotifyUsers);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -136,26 +138,26 @@ public class BackupService(ILogger<BackupService> logger,
             request.StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(backupRecord.StorageParams);
         }
 
-        var progress = backupWorker.StartRestore(request);
+        var progress = await backupWorker.StartRestoreAsync(request);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
         }
     }
 
-    public BackupProgress GetBackupProgress(int tenantId)
+    public async Task<BackupProgress> GetBackupProgress(int tenantId)
     {
-        return backupWorker.GetBackupProgress(tenantId);
+        return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
-    public BackupProgress GetTransferProgress(int tenantId)
+    public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
-        return backupWorker.GetTransferProgress(tenantId);
+        return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public BackupProgress GetRestoreProgress(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgress(int tenantId)
     {
-        return backupWorker.GetRestoreProgress(tenantId);
+        return await backupWorker.GetRestoreProgressAsync(tenantId);
     }
 
     public string GetTmpFolder()
@@ -166,14 +168,15 @@ public class BackupService(ILogger<BackupService> logger,
     public async Task CreateScheduleAsync(CreateScheduleRequest request)
     {
         await backupRepository.SaveBackupScheduleAsync(
-            new BackupSchedule()
+            new BackupSchedule
             {
                 TenantId = request.TenantId,
                 Cron = request.Cron,
                 BackupsStored = request.NumberOfBackupsStored,
                 StorageType = request.StorageType,
                 StorageBasePath = request.StorageBasePath,
-                StorageParams = JsonConvert.SerializeObject(request.StorageParams)
+                StorageParams = JsonConvert.SerializeObject(request.StorageParams),
+                Dump = request.Dump
             });
     }
 
@@ -194,7 +197,8 @@ public class BackupService(ILogger<BackupService> logger,
                 NumberOfBackupsStored = schedule.BackupsStored,
                 Cron = schedule.Cron,
                 LastBackupTime = schedule.LastBackupTime,
-                StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams)
+                StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),
+                Dump = schedule.Dump
             };
 
             return tmp;

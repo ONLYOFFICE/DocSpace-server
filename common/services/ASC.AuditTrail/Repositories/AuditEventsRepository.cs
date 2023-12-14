@@ -168,14 +168,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         {
             if (hasFromFilter)
             {
-                if (hasToFilter)
-                {
-                    query = query.Where(q => q.Event.Date >= from.Value && q.Event.Date <= to.Value);
-                }
-                else
-                {
-                    query = query.Where(q => q.Event.Date >= from.Value);
-                }
+                query = hasToFilter ? query.Where(q => q.Event.Date >= from.Value && q.Event.Date <= to.Value) : query.Where(q => q.Event.Date >= from.Value);
             }
             else if (hasToFilter)
             {

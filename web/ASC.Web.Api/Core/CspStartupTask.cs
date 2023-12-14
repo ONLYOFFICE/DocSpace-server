@@ -29,7 +29,7 @@ namespace ASC.Api.Core.Core;
 public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache)
     : IStartupTask
 {
-    private const string HeaderKey = $"csp";
+    private const string HeaderKey = "csp";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {

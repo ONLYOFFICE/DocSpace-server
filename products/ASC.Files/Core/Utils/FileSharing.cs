@@ -43,7 +43,9 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         CountPaidUserChecker countPaidUserChecker,
-        IUrlShortener urlShortener,
+        IUrlShortener urlShortener, 
+        IDistributedLockProvider distributedLockProvider,
+        TenantManager tenantManager,
         IConfiguration configuration)
     {
 
@@ -66,8 +68,8 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
         }
     }
 
-    private static readonly SemaphoreSlim _semaphore = new(1);
     
+
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
@@ -99,7 +101,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == currentUserId && w.Id == currentUserId)
+            if (entry.CreateBy == currentUserId && w.Id == currentUserId && w.Access != FileShare.RoomAdmin)
             {
                 continue;
             }
@@ -178,11 +180,15 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
+                IDistributedLockHandle lockHandle = null;
+                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
                 try
                 {
-                    await _semaphore.WaitAsync();
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
+                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
+                        
                         await countPaidUserChecker.CheckAppend();
                     }
 
@@ -211,7 +217,10 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
                 }
                 finally
                 {
-                    _semaphore.Release();
+                    if (lockHandle != null)
+                    {
+                        await lockHandle.ReleaseAsync();
+                }
                 }
                 
                 if (emailInvite)
@@ -639,7 +648,7 @@ public class FileSharing(Global global,
                 Id = r.Subject,
                 SubjectGroup = isgroup,
                 Access = share,
-                FileShareOptions = r.Options,
+                FileShareOptions = r.Options
             };
 
             w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
@@ -699,7 +708,7 @@ public class FileSharing(Global global,
                 SubjectGroup = false,
                 Access = FileShare.ReadWrite,
                 Owner = true,
-                CanEditAccess = false,
+                CanEditAccess = false
             };
 
             result.Add(w);
@@ -721,7 +730,7 @@ public class FileSharing(Global global,
                     SubjectGroup = true,
                     Access = FileShare.ReadWrite,
                     Owner = false,
-                    LockedRights = true,
+                    LockedRights = true
                 };
 
                 result.Add(w);
@@ -766,7 +775,7 @@ public class FileSharing(Global global,
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Cast<FileEntry<T>>().Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Cast<FileEntry<T>>());
 
         foreach (var entry in entries)
         {
@@ -915,7 +924,7 @@ public class FileSharing(Global global,
             SubjectGroup = false,
             Access = FileShare.ReadWrite,
             Owner = true,
-            CanEditAccess = false,
+            CanEditAccess = false
         };
 
         yield return owner;

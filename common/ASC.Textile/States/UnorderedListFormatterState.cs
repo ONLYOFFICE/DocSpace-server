@@ -44,11 +44,11 @@ public class UnorderedListFormatterState(TextileFormatter formatter) : ListForma
 
     protected override bool IsMatchForMe(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*[\*]{" + minNestingDepth + @"," + maxNestingDepth + @"}" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*[\*]{" + minNestingDepth + "," + maxNestingDepth + "}" + Globals.BlockModifiersPattern + @"\s");
     }
 
     protected override bool IsMatchForOthers(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*[#]{" + minNestingDepth + @"," + maxNestingDepth + @"}" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*[#]{" + minNestingDepth + "," + maxNestingDepth + "}" + Globals.BlockModifiersPattern + @"\s");
     }
 }

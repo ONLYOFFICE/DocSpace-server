@@ -44,7 +44,7 @@ public class LoggerMiddleware(RequestDelegate next)
             return;
         }
 
-        var state = new Dictionary<string, object>()
+        var state = new Dictionary<string, object>
         {
             new("tenantId", tenant.Id),
             new("tenantAlias", tenant.GetTenantDomain(coreSettings, false))

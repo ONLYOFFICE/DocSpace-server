@@ -58,7 +58,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
     
-    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
+    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
     {
         {
             FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -209,7 +209,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }.ToFrozenDictionary();
 
-    public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>()
+    public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
     {
         {
             EmployeeType.DocSpaceAdmin, new HashSet<FileShare>
@@ -238,10 +238,10 @@ public class FileSecurity(IDaoFactory daoFactory,
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
-    new Dictionary<FileEntryType, IEnumerable<FilesSecurityActions>>()
+    new Dictionary<FileEntryType, IEnumerable<FilesSecurityActions>>
     {
             {
-                FileEntryType.File, new List<FilesSecurityActions>()
+                FileEntryType.File, new List<FilesSecurityActions>
                 {
                     FilesSecurityActions.Read,
                     FilesSecurityActions.Comment,
@@ -263,7 +263,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             },
             {
-                FileEntryType.Folder, new List<FilesSecurityActions>()
+                FileEntryType.Folder, new List<FilesSecurityActions>
                 {
                     FilesSecurityActions.Read,
                     FilesSecurityActions.Create,
@@ -773,7 +773,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             FileShare.RoomAdmin => EmployeeType.RoomAdmin,
             FileShare.Collaborator => EmployeeType.Collaborator,
-            _ => EmployeeType.User,
+            _ => EmployeeType.User
         };
     }
 
@@ -1408,7 +1408,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             Owner = authContext.CurrentAccount.ID,
             Share = share,
             SubjectType = subjectType,
-            Options = options,
+            Options = options
         };
 
         await securityDao.SetShareAsync(r);
@@ -1446,7 +1446,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await daoFactory.GetSecurityDao<T>().GetUsersWithSharedCountAsync(entry, text, employeeStatus, activationStatus, excludeShared);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
@@ -1668,7 +1668,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
-        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -1788,7 +1788,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
@@ -1808,7 +1808,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
-        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();

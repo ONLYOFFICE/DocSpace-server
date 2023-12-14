@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis;
-
 namespace ASC.Common.Caching;
 
 [Singleton]
@@ -39,7 +37,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Publish(T obj, CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T>() { Id = _instanceId, Object = obj, Action = action }))
+        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }))
             .GetAwaiter()
             .GetResult();
 
@@ -51,7 +49,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
-        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T>() { Id = _instanceId, Object = obj, Action = action }));
+        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }));
 
         foreach (var hanlder in GetInvoctionList(action))
         {
@@ -77,10 +75,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Unsubscribe(CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ =>
-        {
-            return Task.FromResult(true);
-        })).GetAwaiter()
+        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ => Task.FromResult(true))).GetAwaiter()
           .GetResult();
 
         _invoctionList.TryRemove(action, out _);

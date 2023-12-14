@@ -48,7 +48,10 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
 
     public async Task<DbLoginEvent> GetByIdAsync(int id)
     {
-        if (id < 0) return null;
+        if (id < 0)
+        {
+            return null;
+        }
 
         var loginEvent = cache.Get<DbLoginEvent>($"{GuidLoginEvent} - {id}");
         if(loginEvent == null)

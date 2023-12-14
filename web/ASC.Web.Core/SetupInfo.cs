@@ -70,7 +70,6 @@ public class SetupInfo
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
-    public string UserForum { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
     public TimeSpan ValidEmailKeyInterval { get; private set; }
@@ -137,7 +136,6 @@ public class SetupInfo
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .OrderBy(l => l.DisplayName)
             .ToList();
 
         EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
@@ -160,7 +158,6 @@ public class SetupInfo
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
-        UserForum = GetAppSettings("web.user-forum", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
 
         ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));
@@ -253,14 +250,9 @@ public class SetupInfo
 
         foreach (var culture in EnabledCulturesPersonal)
         {
-            if (result.ContainsKey(culture.TwoLetterISOLanguageName))
-            {
-                result.Add(culture.Name, culture);
-            }
-            else
-            {
-                result.Add(culture.TwoLetterISOLanguageName, culture);
-            }
+            result.Add(
+                result.ContainsKey(culture.TwoLetterISOLanguageName) ? culture.Name : culture.TwoLetterISOLanguageName,
+                culture);
         }
 
         return result.OrderBy(item => item.Value.DisplayName).ToList();
@@ -276,18 +268,14 @@ public class SetupInfo
             }
         }
 
-        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase));
-
-        if (cultureInfo == null)
-        {
-            cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
-        }
+        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase)) ??
+                          EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
 
         if (cultureInfo != null)
         {
             foreach (var item in PersonalCultures)
             {
-                if (item.Value == cultureInfo)
+                if (Equals(item.Value, cultureInfo))
                 {
                     return item;
                 }

@@ -40,7 +40,7 @@ public static class Validate
 
     public static T ThrowIfNull<T>(this T item, Exception e) where T : class
     {
-        return item.IfNull(() => { throw e; });
+        return item.IfNull(() => throw e);
     }
 
     public static T NotFoundIfNull<T>(this T item) where T : class
@@ -50,11 +50,11 @@ public static class Validate
 
     public static T NotFoundIfNull<T>(this T item, string message) where T : class
     {
-        return item.IfNull(() => { throw new ItemNotFoundException(message); });
+        return item.IfNull(() => throw new ItemNotFoundException(message));
     }
 
     public static T? NullIfDefault<T>(this T item) where T : struct
     {
-        return EqualityComparer<T>.Default.Equals(item, default(T)) ? default(T?) : item;
+        return EqualityComparer<T>.Default.Equals(item, default) ? default(T?) : item;
     }
 }

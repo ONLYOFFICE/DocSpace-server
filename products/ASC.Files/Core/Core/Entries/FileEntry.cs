@@ -64,10 +64,10 @@ public abstract class FileEntry : ICloneable
     }
 
     [JsonIgnore]
-    public string CreateOnString => CreateOn.Equals(default) ? null : CreateOn.ConvertNumerals();
+    public string CreateOnString => CreateOn.Equals(default) ? null : CreateOn.ConvertNumerals("g");
 
     [JsonIgnore]
-    public string ModifiedOnString => ModifiedOn.Equals(default) ? null : ModifiedOn.ConvertNumerals();
+    public string ModifiedOnString => ModifiedOn.Equals(default) ? null : ModifiedOn.ConvertNumerals("g");
 
     public string Error { get; set; }
     public FileShare Access { get; set; }
@@ -101,31 +101,6 @@ public abstract class FileEntry : ICloneable
     public object Clone()
     {
         return MemberwiseClone();
-    }
-}
-
-static file class ArabicNumeralHelper
-{
-    public static string ConvertNumerals(this DateTime input)
-    {
-        if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
-        {
-            return input.ToString("g", CultureInfo.InvariantCulture);
-        }
-        
-        var result = input.ToString($"g", new CultureInfo("ar"));
-        return result
-            .Replace('0', '\u06f0')
-            .Replace('1', '\u06f1')
-            .Replace('2', '\u06f2')
-            .Replace('3', '\u06f3')
-            .Replace('4', '\u06f4')
-            .Replace('5', '\u06f5')
-            .Replace('6', '\u06f6')
-            .Replace('7', '\u06f7')
-            .Replace('8', '\u06f8')
-            .Replace('9', '\u06f9');
-
     }
 }
 

@@ -45,7 +45,7 @@ public class TenantManager
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal CoreSettings CoreSettings { get; set; }
 
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     static TenantManager()
     {
@@ -72,13 +72,15 @@ public class TenantManager
         IQuotaService quotaService,
         ITariffService tariffService,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider)
     {
         TenantService = tenantService;
         QuotaService = quotaService;
         TariffService = tariffService;
         CoreBaseSettings = coreBaseSettings;
         CoreSettings = coreSettings;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public TenantManager(
@@ -87,7 +89,8 @@ public class TenantManager
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings, distributedLockProvider)
     {
         HttpContextAccessor = httpContextAccessor;
     }
@@ -126,13 +129,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = await TenantService.GetTenantAsync(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = await TenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = await TenantService.GetTenantAsync(domain);
-        }
+        
+        t ??= await TenantService.GetTenantAsync(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = await TenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
@@ -161,13 +163,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = TenantService.GetTenant(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = TenantService.GetTenant(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = TenantService.GetTenant(domain);
-        }
+        
+        t ??= TenantService.GetTenant(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = TenantService.GetTenantForStandaloneWithoutAlias(domain);
@@ -430,14 +431,10 @@ public class TenantManager
 
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
-        try
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(
+                         $"quota_{row.TenantId}_{row.Path}_{row.UserId}"))
         {
-            await _semaphore.WaitAsync();
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 

@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FooterCommonV10" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt; &lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;"&gt;
               &lt;img src="%IMAGEPATH%/tech-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
@@ -89,34 +89,34 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="FooterOpensourceV10" xml:space="preserve">
-    <value>&lt;tr borde = "0" espaciadodecelda = "0" rellenodecelda = "0"&gt; &lt;td colspan = "3" estilo = "altura: 10px; línea-altura: 10px; fondo: #fff; relleno: 0; margen: 0 ; "&gt; &amp; nbsp; &lt;/ td&gt; &lt;/ tr&gt;
-        &lt;tr borde = "0" espaciadodecelda = "0" rellenodecelda = "0"&gt;
-            &lt;td estilo = "alineación vertical: superior; margen: 0; relleno: 34px 0 0 0; ancho: 210px; alto: 108px; fondo: # f6f6f6; -moz-borde-radio-izquierdasuperior: 6px; -webkit-borde -superior-izquierdo-radio: 6px; borde-superior-izquierdo-radio: 6px; "&gt;
-              &lt;img src = "%IMAGEPATH%/tech-100.png" estilo = "ancho: 100px; altura: 100px; margen: 0 auto;" /&gt;
-            &lt;/ td&gt;
-            &lt;td estilo = "alineación vertical: superior; margen: 0; relleno: 34px 0 0 0; ancho: 180px; alto: 108px; fondo: # f6f6f6;"&gt;
-              &lt;img src = "%IMAGEPATH%/mailus-100.png" style = "ancho: 100px; altura: 100px; margen: 0 auto;" /&gt;
-            &lt;/ td&gt;
-            &lt;td estilo = "alineamiento vertical: superior; margen: 0; relleno: 34px 0 0 0; ancho: 210px; alto: 108px; fondo: # f6f6f6; -moz-border-radio-superiorderecha: 6px; -webkit-borde -superior-derecha-radio: 6px; borde-superior-derecha-radio: 6px; "&gt;
-              &lt;img src = "%IMAGEPATH%/demo-100.png" style = "ancho: 100px; altura: 100px; margen: 0 auto;" /&gt;
-            &lt;/ td&gt;
-        &lt;/ tr&gt;
-        &lt;tr borde = "0" espaciadodecelda= "0" rellenodecelda= "0"&gt;
-            &lt;td estilo= "alineamiento vertical: superior; margen: 0; relleno: 0; ancho: 210px; alto: 16px; fondo: # f6f6f6;"&gt; ¿Necesita ayuda técnica? &lt;/ td&gt;
-            &lt;td estilo = "alinemaiento vertical: superior; margen: 0; relleno: 0; ancho: 180px; alto: 16px; fondo: # f6f6f6;"&gt; Preguntas de venta &lt;/ td&gt;
-            &lt;td estilo= "alineamiento vertical: superior; margen: 0; relleno: 0; ancho: 210px; alto: 16px; fondo: # f6f6f6;"&gt; Pedir Demo &lt;/ td&gt;
-        &lt;/ tr&gt;
-        &lt;tr borde = "0" espaciadodecelda= "0" rellenodecelda= "0"&gt;
-            &lt;td estilo= "alineamiento vertical: superior; margen: 0; relleno: 0 0 30px; ancho: 210px; fondo: # f6f6f6; -moz-border-radio-inferiorizquierdo: 6px; -webkit-borde-inferior-izquierda- radio: 6px; borde-inferior-radio-izquierdo: 6px; "&gt;
-              &lt;a href="http://dev.onlyoffice.org/" destino="_en blanco" estilo="color: #333;"&gt; Pregunta a la comunidad &lt;/a&gt;
-            &lt;/ td&gt;
-            &lt;td estilo= "alineción vertical: superior; margen: 0; relleno: 0 0 30px; ancho: 180px; fondo: # f6f6f6;"&gt;
-              &lt;a href="mailto:sales@onlyoffice.com" estilo="color: #333;"&gt; Envíenos un correo electrónico &lt;/a&gt;
-            &lt;/ td&gt;
-            &lt;td estilo= "alineación vertical: superior; margen: 0; relleno: 0 0 30px; ancho: 210px; fondo: # f6f6f6; -moz-borde-radio-inferiorderecha: 6px; -webkit-borde-inferior-derecha- radio: 6px; borde-inferior-derecho-radio: 6px; "&gt;
-              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" destino="_en blanco" estilo="color: #333;"&gt; Enviar una solicitud &lt;/a&gt;
-            &lt;/ td&gt;
-        &lt;/ tr&gt;</value>
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;"&gt;
+              &lt;img src="%IMAGEPATH%/tech-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
+            &lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 180px; height: 108px; background: #f6f6f6;"&gt;
+              &lt;img src="%IMAGEPATH%/mailus-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
+            &lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topright: 6px; -webkit-border-top-right-radius: 6px; border-top-right-radius: 6px;"&gt;
+              &lt;img src="%IMAGEPATH%/demo-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;¿Necesita ayuda técnica?&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Preguntas de venta&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Pedir Demo&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
+              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Pregunta a la comunidad&lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
+              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Envíenos un correo electrónico&lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Enviar una solicitud&lt;/a&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
     <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;

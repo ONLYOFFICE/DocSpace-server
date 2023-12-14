@@ -59,9 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>このメールは自動的に生成されるので、回答する必要はありません。&lt;br /&gt;&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;DocSpace&lt;/a&gt;の登録ユーザーであるため、このメールを受け取りました。
-&lt;br /&gt;DocSpaceの通知メールの配信を停止するには、ここをクリックしてください： &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;購読中止&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>ご購入に関するご質問は、 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt;技術的な問題の場合は &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;サポートチームまで。配信停止は&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;こちら&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
     <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;

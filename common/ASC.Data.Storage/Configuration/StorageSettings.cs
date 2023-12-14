@@ -210,7 +210,7 @@ public class StorageSettingsHelper
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {
-            await _cache.PublishAsync(new DataStoreCacheItem() { TenantId = path, Module = module }, CacheNotifyAction.Remove);
+            await _cache.PublishAsync(new DataStoreCacheItem { TenantId = path, Module = module }, CacheNotifyAction.Remove);
         }
     }
 }

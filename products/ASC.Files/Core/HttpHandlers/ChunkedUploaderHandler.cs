@@ -175,7 +175,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions()
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions
         {
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -261,7 +261,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -276,7 +276,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -325,7 +325,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     private bool IsFileDataSet()
     {
-        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default(T));
+        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default);
     }
 }
 

@@ -29,7 +29,7 @@ namespace ASC.ElasticSearch;
 [Singleton]
 public class Client(ILoggerProvider option, Settings settings)
 {
-    private ElasticClient _client;
+    private volatile ElasticClient _client;
     private static readonly object _locker = new();
     private readonly ILogger _logger = option.CreateLogger("ASC.Indexer");
 

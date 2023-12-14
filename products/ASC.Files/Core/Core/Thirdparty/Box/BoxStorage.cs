@@ -26,8 +26,6 @@
 
 using Box.V2.Exceptions;
 
-using BoxSDK = Box.V2;
-
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient]
@@ -262,7 +260,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
     public async Task<long> GetMaxUploadSizeAsync()
     {
-        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string>() { "max_upload_size" });
+        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });
         var max = boxUser.MaxUploadSize ?? _maxChunkedUploadFileSize;
 
         //todo: without chunked uploader:
@@ -273,7 +271,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         var boxRepresentation = new BoxRepresentationRequest();
         boxRepresentation.FileId = fileId;
-        boxRepresentation.XRepHints = $"[jpg?dimensions=320x320]";
+        boxRepresentation.XRepHints = "[jpg?dimensions=320x320]";
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
     }
 }

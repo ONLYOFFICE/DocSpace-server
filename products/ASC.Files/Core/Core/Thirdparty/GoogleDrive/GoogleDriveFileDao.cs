@@ -157,7 +157,8 @@ internal class GoogleDriveFileDao(UserManager userManager,
 
             return Task.CompletedTask;
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
+
+        if (uploadSession.Items.ContainsKey("TempPath"))
         {
             File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 

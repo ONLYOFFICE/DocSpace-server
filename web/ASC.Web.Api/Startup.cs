@@ -39,9 +39,9 @@ public class Startup : BaseStartup
         WebhooksEnabled = true;
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {

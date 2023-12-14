@@ -104,10 +104,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                 return portalUserInfo;
             }
 
-            if (!ldapUserInfo.WorkFromDate.HasValue)
-            {
-                ldapUserInfo.WorkFromDate = tenantUtil.DateTimeNow();
-            }
+            ldapUserInfo.WorkFromDate ??= tenantUtil.DateTimeNow();
 
             if (onlyGetChanges)
             {
@@ -202,11 +199,11 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
         return (await SyncLDAPUserAsync(ldapUserInfo, ldapUsers, false)).UserInfo;
     }
 
-    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUserAsync(UserInfo ldapUserInfo, List<UserInfo> ldapUsers, bool onlyGetChanges = false)
+    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUserAsync(UserInfo ldapUserInfo, IReadOnlyCollection<UserInfo> ldapUsers, bool onlyGetChanges = false)
     {
         UserInfo userToUpdate;
 
-        var wrapper = new UserInfoAndLdapChangeCollectionWrapper()
+        var wrapper = new UserInfoAndLdapChangeCollectionWrapper
         {
             LdapChangeCollection = new LdapChangeCollection(userFormatter),
             UserInfo = Constants.LostUser
@@ -262,7 +259,6 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
-                        null,
                         new IRecipient[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
                         new[] { Core.Configuration.Constants.NotifyEMailSenderSysName },
                         null,
@@ -339,7 +335,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     private const string EXT_PHONE = "extphone";
     private const string EXT_SKYPE = "extskype";
 
-    private static void UpdateLdapUserContacts(UserInfo ldapUser, List<string> portalUserContacts)
+    private static void UpdateLdapUserContacts(UserInfo ldapUser, IReadOnlyList<string> portalUserContacts)
     {
         if (portalUserContacts == null || !portalUserContacts.Any())
         {
@@ -621,7 +617,17 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 var tenant = await tenantManager.GetCurrentTenantAsync();
 
-                new Task(async () =>
+                Action().Start();
+
+                if (ldapUserInfo.Item2.IsDisabled)
+                {
+                    logger.DebugTryGetAndSyncLdapUserInfo(login);
+                    return userInfo;
+                }
+
+                userInfo = portalUser;
+
+                async Task Action()
                 {
                     using var scope = serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -649,16 +655,6 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                             await cookiesManager.ResetUserCookieAsync(uInfo.Id);
                         }
                     }
-                }).Start();
-
-                if (ldapUserInfo.Item2.IsDisabled)
-                {
-                    logger.DebugTryGetAndSyncLdapUserInfo(login);
-                    return userInfo;
-                }
-                else
-                {
-                    userInfo = portalUser;
                 }
             }
 

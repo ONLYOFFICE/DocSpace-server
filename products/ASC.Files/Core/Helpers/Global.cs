@@ -191,11 +191,11 @@ public class Global
             var pos = title.LastIndexOf('.');
             if (MaxTitle - 20 < pos)
             {
-                title = title.Substring(0, MaxTitle - (title.Length - pos)) + title.Substring(pos);
+                title = title[..(MaxTitle - (title.Length - pos))] + title[pos..];
             }
             else
             {
-                title = title.Substring(0, MaxTitle);
+                title = title[..MaxTitle];
             }
         }
 

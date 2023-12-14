@@ -56,7 +56,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
@@ -86,5 +86,5 @@ finally
 public partial class Program
 {
     private static readonly string _namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = _namespace.Substring(_namespace.LastIndexOf('.', _namespace.LastIndexOf('.') - 1) + 1).Replace(".", "");
+    public static readonly string AppName = _namespace[(_namespace.LastIndexOf('.', _namespace.LastIndexOf('.') - 1) + 1)..].Replace(".", "");
 }

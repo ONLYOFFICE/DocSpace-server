@@ -77,7 +77,7 @@ public class FilesMessageService(ILoggerProvider options,
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
-    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default(Guid), FileShare userRole = FileShare.None, params string[] description)
+    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
     {
         if (entry == null)
         {
@@ -101,7 +101,7 @@ public class FilesMessageService(ILoggerProvider options,
         await messageService.SendHeadersMessageAsync(action, messageTarget.Create(entry.Id), headers, description);
     }
 
-    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default(Guid), FileShare userRole = FileShare.None, params string[] description)
+    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
     {
         if (entry == null)
         {
@@ -201,7 +201,7 @@ public class FilesMessageService(ILoggerProvider options,
         await messageService.SendAsync(initiator, action, messageTarget.Create(entry.Id), description);
     }
 
-    private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default(Guid), FileShare userRole = FileShare.None)
+    private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
@@ -238,7 +238,7 @@ public class FilesMessageService(ILoggerProvider options,
             _ => string.Empty
         };
 
-        var serializedParam = JsonSerializer.Serialize(info);
+        var serializedParam = JsonSerializer.Serialize(info, new JsonSerializerOptions{ DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
 
         return serializedParam;
     }

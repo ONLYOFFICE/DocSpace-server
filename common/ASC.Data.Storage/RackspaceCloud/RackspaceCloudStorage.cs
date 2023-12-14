@@ -134,8 +134,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var client = GetClient();
 
         var accounMetaData = client.GetAccountMetaData(_region);
-        string secretKey;
-        if (accounMetaData.TryGetValue("Temp-Url-Key", out secretKey))
+        if (accounMetaData.TryGetValue("Temp-Url-Key", out var secretKey))
         {
 
         }
@@ -435,7 +434,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var client = GetClient();
 
         return client.ListObjects(_private_container, null, null, null, MakePath(domain, path), _region)
-                  .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length)).ToAsyncEnumerable();
+                  .Select(x => x.Name[MakePath(domain, path + "/").Length..]).ToAsyncEnumerable();
     }
 
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
@@ -446,7 +445,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
         return paths
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x)))
-                .Select(x => x.Substring(MakePath(domain, path + "/").Length).TrimStart('/')).ToAsyncEnumerable();
+                .Select(x => x[MakePath(domain, path + "/").Length..].TrimStart('/')).ToAsyncEnumerable();
     }
 
     public override Task<bool> IsFileAsync(string domain, string path)
@@ -717,7 +716,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     private CloudFilesProvider GetClient()
     {
-        var cloudIdentity = new CloudIdentity()
+        var cloudIdentity = new CloudIdentity
         {
             Username = _username,
             APIKey = _apiKey
@@ -739,11 +738,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             return ACL.Auto;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override Task<string> GetFileEtagAsync(string domain, string path)

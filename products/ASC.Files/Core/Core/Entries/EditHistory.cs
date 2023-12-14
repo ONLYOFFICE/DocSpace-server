@@ -70,12 +70,12 @@ public class EditHistory(ILogger<EditHistory> logger,
 
                 changes = jObject.Changes.Select(r =>
                 {
-                    var result = new EditHistoryChanges()
+                    var result = new EditHistoryChanges
                     {
                         Author = new EditHistoryAuthor(userManager, displayUserSettingsHelper)
                         {
                             Id = r.User.Id ?? "",
-                            Name = r.User.Name,
+                            Name = r.User.Name
                         }
                     };
 

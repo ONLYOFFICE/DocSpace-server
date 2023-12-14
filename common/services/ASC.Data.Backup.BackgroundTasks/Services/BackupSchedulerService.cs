@@ -44,7 +44,7 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
     {
         logger.DebugBackupSchedulerServiceStarting();
 
-        stoppingToken.Register(() => logger.DebugBackupSchedulerServiceStopping());
+        stoppingToken.Register(logger.DebugBackupSchedulerServiceStopping);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -82,7 +82,10 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
 
         logger.DebugStartedToSchedule();
 
-        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync()).ToAsyncEnumerable().WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule)).ToListAsync();
+        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync())
+            .ToAsyncEnumerable()
+            .WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule))
+            .ToListAsync(cancellationToken: stoppingToken);
 
         logger.DebugBackupsSchedule(backupsToSchedule.Count);
 

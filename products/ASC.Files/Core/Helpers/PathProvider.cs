@@ -44,7 +44,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
     public string RoomUrlString
     {
-        get { return $"/rooms/shared/{{0}}/filter?withSubfolders=true&folder={{0}}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
+        get { return "/rooms/shared/{0}/filter?withSubfolders=true&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
     }
 
     public string GetRoomsUrl(int roomId)

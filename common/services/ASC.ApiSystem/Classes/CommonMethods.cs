@@ -24,10 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
-public class CommonMethods(IHttpContextAccessor httpContextAccessor,
+public class CommonMethods(
+    IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration,
     ILogger<CommonMethods> log,
     CoreSettings coreSettings,
@@ -40,7 +42,7 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
     IHttpClientFactory clientFactory)
 {
-    public object ToTenantWrapper(Tenant t)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
         return new
         {
@@ -56,6 +58,8 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
             status = t.Status.ToString(),
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            quotaUsage,
+            owner
         };
     }
 
@@ -118,7 +122,7 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
 
     public async Task<(bool, Tenant)> TryGetTenantAsync(IModel model)
     {
-        Tenant tenant = null;
+        Tenant tenant;
         if (coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
         {
             tenant = await tenantManager.GetTenantAsync((model.PortalName ?? "").Trim());
@@ -138,6 +142,47 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
         }
 
         return (false, null);
+    }
+
+    public async Task<List<Tenant>> GetTenantsAsync(TenantModel model)
+    {
+        var tenants = new List<Tenant>();
+        var empty = true;
+
+        if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
+        {
+            empty = false;
+            tenants.AddRange(await hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
+        }
+
+        if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        {
+            empty = false;
+            var tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (model.TenantId.HasValue)
+        {
+            empty = false;
+            var tenant = await hostedSolution.GetTenantAsync(model.TenantId.Value);
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (empty)
+        {
+            tenants.AddRange((await hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
+        }
+
+        return tenants;
     }
 
     public bool IsTestEmail(string email)
@@ -220,23 +265,23 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
         //return null;
     }
 
+    public async Task<IEnumerable<string>> GetHostIpsAsync()
+    {
+        var hostName = Dns.GetHostName();
+        var hostEntry = await Dns.GetHostEntryAsync(hostName);
+        return hostEntry.AddressList.Select(ip => ip.ToString());
+    }
+
     public bool ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
     {
         try
         {
-            string privateKey;
-            switch (recaptchaType)
+            var privateKey = recaptchaType switch
             {
-                case RecaptchaType.AndroidV2:
-                    privateKey = configuration["recaptcha:private-key:android"];
-                    break;
-                case RecaptchaType.iOSV2:
-                    privateKey = configuration["recaptcha:private-key:ios"];
-                    break;
-                default:
-                    privateKey = configuration["recaptcha:private-key:default"];
-                    break;
-            }
+                RecaptchaType.AndroidV2 => configuration["recaptcha:private-key:android"],
+                RecaptchaType.iOSV2 => configuration["recaptcha:private-key:ios"],
+                _ => configuration["recaptcha:private-key:default"]
+            };
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
             var url = configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
@@ -260,10 +305,8 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
             {
                 return true;
             }
-            else
-            {
-                log.LogDebug("Recaptcha error: {0}", resp);
-            }
+
+            log.LogDebug("Recaptcha error: {0}", resp);
 
             if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
             {

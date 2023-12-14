@@ -37,11 +37,12 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
     {
         logger.InformationThumbnailWorkerRunnig();
 
-        stoppingToken.Register(() => logger.InformationThumbnailWorkerStopping());
+        stoppingToken.Register(logger.InformationThumbnailWorkerStopping);
 
         logger.TraceProcedureStart();
 
-        var readers = new List<ChannelReader<FileData<int>>>() {
+        var readers = new List<ChannelReader<FileData<int>>>
+        {
             channelReader 
         };
 

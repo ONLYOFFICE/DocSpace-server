@@ -44,17 +44,18 @@ public class BackupPortalTask(DbFactory dbFactory,
     private const int MaxLength = 250;
     private const int BatchLimit = 5000;
 
-    private readonly bool _dump = coreBaseSettings.Standalone;
+    private bool _dump = coreBaseSettings.Standalone;
 
-    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator)
+    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
         ArgumentException.ThrowIfNullOrEmpty(toFilePath);
 
         BackupFilePath = toFilePath;
         Limit = limit;
         WriteOperator = writeOperator;
-        Init(tenantId);
+        _dump = dump;
 
+        Init(tenantId);
     }
 
     public override async Task RunJob()
@@ -118,9 +119,9 @@ public class BackupPortalTask(DbFactory dbFactory,
             {
                 var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
 
-                var command = connection.CreateCommand();
-                command.CommandText = "show tables";
-                var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
+                var dbCommand = connection.CreateCommand();
+                dbCommand.CommandText = "show tables";
+                var tables = ExecuteList(dbCommand).Select(objects => Convert.ToString(objects[0])).ToList();
                 databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
             });
         }
@@ -139,7 +140,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
         using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(true.ToString())))
         {
-            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream);
+            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, (t) => { });
         }
 
         var files = new List<BackupFileInfo>();
@@ -409,7 +410,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         }
     }
 
-    private List<object[]> GetData(string t, List<string> columns, int offset, string connectionString)
+    private List<object[]> GetData(string t, IEnumerable<string> columns, int offset, string connectionString)
     {
         using var connection = DbFactory.OpenConnection(connectionString: connectionString);
         var command = connection.CreateCommand();
@@ -419,7 +420,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         return ExecuteList(command);
     }
 
-    private List<object[]> GetDataWithPrimary(string t, List<string> columns, string primary, int start, int step, string connectionString)
+    private List<object[]> GetDataWithPrimary(string t, IEnumerable<string> columns, string primary, int start, int step, string connectionString)
     {
         using var connection = DbFactory.OpenConnection(connectionString: connectionString);
         var command = connection.CreateCommand();
@@ -431,7 +432,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     private ConnectionStringSettings GetConnectionString(int id, string connectionString)
     {
-        connectionString = connectionString + ";convert zero datetime=True";
+        connectionString += ";convert zero datetime=True";
         return new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
     }
 
@@ -467,8 +468,7 @@ public class BackupPortalTask(DbFactory dbFactory,
                         }
                         else
                         {
-                            var s = obj[i] as string;
-                            if (s != null)
+                            if (obj[i] is string s)
                             {
                                 sw.Write("'" + s.Replace("\r", "\\r").Replace("\n", "\\n") + "'");
                             }
@@ -486,14 +486,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     sw.Write(")");
 
-                    if (j != portion.Count - 1)
-                    {
-                        sw.Write(",");
-                    }
-                    else
-                    {
-                        sw.Write(";");
-                    }
+                    sw.Write(j != portion.Count - 1 ? "," : ";");
 
                     sw.WriteLine();
                 }
@@ -541,7 +534,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => SetStepCompleted());
         }
 
         SetStepCompleted();
@@ -591,10 +584,8 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             await using (var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
             {
-                await writer.WriteEntryAsync(enumerateFile.Substring(subDir.Length), tmpFile);
+                await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, task => SetStepCompleted());
             }
-
-            SetStepCompleted();
         }
 
         logger.DebugArchiveDirEnd(subDir);
@@ -644,8 +635,8 @@ public class BackupPortalTask(DbFactory dbFactory,
                         },
                         table,
                         maxAttempts: 5,
-                        onFailure: error => { throw ThrowHelper.CantBackupTable(table.Name, error); },
-                        onAttemptFailure: error => logger.WarningBackupAttemptFailure(error));
+                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                        onAttemptFailure: logger.WarningBackupAttemptFailure);
 
                     foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
                     {
@@ -663,13 +654,16 @@ public class BackupPortalTask(DbFactory dbFactory,
                         data.WriteXml(file, XmlWriteMode.WriteSchema);
                         data.Clear();
 
-                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file);
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
+                    }
+
+                    void SetProgress(Task task)
+                    {
+                        SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
                     }
 
                     logger.DebugEndSavingTable(table.Name);
                 }
-
-                SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
             }
         }
 
@@ -685,18 +679,15 @@ public class BackupPortalTask(DbFactory dbFactory,
             var filesProcessed = 0;
             var filesCount = group.Count();
 
+            void SetProgress(Task task)
+            {
+                SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+            }
+
             foreach (var file in group)
             {
                 var storage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
-                try
-                {
-                    await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage);
-                }
-                catch(Exception error)
-                {
-                    logger.WarningCanNotBackupFile(file.Module, file.Path, error);
-                }
-                SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+                await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
             }
         }
 
@@ -709,7 +700,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, task => {});
         }
 
         logger.DebugEndBackupStorage();

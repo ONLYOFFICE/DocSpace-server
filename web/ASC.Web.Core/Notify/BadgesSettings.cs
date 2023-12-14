@@ -36,7 +36,7 @@ public class BadgesSettings : ISettings<BadgesSettings>
     }
     public BadgesSettings GetDefault()
     {
-        return new BadgesSettings()
+        return new BadgesSettings
         {
             EnableBadges = true
         };

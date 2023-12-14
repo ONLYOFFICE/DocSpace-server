@@ -83,7 +83,9 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
     {
-        foreach (var e in await fileStorageService.DeleteFolderAsync("delete", folderId, false, inDto.DeleteAfter, inDto.Immediately))
+        var (tasks, _) = await fileStorageService.DeleteFolderAsync("delete", folderId, false, inDto.DeleteAfter, inDto.Immediately);
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -119,7 +121,9 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
         ApplyFilterOption? applyFilterOption, string extension)
     {
-        var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, null, extension);
+
+        var split = extension == null ? new string[] { } : extension.Split(",");
+        var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, null, split);
 
         return folder.NotFoundIfNull();
     }
@@ -347,7 +351,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <httpMethod>GET</httpMethod>
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
-        ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string extension)
+        ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension)
     {
         return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderRecentAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             excludeSubject, applyFilterOption, searchArea, extension);

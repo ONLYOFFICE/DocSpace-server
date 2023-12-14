@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Classes;
 
 [Singleton]
@@ -115,7 +116,7 @@ public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstant
             return commonConstants.DefaultCulture;
         }
 
-        var culture = _cultureUiMap.TryGetValue(languageKey, out var value) ? value : null;
+        var culture = _cultureUiMap.GetValueOrDefault(languageKey);
 
         return culture ?? commonConstants.DefaultCulture;
     }

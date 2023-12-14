@@ -65,6 +65,10 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
         request.TryGetValue("uid", out var userIdKey);
         Guid.TryParse(userIdKey, out var userId);
 
+        request.TryGetValue("module", out var module);
+        request.TryGetValue("first", out var first);
+        request.TryGetValue("sms", out var sms);
+
         return new EmailValidationKeyModel
         {
             Email = _email,
@@ -72,12 +76,15 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             Key = key,
             Type = cType,
             UiD = userId,
+            Module = module,
+            First = first,
+            Sms = sms
         };
     }
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, _) = inDto;
+        var (key, emplType, email, uiD, type, module, first, sms) = inDto;
 
         ValidationResult checkKeyResult;
 
@@ -96,11 +103,11 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + authContext.CurrentAccount.ID, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);
-                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -131,7 +138,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 var user = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (user == null || user == Constants.LostUser || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
+                if (user == null || Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
                 {
                     return ValidationResult.Invalid;
                 }
@@ -148,7 +155,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
             case ConfirmType.Auth:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidAuthKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first + module + sms, key, provider.ValidAuthKeyInterval);
                 break;
 
             case ConfirmType.PortalContinue:

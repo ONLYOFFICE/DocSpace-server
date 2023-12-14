@@ -63,7 +63,7 @@ public class EmployeeDto
             Id = Guid.Empty,
             DisplayName = "Mike Zanyatski",
             Title = "Manager",
-            AvatarSmall = "url to small avatar",
+            AvatarSmall = "url to small avatar"
         };
     }
 }

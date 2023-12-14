@@ -37,12 +37,10 @@ public enum WebZoneType
     All = Nowhere | StartProductList | TopNavigationProductList | CustomProductList
 }
 
-[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class)]
 public class WebZoneAttribute(WebZoneType type) : Attribute
 {
     public WebZoneType Type { get; private set; } = type;
 }
 
-public interface IRenderWebItem
-{
-}
+public interface IRenderWebItem;

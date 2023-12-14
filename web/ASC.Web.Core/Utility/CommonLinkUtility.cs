@@ -59,15 +59,10 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        WebItemManager webItemManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
-    private static readonly Regex _regFilePathTrim = new("/[^/]*\\.aspx", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    public const string ParamName_ProductSysName = "product";
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
@@ -77,11 +72,9 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        WebItemManager webItemManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options) :
-        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, options)
+        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, emailValidationKeyProvider, options)
     {
     }
 
@@ -140,155 +133,6 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
     }
 
     #endregion
-    
-    public void GetLocationByRequest(out IProduct currentProduct, out IModule currentModule)
-    {
-        var currentURL = string.Empty;
-        if (_httpContextAccessor?.HttpContext?.Request != null)
-        {
-            currentURL = _httpContextAccessor.HttpContext.Request.Url().AbsoluteUri;
-
-            //TODO ?
-            // http://[hostname]/[virtualpath]/[AjaxPro.Utility.HandlerPath]/[assembly],[classname].ashx
-            //if (currentURL.Contains("/" + AjaxPro.Utility.HandlerPath + "/") && HttpContext.Current.Request.Headers["Referer"].FirstOrDefault() != null)
-            //{
-            //    currentURL = HttpContext.Current.Request.Headers["Referer"].FirstOrDefault().ToString();
-            //}
-        }
-
-        GetLocationByUrl(currentURL, out currentProduct, out currentModule);
-    }
-    
-
-    private void GetLocationByUrl(string currentURL, out IProduct currentProduct, out IModule currentModule)
-    {
-        currentProduct = null;
-        currentModule = null;
-
-        if (string.IsNullOrEmpty(currentURL))
-        {
-            return;
-        }
-
-        var urlParams = HttpUtility.ParseQueryString(new Uri(currentURL).Query);
-        var productByName = GetProductBySysName(urlParams[ParamName_ProductSysName]);
-        var pid = productByName?.ID ?? Guid.Empty;
-
-        if (pid == Guid.Empty && !string.IsNullOrEmpty(urlParams["pid"]))
-        {
-            try
-            {
-                pid = new Guid(urlParams["pid"]);
-            }
-            catch
-            {
-                pid = Guid.Empty;
-            }
-        }
-
-        var currentProductName = GetProductNameFromUrl(currentURL);
-        var currentModuleName = GetModuleNameFromUrl(currentURL);
-
-        if (!string.IsNullOrEmpty(currentProductName) || !string.IsNullOrEmpty(currentModuleName))
-        {
-            foreach (var product in webItemManager.GetItemsAll<IProduct>())
-            {
-                var startProductName = GetProductNameFromUrl(product.StartURL);
-                if (string.IsNullOrEmpty(startProductName) || !string.Equals(currentProductName, startProductName, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
-
-                currentProduct = product;
-
-                if (!string.IsNullOrEmpty(currentModuleName))
-                {
-                    foreach (var module in webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
-                    {
-                        var startModuleName = GetModuleNameFromUrl(module.StartURL);
-                        if (!string.IsNullOrEmpty(startModuleName) && string.Equals(currentModuleName, startModuleName, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            currentModule = module;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var module in webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
-                    {
-                        if (!module.StartURL.Equals(product.StartURL) && currentURL.Contains(_regFilePathTrim.Replace(module.StartURL, string.Empty)))
-                        {
-                            currentModule = module;
-                            break;
-                        }
-                    }
-                }
-
-                break;
-            }
-        }
-
-        if (pid != Guid.Empty)
-        {
-            currentProduct = webItemManager[pid] as IProduct;
-        }
-    }
-
-    private string GetProductNameFromUrl(string url)
-    {
-        try
-        {
-            var pos = url.IndexOf("/products/", StringComparison.InvariantCultureIgnoreCase);
-            if (0 <= pos)
-            {
-                url = url.Substring(pos + 10).ToLower();
-                pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
-            }
-        }
-        catch
-        {
-        }
-        return null;
-    }
-
-    private static string GetModuleNameFromUrl(string url)
-    {
-        try
-        {
-            var pos = url.IndexOf("/modules/", StringComparison.InvariantCultureIgnoreCase);
-            if (0 <= pos)
-            {
-                url = url.Substring(pos + 9).ToLower();
-                pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
-            }
-        }
-        catch
-        {
-        }
-        return null;
-    }
-
-    private IProduct GetProductBySysName(string sysName)
-    {
-        IProduct result = null;
-
-        if (!string.IsNullOrEmpty(sysName))
-        {
-            foreach (var product in webItemManager.GetItemsAll<IProduct>())
-            {
-                if (string.Equals(sysName, product.GetSysName()))
-                {
-                    result = product;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
 
     private async Task<string> GetUserParamsPairAsync(Guid userID)
     {
@@ -305,16 +149,14 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
     }
 
-    #region Help Centr
-
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
-        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
+        var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
 
         if (string.IsNullOrEmpty(url))
         {
@@ -323,10 +165,12 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
+    
+    #region Help Centr
 
-    public string GetHelpLink(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
-        if (!settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>().HelpCenterEnabled)
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
             return string.Empty;
         }

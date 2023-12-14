@@ -28,7 +28,8 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.ActiveDirectory.Base;
 [Scope]
-public class LdapUserImporter(ILogger<LdapUserImporter> logger,
+public class LdapUserImporter(
+        ILogger<LdapUserImporter> logger,
         UserManager userManager,
         IConfiguration configuration,
         NovellLdapHelper novellLdapHelper,
@@ -86,7 +87,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         var users = new List<UserInfo>();
 
-        if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
+        if (AllDomainUsers.Count == 0 && !TryLoadLDAPUsers())
         {
             return users;
         }
@@ -105,7 +106,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             return new List<GroupInfo>();
         }
 
-        if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
+        if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
             return new List<GroupInfo>();
         }
@@ -135,7 +136,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
         var users = new List<UserInfo>();
 
-        if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
+        if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
             return users;
         }
@@ -241,10 +242,10 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             }
 
             var userGroups = ldapObjectExtension.GetAttributes(ldapUser, LdapConstants.ADSchemaAttributes.MEMBER_OF)
-                .Select(s => LdapUtils.UnescapeLdapString(s))
+                .Select(LdapUtils.UnescapeLdapString)
                 .ToList();
 
-            if (!userGroups.Any())
+            if (userGroups.Count == 0)
             {
                 userGroups = ldapObjectExtension.GetAttributes(ldapUser, GROUP_MEMBERSHIP);
             }
@@ -260,16 +261,16 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
                 if (index > -1)
                 {
-                    var primaryGroupSid = userSid.Substring(0, index + 1) + primaryGroupId;
+                    var primaryGroupSid = userSid[..(index + 1)] + primaryGroupId;
                     searchExpressions.Add(Expression.Equal(ldapUser.SidAttribute, primaryGroupSid));
                 }
             }
 
-            if (userGroups.Any())
+            if (userGroups.Count != 0)
             {
                 var cnRegex = new Regex(",[A-z]{2}=");
                 searchExpressions.AddRange(userGroups
-                    .Select(g => g.Substring(0, cnRegex.Match(g).Index))
+                    .Select(g => g[..cnRegex.Match(g).Index])
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Select(Expression.Parse)
                     .Where(e => e != null));
@@ -278,7 +279,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
                 var foundList = LdapHelper.GetGroups(criteria);
 
-                if (foundList.Any())
+                if (foundList.Count != 0)
                 {
                     ldapUserGroups.AddRange(foundList);
                 }
@@ -322,7 +323,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             var criteria = Criteria.Any(searchExpressions.ToArray());
             var foundList = LdapHelper.GetGroups(criteria);
 
-            if (foundList.Any())
+            if (foundList.Count != 0)
             {
                 var stillExistingGroups = portalGroups.Where(g => foundList.Any(fg => fg.Sid == g.Sid));
 
@@ -451,13 +452,13 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
                 AllDomainUsers.Add(user);
             }
 
-            if (AllDomainUsers.Any())
+            if (AllDomainUsers.Count != 0)
             {
                 PrimaryGroupIds = AllDomainUsers.Select(u => u.GetValue(LdapConstants.ADSchemaAttributes.PRIMARY_GROUP_ID)).Cast<string>()
                     .Distinct().ToList();
             }
 
-            return AllDomainUsers.Any() || !users.Any();
+            return AllDomainUsers.Count != 0 || users.Count == 0;
         }
         catch (ArgumentException)
         {
@@ -506,7 +507,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
                 AllDomainGroups.Add(group);
             }
 
-            return AllDomainGroups.Any() || !groups.Any();
+            return AllDomainGroups.Count != 0 || groups.Count == 0;
         }
         catch (ArgumentException)
         {
@@ -532,7 +533,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
             string ldapDomain;
 
-            if (AllDomainUsers.Any())
+            if (AllDomainUsers.Count != 0)
             {
                 ldapDomain = ldapObjectExtension.GetDomainFromDn(AllDomainUsers.First());
 
@@ -629,7 +630,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
         try
         {
             var groupNameAttribute = group.GetValues(groupAttr);
-            if (!groupNameAttribute.Any())
+            if (groupNameAttribute.Count == 0)
             {
                 logger.DebugGroupNameAttributeParameterNotFound(Settings.GroupNameAttribute,
                     groupAttr);
@@ -649,7 +650,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         logger.DebugFindUsersByPrimaryGroup();
 
-        if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
+        if (AllDomainUsers.Count == 0 && !TryLoadLDAPUsers())
         {
             return null;
         }
@@ -669,7 +670,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
     private LdapObject FindUserByMember(string userAttributeValue)
     {
-        if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
+        if (AllDomainUsers.Count == 0 && !TryLoadLDAPUsers())
         {
             return null;
         }
@@ -684,7 +685,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
     private LdapObject FindGroupByMember(string member)
     {
-        if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
+        if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
             return null;
         }
@@ -752,7 +753,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
             });
 
-        if (!users.Any())
+        if (users.Count == 0)
         {
             return listResults;
         }
@@ -804,7 +805,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         var users = new List<LdapObject>();
 
-        if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
+        if (AllDomainUsers.Count == 0 && !TryLoadLDAPUsers())
         {
             return users;
         }
@@ -816,7 +817,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         var users = new List<LdapObject>();
 
-        if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
+        if (AllDomainUsers.Count == 0 && !TryLoadLDAPUsers())
         {
             return users;
         }
@@ -828,7 +829,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         var gr = new List<LdapObject>();
 
-        if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
+        if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
             return gr;
         }
@@ -840,7 +841,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
     {
         var gr = new List<LdapObject>();
 
-        if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
+        if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
             return gr;
         }
@@ -874,7 +875,8 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
                     {
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
+
+                    if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
                         || string.IsNullOrEmpty(ldapUserObject.Sid))
                     {
                         logger.DebugLdapUserImporterFailed(login, ldapUserObject.Sid);

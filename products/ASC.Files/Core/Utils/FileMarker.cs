@@ -102,12 +102,11 @@ public class FileMarker(TenantManager tenantManager,
     FilesSettingsHelper filesSettingsHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
+        IDistributedLockProvider distributedLockProvider,
     FileMarkerHelper fileMarkerHelper)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
-
-    private static readonly SemaphoreSlim _semaphore = new(1);
-
+    private const string LockKey = "file_marker";
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
@@ -361,10 +360,10 @@ public class FileMarker(TenantManager tenantManager,
         var newTags = new List<Tag>();
         var updateTags = new List<Tag>();
 
-        try
-        {
-            await _semaphore.WaitAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
+        await using (await distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(5)))
+        {
             foreach (var userId in userEntriesData.Keys)
             {
                 if (await tagDao.GetNewTagsAsync(userId, obj.FileEntry).AnyAsync())
@@ -387,10 +386,6 @@ public class FileMarker(TenantManager tenantManager,
             {
                 await tagDao.SaveTagsAsync(newTags, obj.CurrentAccountId);
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
 
         await SendChangeNoticeAsync(updateTags.Concat(newTags).ToList(), socketManager);
@@ -641,12 +636,13 @@ public class FileMarker(TenantManager tenantManager,
             var folderDao = daoFactory.GetFolderDao<T>();
             var requestTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
             var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
-            var count = requestTag == null ? 0 : requestTag.Count;
+            var count = requestTag?.Count ?? 0;
             InsertToCache(rootId, count);
 
             return count;
         }
-        else if (fromCache > 0)
+
+        if (fromCache > 0)
         {
             return fromCache;
         }
@@ -713,7 +709,7 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         tags = tags
-            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id))
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
                 .Distinct()
                 .ToList();
 
@@ -799,11 +795,8 @@ public class FileMarker(TenantManager tenantManager,
             {
                 entryTags.Add(entry, tag);
             }
-            else
-            {
                 //todo: RemoveMarkAsNew(tag);
             }
-        }
 
         return entryTags;
     }
@@ -824,7 +817,7 @@ public class FileMarker(TenantManager tenantManager,
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
                                     : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
-        totalTags = totalTags.Where(e => !e.Equals(parentFolderTag)).ToList();
+        totalTags = totalTags.Where(e => !Equals(e, parentFolderTag)).ToList();
 
         foreach (var e in entries)
         {

@@ -277,8 +277,8 @@ public class Expression : ICloneable
             return null;
         }
 
-        var attributeName = origin.Substring(0, index);
-        var attributeValue = origin.Substring(index + 1);
+        var attributeName = origin[..index];
+        var attributeValue = origin[(index + 1)..];
 
         if (string.IsNullOrEmpty(attributeName) || string.IsNullOrEmpty(attributeValue))
         {

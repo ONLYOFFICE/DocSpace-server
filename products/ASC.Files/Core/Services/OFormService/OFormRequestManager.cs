@@ -29,11 +29,10 @@ namespace ASC.Files.Core.Services.OFormService;
 [Singleton]
 public class OFormRequestManager(ILogger<OFormRequestManager> logger,
     ConfigurationExtension configuration,
-    IHttpClientFactory httpClientFactory,
-    TempPath tempPath)
+    IHttpClientFactory httpClientFactory)
 {
     private readonly OFormSettings _configuration = configuration.GetSetting<OFormSettings>("files:oform");
-    private readonly TempPath _tempPath = tempPath;
+
     private readonly JsonSerializerOptions _options = new()
     {
         PropertyNameCaseInsensitive = true

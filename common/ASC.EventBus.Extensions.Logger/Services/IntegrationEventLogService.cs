@@ -48,7 +48,7 @@ public class IntegrationEventLogService : IIntegrationEventLogService
 
         var result = await Queries.IntegrationEventLogEntriesAsync(integrationEventLogContext, tid).ToListAsync();
 
-        if (result.Any())
+        if (result.Count != 0)
         {
             return result
                 .OrderBy(o => o.CreateOn)

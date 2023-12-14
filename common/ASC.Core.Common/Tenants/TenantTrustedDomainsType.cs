@@ -32,5 +32,5 @@ public enum TenantTrustedDomainsType
 {
     None,
     Custom,
-    All,
+    All
 }

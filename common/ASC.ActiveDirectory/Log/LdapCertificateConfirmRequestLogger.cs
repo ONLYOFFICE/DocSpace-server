@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapCertificateConfirmRequestLogger
+internal static partial class LdapCertificateConfirmRequestLogger
 {
     [LoggerMessage(Level = LogLevel.Warning, Message = "GetLdapCertProblems: {SslPolicyErrors}")]
     public static partial void WarnGetLdapCertProblems(this ILogger logger, string SslPolicyErrors);

@@ -182,7 +182,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
 
     private FileTracker GetTracker<T>(T fileId)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
             return cache.Get<FileTracker>(Tracker + fileId);
         }
@@ -192,7 +192,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
 
     private void SetTracker<T>(T fileId, FileTracker tracker)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
             if (tracker != null)
             {

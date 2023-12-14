@@ -61,7 +61,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
             return null;
         }
 
-        if (item.IsCompleted == true)
+        if (item.IsCompleted)
         {
             _progressQueue.DequeueTask(item.Id);
         }

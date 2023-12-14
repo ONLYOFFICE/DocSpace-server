@@ -45,19 +45,13 @@ public class UserInfoComparer(UserSortOrder sortOrder, bool descending) : ICompa
 
     public int Compare(UserInfo x, UserInfo y)
     {
-        var result = 0;
-        switch (SortOrder)
+        var result = SortOrder switch
         {
-            case UserSortOrder.DisplayName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.Default);
-                break;
-            case UserSortOrder.FirstName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.FirstLast);
-                break;
-            case UserSortOrder.LastName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.LastFirst);
-                break;
-        }
+            UserSortOrder.DisplayName => UserFormatter.Compare(x, y, DisplayUserNameFormat.Default),
+            UserSortOrder.FirstName => UserFormatter.Compare(x, y, DisplayUserNameFormat.FirstLast),
+            UserSortOrder.LastName => UserFormatter.Compare(x, y, DisplayUserNameFormat.LastFirst),
+            _ => 0
+        };
 
         return !Descending ? result : -result;
     }

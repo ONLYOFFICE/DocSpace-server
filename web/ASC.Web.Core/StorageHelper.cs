@@ -43,7 +43,7 @@ public class StorageHelper(UserPhotoManager userPhotoManager, StorageFactory sto
 
             if (tmpLogoPath.StartsWith(Base64Start))
             {
-                data = Convert.FromBase64String(tmpLogoPath.Substring(Base64Start.Length));
+                data = Convert.FromBase64String(tmpLogoPath[Base64Start.Length..]);
 
                 return await SaveLogoAsync(Guid.NewGuid() + ".png", data);
             }

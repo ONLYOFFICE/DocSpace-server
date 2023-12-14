@@ -118,12 +118,10 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
                 return true;
             }
-            else
-            {
-                _logger.CriticalRabbitMQCouldNotBeCreated();
 
-                return false;
-            }
+            _logger.CriticalRabbitMQCouldNotBeCreated();
+
+            return false;
         }
     }
 

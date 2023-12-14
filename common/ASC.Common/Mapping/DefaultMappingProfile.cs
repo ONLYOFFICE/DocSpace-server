@@ -30,7 +30,7 @@ public class DefaultMappingProfile : Profile
 {
     public DefaultMappingProfile()
     {
-        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), a => ApplyMappingsFromAssembly(a));
+        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), ApplyMappingsFromAssembly);
         ApplyPrimitiveMappers();
     }
 
