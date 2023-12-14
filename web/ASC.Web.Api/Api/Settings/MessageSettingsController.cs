@@ -156,7 +156,7 @@ public class MessageSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
+    [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
     {
