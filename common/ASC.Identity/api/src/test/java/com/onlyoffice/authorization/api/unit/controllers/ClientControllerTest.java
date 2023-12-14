@@ -8,7 +8,7 @@ import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.server.controllers.ClientController;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
-import com.onlyoffice.authorization.api.web.client.transfer.MeDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
@@ -66,10 +66,10 @@ public class ClientControllerTest {
     void canRetrieve() throws Exception {
         given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
-                        .<MeDTO>builder()
+                        .<PersonDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
-                        .response(MeDTO
+                        .response(PersonDTO
                                 .builder()
                                 .userName("Admin")
                                 .firstName("Admin")
@@ -82,10 +82,10 @@ public class ClientControllerTest {
                         .build());
         given(apiClient.getProfile(URI.create("http://127.0.0.1"), "asc_auth_key=zxc", "admin@admin.com"))
                 .willReturn(APIClientDTOWrapper
-                        .<MeDTO>builder()
+                        .<PersonDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
-                        .response(MeDTO
+                        .response(PersonDTO
                                 .builder()
                                 .userName("Admin")
                                 .firstName("Admin")
@@ -131,10 +131,10 @@ public class ClientControllerTest {
     void canRetrieveByIdAndTenant() throws Exception {
         given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
-                        .<MeDTO>builder()
+                        .<PersonDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
-                        .response(MeDTO
+                        .response(PersonDTO
                                 .builder()
                                 .userName("Admin")
                                 .firstName("Admin")
@@ -174,10 +174,10 @@ public class ClientControllerTest {
     void canCreateClient() throws Exception {
         given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
-                        .<MeDTO>builder()
+                        .<PersonDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
-                        .response(MeDTO
+                        .response(PersonDTO
                                 .builder()
                                 .userName("Admin")
                                 .firstName("Admin")

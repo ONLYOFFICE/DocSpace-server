@@ -15,8 +15,8 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCle
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.client.APIClient;
+import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.UserContextContainer;
 import com.onlyoffice.authorization.api.web.server.transfer.messages.AuditMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
@@ -182,15 +182,15 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new user revocation request");
         MDC.clear();
-        var user = UserContextContainer.context
+        var person = PersonContextContainer.context
                 .get().getResponse();
-        consentCleanupUsecases.asyncRevokeConsent(clientId, user.getEmail());
+        consentCleanupUsecases.asyncRevokeConsent(clientId, person.getEmail());
         amqpTemplate.convertAndSend(
                 configuration.getAudit().getExchange(),
                 configuration.getAudit().getRouting(),
@@ -200,7 +200,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.REVOKE_USER_CLIENT)
                         .build());
@@ -213,14 +213,14 @@ public class ClientController {
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
         var context = TenantContextContainer.context.get();
-        var user = UserContextContainer.context.get();
+        var person = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
-        MDC.put("user", user.getResponse().getUserName());
+        MDC.put("user", person.getResponse().getUserName());
         log.info("Received a new get clients info");
         log.debug("Trying to retrieve all clients by principal name");
         var result = consentRetrieveUsecases
-                .getAllByPrincipalName(user.getResponse().getEmail());
+                .getAllByPrincipalName(person.getResponse().getEmail());
         MDC.put("number of clients", String.valueOf(result.size()));
         log.debug("Found clients");
         MDC.clear();
@@ -282,7 +282,7 @@ public class ClientController {
             @RequestBody @Valid CreateClientDTO body
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         log.info("Received a new create client request", body);
@@ -332,7 +332,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.CREATE_CLIENT)
                         .build());
@@ -352,7 +352,7 @@ public class ClientController {
             @RequestBody @Valid UpdateClientDTO body
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
@@ -394,7 +394,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.UPDATE_CLIENT)
                         .build());
@@ -413,7 +413,7 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
@@ -457,7 +457,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.REGENERATE_SECRET)
                         .build());
@@ -476,7 +476,7 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
@@ -492,7 +492,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.DELETE_CLIENT)
                         .build());
@@ -511,7 +511,7 @@ public class ClientController {
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
         var tenantContext = TenantContextContainer.context.get();
-        var userContext = UserContextContainer.context.get();
+        var personContext = PersonContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
         MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
@@ -526,7 +526,7 @@ public class ClientController {
                         .platform(HttpUtils.getClientOS(request))
                         .date(Timestamp.from(Instant.now()))
                         .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(userContext.getResponse().getId())
+                        .userId(personContext.getResponse().getId())
                         .page(HttpUtils.getFullURL(request))
                         .actionEnum(Action.CHANGE_CLIENT_ACTIVATION)
                         .build());

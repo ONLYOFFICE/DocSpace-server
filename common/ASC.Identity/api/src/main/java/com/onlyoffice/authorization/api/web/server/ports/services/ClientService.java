@@ -14,7 +14,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreat
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.UserContextContainer;
+import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import com.onlyoffice.authorization.api.web.server.transfer.messages.ClientMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
@@ -74,7 +74,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                             .clientSecret(UUID.randomUUID().toString())
                             .scopes(Set.of("***"))
                             .redirectUris("***")
-                            .modifiedBy(UserContextContainer.context.get()
+                            .modifiedBy(PersonContextContainer.context.get()
                                     .getResponse().getUserName())
                             .enabled(false)
                             .invalidated(true)
@@ -148,7 +148,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             var client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
             var now = Timestamp.from(Instant.now());
-            var me = UserContextContainer.context.get()
+            var me = PersonContextContainer.context.get()
                     .getResponse();
             var authenticationMethods = new HashSet<String>();
             authenticationMethods.add("client_secret_post");
@@ -198,7 +198,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             authenticationMethods = String
                     .join(",", "client_secret_post", "none");
         c.setAuthenticationMethod(authenticationMethods);
-        c.setModifiedBy(UserContextContainer.context.get()
+        c.setModifiedBy(PersonContextContainer.context.get()
                 .getResponse().getEmail());
         return ClientMapper.INSTANCE.fromEntityToQuery(c);
     }

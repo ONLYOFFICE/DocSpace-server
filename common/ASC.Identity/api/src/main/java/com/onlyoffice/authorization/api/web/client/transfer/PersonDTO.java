@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MeDTO {
+public class PersonDTO {
     private String id;
     private String firstName;
     private String lastName;

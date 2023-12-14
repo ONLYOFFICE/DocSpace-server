@@ -2,10 +2,9 @@ package com.onlyoffice.authorization.api.web.security.filters;
 
 import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.UserContextContainer;
+import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +86,7 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
             return;
         }
 
-        UserContextContainer.context.set(me);
+        PersonContextContainer.context.set(me);
         TenantContextContainer.context.set(tenant);
         chain.doFilter(request, response);
     }

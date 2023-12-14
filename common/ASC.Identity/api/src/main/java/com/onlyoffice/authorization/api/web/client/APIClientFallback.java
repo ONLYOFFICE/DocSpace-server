@@ -1,7 +1,7 @@
 package com.onlyoffice.authorization.api.web.client;
 
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
-import com.onlyoffice.authorization.api.web.client.transfer.MeDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -13,19 +13,19 @@ import java.net.URI;
 @Slf4j
 public class APIClientFallback implements APIClient {
     @Override
-    public APIClientDTOWrapper<MeDTO> getMe(URI base, String cookie) {
+    public APIClientDTOWrapper<PersonDTO> getMe(URI base, String cookie) {
         MDC.put("URL", base.toString());
         log.warn("Get me fallback");
         MDC.clear();
-        return APIClientDTOWrapper.<MeDTO>builder().build();
+        return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
     @Override
-    public APIClientDTOWrapper<MeDTO> getProfile(URI base, String cookie, String email) {
+    public APIClientDTOWrapper<PersonDTO> getProfile(URI base, String cookie, String email) {
         MDC.put("URL", base.toString());
         log.warn("Get profile fallback");
         MDC.clear();
-        return APIClientDTOWrapper.<MeDTO>builder().build();
+        return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
     @Override
