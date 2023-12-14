@@ -35,7 +35,6 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
 
     public Guid Guid => _userInfo.Id;
 
-    public string ConnectionString { get; set; }
     private string _rootFolder;
     private bool _hasPhoto;
     private string _pathToPhoto;
@@ -82,7 +81,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
         else
         {
             _pathToPhoto = File.Exists(Path.Combine(drivePath, "avatar_upload")) ? Directory.GetFiles(drivePath, "avatar_upload")[0] : null;
-            _hasPhoto = _pathToPhoto != null ? true : false;
+            _hasPhoto = _pathToPhoto != null;
         }
 
         var userName = _user.Data.DisplayName.Split(' ');
@@ -91,7 +90,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
         {
             _userInfo.LastName = userName[1];
         }
-        if (_user.Data.Email != null && _user.Data.Email != "" && _user.Data.Email != "NULL")
+        if (!string.IsNullOrEmpty(_user.Data.Email) && _user.Data.Email != "NULL")
         {
             var email = _emailRegex.Match(_user.Data.Email);
             if (email.Success)
@@ -113,21 +112,16 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
         if (_userInfo.Email == null)
         {
             _userInfo.Email = frontUser.Email;
-            if (_userInfo.UserName == null)
-            {
-                _userInfo.UserName = _userInfo.Email.Split('@').First();
-            }
+            _userInfo.UserName ??= _userInfo.Email.Split('@').First();
         }
-        if (_userInfo.LastName == null)
-        {
-            _userInfo.LastName = "NOTPROVIDED";
-        }
+
+        _userInfo.LastName ??= "NOTPROVIDED";
     }
 
     public override async Task MigrateAsync()
     {
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved == ASC.Core.Users.Constants.LostUser)
+        if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {
@@ -158,14 +152,12 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
 
             if (_hasPhoto)
             {
-                using (var ms = new MemoryStream())
+                using var ms = new MemoryStream();
+                await using (var fs = File.OpenRead(_pathToPhoto))
                 {
-                    using (var fs = File.OpenRead(_pathToPhoto))
-                    {
-                        fs.CopyTo(ms);
-                    }
-                    await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                    await fs.CopyToAsync(ms);
                 }
+                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

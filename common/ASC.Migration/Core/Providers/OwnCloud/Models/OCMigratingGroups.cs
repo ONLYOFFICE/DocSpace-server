@@ -35,8 +35,7 @@ public class OCMigratingGroups : MigratingGroup
     private List<string> _userUidList;
     private readonly UserManager _userManager;
     private OCGroup _group;
-    private GroupInfo _groupinfo;
-    public Guid Guid => _groupinfo.ID;
+    private GroupInfo _groupInfo;
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
@@ -54,7 +53,7 @@ public class OCMigratingGroups : MigratingGroup
     public override void Parse()
     {
         _groupName = _group.GroupGid;
-        _groupinfo = new GroupInfo()
+        _groupInfo = new GroupInfo()
         {
             Name = _group.GroupGid
         };
@@ -64,28 +63,27 @@ public class OCMigratingGroups : MigratingGroup
     public override async Task MigrateAsync()
     {
         var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
-        var oldGroup = existingGroups.Find(g => g.Name == _groupinfo.Name);
+        var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)
         {
-            _groupinfo = oldGroup;
+            _groupInfo = oldGroup;
         }
         else
         {
-            _groupinfo = await _userManager.SaveGroupInfoAsync(_groupinfo);
+            _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
         }
         foreach (var userGuid in UsersGuidList)
         {
-            UserInfo user;
             try
             {
-                user = await _userManager.GetUsersAsync(userGuid.Value);
-                if (user == Constants.LostUser)
+                var user = await _userManager.GetUsersAsync(userGuid.Value);
+                if (user.Equals(Constants.LostUser))
                 {
                     throw new ArgumentNullException();
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupinfo.ID))
+                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupinfo.ID);
+                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                 }
             }
             catch (Exception ex)

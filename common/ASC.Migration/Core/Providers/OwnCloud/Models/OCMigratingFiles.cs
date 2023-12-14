@@ -180,7 +180,7 @@ public class OCMigratingFiles : MigratingFiles
                 try
                 {
                     var realPath = Path.Combine(drivePath, maskPath);
-                    using var fs = new FileStream(realPath, FileMode.Open);
+                    await using var fs = new FileStream(realPath, FileMode.Open);
                     var fileDao = _daoFactory.GetFileDao<int>();
                     var folderDao = _daoFactory.GetFolderDao<int>();
 
@@ -206,7 +206,7 @@ public class OCMigratingFiles : MigratingFiles
         foreach (var item in _matchingFileId)
         {
             var list = new List<AceWrapper>();
-            var entryIsFile = _files.Exists(el => el.FileId == item.Value) ? true : false;
+            var entryIsFile = _files.Exists(el => el.FileId == item.Value);
             var entry = entryIsFile ? _files.Find(el => el.FileId == item.Value) : _folders.Find(el => el.FileId == item.Value);
             if (entry.Share.Count == 0)
             {
@@ -234,7 +234,7 @@ public class OCMigratingFiles : MigratingFiles
                     });
                 }
             }
-            if (!list.Any())
+            if (list.Count == 0)
             {
                 continue;
             }
