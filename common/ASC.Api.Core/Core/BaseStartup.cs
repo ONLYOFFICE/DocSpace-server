@@ -64,7 +64,7 @@ public abstract class BaseStartup
         }
     }
 
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
@@ -102,8 +102,22 @@ public abstract class BaseStartup
             }
         });
 
-        var redisOptions = _configuration.GetSection("Redis").Get<RedisConfiguration>().ConfigurationOptions;
-        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+        var redisConfiguration = _configuration.GetSection("Redis").Get<RedisConfiguration>();
+        IConnectionMultiplexer connectionMultiplexer = null;
+
+        if (redisConfiguration != null)
+        {
+            var configurationOption = redisConfiguration?.ConfigurationOptions;
+
+            configurationOption.ClientName = GetType().Namespace;
+
+            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+            services.AddSingleton(redisConfiguration)
+                    .AddSingleton(redisConnection);
+
+            connectionMultiplexer = redisConnection?.GetConnection();
+        }
 
         services.AddRateLimiter(options =>
         {
@@ -237,7 +251,6 @@ public abstract class BaseStartup
         DIHelper.TryAdd<CookieAuthHandler>();
         DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
 
-
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             services.AddCors(options =>
@@ -254,11 +267,12 @@ public abstract class BaseStartup
             });
         }
 
-        services.AddDistributedCache(_configuration);
-        services.AddEventBus(_configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(_configuration);
-        services.AddDistributedLock(_configuration);
+        
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(_configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(_configuration)
+                .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
 
