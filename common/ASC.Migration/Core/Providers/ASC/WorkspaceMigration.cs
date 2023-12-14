@@ -76,7 +76,8 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 ReportProgress(5, MigrationResource.StartOfDataProcessing);
             }
-            using var stream = _dataReader.GetEntry("databases/core/core_user");
+
+            await using var stream = _dataReader.GetEntry("databases/core/core_user");
             var data = new DataTable();
             data.ReadXml(stream);
             var progressStep = 70 / data.Rows.Count;
@@ -112,7 +113,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 var user = _serviceProvider.GetService<WorkspaceMigratingUser>();
                 user.Init(u.Id, u, _tmpFolder, _dataReader, Log);
                 user.Parse();
-                if ((await _userManager.GetUserByEmailAsync(u.Info.Email)) != Constants.LostUser)
+                if (!(await _userManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
                 {
                     _migrationInfo.ExistUsers.Add(u.Id, user);
                 }
@@ -122,7 +123,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 }
             }
 
-            var groups = DBExtractGroup();
+            var groups = DbExtractGroup();
             var progress = 80;
             foreach (var item in groups)
             {
@@ -146,30 +147,23 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         return _migrationInfo.ToApiInfo();
     }
 
-    public List<WorkspaceGroup> DBExtractGroup()
+    private List<WorkspaceGroup> DbExtractGroup()
     {
-        var groups = new List<WorkspaceGroup>();
-
         using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
         var dataGroup = new DataTable();
         dataGroup.ReadXml(streamGroup);
 
-        foreach (var row in dataGroup.Rows.Cast<DataRow>())
-        {
-            if (int.Parse(row["removed"].ToString()) == 0)
+        var groups = (from row in dataGroup.Rows.Cast<DataRow>()
+            where int.Parse(row["removed"].ToString()) == 0
+            select new WorkspaceGroup
             {
-                var group = new WorkspaceGroup()
-                {
-                    Id = Guid.Parse(row["id"].ToString()),
-                    Name = row["name"].ToString(),
-                    Categoryid = Guid.Parse(row["categoryid"].ToString()),
-                    Parentid = Guid.Parse(row["parentid"].ToString()),
-                    Sid = row["sid"].ToString(),
-                    UsersUid = new List<string>()
-                };
-                groups.Add(group);
-            }
-        }
+                Id = Guid.Parse(row["id"].ToString()),
+                Name = row["name"].ToString(),
+                Categoryid = Guid.Parse(row["categoryid"].ToString()),
+                Parentid = Guid.Parse(row["parentid"].ToString()),
+                Sid = row["sid"].ToString(),
+                UsersUid = new List<string>()
+            }).ToList();
 
         using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
         var dataUserGroup = new DataTable();
@@ -181,10 +175,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 var groupId = Guid.Parse(row["groupid"].ToString());
                 var g = groups.FirstOrDefault(g => g.Id == groupId);
-                if(g != null)
-                {
-                    g.UsersUid.Add(row["userid"].ToString());
-                }
+                g?.UsersUid.Add(row["userid"].ToString());
             }
         }
         return groups;
@@ -198,10 +189,10 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
 
         var usersForImport = _migrationInfo.Users
             .Where(u => u.Value.ShouldImport)
-            .Select(u => u.Value);
+            .Select(u => u.Value).ToList();
 
         var failedUsers = new List<WorkspaceMigratingUser>();
-        var usersCount = usersForImport.Count();
+        var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         var i = 1;
 
@@ -244,12 +235,13 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
 
         var groupsForImport = _migrationInfo.Groups
             .Where(g => g.ShouldImport)
-            .Select(g => g);
-        var groupsCount = groupsForImport.Count();
+            .Select(g => g).ToList();
+        
+        var groupsCount = groupsForImport.Count;
         if (groupsCount != 0)
         {
-            progressStep = 25 / groupsForImport.Count();
-            //Create all groups
+            progressStep = 25 / groupsCount;
+            
             i = 1;
             foreach (var group in groupsForImport)
             {
@@ -271,16 +263,13 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         }
 
         _migrationInfo.FailedUsers = failedUsers.Count;
-        _migrationInfo.SuccessedUsers = usersForImport.Count() - _migrationInfo.FailedUsers;
+        _migrationInfo.SuccessedUsers = usersCount - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 
     public override void Dispose()
     {
         base.Dispose();
-        if (_dataReader != null)
-        {
-            _dataReader.Dispose();
-        }
+        _dataReader?.Dispose();
     }
 }

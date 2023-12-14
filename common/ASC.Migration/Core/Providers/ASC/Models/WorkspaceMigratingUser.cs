@@ -73,7 +73,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
         else
         {
             _pathToPhoto = Directory.GetFiles(drivePath).FirstOrDefault(p => Path.GetFileName(p).StartsWith(Key + "_orig_"));
-            _hasPhoto = _pathToPhoto != null ? true : false;
+            _hasPhoto = _pathToPhoto != null;
         }
 
         MigratingFiles = _serviceProvider.GetService<WorkspaceMigratingFiles>();
@@ -89,7 +89,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
     public override async Task MigrateAsync()
     {
         var saved = await _userManager.GetUserByEmailAsync(_user.Info.Email);
-        if (saved == Constants.LostUser)
+        if (saved.Equals(Constants.LostUser))
         {
             saved = await _userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch
@@ -113,14 +113,12 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
             _user.Info = saved;
             if (_hasPhoto)
             {
-                using (var ms = new MemoryStream())
+                using var ms = new MemoryStream();
+                await using (var fs = File.OpenRead(_pathToPhoto))
                 {
-                    using (var fs = File.OpenRead(_pathToPhoto))
-                    {
-                        fs.CopyTo(ms);
-                    }
-                    await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                    await fs.CopyToAsync(ms);
                 }
+                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }
