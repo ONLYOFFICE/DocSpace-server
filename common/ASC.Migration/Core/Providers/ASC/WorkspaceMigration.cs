@@ -56,7 +56,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         _logger.Init();
         _cancellationToken = cancellationToken;
         var files = Directory.GetFiles(path);
-        if (!files.Any() || !files.Any(f => f.EndsWith(".gz") || f.EndsWith(".tar")))
+        if (files.Length == 0 || !files.Any(f => f.EndsWith(".gz") || f.EndsWith(".tar")))
         {
             throw new Exception("Folder must not be empty and should contain only .gz or .tar files.");
         }
