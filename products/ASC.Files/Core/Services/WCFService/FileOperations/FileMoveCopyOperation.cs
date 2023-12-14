@@ -630,6 +630,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         || file.RootFolderType == FolderType.Privacy || file.Encrypted
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
+                    var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
                     if (conflict == null)
                     {
                         File<TTo> newFile = null;
@@ -691,8 +693,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     needToMark.Add(newFile);
                                 }
 
+                                if (fileType == FileType.OForm)
+                                {
+                                    await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                    await FileDao.SaveProperties(file.Id, null);
+                                }
                                 await socketManager.DeleteFileAsync(file);
-
+                                
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))
