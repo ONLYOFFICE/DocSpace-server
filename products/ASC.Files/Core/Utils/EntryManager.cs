@@ -1093,6 +1093,12 @@ public class EntryManager(IDaoFactory daoFactory,
                 linkedFile = await fileDao.SaveFileAsync(linkedFile, stream);
             }
 
+            if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
+            {
+                var prop = await fileDao.GetProperties(sourceFile.Id);
+                await fileDao.SaveProperties(linkedFile.Id, prop);
+            }
+
             await fileMarker.MarkAsNewAsync(linkedFile);
 
             await socketManager.CreateFileAsync(linkedFile);
@@ -1704,13 +1710,13 @@ public class EntryManager(IDaoFactory daoFactory,
         var templatesFolder = serviceProvider.GetService<Folder<T>>();
         templatesFolder.Title = sourceTitle;
         templatesFolder.ParentId = inProcessFormFolderId;
-        templatesFolder.FolderType = FolderType.FormFillingFolder;
+        templatesFolder.FolderType = FolderType.FormFillingFolderInProgress;
         templatesFolder.CreateBy = createBy;
 
         var resultsFolder = serviceProvider.GetService<Folder<T>>();
         resultsFolder.Title = sourceTitle;
         resultsFolder.ParentId = readyFormFolderId;
-        resultsFolder.FolderType = FolderType.FormFillingFolder;
+        resultsFolder.FolderType = FolderType.FormFillingFolderDone;
         resultsFolder.CreateBy = createBy;
 
         var templatesFolderId = await folderDao.SaveFolderAsync(templatesFolder);
@@ -1722,6 +1728,16 @@ public class EntryManager(IDaoFactory daoFactory,
         currentProperies.FormFilling.ToFolderId = templatesFolderId.ToString();
         currentProperies.FormFilling.ResultsFolderId = resultsFolderId.ToString();
         currentProperies.FormFilling.CollectFillForm = true;
+
+        using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
+
+        var csvFile = serviceProvider.GetService<File<T>>();
+        csvFile.ParentId = resultsFolderId;
+        csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+
+        var file = await fileDao.SaveFileAsync(csvFile, textStream);
+
+        currentProperies.FormFilling.ResultsFileID = file.Id.ToString();
 
         await fileDao.SaveProperties(sourceFileId, currentProperies);
 

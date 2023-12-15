@@ -869,7 +869,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                               FilesSecurityActions.MoveTo or
                               FilesSecurityActions.Rename or
                               FilesSecurityActions.Create
-                    && (folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.FormFillingFolder))
+                    && (folder.FolderType == FolderType.ReadyFormFolder || 
+                    folder.FolderType == FolderType.InProcessFormFolder || 
+                    folder.FolderType == FolderType.FormFillingFolderDone ||
+                    folder.FolderType == FolderType.FormFillingFolderInProgress))
                 {
                     return false;
                 }
@@ -971,7 +974,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
                     var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
-                    if (fileFolder.FolderType == FolderType.FormFillingFolder && file.CreateBy != userId)
+                    if ((fileFolder.FolderType == FolderType.FormFillingFolderDone || fileFolder.FolderType == FolderType.FormFillingFolderInProgress) && file.CreateBy != userId)
                     {
                         return false;
                     }

@@ -53,41 +53,22 @@ public class FormFillingReportCreator
 
         if (sourceId != null && formsDataUrl != null)
         {
-            EntryProperties properties;
-
+            var properties = await _daoFactory.GetFileDao<T>().GetProperties(form.Id);
             var fileDao = _daoFactory.GetFileDao<T>();
-
-            if (int.TryParse(sourceId, out var sourceInt))
-            {
-                properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
-            }
-            else
-            {
-                properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
-            }
             var submitFormsData = await GetSubmitFormsData(formsDataUrl);
 
-            if (properties.FormFilling.ResultsFileID == null)
-            {
-                var dt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
-
-                var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
-
-                properties.FormFilling.ResultsFileID = resultsFileID.ToString();
-                await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
-            }
-            else
+            if (properties.FormFilling.ResultsFileID != null)
             {
                 var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
 
                 var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
                 await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-            }
-            await _socketManager.DeleteFileAsync(form);
-            await linkDao.DeleteLinkAsync(sourceId);
 
-            return properties;
+                await _socketManager.DeleteFileAsync(form);
+                await linkDao.DeleteLinkAsync(sourceId);
+
+                return properties;
+            }
         }
 
         return null;

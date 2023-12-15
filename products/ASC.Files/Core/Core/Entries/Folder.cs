@@ -53,7 +53,8 @@ public enum FolderType
     FormRoom = 24,
     ReadyFormFolder = 25,
     InProcessFormFolder = 26,
-    FormFillingFolder = 27
+    FormFillingFolderDone = 27,
+    FormFillingFolderInProgress = 28
 }
 
 public interface IFolder

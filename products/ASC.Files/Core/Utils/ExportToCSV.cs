@@ -77,7 +77,7 @@ public class ExportToCSV
             using var reader = new StreamReader(source);
             var oldData = await reader.ReadToEndAsync();
 
-            var data = DataTableToCsv(dataTable, true);
+            var data = DataTableToCsv(dataTable, !string.IsNullOrEmpty(oldData));
             var resultData = oldData + data;
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(resultData));
 

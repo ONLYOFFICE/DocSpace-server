@@ -181,7 +181,7 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(!await fileSecurity.CanReadAsync(parent), FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
         ErrorIf(parent.RootFolderType == FolderType.TRASH && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync), FilesCommonResource.ErrorMassage_ViewTrashItem);
 
-        if (parent.FolderType == FolderType.FormFillingFolder)
+        if (parent.FolderType == FolderType.FormFillingFolderDone || parent.FolderType == FolderType.FormFillingFolderInProgress)
         {
             var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
@@ -3460,41 +3460,21 @@ public class FileStorageService //: IFileStorageService
 
         if (sourceId != null)
         {
-            EntryProperties properties;
+            var properties = await daoFactory.GetFileDao<T>().GetProperties(form.Id);
 
-            if (int.TryParse(sourceId, out var sourceInt))
+            if(properties.FormFilling.ResultsFileID != null)
             {
-                properties = daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
-            }
-            else
-            {
-                properties = daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
-            }
-
-            if (properties.FormFilling.ResultsFileID == null)
-            {
-                var dt = JsonConvert.DeserializeObject<DataTable>(data);
-
-                var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                var resultsFileID = await exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
-
-                properties.FormFilling.ResultsFileID = resultsFileID.ToString();
-                await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
-            }
-            else
-            {
+                var folder = await folderDao.GetFolderAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
                 var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-
                 var updateDt = JsonConvert.DeserializeObject<DataTable>(data);
                 await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
+
+                await fileDao.MoveFileAsync(form.Id, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
+                await linkDao.DeleteLinkAsync(sourceId);
+
+                await socketManager.UpdateFileAsync(form);
+                await socketManager.UpdateFolderAsync(folder);
             }
-
-            await fileDao.MoveFileAsync(form.Id, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
-            await linkDao.DeleteLinkAsync(sourceId);
-
-            await socketManager.UpdateFileAsync(form);
-            var folder = await folderDao.GetFolderAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
-            await socketManager.UpdateFolderAsync(folder);
         }
     }
 
