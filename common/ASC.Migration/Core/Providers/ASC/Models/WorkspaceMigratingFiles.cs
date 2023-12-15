@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using FileShare = ASC.Files.Core.Security.FileShare;
+
 namespace ASC.Migration.Core.Core.Providers.Models;
 
 [Transient]
@@ -38,6 +40,8 @@ public class WorkspaceMigratingFiles : MigratingFiles
     private string _myFolder;
     private IDataReadOperator _dataReader;
     private WorkspaceStorage _storage;
+    private List<WorkspaceSecurity> _securities;
+    private Dictionary<string, string> _mappedGuids;
     private readonly FileStorageService _fileStorageService;
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly IServiceProvider _serviceProvider;
@@ -58,13 +62,15 @@ public class WorkspaceMigratingFiles : MigratingFiles
         _securityContext = securityContext;
     }
 
-    public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log)
+    public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log, Dictionary<string, string> mappedGuids)
     {
         _key = key;
         _user = user;
         _dataReader = dataReader;
         Log = log;
         _storage = storage;
+        _securities = new();
+        _mappedGuids = mappedGuids;
     }
 
     public override void Parse()
@@ -78,7 +84,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
                 && (FolderType)int.Parse(row["folder_type"].ToString()) == FolderType.USER)
             {
                 _myFolder = row["id"].ToString();
-                continue;
+                break;
             }
         }
 
@@ -129,6 +135,31 @@ public class WorkspaceMigratingFiles : MigratingFiles
                 _bytesTotal += int.Parse(row["content_length"].ToString());
             }
         }
+        DbExtractFilesSecurity();
+    }
+    
+    private void DbExtractFilesSecurity()
+    {
+        using var streamGroup = _dataReader.GetEntry("databases/files/files_security");
+        var data = new DataTable();
+        data.ReadXml(streamGroup);
+
+        foreach (var row in data.Rows.Cast<DataRow>())
+        {
+            if (row["owner"].ToString() == _key)
+            {
+                var security = new WorkspaceSecurity()
+                {
+                    Owner = row["owner"].ToString(),
+                    Subject = row["subject"].ToString(),
+                    SubjectType = int.Parse(row["subject_type"].ToString()),
+                    EntryId = int.Parse(row["entry_id"].ToString()),
+                    EntryType = int.Parse(row["entry_type"].ToString()),
+                    Security = int.Parse(row["security"].ToString())
+                };
+                _securities.Add(security);
+            }
+        }
     }
 
     public override async Task MigrateAsync()
@@ -140,46 +171,64 @@ public class WorkspaceMigratingFiles : MigratingFiles
 
         await _securityContext.AuthenticateMeAsync(_user.Guid);
 
-        var newFolder = await _fileStorageService.CreateNewFolderAsync(await _globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now.ToString("dd.MM.yyyy")}");
+        var newFolder = await _fileStorageService.CreateNewFolderAsync(await _globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}");
 
-        var compareIds = new Dictionary<int, int>();
-        
-        compareIds.Add(int.Parse(_myFolder), newFolder.Id);
+        var matchingIds = new Dictionary<int, int> { { int.Parse(_myFolder), newFolder.Id } };
 
-        if (_storage.Folders != null)
+        var orderedFolders = _storage.Folders.OrderBy(f => f.Level);
+        foreach (var folder in orderedFolders)
         {
-            _storage.Folders.OrderBy(f => f.Level);
-            foreach (var folder in _storage.Folders)
+            newFolder = await _fileStorageService.CreateNewFolderAsync(matchingIds[folder.ParentId], folder.Title);
+            matchingIds.Add(folder.Id, newFolder.Id);
+        }
+
+        var fileDao = _daoFactory.GetFileDao<int>();
+        foreach (var file in _storage.Files)
+        {
+            try
             {
-                newFolder = await _fileStorageService.CreateNewFolderAsync(compareIds[folder.ParentId], folder.Title);
-                compareIds.Add(folder.Id, newFolder.Id);
+                var path =
+                    $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                await using var fs = _dataReader.GetEntry(path);
+
+                var newFile = _serviceProvider.GetService<File<int>>();
+                newFile.ParentId = matchingIds[file.Folder];
+                newFile.Comment = FilesCommonResource.CommentCreate;
+                newFile.Title = Path.GetFileName(file.Title);
+                newFile.ContentLength = fs.Length;
+                newFile.Version = file.Version;
+                newFile.VersionGroup = file.VersionGroup;
+                newFile = await fileDao.SaveFileAsync(newFile, fs);
+                matchingIds.Add(file.Id, newFile.Id);
+            }
+            catch(Exception ex)
+            {
+                Log($"Couldn't create file {file.Title}", ex);
             }
         }
 
-        if (_storage.Files != null)
+        foreach (var security in _securities)
         {
-            var fileDao = _daoFactory.GetFileDao<int>();
-            foreach (var file in _storage.Files)
+            var list = new List<AceWrapper>
             {
-                try
+                new AceWrapper
                 {
-                    var path = string.Format("files/folder_{0}/file_{1}/v{2}/content{3}", (Convert.ToInt32(file.Id) / 1000 + 1) * 1000, file.Id, file.Version, FileUtility.GetFileExtension(file.Title));
-                    using var fs = _dataReader.GetEntry(path);
+                    Access = (FileShare)security.Security,
+                    Id = Guid.Parse(_mappedGuids[security.Subject]),
+                    SubjectGroup = security.EntryType == 2
+                }
+            };
 
-                    var newFile = _serviceProvider.GetService<File<int>>();
-                    newFile.ParentId = compareIds[file.Folder];
-                    newFile.Comment = FilesCommonResource.CommentCreate;
-                    newFile.Title = Path.GetFileName(file.Title);
-                    newFile.ContentLength = fs.Length;
-                    newFile.Version = file.Version;
-                    newFile.VersionGroup = file.VersionGroup;
-                    newFile = await fileDao.SaveFileAsync(newFile, fs);
-                }
-                catch(Exception ex)
-                {
-                    Log($"Couldn't create file {file.Title}", ex);
-                }
-            }
+            var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
+            var aceCollection = new AceCollection<int>
+            {
+                Files = entryIsFile ? new List<int> { matchingIds[security.EntryId] } : [],
+                Folders = entryIsFile ? [] : new List<int> { matchingIds[security.EntryId] },
+                Aces = list,
+                Message = null
+            };
+            
+            await _fileStorageService.SetAceObjectAsync(aceCollection, false);
         }
     }
 }

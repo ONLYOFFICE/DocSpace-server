@@ -31,6 +31,7 @@ global using System.Text.RegularExpressions;
 
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Migration.Core.Core.Providers.ASC.Models;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -44,6 +45,7 @@ global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.Files.Core;
 global using ASC.Files.Core.Helpers;
+global using ASC.Migration.Core.Core.Providers.ASC.Models.Parse;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Migration.Core;

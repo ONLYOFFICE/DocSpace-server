@@ -36,10 +36,11 @@ public class WorkspaceMigrationGroups : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
+    private List<string> _managerUidList;
     private readonly UserManager _userManager;
     private WorkspaceGroup _group;
     private GroupInfo _groupInfo;
-    public Guid Guid => _groupInfo.ID;
+    public Guid Guid => _group.Id;
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
@@ -57,13 +58,14 @@ public class WorkspaceMigrationGroups : MigratingGroup
     public override void Parse()
     {
         _groupName = _group.Name;
-        _groupInfo = new GroupInfo()
+        _groupInfo = new GroupInfo
         {
             Name = _group.Name,
             Sid = _group.Sid,
-            CategoryID = _group.Categoryid
+            CategoryID = _group.CategoryId
         };
-        _userUidList = _group.UsersUid;
+        _userUidList = _group.UsersUId.ToList();
+        _managerUidList = _group.ManagersUId.ToList();
     }
 
     public override async Task MigrateAsync()
@@ -78,6 +80,7 @@ public class WorkspaceMigrationGroups : MigratingGroup
         {
             _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
         }
+        _group.Id = _groupInfo.ID;
         foreach (var userGuid in UsersGuidList)
         {
             try
@@ -90,12 +93,16 @@ public class WorkspaceMigrationGroups : MigratingGroup
                 if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
                     await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
+                    if (_managerUidList.Contains(userGuid.Key))
+                    {
+                        await _userManager.SetDepartmentManagerAsync(_groupInfo.ID, user.Id);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 //Think about the text of the error
-                Log($"Couldn't to add user {userGuid.Key} to group {_groupName} ", ex);
+                Log($"Couldn't to add user {userGuid} to group {_groupName} ", ex);
             }
         }
     }

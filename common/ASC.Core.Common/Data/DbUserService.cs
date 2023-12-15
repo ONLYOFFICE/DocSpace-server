@@ -148,24 +148,26 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     }
 
     public UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType)
-    {
-        return GetUserGroupRefInternal(tenant, groupId, refType).SingleOrDefault();
+    { 
+        using var userDbContext = dbContextFactory.CreateDbContext();
+        return GetUserGroupRefInternal(userDbContext, tenant, groupId, refType).SingleOrDefault();
     }
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
-        return await GetUserGroupRefInternal(tenant, groupId, refType).SingleOrDefaultAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetUserGroupRefInternal(userDbContext, tenant, groupId, refType).SingleOrDefaultAsync();
     }
 
-    private IQueryable<UserGroupRef> GetUserGroupRefInternal(int tenant, Guid groupId, UserGroupRefType refType)
+    private IQueryable<UserGroupRef> GetUserGroupRefInternal(UserDbContext userDbContext, int tenant, Guid groupId, UserGroupRefType refType)
     {
-        using var userDbContext = dbContextFactory.CreateDbContext();
         IQueryable<UserGroup> q = userDbContext.UserGroups;
 
         if (tenant != Tenant.DefaultTenant)
         {
             q = q.Where(r => r.TenantId == tenant);
         }
+
         return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed)
             .ProjectTo<UserGroupRef>(mapper.ConfigurationProvider);
     }

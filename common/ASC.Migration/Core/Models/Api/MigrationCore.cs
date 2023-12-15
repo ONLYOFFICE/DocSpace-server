@@ -103,5 +103,6 @@ public class MigrationCore
         services.TryAdd<IMigration, WorkspaceMigration>();
         services.TryAdd<WorkspaceMigratingUser>();
         services.TryAdd<WorkspaceMigratingFiles>();
+        services.TryAdd<WorkspaceMigrationGroups>();
     }
 }

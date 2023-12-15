@@ -40,6 +40,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
     private string _pathToPhoto;
     private string _rootFolder;
     private IDataReadOperator _dataReader;
+    private Dictionary<string, string> _mappedGuids;
     private readonly UserManager _userManager;
     private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
     private readonly QuotaSocketManager _quotaSocketManager;
@@ -53,13 +54,14 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
         _quotaSocketManager = quotaSocketManager;
     }
 
-    public void Init(string key, WorkspaceUser user, string rootFolder, IDataReadOperator dataReader, Action<string, Exception> log)
+    public void Init(string key, WorkspaceUser user, string rootFolder, IDataReadOperator dataReader, Action<string, Exception> log, Dictionary<string, string> mappedGuids)
     {
         Key = key;
         _dataReader = dataReader;
         _rootFolder = rootFolder;
         _user = user;
         Log = log;
+        _mappedGuids = mappedGuids;
     }
 
     public override void Parse()
@@ -82,7 +84,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
             Files = new List<WorkspaceFile>(),
             Folders = new List<WorkspaceFolder>()
         };
-        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log);
+        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log, _mappedGuids);
         MigratingFiles.Parse();
     }
 

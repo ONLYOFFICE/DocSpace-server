@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Core.Providers.ASC.Models;
-using ASC.Migration.Core.Core.Providers.ASC.Models.Parse;
-
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Core.Providers;
@@ -40,6 +37,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
     private readonly MigratorMeta _meta;
     private readonly UserManager _userManager;
     private IDataReadOperator _dataReader;
+    private Dictionary<string, string> _mappedGuids;
     public override MigratorMeta Meta => _meta;
 
     public WorkspaceMigration(MigrationLogger migrationLogger,
@@ -66,6 +64,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         _migrationInfo = new WorkspaceMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
         _tmpFolder = path;
+        _mappedGuids = new();
     }
     public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
     {
@@ -93,6 +92,10 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                     return null;
                 }
 
+                if (int.Parse(row["removed"].ToString()) == 1)
+                {
+                    continue;
+                } 
                 var u = new WorkspaceUser()
                 {
                     Id = row["id"].ToString(),
@@ -111,7 +114,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 }
 
                 var user = _serviceProvider.GetService<WorkspaceMigratingUser>();
-                user.Init(u.Id, u, _tmpFolder, _dataReader, Log);
+                user.Init(u.Id, u, _tmpFolder, _dataReader, Log, _mappedGuids);
                 user.Parse();
                 if (!(await _userManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
                 {
@@ -159,15 +162,15 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 Id = Guid.Parse(row["id"].ToString()),
                 Name = row["name"].ToString(),
-                Categoryid = Guid.Parse(row["categoryid"].ToString()),
-                Parentid = Guid.Parse(row["parentid"].ToString()),
+                CategoryId = Guid.Parse(row["categoryid"].ToString()),
                 Sid = row["sid"].ToString(),
-                UsersUid = new List<string>()
+                UsersUId = new HashSet<string>(),
+                ManagersUId = new HashSet<string>()
             }).ToList();
 
         using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
         var dataUserGroup = new DataTable();
-        dataGroup.ReadXml(streamUserGroup);
+        dataUserGroup.ReadXml(streamUserGroup);
 
         foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
         {
@@ -175,7 +178,11 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 var groupId = Guid.Parse(row["groupid"].ToString());
                 var g = groups.FirstOrDefault(g => g.Id == groupId);
-                g?.UsersUid.Add(row["userid"].ToString());
+                g?.UsersUId.Add(row["userid"].ToString());
+                if (string.Equals(row["ref_type"].ToString(), "1"))
+                {
+                    g?.ManagersUId.Add(row["userid"].ToString());
+                }
             }
         }
         return groups;
@@ -211,25 +218,12 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
 
                 await user.MigrateAsync();
                 _importedUsers.Add(user.Guid);
+                _mappedGuids.Add(u.Key, user.Guid.ToString());
             }
             catch (Exception ex)
             {
                 failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email})", ex);
-                continue;
-            }
-
-            try
-            {
-                if (user.UserType != EmployeeType.User)
-                {
-                    await user.MigratingFiles.MigrateAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                failedUsers.Add(user);
-                Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
             }
         }
 
@@ -249,16 +243,35 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
+                    var key = group.Guid.ToString();
                     group.UsersGuidList = _migrationInfo.Users
-                    .Where(user => group.UserGuidList.Exists(u => user.Key == u))
-                    .Select(u => u)
-                    .ToDictionary(k => k.Key, v => v.Value.Guid);
+                        .Where(user => group.UserGuidList.Exists(u => user.Key == u))
+                        .Select(u => u)
+                        .ToDictionary(k => k.Key, v => v.Value.Guid);
                     await group.MigrateAsync();
+                    _mappedGuids.Add(key, group.Guid.ToString());
                 }
                 catch (Exception ex)
                 {
                     Log($"Couldn't migrate group {group.GroupName} ", ex);
                 }
+            }
+        }
+
+        foreach (var user in usersForImport)
+        {
+            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
+            try
+            {
+                if (user.UserType != EmployeeType.User)
+                {
+                    await user.MigratingFiles.MigrateAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                failedUsers.Add(user);
+                Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
             }
         }
 
