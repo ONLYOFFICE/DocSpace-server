@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 	  <ImplicitUsings>enable</ImplicitUsings>
+	  <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
@@ -97,6 +98,21 @@
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="AuditReportResource.az.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ar-SA.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.hy-AM.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ko-KR.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.pt.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ro.resx">
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

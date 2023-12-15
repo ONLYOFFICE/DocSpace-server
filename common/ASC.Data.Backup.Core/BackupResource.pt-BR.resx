@@ -123,4 +123,7 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>O arquivo de backup é inválido. Por favor, use um arquivo criado no ONLYOFFICE v11.5 ou posterior.</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>O backup é maior que o tamanho total do portal</value>
+  </data>
 </root>

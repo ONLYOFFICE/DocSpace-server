@@ -685,13 +685,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Stanza eliminata</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Link creato. Ruolo: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Link eliminato</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Link aggiornato. Ruolo: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -723,5 +723,14 @@
   </data>
   <data name="CountryCol" xml:space="preserve">
     <value>Paese</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Link esterno creato: {0}. Ruolo: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Link esterno eliminato: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Link esterno aggiornato: {0}. Ruolo: {1}</value>
   </data>
 </root>

@@ -8,10 +8,12 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
+using System.Resources;
+using System.Runtime.CompilerServices;
+
 namespace ASC.Web.Core.PublicResources {
-    using System;
-    
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,27 +21,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [DebuggerNonUserCode()]
+    [CompilerGenerated()]
     public class Resource {
         
-        private static global::System.Resources.ResourceManager resourceMan;
+        private static ResourceManager resourceMan;
         
-        private static global::System.Globalization.CultureInfo resourceCulture;
+        private static CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static ResourceManager ResourceManager {
             get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.Resource", typeof(Resource).Assembly);
+                if (ReferenceEquals(resourceMan, null)) {
+                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -50,8 +52,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -1294,7 +1296,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account and search for contacts..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -1645,6 +1647,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The last full access space cannot be deleted.
+        /// </summary>
+        public static string ErrorCannotDeleteLastSpace {
+            get {
+                return ResourceManager.GetString("ErrorCannotDeleteLastSpace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your profile is suspended.
         /// </summary>
         public static string ErrorDisabledProfile {
@@ -1911,6 +1922,87 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorUserNotFoundByEmail {
             get {
                 return ResourceManager.GetString("ErrorUserNotFoundByEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong plugin archive.
+        /// </summary>
+        public static string ErrorWebPluginArchive {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin already exist.
+        /// </summary>
+        public static string ErrorWebPluginExist {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong file extension.
+        /// </summary>
+        public static string ErrorWebPluginFileExtension {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginFileExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File size exceeds limit.
+        /// </summary>
+        public static string ErrorWebPluginFileSize {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginFileSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Сhanges to system plugins are prohibited.
+        /// </summary>
+        public static string ErrorWebPluginForbiddenSystem {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginForbiddenSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong plugin name.
+        /// </summary>
+        public static string ErrorWebPluginName {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No input file.
+        /// </summary>
+        public static string ErrorWebPluginNoInputFile {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginNoInputFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin not found.
+        /// </summary>
+        public static string ErrorWebPluginNotFound {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To many input files.
+        /// </summary>
+        public static string ErrorWebPluginToManyInputFiles {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginToManyInputFiles", resourceCulture);
             }
         }
         

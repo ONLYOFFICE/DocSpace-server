@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,22 +27,20 @@
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBase<Item, Item, Item>
+internal class OneDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<Item, Item, Item>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory,
+        setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<Item, Item, Item>
 {
     private OneDriveProviderInfo _providerInfo;
-
-    public OneDriveDaoBase(IServiceProvider serviceProvider, 
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<Item, Item, Item> providerInfo)
     {
@@ -124,10 +122,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFolder is ErrorItem)
+        if (onedriveFolder is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFolder(onedriveFolder as ErrorItem);
+            return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -143,8 +141,8 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
         folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
         SetFolderType(folder, isRoot);
 
         folder.Title = MakeFolderTitle(onedriveFolder);
@@ -192,10 +190,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFile is ErrorItem)
+        if (onedriveFile is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFile(onedriveFile as ErrorItem);
+            return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)
@@ -206,7 +204,7 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         var file = GetFile();
 
         file.Id = MakeId(onedriveFile.Id);
-        file.ContentLength = onedriveFile.Size.HasValue ? (long)onedriveFile.Size : 0;
+        file.ContentLength = onedriveFile.Size ?? 0;
         file.CreateOn = onedriveFile.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.CreatedDateTime.Value.DateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(onedriveFile));
         file.ModifiedOn = onedriveFile.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.LastModifiedDateTime.Value.DateTime) : default;
@@ -322,7 +320,7 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

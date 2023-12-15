@@ -1,67 +1,57 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Billing;
 
-[Singletone]
-public class TenantExtraConfig
+[Singleton]
+public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReaderConfig _licenseReaderConfig;
-
-    public TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReaderConfig = licenseReaderConfig;
-    }
-
     public bool Saas
     {
-        get { return !_coreBaseSettings.Standalone; }
+        get { return !coreBaseSettings.Standalone; }
     }
 
     public bool Enterprise
     {
-        get { return _coreBaseSettings.Standalone && !string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
     public bool Opensource
     {
-        get { return _coreBaseSettings.Standalone && string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 }
 
-[Singletone]
+[Singleton]
 public class TariffServiceStorage
 {
     private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     internal readonly ICache Cache;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceProvider _serviceProvider;
     internal readonly ICacheNotify<TariffCacheItem> Notify;
     private TimeSpan _cacheExpiration;
 
@@ -71,9 +61,8 @@ public class TariffServiceStorage
 
         Cache = cache;
         _coreBaseSettings = coreBaseSettings;
-        _serviceProvider = serviceProvider;
         Notify = notify;
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             Cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
 
@@ -82,9 +71,9 @@ public class TariffServiceStorage
             Cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
         }, CacheNotifyAction.Remove);
 
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();
             var tariff = tariffService.GetBillingInfoAsync(i.TenantId, i.TariffId).Result;
             if (tariff != null)
@@ -233,7 +222,10 @@ public class TariffService : ITariffService
                         updatedQuota += tenantQuota;
                     }
 
-                    await updatedQuota.CheckAsync(_serviceProvider);
+                    if (updatedQuota != null)
+                    {
+                        await updatedQuota.CheckAsync(_serviceProvider);
+                    }
 
                     if (!string.IsNullOrEmpty(email))
                     {
@@ -300,7 +292,7 @@ public class TariffService : ITariffService
 
                 tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(quota.TenantId, 1) },
+                    Quotas = new List<Quota> { new(quota.TenantId, 1) },
                     DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
                 };
 
@@ -329,8 +321,8 @@ public class TariffService : ITariffService
             return false;
         }
 
-        var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId));
-        var newQuotas = quantity.Keys.Select(name => allQuotas.FirstOrDefault(q => q.Name == name));
+        var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId)).ToList();
+        var newQuotas = quantity.Keys.Select(name => allQuotas.Find(q => q.Name == name)).ToList();
 
         var tariff = await GetTariffAsync(tenantId);
 
@@ -354,7 +346,7 @@ public class TariffService : ITariffService
         }
 
         // add new quotas
-        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Any(t => t.Id == q.TenantId));
+        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Exists(t => t.Id == q.TenantId));
         foreach (var addedQuota in addedQuotas)
         {
             var qty = quantity[addedQuota.Name];
@@ -365,7 +357,10 @@ public class TariffService : ITariffService
             updatedQuota += quota;
         }
 
-        await updatedQuota.CheckAsync(_serviceProvider);
+        if (updatedQuota != null)
+        {
+            await updatedQuota.CheckAsync(_serviceProvider);
+        }
 
         var productIds = newQuotas.Select(q => q.ProductId);
 
@@ -401,17 +396,14 @@ public class TariffService : ITariffService
 
         await SaveBillingInfoAsync(tenantId, tariff);
 
-        if (quotas.Any(q => q.Trial))
+        if (quotas.Exists(q => q.Trial) && tenantId != Tenant.DefaultTenant)
         {
             // reset trial date
-            if (tenantId != Tenant.DefaultTenant)
+            var tenant = await _tenantService.GetTenantAsync(tenantId);
+            if (tenant != null)
             {
-                var tenant = await _tenantService.GetTenantAsync(tenantId);
-                if (tenant != null)
-                {
-                    tenant.VersionChanged = DateTime.UtcNow;
-                    await _tenantService.SaveTenantAsync(_coreSettings, tenant);
-                }
+                tenant.VersionChanged = DateTime.UtcNow;
+                await _tenantService.SaveTenantAsync(_coreSettings, tenant);
             }
         }
     }
@@ -437,7 +429,7 @@ public class TariffService : ITariffService
     }
 
 
-    public void ClearCache(int tenantId)
+    private void ClearCache(int tenantId)
     {
         _notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
     }
@@ -476,14 +468,14 @@ public class TariffService : ITariffService
         return payments;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
+    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
     {
         List<TenantQuota> newQuotas = new();
 
         if (_billingClient.Configured)
         {
             var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible).ToList();
-            newQuotas = quantity.Select(item => allQuotas.FirstOrDefault(q => q.Name == item.Key)).ToList();
+            newQuotas = quantity.Select(item => allQuotas.Find(q => q.Name == item.Key)).ToList();
 
             TenantQuota updatedQuota = null;
             foreach (var addedQuota in newQuotas)
@@ -496,11 +488,25 @@ public class TariffService : ITariffService
                 updatedQuota += quota;
             }
 
-            await updatedQuota.CheckAsync(_serviceProvider);
+            if (updatedQuota != null)
+            {
+                await updatedQuota.CheckAsync(_serviceProvider);
+            }
         }
 
         var hasQuantity = quantity != null && quantity.Any();
-        var key = "shopingurl_" + (hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all") + (!string.IsNullOrEmpty(affiliateId) ? "_" + affiliateId : "");
+        var keyBuilder = new StringBuilder("shopingurl_");
+        keyBuilder.Append(hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all");
+        if (!string.IsNullOrEmpty(affiliateId))
+        {
+            keyBuilder.Append($"_{affiliateId}");
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            keyBuilder.Append($"_{partnerId}");
+        }
+        
+        var key = keyBuilder.ToString();
         var url = _cache.Get<string>(key);
         if (url == null)
         {
@@ -516,6 +522,7 @@ public class TariffService : ITariffService
                             "__Tenant__",
                             productIds.ToArray(),
                             affiliateId,
+                            partnerId,
                             null,
                             !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
                             !string.IsNullOrEmpty(language) ? "__Language__" : null,
@@ -539,7 +546,7 @@ public class TariffService : ITariffService
             return null;
         }
 
-        var result = new Uri(url.ToString()
+        var result = new Uri(url
                                .Replace("__Tenant__", HttpUtility.UrlEncode(await _coreSettings.GetKeyAsync(tenant)))
                                .Replace("__Currency__", HttpUtility.UrlEncode(currency ?? ""))
                                .Replace("__Language__", HttpUtility.UrlEncode((language ?? "").ToLower()))
@@ -549,172 +556,60 @@ public class TariffService : ITariffService
         return result;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int? tenant, int quotaId, string affiliateId, string currency = null, string language = null, string customerId = null, string quantity = null)
-    {
-        var quota = await _quotaService.GetTenantQuotaAsync(quotaId);
-        if (quota == null)
-        {
-            return null;
-        }
-
-        var key = tenant.HasValue
-                      ? GetBillingUrlCacheKey(tenant.Value)
-                      : string.Format($"notenant{(!string.IsNullOrEmpty(affiliateId) ? "_" + affiliateId : "")}");
-        key += quota.Visible ? "" : "0";
-        if (_cache.Get<Dictionary<string, Uri>>(key) is not IDictionary<string, Uri> urls)
-        {
-            urls = new Dictionary<string, Uri>();
-            if (_billingClient.Configured)
-            {
-                try
-                {
-                    var products = (await _quotaService.GetTenantQuotasAsync())
-                                               .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible == quota.Visible)
-                                               .Select(q => q.ProductId)
-                                               .ToArray();
-
-                    urls =
-                        _billingClient.GetPaymentUrls(
-                            tenant.HasValue ? await _coreSettings.GetKeyAsync(tenant.Value) : null,
-                            products,
-                            tenant.HasValue ? await _coreSettings.GetAffiliateIdAsync(tenant.Value) : affiliateId,
-                            tenant.HasValue ? await _coreSettings.GetCampaignAsync(tenant.Value) : null,
-                            !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
-                            !string.IsNullOrEmpty(language) ? "__Language__" : null,
-                            !string.IsNullOrEmpty(customerId) ? "__CustomerID__" : null,
-                            !string.IsNullOrEmpty(quantity) ? "__Quantity__" : null
-                            );
-                }
-                catch (Exception error)
-                {
-                    _logger.ErrorGetShoppingUri(error);
-                }
-            }
-            _cache.Insert(key, urls, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
-        }
-
-        _tariffServiceStorage.ResetCacheExpiration();
-
-        if (!string.IsNullOrEmpty(quota.ProductId) && urls.TryGetValue(quota.ProductId, out var url))
-        {
-            if (url == null)
-            {
-                return null;
-            }
-
-            url = new Uri(url.ToString()
-                                   .Replace("__Currency__", HttpUtility.UrlEncode(currency ?? ""))
-                                   .Replace("__Language__", HttpUtility.UrlEncode((language ?? "").ToLower()))
-                                   .Replace("__CustomerID__", HttpUtility.UrlEncode(customerId ?? ""))
-                                   .Replace("__Quantity__", HttpUtility.UrlEncode(quantity ?? "")));
-            return url;
-        }
-        return null;
-    }
-
-    public Uri GetShoppingUri(string[] productIds, string affiliateId = null, string currency = null, string language = null, string customerId = null, string quantity = null)
-    {
-        var key = "shopingurl" + string.Join("_", productIds) + (!string.IsNullOrEmpty(affiliateId) ? "_" + affiliateId : "");
-        var url = _cache.Get<string>(key);
-        if (url == null)
-        {
-            url = string.Empty;
-            if (_billingClient.Configured)
-            {
-                try
-                {
-                    url =
-                        _billingClient.GetPaymentUrl(
-                            null,
-                            productIds,
-                            affiliateId,
-                            null,
-                            !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
-                            !string.IsNullOrEmpty(language) ? "__Language__" : null,
-                            !string.IsNullOrEmpty(customerId) ? "__CustomerID__" : null,
-                            !string.IsNullOrEmpty(quantity) ? "__Quantity__" : null
-                            );
-                }
-                catch (Exception error)
-                {
-                    _logger.ErrorWithException(error);
-                }
-            }
-            _cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
-        }
-
-        _tariffServiceStorage.ResetCacheExpiration();
-
-        if (string.IsNullOrEmpty(url))
-        {
-            return null;
-        }
-
-        var result = new Uri(url.ToString()
-                               .Replace("__Currency__", HttpUtility.UrlEncode(currency ?? ""))
-                               .Replace("__Language__", HttpUtility.UrlEncode((language ?? "").ToLower()))
-                               .Replace("__CustomerID__", HttpUtility.UrlEncode(customerId ?? ""))
-                               .Replace("__Quantity__", HttpUtility.UrlEncode(quantity ?? "")));
-        return result;
-    }
-
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId = "", params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
-        try
+        var def = productIds
+            .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
+            .ToDictionary(e => e.ProductId, e => e.Prices);
+
+        if (_billingClient.Configured)
         {
-            var key = "biling-prices" + string.Join(",", productIds);
-            var result = _cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
-            if (result == null)
+            try
             {
-                result = _billingClient.GetProductPriceInfo(productIds);
-                _cache.Insert(key, result, DateTime.Now.AddHours(1));
+                var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
+                var result = _cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
+                if (result == null)
+                {
+                    result = _billingClient.GetProductPriceInfo(partnerId, productIds);
+                    _cache.Insert(key, result, DateTime.Now.AddHours(1));
+                }
+
+                return result;
             }
-
-            return result;
+            catch (Exception error)
+            {
+                LogError(error);
+            }
         }
-        catch (Exception error)
-        {
-            LogError(error);
 
-            return productIds
-                .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
-                .ToDictionary(e => e.ProductId, e => e.Prices);
-        }
+        return def;
     }
 
     public async Task<Uri> GetAccountLinkAsync(int tenant, string backUrl)
     {
         var key = "accountlink_" + tenant;
         var url = _cache.Get<string>(key);
-        if (url == null)
+        if (url == null && _billingClient.Configured)
         {
-            if (_billingClient.Configured)
+            try
             {
-                try
-                {
-                    url = _billingClient.GetAccountLink(await _coreSettings.GetKeyAsync(tenant), backUrl);
-                    _cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
-                }
-                catch (Exception error)
-                {
-                    LogError(error);
-                }
+                url = _billingClient.GetAccountLink(await _coreSettings.GetKeyAsync(tenant), backUrl);
+                _cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
+            }
+            catch (Exception error)
+            {
+                LogError(error);
             }
         }
-        if (!string.IsNullOrEmpty(url))
-        {
-            return new Uri(url);
-        }
-
-        return null;
+        
+        return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
-
-
+    
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
-        await using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var r = await Queries.TariffAsync(coreDbContext, tenant, id);
 
@@ -740,7 +635,7 @@ public class TariffService : ITariffService
         {
             try
             {
-                await using var dbContext = _dbContextFactory.CreateDbContext();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
                 var stamp = tariffInfo.DueDate;
                 if (stamp.Equals(DateTime.MaxValue))
@@ -763,16 +658,12 @@ public class TariffService : ITariffService
                     tariffInfo.Id = efTariff.Id;
                 }
 
-                if (efTariff.CustomerId == default)
-                {
-                    efTariff.CustomerId = "";
-                }
-
+                efTariff.CustomerId ??= "";
                 efTariff = await dbContext.AddOrUpdateAsync(q => q.Tariffs, efTariff);
 
                 foreach (var q in tariffInfo.Quotas)
                 {
-                    await dbContext.AddOrUpdateAsync(q => q.TariffRows, new DbTariffRow
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = efTariff.Id,
                         Quota = q.Id,
@@ -815,8 +706,8 @@ public class TariffService : ITariffService
     {
         const int tenant = Tenant.DefaultTenant;
 
-        await using var coreDbContext = _dbContextFactory.CreateDbContext();
-        await Queries.UpdateTariffs(coreDbContext, tenant);
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await Queries.DeleteTariffs(coreDbContext, tenant);
 
         ClearCache(tenant);
     }
@@ -898,16 +789,16 @@ public class TariffService : ITariffService
 
                 var defaultQuota = await _quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
                 defaultQuota.Name = "overdue";
-                defaultQuota.Features = updatedQuota.Features;
+                defaultQuota.Features = updatedQuota?.Features;
 
                 await _quotaService.SaveTenantQuotaAsync(defaultQuota);
 
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>()
+                unlimTariff.Quotas = new List<Quota>
                 {
-                    new Quota(defaultQuota.TenantId, 1)
+                    new(defaultQuota.TenantId, 1)
                 };
 
                 tariff = unlimTariff;
@@ -947,15 +838,9 @@ public class TariffService : ITariffService
     private async Task AddDefaultQuotaAsync(Tariff tariff)
     {
         var allQuotas = await _quotaService.GetTenantQuotasAsync();
-        TenantQuota toAdd = null;
-        if (_trialEnabled)
-        {
-            toAdd = allQuotas.FirstOrDefault(r => r.Trial && !r.Custom);
-        }
-        else
-        {
-            toAdd = allQuotas.FirstOrDefault(r => _coreBaseSettings.Standalone || r.Free && !r.Custom);
-        }
+        var toAdd = _trialEnabled ? 
+            allQuotas.FirstOrDefault(r => r.Trial && !r.Custom) : 
+            allQuotas.FirstOrDefault(r => _coreBaseSettings.Standalone || r.Free && !r.Custom);
 
         if (toAdd != null)
         {
@@ -1066,10 +951,6 @@ static file class Queries
                     .Where(r => r.TariffId == id && r.TenantId == tenantId)
                     .Select(r => new Quota(r.Quota, r.Quantity)));
 
-    public static readonly Func<CoreDbContext, int, Task<int>> UpdateTariffs =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId) =>
-                ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteUpdate(t =>
-                    t.SetProperty(p => p.TenantId, -2)
-                        .SetProperty(p => p.CreateOn, DateTime.UtcNow)));
+    public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
+        EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }

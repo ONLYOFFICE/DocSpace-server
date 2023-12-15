@@ -12,7 +12,9 @@ module.exports = (socket, next) => {
   const share = socket.handshake.query?.share;
 
   if (!cookie && !token && !share) {
-    const err = new Error("Authentication error (not token or cookie or share key)");
+    const err = new Error(
+      "Authentication error (not token or cookie or share key)"
+    );
     logger.error(err);
     socket.disconnect("unauthorized");
     next(err);
@@ -38,29 +40,27 @@ module.exports = (socket, next) => {
   if (cookie) {
     headers.Authorization = cookie;
 
-    logger.info(`API basePath='${basePath}' Authorization='${cookie}'`);
+    const getUser = () => {
+      return request({
+        method: "get",
+        url: "/people/@self?fields=id,userName,displayName",
+        headers,
+        basePath,
+      });
+    };
 
-  const getUser = () => {
-    return request({
-      method: "get",
-      url: "/people/@self?fields=id,userName,displayName",
-      headers,
-      basePath,
-    });
-  };
-
-  const getPortal = () => {
-    return request({
-      method: "get",
-      url: "/portal?fields=tenantId,tenantDomain",
-      headers,
-      basePath,
-    });
-  };
+    const getPortal = () => {
+      return request({
+        method: "get",
+        url: "/portal?fields=tenantId,tenantDomain",
+        headers,
+        basePath,
+      });
+    };
 
     return Promise.all([getUser(), getPortal()])
       .then(([user, portal]) => {
-        logger.info("Get account info", { user, portal });
+        logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
         session.save();
@@ -75,36 +75,40 @@ module.exports = (socket, next) => {
 
   if (share) {
     if (req?.cookies) {
-      const pairs = Object.entries(req.cookies).map(([key, value]) => `${key}=${value}`);
+      const pairs = Object.entries(req.cookies).map(
+        ([key, value]) => `${key}=${value}`
+      );
 
       if (pairs.length > 0) {
-        let cookie = pairs.join(';');
-        cookie += ';';
+        let cookie = pairs.join(";");
+        cookie += ";";
         headers.Cookie = cookie;
       }
     }
-    
+
     return request({
       method: "get",
       url: `/files/share/${share}`,
       headers,
       basePath,
-    }).then(validation => {
-      if (validation.status !== 0) {
-        const err = new Error("Invalid share key");
-        logger.error("Share key validation failure:", err);
-        next(err);
-      } else {
-        logger.info(`Share key validation successful: key=${share}`)
+    })
+      .then((validation) => {
+        if (validation.status !== 0) {
+          const err = new Error("Invalid share key");
+          logger.error("WS: share key validation failure:", err);
+          return next(err);
+        }
+
+        logger.info(`WS: share key validation successful: key='${share}' sessionId='sess:${session.id}'`);
         session.anonymous = true;
-        session.portal = { tenantId: validation.tenantId }
+        session.portal = { tenantId: validation.tenantId };
         session.save();
         next();
-      }
-    }).catch(err => {
-      logger.error(err);
-      socket.disconnect("Unauthorized");
-      next(err);
-    })
+      })
+      .catch((err) => {
+        logger.error(err);
+        socket.disconnect("Unauthorized");
+        next(err);
+      });
   }
 };

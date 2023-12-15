@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,19 +28,19 @@ namespace ASC.Web.Files.Services.WCFService;
 
 public class AceCollection<T>
 {
-    public IEnumerable<T> Files { get; set; }
-    public IEnumerable<T> Folders { get; set; }
-    public List<AceWrapper> Aces { get; set; }
-    public string Message { get; set; }
-    public AceAdvancedSettingsWrapper AdvancedSettings { get; set; }
+    public IEnumerable<T> Files { get; init; }
+    public IEnumerable<T> Folders { get; init; }
+    public List<AceWrapper> Aces { get; init; }
+    public string Message { get; init; }
+    public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
 public class AceWrapper : IMapFrom<RoomInvitation>
 {
     public Guid Id { get; set; }
-    public string Email { get; set; }
+    public string Email { get; init; }
     public SubjectType SubjectType { get; set; }
-    public FileShareOptions FileShareOptions { get; set; }
+    public FileShareOptions FileShareOptions { get; init; }
     public bool CanEditAccess { get; set; }
 
     [JsonPropertyName("title")]
@@ -61,6 +61,7 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
+    public string RequestToken { get; set; }
 
     [JsonIgnore] 
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
@@ -84,32 +85,17 @@ public class AceShortWrapper
 
     public AceShortWrapper(AceWrapper aceWrapper)
     {
-        var permission = string.Empty;
-
-        switch (aceWrapper.Access)
+        var permission = aceWrapper.Access switch
         {
-            case FileShare.Read:
-                permission = FilesCommonResource.AceStatusEnum_Read;
-                break;
-            case FileShare.ReadWrite:
-                permission = FilesCommonResource.AceStatusEnum_ReadWrite;
-                break;
-            case FileShare.CustomFilter:
-                permission = FilesCommonResource.AceStatusEnum_CustomFilter;
-                break;
-            case FileShare.Review:
-                permission = FilesCommonResource.AceStatusEnum_Review;
-                break;
-            case FileShare.FillForms:
-                permission = FilesCommonResource.AceStatusEnum_FillForms;
-                break;
-            case FileShare.Comment:
-                permission = FilesCommonResource.AceStatusEnum_Comment;
-                break;
-            case FileShare.Restrict:
-                permission = FilesCommonResource.AceStatusEnum_Restrict;
-                break;
-        }
+            FileShare.Read => FilesCommonResource.AceStatusEnum_Read,
+            FileShare.ReadWrite => FilesCommonResource.AceStatusEnum_ReadWrite,
+            FileShare.CustomFilter => FilesCommonResource.AceStatusEnum_CustomFilter,
+            FileShare.Review => FilesCommonResource.AceStatusEnum_Review,
+            FileShare.FillForms => FilesCommonResource.AceStatusEnum_FillForms,
+            FileShare.Comment => FilesCommonResource.AceStatusEnum_Comment,
+            FileShare.Restrict => FilesCommonResource.AceStatusEnum_Restrict,
+            _ => string.Empty
+        };
 
         User = aceWrapper.SubjectName;
         if (aceWrapper.Id.Equals(FileConstant.ShareLinkId))
@@ -126,5 +112,5 @@ public class AceAdvancedSettingsWrapper
 {
     public bool DenyDownload { get; set; }
     public bool DenySharing { get; set; }
-    public bool InvitationLink { get; set; }
+    public bool InvitationLink { get; init; }
 }

@@ -747,13 +747,13 @@
   <data name="RoomCreateUser" xml:space="preserve">
     <value>Ավելացված օգտվող: {0}. Դեր: {1}</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Հղումը ստեղծվել է: Դեր: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Հղումը ջնջված է</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Հղումը թարմացվել է: Դեր: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -776,5 +776,20 @@
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0} նշանակված: {1}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Քաղաք</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Երկիր</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Ստեղծվել է արտաքին հղում՝ {0}:Դերը՝ {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Արտաքին հղումը ջնջված է՝ {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Արտաքին հղումը թարմացվել է՝ {0}:Դերը՝ {1}</value>
   </data>
 </root>

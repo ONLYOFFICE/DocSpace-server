@@ -70,4 +70,16 @@
   <data name="ProductName" xml:space="preserve">
     <value>Utilizatori</value>
   </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Imposibil de găsit fișierul încărcat</value>
+  </data>
+  <data name="ProductAdminOpportunities" xml:space="preserve">
+    <value>Faceţi aceleaşi lucruri în calitate de utilizator|Creați profile și grupe|Importați profile|Invitați utilizatori</value>
+  </data>
+  <data name="ErrorUnknownFileImageType" xml:space="preserve">
+    <value>Tip de format de imagine necunoscut</value>
+  </data>
+  <data name="ProductUserOpportunities" xml:space="preserve">
+    <value>Afișare profiluri și grupuri</value>
+  </data>
 </root>
