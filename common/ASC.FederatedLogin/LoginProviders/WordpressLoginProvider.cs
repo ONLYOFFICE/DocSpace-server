@@ -48,10 +48,8 @@ public class WordpressLoginProvider : BaseLoginProvider<WordpressLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
     }
 

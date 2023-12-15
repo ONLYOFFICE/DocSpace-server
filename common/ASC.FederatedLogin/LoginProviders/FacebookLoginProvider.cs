@@ -49,11 +49,9 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -68,7 +66,7 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         return RequestProfile(accessToken);
     }
 
-    internal LoginProfile ProfileFromFacebook(string facebookProfile)
+    private LoginProfile ProfileFromFacebook(string facebookProfile)
     {
         var jProfile = JObject.Parse(facebookProfile);
         if (jProfile == null)
@@ -76,7 +74,7 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             BirthDay = jProfile.Value<string>("birthday"),
             Link = jProfile.Value<string>("link"),
