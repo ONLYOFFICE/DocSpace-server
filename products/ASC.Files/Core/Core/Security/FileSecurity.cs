@@ -130,7 +130,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     SubjectType.InvitationLink, new HashSet<FileShare>
                     {
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None
                     }
                 }
             }
