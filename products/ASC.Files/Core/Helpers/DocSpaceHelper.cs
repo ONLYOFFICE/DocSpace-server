@@ -62,6 +62,25 @@ public static class DocSpaceHelper
 
         return room is { SettingsPrivate: true };
     }
+    public static async Task<bool> WatermarkEnabledAsync<T>(File<T> file, IFolderDao<T> folderDao)
+    {
+        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+        var room = parents.Find(f => IsRoom(f.FolderType));
+
+        if(room != null)
+        {
+            if (string.IsNullOrEmpty(room.SettingsWatermark))
+            {
+                return false;
+            }
+            else
+            {
+                var watermarkSettings = JsonSerializer.Deserialize<WatermarkSettings>(room.SettingsWatermark);
+                return watermarkSettings == null ? false : watermarkSettings.Enabled;
+            }
+        }
+        return false;
+    }
     public static async Task<Folder<T>> GetRoomId<T>(File<T> file, IFolderDao<T> folderDao)
     {
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();

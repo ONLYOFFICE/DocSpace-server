@@ -232,12 +232,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var watermarkEnabled = await DocSpaceHelper.WatermarkEnabledAsync((File<T>)file, folderDao);
+        if (watermarkEnabled)
+        {
+            _files[file.Id] = ".pdf";
+        }
         var title = file.Title;
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
                 title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+        }
 
         var entriesPathId = new ItemNameValueCollection<T>();
         entriesPathId.Add(path + title, file.Id);

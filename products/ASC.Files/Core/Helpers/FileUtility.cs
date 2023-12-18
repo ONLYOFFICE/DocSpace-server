@@ -203,12 +203,14 @@ public class FileUtility
         FileUtilityConfiguration fileUtilityConfiguration,
         FilesLinkUtility filesLinkUtility,
         IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo)
+        SetupInfo setupInfo,
+        DaoFactory daoFactory)
     {
         _fileUtilityConfiguration = fileUtilityConfiguration;
         _filesLinkUtility = filesLinkUtility;
         _dbContextFactory = dbContextFactory;
         _setupInfo = setupInfo;
+        _daoFactory = daoFactory;
         CanForcesave = GetCanForcesave();
     }
 
@@ -411,6 +413,11 @@ public class FileUtility
     
     public async Task<bool> CanConvert<T>(File<T> file)
     {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        if (await DocSpaceHelper.WatermarkEnabledAsync(file, folderDao))
+        {
+            return false;
+        }
         var ext = GetFileExtension(file.Title);
         return (await GetExtsConvertibleAsync()).ContainsKey(ext) && file.ContentLength <= _setupInfo.AvailableFileSize;
     }
@@ -606,6 +613,7 @@ public class FileUtility
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly SetupInfo _setupInfo;
+    private readonly DaoFactory _daoFactory;
 
     public static readonly ImmutableList<string> ExtsArchive =  new List<string>
     {

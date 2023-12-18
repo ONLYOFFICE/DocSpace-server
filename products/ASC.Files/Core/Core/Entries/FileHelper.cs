@@ -27,7 +27,7 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLinkUtility, FileUtility fileUtility, FileConverter fileConverter)
+public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLinkUtility, FileUtility fileUtility, FileConverter fileConverter, IDaoFactory daoFactory)
 {
     internal string GetTitle<T>(File<T> file)
     {
@@ -58,6 +58,12 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
 
     public string GetDownloadUrl<T>(FileEntry<T> fileEntry)
     {
-        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id);
+        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id, CheckWatermarkEnable(fileEntry).Result);
+    }
+    public async Task<bool> CheckWatermarkEnable<T>(FileEntry<T> fileEntry)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var watermarkEnabled = await DocSpaceHelper.WatermarkEnabledAsync((File<T>)fileEntry, folderDao);
+        return watermarkEnabled;
     }
 }
