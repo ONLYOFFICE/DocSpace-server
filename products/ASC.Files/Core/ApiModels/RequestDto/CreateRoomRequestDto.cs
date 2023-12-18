@@ -36,7 +36,7 @@ public enum RoomType
     ReadOnlyRoom = 4,
     CustomRoom = 5,
     PublicRoom = 6,
-    FormRoom = 7,
+    FormRoom = 7
 }
 
 /// <summary>

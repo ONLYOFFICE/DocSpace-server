@@ -372,12 +372,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         return await filesControllerHelper.UpdateCommentAsync(fileId, inDto.Version, inDto.Comment);
     }
 
-    [HttpPut("file/{formId}/signed")]
-    public async Task<object> SignedFormAsync(T formId, SignedFormRequestDto inDto)
-    {
-        return await filesControllerHelper.SignedFormAsync(formId, inDto.Data);
-    }
-
     /// <summary>
     /// Updates the information of the selected file with the parameters specified in the request.
     /// </summary>
