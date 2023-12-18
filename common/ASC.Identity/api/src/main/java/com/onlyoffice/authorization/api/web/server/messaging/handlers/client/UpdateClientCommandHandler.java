@@ -39,7 +39,7 @@ final class UpdateClientCommandHandler extends ScheduledMessagingCommandHandler<
                 var channel = w.getChannel();
 
                 try {
-                    if (!ids.contains(w.getData().getClientId()))
+                    if (ids.contains(w.getData().getClientId()))
                         channel.basicAck(tag, true);
                     else
                         channel.basicNack(tag, false, true);

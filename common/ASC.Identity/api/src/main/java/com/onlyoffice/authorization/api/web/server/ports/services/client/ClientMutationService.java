@@ -115,6 +115,7 @@ public class ClientMutationService implements ClientMutationUsecases {
                 .getResponse().getEmail());
     }
 
+    @Transactional(rollbackFor = Exception.class, timeout = 5000)
     public Set<String> updateClients(Iterable<Pair<String, ClientMessage>> updateClientPair) {
         var ids = StreamSupport.stream(updateClientPair.spliterator(), false)
                 .map(c -> c.getFirst())
