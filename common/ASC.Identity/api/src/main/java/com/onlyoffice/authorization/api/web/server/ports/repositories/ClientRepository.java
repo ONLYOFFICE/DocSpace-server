@@ -32,11 +32,12 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
     @EntityGraph(attributePaths = {"scopes", "tenant"})
     Optional<Client> findClientByClientIdAndTenant(String id, int tenant);
     Page<Client> findAllByTenant(int tenant, Pageable pageable);
-    @Query("UPDATE Client c SET c.clientSecret=:secret, c.modifiedOn=CURRENT_DATE() WHERE c.clientId=:clientId AND c.tenant=:tenant")
+    @Query("UPDATE Client c SET c.clientSecret=:secret, c.modifiedOn=:modifiedOn WHERE c.clientId=:clientId AND c.tenant=:tenant")
     @Modifying
     void regenerateClientSecretByClientId(@Param("clientId") String clientId,
                                           @Param("tenant") int tenant,
-                                          @Param("secret") String secret);
+                                          @Param("secret") String secret,
+                                          @Param("modifiedOn") Timestamp modifiedOn);
     @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId=:clientId")
     @Modifying
     void changeActivation(@Param("clientId") String clientId,

@@ -9,6 +9,7 @@ import java.sql.Timestamp;
  *
  */
 public interface ClientPersistenceMutationUsecases {
-    void regenerateClientSecretByClientId(String clientId, int tenant, String secret);
+    void regenerateClientSecretByClientId(String clientId, int tenant,
+                                          String secret, Timestamp modifiedOn);
     void changeActivation(String clientId, boolean enabled, Timestamp modifiedOn);
 }

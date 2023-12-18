@@ -60,7 +60,7 @@ public class ClientMutationService implements ClientMutationUsecases {
         MDC.clear();
 
         mutationUsecases.regenerateClientSecretByClientId(clientId,
-                tenant, cipher.encrypt(secret));
+                tenant, cipher.encrypt(secret), Timestamp.from(Instant.now()));
 
         return SecretDTO.builder().clientSecret(secret).build();
     }
