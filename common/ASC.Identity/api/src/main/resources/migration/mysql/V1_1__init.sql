@@ -109,6 +109,18 @@ ON COMPLETION PRESERVE
     DO
       DELETE FROM identity_authorizations ia WHERE ia.invalidated = 1;
 
+DROP TRIGGER IF EXISTS identity_update_entry_clients;
+
+CREATE TRIGGER identity_update_entry_clients
+BEFORE UPDATE ON identity_clients
+FOR EACH ROW
+BEGIN
+  IF new.modified_on <= old.modified_on
+  THEN
+   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
+  END IF;
+END;
+
 DROP TRIGGER IF EXISTS identity_update_entry_authorizations;
 
 CREATE TRIGGER identity_update_entry_authorizations
