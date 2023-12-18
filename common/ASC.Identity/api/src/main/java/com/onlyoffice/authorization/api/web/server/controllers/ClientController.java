@@ -15,6 +15,8 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCle
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.client.APIClient;
+import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
+import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessage;
@@ -37,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,8 +50,11 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -102,27 +108,48 @@ public class ClientController {
     ) {
         var context = TenantContextContainer.context.get();
         var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
+
         MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Received a new get clients request for tenant with page and limit");
+
         PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(context
                 .getResponse().getTenantId(), page, limit);
+
         log.debug("Got clients");
         MDC.clear();
+
+        var tasks = new HashSet<Pair<ClientDTO, CompletableFuture<APIClientDTOWrapper<PersonDTO>>>>();
         pagination.getData().forEach(c -> {
             MDC.put("profile", c.getModifiedBy());
-            log.debug("Trying to get profile");
-            var profile = apiClient.getProfile(URI.create(address), cookie, c.getModifiedBy());
-            if (profile != null && profile.getResponse() != null) {
-                log.debug("Got profile");
-                var r = profile.getResponse();
-                c.setCreatorAvatar(r.getAvatarSmall());
-                c.setCreatorDisplayName(String
-                        .format("%s %s", r.getFirstName(), r.getLastName()).trim());
-            }
+            log.debug("Creating a task to get user's profile");
+
+            tasks.add(Pair.of(c, CompletableFuture.supplyAsync(() -> apiClient
+                    .getProfile(URI.create(address), cookie, c.getModifiedBy()))));
+
             MDC.clear();
+        });
+
+        CompletableFuture.allOf(tasks.stream().map(Pair::getSecond).collect(Collectors.toSet())
+                .toArray(new CompletableFuture[tasks.size()]));
+
+        tasks.forEach(task -> {
+            var client = task.getFirst();
+            try {
+                var result = task.getSecond().get();
+                if (result != null && result.getResponse() != null) {
+                    var profile = result.getResponse();
+                    client.setCreatorAvatar(profile.getAvatarSmall());
+                    client.setCreatorDisplayName(String
+                            .format("%s %s", profile.getFirstName(), profile.getLastName()).trim());
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                MDC.put("profile", client.getModifiedBy());
+                log.error("Could not get user's profile");
+                MDC.clear();
+            }
         });
 
         for (final var client : pagination.getData()) {
