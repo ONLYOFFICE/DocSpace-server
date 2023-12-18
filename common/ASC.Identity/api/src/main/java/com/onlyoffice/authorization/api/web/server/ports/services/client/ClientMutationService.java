@@ -4,6 +4,7 @@ import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfigur
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
@@ -47,12 +48,11 @@ public class ClientMutationService implements ClientMutationUsecases {
     @SneakyThrows
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
-    public SecretDTO regenerateSecret(String clientId, int tenant) {
-        var tenantContext = TenantContextContainer.context.get().getResponse();
+    public SecretDTO regenerateSecret(String clientId, TenantDTO tenant) {
         var secret = UUID.randomUUID().toString();
 
-        MDC.put("tenantId", String.valueOf(tenantContext.getTenantId()));
-        MDC.put("tenantAlias", tenantContext.getTenantAlias());
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Regenerating client's secret");
         MDC.put("clientSecret", secret);
@@ -60,8 +60,8 @@ public class ClientMutationService implements ClientMutationUsecases {
         MDC.clear();
 
         try {
-            mutationUsecases.regenerateClientSecretByClientId(clientId,
-                    tenant, cipher.encrypt(secret), Timestamp.from(Instant.now()));
+            mutationUsecases.regenerateClientSecretByClientId(clientId, tenant.getTenantId(),
+                    cipher.encrypt(secret), Timestamp.from(Instant.now()));
         } catch (Exception e) {
             throw new UnsupportedOperationException(String
                     .format("Could not execute regenerate secret operation %s", e.getMessage()));

@@ -369,40 +369,48 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
+        var tenant = TenantContextContainer.context.get().getResponse();
+
         setLoggerContextAttributes();
         log.info("Received a new regenerate client's secret request");
         log.debug("Trying to regenerate client's secret");
         MDC.clear();
 
-        authorizationCleanupUsecases.deleteAuthorizationsByClientId(clientId);
-        var regenerate = mutationUsecases.regenerateSecret(clientId, TenantContextContainer
-                .context.get().getResponse().getTenantId());
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, address, clientId))
-                .withRel(HttpMethod.GET.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .updateClient(request, response, address, clientId, null))
-                .withRel(HttpMethod.PUT.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(request, response, address, clientId))
-                .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
-                .withTitle("create_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .activateClient(request, response, address, clientId, null))
-                .withRel(HttpMethod.PATCH.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("activate_client"));
+        try {
+            var regenerate = CompletableFuture.supplyAsync(() -> authorizationCleanupUsecases
+                            .deleteAuthorizationsByClientId(clientId))
+                    .thenApplyAsync((r) -> mutationUsecases.regenerateSecret(clientId, tenant))
+                    .get();
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .getClient(response, address, clientId))
+                    .withRel(HttpMethod.GET.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("get_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .updateClient(request, response, address, clientId, null))
+                    .withRel(HttpMethod.PUT.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("update_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .deleteClient(request, response, address, clientId))
+                    .withRel(HttpMethod.DELETE.name())
+                    .withTitle("delete_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
+                    .withTitle("create_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .activateClient(request, response, address, clientId, null))
+                    .withRel(HttpMethod.PATCH.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("activate_client"));
 
-        log.debug("Regeneration result", regenerate);
+            log.debug("Regeneration result", regenerate);
 
-        return ResponseEntity.ok(regenerate);
+            return ResponseEntity.ok(regenerate);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @DeleteMapping("/{clientId}")
