@@ -58,7 +58,13 @@ public class FileTrackerHelper
             }
             else
             {
-                tracker.EditingBy.Add(tabId, new TrackInfo(userId, tabId == userId, editingAlone, tenantId));
+                tracker.EditingBy.Add(tabId, new TrackInfo
+                {
+                    UserId = userId,
+                    NewScheme = tabId == userId,
+                    EditingAlone = editingAlone,
+                    TenantId = tenantId
+                });
             }
         }
         else
@@ -102,36 +108,14 @@ public class FileTrackerHelper
         SetTracker(fileId, null);
     }
 
-    public void RemoveAllOther<T>(Guid userId, T fileId)
-    {
-        var tracker = GetTracker(fileId);
-        if (tracker != null)
-        {
-            var listForRemove = tracker.EditingBy
-                                       .Where(b => b.Value.UserId != userId);
-
-            if (listForRemove.Count() != tracker.EditingBy.Count)
-            {
-                foreach (var forRemove in listForRemove)
-                {
-                    tracker.EditingBy.Remove(forRemove.Key);
-                }
-
-                SetTracker(fileId, tracker);
-
-                return;
-            }
-        }
-        SetTracker(fileId, null);
-    }
-
     public bool IsEditing<T>(T fileId)
     {
         var tracker = GetTracker(fileId);
         if (tracker != null)
         {
+            var now = DateTime.UtcNow;
             var listForRemove = tracker.EditingBy
-                                       .Where(e => !e.Value.NewScheme && (DateTime.UtcNow - e.Value.TrackTime).Duration() > TrackTimeout);
+                                       .Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > TrackTimeout);
 
             foreach (var editTab in listForRemove)
             {
@@ -206,7 +190,8 @@ public class FileTrackerHelper
         {
             if (tracker != null)
             {
-                _cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
+                tracker = tracker with { };
+                _cache.Insert(Tracker + fileId, tracker with {}, CacheTimeout, EvictionCallback());
             }
             else
             {
@@ -215,9 +200,21 @@ public class FileTrackerHelper
         }
     }
 
-    private Action<object, object, EvictionReason, object> EvictionCallback<T>(T fileId, FileTracker fileTracker)
+    private Action<object, object, EvictionReason, object> EvictionCallback()
     {
-        return async (_, _, reason, _) =>
+        return (cacheFileId, fileTracker, reason, _) =>
+        {
+            if(int.TryParse(cacheFileId?.ToString(), out var internalFileId))
+            {
+                Callback(internalFileId, fileTracker as FileTracker, reason).Wait();
+            }
+            else
+            {
+                Callback(cacheFileId?.ToString(), fileTracker as FileTracker, reason).Wait();
+            }
+        };
+
+        async Task Callback<T>(T fileId, FileTracker fileTracker, EvictionReason reason)
         {
             if (reason != EvictionReason.Expired)
             {
@@ -241,50 +238,47 @@ public class FileTrackerHelper
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
                 var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileAsync(fileId));
-
+                
                 if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                 {
-                    _cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
+                    _cache.Insert(Tracker + fileId, fileTracker with {}, CacheTimeout, EvictionCallback());
                 }
             }
             catch (Exception e)
             {
                 _logger.ErrorWithException(e);
             }
-        };
+        }
     }
 }
 
-public class FileTracker
+public record FileTracker
 {
-
-    internal Dictionary<Guid, TrackInfo> EditingBy { get; private set; }
+    internal Dictionary<Guid, TrackInfo> EditingBy { get; }
 
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId)
     {
-        EditingBy = new Dictionary<Guid, TrackInfo> { { tabId, new TrackInfo(userId, newScheme, editingAlone, tenantId) } };
+        EditingBy = new()
+        { 
+            { tabId, new TrackInfo
+                {
+                    UserId = userId,
+                    NewScheme = newScheme,
+                    EditingAlone = editingAlone,
+                    TenantId = tenantId
+                } 
+            } 
+        };
     }
 
 
     internal class TrackInfo
     {
-        public DateTime CheckRightTime { get; set; }
-        public DateTime TrackTime { get; set; }
-        public Guid UserId { get; set; }
-        public int TenantId { get; set; }
-        public bool NewScheme { get; set; }
-        public bool EditingAlone { get; set; }
-
-        public TrackInfo() { }
-
-        public TrackInfo(Guid userId, bool newScheme, bool editingAlone, int tenantId)
-        {
-            CheckRightTime = DateTime.UtcNow;
-            TrackTime = DateTime.UtcNow;
-            NewScheme = newScheme;
-            UserId = userId;
-            EditingAlone = editingAlone;
-            TenantId = tenantId;
-        }
+        public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;
+        public DateTime TrackTime { get; set; } = DateTime.UtcNow;
+        public required Guid UserId { get; init; }
+        public required int TenantId { get; init; }
+        public required bool NewScheme { get;  init; }
+        public required bool EditingAlone { get;  init; }
     }
 }
