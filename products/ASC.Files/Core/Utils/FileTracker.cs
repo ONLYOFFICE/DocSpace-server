@@ -33,15 +33,17 @@ public class FileTrackerHelper
     private readonly ICache _cache;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<FileTrackerHelper> _logger;
-    public static readonly TimeSpan TrackTimeout = TimeSpan.FromSeconds(12);
-    public static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(60);
-    public static readonly TimeSpan CheckRightTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan _trackTimeout = TimeSpan.FromSeconds(12);
+    private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
+    private readonly Action<object, object, EvictionReason, object> _callbackAction;
 
     public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
     {
         _cache = cache;
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
+        _callbackAction = EvictionCallback();
     }
 
 
@@ -54,7 +56,7 @@ public class FileTrackerHelper
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
                 trackInfo.TrackTime = DateTime.UtcNow;
-                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > CheckRightTimeout;
+                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > _checkRightTimeout;
             }
             else
             {
@@ -91,8 +93,7 @@ public class FileTrackerHelper
             }
             if (userId != Guid.Empty)
             {
-                var listForRemove = tracker.EditingBy
-                                           .Where(b => tracker.EditingBy[b.Key].UserId == userId);
+                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
 
                 foreach (var editTab in listForRemove)
                 {
@@ -105,7 +106,7 @@ public class FileTrackerHelper
             }
         }
 
-        SetTracker(fileId, null);
+        RemoveTracker(fileId);
     }
 
     public bool IsEditing<T>(T fileId)
@@ -114,8 +115,7 @@ public class FileTrackerHelper
         if (tracker != null)
         {
             var now = DateTime.UtcNow;
-            var listForRemove = tracker.EditingBy
-                                       .Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > TrackTimeout);
+            var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout);
 
             foreach (var editTab in listForRemove)
             {
@@ -124,7 +124,7 @@ public class FileTrackerHelper
 
             if (tracker.EditingBy.Count == 0)
             {
-                SetTracker(fileId, null);
+                RemoveTracker(fileId);
 
                 return false;
             }
@@ -134,7 +134,7 @@ public class FileTrackerHelper
             return true;
         }
 
-        SetTracker(fileId, null);
+        RemoveTracker(fileId);
 
         return false;
     }
@@ -163,7 +163,7 @@ public class FileTrackerHelper
         }
         else
         {
-            SetTracker(fileId, null);
+            RemoveTracker(fileId);
         }
     }
 
@@ -176,7 +176,7 @@ public class FileTrackerHelper
 
     private FileTracker GetTracker<T>(T fileId)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
             return _cache.Get<FileTracker>(Tracker + fileId);
         }
@@ -186,41 +186,41 @@ public class FileTrackerHelper
 
     private void SetTracker<T>(T fileId, FileTracker tracker)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            if (tracker != null)
-            {
-                tracker = tracker with { };
-                _cache.Insert(Tracker + fileId, tracker with {}, CacheTimeout, EvictionCallback());
-            }
-            else
-            {
-                _cache.Remove(Tracker + fileId);
-            }
+            _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
+        }
+    }
+    
+    private void RemoveTracker<T>(T fileId)
+    {
+        if (!EqualityComparer<T>.Default.Equals(fileId, default))
+        {
+            _cache.Remove(Tracker + fileId);
         }
     }
 
     private Action<object, object, EvictionReason, object> EvictionCallback()
     {
         return (cacheFileId, fileTracker, reason, _) =>
-        {
-            if(int.TryParse(cacheFileId?.ToString(), out var internalFileId))
-            {
-                Callback(internalFileId, fileTracker as FileTracker, reason).Wait();
-            }
-            else
-            {
-                Callback(cacheFileId?.ToString(), fileTracker as FileTracker, reason).Wait();
-            }
-        };
-
-        async Task Callback<T>(T fileId, FileTracker fileTracker, EvictionReason reason)
-        {
+        {            
             if (reason != EvictionReason.Expired)
             {
                 return;
             }
+            
+            if(int.TryParse(cacheFileId?.ToString(), out var internalFileId))
+            {
+                Callback(internalFileId, fileTracker as FileTracker).Wait();
+            }
+            else
+            {
+                Callback(cacheFileId?.ToString(), fileTracker as FileTracker).Wait();
+            }
+        };
 
+        async Task Callback<T>(T fileId, FileTracker fileTracker)
+        {
             try
             {
                 if (fileTracker.EditingBy == null || !fileTracker.EditingBy.Any())
@@ -241,7 +241,7 @@ public class FileTrackerHelper
                 
                 if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                 {
-                    _cache.Insert(Tracker + fileId, fileTracker with {}, CacheTimeout, EvictionCallback());
+                    _cache.Insert(Tracker + fileId, fileTracker with {}, _cacheTimeout, _callbackAction);
                 }
             }
             catch (Exception e)
