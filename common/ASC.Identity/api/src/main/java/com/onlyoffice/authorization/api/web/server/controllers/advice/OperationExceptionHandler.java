@@ -18,9 +18,9 @@ import java.util.concurrent.ExecutionException;
  */
 @ControllerAdvice
 @Slf4j
-public class ExecutionExceptionHandler {
-    @ExceptionHandler(ExecutionException.class)
-    public ResponseEntity<ErrorDTO> handleExecutionException(ExecutionException ex, HttpServletRequest request) {
+public class OperationExceptionHandler {
+    @ExceptionHandler(value = {ExecutionException.class, UnsupportedOperationException.class})
+    public ResponseEntity<ErrorDTO> handleExecutionException(Throwable ex, HttpServletRequest request) {
         log.error(ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
