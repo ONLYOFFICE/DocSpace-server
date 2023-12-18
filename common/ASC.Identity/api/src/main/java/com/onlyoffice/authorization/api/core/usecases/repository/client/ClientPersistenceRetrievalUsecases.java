@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  *
@@ -16,4 +17,5 @@ public interface ClientPersistenceRetrievalUsecases {
     Optional<Client> findById(String id);
     Page<Client> findAllByTenant(int tenant, Pageable pageable);
     Optional<Client> findClientByClientIdAndTenant(String clientId, int tenant);
+    Set<Client> findClientsByClientIdIn(Iterable<String> clientIds);
 }

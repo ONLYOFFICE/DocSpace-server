@@ -13,7 +13,6 @@ import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.PaginationDTO;
-import com.onlyoffice.authorization.api.web.server.ports.services.ClientService;
 import com.onlyoffice.authorization.api.web.security.filters.CheckAuthAdminCookieFilter;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;

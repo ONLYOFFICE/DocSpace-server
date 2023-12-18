@@ -5,10 +5,10 @@ package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Authorization;
-import com.onlyoffice.authorization.api.web.server.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.AuthorizationRepository;
-import com.onlyoffice.authorization.api.web.server.ports.services.AuthorizationService;
+import com.onlyoffice.authorization.api.web.server.ports.services.authorization.AuthorizationCreationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("test")
 public class AuthorizationServiceTest extends ContainerBase {
     @Autowired
-    private AuthorizationService authorizationService;
+    private AuthorizationCreationService authorizationService;
     @Autowired
     private AuthorizationRepository authorizationRepository;
 

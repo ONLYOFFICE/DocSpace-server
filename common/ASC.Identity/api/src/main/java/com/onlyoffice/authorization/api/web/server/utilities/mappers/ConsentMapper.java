@@ -5,7 +5,7 @@ package com.onlyoffice.authorization.api.web.server.utilities.mappers;
 
 import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
-import com.onlyoffice.authorization.api.web.server.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.ConsentMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ConsentDTO;
 import org.mapstruct.Mapper;

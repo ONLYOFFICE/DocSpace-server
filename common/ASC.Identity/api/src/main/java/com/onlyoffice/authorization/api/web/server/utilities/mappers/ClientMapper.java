@@ -4,7 +4,7 @@
 package com.onlyoffice.authorization.api.web.server.utilities.mappers;
 
 import com.onlyoffice.authorization.api.core.entities.Client;
-import com.onlyoffice.authorization.api.web.server.transfer.messages.ClientMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
@@ -29,6 +29,7 @@ public interface ClientMapper {
     }
 
     default String map(Set<String> value) {
+        if (value == null) return null;
         return String.join(",", value);
     }
 
@@ -64,6 +65,7 @@ public interface ClientMapper {
     })
     ClientMessage fromQueryToMessage(ClientDTO client);
     ClientDTO fromCommandToQuery(CreateClientDTO client);
+    ClientMessage fromCommandToMessage(UpdateClientDTO client);
     @Mappings({
             @Mapping(source = "enabled", target = "enabled"),
             @Mapping(source = "authenticationMethod", target = "authenticationMethods")
@@ -73,5 +75,16 @@ public interface ClientMapper {
             @Mapping(source = "enabled", target = "enabled"),
     })
     Client fromQueryToEntity(ClientDTO client);
+    @Mappings({
+            @Mapping(target = "enabled", ignore = true),
+            @Mapping(target = "invalidated", ignore = true),
+            @Mapping(target = "tenant", ignore = true)
+    })
     void update(@MappingTarget Client entity, UpdateClientDTO clientDTO);
+    @Mappings({
+            @Mapping(target = "enabled", ignore = true),
+            @Mapping(target = "invalidated", ignore = true),
+            @Mapping(target = "tenant", ignore = true)
+    })
+    void update(@MappingTarget Client entity, Client secondEntity);
 }

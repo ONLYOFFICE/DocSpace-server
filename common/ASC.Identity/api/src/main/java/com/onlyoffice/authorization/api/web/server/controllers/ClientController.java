@@ -17,7 +17,7 @@ import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLi
 import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.server.transfer.messages.AuditMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.UpdateClientDTO;
@@ -344,7 +344,7 @@ public class ClientController {
     @Retry(name = "updateClientRetryRateLimiter")
     @RateLimiter(name = "updateClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
-    public ResponseEntity<ClientDTO> updateClient(
+    public ResponseEntity updateClient(
             HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
@@ -358,32 +358,33 @@ public class ClientController {
         MDC.put("clientId", clientId);
         log.info("Received a new update client request");
         log.debug("Trying to update client with body", body);
-        var client = creationUsecases.updateClient(body, clientId, tenantContext
-                .getResponse().getTenantId());
-        log.debug("Client has been updated", client);
+        mutationUsecases.updateClientAsync(body, clientId);
+//        var client = creationUsecases.updateClient(body, clientId, tenantContext
+//                .getResponse().getTenantId());
+        log.debug("Client has been updated");
         MDC.clear();
-        client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, address, client.getClientId()))
-                .withRel(HttpMethod.GET.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(request, response, address, client.getClientId()))
-                .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(request, response, address, client.getClientId()))
-                .withRel(HttpMethod.PATCH.name())
-                .withTitle("regenerate_secret"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .postClient(request, response, address,null))
-                .withRel(HttpMethod.POST.name())
-                .withTitle("create_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(request, response, address, clientId, null))
-                .withRel(HttpMethod.PATCH.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("activate_client"));
+//        client.add(linkTo(methodOn(ClientController.class)
+//                .getClient(response, address, client.getClientId()))
+//                .withRel(HttpMethod.GET.name())
+//                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+//                .withTitle("get_client"));
+//        client.add(linkTo(methodOn(ClientController.class)
+//                .deleteClient(request, response, address, client.getClientId()))
+//                .withRel(HttpMethod.DELETE.name())
+//                .withTitle("delete_client"));
+//        client.add(linkTo(methodOn(ClientController.class)
+//                .regenerateSecret(request, response, address, client.getClientId()))
+//                .withRel(HttpMethod.PATCH.name())
+//                .withTitle("regenerate_secret"));
+//        client.add(linkTo(methodOn(ClientController.class)
+//                .postClient(request, response, address,null))
+//                .withRel(HttpMethod.POST.name())
+//                .withTitle("create_client"));
+//        client.add(linkTo(methodOn(ClientController.class)
+//                .activateClient(request, response, address, clientId, null))
+//                .withRel(HttpMethod.PATCH.name())
+//                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+//                .withTitle("activate_client"));
 
         amqpTemplate.convertAndSend(
                 configuration.getAudit().getExchange(),
@@ -399,7 +400,7 @@ public class ClientController {
                         .actionEnum(Action.UPDATE_CLIENT)
                         .build());
 
-        return ResponseEntity.ok(client);
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{clientId}/regenerate")
@@ -420,49 +421,53 @@ public class ClientController {
         log.info("Received a new regenerate client's secret request");
         log.debug("Trying to regenerate client's secret");
         MDC.clear();
-        authorizationCleanupUsecases.deleteAuthorizationsByClientId(clientId);
-        var regenerate = mutationUsecases.regenerateSecret(clientId, tenantContext
-                .getResponse().getTenantId());
-        log.debug("Regeneration result", regenerate);
+        try {
+            authorizationCleanupUsecases.deleteAuthorizationsByClientId(clientId);
+            var regenerate = mutationUsecases.regenerateSecret(clientId, tenantContext
+                    .getResponse().getTenantId());
+            log.debug("Regeneration result", regenerate);
 
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, address, clientId))
-                .withRel(HttpMethod.GET.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .updateClient(request, response, address, clientId, null))
-                .withRel(HttpMethod.PUT.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(request, response, address, clientId))
-                .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
-                .withTitle("create_client"));
-        regenerate.add(linkTo(methodOn(ClientController.class)
-                .activateClient(request, response, address, clientId, null))
-                .withRel(HttpMethod.PATCH.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("activate_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .getClient(response, address, clientId))
+                    .withRel(HttpMethod.GET.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("get_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .updateClient(request, response, address, clientId, null))
+                    .withRel(HttpMethod.PUT.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("update_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .deleteClient(request, response, address, clientId))
+                    .withRel(HttpMethod.DELETE.name())
+                    .withTitle("delete_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
+                    .withTitle("create_client"));
+            regenerate.add(linkTo(methodOn(ClientController.class)
+                    .activateClient(request, response, address, clientId, null))
+                    .withRel(HttpMethod.PATCH.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("activate_client"));
 
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(personContext.getResponse().getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.REGENERATE_SECRET)
-                        .build());
+            amqpTemplate.convertAndSend(
+                    configuration.getAudit().getExchange(),
+                    configuration.getAudit().getRouting(),
+                    AuditMessage.builder()
+                            .ip(HttpUtils.getRequestIP(request))
+                            .browser(HttpUtils.getClientBrowser(request))
+                            .platform(HttpUtils.getClientOS(request))
+                            .date(Timestamp.from(Instant.now()))
+                            .tenantId(tenantContext.getResponse().getTenantId())
+                            .userId(personContext.getResponse().getId())
+                            .page(HttpUtils.getFullURL(request))
+                            .actionEnum(Action.REGENERATE_SECRET)
+                            .build());
 
-        return ResponseEntity.ok(regenerate);
+            return ResponseEntity.ok(regenerate);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @DeleteMapping("/{clientId}")
@@ -482,7 +487,7 @@ public class ClientController {
         MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
-        cleanupUsecases.deleteClientAsync(clientId, tenantContext.getResponse().getTenantId());
+        cleanupUsecases.deleteClientAsync(clientId);
         amqpTemplate.convertAndSend(
                 configuration.getAudit().getExchange(),
                 configuration.getAudit().getRouting(),
@@ -517,22 +522,26 @@ public class ClientController {
         MDC.put("clientId", clientId);
         log.info("Received a new change client activation request for tenant");
         MDC.clear();
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenantContext.getResponse().getTenantId())
-                        .userId(personContext.getResponse().getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.CHANGE_CLIENT_ACTIVATION)
-                        .build());
-        if (mutationUsecases.changeActivation(body, clientId))
-            return ResponseEntity.status(HttpStatus.OK).build();
-        return ResponseEntity.badRequest().build();
+        try {
+            if (mutationUsecases.changeActivation(body, clientId))
+                return ResponseEntity.status(HttpStatus.OK).build();
+            amqpTemplate.convertAndSend(
+                    configuration.getAudit().getExchange(),
+                    configuration.getAudit().getRouting(),
+                    AuditMessage.builder()
+                            .ip(HttpUtils.getRequestIP(request))
+                            .browser(HttpUtils.getClientBrowser(request))
+                            .platform(HttpUtils.getClientOS(request))
+                            .date(Timestamp.from(Instant.now()))
+                            .tenantId(tenantContext.getResponse().getTenantId())
+                            .userId(personContext.getResponse().getId())
+                            .page(HttpUtils.getFullURL(request))
+                            .actionEnum(Action.CHANGE_CLIENT_ACTIVATION)
+                            .build());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
 

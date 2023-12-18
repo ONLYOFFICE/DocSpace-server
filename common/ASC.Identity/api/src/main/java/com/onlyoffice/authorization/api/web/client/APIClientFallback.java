@@ -15,7 +15,8 @@ public class APIClientFallback implements APIClient {
     @Override
     public APIClientDTOWrapper<PersonDTO> getMe(URI base, String cookie) {
         MDC.put("URL", base.toString());
-        log.warn("Get me fallback");
+        MDC.put("Fallback", APIClientFallback.class.getName());
+        log.warn("Could not fetch current user profile");
         MDC.clear();
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
@@ -23,7 +24,9 @@ public class APIClientFallback implements APIClient {
     @Override
     public APIClientDTOWrapper<PersonDTO> getProfile(URI base, String cookie, String email) {
         MDC.put("URL", base.toString());
-        log.warn("Get profile fallback");
+        MDC.put("Email", email);
+        MDC.put("Fallback", APIClientFallback.class.getName());
+        log.warn("Could not fetch user profile");
         MDC.clear();
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
@@ -31,7 +34,8 @@ public class APIClientFallback implements APIClient {
     @Override
     public APIClientDTOWrapper<TenantDTO> getTenant(URI base, String cookie) {
         MDC.put("URL", base.toString());
-        log.warn("Get tenant fallback");
+        MDC.put("Fallback", APIClientFallback.class.getName());
+        log.warn("Could not fetch current tenant info");
         MDC.clear();
         return APIClientDTOWrapper.<TenantDTO>builder().build();
     }

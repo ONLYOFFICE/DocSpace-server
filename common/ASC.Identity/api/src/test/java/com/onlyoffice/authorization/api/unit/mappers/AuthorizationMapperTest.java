@@ -4,7 +4,7 @@
 package com.onlyoffice.authorization.api.unit.mappers;
 
 import com.onlyoffice.authorization.api.core.entities.Authorization;
-import com.onlyoffice.authorization.api.web.server.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.AuthorizationMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;

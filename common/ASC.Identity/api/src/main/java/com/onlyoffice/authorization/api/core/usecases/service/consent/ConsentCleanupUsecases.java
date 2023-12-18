@@ -3,7 +3,7 @@
  */
 package com.onlyoffice.authorization.api.core.usecases.service.consent;
 
-import com.onlyoffice.authorization.api.web.server.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.web.server.messaging.messages.ConsentMessage;
 
 /**
  *

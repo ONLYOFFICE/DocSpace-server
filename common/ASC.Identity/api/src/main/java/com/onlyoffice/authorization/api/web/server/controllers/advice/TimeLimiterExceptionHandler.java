@@ -3,7 +3,6 @@
  */
 package com.onlyoffice.authorization.api.web.server.controllers.advice;
 
-import com.onlyoffice.authorization.api.web.server.transfer.response.ErrorDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,13 +19,8 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class TimeLimiterExceptionHandler {
     @ExceptionHandler(TimeoutException.class)
-    public ResponseEntity<ErrorDTO> handleTimeoutException(TimeoutException ex, HttpServletRequest request) {
+    public ResponseEntity handleTimeoutException(TimeoutException ex, HttpServletRequest request) {
         log.error(ex.getMessage());
-        return new ResponseEntity<ErrorDTO>(ErrorDTO
-                .builder()
-                .reason("request timeout")
-                .build(),
-                HttpStatus.REQUEST_TIMEOUT
-        );
+        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build();
     }
 }

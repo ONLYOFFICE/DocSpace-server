@@ -1,8 +1,8 @@
 package com.onlyoffice.authorization.api.web.security.filters;
 
 import com.onlyoffice.authorization.api.web.client.APIClient;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
+import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,84 +11,51 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class CheckAuthCookieFilter extends OncePerRequestFilter {
-    private final String AUTH_COOKIE_NAME = "asc_auth_key";
-    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
-
+    private final CheckAscCookieCommonProcessor ascCookieCommonProcessor;
     private final APIClient apiClient;
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         log.debug("Validating asc user");
-        var cookies = request.getCookies();
-        if (cookies == null || cookies.length < 1) {
+        try {
+            var processed = ascCookieCommonProcessor.processAscCookies(request);
+            var address = processed.getFirst();
+            var ascCookie = processed.getSecond();
+            MDC.put("address", address);
+            MDC.put("cookie", ascCookie);
+            log.debug("ASC COOKIE");
+            MDC.clear();
+
+            log.debug("An attempt to get current user profile and tenant info");
+            var firstFuture = CompletableFuture.supplyAsync(() -> apiClient
+                    .getMe(URI.create(address), ascCookie));
+            var secondFuture = CompletableFuture.supplyAsync(() -> apiClient
+                    .getTenant(URI.create(address), ascCookie));
+
+            CompletableFuture.allOf(firstFuture, secondFuture).join();
+            PersonContextContainer.context.set(firstFuture.get());
+            TenantContextContainer.context.set(secondFuture.get());
+
+            chain.doFilter(request, response);
+        } catch (BadCredentialsException accessException) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
-
-        var addressCookie = Arrays.stream(cookies)
-                .filter(c -> c.getName().equalsIgnoreCase(X_DOCSPACE_ADDRESS))
-                .findFirst();
-
-        if (addressCookie.isEmpty()) {
-            log.debug("Docspace cookie is empty");
+        } catch (InterruptedException | ExecutionException exception) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
-            return;
         }
-
-        var authCookie = Arrays.stream(cookies)
-                .filter(c -> c.getName().equalsIgnoreCase(AUTH_COOKIE_NAME))
-                .findFirst();
-
-        if (authCookie.isEmpty()) {
-            log.debug("ASC cookie is empty");
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
-
-        var cookie = String.format("%s=%s", authCookie.get().getName(),
-                authCookie.get().getValue());
-
-        MDC.put("cookie", cookie);
-        log.debug("========ASC COOKIE========");
-        MDC.clear();
-
-        var address = URI.create(addressCookie.get().getValue());
-        log.debug("An attempt to get current user profile");
-        var me = apiClient.getMe(address, cookie);
-        if (me.getStatusCode() != HttpStatus.OK.value()) {
-            MDC.put("address", address.toString());
-            MDC.put("cookie", cookie);
-            log.debug("Could not get current user profile");
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            MDC.clear();
-            return;
-        }
-
-        var tenant = apiClient.getTenant(address, cookie);
-        if (tenant.getStatusCode() != HttpStatus.OK.value()) {
-            MDC.put("address", address.toString());
-            MDC.put("cookie", cookie);
-            log.debug("Could not get tenant info");
-            MDC.clear();
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return;
-        }
-
-        PersonContextContainer.context.set(me);
-        TenantContextContainer.context.set(tenant);
-        chain.doFilter(request, response);
     }
 
     @Override

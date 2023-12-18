@@ -31,10 +31,10 @@ import java.util.Base64;
 /**
  *
  */
-@Profile(value = {"prod", "production", "p", "testing", "t", "test"})
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Profile(value = {"prod", "production", "p", "testing", "t", "test"})
 public class AesGcmCipher implements com.onlyoffice.authorization.api.web.security.crypto.Cipher {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final String FACTORY_INSTANCE = "PBKDF2WithHmacSHA256";
@@ -51,7 +51,7 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
         var nonce = new byte[length];
         new SecureRandom().nextBytes(nonce);
         MDC.put("nonce", Arrays.toString(nonce));
-        log.debug("=========RANDOM NONCE=========");
+        log.debug("RANDOM NONCE");
         MDC.clear();
         return nonce;
     }
@@ -59,7 +59,7 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
     private SecretKey getSecretKey(String password, byte[] salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
         MDC.put("password", password);
-        log.debug("=========SECRET PASSWORD=========");
+        log.debug("SECRET PASSWORD");
         MDC.clear();
         var spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
 

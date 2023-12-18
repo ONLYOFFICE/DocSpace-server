@@ -95,6 +95,5 @@ public class Client {
     private void preUpdate() {
         if (this.invalidated)
             this.enabled = false;
-        this.modifiedOn = Timestamp.from(Instant.now());
     }
 }

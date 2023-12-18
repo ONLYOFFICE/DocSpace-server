@@ -9,7 +9,6 @@ import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClient
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.web.server.ports.services.ClientService;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import lombok.SneakyThrows;

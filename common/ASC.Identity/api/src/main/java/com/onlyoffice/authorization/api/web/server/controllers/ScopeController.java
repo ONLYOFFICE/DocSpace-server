@@ -4,12 +4,12 @@
 package com.onlyoffice.authorization.api.web.server.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.core.exceptions.ScopeNotFoundException;
 import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ScopeDTO;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,13 +47,13 @@ public class ScopeController {
                         .group(s.getGroup())
                         .build()
                 )
-                .sorted((o1, o2)-> {
-                    if (o1.getName().equalsIgnoreCase("openid"))
+                .sorted((s1, s2)-> {
+                    if (s1.getName().equalsIgnoreCase("openid"))
                         return 1;
-                    if (o2.getName().equalsIgnoreCase("openid"))
+                    if (s2.getName().equalsIgnoreCase("openid"))
                         return -1;
-                    return o1.getName().
-                            compareToIgnoreCase(o2.getName());
+                    return s1.getName().
+                            compareToIgnoreCase(s2.getName());
                 })
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -87,7 +87,7 @@ public class ScopeController {
         var scope = scopes.stream()
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new ScopeNotFoundException("could not find scope with this name"));
+                .orElseThrow(() -> new EntityNotFoundException("could not find scope with this name"));
         return ResponseEntity.ok(scope);
     }
 }

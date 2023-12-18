@@ -27,8 +27,8 @@ public class Audit {
     private String userId;
     @Column(nullable = false)
     private String page;
-    @Column(nullable = false)
     @Basic
+    @Column(nullable = false)
     private int action;
     @Transient
     private Action actionEnum;
