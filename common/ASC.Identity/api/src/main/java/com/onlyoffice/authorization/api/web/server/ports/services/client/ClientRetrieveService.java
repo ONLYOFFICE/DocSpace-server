@@ -2,7 +2,6 @@ package com.onlyoffice.authorization.api.web.server.ports.services.client;
 
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.PaginationDTO;
@@ -29,12 +28,6 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
     @Cacheable("clients")
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 1250)
     public ClientDTO getClient(String clientId) {
-        var tenantContext = TenantContextContainer.context.get();
-        if (tenantContext != null) {
-            MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
-            MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
-        }
-
         MDC.put("clientId", clientId);
         log.info("Trying to get a client", clientId);
         MDC.clear();
@@ -48,11 +41,6 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
                         query.setClientSecret(cipher.decrypt(query.getClientSecret()));
                         return query;
                     } catch (Exception e) {
-                        if (tenantContext != null) {
-                            MDC.put("tenantId", String.valueOf(tenantContext
-                                    .getResponse().getTenantId()));
-                            MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
-                        }
                         MDC.put("clientId", clientId);
                         log.error("Could not map a client", e);
                         MDC.clear();
@@ -66,10 +54,6 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2250)
     public PaginationDTO getTenantClients(int tenant, int page, int limit) {
-        var tenantContext = TenantContextContainer.context.get().getResponse();
-
-        MDC.put("tenantId", String.valueOf(tenantContext.getTenantId()));
-        MDC.put("tenantAlias", tenantContext.getTenantAlias());
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Trying to get tenant clients", tenant, page, limit);

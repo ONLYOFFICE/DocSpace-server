@@ -18,7 +18,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuditCreationService implements AuditCreationUsecases {
     private final AuditPersistenceCreationUsecases auditUsecases;
-    @Transactional
+    @Transactional(timeout = 5000)
     public Set<String> saveAudits(Iterable<AuditMessage> audits) {
         var ids = new HashSet<String>();
         for (AuditMessage audit : audits) {
@@ -26,6 +26,7 @@ public class AuditCreationService implements AuditCreationUsecases {
                 MDC.put("auditUserId", audit.getUserId());
                 MDC.put("auditIp", audit.getIp());
                 log.info("Saving an audit");
+
                 auditUsecases.saveAudit(AuditMapper.INSTANCE.toEntity(audit));
             } catch (Exception e) {
                 ids.add(audit.getTag());

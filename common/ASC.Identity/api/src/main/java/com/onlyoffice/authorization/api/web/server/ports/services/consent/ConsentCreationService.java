@@ -23,8 +23,10 @@ public class ConsentCreationService implements ConsentCreationUsecases {
         MDC.put("clientId", consentMessage.getRegisteredClientId());
         log.info("Trying to save a new consent");
         MDC.clear();
+
         var entity = ConsentMapper.INSTANCE.toEntity(consentMessage);
         entity.setClient(Client.builder().clientId(consentMessage.getRegisteredClientId()).build());
+
         mutationUsecases.saveConsent(entity);
     }
 
@@ -35,10 +37,13 @@ public class ConsentCreationService implements ConsentCreationUsecases {
                 MDC.put("principalName", consent.getPrincipalName());
                 MDC.put("clientId", consent.getRegisteredClientId());
                 log.info("Trying to save consent");
+
                 var entity = ConsentMapper.INSTANCE.toEntity(consent);
                 entity.setClient(Client.builder()
                         .clientId(consent.getRegisteredClientId()).build());
+
                 log.info("Saving a new consent");
+
                 mutationUsecases.saveConsent(entity);
             } catch (Exception e) {
                 log.error("Could not persist a new consent", e);

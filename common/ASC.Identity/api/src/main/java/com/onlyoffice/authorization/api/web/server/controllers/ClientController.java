@@ -303,7 +303,8 @@ public class ClientController {
         log.debug("Generating a new client's credentials");
 
         var client = creationUsecases.createClientAsync(body, TenantContextContainer
-                .context.get().getResponse().getTenantId(), address);
+                .context.get().getResponse(), PersonContextContainer.context.
+                get().getResponse(), address);
         client.add(linkTo(methodOn(ClientController.class)
                 .getClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.GET.name())

@@ -6,7 +6,6 @@ import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPe
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
@@ -47,7 +46,7 @@ public class ClientMutationService implements ClientMutationUsecases {
 
     @SneakyThrows
     @CacheEvict(cacheNames = "clients", key = "#clientId")
-    @Transactional(rollbackFor = Exception.class, timeout = 2000)
+    @Transactional(rollbackFor = Exception.class, timeout = 2500)
     public SecretDTO regenerateSecret(String clientId, TenantDTO tenant) {
         var secret = UUID.randomUUID().toString();
 
@@ -73,12 +72,6 @@ public class ClientMutationService implements ClientMutationUsecases {
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
-        var tenantContext = TenantContextContainer.context.get().getResponse();
-
-        MDC.put("tenantId", String.valueOf(tenantContext.getTenantId()));
-        MDC.put("tenantAlias", tenantContext.getTenantAlias());
-        MDC.put("clientId", clientId);
-        MDC.put("status", String.valueOf(activationDTO.getStatus()));
         log.info("Changing client's activation", clientId, activationDTO.getStatus());
 
         try {
@@ -97,10 +90,6 @@ public class ClientMutationService implements ClientMutationUsecases {
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public void updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
-        var tenantContext = TenantContextContainer.context.get().getResponse();
-
-        MDC.put("tenantId", String.valueOf(tenantContext.getTenantId()));
-        MDC.put("tenantAlias", tenantContext.getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Trying to update a client");
         MDC.clear();

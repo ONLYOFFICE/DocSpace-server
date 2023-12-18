@@ -33,6 +33,7 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
         MDC.put("clientId", consentMessage.getRegisteredClientId());
         log.info("Deleting a consent");
         MDC.clear();
+
         cleanupUsecases.deleteById(new Consent.ConsentId(
                 consentMessage.getRegisteredClientId(),
                 consentMessage.getPrincipalName()));

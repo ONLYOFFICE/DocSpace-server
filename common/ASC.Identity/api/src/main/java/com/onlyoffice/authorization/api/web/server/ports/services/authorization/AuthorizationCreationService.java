@@ -30,6 +30,7 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
         MDC.put("authorizationId", authorizationMessage.getId());
         log.info("Saving an authorization");
         MDC.clear();
+
         creationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE
                 .toEntity(authorizationMessage));
     }
@@ -39,15 +40,16 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      * @param authorizations
      * @return a list of failed ids
      */
-    @Transactional
+    @Transactional(timeout = 5000)
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
         log.info("Saving authorizations");
-        var ids = new ArrayList<String>();
 
+        var ids = new ArrayList<String>();
         for (AuthorizationMessage authorization : authorizations) {
             try {
                 MDC.put("authorizationId", authorization.getId());
                 log.info("Saving an authorization");
+
                 creationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorization));
             } catch (Exception e) {
                 ids.add(authorization.getId());

@@ -25,6 +25,7 @@ public class ConsentRetrieveService implements ConsentRetrieveUsecases {
         MDC.put("principalName", principalName);
         log.info("Trying to get all consents by principal name");
         MDC.clear();
+
         var response = new HashSet<ConsentDTO>();
         var results = retrieveUsecases.findAllByPrincipalName(principalName);
         results.forEach(r -> response.add(ConsentMapper.INSTANCE.toDTO(r)));

@@ -4,8 +4,8 @@ import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfigur
 import com.onlyoffice.authorization.api.core.exceptions.EntityCreationException;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
-import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
+import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
@@ -60,7 +60,7 @@ public class ClientCreationService implements ClientCreationUsecases {
         return ClientMapper.INSTANCE.fromEntityToQuery(client);
     }
 
-    @Transactional
+    @Transactional(timeout = 5000)
     public List<String> saveClients(Iterable<ClientMessage> messages) {
         log.info("Trying to save new clients");
 
@@ -86,12 +86,12 @@ public class ClientCreationService implements ClientCreationUsecases {
         return ids;
     }
 
-    @Override
-    public ClientDTO createClientAsync(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
-        var context = TenantContextContainer.context.get().getResponse();
-
-        MDC.put("tenantId", String.valueOf(context.getTenantId()));
-        MDC.put("tenantAlias", context.getTenantAlias());
+    public ClientDTO createClientAsync(
+            CreateClientDTO clientDTO, TenantDTO tenant,
+            PersonDTO person, String tenantUrl
+    ) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("clientName", clientDTO.getName());
         log.info("Trying to create a new client creation task");
 
@@ -99,7 +99,6 @@ public class ClientCreationService implements ClientCreationUsecases {
             var client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
             var now = Timestamp.from(Instant.now());
-            var me = PersonContextContainer.context.get().getResponse();
             var authenticationMethods = new HashSet<String>();
             authenticationMethods.add(DEFAULT_AUTHENTICATION);
             if (clientDTO.isAllowPkce())
@@ -107,12 +106,12 @@ public class ClientCreationService implements ClientCreationUsecases {
 
             client.setClientId(UUID.randomUUID().toString());
             client.setClientSecret(cipher.encrypt(secret));
-            client.setTenant(tenant);
+            client.setTenant(tenant.getTenantId());
             client.setTenantUrl(tenantUrl);
             client.setCreatedOn(now);
             client.setModifiedOn(now);
-            client.setCreatedBy(me.getEmail());
-            client.setModifiedBy(me.getEmail());
+            client.setCreatedBy(person.getEmail());
+            client.setModifiedBy(person.getEmail());
             client.setAuthenticationMethods(authenticationMethods);
 
             amqpClient.convertAndSend(configuration.getClient().getExchange(),

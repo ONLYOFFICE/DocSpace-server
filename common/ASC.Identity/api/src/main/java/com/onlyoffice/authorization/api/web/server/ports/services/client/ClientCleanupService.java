@@ -29,11 +29,8 @@ public class ClientCleanupService implements ClientCleanupUsecases {
 
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     public void deleteClientAsync(String clientId) {
-        var tenantContext = TenantContextContainer.context.get().getResponse();
-        MDC.put("tenantId", String.valueOf(tenantContext.getTenantId()));
-        MDC.put("tenantAlias", tenantContext.getTenantAlias());
-        MDC.put("clientId", clientId);
         log.info("Trying to create a new client deletion task");
+
         try {
             amqpClient.convertAndSend(
                     configuration.getClient().getExchange(),
@@ -66,9 +63,11 @@ public class ClientCleanupService implements ClientCleanupUsecases {
         MDC.put("clientId", id);
         log.info("Deleting a client");
         MDC.clear();
+
         if (cleanupUsecases.deleteByClientIdAndTenant(id, tenant) < 1)
             throw new EntityCleanupException(String
                     .format("could not delete client with client id %s for %d", id, tenant));
+
         return true;
     }
 }
