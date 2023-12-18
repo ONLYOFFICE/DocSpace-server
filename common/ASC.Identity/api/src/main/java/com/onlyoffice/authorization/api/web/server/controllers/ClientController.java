@@ -13,18 +13,17 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutat
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
+import com.onlyoffice.authorization.api.extensions.annotations.AuditAction;
 import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessage;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.*;
-import com.onlyoffice.authorization.api.web.server.utilities.HttpUtils;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -47,8 +46,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -206,6 +203,7 @@ public class ClientController {
     @DeleteMapping("/{clientId}/revoke")
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
+    @AuditAction(action = Action.REVOKE_USER_CLIENT)
     @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity revokeUserClient(
             HttpServletRequest request,
@@ -221,19 +219,6 @@ public class ClientController {
         MDC.clear();
 
         consentCleanupUsecases.asyncRevokeConsent(clientId, person.getEmail());
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.REVOKE_USER_CLIENT)
-                        .build());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -309,6 +294,7 @@ public class ClientController {
     }
 
     @PostMapping
+    @AuditAction(action = Action.CREATE_CLIENT)
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
@@ -362,24 +348,11 @@ public class ClientController {
         log.debug("Successfully submitted a new client broker message", client);
         MDC.clear();
 
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.CREATE_CLIENT)
-                        .build());
-
         return ResponseEntity.status(HttpStatus.CREATED).body(client);
     }
 
     @PutMapping("/{clientId}")
+    @AuditAction(action = Action.UPDATE_CLIENT)
     @Retry(name = "updateClientRetryRateLimiter")
     @RateLimiter(name = "updateClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
@@ -404,24 +377,11 @@ public class ClientController {
         log.debug("Client has been updated");
         MDC.clear();
 
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.UPDATE_CLIENT)
-                        .build());
-
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{clientId}/regenerate")
+    @AuditAction(action = Action.REGENERATE_SECRET)
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
@@ -468,24 +428,11 @@ public class ClientController {
 
         log.debug("Regeneration result", regenerate);
 
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.REGENERATE_SECRET)
-                        .build());
-
         return ResponseEntity.ok(regenerate);
     }
 
     @DeleteMapping("/{clientId}")
+    @AuditAction(action = Action.DELETE_CLIENT)
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
@@ -505,24 +452,12 @@ public class ClientController {
         MDC.clear();
 
         cleanupUsecases.deleteClientAsync(clientId);
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.DELETE_CLIENT)
-                        .build());
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/{clientId}/activation")
+    @AuditAction(action = Action.CHANGE_CLIENT_ACTIVATION)
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
@@ -544,20 +479,6 @@ public class ClientController {
 
         if (mutationUsecases.changeActivation(body, clientId))
             return ResponseEntity.status(HttpStatus.OK).build();
-
-        amqpTemplate.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(Action.CHANGE_CLIENT_ACTIVATION)
-                        .build());
 
         return ResponseEntity.badRequest().build();
     }
