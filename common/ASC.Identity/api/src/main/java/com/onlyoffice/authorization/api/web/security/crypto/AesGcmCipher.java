@@ -45,14 +45,17 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
     private static final int KEY_LENGTH = 128;
     private static final int ITERATION_COUNT = 1200; // Min 1000
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
     private final ApplicationConfiguration configuration;
 
     private byte[] getRandomNonce(int length) {
         var nonce = new byte[length];
         new SecureRandom().nextBytes(nonce);
+
         MDC.put("nonce", Arrays.toString(nonce));
         log.debug("RANDOM NONCE");
         MDC.clear();
+
         return nonce;
     }
 
@@ -61,8 +64,8 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
         MDC.put("password", password);
         log.debug("SECRET PASSWORD");
         MDC.clear();
-        var spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
 
+        var spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
         var factory = SecretKeyFactory.getInstance(FACTORY_INSTANCE);
         return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), ALGORITHM_TYPE);
     }
@@ -92,10 +95,12 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
                 .array();
 
         var encrypted = Base64.getEncoder().encodeToString(cipherByte);
+
         MDC.put("plain_message", plainMessage);
         MDC.put("encrypted_message", encrypted);
         log.info("Managed to encrypt plain text message");
         MDC.clear();
+
         return encrypted;
     }
 
@@ -103,6 +108,7 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
         MDC.put("cipher_message", cipherMessage);
         log.info("Trying to decrypt cipher message");
         MDC.clear();
+
         var decodedCipherByte = Base64.getDecoder().decode(cipherMessage.getBytes(UTF_8));
         ByteBuffer byteBuffer = ByteBuffer.wrap(decodedCipherByte);
 
@@ -121,10 +127,12 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
         var decryptedMessageByte = cipher.doFinal(encryptedByte);
 
         var decrypted = new String(decryptedMessageByte, UTF_8);
+
         MDC.put("cipher_message", cipherMessage);
         MDC.put("decrypted_message", decrypted);
         log.info("Managed to decrypt cipher text");
         MDC.clear();
+
         return decrypted;
     }
 }
