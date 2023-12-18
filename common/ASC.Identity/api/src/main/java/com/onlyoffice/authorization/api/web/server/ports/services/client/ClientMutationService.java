@@ -59,8 +59,13 @@ public class ClientMutationService implements ClientMutationUsecases {
         log.debug("Generated a new client's secret");
         MDC.clear();
 
-        mutationUsecases.regenerateClientSecretByClientId(clientId,
-                tenant, cipher.encrypt(secret), Timestamp.from(Instant.now()));
+        try {
+            mutationUsecases.regenerateClientSecretByClientId(clientId,
+                    tenant, cipher.encrypt(secret), Timestamp.from(Instant.now()));
+        } catch (Exception e) {
+            throw new UnsupportedOperationException(String
+                    .format("Could not execute regenerate secret operation %s", e.getMessage()));
+        }
 
         return SecretDTO.builder().clientSecret(secret).build();
     }
@@ -80,9 +85,10 @@ public class ClientMutationService implements ClientMutationUsecases {
             mutationUsecases.changeActivation(clientId,
                     activationDTO.getStatus(), Timestamp.from(Instant.now()));
             return true;
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.error("could not change client's activation", e.getMessage());
-            return false;
+            throw new UnsupportedOperationException(String
+                    .format("Could not change client's activation %s", e.getMessage()));
         } finally {
             MDC.clear();
         }
@@ -148,7 +154,7 @@ public class ClientMutationService implements ClientMutationUsecases {
                     configuration.getClient().getRouting(), msg);
         } catch (Exception e) {
             log.error("Could not create a new client update task", e);
-            throw new EntityNotFoundException(String
+            throw new UnsupportedOperationException(String
                     .format("Could not create a new client update task: %s", e.getMessage()));
         } finally {
             MDC.clear();
