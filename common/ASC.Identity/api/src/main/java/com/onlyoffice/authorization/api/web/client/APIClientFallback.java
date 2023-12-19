@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
-@Component
 @Slf4j
+@Component
 public class APIClientFallback implements APIClient {
-    @Override
     public APIClientDTOWrapper<PersonDTO> getMe(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());
@@ -22,7 +21,6 @@ public class APIClientFallback implements APIClient {
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
-    @Override
     public APIClientDTOWrapper<PersonDTO> getProfile(URI base, String cookie, String email) {
         MDC.put("URL", base.toString());
         MDC.put("Email", email);
@@ -32,7 +30,6 @@ public class APIClientFallback implements APIClient {
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
-    @Override
     public APIClientDTOWrapper<TenantDTO> getTenant(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());
