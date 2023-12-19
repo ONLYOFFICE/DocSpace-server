@@ -326,6 +326,7 @@ public class EditorController : ApiControllerBase
     private readonly MessageService _messageService;
     private readonly DocumentServiceConnector _documentServiceConnector;
     private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly PermissionContext _permissionContext;
 
     public EditorController(
         FilesLinkUtility filesLinkUtility,
@@ -333,12 +334,14 @@ public class EditorController : ApiControllerBase
         DocumentServiceConnector documentServiceConnector,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _filesLinkUtility = filesLinkUtility;
         _messageService = messageService;
         _documentServiceConnector = documentServiceConnector;
         _commonLinkUtility = commonLinkUtility;
+        _permissionContext = permissionContext;
     }
 
 
@@ -354,7 +357,9 @@ public class EditorController : ApiControllerBase
     /// <collection>list</collection>
     [HttpPut("docservice")]
     public async Task<IEnumerable<string>> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
-    {
+    {        
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         _filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         _filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         _filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
