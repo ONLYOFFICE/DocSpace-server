@@ -65,4 +65,7 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
 
     [ProtoMember(10)]
     public string TaskId { get; set;}
+
+    [ProtoMember(11)]
+    public IDictionary<string, string> Headers {  get; set; }
 }

@@ -68,7 +68,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             folders.Add(folderId, string.Empty);
         }
 
-        var (tasks, currentTaskId) = await fileStorageService.BulkDownloadAsync(folders, files, false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.BulkDownloadAsync(folders, files, enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -76,7 +76,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         {
             FileStringIds = files.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
             FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
@@ -101,7 +102,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content, false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content, enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -116,7 +117,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             Content = inDto.Content,
             ConflictResolveType = inDto.ConflictResolveType,
             DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
@@ -141,7 +143,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId) = await fileStorageService.DeleteItemsAsync("delete", folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately, false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.DeleteItemsAsync("delete", folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately, enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -153,7 +155,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             FileStringIds = fileStringIds,
             FolderIntIds = folderIntIds,
             FileIntIds = fileIntIds,
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
@@ -174,13 +177,14 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var (tasks, currentTaskId) = await fileStorageService.EmptyTrashAsync(false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.EmptyTrashAsync(enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
@@ -224,7 +228,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId) = await fileStorageService.MarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.MarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -234,7 +238,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             FileStringIds = fileStringIds,
             FolderIntIds = folderIntIds,
             FileIntIds = fileIntIds,
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
@@ -259,7 +264,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content, false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content, enqueueTask: false);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -274,7 +279,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             Content = inDto.Content,
             ConflictResolveType = inDto.ConflictResolveType,
             DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
         });
 
         foreach (var e in tasks)
