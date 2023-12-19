@@ -46,7 +46,7 @@ public class RabbitMQConfiguration {
         queues.forEach((key, value) -> {
             value.validate();
 
-            QueueBuilder builder = QueueBuilder.durable(value.getQueue());
+            var builder = QueueBuilder.durable(value.getQueue());
             if (value.isNonDurable())
                 builder = QueueBuilder.nonDurable(value.getQueue());
             if (value.isAutoDelete())
