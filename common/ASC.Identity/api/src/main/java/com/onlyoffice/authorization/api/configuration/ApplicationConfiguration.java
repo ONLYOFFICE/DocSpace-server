@@ -9,19 +9,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
 
 /**
  *
  */
-@Configuration
-@ConfigurationProperties(prefix = "application")
 @Getter
 @Setter
+@Configuration
 @NoArgsConstructor
-@EnableScheduling
+@ConfigurationProperties(prefix = "application")
 public class ApplicationConfiguration {
     private SecurityConfiguration security = new SecurityConfiguration();
     private List<ScopeConfiguration> scopes = List.of();
