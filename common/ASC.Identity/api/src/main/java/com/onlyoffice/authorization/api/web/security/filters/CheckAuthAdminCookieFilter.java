@@ -3,25 +3,19 @@
  */
 package com.onlyoffice.authorization.api.web.security.filters;
 
-import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 /**
@@ -32,40 +26,20 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     private final CheckAscCookieCommonProcessor ascCookieCommonProcessor;
-    private final APIClient apiClient;
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         log.debug("Validating admin user");
         try {
-            var processed = ascCookieCommonProcessor.processAscCookies(request);
-            var address = processed.getFirst();
-            var ascCookie = processed.getSecond();
-            MDC.put("address", address);
-            MDC.put("cookie", ascCookie);
-            log.debug("ASC COOKIE");
-            MDC.clear();
-
-            log.debug("An attempt to get current user profile and tenant info");
-            var firstFuture = CompletableFuture.supplyAsync(() -> apiClient
-                    .getMe(URI.create(address), ascCookie));
-            var secondFuture = CompletableFuture.supplyAsync(() -> apiClient
-                    .getTenant(URI.create(address), ascCookie));
-
-            CompletableFuture.allOf(firstFuture, secondFuture).join();
-            var user = firstFuture.get();
-            if (!user.getResponse().getIsAdmin()) {
+            ascCookieCommonProcessor.processAscCookies(request);
+            if (!PersonContextContainer.context.get().getResponse().getIsAdmin()) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 return;
             }
 
-            PersonContextContainer.context.set(user);
-            TenantContextContainer.context.set(secondFuture.get());
             chain.doFilter(request, response);
         } catch (BadCredentialsException accessException) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        } catch (InterruptedException | ExecutionException exception) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
         }
     }
 
