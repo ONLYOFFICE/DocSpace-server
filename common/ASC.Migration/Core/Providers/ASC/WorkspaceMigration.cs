@@ -38,15 +38,21 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
     private readonly UserManager _userManager;
     private IDataReadOperator _dataReader;
     private Dictionary<string, string> _mappedGuids;
+    private WorkspaceMigratingFiles _migratingCommonFiles;
+    private WorkspaceMigratingFiles _migratingProjectFiles;
     public override MigratorMeta Meta => _meta;
 
     public WorkspaceMigration(MigrationLogger migrationLogger,
         IServiceProvider serviceProvider,
-        UserManager userManager) : base(migrationLogger)
+        UserManager userManager,
+        WorkspaceMigratingFiles migratingCommonFiles,
+        WorkspaceMigratingFiles migratingProjectFiles) : base(migrationLogger)
     {
         _meta = new("Workspace", 5, false);
         _serviceProvider = serviceProvider;
         _userManager = userManager;
+        _migratingCommonFiles = migratingCommonFiles;
+        _migratingProjectFiles = migratingProjectFiles;
     }
 
     public override void Init(string path, CancellationToken cancellationToken)
@@ -137,6 +143,23 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
             }
+            
+            var storage = new WorkspaceStorage
+            {
+                Files = new List<WorkspaceFile>(),
+                Folders = new List<WorkspaceFolder>()
+            };
+            _migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON);
+            _migratingCommonFiles.Parse();
+            
+            
+            storage = new WorkspaceStorage
+            {
+                Files = new List<WorkspaceFile>(),
+                Folders = new List<WorkspaceFolder>()
+            };
+            _migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.BUNCH);
+            _migratingProjectFiles.Parse();
         }
         catch (Exception ex)
         {
@@ -258,6 +281,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             }
         }
 
+        i = 1;
         foreach (var user in usersForImport)
         {
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
@@ -274,6 +298,9 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
             }
         }
+
+        await _migratingCommonFiles.MigrateAsync();
+        await _migratingProjectFiles.MigrateAsync();
 
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersCount - _migrationInfo.FailedUsers;

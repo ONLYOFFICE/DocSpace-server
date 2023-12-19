@@ -84,7 +84,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
             Files = new List<WorkspaceFile>(),
             Folders = new List<WorkspaceFolder>()
         };
-        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log, _mappedGuids);
+        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log, _mappedGuids, FolderType.USER);
         MigratingFiles.Parse();
     }
 

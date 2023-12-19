@@ -37,7 +37,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
 
     private string _key;
     private long _bytesTotal;
-    private string _myFolder;
+    private string _folder;
     private IDataReadOperator _dataReader;
     private WorkspaceStorage _storage;
     private List<WorkspaceSecurity> _securities;
@@ -48,6 +48,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
     private readonly IDaoFactory _daoFactory;
     private readonly SecurityContext _securityContext;
     private WorkspaceMigratingUser _user;
+    private FolderType _type;
 
     public WorkspaceMigratingFiles(FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
@@ -62,7 +63,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
         _securityContext = securityContext;
     }
 
-    public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log, Dictionary<string, string> mappedGuids)
+    public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log, Dictionary<string, string> mappedGuids, FolderType type)
     {
         _key = key;
         _user = user;
@@ -71,20 +72,23 @@ public class WorkspaceMigratingFiles : MigratingFiles
         _storage = storage;
         _securities = new();
         _mappedGuids = mappedGuids;
+        _type = type;
     }
 
     public override void Parse()
     {
+        var rootFolders = new List<string>();
         using var streamFolders = _dataReader.GetEntry("databases/files/files_folder");
         var dataFolders = new DataTable();
         dataFolders.ReadXml(streamFolders);
         foreach (var row in dataFolders.Rows.Cast<DataRow>())
         {
-            if (row["create_by"].ToString().Equals(_key) 
-                && (FolderType)int.Parse(row["folder_type"].ToString()) == FolderType.USER)
+            if ((FolderType)int.Parse(row["folder_type"].ToString()) == _type && (
+                    (_type == FolderType.USER && row["create_by"].ToString().Equals(_key)) ||
+                    _type == FolderType.COMMON ||
+                    (_type == FolderType.BUNCH && row["title"].ToString().StartsWith("projects_project"))))
             {
-                _myFolder = row["id"].ToString();
-                break;
+                rootFolders.Add(row["id"].ToString());
             }
         }
 
@@ -94,22 +98,49 @@ public class WorkspaceMigratingFiles : MigratingFiles
         var folderTree = new Dictionary<string, int>();
         foreach (var row in dataTree.Rows.Cast<DataRow>())
         {
-            if (row["parent_id"].ToString().Equals(_myFolder))
+            if (rootFolders.Contains(row["parent_id"].ToString()))
             {
                 folderTree.Add(row["folder_id"].ToString(), int.Parse(row["level"].ToString()));
             }
         }
 
+        var projectTitle = new Dictionary<string, string>();
+        if (_type == FolderType.BUNCH)
+        {
+            using var streamProject = _dataReader.GetEntry("databases/projects/projects_projects");
+            var dataProject = new DataTable();
+            dataProject.ReadXml(streamProject);
+            foreach (var row in dataProject.Rows.Cast<DataRow>())
+            {
+                projectTitle.Add(row["id"].ToString(), row["title"].ToString());
+            }
+            _folder = "0";
+            folderTree.Add("0", -1);
+        }
+        else
+        {
+            _folder = rootFolders[0];
+        }
+
         foreach (var row in dataFolders.Rows.Cast<DataRow>())
         {
-            if (row["parent_id"].ToString().Equals(_myFolder))
+            if (folderTree.ContainsKey(row["id"].ToString()) && row["id"].ToString() != _folder)
             {
+                var title = row["title"].ToString();
+                if (_type == FolderType.BUNCH)
+                {
+                    if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
+                    {
+                        var split = row["title"].ToString().Split('_');
+                        title = projectTitle[split.Last()];
+                    }
+                }
                 var id = row["id"].ToString();
-                var folder = new WorkspaceFolder()
+                var folder = new WorkspaceFolder
                 {
                     Id = int.Parse(id),
                     ParentId = int.Parse(row["parent_id"].ToString()),
-                    Title = row["title"].ToString(),
+                    Title = title,
                     Level = folderTree[id]
                 };
                 _storage.Folders.Add(folder);
@@ -135,7 +166,11 @@ public class WorkspaceMigratingFiles : MigratingFiles
                 _bytesTotal += int.Parse(row["content_length"].ToString());
             }
         }
-        DbExtractFilesSecurity();
+
+        if (_type == FolderType.USER)
+        {
+            DbExtractFilesSecurity();
+        }
     }
     
     private void DbExtractFilesSecurity()
@@ -146,14 +181,15 @@ public class WorkspaceMigratingFiles : MigratingFiles
 
         foreach (var row in data.Rows.Cast<DataRow>())
         {
-            if (row["owner"].ToString() == _key)
+            var id = int.Parse(row["entry_id"].ToString());
+            if (row["owner"].ToString() == _key && (_storage.Files.Select(f => f.Id).ToList().Contains(id) || _storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
             {
                 var security = new WorkspaceSecurity()
                 {
                     Owner = row["owner"].ToString(),
                     Subject = row["subject"].ToString(),
                     SubjectType = int.Parse(row["subject_type"].ToString()),
-                    EntryId = int.Parse(row["entry_id"].ToString()),
+                    EntryId = id,
                     EntryType = int.Parse(row["entry_type"].ToString()),
                     Security = int.Parse(row["security"].ToString())
                 };
@@ -169,11 +205,18 @@ public class WorkspaceMigratingFiles : MigratingFiles
             return;
         }
 
-        await _securityContext.AuthenticateMeAsync(_user.Guid);
+        if (_user != null)
+        {
+            await _securityContext.AuthenticateMeAsync(_user.Guid);
+        }
 
-        var newFolder = await _fileStorageService.CreateNewFolderAsync(await _globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}");
-
-        var matchingIds = new Dictionary<int, int> { { int.Parse(_myFolder), newFolder.Id } };
+        var newFolder = _type == FolderType.USER
+            ? await _fileStorageService.CreateNewFolderAsync(await _globalFolderHelper.FolderMyAsync,
+                $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
+            : await _fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
+                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "");
+        
+        var matchingIds = new Dictionary<int, int> { { int.Parse(_folder), newFolder.Id } };
 
         var orderedFolders = _storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
@@ -207,6 +250,11 @@ public class WorkspaceMigratingFiles : MigratingFiles
             }
         }
 
+        if (_type != FolderType.USER)
+        {
+            return;
+        }
+        
         foreach (var security in _securities)
         {
             var list = new List<AceWrapper>

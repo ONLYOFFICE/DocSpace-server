@@ -66,8 +66,8 @@ global using ASC.Migration.OwnCloud;
 global using ASC.Migration.OwnCloud.Models;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
-
-global using Autofac;
+global using ASC.Files.Core.ApiModels;
+global using ASC.Files.Core.ApiModels.RequestDto;
 
 global using HtmlAgilityPack;
 
