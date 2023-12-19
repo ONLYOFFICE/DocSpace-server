@@ -6,7 +6,7 @@ package com.onlyoffice.authorization.core.transfer.messaging;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -25,19 +25,19 @@ public class AuthorizationMessage implements Serializable {
     private String attributes;
     private String state;
     private String authorizationCodeValue;
-    private Timestamp authorizationCodeIssuedAt;
-    private Timestamp authorizationCodeExpiresAt;
+    private ZonedDateTime authorizationCodeIssuedAt;
+    private ZonedDateTime authorizationCodeExpiresAt;
     private String authorizationCodeMetadata;
     private String accessTokenValue;
-    private Timestamp accessTokenIssuedAt;
-    private Timestamp accessTokenExpiresAt;
+    private ZonedDateTime accessTokenIssuedAt;
+    private ZonedDateTime accessTokenExpiresAt;
     private String accessTokenMetadata;
     private String accessTokenType;
     private String accessTokenScopes;
     private String refreshTokenValue;
-    private Timestamp refreshTokenIssuedAt;
-    private Timestamp refreshTokenExpiresAt;
+    private ZonedDateTime refreshTokenIssuedAt;
+    private ZonedDateTime refreshTokenExpiresAt;
     private String refreshTokenMetadata;
-    private Timestamp modifiedAt;
+    private ZonedDateTime modifiedAt;
     private Boolean invalidated;
 }

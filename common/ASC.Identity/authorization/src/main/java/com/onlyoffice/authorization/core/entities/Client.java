@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -37,7 +37,7 @@ public class Client {
     @Column(name = "logo")
     private String logo;
     @Column(name = "client_issued_at")
-    private Timestamp clientIssuedAt;
+    private ZonedDateTime clientIssuedAt;
     @Column(name = "authentication_method")
     private String authenticationMethod;
     @Column(name = "tenant_id")
@@ -63,11 +63,11 @@ public class Client {
     @Column(name = "scopes")
     private String scopes;
     @Column(name = "created_on")
-    private Timestamp createdOn;
+    private ZonedDateTime createdOn;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "modified_on")
-    private Timestamp modifiedOn;
+    private ZonedDateTime modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
 }

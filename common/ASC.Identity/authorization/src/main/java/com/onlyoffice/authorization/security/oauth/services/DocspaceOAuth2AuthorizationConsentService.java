@@ -18,8 +18,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 /**
@@ -114,7 +113,7 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
                 .registeredClientId(authorizationConsent.getRegisteredClientId())
                 .principalName(authorizationConsent.getPrincipalName())
                 .scopes(String.join(",", authorizationConsent.getScopes()))
-                .modifiedAt(Timestamp.from(Instant.now()))
+                .modifiedAt(ZonedDateTime.now())
                 .build();
     }
 }

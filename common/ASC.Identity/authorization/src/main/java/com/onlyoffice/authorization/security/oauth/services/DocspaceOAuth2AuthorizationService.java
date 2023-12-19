@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.security.oauth.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onlyoffice.authorization.core.entities.Authorization;
 import com.onlyoffice.authorization.core.transfer.messaging.AuthorizationMessage;
@@ -23,7 +24,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -43,8 +43,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         this.objectMapper.registerModules(securityModules);
         this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
         this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     public void save(OAuth2Authorization authorization) {
@@ -514,14 +516,14 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     private void setTokenValues(
             OAuth2Authorization.Token<?> token,
             Consumer<String> tokenValueConsumer,
-            Consumer<Timestamp> issuedAtConsumer,
-            Consumer<Timestamp> expiresAtConsumer,
+            Consumer<ZonedDateTime> issuedAtConsumer,
+            Consumer<ZonedDateTime> expiresAtConsumer,
             Consumer<String> metadataConsumer) {
         if (token != null) {
             OAuth2Token oAuth2Token = token.getToken();
             tokenValueConsumer.accept(oAuth2Token.getTokenValue());
-            issuedAtConsumer.accept(Timestamp.from(oAuth2Token.getIssuedAt()));
-            expiresAtConsumer.accept(Timestamp.from(oAuth2Token.getExpiresAt()));
+            issuedAtConsumer.accept(ZonedDateTime.ofInstant(oAuth2Token.getIssuedAt(), ZoneId.systemDefault()));
+            expiresAtConsumer.accept(ZonedDateTime.ofInstant(oAuth2Token.getExpiresAt(), ZoneId.systemDefault()));
             metadataConsumer.accept(writeMap(token.getMetadata()));
         }
     }
