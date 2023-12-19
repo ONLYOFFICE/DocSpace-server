@@ -14,11 +14,12 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "caching.redis")
+@ConfigurationProperties(prefix = "spring.cloud.ratelimiter.redis")
 public class RedisConfiguration {
     private List<String> addresses = new ArrayList<>();
     private List<RateLimiterConfiguration> limiters = new ArrayList<>();
@@ -33,12 +34,18 @@ public class RedisConfiguration {
     @Bean
     public RedissonClient config(){
         var config = new Config();
-        if (addresses.size() < 1)
+        var sanitizedAddresses = addresses.stream().map(address -> {
+            if (!address.startsWith("redis://"))
+                return String.format("redis://%s", address);
+            return address;
+        }).collect(Collectors.toList());
+
+        if (sanitizedAddresses.size() < 1)
             throw new RuntimeException("No redis address provided");
-        if (addresses.size() == 1)
-            config.useSingleServer().setAddress(addresses.get(0));
-        if (addresses.size() > 1)
-            config.useClusterServers().setNodeAddresses(addresses);
+        if (sanitizedAddresses.size() == 1)
+            config.useSingleServer().setAddress(sanitizedAddresses.get(0));
+        if (sanitizedAddresses.size() > 1)
+            config.useClusterServers().setNodeAddresses(sanitizedAddresses);
 
         return buildRateLimiters(Redisson.create(config));
     }

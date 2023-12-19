@@ -104,6 +104,19 @@ spring:
     loadbalancer:
       ribbon:
         enable: false
+    ratelimiter:
+      redis:
+        addresses: ${REDIS_ADDRESSES:localhost:6379}
+        limiters:
+          - name: "identityFetchClient"
+            limit: 5
+            refresh: 1
+          - name: "identityMutateClient"
+            limit: 2
+            refresh: 1
+          - name: "identityFetchScope"
+            limit: 5
+            refresh: 1
     openfeign:
       circuitbreaker:
         enabled: true
@@ -163,23 +176,6 @@ spring:
           max-attempts: 3
           max-interval: 3000
           multiplier: 3.0
-
-caching:
-  redis:
-    addresses: ${REDIS_ADDRESSES:redis://localhost:6379}
-    limiters:
-      -
-        name: "identityFetchClient"
-        limit: 5
-        refresh: 1
-      -
-        name: "identityMutateClient"
-        limit: 3
-        refresh: 1
-      -
-        name: "identityFetchScope"
-        limit: 5
-        refresh: 1
 
 resilience4j:
   circuitbreaker:
