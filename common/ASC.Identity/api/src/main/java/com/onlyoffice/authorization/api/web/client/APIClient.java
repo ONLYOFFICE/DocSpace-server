@@ -5,6 +5,7 @@ package com.onlyoffice.authorization.api.web.client;
 
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.SettingsDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,4 +26,6 @@ public interface APIClient {
     APIClientDTOWrapper<PersonDTO> getProfile(URI base, @RequestHeader("Cookie") String cookie, @RequestParam("email") String email);
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/portal")
     APIClientDTOWrapper<TenantDTO> getTenant(URI base, @RequestHeader("Cookie") String cookie);
+    @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/settings")
+    APIClientDTOWrapper<SettingsDTO> getSettings(URI base, @RequestHeader("Cookie") String cookie);
 }

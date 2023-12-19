@@ -2,6 +2,7 @@ package com.onlyoffice.authorization.api.web.client;
 
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.SettingsDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -38,5 +39,13 @@ public class APIClientFallback implements APIClient {
         log.warn("Could not fetch current tenant info");
         MDC.clear();
         return APIClientDTOWrapper.<TenantDTO>builder().build();
+    }
+
+    public APIClientDTOWrapper<SettingsDTO> getSettings(URI base, String cookie) {
+        MDC.put("URL", base.toString());
+        MDC.put("Fallback", APIClientFallback.class.getName());
+        log.warn("Could not fetch current tenant settings");
+        MDC.clear();
+        return APIClientDTOWrapper.<SettingsDTO>builder().build();
     }
 }
