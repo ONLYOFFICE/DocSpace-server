@@ -27,9 +27,9 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class EncryptionLoginProvider(ILogger<EncryptionLoginProvider> logger,
+public class EncryptionLoginProvider(
+    ILogger<EncryptionLoginProvider> logger,
         SecurityContext securityContext,
-        Signature signature,
         InstanceCrypto instanceCrypto,
         AccountLinker accountLinker)
     {
@@ -40,7 +40,7 @@ public class EncryptionLoginProvider(ILogger<EncryptionLoginProvider> logger,
             return;
         }
 
-        var loginProfile = new LoginProfile(signature, instanceCrypto)
+        var loginProfile = new LoginProfile
         {
             Provider = ProviderConstants.Encryption,
             Name = instanceCrypto.Encrypt(keys)
