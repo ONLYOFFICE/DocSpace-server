@@ -19,8 +19,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +97,7 @@ public class ClientCreationService implements ClientCreationUsecases {
         try {
             var client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
-            var now = Timestamp.from(Instant.now());
+            var now = ZonedDateTime.now();
             var authenticationMethods = new HashSet<String>();
             authenticationMethods.add(DEFAULT_AUTHENTICATION);
             if (clientDTO.isAllowPkce())

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -17,7 +17,7 @@ public class ConsentDTO {
     private String principalName;
     private String scopes;
     @JsonProperty("modified_at")
-    private Timestamp modifiedAt;
+    private ZonedDateTime modifiedAt;
     private boolean invalidated;
     private ClientDTO client;
 }

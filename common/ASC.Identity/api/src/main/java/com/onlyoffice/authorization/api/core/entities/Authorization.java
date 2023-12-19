@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
@@ -42,18 +42,18 @@ public class Authorization {
     @Column(name = "authorization_code_value", length = 4000)
     private String authorizationCodeValue;
     @Column(name = "authorization_code_issued_at")
-    private Timestamp authorizationCodeIssuedAt;
+    private ZonedDateTime authorizationCodeIssuedAt;
     @Column(name = "authorization_code_expires_at")
-    private Timestamp authorizationCodeExpiresAt;
+    private ZonedDateTime authorizationCodeExpiresAt;
     @Column(name = "authorization_code_metadata")
     private String authorizationCodeMetadata;
     @Lob
     @Column(name = "access_token_value", length = 4000)
     private String accessTokenValue;
     @Column(name = "access_token_issued_at")
-    private Timestamp accessTokenIssuedAt;
+    private ZonedDateTime accessTokenIssuedAt;
     @Column(name = "access_token_expires_at")
-    private Timestamp accessTokenExpiresAt;
+    private ZonedDateTime accessTokenExpiresAt;
     @Lob
     @Column(name = "access_token_metadata", length = 2000)
     private String accessTokenMetadata;
@@ -65,14 +65,14 @@ public class Authorization {
     @Column(name = "refresh_token_value", length = 4000)
     private String refreshTokenValue;
     @Column(name = "refresh_token_issued_at")
-    private Timestamp refreshTokenIssuedAt;
+    private ZonedDateTime refreshTokenIssuedAt;
     @Column(name = "refresh_token_expires_at")
-    private Timestamp refreshTokenExpiresAt;
+    private ZonedDateTime refreshTokenExpiresAt;
     @Lob
     @Column(name = "refresh_token_metadata", length = 2000)
     private String refreshTokenMetadata;
     @Column(name = "modified_at")
-    private Timestamp modifiedAt;
+    private ZonedDateTime modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)

@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Aspect
 @Component
@@ -43,7 +42,7 @@ public class AuditActionAspect {
                         .ip(HttpUtils.getRequestIP(request))
                         .browser(HttpUtils.getClientBrowser(request))
                         .platform(HttpUtils.getClientOS(request))
-                        .date(Timestamp.from(Instant.now()))
+                        .date(ZonedDateTime.now())
                         .tenantId(tenant.getTenantId())
                         .userId(person.getId())
                         .page(HttpUtils.getFullURL(request))

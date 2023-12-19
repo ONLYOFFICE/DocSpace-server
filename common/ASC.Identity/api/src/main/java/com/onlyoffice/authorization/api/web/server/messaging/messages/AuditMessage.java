@@ -4,7 +4,7 @@ import com.onlyoffice.authorization.api.core.entities.Action;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Builder
 @Getter
@@ -19,7 +19,7 @@ public class AuditMessage implements Message, Serializable {
     private String ip;
     private String browser;
     private String platform;
-    private Timestamp date;
+    private ZonedDateTime date;
     private int tenantId;
     private String userId;
     private String page;

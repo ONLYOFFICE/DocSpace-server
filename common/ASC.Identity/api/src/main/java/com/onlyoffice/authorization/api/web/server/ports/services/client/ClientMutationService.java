@@ -24,8 +24,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,7 +59,7 @@ public class ClientMutationService implements ClientMutationUsecases {
 
         try {
             mutationUsecases.regenerateClientSecretByClientId(clientId, tenant.getTenantId(),
-                    cipher.encrypt(secret), Timestamp.from(Instant.now()));
+                    cipher.encrypt(secret), ZonedDateTime.now());
         } catch (Exception e) {
             throw new UnsupportedOperationException(String
                     .format("Could not execute regenerate secret operation %s", e.getMessage()));
@@ -76,7 +75,7 @@ public class ClientMutationService implements ClientMutationUsecases {
 
         try {
             mutationUsecases.changeActivation(clientId,
-                    activationDTO.getStatus(), Timestamp.from(Instant.now()));
+                    activationDTO.getStatus(), ZonedDateTime.now());
             return true;
         } catch (Exception e) {
             log.error("could not change client's activation", e.getMessage());

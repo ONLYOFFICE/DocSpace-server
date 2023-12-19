@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
@@ -34,7 +34,7 @@ public class Consent {
     @Column(name = "scopes")
     private String scopes;
     @Column(name = "modified_at")
-    private Timestamp modifiedAt;
+    private ZonedDateTime modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
     @JsonManagedReference

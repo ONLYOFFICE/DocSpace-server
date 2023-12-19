@@ -13,8 +13,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -57,7 +56,7 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
                         .registeredClientId(clientId)
                         .principalName(principalName)
                         .scopes("***")
-                        .modifiedAt(Timestamp.from(Instant.now()))
+                        .modifiedAt(ZonedDateTime.now())
                         .invalidated(true)
                         .build()
         );

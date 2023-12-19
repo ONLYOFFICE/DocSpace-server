@@ -9,8 +9,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 /**
@@ -38,7 +37,7 @@ public class Client {
     private String logo;
     @CreatedDate
     @Column(name = "client_issued_at")
-    private Timestamp clientIssuedAt;
+    private ZonedDateTime clientIssuedAt;
     @Column(name = "authentication_method", length = 100)
     private String authenticationMethod;
     @Column(name = "tenant_id")
@@ -73,12 +72,12 @@ public class Client {
     private String scopes;
     @LastModifiedDate
     @Column(name = "created_on")
-    private Timestamp createdOn;
+    private ZonedDateTime createdOn;
     @Column(name = "created_by")
     private String createdBy;
     @LastModifiedDate
     @Column(name = "modified_on")
-    private Timestamp modifiedOn;
+    private ZonedDateTime modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
     @JsonBackReference
@@ -88,8 +87,8 @@ public class Client {
     private void prePersist() {
         this.enabled = true;
         this.invalidated = false;
-        this.createdOn = Timestamp.from(Instant.now());
-        this.clientIssuedAt = Timestamp.from(Instant.now());
+        this.createdOn = ZonedDateTime.now();
+        this.clientIssuedAt = ZonedDateTime.now();
     }
     @PreUpdate
     private void preUpdate() {

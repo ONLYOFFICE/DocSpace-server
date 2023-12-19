@@ -6,8 +6,7 @@ package com.onlyoffice.authorization.api.web.server.messaging.messages;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 /**
@@ -36,10 +35,10 @@ public class ClientMessage implements Message, Serializable {
     private String tenantUrl;
     private boolean enabled;
     private boolean invalidated;
-    private Timestamp createdOn;
+    private ZonedDateTime createdOn;
     private String createdBy;
     @Builder.Default
-    private Timestamp modifiedOn = Timestamp.from(Instant.now());
+    private ZonedDateTime modifiedOn = ZonedDateTime.now();
     private String modifiedBy;
     @Builder.Default
     private ClientCommandCode commandCode = ClientCommandCode.CREATE_CLIENT;

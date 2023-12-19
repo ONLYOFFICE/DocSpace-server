@@ -3,13 +3,13 @@
  */
 package com.onlyoffice.authorization.api.core.usecases.repository.client;
 
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 /**
  *
  */
 public interface ClientPersistenceMutationUsecases {
     void regenerateClientSecretByClientId(String clientId, int tenant,
-                                          String secret, Timestamp modifiedOn);
-    void changeActivation(String clientId, boolean enabled, Timestamp modifiedOn);
+                                          String secret, ZonedDateTime modifiedOn);
+    void changeActivation(String clientId, boolean enabled, ZonedDateTime modifiedOn);
 }

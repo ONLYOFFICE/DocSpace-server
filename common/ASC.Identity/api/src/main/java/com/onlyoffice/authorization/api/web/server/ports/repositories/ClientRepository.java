@@ -17,7 +17,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 /**
@@ -37,12 +37,12 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
     void regenerateClientSecretByClientId(@Param("clientId") String clientId,
                                           @Param("tenant") int tenant,
                                           @Param("secret") String secret,
-                                          @Param("modifiedOn") Timestamp modifiedOn);
+                                          @Param("modifiedOn") ZonedDateTime modifiedOn);
     @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId=:clientId")
     @Modifying
     void changeActivation(@Param("clientId") String clientId,
                           @Param(value = "enabled") boolean enabled,
-                          @Param(value = "modifiedOn") Timestamp modifiedOn);
+                          @Param(value = "modifiedOn") ZonedDateTime modifiedOn);
     default Client saveClient(Client entity) {
         return this.save(entity);
     }

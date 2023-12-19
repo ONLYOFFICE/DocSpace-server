@@ -9,7 +9,7 @@ import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 /**
@@ -51,11 +51,11 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     private boolean invalidated;
     private Set<String> scopes;
     @JsonProperty("created_on")
-    private Timestamp createdOn;
+    private ZonedDateTime createdOn;
     @JsonProperty("created_by")
     private String createdBy;
     @JsonProperty("modified_on")
-    private Timestamp modifiedOn;
+    private ZonedDateTime modifiedOn;
     @JsonProperty("modified_by")
     private String modifiedBy;
     @JsonProperty("creator_avatar")

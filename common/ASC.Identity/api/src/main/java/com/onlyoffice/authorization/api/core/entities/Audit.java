@@ -3,7 +3,7 @@ package com.onlyoffice.authorization.api.core.entities;
 import jakarta.persistence.*;
 import lombok.Builder;
 
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Entity
 @Builder
@@ -20,7 +20,7 @@ public class Audit {
     @Column(nullable = false)
     private String platform;
     @Column(nullable = false)
-    private Timestamp date;
+    private ZonedDateTime date;
     @Column(nullable = false, name = "tenant_id")
     private int tenantId;
     @Column(nullable = false, name = "user_id")
