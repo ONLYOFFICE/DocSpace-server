@@ -98,7 +98,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                     return null;
                 }
 
-                if (int.Parse(row["removed"].ToString()) == 1)
+                if (row["removed"].ToString() == "1" || row["removed"].ToString() == "true")
                 {
                     continue;
                 } 
@@ -132,18 +132,25 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 }
             }
 
-            var groups = DbExtractGroup();
-            var progress = 80;
-            foreach (var item in groups)
+            try
             {
-                ReportProgress(progress, MigrationResource.DataProcessing);
-                progress += 10 / groups.Count;
-                var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
-                group.Init(item, Log);
-                group.Parse();
-                _migrationInfo.Groups.Add(group);
+                var groups = DbExtractGroup();
+                var progress = 80;
+                foreach (var item in groups)
+                {
+                    ReportProgress(progress, MigrationResource.DataProcessing);
+                    progress += 10 / groups.Count;
+                    var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
+                    group.Init(item, Log);
+                    group.Parse();
+                    _migrationInfo.Groups.Add(group);
+                }
             }
-            
+            catch
+            {
+                
+            }
+
             var storage = new WorkspaceStorage
             {
                 Files = new List<WorkspaceFile>(),
