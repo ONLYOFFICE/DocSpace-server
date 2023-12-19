@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "server.socket")
 public class WebSocketConfiguration {
-    private String host;
-    private Integer port;
+    private String host = "127.0.0.1";
+    private Integer port = 8585;
 
     @Bean
     public SocketIOServer socketIOServer() {
