@@ -4,18 +4,21 @@
 package com.onlyoffice.authorization.api.configuration;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  *
  */
+@Getter
+@Setter
 @Configuration
+@ConfigurationProperties(prefix = "server.socket")
 public class WebSocketConfiguration {
-    @Value("${server.socket.host}")
     private String host;
-    @Value("${server.socket.port}")
     private Integer port;
 
     @Bean
