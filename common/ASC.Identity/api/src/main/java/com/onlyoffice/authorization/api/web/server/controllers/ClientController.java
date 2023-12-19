@@ -18,6 +18,7 @@ import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
+import com.onlyoffice.authorization.api.web.security.context.SettingsContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
@@ -44,6 +45,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -109,6 +112,8 @@ public class ClientController {
             @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
         var tenant = TenantContextContainer.context.get().getResponse();
+        var zone = ZoneId.of(SettingsContextContainer.context.get()
+                .getResponse().getTimezone());
         var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
 
         MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
@@ -139,6 +144,8 @@ public class ClientController {
 
         tasks.forEach(task -> {
             var client = task.getFirst();
+            client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
+            client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
             try {
                 var result = task.getSecond().get();
                 if (result != null && result.getResponse() != null) {
@@ -222,12 +229,17 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
+        var zone = ZoneId.of(SettingsContextContainer.context.get()
+                .getResponse().getTimezone());
+
         setLoggerContextAttributes();
         log.info("Received a new get clients info");
         log.debug("Trying to retrieve all clients by principal name");
 
         var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
                 .context.get().getResponse().getEmail());
+
+        result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
 
         MDC.put("number of clients", String.valueOf(result.size()));
         log.debug("Found clients");
@@ -245,12 +257,17 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
+        var zone = ZoneId.of(SettingsContextContainer.context.get()
+                .getResponse().getTimezone());
+
         setLoggerContextAttributes();
         log.info("Received a new get client request for tenant");
         log.debug("Trying to retrieve client");
         MDC.clear();
 
         var client = retrieveUsecases.getClient(clientId);
+        client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
+        client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
         client.add(linkTo(methodOn(ClientController.class)
                 .updateClient(null, response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
