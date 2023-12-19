@@ -1,11 +1,10 @@
 package com.onlyoffice.authorization.api.web.server.ports.services.client;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.EntityCleanupException;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +31,10 @@ public class ClientCleanupService implements ClientCleanupUsecases {
         log.info("Trying to create a new client deletion task");
 
         try {
+            var queue = configuration.getQueues().get("client");
             amqpClient.convertAndSend(
-                    configuration.getClient().getExchange(),
-                    configuration.getClient().getRouting(),
+                    queue.getExchange(),
+                    queue.getRouting(),
                     ClientMessage
                             .builder()
                             .tenant(0)

@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.web.server.ports.services.client;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.EntityCreationException;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
@@ -113,8 +113,10 @@ public class ClientCreationService implements ClientCreationUsecases {
             client.setModifiedBy(person.getEmail());
             client.setAuthenticationMethods(authenticationMethods);
 
-            amqpClient.convertAndSend(configuration.getClient().getExchange(),
-                    configuration.getClient().getRouting(),
+            var queue = configuration.getQueues().get("client");
+
+            amqpClient.convertAndSend(queue.getExchange(),
+                    queue.getRouting(),
                     ClientMapper.INSTANCE.fromQueryToMessage(client));
 
             client.setClientSecret(secret);

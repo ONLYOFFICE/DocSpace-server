@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.api.configuration.messaging;
+package com.onlyoffice.authorization.api.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.AuthorizationMessage;
@@ -10,10 +10,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,14 +35,67 @@ import java.util.Map;
 @Setter
 @Getter
 @Configuration
-@ConfigurationProperties(prefix = "messaging.rabbitmq.configuration")
+@ConfigurationProperties(prefix = "spring.cloud.messaging.rabbitmq")
 public class RabbitMQConfiguration {
-    private GenericQueueConfiguration audit;
-    private GenericQueueConfiguration authorization;
-    private GenericQueueConfiguration client;
-    private GenericQueueConfiguration consent;
-    private GenericQueueConfiguration socket;
+    private final Map<String, GenericQueueConfiguration> queues = new HashMap<>();
     private int prefetch = 500;
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        var rabbitAdmin = new RabbitAdmin(connectionFactory);
+        queues.forEach((key, value) -> {
+            value.validate();
+
+            QueueBuilder builder = QueueBuilder.durable(value.getQueue());
+            if (value.isNonDurable())
+                builder = QueueBuilder.nonDurable(value.getQueue());
+            if (value.isAutoDelete())
+                builder = builder.autoDelete();
+            else
+                builder
+                        .withArgument("x-delivery-limit", value.getDeliveryLimit())
+                        .withArgument("x-queue-type", "quorum");
+            var deadQueueName = value.getDeadQueue();
+            var deadExchangeName = value.getDeadExchange();
+            var deadRoutingName = value.getDeadRouting();
+            if (deadQueueName != null) {
+                var deadQueue = QueueBuilder.durable(deadQueueName)
+                        .withArgument("x-max-length-bytes", value.getDeadMaxBytes())
+                        .withArgument("x-message-ttl", value.getMessageTTL())
+                        .withArgument("x-queue-type", "quorum")
+                        .build();
+                var deadExchange = new TopicExchange(deadExchangeName);
+                var deadBinding = BindingBuilder.bind(deadQueue)
+                        .to(deadExchange)
+                        .with(deadRoutingName);
+                builder
+                        .withArgument("x-dead-letter-exchange", deadExchangeName)
+                        .withArgument("x-dead-letter-routing-key", deadRoutingName);
+                rabbitAdmin.declareQueue(deadQueue);
+                rabbitAdmin.declareExchange(deadExchange);
+                rabbitAdmin.declareBinding(deadBinding);
+            }
+
+            Exchange exchange = new TopicExchange(value.getExchange());
+            if (value.isFanOut())
+                exchange = new FanoutExchange(value.getExchange());
+            var queue = builder
+                    .withArgument("x-max-length-bytes", value.getMaxBytes())
+                    .withArgument("x-message-ttl", value.getMessageTTL())
+                    .withArgument("x-overflow", "reject-publish")
+                    .build();
+            var binding = BindingBuilder.bind(queue)
+                    .to(exchange)
+                    .with(value.getRouting())
+                    .noargs();
+            
+            rabbitAdmin.declareQueue(queue);
+            rabbitAdmin.declareExchange(exchange);
+            rabbitAdmin.declareBinding(binding);
+        });
+
+        return rabbitAdmin;
+    }
 
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper mapper) {

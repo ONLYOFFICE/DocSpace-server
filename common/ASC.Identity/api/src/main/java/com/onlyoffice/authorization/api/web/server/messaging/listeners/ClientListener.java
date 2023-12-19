@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RabbitListener(
-        queues = "${messaging.rabbitmq.configuration.client.queue}",
+        queues = "${spring.cloud.messaging.rabbitmq.queues.client.queue}",
         containerFactory = "prefetchRabbitListenerContainerFactory"
 )
 public class ClientListener extends MessageListener<ClientMessage> {}

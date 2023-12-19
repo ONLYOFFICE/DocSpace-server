@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.web.server.messaging.handlers;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.MessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 

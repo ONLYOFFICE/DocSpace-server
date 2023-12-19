@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.web.server.ports.services.client;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
@@ -138,8 +138,8 @@ public class ClientMutationService implements ClientMutationUsecases {
             msg.setClientId(clientId);
             msg.setCommandCode(ClientMessage.ClientCommandCode.UPDATE_CLIENT);
 
-            amqpClient.convertAndSend(configuration.getClient().getExchange(),
-                    configuration.getClient().getRouting(), msg);
+            var queue = configuration.getQueues().get("client");
+            amqpClient.convertAndSend(queue.getExchange(), queue.getRouting(), msg);
         } catch (Exception e) {
             log.error("Could not create a new client update task", e);
             throw new UnsupportedOperationException(String

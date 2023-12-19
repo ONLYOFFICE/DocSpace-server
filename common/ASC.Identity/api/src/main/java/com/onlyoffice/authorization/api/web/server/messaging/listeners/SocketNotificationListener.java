@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@RabbitListener(queues = "#{rabbitMQConfiguration.getSocket().getQueue()}")
+@RabbitListener(queues = "#{rabbitMQConfiguration.getQueues().get('socket').getQueue()}")
 public class SocketNotificationListener {
     private final String CLIENT_CHANGED_EVENT = "client_changed";
 

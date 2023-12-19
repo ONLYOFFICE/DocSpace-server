@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RabbitListener(
-        queues = "${messaging.rabbitmq.configuration.authorization.queue}",
+        queues = "${spring.cloud.messaging.rabbitmq.queues.authorization.queue}",
         containerFactory = "prefetchRabbitListenerContainerFactory"
 )
 public class AuthorizationListener extends MessageListener<AuthorizationMessage> {}

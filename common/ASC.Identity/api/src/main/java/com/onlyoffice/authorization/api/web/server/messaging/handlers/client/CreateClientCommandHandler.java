@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.web.server.messaging.handlers.client;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.web.server.messaging.handlers.ScheduledMessagingCommandHandler;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
@@ -37,6 +37,7 @@ final class CreateClientCommandHandler extends ScheduledMessagingCommandHandler<
             var ids = creationUsecases.saveClients(messages.stream()
                     .map(msg -> msg.getData())
                     .collect(Collectors.toList()));
+            var queue = configuration.getQueues().get("socket");
 
             messages.removeIf(w -> {
                 var tag = w.getTag();
@@ -46,7 +47,7 @@ final class CreateClientCommandHandler extends ScheduledMessagingCommandHandler<
                     if (!ids.contains(w.getData().getClientId())) {
                         channel.basicAck(tag, true);
                         amqpClient.convertAndSend(
-                                configuration.getSocket().getExchange(),
+                                queue.getExchange(),
                                 "",
                                 SocketNotification.builder()
                                         .tenant(w.getData().getTenant())

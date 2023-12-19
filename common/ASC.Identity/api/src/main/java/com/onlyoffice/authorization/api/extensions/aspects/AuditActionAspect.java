@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.extensions.aspects;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.extensions.annotations.AuditAction;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
@@ -35,9 +35,10 @@ public class AuditActionAspect {
         var tenant = TenantContextContainer.context.get().getResponse();
         var person = PersonContextContainer.context.get().getResponse();
 
+        var queue = configuration.getQueues().get("audit");
         amqpClient.convertAndSend(
-                configuration.getAudit().getExchange(),
-                configuration.getAudit().getRouting(),
+                queue.getExchange(),
+                queue.getRouting(),
                 AuditMessage.builder()
                         .ip(HttpUtils.getRequestIP(request))
                         .browser(HttpUtils.getClientBrowser(request))

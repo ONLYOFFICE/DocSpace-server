@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RabbitListener(
-        queues = "${messaging.rabbitmq.configuration.audit.queue}",
+        queues = "${spring.cloud.messaging.rabbitmq.queues.audit.queue}",
         containerFactory = "prefetchRabbitListenerContainerFactory"
 )
 public class AuditListener extends MessageListener<AuditMessage> {}

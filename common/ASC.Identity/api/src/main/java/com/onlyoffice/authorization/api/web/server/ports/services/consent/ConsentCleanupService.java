@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.web.server.ports.services.consent;
 
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.entities.Consent;
 import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCleanupUsecases;
@@ -48,9 +48,10 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
     }
 
     public void asyncRevokeConsent(String clientId, String principalName) {
+        var queue = configuration.getQueues().get("consent");
         amqpTemplate.convertAndSend(
-                configuration.getConsent().getExchange(),
-                configuration.getConsent().getRouting(),
+                queue.getExchange(),
+                queue.getRouting(),
                 ConsentMessage
                         .builder()
                         .registeredClientId(clientId)
