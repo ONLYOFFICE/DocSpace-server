@@ -187,7 +187,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("rooms/roomquota")]
+    [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<T>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
         ErrorIfNotDocSpace();
@@ -211,7 +211,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomsQuotaRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating room</param>
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("rooms/resetquota")]
+    [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<T>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
         ErrorIfNotDocSpace();

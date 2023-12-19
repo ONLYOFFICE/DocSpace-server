@@ -84,6 +84,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Int32, System</type>
     public long? QuotaLimit { get; set; }
 
+    /// <summary>Specifies if the room has a custom quota or not.</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsCustomQuota { get; set; }
+
     /// <summary>Counter</summary>
     /// <type>System.Int32, System</type>
     public long? UsedSpace { get; set; }
@@ -162,6 +166,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (quotaRoomSettings.EnableQuota)
             {
+                result.IsCustomQuota = folder.Quota > -2;
                 result.QuotaLimit = folder.Quota > -2 ? folder.Quota : quotaRoomSettings.DefaultQuota;
             }
         }
