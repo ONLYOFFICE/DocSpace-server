@@ -38,17 +38,12 @@ public class FileTrackerHelper
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<FileTrackerHelper> _logger;
 
-    private FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
+    public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
     {
         _cache = cache;
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
         _callbackAction = EvictionCallback();
-    }
-
-    public static FileTrackerHelper CreateInstance(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
-    {
-        return new FileTrackerHelper(cache, serviceScopeFactory, logger);
     }
 
     public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
