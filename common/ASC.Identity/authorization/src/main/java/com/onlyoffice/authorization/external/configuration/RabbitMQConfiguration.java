@@ -3,6 +3,9 @@
  */
 package com.onlyoffice.authorization.external.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onlyoffice.authorization.core.transfer.messaging.AuthorizationMessage;
 import com.onlyoffice.authorization.core.transfer.messaging.ConsentMessage;
 import lombok.Getter;
@@ -21,6 +24,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 
 import java.util.Map;
 
@@ -35,10 +39,15 @@ public class RabbitMQConfiguration {
     private GenericQueueConfiguration authorization;
     private GenericQueueConfiguration consent;
     private int prefetch = 500;
-    
+
     @Bean
     public MessageConverter jsonMessageConverter() {
-        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
+        var objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter(objectMapper);
         DefaultJackson2JavaTypeMapper classMapper = new DefaultJackson2JavaTypeMapper();
         classMapper.setTrustedPackages("*");
         classMapper.setIdClassMapping(Map.of(
