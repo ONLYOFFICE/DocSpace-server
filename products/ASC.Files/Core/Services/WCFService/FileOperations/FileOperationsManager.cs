@@ -31,7 +31,7 @@ public class FileOperationsManager(TempStream tempStream,
         IDistributedTaskQueueFactory queueFactory,
         IServiceProvider serviceProvider,
         ThumbnailSettings thumbnailSettings)
-    {
+{
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
@@ -91,18 +91,35 @@ public class FileOperationsManager(TempStream tempStream,
         return GetOperationResults(userId);
     }
 
+    #region MarkAsRead
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
+    public List<FileOperationResult> MarkAsRead(Guid userId, Tenant tenant, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
     {
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
 
-        return MarkAsRead(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, headers, externalShareData, enqueueTask, taskId);
+        var (operations, _) = MarkAsRead(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, headers, externalShareData);
+
+        return operations;
     }
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, List<int> folderIdsInt, List<int> fileIdsInt, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
+    public (List<FileOperationResult>, string) PublishMarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
+    {
+        return MarkAsRead(userId, tenant, folderIdsString, fileIdsString, folderIdsInt, fileIdsInt, headers, externalShareData, enqueueTask: false);
+    }
+
+    public List<FileOperationResult> EnqueueMarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, string taskId)
+    {
+        var (operations, _) = MarkAsRead(userId, tenant, folderIdsString, fileIdsString, folderIdsInt, fileIdsInt, headers, externalShareData, enqueueTask: true, taskId);
+
+        return operations;
+    }
+
+    private (List<FileOperationResult>, string) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
     {
         var op1 = new FileMarkAsReadOperation<int>(serviceProvider, new FileMarkAsReadOperationData<int>(folderIdsInt, fileIdsInt, tenant, headers, externalShareData));
         var op2 = new FileMarkAsReadOperation<string>(serviceProvider, new FileMarkAsReadOperationData<string>(folderIdsString, fileIdsString, tenant, headers, externalShareData));
@@ -113,11 +130,37 @@ public class FileOperationsManager(TempStream tempStream,
             op.Id = taskId;
         }
 
-        return (QueueTask(userId, op, enqueueTask), op.Id, headers);
+        return (QueueTask(userId, op, enqueueTask), op.Id);
     }
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
+    #endregion
+
+    #region Download
+
+    public List<FileOperationResult> Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
+    {
+        var (operations, _) = Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: true);
+
+        return operations;
+    }
+
+    public (List<FileOperationResult>, string) PublishDownload(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
+    {
+        return Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: false);
+    }
+
+    public List<FileOperationResult> EnqueueDownload(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, string taskId)
+    {
+        var (operations, _) = Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: true, taskId);
+
+        return operations;
+    }
+
+    private (List<FileOperationResult>, string) Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
     {
         var operations = _tasks.GetAllTasks()
             .Where(t => new Guid(t[FileOperation.Owner]) == ProcessUserId(userId))
@@ -140,19 +183,39 @@ public class FileOperationsManager(TempStream tempStream,
             op.Id = taskId;
         }
 
-        return (QueueTask(userId, op, enqueueTask), op.Id, headers);
+        return (QueueTask(userId, op, enqueueTask), op.Id);
     }
 
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> MoveOrCopy(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool content = false, bool enqueueTask = true, string taskId = null)
+    #endregion
+
+    #region MoveOrCopy
+
+    public async Task<List<FileOperationResult>> MoveOrCopyAsync(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool content)
     {
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        return await MoveOrCopy(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask, taskId);
+        var (operations, _) = await MoveOrCopyAsync(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask: true);
+
+        return operations;
     }
 
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> MoveOrCopy(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers,
+    public async Task<(List<FileOperationResult>, string)> PublishMoveOrCopyAsync(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool content)
+    {
+        return await MoveOrCopyAsync(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask: false);
+    }
+
+    public async Task<List<FileOperationResult>> EnqueueMoveOrCopyAsync(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool content, string taskId)
+    {
+        var (operations, _) = await MoveOrCopyAsync(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask: true, taskId);
+
+        return operations;
+    }
+
+    private async Task<(List<FileOperationResult>, string)> MoveOrCopyAsync(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool content = false, bool enqueueTask = true, string taskId = null)
     {
         if (content)
@@ -170,7 +233,7 @@ public class FileOperationsManager(TempStream tempStream,
             op.Id = taskId;
         }
 
-        return (QueueTask(userId, op, enqueueTask), op.Id, headers);
+        return (QueueTask(userId, op, enqueueTask), op.Id);
 
         async Task GetContent<T1>(List<T1> folderIds, List<T1> fileIds)
         {
@@ -190,8 +253,32 @@ public class FileOperationsManager(TempStream tempStream,
         }
     }
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
-        bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
+    #endregion
+
+    #region Delete
+
+    public List<FileOperationResult> Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
+    {
+        var (operations, _) = Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true);
+        return operations;
+    }
+
+    public (List<FileOperationResult>, string) PublishDelete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
+    {
+        return Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: false);
+    }
+
+    public List<FileOperationResult> EnqueueDelete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, string taskId = null)
+    {
+        var (operations, _) = Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true, taskId);
+        return operations;
+    }
+
+    private (List<FileOperationResult>, string) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
         var op = new FileDeleteOperation<T>(serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
 
@@ -200,19 +287,39 @@ public class FileOperationsManager(TempStream tempStream,
             op.Id = taskId;
         }
 
-        return (QueueTask(userId, op, enqueueTask), op.Id, headers);
+        return (QueueTask(userId, op, enqueueTask), op.Id);
     }
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) Delete(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
+    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
     {
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        return Delete(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask, taskId);
+        return Delete(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash);
     }
 
-    public (List<FileOperationResult>, string, IDictionary<string, StringValues>) Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
+    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
+    {
+        var (operations, _) = Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true);
+        return operations;
+    }
+
+    public (List<FileOperationResult>, string) PublishDelete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
+    {
+        return Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: false);
+    }
+
+    public List<FileOperationResult> EnqueueDelete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, string taskId = null)
+    {
+        var (operations, _) = Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true, taskId);
+        return operations;
+    }
+
+    private (List<FileOperationResult>, string) Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
         var op1 = new FileDeleteOperation<int>(serviceProvider, new FileDeleteOperationData<int>(foldersIdInt, filesIdInt, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
@@ -224,8 +331,10 @@ public class FileOperationsManager(TempStream tempStream,
             op.Id = taskId;
         }
 
-        return (QueueTask(userId, op, enqueueTask), op.Id, headers);
+        return (QueueTask(userId, op, enqueueTask), op.Id);
     }
+
+    #endregion
 
     private List<FileOperationResult> QueueTask(Guid userId, DistributedTaskProgress op, bool enqueueTask)
     {

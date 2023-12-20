@@ -68,7 +68,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             folders.Add(folderId, string.Empty);
         }
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.BulkDownloadAsync(folders, files, enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishBulkDownloadAsync(folders, files);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -102,7 +102,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content, enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -143,7 +143,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.DeleteItemsAsync("delete", folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately, enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishDeleteItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -177,7 +177,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var (tasks, currentTaskId, headers) = await fileStorageService.EmptyTrashAsync(enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishEmptyTrashAsync();
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -228,7 +228,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.MarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMarkAsRead(folderStringIds, fileStringIds, folderIntIds, fileIntIds);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -264,7 +264,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content, enqueueTask: false);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 

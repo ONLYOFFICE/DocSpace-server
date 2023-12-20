@@ -75,7 +75,7 @@ public class BulkDownloadIntegrationEventHandler : IIntegrationEventHandler<Bulk
             var files = @event.FileStringIds == null ? new Dictionary<JsonElement, string>() : @event.FileStringIds.ToDictionary(k => ToJsonElement(k.Key), k => k.Value);
             var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            await _fileStorageService.BulkDownloadAsync(folders, files, headers, true, @event.TaskId);
+            await _fileStorageService.EnqueueBulkDownloadAsync(folders, files, headers, @event.TaskId);
         }
 
     }
