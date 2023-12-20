@@ -110,7 +110,7 @@ public class DocumentServiceConnector
                                string[] users = null,
                                MetaData meta = null)
     {
-        _logger.DebugDocServiceCommand(method, fileId.ToString(), docKeyForTrack, callbackUrl, users != null ? string.Join(", ", users) : null, JsonConvert.SerializeObject(meta));
+        _logger.DebugDocServiceCommand(method, fileId.ToString(), docKeyForTrack, callbackUrl, users != null ? string.Join(", ", users) : "null", JsonConvert.SerializeObject(meta));
         try
         {
             var commandResponse = await CommandRequestAsync(

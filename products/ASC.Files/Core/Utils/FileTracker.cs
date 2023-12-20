@@ -47,7 +47,7 @@ public class FileTrackerHelper
     }
 
 
-    public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
+    public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false)
     {
         var checkRight = true;
         var tracker = GetTracker(fileId);
@@ -65,13 +65,14 @@ public class FileTrackerHelper
                     UserId = userId,
                     NewScheme = tabId == userId,
                     EditingAlone = editingAlone,
-                    TenantId = tenantId
+                    TenantId = tenantId,
+                    BaseUri = baseUri
                 });
             }
         }
         else
         {
-            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenantId);
+            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenantId, baseUri);
         }
 
         SetTracker(fileId, tracker);
@@ -235,6 +236,9 @@ public class FileTrackerHelper
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
 
+                var commonLinkUtility = scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>();
+                commonLinkUtility.ServerUri = editedBy.Value.BaseUri;
+                
                 var helper = scope.ServiceProvider.GetRequiredService<DocumentServiceHelper>();
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
@@ -258,7 +262,7 @@ public record FileTracker
 {
     internal Dictionary<Guid, TrackInfo> EditingBy { get; }
 
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
         EditingBy = new()
         { 
@@ -267,7 +271,8 @@ public record FileTracker
                     UserId = userId,
                     NewScheme = newScheme,
                     EditingAlone = editingAlone,
-                    TenantId = tenantId
+                    TenantId = tenantId,
+                    BaseUri = baseUri
                 } 
             } 
         };
@@ -280,6 +285,8 @@ public record FileTracker
         public DateTime TrackTime { get; set; } = DateTime.UtcNow;
         public required Guid UserId { get; init; }
         public required int TenantId { get; init; }
+        
+        public required string BaseUri { get; init; }
         public required bool NewScheme { get;  init; }
         public required bool EditingAlone { get;  init; }
     }

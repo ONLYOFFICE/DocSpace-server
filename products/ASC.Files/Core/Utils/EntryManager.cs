@@ -282,6 +282,7 @@ public class EntryManager
     private readonly FilesMessageService _filesMessageService;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SocketManager _socketManager;
+    private readonly CommonLinkUtility _commonLinkUtility;
 
     public EntryManager(
         IDaoFactory daoFactory,
@@ -312,7 +313,8 @@ public class EntryManager
         FilesMessageService filesMessageService,
         ThumbnailSettings thumbnailSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        CommonLinkUtility commonLinkUtility)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
@@ -343,6 +345,7 @@ public class EntryManager
         _thumbnailSettings = thumbnailSettings;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _socketManager = socketManager;
+        _commonLinkUtility = commonLinkUtility;
     }
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
@@ -1535,7 +1538,7 @@ public class EntryManager
         bool checkRight;
         if (_fileTracker.GetEditingBy(fileId).Contains(userId))
         {
-            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, _commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1574,7 +1577,7 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
         }
 
-        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, _commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
             _fileTracker.ChangeRight(fileId, userId, false);
