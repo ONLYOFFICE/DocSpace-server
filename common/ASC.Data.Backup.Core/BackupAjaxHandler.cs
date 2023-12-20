@@ -51,7 +51,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region Backup
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, bool dump, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -61,7 +61,8 @@ public class BackupAjaxHandler(BackupService backupService,
             UserId = securityContext.CurrentAccount.ID,
             StorageType = storageType,
             StorageParams = storageParams,
-            Dump = dump
+            Dump = dump,
+            ServerBaseUri = serverBaseUri
         };
 
         switch (storageType)
@@ -82,7 +83,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
         await messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        return await backupService.StartBackupAsync(backupRequest);
+        return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -261,7 +262,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify)
+    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = await GetCurrentTenantIdAsync();
@@ -269,7 +270,8 @@ public class BackupAjaxHandler(BackupService backupService,
         {
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))

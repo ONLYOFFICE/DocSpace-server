@@ -98,7 +98,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="ASC.Core.Users.UserInfo, ASC.Core.Common">User information</returns>
     /// <path>api/2.0/portal/users/{userID}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("users/{userID}")]
+    [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserAsync(Guid userID)
     {
         return await userManager.GetUsersAsync(userID);

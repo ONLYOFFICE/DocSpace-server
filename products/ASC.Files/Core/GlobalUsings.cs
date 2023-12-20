@@ -114,7 +114,6 @@ global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Mapping;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
-global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Thirdparty;

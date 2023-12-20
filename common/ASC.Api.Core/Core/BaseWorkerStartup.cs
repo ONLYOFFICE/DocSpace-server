@@ -32,7 +32,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
 
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
@@ -65,13 +65,30 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         services.AddMemoryCache();
+        
+        var redisConfiguration = Configuration.GetSection("Redis").Get<RedisConfiguration>();
+        IConnectionMultiplexer connectionMultiplexer = null;
 
-        services.AddDistributedCache(Configuration);
-        services.AddEventBus(Configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(Configuration);
-        services.AddHttpClient();
-        services.AddDistributedLock(Configuration);
+        if (redisConfiguration != null)
+        {
+            var configurationOption = redisConfiguration?.ConfigurationOptions;
+
+            configurationOption.ClientName = GetType().Namespace;
+
+            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+            services.AddSingleton(redisConfiguration)
+                    .AddSingleton(redisConnection);
+
+            connectionMultiplexer = redisConnection?.GetConnection();
+        }
+
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(Configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(Configuration)
+                .AddHttpClient()
+                .AddDistributedLock(Configuration);
 
         DIHelper.Configure(services);
 

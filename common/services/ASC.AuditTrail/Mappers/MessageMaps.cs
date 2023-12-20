@@ -177,7 +177,7 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
         _moduleType = moduleType;
     }
 
-    public void Add(MessageAction[] value)
+    public void Add(IEnumerable<MessageAction> value)
     {
         foreach (var item in value)
         {
@@ -217,7 +217,7 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
         }
     }
 
-    public void Add(ActionType key, MessageAction[] value)
+    public void Add(ActionType key, IEnumerable<MessageAction> value)
     {
         foreach (var item in value)
         {

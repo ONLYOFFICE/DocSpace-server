@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Serialization;
+
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
@@ -278,6 +280,9 @@ public class MessageService
             {
                 UserIds = userIds,
                 UserRole = (int)userType
+            }, new JsonSerializerOptions
+            {
+                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
         else if (action is MessageAction.UserCreated or MessageAction.UserUpdated)
@@ -285,6 +290,9 @@ public class MessageService
             parametr = JsonSerializer.Serialize(new AdditionalNotificationInfo
             {
                 UserIds = userIds
+            }, new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
         else

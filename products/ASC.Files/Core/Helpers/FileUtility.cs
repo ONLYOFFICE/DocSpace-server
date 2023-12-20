@@ -240,9 +240,7 @@ public class FileUtility
     public string GetInternalExtension(string fileName)
     {
         var extension = GetFileExtension(fileName);
-        return InternalExtension.TryGetValue(GetFileTypeByExtention(extension), out var internalExtension)
-                   ? internalExtension
-                   : extension;
+        return InternalExtension.GetValueOrDefault(GetFileTypeByExtention(extension), extension);
     }
 
     public string GetGoogleDownloadableExtension(string googleExtension)

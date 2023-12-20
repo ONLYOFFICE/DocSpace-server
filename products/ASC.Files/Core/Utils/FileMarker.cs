@@ -708,7 +708,10 @@ public class FileMarker(TenantManager tenantManager,
             }
         }
 
-        tags = tags.Distinct().ToList();
+        tags = tags
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
+                .Distinct()
+                .ToList();
 
         //TODO: refactoring
         var entryTagsProvider = await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string).ToAsyncEnumerable());
@@ -795,7 +798,7 @@ public class FileMarker(TenantManager tenantManager,
                 entryTags.Add(entry, tag);
             }
                 //todo: RemoveMarkAsNew(tag);
-            }
+        }
 
         return entryTags;
     }
