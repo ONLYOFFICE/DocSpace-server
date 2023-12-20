@@ -32,7 +32,7 @@ public class OwnCloudMigration(
     MigrationLogger migrationLogger,
     IServiceProvider serviceProvider,
     UserManager userManager)
-    : AbstractMigration<OCMigrationInfo, OCMigratingUser, OCMigratingFiles, OCMigratingGroups>(migrationLogger)
+    : AbstractMigration<OсMigrationInfo, OсMigratingUser, OсMigratingFiles, OсMigratingGroups>(migrationLogger)
 {
     private string _takeout;
     private string _tmpFolder;
@@ -51,7 +51,7 @@ public class OwnCloudMigration(
 
         _takeout = files.First(f => f.EndsWith(".zip"));
 
-        _migrationInfo = new OCMigrationInfo();
+        _migrationInfo = new OсMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
         _tmpFolder = path;
     }
@@ -126,7 +126,7 @@ public class OwnCloudMigration(
                         var userName = u.Data.DisplayName.Split(' ');
                         u.Data.DisplayName = userName.Length > 1 ? $"{userName[0]} {userName[1]}".Trim() : userName[0].Trim();
                         
-                        var user = serviceProvider.GetService<OCMigratingUser>();
+                        var user = serviceProvider.GetService<OсMigratingUser>();
                         user.Init(u, Directory.GetDirectories(_tmpFolder)[0], Log);
                         user.Parse();
                         if (user.Email.IsNullOrEmpty())
@@ -155,7 +155,7 @@ public class OwnCloudMigration(
             {
                 ReportProgress(progress, MigrationResource.DataProcessing);
                 progress += 10 / groups.Count;
-                var group = serviceProvider.GetService<OCMigratingGroups>();
+                var group = serviceProvider.GetService<OсMigratingGroups>();
                 group.Init(item, Log);
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
@@ -173,9 +173,9 @@ public class OwnCloudMigration(
         return _migrationInfo.ToApiInfo();
     }
 
-    private List<OCGroup> DbExtractGroup(string dbFile)
+    private List<OсGroup> DbExtractGroup(string dbFile)
     {
-        var groups = new List<OCGroup>();
+        var groups = new List<OсGroup>();
 
         var sqlFile = File.ReadAllText(dbFile);
 
@@ -187,7 +187,7 @@ public class OwnCloudMigration(
 
         foreach (var group in groupList)
         {
-            groups.Add(new OCGroup
+            groups.Add(new OсGroup
             {
                 GroupGid = group.Trim('\''),
                 UsersUid = new List<string>()
@@ -205,9 +205,9 @@ public class OwnCloudMigration(
         return groups;
     }
 
-    private List<OCUser> DbExtractUser(string dbFile)
+    private List<OсUser> DbExtractUser(string dbFile)
     {
-        var userDataList = new Dictionary<string, OCUser>();
+        var userDataList = new Dictionary<string, OсUser>();
 
         var sqlFile = File.ReadAllText(dbFile);
 
@@ -228,15 +228,15 @@ public class OwnCloudMigration(
 
             var userId = account.Split(',')[2].Trim('\'');
 
-            userDataList.Add(userId, new OCUser
+            userDataList.Add(userId, new OсUser
             {
                 Uid = account.Split(',')[2].Trim('\''),
-                Data = new OCUserData
+                Data = new OсUserData
                 {
                     DisplayName = account.Split(',')[4].Trim('\''),
                     Email = account.Split(',')[1].Trim('\'')
                 },
-                Storages = new OCStorages()
+                Storages = new OсStorages()
             });
         }
 
@@ -256,7 +256,7 @@ public class OwnCloudMigration(
 
                 user.Storages.NumericId = int.Parse(values[1]);
                 user.Storages.Id = values[0];
-                user.Storages.FileCache = new List<OCFileCache>();
+                user.Storages.FileCache = new List<OсFileCache>();
             }
         }
 
@@ -277,11 +277,11 @@ public class OwnCloudMigration(
                     continue;
                 }
 
-                storage.FileCache.Add(new OCFileCache()
+                storage.FileCache.Add(new OсFileCache()
                 {
                     FileId = int.Parse(values[0]),
                     Path = values[2],
-                    Share = new List<OCShare>()
+                    Share = new List<OсShare>()
                 });
             }
         }
@@ -303,7 +303,7 @@ public class OwnCloudMigration(
                     continue;
                 }
 
-                file.Share.Add(new OCShare()
+                file.Share.Add(new OсShare()
                 {
                     Id = int.Parse(values[0]),
                     ShareWith = values[2],
@@ -340,7 +340,7 @@ public class OwnCloudMigration(
             .Where(u => u.Value.ShouldImport)
             .Select(u => u.Value).ToList();
 
-        var failedUsers = new List<OCMigratingUser>();
+        var failedUsers = new List<OсMigratingUser>();
         var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         var i = 1;

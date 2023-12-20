@@ -30,7 +30,7 @@ using File = System.IO.File;
 namespace ASC.Migration.OwnCloud.Models;
 
 [Transient]
-public class OCMigratingFiles(
+public class OсMigratingFiles(
     GlobalFolderHelper globalFolderHelper,
     IDaoFactory daoFactory,
     FileStorageService fileStorageService,
@@ -41,20 +41,20 @@ public class OCMigratingFiles(
     public override int FilesCount => _filesCount;
     public override long BytesTotal => _bytesTotal;
 
-    private OCMigratingUser _user;
+    private OсMigratingUser _user;
     private string _rootFolder;
-    private List<OCFileCache> _files;
-    private List<OCFileCache> _folders;
+    private List<OсFileCache> _files;
+    private List<OсFileCache> _folders;
     private int _foldersCount;
     private int _filesCount;
     private long _bytesTotal;
-    private OCStorages _storages;
-    private Dictionary<string, OCMigratingUser> _users;
-    private Dictionary<string, OCMigratingGroups> _groups;
+    private OсStorages _storages;
+    private Dictionary<string, OсMigratingUser> _users;
+    private Dictionary<string, OсMigratingGroups> _groups;
     private Dictionary<object, int> _matchingFileId;
     private string _folderCreation;
 
-    public void Init(OCMigratingUser user, OCStorages storages, string rootFolder, Action<string, Exception> log)
+    public void Init(OсMigratingUser user, OсStorages storages, string rootFolder, Action<string, Exception> log)
     {
         _user = user;
         _rootFolder = rootFolder;
@@ -72,8 +72,8 @@ public class OCMigratingFiles(
             return;
         }
 
-        _files = new List<OCFileCache>();
-        _folders = new List<OCFileCache>();
+        _files = new List<OсFileCache>();
+        _folders = new List<OсFileCache>();
         _folderCreation = _folderCreation != null ? _folderCreation : DateTime.Now.ToString("dd.MM.yyyy");
         foreach (var entry in _storages.FileCache)
         {
@@ -253,11 +253,11 @@ public class OCMigratingFiles(
         }
     }
 
-    public void SetUsersDict(IEnumerable<OCMigratingUser> users)
+    public void SetUsersDict(IEnumerable<OсMigratingUser> users)
     {
         _users = users.ToDictionary(user => user.Key, user => user);
     }
-    public void SetGroupsDict(IEnumerable<OCMigratingGroups> groups)
+    public void SetGroupsDict(IEnumerable<OсMigratingGroups> groups)
     {
         _groups = groups.ToDictionary(group => group.GroupName, group => group);
     }

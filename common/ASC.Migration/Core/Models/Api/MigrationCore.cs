@@ -82,9 +82,9 @@ public class MigrationCore(
         services.TryAdd<NcMigratingGroups>();
 
         services.TryAdd<IMigration, OwnCloudMigration>();
-        services.TryAdd<OCMigratingUser>();
-        services.TryAdd<OCMigratingFiles>();
-        services.TryAdd<OCMigratingGroups>();
+        services.TryAdd<OсMigratingUser>();
+        services.TryAdd<OсMigratingFiles>();
+        services.TryAdd<OсMigratingGroups>();
 
         services.TryAdd<IMigration, WorkspaceMigration>();
         services.TryAdd<WorkspaceMigratingUser>();

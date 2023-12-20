@@ -29,17 +29,17 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.OwnCloud.Models;
 
 [Transient]
-public class OCMigratingGroups(UserManager userManager) : MigratingGroup
+public class OсMigratingGroups(UserManager userManager) : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
-    private OCGroup _group;
+    private OсGroup _group;
     private GroupInfo _groupInfo;
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
 
-    public void Init(OCGroup group, Action<string, Exception> log)
+    public void Init(OсGroup group, Action<string, Exception> log)
     {
         _group = group;
         Log = log;
