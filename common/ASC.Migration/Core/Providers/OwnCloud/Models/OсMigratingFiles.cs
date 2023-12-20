@@ -215,7 +215,7 @@ public class OсMigratingFiles(
                     continue;
                 }
 
-                var shareType = GetPortalShare(shareInfo.Premissions, entryIsFile);
+                var shareType = GetPortalShare(shareInfo.Permissions, entryIsFile);
                 _users.TryGetValue(shareInfo.ShareWith, out var userToShare);
 
                 if (userToShare != null)

@@ -44,5 +44,5 @@ public class OсShare
 {
     public int Id { get; set; }
     public string ShareWith { get; set; }
-    public int Premissions { get; set; }
+    public int Permissions { get; set; }
 }

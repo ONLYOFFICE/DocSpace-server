@@ -307,7 +307,7 @@ public class OwnCloudMigration(
                 {
                     Id = int.Parse(values[0]),
                     ShareWith = values[2],
-                    Premissions = int.Parse(values[11])
+                    Permissions = int.Parse(values[11])
                 });
             }
         }
