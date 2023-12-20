@@ -2015,15 +2015,13 @@ public class FileStorageService //: IFileStorageService
         return (fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID), null, null);
     }
 
-    public async Task<List<FileOperationResult>> EnqueueMoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool ic, bool deleteAfter = false, bool content = false, IDictionary<string, StringValues> httpHeaders = null, string taskId = null)
+    public async Task<List<FileOperationResult>> EnqueueMoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false, IDictionary<string, StringValues> headers = null, string taskId = null)
     {
         ErrorIf(resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
 
         if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
         {
-            var headers = httpHeaders ?? GetHttpHeaders();
-
-            return await fileOperationsManager.EnqueueMoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, ic, resolve, !deleteAfter, headers, await externalShare.GetCurrentShareDataAsync(), content, taskId);
+            return await fileOperationsManager.EnqueueMoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers, await externalShare.GetCurrentShareDataAsync(), content, taskId);
         }
 
         return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
