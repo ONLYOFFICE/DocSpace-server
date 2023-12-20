@@ -3332,7 +3332,7 @@ public class FileStorageService //: IFileStorageService
 
         ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
         ErrorIf(!await fileSecurity.CanReadAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
-        var access = FileShare.None;
+        FileShare access;
 
         if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
@@ -3340,12 +3340,12 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            access = (await fileSharing.GetSharedInfoAsync(file)).Where(s => s.Id == authContext.CurrentAccount.ID).FirstOrDefault().Access;
+            access = (await fileSharing.GetSharedInfoAsync(file)).FirstOrDefault(s => s.Id == authContext.CurrentAccount.ID).Access;
         }
 
         await fileSecurity.ShareAsync(file.Id, FileEntryType.File, authContext.CurrentAccount.ID, access);
 
-        var fileShare = (await fileSecurity.GetSharesAsync(file)).Where(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID).FirstOrDefault();
+        var fileShare = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
         var keys = await encryptionLoginProvider.GetKeysAsync();
 
         return new FileEncryptionInfoDto

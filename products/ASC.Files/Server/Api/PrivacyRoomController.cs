@@ -79,10 +79,9 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         SettingsManager settingsManager,
         EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
         MessageService messageService,
-        ILoggerProvider option)
+        ILogger<PrivacyRoomControllerCommon> logger)
     : ControllerBase
 {
-    private readonly ILogger _logger = option.CreateLogger("ASC.Api.Documents");
 
     /// <summary>
     /// Returns a key pair for the current user.
@@ -149,7 +148,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
                 return new { isset = true };
             }
 
-            _logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
+            logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
         }
 
         await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
