@@ -102,7 +102,7 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
             }
             else
             {
-                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted));
+                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted), stoppingToken);
             }
         }
         catch (ThreadAbortException)

@@ -843,7 +843,7 @@ public class FileSharing(Global global,
         if (filterType == ShareFilterType.User)
         {
             return true;
-    }
+        }
     
         return await fileSecurity.CanReadLinksAsync(entry);
     }

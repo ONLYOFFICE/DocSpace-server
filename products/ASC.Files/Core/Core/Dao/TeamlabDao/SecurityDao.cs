@@ -29,39 +29,31 @@ using User = ASC.Core.Common.EF.User;
 namespace ASC.Files.Core.Data;
 
 [Scope]
-internal abstract class SecurityBaseDao<T> : AbstractDao
+internal abstract class SecurityBaseDao<T>(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    CoreBaseSettings coreBaseSettings,
+    CoreConfiguration coreConfiguration,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IMapper mapper)
+    : AbstractDao(dbContextFactory,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        coreBaseSettings,
+        coreConfiguration,
+        settingsManager,
+        authContext,
+        serviceProvider)
 {
-    private readonly IMapper _mapper;
-
-    public SecurityBaseDao(
-        UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache,
-        IMapper mapper)
-        : base(dbContextFactory,
-              userManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider)
-    {
-        _mapper = mapper;
-    }
-
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord> records)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -141,7 +133,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
         else
         {
-            var toInsert = _mapper.Map<FileShareRecord, DbFilesSecurity>(r);
+            var toInsert = mapper.Map<FileShareRecord, DbFilesSecurity>(r);
             toInsert.EntryId = (await MappingIDAsync(r.EntryId, true)).ToString();
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -308,7 +300,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         await foreach (var r in q1.ToAsyncEnumerable())
         {
-            yield return new UserInfoWithShared { UserInfo = _mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
+            yield return new UserInfoWithShared { UserInfo = mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
         }
     }
 
@@ -378,7 +370,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(List<string> files, List<string> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(IEnumerable<string> files, IEnumerable<string> folders)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -461,7 +453,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     internal async Task<FileShareRecord> ToFileShareRecordAsync(DbFilesSecurity r)
     {
-        var result = _mapper.Map<DbFilesSecurity, FileShareRecord>(r);
+        var result = mapper.Map<DbFilesSecurity, FileShareRecord>(r);
         result.EntryId = await MappingIDAsync(r.EntryId);
 
         return result;
@@ -469,7 +461,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     protected FileShareRecord ToFileShareRecord(SecurityTreeRecord r)
     {
-        var result = _mapper.Map<SecurityTreeRecord, FileShareRecord>(r);
+        var result = mapper.Map<SecurityTreeRecord, FileShareRecord>(r);
 
         if (r.FolderId != default)
         {
@@ -532,10 +524,9 @@ internal class SecurityDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
         IMapper mapper)
     : SecurityBaseDao<int>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic,
-        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper), ISecurityDao<int>
+        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<int>
 {
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
@@ -647,12 +638,10 @@ internal class ThirdPartySecurityDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
         IMapper mapper,
         SelectorFactory selectorFactory)
     : SecurityBaseDao<string>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo,
-        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider,
-        cache, mapper), ISecurityDao<string>
+        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<string>
 {
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {
@@ -708,7 +697,7 @@ internal class ThirdPartySecurityDao(UserManager userManager,
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IReadOnlyCollection<FileEntry<string>> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IEnumerable<FileEntry<string>> folders)
     {
         foreach (var folder in folders)
         {

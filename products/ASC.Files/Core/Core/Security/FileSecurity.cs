@@ -1014,51 +1014,51 @@ public class FileSecurity(IDaoFactory daoFactory,
                 (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) || 
                 _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
-            ace = value.Clone();
-            ace.EntryId = e.Id;
-        }
-        else
-        {
-            var subjects = new List<Guid>();
-            if (shares == null)
-            {
-                subjects = await GetUserSubjectsAsync(userId);
-                shares = await GetSharesAsync(e, subjects);
-            }
-
-            if (e.FileEntryType == FileEntryType.File)
-            {
-                ace = shares
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-                    .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
-
-                if (ace == null)
-                {
-                    // share on parent folders
-                    ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
-                        .OrderBy(r => r, new SubjectComparer(subjects))
-                        .ThenBy(r => r.Level)
-                        .FirstOrDefault();
-                }
+                ace = value.Clone();
+                ace.EntryId = e.Id;
             }
             else
             {
-                ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenBy(r => r.Level)
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-                    .FirstOrDefault();
-            }
+                var subjects = new List<Guid>();
+                if (shares == null)
+                {
+                    subjects = await GetUserSubjectsAsync(userId);
+                    shares = await GetSharesAsync(e, subjects);
+                }
+
+                if (e.FileEntryType == FileEntryType.File)
+                {
+                    ace = shares
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                        .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
+
+                    if (ace == null)
+                    {
+                        // share on parent folders
+                        ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
+                            .OrderBy(r => r, new SubjectComparer(subjects))
+                            .ThenBy(r => r.Level)
+                            .FirstOrDefault();
+                    }
+                }
+                else
+                {
+                    ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenBy(r => r.Level)
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                        .FirstOrDefault();
+                }
             
-            if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
-            {
-                var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                    ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                {
+                    var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
                     _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                }
             }
-        }
         }
 
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 

@@ -36,13 +36,13 @@ public class Startup : BaseStartup
         WebhooksEnabled = true;
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {

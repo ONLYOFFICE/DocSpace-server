@@ -102,7 +102,8 @@ public class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
-            UserNameRegex = userFormatter.UserNameRegex.ToString()
+            UserNameRegex = userFormatter.UserNameRegex.ToString(),
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -115,7 +116,7 @@ public class SettingsController(MessageService messageService,
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
             var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZone;
+            settings.Timezone = timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
             settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -161,7 +162,15 @@ public class SettingsController(MessageService messageService,
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(configuration["plugins:upload"], out var pluginsUpload))
+            {
+                settings.Plugins.Upload = pluginsUpload;
+            }
+
+            if (bool.TryParse(configuration["plugins:delete"], out var pluginsDelete))
+            {
+                settings.Plugins.Delete = pluginsDelete;
+            }
 
             var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
@@ -296,9 +305,9 @@ public class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -329,7 +338,7 @@ public class SettingsController(MessageService messageService,
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -707,7 +716,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("statistics/spaceusage/{id}")]
+    [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -975,8 +984,8 @@ public class SettingsController(MessageService messageService,
             return url;
         }
 
-            return currentLink;
-        }
+        return currentLink;
+    }
 
     /// <summary>
     /// Checks if the user has connected to TelegramBot.

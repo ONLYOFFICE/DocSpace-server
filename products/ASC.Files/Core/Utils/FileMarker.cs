@@ -709,7 +709,7 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         tags = tags
-            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id))
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
                 .Distinct()
                 .ToList();
 
@@ -796,7 +796,7 @@ public class FileMarker(TenantManager tenantManager,
                 entryTags.Add(entry, tag);
             }
                 //todo: RemoveMarkAsNew(tag);
-            }
+        }
 
         return entryTags;
     }
