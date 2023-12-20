@@ -14,7 +14,23 @@
 	<name>api</name>
 	<description>Docspace Authorization Server API</description>
 	<properties>
-		<bouncycastle.version>1.70</bouncycastle.version>
+		<spring.hateoas.version>2.1.2</spring.hateoas.version>
+		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
+
+		<caffeine.caching.version>3.1.8</caffeine.caching.version>
+		<redisson.caching.version>3.23.1</redisson.caching.version>
+		<spring.caching.version>2.4.0</spring.caching.version>
+
+		<netty.socket.version>1.7.17</netty.socket.version>
+
+		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
+		<resilience4j.version>2.1.0</resilience4j.version>
+
+		<logback.gelf.version>5.0.1</logback.gelf.version>
+		<logback.logstash.version>7.4</logback.logstash.version>
+
+		<springdoc.version>2.2.0</springdoc.version>
+		<testcontainers.version>1.19.1</testcontainers.version>
 	</properties>
 
 	<dependencyManagement>
@@ -37,51 +53,13 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-batch</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.logstash.logback</groupId>
-			<artifactId>logstash-logback-encoder</artifactId>
-			<version>7.4</version>
-		</dependency>
-		<dependency>
-			<groupId>de.siegmar</groupId>
-			<artifactId>logback-gelf</artifactId>
-			<version>5.0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.hateoas</groupId>
 			<artifactId>spring-hateoas</artifactId>
-			<version>2.1.2</version>
+			<version>${spring.hateoas.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
-			<version>3.3.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-			<version>2.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<version>3.1.8</version>
 		</dependency>
 
 		<!-- -->
@@ -89,19 +67,29 @@
 		<!-- Spring Cloud Dependencies -->
 
 		<dependency>
-			<groupId>org.redisson</groupId>
-			<artifactId>redisson-spring-boot-starter</artifactId>
-			<version>3.23.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
-			<version>4.0.4</version>
+			<version>${spring.cloud.feign.version}</version>
+		</dependency>
+
+		<!-- -->
+
+		<!-- Spring Caching Dependencies -->
+
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${caffeine.caching.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
-			<version>3.0.3</version>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson-spring-boot-starter</artifactId>
+			<version>${redisson.caching.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+			<version>${spring.caching.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -146,7 +134,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.17</version>
+			<version>${netty.socket.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -156,27 +144,46 @@
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-retry</artifactId>
-			<version>2.1.0</version>
+			<version>${resilience4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-bulkhead</artifactId>
-			<version>2.1.0</version>
+			<version>${resilience4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+			<version>${resilience4j.circuit.version}</version>
 		</dependency>
 
 		<!-- -->
 
-		<!-- Utility Dependencies -->
+		<!-- Logging Dependencies -->
 
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.13.0</version>
+			<groupId>de.siegmar</groupId>
+			<artifactId>logback-gelf</artifactId>
+			<version>${logback.gelf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>${logback.logstash.version}</version>
+		</dependency>
+
+		<!-- -->
+
+		<!-- Misc Dependencies -->
+
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -196,25 +203,25 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.19.1</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>mysql</artifactId>
-			<version>1.19.1</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>1.19.1</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>rabbitmq</artifactId>
-			<version>1.19.1</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 
