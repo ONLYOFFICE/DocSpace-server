@@ -31,6 +31,8 @@ public abstract class MigratingFiles : ImportableEntity
     public abstract int FoldersCount { get; }
     public abstract int FilesCount { get; }
     public abstract long BytesTotal { get; }
+    
+    public bool ShouldImportSharedFiles { get; set; } = true;
 
     public virtual MigratingApiFiles ToApiInfo()
     {

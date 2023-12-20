@@ -51,8 +51,15 @@ public class MigrationApiInfo
     public bool ImportPersonalFiles { get; set; } = true;
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; } = true;
+    
     [ProtoMember(10)]
-    public int SuccessedUsers { get; set; }
+    public bool ImportCommonFiles { get; set; } = true;
+    
     [ProtoMember(11)]
+    public bool ImportProjectFiles { get; set; } = true;
+    
+    [ProtoMember(12)]
+    public int SuccessedUsers { get; set; }
+    [ProtoMember(13)]
     public int FailedUsers { get; set; }
 }

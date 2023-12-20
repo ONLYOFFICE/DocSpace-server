@@ -136,147 +136,152 @@ public class GwsMigratingFiles : MigratingFiles
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var tmpFolder = Path.Combine(_tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(_user.Key));
         try
         {
             ZipFile.ExtractToDirectory(Path.Combine(_rootFolder, _user.Key), tmpFolder);
             var drivePath = Path.Combine(tmpFolder, "Takeout", "Drive");
-            if (ShouldImport) 
+            // Create all folders first
+            var foldersDict = new Dictionary<string, Folder<int>>();
+            if (_folders != null && _folders.Count != 0)
             {
-                // Create all folders first
-                var foldersDict = new Dictionary<string, Folder<int>>();
-                if (_folders != null && _folders.Count != 0)
+                foreach (var folder in _folders)
                 {
-                    foreach (var folder in _folders)
+                    var split = folder.Split(Path.DirectorySeparatorChar); // recursivly create all the folders
+                    for (var i = 0; i < split.Length; i++)
                     {
-                        var split = folder.Split(Path.DirectorySeparatorChar); // recursivly create all the folders
-                        for (var i = 0; i < split.Length; i++)
+                        var path = string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i + 1));
+                        if (foldersDict.ContainsKey(path))
                         {
-                            var path = string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i + 1));
-                            if (foldersDict.ContainsKey(path))
-                            {
-                                continue; // skip folder if it was already created as a part of another path
-                            }
-
-                            var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
-                            try
-                            {
-                                var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
-                                path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
-                                foldersDict.Add(path, createdFolder);
-                            }
-                            catch (Exception ex)
-                            {
-                                Log($"Couldn't create folder {path}", ex);
-                            }
+                            continue; // skip folder if it was already created as a part of another path
                         }
-                    }
-                }
-                //create default folder
-                if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
-                {
-                    var parentId = await _globalFolderHelper.FolderMyAsync;
-                    var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
-                    foldersDict.Add(_newParentFolder, createdFolder);
-                }
 
-                var filesDict = new Dictionary<string, File<int>>();
-                if (_files != null && _files.Count != 0)
-                {
-                    foreach (var file in _files)
-                    {
-                        var maskFile = file.Replace(MigrationResource.GoogleModuleNameDocuments + " " + _folderCreation + Path.DirectorySeparatorChar, "");
-                        var maskParentPath = Path.GetDirectoryName(maskFile);
-                        var realPath = Path.Combine(drivePath, maskFile);
-
+                        var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                         try
                         {
-                            var parentFolder = string.IsNullOrWhiteSpace(maskParentPath) ? foldersDict[_newParentFolder] : foldersDict[maskParentPath];
-                            var newFile = await AddFileAsync(realPath, parentFolder.Id, Path.GetFileName(file));
-                            filesDict.Add(realPath, newFile);
+                            var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                            path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
+                            foldersDict.Add(path, createdFolder);
                         }
                         catch (Exception ex)
                         {
-                            Log($"Couldn't create file {maskParentPath}/{Path.GetFileName(file)}", ex);
+                            Log($"Couldn't create folder {path}", ex);
                         }
                     }
                 }
-                
-                var entries = filesDict
-                .ToDictionary(kv => kv.Key, kv => (FileEntry<int>)kv.Value)
-                .Concat(foldersDict.ToDictionary(kv => Path.Combine(drivePath, kv.Key), kv => (FileEntry<int>)kv.Value))
-                .OrderBy(kv => kv.Value is File<int>)
-                .ThenBy(kv => kv.Key.Count(c => Path.DirectorySeparatorChar.Equals(c)));
+            }
+            //create default folder
+            if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
+            {
+                var parentId = await _globalFolderHelper.FolderMyAsync;
+                var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
+                foldersDict.Add(_newParentFolder, createdFolder);
+            }
 
-                foreach (var kv in entries)
+            var filesDict = new Dictionary<string, File<int>>();
+            if (_files != null && _files.Count != 0)
+            {
+                foreach (var file in _files)
                 {
-                    if (TryReadInfoFile(kv.Key, out var info))
+                    var maskFile = file.Replace(MigrationResource.GoogleModuleNameDocuments + " " + _folderCreation + Path.DirectorySeparatorChar, "");
+                    var maskParentPath = Path.GetDirectoryName(maskFile);
+                    var realPath = Path.Combine(drivePath, maskFile);
+
+                    try
                     {
-                        var list = new List<AceWrapper>();
-                        foreach (var shareInfo in info.Permissions)
+                        var parentFolder = string.IsNullOrWhiteSpace(maskParentPath) ? foldersDict[_newParentFolder] : foldersDict[maskParentPath];
+                        var newFile = await AddFileAsync(realPath, parentFolder.Id, Path.GetFileName(file));
+                        filesDict.Add(realPath, newFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Couldn't create file {maskParentPath}/{Path.GetFileName(file)}", ex);
+                    }
+                }
+            }
+
+            if (!ShouldImportSharedFiles)
+            {
+                return;
+            }
+            var entries = filesDict
+            .ToDictionary(kv => kv.Key, kv => (FileEntry<int>)kv.Value)
+            .Concat(foldersDict.ToDictionary(kv => Path.Combine(drivePath, kv.Key), kv => (FileEntry<int>)kv.Value))
+            .OrderBy(kv => kv.Value is File<int>)
+            .ThenBy(kv => kv.Key.Count(c => Path.DirectorySeparatorChar.Equals(c)));
+
+            foreach (var kv in entries)
+            {
+                if (TryReadInfoFile(kv.Key, out var info))
+                {
+                    var list = new List<AceWrapper>();
+                    foreach (var shareInfo in info.Permissions)
+                    {
+                        if (shareInfo.Type is "user" or "group")
                         {
-                            if (shareInfo.Type is "user" or "group")
+                            var shareType = GetPortalShare(shareInfo);
+                            _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
+                            _groups.TryGetValue(shareInfo.Name, out var groupToShare);
+                            if (shareType == null || (userToShare == null && groupToShare == null))
                             {
-                                var shareType = GetPortalShare(shareInfo);
-                                _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
-                                _groups.TryGetValue(shareInfo.Name, out var groupToShare);
-                                if (shareType == null || (userToShare == null && groupToShare == null))
-                                {
-                                    continue;
-                                }
-
-                                Func<FileEntry<int>, Guid, Task<bool>> checkRights = null;
-                                switch (shareType)
-                                {
-                                    case ASCShare.ReadWrite:
-                                        checkRights = _fileSecurity.CanEditAsync;
-                                        break;
-                                    case ASCShare.Comment:
-                                        checkRights = _fileSecurity.CanCommentAsync;
-                                        break;
-                                    case ASCShare.Read:
-                                        checkRights = _fileSecurity.CanReadAsync;
-                                        break;
-                                    default: // unused
-                                        break;
-                                }
-                                var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
-
-                                if (checkRights != null && await checkRights(kv.Value, entryGuid))
-                                {
-                                    continue; // already have rights, skip
-                                }
-
-                                list.Add(new AceWrapper
-                                {
-                                    Access = shareType.Value,
-                                    Id = entryGuid,
-                                    SubjectGroup = false
-                                });
+                                continue;
                             }
-                        }
 
-                        if (list.Count == 0)
-                        {
-                            continue;
-                        }
+                            Func<FileEntry<int>, Guid, Task<bool>> checkRights = null;
+                            switch (shareType)
+                            {
+                                case ASCShare.ReadWrite:
+                                    checkRights = _fileSecurity.CanEditAsync;
+                                    break;
+                                case ASCShare.Comment:
+                                    checkRights = _fileSecurity.CanCommentAsync;
+                                    break;
+                                case ASCShare.Read:
+                                    checkRights = _fileSecurity.CanReadAsync;
+                                    break;
+                                default: // unused
+                                    break;
+                            }
+                            var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
 
-                        var aceCollection = new AceCollection<int>
-                        {
-                            Files = kv.Value is File<int> ? new List<int> { kv.Value.Id } : new List<int>(),
-                            Folders = kv.Value is File<int> ? new List<int>() : new List<int> { kv.Value.Id },
-                            Aces = list,
-                            Message = null
-                        };
+                            if (checkRights != null && await checkRights(kv.Value, entryGuid))
+                            {
+                                continue; // already have rights, skip
+                            }
 
-                        try
-                        {
-                            await _fileStorageService.SetAceObjectAsync(aceCollection, false);
+                            list.Add(new AceWrapper
+                            {
+                                Access = shareType.Value,
+                                Id = entryGuid,
+                                SubjectGroup = false
+                            });
                         }
-                        catch (Exception ex)
-                        {
-                            Log($"Couldn't change file permissions for {kv.Value.Id}", ex);
-                        }
+                    }
+
+                    if (list.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var aceCollection = new AceCollection<int>
+                    {
+                        Files = kv.Value is File<int> ? new List<int> { kv.Value.Id } : new List<int>(),
+                        Folders = kv.Value is File<int> ? new List<int>() : new List<int> { kv.Value.Id },
+                        Aces = list,
+                        Message = null
+                    };
+
+                    try
+                    {
+                        await _fileStorageService.SetAceObjectAsync(aceCollection, false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Couldn't change file permissions for {kv.Value.Id}", ex);
                     }
                 }
             }

@@ -250,7 +250,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
             }
         }
 
-        if (_type != FolderType.USER)
+        if (_type != FolderType.USER || !ShouldImportSharedFiles)
         {
             return;
         }

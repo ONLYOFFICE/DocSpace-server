@@ -68,7 +68,7 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             var user = Users[apiUser.Key];
             user.ShouldImport = apiUser.ShouldImport;
             user.MigratingFiles.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
-            user.MigratingFiles.ShouldImportSharedFiles = false;
+            user.MigratingFiles.ShouldImportSharedFiles = user.MigratingFiles.ShouldImport && apiInfo.ImportSharedFiles;
         }
 
         foreach (var apiGroup in apiInfo.Groups)
@@ -81,5 +81,6 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             var group = Groups.Find(g => apiGroup.GroupName == g.GroupName);
             group.ShouldImport = apiGroup.ShouldImport;
         }
+        
     }
 }

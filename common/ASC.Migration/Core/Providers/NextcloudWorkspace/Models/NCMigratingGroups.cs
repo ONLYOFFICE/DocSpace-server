@@ -64,6 +64,10 @@ public class NCMigratingGroups : MigratingGroup
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
         var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)

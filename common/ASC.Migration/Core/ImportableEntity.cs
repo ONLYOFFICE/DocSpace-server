@@ -29,7 +29,6 @@ namespace ASC.Migration.Core;
 public abstract class ImportableEntity
 {
     public bool ShouldImport { get; set; } = true;
-    public bool ShouldImportSharedFiles { get; set; } = true;
 
     public abstract void Parse();
 

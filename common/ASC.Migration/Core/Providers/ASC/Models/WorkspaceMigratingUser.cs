@@ -90,6 +90,10 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var saved = await _userManager.GetUserByEmailAsync(_user.Info.Email);
         if (saved.Equals(Constants.LostUser))
         {

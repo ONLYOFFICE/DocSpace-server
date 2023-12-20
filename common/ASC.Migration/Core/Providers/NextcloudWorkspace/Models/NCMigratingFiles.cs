@@ -193,6 +193,11 @@ public class NCMigratingFiles : MigratingFiles
             }
         }
         
+        if (!ShouldImportSharedFiles)
+        {
+            return;
+        }
+        
         foreach (var item in _matchingFileId)
         {
             var list = new List<AceWrapper>();

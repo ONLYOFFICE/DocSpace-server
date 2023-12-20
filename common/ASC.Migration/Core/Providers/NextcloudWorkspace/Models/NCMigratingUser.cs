@@ -87,7 +87,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
 
         if (!_hasPhoto)
         {
-            var appdataDir = Directory.GetDirectories(Path.Combine(_rootFolder, "data")).Where(dir => dir.Split(Path.DirectorySeparatorChar).Last().StartsWith("appdata_")).First();
+            var appdataDir = Directory.GetDirectories(Path.Combine(_rootFolder, "data")).FirstOrDefault(dir => dir.Split(Path.DirectorySeparatorChar).Last().StartsWith("appdata_"));
             if (appdataDir != null)
             {
                 var pathToAvatarDir = Path.Combine(appdataDir, "avatar", Key);
@@ -115,7 +115,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
             _userInfo.ContactsList.Add(_user.Data.Twitter);
 
         }
-        if (_user.Data.Email != null && _user.Data.Email != "" && _user.Data.Email != "NULL")
+        if (!string.IsNullOrEmpty(_user.Data.Email) && _user.Data.Email != "NULL")
         {
             var email = _emailRegex.Match(_user.Data.Email);
             if (email.Success)
@@ -151,8 +151,12 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved == ASC.Core.Users.Constants.LostUser)
+        if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {
@@ -183,14 +187,12 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
 
             if (_hasPhoto)
             {
-                using (var ms = new MemoryStream())
+                using var ms = new MemoryStream();
+                await using (var fs = File.OpenRead(_pathToPhoto))
                 {
-                    using (var fs = File.OpenRead(_pathToPhoto))
-                    {
-                        fs.CopyTo(ms);
-                    }
-                    await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                    await fs.CopyToAsync(ms);
                 }
+                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

@@ -88,7 +88,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
         MigratingFiles.Parse();
 
         _userInfo.UserName = _userInfo.Email.Split('@').First();
-        if (_userInfo.FirstName == null || _userInfo.FirstName == "")
+        if (string.IsNullOrEmpty(_userInfo.FirstName))
         {
             _userInfo.FirstName = _userInfo.Email.Split('@').First();
         }
@@ -105,8 +105,12 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved == ASC.Core.Users.Constants.LostUser)
+        if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {
@@ -138,20 +142,14 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
 
             if (_hasPhoto)
             {
-                using (var fs = File.OpenRead(Key))
+                await using var fs = File.OpenRead(Key);
+                using var zip = new ZipArchive(fs);
+                using var ms = new MemoryStream();
+                await using (var imageStream = zip.GetEntry(string.Join("/", "Takeout", "Profile", "ProfilePhoto.jpg")).Open())
                 {
-                    using (var zip = new ZipArchive(fs))
-                    {
-                        using (var ms = new MemoryStream())
-                        {
-                            using (var imageStream = zip.GetEntry(string.Join("/", "Takeout", "Profile", "ProfilePhoto.jpg")).Open())
-                            {
-                                imageStream.CopyTo(ms);
-                            }
-                            await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
-                        }
-                    }
+                    await imageStream.CopyToAsync(ms);
                 }
+                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

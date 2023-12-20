@@ -120,6 +120,10 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
 
     public override async Task MigrateAsync()
     {
+        if (!ShouldImport)
+        {
+            return;
+        }
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
         if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {

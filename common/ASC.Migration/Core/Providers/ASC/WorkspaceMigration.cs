@@ -132,23 +132,16 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 }
             }
 
-            try
+            var groups = DbExtractGroup();
+            var progress = 80;
+            foreach (var item in groups)
             {
-                var groups = DbExtractGroup();
-                var progress = 80;
-                foreach (var item in groups)
-                {
-                    ReportProgress(progress, MigrationResource.DataProcessing);
-                    progress += 10 / groups.Count;
-                    var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
-                    group.Init(item, Log);
-                    group.Parse();
-                    _migrationInfo.Groups.Add(group);
-                }
-            }
-            catch
-            {
-                
+                ReportProgress(progress, MigrationResource.DataProcessing);
+                progress += 10 / groups.Count;
+                var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
+                group.Init(item, Log);
+                group.Parse();
+                _migrationInfo.Groups.Add(group);
             }
 
             var storage = new WorkspaceStorage
@@ -158,15 +151,21 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             };
             _migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON);
             _migratingCommonFiles.Parse();
-            
-            
-            storage = new WorkspaceStorage
+
+            try
             {
-                Files = new List<WorkspaceFile>(),
-                Folders = new List<WorkspaceFolder>()
-            };
-            _migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.BUNCH);
-            _migratingProjectFiles.Parse();
+                storage = new WorkspaceStorage
+                {
+                    Files = new List<WorkspaceFile>(), Folders = new List<WorkspaceFolder>()
+                };
+                _migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids,
+                    FolderType.BUNCH);
+                _migratingProjectFiles.Parse();
+            }
+            catch
+            {
+                _migratingProjectFiles = null;
+            }
         }
         catch (Exception ex)
         {
@@ -182,40 +181,48 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
 
     private List<WorkspaceGroup> DbExtractGroup()
     {
-        using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
-        var dataGroup = new DataTable();
-        dataGroup.ReadXml(streamGroup);
-
-        var groups = (from row in dataGroup.Rows.Cast<DataRow>()
-            where int.Parse(row["removed"].ToString()) == 0
-            select new WorkspaceGroup
-            {
-                Id = Guid.Parse(row["id"].ToString()),
-                Name = row["name"].ToString(),
-                CategoryId = Guid.Parse(row["categoryid"].ToString()),
-                Sid = row["sid"].ToString(),
-                UsersUId = new HashSet<string>(),
-                ManagersUId = new HashSet<string>()
-            }).ToList();
-
-        using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
-        var dataUserGroup = new DataTable();
-        dataUserGroup.ReadXml(streamUserGroup);
-
-        foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
+        try
         {
-            if (int.Parse(row["removed"].ToString()) == 0)
-            {
-                var groupId = Guid.Parse(row["groupid"].ToString());
-                var g = groups.FirstOrDefault(g => g.Id == groupId);
-                g?.UsersUId.Add(row["userid"].ToString());
-                if (string.Equals(row["ref_type"].ToString(), "1"))
+            using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
+            var dataGroup = new DataTable();
+            dataGroup.ReadXml(streamGroup);
+
+            var groups = (from row in dataGroup.Rows.Cast<DataRow>()
+                where int.Parse(row["removed"].ToString()) == 0
+                select new WorkspaceGroup
                 {
-                    g?.ManagersUId.Add(row["userid"].ToString());
+                    Id = Guid.Parse(row["id"].ToString()),
+                    Name = row["name"].ToString(),
+                    CategoryId = Guid.Parse(row["categoryid"].ToString()),
+                    Sid = row["sid"].ToString(),
+                    UsersUId = new HashSet<string>(),
+                    ManagersUId = new HashSet<string>()
+                }).ToList();
+
+            using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
+            var dataUserGroup = new DataTable();
+            dataUserGroup.ReadXml(streamUserGroup);
+
+            foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
+            {
+                if (int.Parse(row["removed"].ToString()) == 0)
+                {
+                    var groupId = Guid.Parse(row["groupid"].ToString());
+                    var g = groups.FirstOrDefault(g => g.Id == groupId);
+                    g?.UsersUId.Add(row["userid"].ToString());
+                    if (string.Equals(row["ref_type"].ToString(), "1"))
+                    {
+                        g?.ManagersUId.Add(row["userid"].ToString());
+                    }
                 }
             }
+
+            return groups;
         }
-        return groups;
+        catch
+        {
+            return new();
+        }
     }
 
     public override async Task Migrate(MigrationApiInfo migrationInfo)
@@ -223,6 +230,8 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationInfo);
+        _migratingCommonFiles.ShouldImport = migrationInfo.ImportCommonFiles;
+        _migratingProjectFiles.ShouldImport = migrationInfo.ImportProjectFiles;
 
         var usersForImport = _migrationInfo.Users
             .Where(u => u.Value.ShouldImport)
@@ -307,7 +316,10 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         }
 
         await _migratingCommonFiles.MigrateAsync();
-        await _migratingProjectFiles.MigrateAsync();
+        if (_migratingProjectFiles != null)
+        {
+            await _migratingProjectFiles.MigrateAsync();
+        }
 
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersCount - _migrationInfo.FailedUsers;
