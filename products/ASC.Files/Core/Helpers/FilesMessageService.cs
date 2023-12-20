@@ -238,7 +238,7 @@ public class FilesMessageService(ILoggerProvider options,
             _ => string.Empty
         };
 
-        var serializedParam = JsonSerializer.Serialize(info);
+        var serializedParam = JsonSerializer.Serialize(info, new JsonSerializerOptions{ DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
 
         return serializedParam;
     }

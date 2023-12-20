@@ -149,16 +149,14 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
     }
 
-    #region Help Centr
-
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
-        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
+        var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
 
         if (string.IsNullOrEmpty(url))
         {
@@ -167,10 +165,12 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
+    
+    #region Help Centr
 
-    public string GetHelpLink(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
-        if (!settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>().HelpCenterEnabled)
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
             return string.Empty;
         }

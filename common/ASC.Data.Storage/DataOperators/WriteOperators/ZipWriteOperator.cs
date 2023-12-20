@@ -52,18 +52,18 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream = new TarOutputStream(gZipOutputStream, Encoding.UTF8);
     }
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
         if (fileStream != null)
         {
-            await WriteEntryAsync(tarKey, fileStream);
+            await WriteEntryAsync(tarKey, fileStream, action);
             await fileStream.DisposeAsync();
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
     {
         await using var buffered = _tempStream.GetBuffered(stream);
         var entry = TarEntry.CreateTarEntry(tarKey);
@@ -71,7 +71,7 @@ public class ZipWriteOperator : IDataWriteOperator
         await _tarOutputStream.PutNextEntryAsync(entry, default);
         buffered.Position = 0;
         await buffered.CopyToAsync(_tarOutputStream);
-        await _tarOutputStream.CloseEntryAsync(default);
+        await _tarOutputStream.CloseEntryAsync(default).ContinueWith(action);
     }
 
     public async ValueTask DisposeAsync()

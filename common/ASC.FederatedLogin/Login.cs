@@ -27,17 +27,16 @@
 namespace ASC.FederatedLogin;
 
 [Scope]
-public class Login(IWebHostEnvironment webHostEnvironment,
-    Signature signature,
+public class Login(
+    IWebHostEnvironment webHostEnvironment,
     InstanceCrypto instanceCrypto,
     ProviderManager providerManager)
 {
-    public bool IsReusable => false;
-    protected string Callback => _params.Get("callback") ?? "loginCallback";
-    protected string Auth => _params.Get("auth");
-    protected string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
+    private string Callback => _params.Get("callback") ?? "loginCallback";
+    private string Auth => _params.Get("auth");
+    private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
 
-    protected LoginMode Mode
+    private LoginMode Mode
     {
         get
         {
@@ -120,7 +119,7 @@ public class Login(IWebHostEnvironment webHostEnvironment,
             }
             catch (Exception ex)
             {
-                await SendJsCallbackAsync(context, LoginProfile.FromError(signature, instanceCrypto, ex));
+                await SendJsCallbackAsync(context, LoginProfile.FromError(ex));
             }
         }
         else
@@ -144,7 +143,7 @@ public class Login(IWebHostEnvironment webHostEnvironment,
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(
             JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{profile.Serialized}\"")
+            .Replace("%PROFILE%", $"\"{profile.Transport(instanceCrypto)}\"")
             .Replace("%CALLBACK%", Callback)
             .Replace("%DESKTOP%", (Mode == LoginMode.Redirect).ToString().ToLowerInvariant())
             );

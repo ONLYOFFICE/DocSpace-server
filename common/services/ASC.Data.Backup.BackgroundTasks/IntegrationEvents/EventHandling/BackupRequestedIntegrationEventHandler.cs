@@ -67,7 +67,7 @@ public class BackupRequestedIntegrationEventHandler(
             }
             else
             {
-                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.Dump, true, @event.TaskId);
+                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
             }
         }
     }

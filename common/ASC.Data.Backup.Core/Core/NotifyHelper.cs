@@ -40,6 +40,14 @@ public class NotifyHelper(UserManager userManager,
     TenantLogoManager tenantLogoManager,
     IServiceProvider serviceProvider)
 {
+    public void SetServerBaseUri(string uri)
+    {
+        if (!string.IsNullOrEmpty(uri))
+        {
+            commonLinkUtility.ServerUri = uri;
+        }
+    }
+
     public async Task SendAboutTransferStartAsync(Tenant tenant, string targetRegion, bool notifyUsers)
     {
         await MigrationNotifyAsync(tenant, Actions.MigrationPortalStart, targetRegion, string.Empty, notifyUsers);

@@ -24,18 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Core.Common;
 
-/// <summary>
-/// </summary>
-public class CreateTextOrHtmlFileRequestDto
+public static class ArabicNumeralHelper
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    public static string ConvertNumerals(this DateTime input, string format)
+    {
+        if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
+        {
+            return input.ToString(format, CultureInfo.InvariantCulture);
+        }
+        
+        var result = input.ToString(format, new CultureInfo("ar"));
+        return result
+            .Replace('0', '\u06f0')
+            .Replace('1', '\u06f1')
+            .Replace('2', '\u06f2')
+            .Replace('3', '\u06f3')
+            .Replace('4', '\u06f4')
+            .Replace('5', '\u06f5')
+            .Replace('6', '\u06f6')
+            .Replace('7', '\u06f7')
+            .Replace('8', '\u06f8')
+            .Replace('9', '\u06f9');
 
-    /// <summary>File contents</summary>
-    /// <type>System.String, System</type>
-    public string Content { get; set; }
-    public bool CreateNewIfExist { get; set; }
+    }
 }
