@@ -29,31 +29,21 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.Core.Core.Providers;
 
 [Scope]
-public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, WorkspaceMigratingUser, WorkspaceMigratingFiles, WorkspaceMigrationGroups>
+public class WorkspaceMigration(
+    MigrationLogger migrationLogger,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    WorkspaceMigratingFiles migratingCommonFiles,
+    WorkspaceMigratingFiles migratingProjectFiles)
+    : AbstractMigration<WorkspaceMigrationInfo, WorkspaceMigratingUser, WorkspaceMigratingFiles,
+        WorkspaceMigrationGroups>(migrationLogger)
 {
     private string _backup;
     private string _tmpFolder;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly MigratorMeta _meta;
-    private readonly UserManager _userManager;
+    private readonly MigratorMeta _meta = new("Workspace", 5, false);
     private IDataReadOperator _dataReader;
     private Dictionary<string, string> _mappedGuids;
-    private WorkspaceMigratingFiles _migratingCommonFiles;
-    private WorkspaceMigratingFiles _migratingProjectFiles;
     public override MigratorMeta Meta => _meta;
-
-    public WorkspaceMigration(MigrationLogger migrationLogger,
-        IServiceProvider serviceProvider,
-        UserManager userManager,
-        WorkspaceMigratingFiles migratingCommonFiles,
-        WorkspaceMigratingFiles migratingProjectFiles) : base(migrationLogger)
-    {
-        _meta = new("Workspace", 5, false);
-        _serviceProvider = serviceProvider;
-        _userManager = userManager;
-        _migratingCommonFiles = migratingCommonFiles;
-        _migratingProjectFiles = migratingProjectFiles;
-    }
 
     public override void Init(string path, CancellationToken cancellationToken)
     {
@@ -119,10 +109,10 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                     ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing + $" {u.Id} ({i++}/{data.Rows.Count})");
                 }
 
-                var user = _serviceProvider.GetService<WorkspaceMigratingUser>();
+                var user = serviceProvider.GetService<WorkspaceMigratingUser>();
                 user.Init(u.Id, u, _tmpFolder, _dataReader, Log, _mappedGuids);
                 user.Parse();
-                if (!(await _userManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
+                if (!(await userManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
                 {
                     _migrationInfo.ExistUsers.Add(u.Id, user);
                 }
@@ -138,7 +128,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 ReportProgress(progress, MigrationResource.DataProcessing);
                 progress += 10 / groups.Count;
-                var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
+                var group = serviceProvider.GetService<WorkspaceMigrationGroups>();
                 group.Init(item, Log);
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
@@ -149,8 +139,8 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 Files = new List<WorkspaceFile>(),
                 Folders = new List<WorkspaceFolder>()
             };
-            _migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON);
-            _migratingCommonFiles.Parse();
+            migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON);
+            migratingCommonFiles.Parse();
 
             try
             {
@@ -158,13 +148,13 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 {
                     Files = new List<WorkspaceFile>(), Folders = new List<WorkspaceFolder>()
                 };
-                _migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids,
+                migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids,
                     FolderType.BUNCH);
-                _migratingProjectFiles.Parse();
+                migratingProjectFiles.Parse();
             }
             catch
             {
-                _migratingProjectFiles = null;
+                migratingProjectFiles = null;
             }
         }
         catch (Exception ex)
@@ -230,8 +220,8 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationInfo);
-        _migratingCommonFiles.ShouldImport = migrationInfo.ImportCommonFiles;
-        _migratingProjectFiles.ShouldImport = migrationInfo.ImportProjectFiles;
+        migratingCommonFiles.ShouldImport = migrationInfo.ImportCommonFiles;
+        migratingProjectFiles.ShouldImport = migrationInfo.ImportProjectFiles;
 
         var usersForImport = _migrationInfo.Users
             .Where(u => u.Value.ShouldImport)
@@ -315,10 +305,10 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             }
         }
 
-        await _migratingCommonFiles.MigrateAsync();
-        if (_migratingProjectFiles != null)
+        await migratingCommonFiles.MigrateAsync();
+        if (migratingProjectFiles != null)
         {
-            await _migratingProjectFiles.MigrateAsync();
+            await migratingProjectFiles.MigrateAsync();
         }
 
         _migrationInfo.FailedUsers = failedUsers.Count;

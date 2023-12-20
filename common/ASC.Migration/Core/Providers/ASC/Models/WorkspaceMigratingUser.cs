@@ -29,7 +29,12 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.Core.Core.Providers.Models;
 
 [Transient]
-public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
+public class WorkspaceMigratingUser(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager)
+    : MigratingUser<WorkspaceMigratingFiles>
 {
     public override string Email => _user.Info.Email;
     public override string DisplayName => $"{_user.Info.FirstName} {_user.Info.LastName}";
@@ -41,18 +46,6 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
     private string _rootFolder;
     private IDataReadOperator _dataReader;
     private Dictionary<string, string> _mappedGuids;
-    private readonly UserManager _userManager;
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
-    private readonly QuotaSocketManager _quotaSocketManager;
-    private readonly IServiceProvider _serviceProvider;
-
-    public WorkspaceMigratingUser(IServiceProvider serviceProvider, UserManager userManager, TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, QuotaSocketManager quotaSocketManager)
-    {
-        _serviceProvider = serviceProvider;
-        _userManager = userManager;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-        _quotaSocketManager = quotaSocketManager;
-    }
 
     public void Init(string key, WorkspaceUser user, string rootFolder, IDataReadOperator dataReader, Action<string, Exception> log, Dictionary<string, string> mappedGuids)
     {
@@ -78,7 +71,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
             _hasPhoto = _pathToPhoto != null;
         }
 
-        MigratingFiles = _serviceProvider.GetService<WorkspaceMigratingFiles>();
+        MigratingFiles = serviceProvider.GetService<WorkspaceMigratingFiles>();
         _user.Storage = new WorkspaceStorage()
         {
             Files = new List<WorkspaceFile>(),
@@ -94,10 +87,10 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
         {
             return;
         }
-        var saved = await _userManager.GetUserByEmailAsync(_user.Info.Email);
+        var saved = await userManager.GetUserByEmailAsync(_user.Info.Email);
         if (saved.Equals(Constants.LostUser))
         {
-            saved = await _userManager.SaveUserInfo(_user.Info, UserType);
+            saved = await userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch
             {
                 EmployeeType.User => Constants.GroupUser.ID,
@@ -108,12 +101,12 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
 
             if (groupId != Guid.Empty)
             {
-                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+                await userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
             }
             else if (UserType == EmployeeType.RoomAdmin)
             {
-                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             }
 
             _user.Info = saved;
@@ -124,7 +117,7 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
                 {
                     await fs.CopyToAsync(ms);
                 }
-                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

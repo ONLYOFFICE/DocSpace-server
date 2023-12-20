@@ -29,31 +29,18 @@
 namespace ASC.Migration.GoogleWorkspace;
 
 [Scope]
-public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsMigratingUser, GwsMigratingFiles, GWSMigratingGroups>
+public class GoogleWorkspaceMigration(
+    MigrationLogger migrationLogger,
+    SecurityContext securityContext,
+    TempPath tempPath,
+    IServiceProvider serviceProvider,
+    UserManager userManager)
+    : AbstractMigration<GwsMigrationInfo, GwsMigratingUser, GwsMigratingFiles, GWSMigratingGroups>(migrationLogger)
 {
     private string[] _takeouts;
-    private readonly SecurityContext _securityContext;
-    private readonly UserManager _userManager;
-    private readonly TempPath _tempPath;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly MigratorMeta _meta;
+    private readonly MigratorMeta _meta = new("GoogleWorkspace", 5, true);
     private string _path;
     public override MigratorMeta Meta => _meta;
-
-    public GoogleWorkspaceMigration(
-        MigrationLogger migrationLogger,
-        SecurityContext securityContext,
-        TempPath tempPath,
-        IServiceProvider serviceProvider,
-        UserManager userManager)
-        : base(migrationLogger)
-    {
-        _securityContext = securityContext;
-        _tempPath = tempPath;
-        _serviceProvider = serviceProvider;
-        _meta = new("GoogleWorkspace", 5, true);
-        _userManager = userManager;
-    }
 
     public override void Init(string path, CancellationToken cancellationToken)
     {
@@ -98,7 +85,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
                 ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
             }
 
-            var tmpFolder = Path.Combine(_tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(takeout)); 
+            var tmpFolder = Path.Combine(tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(takeout)); 
             var key = Path.GetFileName(takeout);
             try
             {
@@ -112,21 +99,21 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
                 var directories = Directory.GetDirectories(rootFolder);
                 if (directories.Length == 1 && directories[0].Split(Path.DirectorySeparatorChar).Last() == "Groups")
                 {
-                    var group = _serviceProvider.GetService<GWSMigratingGroups>();
+                    var group = serviceProvider.GetService<GWSMigratingGroups>();
                     group.Init(rootFolder, Log);
                     group.Parse();
                     _migrationInfo.Groups.Add(group);
                 }
                 else
                 {
-                    var user = _serviceProvider.GetService<GwsMigratingUser>();
+                    var user = serviceProvider.GetService<GwsMigratingUser>();
                     user.Init(key, rootFolder, Log);
                     user.Parse();
                     if (user.Email.IsNullOrEmpty())
                     {
                         _migrationInfo.WithoutEmailUsers.Add(key, user);
                     }
-                    else if ((await _userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
+                    else if ((await userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
                         _migrationInfo.ExistUsers.Add(key, user);
                     }
@@ -176,7 +163,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
         {
             if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
 
-            var user = _serviceProvider.GetService<GwsMigratingUser>();
+            var user = serviceProvider.GetService<GwsMigratingUser>();
             user.Init(u);
 
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
@@ -240,13 +227,13 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
             {
                 try
                 {
-                    var currentUser = _securityContext.CurrentAccount;
-                    await _securityContext.AuthenticateMeAsync(user.Guid);
+                    var currentUser = securityContext.CurrentAccount;
+                    await securityContext.AuthenticateMeAsync(user.Guid);
                     user.MigratingFiles.Init(_path, user, Log);
                     user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
                     user.MigratingFiles.SetGroupsDict(groupsForImport);
                     await user.MigratingFiles.MigrateAsync();
-                    await _securityContext.AuthenticateMeAsync(currentUser.ID);
+                    await securityContext.AuthenticateMeAsync(currentUser.ID);
                 }
                 catch (Exception ex)
                 {

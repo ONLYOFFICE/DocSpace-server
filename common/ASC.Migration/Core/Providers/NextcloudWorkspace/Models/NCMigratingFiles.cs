@@ -30,7 +30,7 @@ using FileShare = ASC.Files.Core.Security.FileShare;
 namespace ASC.Migration.NextcloudWorkspace.Models.Parse;
 
 [Transient]
-public class NCMigratingFiles : MigratingFiles
+public class NcMigratingFiles : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
     public override int FilesCount => _filesCount;
@@ -41,7 +41,7 @@ public class NCMigratingFiles : MigratingFiles
     private readonly FileStorageService _fileStorageService;
     private readonly IServiceProvider _serviceProvider;
 
-    private NCMigratingUser _user;
+    private NcMigratingUser _user;
     private string _rootFolder;
     private List<NCFileCache> _files;
     private List<NCFileCache> _folders;
@@ -49,12 +49,12 @@ public class NCMigratingFiles : MigratingFiles
     private int _filesCount;
     private long _bytesTotal;
     private NCStorages _storages;
-    private Dictionary<string, NCMigratingUser> _users;
-    private Dictionary<string, NCMigratingGroups> _groups;
+    private Dictionary<string, NcMigratingUser> _users;
+    private Dictionary<string, NcMigratingGroups> _groups;
     private string _folderCreation;
     private readonly Dictionary<object, int> _matchingFileId = new();
 
-    public NCMigratingFiles(GlobalFolderHelper globalFolderHelper,
+    public NcMigratingFiles(GlobalFolderHelper globalFolderHelper,
         IDaoFactory daoFactory,
         FileStorageService fileStorageService,
         IServiceProvider serviceProvider)
@@ -65,7 +65,7 @@ public class NCMigratingFiles : MigratingFiles
         _serviceProvider = serviceProvider;
     }
 
-    public void Init(string rootFolder, NCMigratingUser user, NCStorages storages, Action<string, Exception> log)
+    public void Init(string rootFolder, NcMigratingUser user, NCStorages storages, Action<string, Exception> log)
     {
         _rootFolder = rootFolder;
         _user = user;
@@ -268,11 +268,11 @@ public class NCMigratingFiles : MigratingFiles
         return await fileDao.SaveFileAsync(newFile, fs);
     }
 
-    public void SetUsersDict(IEnumerable<NCMigratingUser> users)
+    public void SetUsersDict(IEnumerable<NcMigratingUser> users)
     {
         _users = users.ToDictionary(user => user.Key, user => user);
     }
-    public void SetGroupsDict(IEnumerable<NCMigratingGroups> groups)
+    public void SetGroupsDict(IEnumerable<NcMigratingGroups> groups)
     {
         _groups = groups.ToDictionary(group => group.GroupName, group => group);
     }

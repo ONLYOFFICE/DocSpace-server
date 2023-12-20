@@ -29,20 +29,15 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.OwnCloud.Models;
 
 [Transient]
-public class OCMigratingGroups : MigratingGroup
+public class OCMigratingGroups(UserManager userManager) : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
-    private readonly UserManager _userManager;
     private OCGroup _group;
     private GroupInfo _groupInfo;
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
-    public OCMigratingGroups(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
 
     public void Init(OCGroup group, Action<string, Exception> log)
     {
@@ -66,7 +61,7 @@ public class OCMigratingGroups : MigratingGroup
         {
             return;
         }
-        var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
+        var existingGroups = (await userManager.GetGroupsAsync()).ToList();
         var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)
         {
@@ -74,20 +69,20 @@ public class OCMigratingGroups : MigratingGroup
         }
         else
         {
-            _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
+            _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
         }
         foreach (var userGuid in UsersGuidList)
         {
             try
             {
-                var user = await _userManager.GetUsersAsync(userGuid.Value);
+                var user = await userManager.GetUsersAsync(userGuid.Value);
                 if (user.Equals(Constants.LostUser))
                 {
                     throw new ArgumentNullException();
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
+                if (!await userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                 }
             }
             catch (Exception ex)

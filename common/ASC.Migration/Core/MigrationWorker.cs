@@ -27,21 +27,14 @@
 namespace ASC.Migration.Core;
 
 [Singleton(Additional = typeof(MigrationWorkerExtension))]
-public class MigrationWorker
+public class MigrationWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly object _locker = new();
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60); // 1 hour
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
-
-    public MigrationWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
-    {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60); // 1 hour
-    }
 
     public void StartParse(int tenantId, Guid userId, string migratorName)
     {
@@ -67,7 +60,7 @@ public class MigrationWorker
 
             if (item == null)
             {
-                item = _serviceProvider.GetService<MigrationOperation>();
+                item = serviceProvider.GetService<MigrationOperation>();
 
                 init(item);
 

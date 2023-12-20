@@ -29,14 +29,15 @@ using System.Extensions;
 namespace ASC.Migration.Core;
 
 [Transient]
-public class MigrationOperation : DistributedTaskProgress
+public class MigrationOperation(
+    ILogger<MigrationOperation> logger,
+    MigrationCore migrationCore,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    IServiceProvider serviceProvider,
+    StorageFactory storageFactory)
+    : DistributedTaskProgress
 {
-    private readonly ILogger<MigrationOperation> _logger;
-    private readonly MigrationCore _migrationCore;
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly StorageFactory _storageFactory;
-    private readonly IServiceProvider _serviceProvider;
     private string _migratorName;
     private Guid _userId;
 
@@ -84,22 +85,6 @@ public class MigrationOperation : DistributedTaskProgress
         }
     }
 
-    public MigrationOperation(
-        ILogger<MigrationOperation> logger,
-        MigrationCore migrationCore,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        IServiceProvider serviceProvider,
-        StorageFactory storageFactory)
-    {
-        _logger = logger;
-        _migrationCore = migrationCore;
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
-        _serviceProvider = serviceProvider;
-        _storageFactory = storageFactory;
-    }
-
     public void InitParse(int tenantId, Guid userId, string migratorName)
     {
         TenantId = tenantId;
@@ -128,9 +113,9 @@ public class MigrationOperation : DistributedTaskProgress
             }
             CustomSynchronizationContext.CreateContext();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-            migrator = _migrationCore.GetMigrator(_migratorName);
+            await tenantManager.SetCurrentTenantAsync(TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            migrator = migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdate += Migrator_OnProgressUpdate;
 
             if (migrator == null)
@@ -138,7 +123,7 @@ public class MigrationOperation : DistributedTaskProgress
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var discStore = await _storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
+            var discStore = await storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
             var folder = discStore.GetPhysicalPath("", "");
             migrator.Init(folder, CancellationToken);
 
@@ -151,7 +136,7 @@ public class MigrationOperation : DistributedTaskProgress
         catch (Exception e)
         {
             Exception = e;
-            _logger.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
         finally
         {
@@ -180,7 +165,7 @@ public class MigrationOperation : DistributedTaskProgress
 
     public async Task CopyLogsAsync(Stream stream)
     {
-        using var logger = _serviceProvider.GetService<MigrationLogger>();
+        using var logger = serviceProvider.GetService<MigrationLogger>();
         logger.Init(LogName);
         await logger.GetStream().CopyToAsync(stream);
     }

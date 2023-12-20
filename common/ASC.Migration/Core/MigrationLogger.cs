@@ -27,21 +27,15 @@
 namespace ASC.Migration.Core;
 
 [Scope]
-public class MigrationLogger : IDisposable
+public class MigrationLogger(
+    ILogger<MigrationLogger> logger,
+    StorageFactory storageFactory,
+    TenantManager tenantManager)
+    : IDisposable
 {
-    private readonly ILogger<MigrationLogger> _logger;
     private string _migrationLogPath;
     private Stream _migration;
     private StreamWriter _migrationLog;
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
-
-    public MigrationLogger(ILogger<MigrationLogger> logger, StorageFactory storageFactory, TenantManager tenantManager)
-    {
-        _logger = logger;
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-    }
 
     public void Init(string logName = null)
     {
@@ -52,7 +46,7 @@ public class MigrationLogger : IDisposable
 
     public async Task<string> GetTmpFilePathAsync(string logName)
     {
-        var discStore = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null) as DiscDataStore;
+        var discStore = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null) as DiscDataStore;
         var folder = discStore.GetPhysicalPath("", "");
 
         if (!Directory.Exists(folder))
@@ -69,11 +63,11 @@ public class MigrationLogger : IDisposable
         {
             if (exception != null)
             {
-                _logger.WarningWithException(msg, exception);
+                logger.WarningWithException(msg, exception);
             }
             else
             {
-                _logger.Information(msg);
+                logger.Information(msg);
             }
             _migrationLog.WriteLine($"{DateTime.Now.ToString("s")}: {msg}");
             if (exception != null)

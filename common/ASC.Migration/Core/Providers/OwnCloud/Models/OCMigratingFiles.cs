@@ -30,16 +30,17 @@ using File = System.IO.File;
 namespace ASC.Migration.OwnCloud.Models;
 
 [Transient]
-public class OCMigratingFiles : MigratingFiles
+public class OCMigratingFiles(
+    GlobalFolderHelper globalFolderHelper,
+    IDaoFactory daoFactory,
+    FileStorageService fileStorageService,
+    IServiceProvider serviceProvider)
+    : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
     public override int FilesCount => _filesCount;
     public override long BytesTotal => _bytesTotal;
 
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly FileStorageService _fileStorageService;
     private OCMigratingUser _user;
     private string _rootFolder;
     private List<OCFileCache> _files;
@@ -52,16 +53,6 @@ public class OCMigratingFiles : MigratingFiles
     private Dictionary<string, OCMigratingGroups> _groups;
     private Dictionary<object, int> _matchingFileId;
     private string _folderCreation;
-    public OCMigratingFiles(GlobalFolderHelper globalFolderHelper,
-        IDaoFactory daoFactory,
-        FileStorageService fileStorageService,
-        IServiceProvider serviceProvider)
-    {
-        _globalFolderHelper = globalFolderHelper;
-        _daoFactory = daoFactory;
-        _fileStorageService = fileStorageService;
-        _serviceProvider = serviceProvider;
-    }
 
     public void Init(OCMigratingUser user, OCStorages storages, string rootFolder, Action<string, Exception> log)
     {
@@ -151,10 +142,10 @@ public class OCMigratingFiles : MigratingFiles
                         continue;
                     }
 
-                    var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
+                    var parentId = i == 0 ? await globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                     try
                     {
-                        var newFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                        var newFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
                         foldersDict.Add(path, newFolder);
                         _matchingFileId.Add(newFolder.Id, folder.FileId);
                     }
@@ -181,12 +172,12 @@ public class OCMigratingFiles : MigratingFiles
                 {
                     var realPath = Path.Combine(drivePath, maskPath);
                     await using var fs = new FileStream(realPath, FileMode.Open);
-                    var fileDao = _daoFactory.GetFileDao<int>();
-                    var folderDao = _daoFactory.GetFolderDao<int>();
+                    var fileDao = daoFactory.GetFileDao<int>();
+                    var folderDao = daoFactory.GetFolderDao<int>();
 
-                    var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
+                    var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
                     
-                    var newFile = _serviceProvider.GetService<File<int>>();
+                    var newFile = serviceProvider.GetService<File<int>>();
                     newFile.ParentId = parentFolder.Id;
                     newFile.Comment = FilesCommonResource.CommentCreate;
                     newFile.Title = Path.GetFileName(file.Path);
@@ -253,7 +244,7 @@ public class OCMigratingFiles : MigratingFiles
 
             try
             {
-                await _fileStorageService.SetAceObjectAsync(aceCollection, false);
+                await fileStorageService.SetAceObjectAsync(aceCollection, false);
             }
             catch (Exception ex)
             {

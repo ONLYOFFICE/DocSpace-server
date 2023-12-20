@@ -29,7 +29,13 @@ using FileShare = ASC.Files.Core.Security.FileShare;
 namespace ASC.Migration.Core.Core.Providers.Models;
 
 [Transient]
-public class WorkspaceMigratingFiles : MigratingFiles
+public class WorkspaceMigratingFiles(
+    FileStorageService fileStorageService,
+    GlobalFolderHelper globalFolderHelper,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    SecurityContext securityContext)
+    : MigratingFiles
 {
     public override int FoldersCount => _storage.Folders.Count;
     public override int FilesCount => _storage.Files.Count;
@@ -42,26 +48,8 @@ public class WorkspaceMigratingFiles : MigratingFiles
     private WorkspaceStorage _storage;
     private List<WorkspaceSecurity> _securities;
     private Dictionary<string, string> _mappedGuids;
-    private readonly FileStorageService _fileStorageService;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IDaoFactory _daoFactory;
-    private readonly SecurityContext _securityContext;
     private WorkspaceMigratingUser _user;
     private FolderType _type;
-
-    public WorkspaceMigratingFiles(FileStorageService fileStorageService,
-        GlobalFolderHelper globalFolderHelper,
-        IServiceProvider serviceProvider,
-        IDaoFactory daoFactory,
-        SecurityContext securityContext)
-    {
-        _fileStorageService = fileStorageService;
-        _globalFolderHelper = globalFolderHelper;
-        _serviceProvider = serviceProvider;
-        _daoFactory = daoFactory;
-        _securityContext = securityContext;
-    }
 
     public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log, Dictionary<string, string> mappedGuids, FolderType type)
     {
@@ -207,13 +195,13 @@ public class WorkspaceMigratingFiles : MigratingFiles
 
         if (_user != null)
         {
-            await _securityContext.AuthenticateMeAsync(_user.Guid);
+            await securityContext.AuthenticateMeAsync(_user.Guid);
         }
 
         var newFolder = _type == FolderType.USER
-            ? await _fileStorageService.CreateNewFolderAsync(await _globalFolderHelper.FolderMyAsync,
+            ? await fileStorageService.CreateNewFolderAsync(await globalFolderHelper.FolderMyAsync,
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-            : await _fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
+            : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
                 RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "");
         
         var matchingIds = new Dictionary<int, int> { { int.Parse(_folder), newFolder.Id } };
@@ -221,11 +209,11 @@ public class WorkspaceMigratingFiles : MigratingFiles
         var orderedFolders = _storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
-            newFolder = await _fileStorageService.CreateNewFolderAsync(matchingIds[folder.ParentId], folder.Title);
+            newFolder = await fileStorageService.CreateNewFolderAsync(matchingIds[folder.ParentId], folder.Title);
             matchingIds.Add(folder.Id, newFolder.Id);
         }
 
-        var fileDao = _daoFactory.GetFileDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
         foreach (var file in _storage.Files)
         {
             try
@@ -234,7 +222,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
                     $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                 await using var fs = _dataReader.GetEntry(path);
 
-                var newFile = _serviceProvider.GetService<File<int>>();
+                var newFile = serviceProvider.GetService<File<int>>();
                 newFile.ParentId = matchingIds[file.Folder];
                 newFile.Comment = FilesCommonResource.CommentCreate;
                 newFile.Title = Path.GetFileName(file.Title);
@@ -276,7 +264,7 @@ public class WorkspaceMigratingFiles : MigratingFiles
                 Message = null
             };
             
-            await _fileStorageService.SetAceObjectAsync(aceCollection, false);
+            await fileStorageService.SetAceObjectAsync(aceCollection, false);
         }
     }
 }

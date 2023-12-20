@@ -29,26 +29,18 @@ using ASC.EventBus.Log;
 namespace ASC.Migration.Core.Core;
 
 [Scope]
-public class MigrationIntegrationEventHandler :
-    IIntegrationEventHandler<MigrationParseIntegrationEvent>,
-    IIntegrationEventHandler<MigrationIntegrationEvent>
+public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<MigrationIntegrationEventHandler> logger)
+    :
+        IIntegrationEventHandler<MigrationParseIntegrationEvent>,
+        IIntegrationEventHandler<MigrationIntegrationEvent>
 {
-    private readonly MigrationWorker _worker;
-    private readonly ILogger<MigrationIntegrationEventHandler> _logger;
-
-    public MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<MigrationIntegrationEventHandler> logger)
-    {
-        _worker = worker;
-        _logger = logger;
-    }
-
     public Task Handle(MigrationParseIntegrationEvent @event)
     {
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration-parse") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration-parse") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, "migration-parse", @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, "migration-parse", @event);
 
-            _worker.StartParse(@event.TenantId, @event.CreateBy, @event.MigratorName);
+            worker.StartParse(@event.TenantId, @event.CreateBy, @event.MigratorName);
 
             return Task.CompletedTask;
         }
@@ -56,11 +48,11 @@ public class MigrationIntegrationEventHandler :
 
     public Task Handle(MigrationIntegrationEvent @event)
     {
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
-            _worker.StartMigrate(@event.TenantId, @event.CreateBy, @event.ApiInfo);
+            worker.StartMigrate(@event.TenantId, @event.CreateBy, @event.ApiInfo);
 
             return Task.CompletedTask;
         }

@@ -27,7 +27,7 @@
 namespace ASC.Migration.NextcloudWorkspace;
 
 [Scope]
-public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NCMigratingUser, NCMigratingFiles, NCMigratingGroups>
+public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, NcMigratingUser, NcMigratingFiles, NcMigratingGroups>
 {
     private string _takeout;
     private string _tmpFolder;
@@ -67,7 +67,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             }
         }
 
-        _migrationInfo = new NCMigrationInfo { MigratorName = _meta.Name };
+        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name };
         _tmpFolder = path;
     }
 
@@ -131,7 +131,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
                     {
                         var userName = u.Data.DisplayName.Split(' ');
                         u.Data.DisplayName = userName.Length > 1 ? $"{userName[0]} {userName[1]}".Trim() : userName[0].Trim();
-                        var user = _serviceProvider.GetService<NCMigratingUser>();
+                        var user = _serviceProvider.GetService<NcMigratingUser>();
                         user.Init(u, Directory.GetDirectories(_tmpFolder)[0], Log);
                         user.Parse();
                         if (user.Email.IsNullOrEmpty())
@@ -160,7 +160,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             {
                 ReportProgress(progress, MigrationResource.DataProcessing);
                 progress += 10 / groups.Count;
-                var group = _serviceProvider.GetService<NCMigratingGroups>();
+                var group = _serviceProvider.GetService<NcMigratingGroups>();
                 group.Init(item, Log);
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
@@ -343,7 +343,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             .Where(u => u.Value.ShouldImport)
             .Select(u => u.Value).ToList();
 
-        var failedUsers = new List<NCMigratingUser>();
+        var failedUsers = new List<NcMigratingUser>();
         var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         var i = 1;

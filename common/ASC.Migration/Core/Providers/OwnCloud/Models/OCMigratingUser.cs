@@ -27,7 +27,12 @@
 namespace ASC.Migration.OwnCloud.Models;
 
 [Transient]
-public class OCMigratingUser : MigratingUser<OCMigratingFiles>
+public class OCMigratingUser(
+    UserManager userManager,
+    IServiceProvider serviceProvider,
+    QuotaSocketManager quotaSocketManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
+    : MigratingUser<OCMigratingFiles>
 {
     public override string Email => _userInfo.Email;
 
@@ -39,24 +44,8 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
     private bool _hasPhoto;
     private string _pathToPhoto;
     private UserInfo _userInfo;
-    private readonly UserManager _userManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
-    private readonly QuotaSocketManager _quotaSocketManager;
     private OCUser _user;
     private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
-
-    public OCMigratingUser(
-        UserManager userManager,
-        IServiceProvider serviceProvider,
-        QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
-    {
-        _userManager = userManager;
-        _serviceProvider = serviceProvider;
-        _quotaSocketManager = quotaSocketManager;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-    }
 
     public void Init(OCUser user, string rootFolder, Action<string, Exception> log)
     {
@@ -102,7 +91,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
         _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
-        MigratingFiles = _serviceProvider.GetService<OCMigratingFiles>();
+        MigratingFiles = serviceProvider.GetService<OCMigratingFiles>();
         MigratingFiles.Init(this, _user.Storages, _rootFolder, log);
         MigratingFiles.Parse();
     }
@@ -124,7 +113,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
         {
             return;
         }
-        var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
+        var saved = await userManager.GetUserByEmailAsync(_userInfo.Email);
         if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
@@ -135,7 +124,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
             {
                 _userInfo.LastName = FilesCommonResource.UnknownLastName;
             }
-            saved = await _userManager.SaveUserInfo(_userInfo, UserType);
+            saved = await userManager.SaveUserInfo(_userInfo, UserType);
             var groupId = UserType switch
             {
                 EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
@@ -146,12 +135,12 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
 
             if (groupId != Guid.Empty)
             {
-                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+                await userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
             }
             else if (UserType == EmployeeType.RoomAdmin)
             {
-                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             }
 
             if (_hasPhoto)
@@ -161,7 +150,7 @@ public class OCMigratingUser : MigratingUser<OCMigratingFiles>
                 {
                     await fs.CopyToAsync(ms);
                 }
-                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

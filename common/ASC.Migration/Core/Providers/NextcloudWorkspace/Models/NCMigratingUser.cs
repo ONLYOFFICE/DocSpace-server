@@ -27,7 +27,12 @@
 namespace ASC.Migration.NextcloudWorkspace.Models.Parse;
 
 [Transient]
-public class NCMigratingUser : MigratingUser<NCMigratingFiles>
+public class NcMigratingUser(
+    UserManager userManager,
+    IServiceProvider serviceProvider,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager)
+    : MigratingUser<NcMigratingFiles>
 {
     public override string Email => _userInfo.Email;
 
@@ -39,24 +44,9 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
     private bool _hasPhoto;
     private string _pathToPhoto;
     private UserInfo _userInfo;
-    private readonly UserManager _userManager;
     private NCUser _user;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
-    private readonly QuotaSocketManager _quotaSocketManager;
     private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
-
-    public NCMigratingUser(UserManager userManager,
-        IServiceProvider serviceProvider,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-    {
-        _userManager = userManager;
-        _serviceProvider = serviceProvider;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-        _quotaSocketManager = quotaSocketManager;
-    }
 
     public void Init(NCUser user, string rootFolder, Action<string, Exception> log)
     {
@@ -127,7 +117,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
         _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
-        MigratingFiles = _serviceProvider.GetService<NCMigratingFiles>();
+        MigratingFiles = serviceProvider.GetService<NcMigratingFiles>();
         MigratingFiles.Init(_rootFolder, this, _user.Storages, log);
 
         MigratingFiles.Parse();
@@ -155,7 +145,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
         {
             return;
         }
-        var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
+        var saved = await userManager.GetUserByEmailAsync(_userInfo.Email);
         if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
@@ -166,7 +156,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
             {
                 _userInfo.LastName = FilesCommonResource.UnknownLastName;
             }
-            saved = await _userManager.SaveUserInfo(_userInfo, UserType);
+            saved = await userManager.SaveUserInfo(_userInfo, UserType);
             var groupId = UserType switch
             {
                 EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
@@ -177,12 +167,12 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
 
             if (groupId != Guid.Empty)
             {
-                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+                await userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
             }
             else if (UserType == EmployeeType.RoomAdmin)
             {
-                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             }
 
             if (_hasPhoto)
@@ -192,7 +182,7 @@ public class NCMigratingUser : MigratingUser<NCMigratingFiles>
                 {
                     await fs.CopyToAsync(ms);
                 }
-                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

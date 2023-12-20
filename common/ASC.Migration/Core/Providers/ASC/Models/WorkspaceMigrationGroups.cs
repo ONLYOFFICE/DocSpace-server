@@ -32,22 +32,17 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.Core.Core.Providers.ASC.Models;
 
 [Transient]
-public class WorkspaceMigrationGroups : MigratingGroup
+public class WorkspaceMigrationGroups(UserManager userManager) : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
     private List<string> _managerUidList;
-    private readonly UserManager _userManager;
     private WorkspaceGroup _group;
     private GroupInfo _groupInfo;
     public Guid Guid => _group.Id;
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
-    public WorkspaceMigrationGroups(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
 
     public void Init(WorkspaceGroup group, Action<string, Exception> log)
     {
@@ -74,7 +69,7 @@ public class WorkspaceMigrationGroups : MigratingGroup
         {
             return;
         }
-        var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
+        var existingGroups = (await userManager.GetGroupsAsync()).ToList();
         var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)
         {
@@ -82,24 +77,24 @@ public class WorkspaceMigrationGroups : MigratingGroup
         }
         else
         {
-            _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
+            _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
         }
         _group.Id = _groupInfo.ID;
         foreach (var userGuid in UsersGuidList)
         {
             try
             {
-                var user = await _userManager.GetUsersAsync(userGuid.Value);
+                var user = await userManager.GetUsersAsync(userGuid.Value);
                 if (user.Equals(Constants.LostUser))
                 {
                     throw new ArgumentNullException();
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
+                if (!await userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                     if (_managerUidList.Contains(userGuid.Key))
                     {
-                        await _userManager.SetDepartmentManagerAsync(_groupInfo.ID, user.Id);
+                        await userManager.SetDepartmentManagerAsync(_groupInfo.ID, user.Id);
                     }
                 }
             }

@@ -27,35 +27,24 @@
 namespace ASC.Migration.GoogleWorkspace.Models;
 
 [Transient]
-public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
+public class GwsMigratingUser(
+    UserManager userManager,
+    IServiceProvider serviceProvider,
+    QuotaSocketManager quotaSocketManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
+    : MigratingUser<GwsMigratingFiles>
 {
     public override string Email => _userInfo.Email;
     public Guid Guid => _userInfo.Id;
 
     public override string DisplayName => $"{_userInfo.FirstName} {_userInfo.LastName}".Trim();
 
-    private readonly UserManager _userManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly QuotaSocketManager _quotaSocketManager;
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
     private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
 
     private string _rootFolder;
     private UserInfo _userInfo;
     private bool _hasPhoto;
-
-    public GwsMigratingUser(
-        UserManager userManager,
-        IServiceProvider serviceProvider,
-        QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
-    {
-        _userManager = userManager;
-        _serviceProvider = serviceProvider;
-        _quotaSocketManager = quotaSocketManager;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-    }
 
     public void Init(string key, string rootFolder, Action<string, Exception> log)
     {
@@ -83,7 +72,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
 
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
-        MigratingFiles = _serviceProvider.GetService<GwsMigratingFiles>();
+        MigratingFiles = serviceProvider.GetService<GwsMigratingFiles>();
         MigratingFiles.Init(_rootFolder, this, log);
         MigratingFiles.Parse();
 
@@ -109,7 +98,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
         {
             return;
         }
-        var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
+        var saved = await userManager.GetUserByEmailAsync(_userInfo.Email);
         if (saved.Equals(ASC.Core.Users.Constants.LostUser))
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
@@ -120,7 +109,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
             {
                 _userInfo.LastName = FilesCommonResource.UnknownLastName;
             }
-            saved = await _userManager.SaveUserInfo(_userInfo, UserType);
+            saved = await userManager.SaveUserInfo(_userInfo, UserType);
 
             var groupId = UserType switch
             {
@@ -132,12 +121,12 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
 
             if (groupId != Guid.Empty)
             {
-                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+                await userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
             }
             else if (UserType == EmployeeType.RoomAdmin)
             {
-                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             }
 
             if (_hasPhoto)
@@ -149,7 +138,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
                 {
                     await imageStream.CopyToAsync(ms);
                 }
-                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
+                await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

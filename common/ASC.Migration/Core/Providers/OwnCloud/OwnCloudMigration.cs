@@ -27,27 +27,17 @@
 namespace ASC.Migration.OwnCloud;
 
 [Scope]
-public class OwnCloudMigration : AbstractMigration<OCMigrationInfo, OCMigratingUser, OCMigratingFiles, OCMigratingGroups>
+public class OwnCloudMigration(
+    SecurityContext securityContext,
+    MigrationLogger migrationLogger,
+    IServiceProvider serviceProvider,
+    UserManager userManager)
+    : AbstractMigration<OCMigrationInfo, OCMigratingUser, OCMigratingFiles, OCMigratingGroups>(migrationLogger)
 {
     private string _takeout;
     private string _tmpFolder;
-    private readonly SecurityContext _securityContext;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly MigratorMeta _meta;
-    private readonly UserManager _userManager;
+    private readonly MigratorMeta _meta = new("Owncloud", 6, false);
     public override MigratorMeta Meta => _meta;
-
-    public OwnCloudMigration(
-        SecurityContext securityContext,
-        MigrationLogger migrationLogger,
-        IServiceProvider serviceProvider,
-        UserManager userManager) : base(migrationLogger)
-    {
-        _securityContext = securityContext;
-        _meta = new MigratorMeta("Owncloud", 6, false);
-        _serviceProvider = serviceProvider;
-        _userManager = userManager;
-    }
 
     public override void Init(string path, CancellationToken cancellationToken)
     {
@@ -136,14 +126,14 @@ public class OwnCloudMigration : AbstractMigration<OCMigrationInfo, OCMigratingU
                         var userName = u.Data.DisplayName.Split(' ');
                         u.Data.DisplayName = userName.Length > 1 ? $"{userName[0]} {userName[1]}".Trim() : userName[0].Trim();
                         
-                        var user = _serviceProvider.GetService<OCMigratingUser>();
+                        var user = serviceProvider.GetService<OCMigratingUser>();
                         user.Init(u, Directory.GetDirectories(_tmpFolder)[0], Log);
                         user.Parse();
                         if (user.Email.IsNullOrEmpty())
                         {
                             _migrationInfo.WithoutEmailUsers.Add(u.Uid, user);
                         }
-                        else if (!(await _userManager.GetUserByEmailAsync(user.Email)).Equals(ASC.Core.Users.Constants.LostUser))
+                        else if (!(await userManager.GetUserByEmailAsync(user.Email)).Equals(ASC.Core.Users.Constants.LostUser))
                         {
                             _migrationInfo.ExistUsers.Add(u.Uid, user);
                         }
@@ -165,7 +155,7 @@ public class OwnCloudMigration : AbstractMigration<OCMigrationInfo, OCMigratingU
             {
                 ReportProgress(progress, MigrationResource.DataProcessing);
                 progress += 10 / groups.Count;
-                var group = _serviceProvider.GetService<OCMigratingGroups>();
+                var group = serviceProvider.GetService<OCMigratingGroups>();
                 group.Init(item, Log);
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
@@ -426,12 +416,12 @@ public class OwnCloudMigration : AbstractMigration<OCMigrationInfo, OCMigratingU
             {
                 try
                 {
-                    var currentUser = _securityContext.CurrentAccount;
-                    await _securityContext.AuthenticateMeAsync(user.Guid);
+                    var currentUser = securityContext.CurrentAccount;
+                    await securityContext.AuthenticateMeAsync(user.Guid);
                     user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
                     user.MigratingFiles.SetGroupsDict(groupsForImport);
                     await user.MigratingFiles.MigrateAsync();
-                    await _securityContext.AuthenticateMeAsync(currentUser.ID);
+                    await securityContext.AuthenticateMeAsync(currentUser.ID);
                 }
                 catch (Exception ex)
                 {

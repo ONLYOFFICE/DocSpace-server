@@ -31,7 +31,14 @@ using File = System.IO.File;
 namespace ASC.Migration.GoogleWorkspace.Models;
 
 [Transient]
-public class GwsMigratingFiles : MigratingFiles
+public class GwsMigratingFiles(
+    GlobalFolderHelper globalFolderHelper,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    FileStorageService fileStorageService,
+    TempPath tempPath,
+    IServiceProvider serviceProvider)
+    : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
 
@@ -43,12 +50,6 @@ public class GwsMigratingFiles : MigratingFiles
 
     private List<string> _files;
     private List<string> _folders;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly FileStorageService _fileStorageService;
-    private readonly TempPath _tempPath;
-    private readonly IServiceProvider _serviceProvider;
     private string _rootFolder;
     private int _foldersCount;
     private int _filesCount;
@@ -57,22 +58,6 @@ public class GwsMigratingFiles : MigratingFiles
     private Dictionary<string, GwsMigratingUser> _users;
     private Dictionary<string, GWSMigratingGroups> _groups;
     private string _folderCreation;
-
-    public GwsMigratingFiles(
-        GlobalFolderHelper globalFolderHelper,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        FileStorageService fileStorageService,
-        TempPath tempPath,
-        IServiceProvider serviceProvider)
-    {
-        _globalFolderHelper = globalFolderHelper;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _fileStorageService = fileStorageService;
-        _tempPath = tempPath;
-        _serviceProvider = serviceProvider;
-    }
 
     public void Init(string rootFolder, GwsMigratingUser user, Action<string, Exception> log)
     {
@@ -140,7 +125,7 @@ public class GwsMigratingFiles : MigratingFiles
         {
             return;
         }
-        var tmpFolder = Path.Combine(_tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(_user.Key));
+        var tmpFolder = Path.Combine(tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(_user.Key));
         try
         {
             ZipFile.ExtractToDirectory(Path.Combine(_rootFolder, _user.Key), tmpFolder);
@@ -160,10 +145,10 @@ public class GwsMigratingFiles : MigratingFiles
                             continue; // skip folder if it was already created as a part of another path
                         }
 
-                        var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
+                        var parentId = i == 0 ? await globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                         try
                         {
-                            var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                            var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
                             path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
                             foldersDict.Add(path, createdFolder);
                         }
@@ -177,8 +162,8 @@ public class GwsMigratingFiles : MigratingFiles
             //create default folder
             if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
             {
-                var parentId = await _globalFolderHelper.FolderMyAsync;
-                var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
+                var parentId = await globalFolderHelper.FolderMyAsync;
+                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
                 foldersDict.Add(_newParentFolder, createdFolder);
             }
 
@@ -235,13 +220,13 @@ public class GwsMigratingFiles : MigratingFiles
                             switch (shareType)
                             {
                                 case ASCShare.ReadWrite:
-                                    checkRights = _fileSecurity.CanEditAsync;
+                                    checkRights = fileSecurity.CanEditAsync;
                                     break;
                                 case ASCShare.Comment:
-                                    checkRights = _fileSecurity.CanCommentAsync;
+                                    checkRights = fileSecurity.CanCommentAsync;
                                     break;
                                 case ASCShare.Read:
-                                    checkRights = _fileSecurity.CanReadAsync;
+                                    checkRights = fileSecurity.CanReadAsync;
                                     break;
                                 default: // unused
                                     break;
@@ -277,7 +262,7 @@ public class GwsMigratingFiles : MigratingFiles
 
                     try
                     {
-                        await _fileStorageService.SetAceObjectAsync(aceCollection, false);
+                        await fileStorageService.SetAceObjectAsync(aceCollection, false);
                     }
                     catch (Exception ex)
                     {
@@ -298,9 +283,9 @@ public class GwsMigratingFiles : MigratingFiles
     private async Task<File<int>> AddFileAsync(string realPath, int folderId, string fileTitle)
     {
         await using var fs = new FileStream(realPath, FileMode.Open);
-        var fileDao = _daoFactory.GetFileDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
 
-        var newFile = _serviceProvider.GetService<File<int>>();
+        var newFile = serviceProvider.GetService<File<int>>();
         newFile.ParentId = folderId;
         newFile.Comment = FilesCommonResource.CommentCreate;
         newFile.Title = fileTitle;

@@ -30,7 +30,7 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.NextcloudWorkspace.Models;
 
 [Transient]
-public class NCMigratingGroups : MigratingGroup
+public class NcMigratingGroups : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
@@ -41,7 +41,7 @@ public class NCMigratingGroups : MigratingGroup
     public Dictionary<string, Guid> UsersGuidList;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
-    public NCMigratingGroups(UserManager userManager)
+    public NcMigratingGroups(UserManager userManager)
     {
         _userManager = userManager;
     }

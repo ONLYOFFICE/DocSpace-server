@@ -27,10 +27,11 @@
 namespace ASC.Migration.Core;
 
 [Scope]
-public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup> : IMigration
+public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup>(MigrationLogger migrationLogger)
+    : IMigration
     where TMigrationInfo : IMigrationInfo
 {
-    protected readonly MigrationLogger _logger;
+    protected readonly MigrationLogger _logger = migrationLogger;
     protected CancellationToken _cancellationToken;
     protected TMigrationInfo _migrationInfo;
     private double _lastProgressUpdate;
@@ -39,11 +40,6 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup> :
     public abstract MigratorMeta Meta { get; }
 
     public event Action<double, string> OnProgressUpdate;
-
-    public AbstractMigration(MigrationLogger migrationLogger)
-    {
-        _logger = migrationLogger;
-    }
 
     protected void ReportProgress(double value, string status)
     {

@@ -27,37 +27,23 @@
 namespace ASC.Migration.Core.Models.Api;
 
 [Scope]
-public class MigrationCore
+public class MigrationCore(
+    IServiceProvider serviceProvider,
+    IEventBus eventBus,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    MigrationWorker migrationWorker)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IEventBus _eventBus;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly MigrationWorker _migrationWorker;
-
-    public MigrationCore(IServiceProvider serviceProvider,
-        IEventBus eventBus,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        MigrationWorker migrationWorker)
-    {
-        _serviceProvider = serviceProvider;
-        _eventBus = eventBus;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _migrationWorker = migrationWorker;
-    }
-
-    public string[] GetAvailableMigrations() => _serviceProvider.GetService<IEnumerable<IMigration>>().Select(r => r.Meta.Name).ToArray();
+    public string[] GetAvailableMigrations() => serviceProvider.GetService<IEnumerable<IMigration>>().Select(r => r.Meta.Name).ToArray();
 
     public IMigration GetMigrator(string migrator)
     {
-        return _serviceProvider.GetService<IEnumerable<IMigration>>().FirstOrDefault(r => r.Meta.Name.Equals(migrator, StringComparison.OrdinalIgnoreCase));
+        return serviceProvider.GetService<IEnumerable<IMigration>>().FirstOrDefault(r => r.Meta.Name.Equals(migrator, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task StartParse(string migrationName)
     {
-        _eventBus.Publish(new MigrationParseIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
+        eventBus.Publish(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
         {
             MigratorName = migrationName
         });
@@ -65,7 +51,7 @@ public class MigrationCore
 
     public async Task Start(MigrationApiInfo info)
     {
-        _eventBus.Publish(new MigrationIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
+        eventBus.Publish(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
         {
             ApiInfo = info
         });
@@ -73,12 +59,12 @@ public class MigrationCore
 
     public async Task Stop()
     {
-        _migrationWorker.Stop(await _tenantManager.GetCurrentTenantIdAsync());
+        migrationWorker.Stop(await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public async Task<MigrationOperation> GetStatus()
     {
-        return _migrationWorker.GetStatus(await _tenantManager.GetCurrentTenantIdAsync());
+        return migrationWorker.GetStatus(await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public static void Register(DIHelper services)
@@ -91,9 +77,9 @@ public class MigrationCore
         services.TryAdd<GWSMigratingGroups>();
 
         services.TryAdd<IMigration, NextcloudWorkspaceMigration>();
-        services.TryAdd<NCMigratingUser>();
-        services.TryAdd<NCMigratingFiles>();
-        services.TryAdd<NCMigratingGroups>();
+        services.TryAdd<NcMigratingUser>();
+        services.TryAdd<NcMigratingFiles>();
+        services.TryAdd<NcMigratingGroups>();
 
         services.TryAdd<IMigration, OwnCloudMigration>();
         services.TryAdd<OCMigratingUser>();

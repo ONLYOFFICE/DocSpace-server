@@ -29,20 +29,15 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.GoogleWorkspace.Models;
 
 [Transient]
-public class GWSMigratingGroups : MigratingGroup
+public class GWSMigratingGroups(UserManager userManager) : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
-    private readonly UserManager _userManager;
     private string _rootFolder;
     private GroupInfo _groupInfo;
     public Guid Guid => _groupInfo.ID;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
-    public GWSMigratingGroups(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
 
     public void Init(string rootFolder, Action<string, Exception> log)
     {
@@ -89,7 +84,7 @@ public class GWSMigratingGroups : MigratingGroup
         {
             return;
         }
-        var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
+        var existingGroups = (await userManager.GetGroupsAsync()).ToList();
         var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)
         {
@@ -97,20 +92,20 @@ public class GWSMigratingGroups : MigratingGroup
         }
         else
         {
-            _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
+            _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
         }
         foreach (var userEmail in _userUidList)
         {
             try
             {
-                var user = await _userManager.GetUserByEmailAsync(userEmail);
+                var user = await userManager.GetUserByEmailAsync(userEmail);
                 if (user.Equals(Constants.LostUser))
                 {
                     continue;
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
+                if (!await userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                 }
             }
             catch (Exception ex)
