@@ -1070,6 +1070,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
+    /// <visible>false</visible>
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1085,6 +1086,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {
