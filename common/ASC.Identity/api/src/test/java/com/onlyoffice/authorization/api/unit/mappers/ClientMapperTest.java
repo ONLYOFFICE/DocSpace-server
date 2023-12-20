@@ -8,8 +8,7 @@ import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMappe
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -18,7 +17,7 @@ import static org.junit.Assert.assertNotNull;
  */
 @ActiveProfiles("test")
 public class ClientMapperTest {
-    private Timestamp iat = Timestamp.from(Instant.now());
+    private ZonedDateTime iat = ZonedDateTime.now();
     private Client client = Client
             .builder()
             .clientId("client")

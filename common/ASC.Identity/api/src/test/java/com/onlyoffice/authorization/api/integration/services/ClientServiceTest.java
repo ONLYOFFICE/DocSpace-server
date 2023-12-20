@@ -5,12 +5,16 @@ package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Client;
-import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
-import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
+import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientCleanupService;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientCreationService;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientMutationService;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientRetrieveService;
+import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +38,13 @@ public class ClientServiceTest extends ContainerBase {
     @Autowired
     private DataSource dataSource;
     @Autowired
-    private ClientService clientService;
+    private ClientRetrieveService clientRetrieveService;
+    @Autowired
+    private ClientCleanupService clientCleanupService;
+    @Autowired
+    private ClientCreationService clientCreationService;
+    @Autowired
+    private ClientMutationService clientMutationService;
     @Autowired
     private ClientRepository clientRepository;
     @Autowired
@@ -77,28 +87,31 @@ public class ClientServiceTest extends ContainerBase {
 
     @Test
     void shouldGetClient() {
-        var c = clientService.getClient("client");
+        var c = clientRetrieveService.getClient("client");
         assertEquals("secret", c.getClientSecret());
     }
 
     @Test
     void shouldDeleteClient() {
-        assertTrue(clientService.deleteClient("client", 1));
+        assertTrue(clientCleanupService.deleteClient("client", 1));
     }
 
     @Test
     void shouldChangeClientActivation() {
-        clientService.changeActivation(ChangeClientActivationDTO
+        clientMutationService.changeActivation(ChangeClientActivationDTO
                 .builder().status(false).build(), "client");
 
-        var c = clientService.getClient("client");
+        var c = clientRetrieveService.getClient("client");
         assertFalse(c.isEnabled());
     }
 
     @Test
     void shouldRegenerateClientSecret() {
-        var secret = clientService.getClient("client").getClientSecret();
-        var newSecret = clientService.regenerateSecret("client", 1);
+        var secret = clientRetrieveService.getClient("client").getClientSecret();
+        var newSecret = clientMutationService.regenerateSecret("client", TenantDTO
+                .builder()
+                        .tenantId(1)
+                .build());
         assertNotNull(newSecret.getClientSecret());
         assertNotEquals(newSecret.getClientSecret(), secret);
     }

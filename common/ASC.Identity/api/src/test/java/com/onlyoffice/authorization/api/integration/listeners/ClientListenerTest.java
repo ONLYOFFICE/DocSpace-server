@@ -4,14 +4,17 @@
 package com.onlyoffice.authorization.api.integration.listeners;
 
 import com.onlyoffice.authorization.api.ContainerBase;
-import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
+import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
+import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.messaging.listeners.ClientListener;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
-import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientCleanupService;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientCreationService;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientRetrieveService;
+import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +25,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
 import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 /**
  *
@@ -37,7 +42,11 @@ public class ClientListenerTest extends ContainerBase {
     @Autowired
     private ClientListener clientListener;
     @Autowired
-    private ClientService clientService;
+    private ClientCreationService clientCreationService;
+    @Autowired
+    private ClientRetrieveService clientRetrieveService;
+    @Autowired
+    private ClientCleanupService clientCleanupService;
     @Autowired
     private ClientRepository clientRepository;
 
@@ -73,7 +82,7 @@ public class ClientListenerTest extends ContainerBase {
     @Test
     @SneakyThrows
     void shouldCreateClientAsync() {
-        clientService.createClientAsync(CreateClientDTO
+        var client = clientCreationService.createClientAsync(CreateClientDTO
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
@@ -82,28 +91,47 @@ public class ClientListenerTest extends ContainerBase {
                 .logoutRedirectUri("http://example.com")
                 .description("mock")
                 .termsUrl("mock")
-                .build(), 1, "http://127.0.0.1");
+                .build(), TenantDTO
+                .builder()
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), PersonDTO
+                .builder()
+                .id(UUID.randomUUID().toString())
+                .build(), "http://127.0.0.1");
         Thread.sleep(1000);
-        assertEquals(1, clientListener.getLastBatchSize());
+        var c = clientRetrieveService.getClient(client.getClientId());
+        assertNotNull("expected to get a non null client", c);
+        assertEquals("expected to get matching client ids", client.getClientId(), c.getClientId());
     }
 
     @Test
     @SneakyThrows
     void shouldCreateDeleteClientAsyncTask() {
-        var c = clientService.createClientAsync(CreateClientDTO
+        var client = clientCreationService.createClientAsync(CreateClientDTO
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
                 .redirectUris(Set.of("http://example.com"))
-                .logoutRedirectUri("http://example.com")
                 .allowedOrigins(Set.of("http://example.com"))
+                .logoutRedirectUri("http://example.com")
                 .description("mock")
                 .termsUrl("mock")
-                .build(), 1, "http://127.0.0.1");
+                .build(), TenantDTO
+                .builder()
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), PersonDTO
+                .builder()
+                .id(UUID.randomUUID().toString())
+                .build(), "http://127.0.0.1");
         Thread.sleep(1000);
-        assertEquals(1, clientListener.getLastBatchSize());
-        clientService.deleteClientAsync(c.getClientId(), 1);
-        Thread.sleep(1000);
-        assertEquals(1, clientListener.getLastBatchSize());
+        var c = clientRetrieveService.getClient(client.getClientId());
+        assertNotNull("expected to get a non null client", c);
+        assertEquals("expected to get matching client ids", client.getClientId(), c.getClientId());
+
+        clientCleanupService.deleteClientAsync(c.getClientId());
     }
 }

@@ -7,11 +7,13 @@ import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Authorization;
 import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
-import com.onlyoffice.authorization.api.web.server.utilities.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ConsentMessage;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.AuthorizationRepository;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.web.server.ports.repositories.ConsentRepository;
+import com.onlyoffice.authorization.api.web.server.ports.services.consent.ConsentCleanupService;
+import com.onlyoffice.authorization.api.web.server.ports.services.consent.ConsentCreationService;
+import com.onlyoffice.authorization.api.web.server.utilities.mappers.ConsentMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -34,7 +35,9 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("test")
 public class ConsentServiceTest extends ContainerBase {
     @Autowired
-    private ConsentService consentService;
+    private ConsentCreationService consentCreationService;
+    @Autowired
+    private ConsentCleanupService consentCleanupService;
     @Autowired
     private ConsentRepository consentRepository;
     @Autowired
@@ -54,12 +57,12 @@ public class ConsentServiceTest extends ContainerBase {
                 .principalName("mock")
                 .registeredClientId("mock")
                 .build());
-        consentService.saveConsent(ConsentMessage
+        consentCreationService.saveConsent(ConsentMessage
                 .builder()
                 .principalName("mock")
                 .registeredClientId("mock")
                 .invalidated(false)
-                .modifiedAt(Timestamp.from(Instant.now()))
+                .modifiedAt(ZonedDateTime.now())
                 .scopes("mock")
                 .build());
     }
@@ -79,7 +82,7 @@ public class ConsentServiceTest extends ContainerBase {
     void shouldDeleteConsent() {
         var c = consentRepository
                 .findById(new Consent.ConsentId("mock", "mock"));
-        consentService.deleteConsent(ConsentMapper.INSTANCE.toMessage(c.get()));
+        consentCleanupService.deleteConsent(ConsentMapper.INSTANCE.toMessage(c.get()));
         c = consentRepository.findById(new Consent.ConsentId("mock", "mock"));
         assertTrue(c.isEmpty());
     }

@@ -6,14 +6,17 @@ package com.onlyoffice.authorization.api.unit.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.web.client.APIClient;
-import com.onlyoffice.authorization.api.web.server.controllers.ClientController;
 import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
 import com.onlyoffice.authorization.api.web.client.transfer.PersonDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.SettingsDTO;
 import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
+import com.onlyoffice.authorization.api.web.security.filters.CheckAscCookieCommonProcessor;
+import com.onlyoffice.authorization.api.web.security.filters.CheckAuthAdminCookieFilter;
+import com.onlyoffice.authorization.api.web.server.controllers.ClientController;
+import com.onlyoffice.authorization.api.web.server.ports.services.client.ClientRetrieveService;
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.PaginationDTO;
-import com.onlyoffice.authorization.api.web.security.filters.CheckAuthAdminCookieFilter;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +33,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +47,7 @@ import static org.mockito.BDDMockito.given;
 public class ClientControllerTest {
     private MockMvc mvc;
     @Mock
-    private ClientService clientService;
+    private ClientRetrieveService clientService;
     @Mock
     private APIClient apiClient;
     @Mock
@@ -57,7 +61,7 @@ public class ClientControllerTest {
     void setup() {
         JacksonTester.initFields(this, new ObjectMapper());
         mvc = MockMvcBuilders.standaloneSetup(clientController)
-                .addFilter(new CheckAuthAdminCookieFilter(apiClient))
+                .addFilter(new CheckAuthAdminCookieFilter(new CheckAscCookieCommonProcessor(apiClient)))
                 .build();
     }
 
@@ -106,10 +110,25 @@ public class ClientControllerTest {
                                 .name("tenant")
                                 .build())
                         .build());
+        given(apiClient.getSettings(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
+                        .<SettingsDTO>builder()
+                        .status(200)
+                        .statusCode(200)
+                        .response(SettingsDTO
+                                .builder()
+                                .timezone("Europe/Moscow")
+                                .build())
+                        .build());
         given(clientService.getTenantClients(1, 0, 5))
                 .willReturn(PaginationDTO.builder()
-                        .data(List.of(ClientDTO.builder().modifiedBy("admin@admin.com")
-                                .clientId("mock").tenant(1).build()))
+                        .data(List.of(ClientDTO.builder()
+                                .modifiedBy("admin@admin.com")
+                                .clientId("mock")
+                                .createdOn(ZonedDateTime.now())
+                                .modifiedOn(ZonedDateTime.now())
+                                .tenant(1)
+                                .build()))
                         .limit(5)
                         .page(0)
                         .build());
@@ -156,8 +175,24 @@ public class ClientControllerTest {
                                 .name("tenant")
                                 .build())
                         .build());
+        given(apiClient.getSettings(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
+                        .<SettingsDTO>builder()
+                        .status(200)
+                        .statusCode(200)
+                        .response(SettingsDTO
+                                .builder()
+                                .timezone("Europe/Moscow")
+                                .build())
+                        .build());
         given(clientService.getClient("mock"))
-                .willReturn(ClientDTO.builder().clientId("mock").tenant(1).build());
+                .willReturn(ClientDTO
+                        .builder()
+                        .clientId("mock")
+                        .modifiedOn(ZonedDateTime.now())
+                        .createdOn(ZonedDateTime.now())
+                        .tenant(1)
+                        .build());
         MockHttpServletResponse response = mvc.perform(
                         MockMvcRequestBuilders.get("/api/2.0/clients/mock")
                                 .cookie(new Cookie[]{
@@ -197,6 +232,16 @@ public class ClientControllerTest {
                                 .tenantId(1)
                                 .tenantAlias("tenant")
                                 .name("tenant")
+                                .build())
+                        .build());
+        given(apiClient.getSettings(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
+                        .<SettingsDTO>builder()
+                        .status(200)
+                        .statusCode(200)
+                        .response(SettingsDTO
+                                .builder()
+                                .timezone("Europe/Moscow")
                                 .build())
                         .build());
         MockHttpServletResponse response = mvc.perform(

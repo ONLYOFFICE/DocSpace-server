@@ -4,13 +4,12 @@
 package com.onlyoffice.authorization.api.unit.mappers;
 
 import com.onlyoffice.authorization.api.core.entities.Consent;
-import com.onlyoffice.authorization.api.web.server.utilities.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.web.server.utilities.mappers.ConsentMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,7 +25,7 @@ public class ConsentMapperTest {
                 .principalName("mock")
                 .registeredClientId("mock")
                 .invalidated(false)
-                .modifiedAt(Timestamp.from(Instant.now()))
+                .modifiedAt(ZonedDateTime.now())
                 .scopes("mock")
                 .build();
         var m = ConsentMapper.INSTANCE.toMessage(c);
@@ -41,7 +40,7 @@ public class ConsentMapperTest {
                 .scopes("mock")
                 .registeredClientId("mock")
                 .principalName("mock")
-                .modifiedAt(Timestamp.from(Instant.now()))
+                .modifiedAt(ZonedDateTime.now())
                 .invalidated(false)
                 .build();
         var c = ConsentMapper.INSTANCE.toEntity(m);
