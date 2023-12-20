@@ -75,7 +75,7 @@ public class WorkspaceMigration(
             await using var stream = _dataReader.GetEntry("databases/core/core_user");
             var data = new DataTable();
             data.ReadXml(stream);
-            var progressStep = 70 / data.Rows.Count;
+            var progressStep = 50 / data.Rows.Count;
             var i = 1;
             foreach (var row in data.Rows.Cast<DataRow>())
             {
@@ -106,7 +106,7 @@ public class WorkspaceMigration(
                 };
                 if (reportProgress)
                 {
-                    ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing + $" {u.Id} ({i++}/{data.Rows.Count})");
+                    ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing);
                 }
 
                 var user = serviceProvider.GetService<WorkspaceMigratingUser>();
@@ -123,15 +123,32 @@ public class WorkspaceMigration(
             }
 
             var groups = DbExtractGroup();
-            var progress = 80;
+            var progress = 60;
             foreach (var item in groups)
             {
-                ReportProgress(progress, MigrationResource.DataProcessing);
-                progress += 10 / groups.Count;
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    if (reportProgress)
+                    {
+                        ReportProgress(100, MigrationResource.MigrationCanceled);
+                    }
+                    return null;
+                }
+                progress += 20 / groups.Count;
+                if (reportProgress)
+                {
+                    ReportProgress(progress, MigrationResource.DataProcessing);
+                }
+                
                 var group = serviceProvider.GetService<WorkspaceMigrationGroups>();
                 group.Init(item, Log);
                 group.Parse();
                 _migrationInfo.Groups.Add(group);
+            }
+
+            if (reportProgress)
+            {
+                ReportProgress(80, MigrationResource.DataProcessing);
             }
 
             var storage = new WorkspaceStorage
@@ -144,6 +161,10 @@ public class WorkspaceMigration(
 
             try
             {
+                if (reportProgress)
+                {
+                    ReportProgress(90, MigrationResource.DataProcessing);
+                }
                 storage = new WorkspaceStorage
                 {
                     Files = new List<WorkspaceFile>(), Folders = new List<WorkspaceFolder>()
@@ -268,7 +289,11 @@ public class WorkspaceMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    ReportProgress(100, MigrationResource.MigrationCanceled);
+                    return;
+                }
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
@@ -290,7 +315,7 @@ public class WorkspaceMigration(
         i = 1;
         foreach (var user in usersForImport)
         {
-            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
+            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
             try
             {
                 if (user.UserType != EmployeeType.User)
@@ -305,9 +330,11 @@ public class WorkspaceMigration(
             }
         }
 
+        ReportProgress(70, string.Format(MigrationResource.MigrationCommonFiles));
         await migratingCommonFiles.MigrateAsync();
         if (migratingProjectFiles != null)
         {
+            ReportProgress(80, string.Format(MigrationResource.MigrationProjectFiles));
             await migratingProjectFiles.MigrateAsync();
         }
 
