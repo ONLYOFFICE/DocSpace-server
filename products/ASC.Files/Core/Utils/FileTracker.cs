@@ -27,13 +27,24 @@
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
+public class FileTrackerHelper
 {
     private const string Tracker = "filesTracker";
-    public static readonly TimeSpan TrackTimeout = TimeSpan.FromSeconds(12);
-    public static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(60);
-    public static readonly TimeSpan CheckRightTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan _trackTimeout = TimeSpan.FromSeconds(12);
+    private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
+    private readonly Action<object, object, EvictionReason, object> _callbackAction;
+    private readonly ICache _cache;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<FileTrackerHelper> _logger;
 
+    public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
+    {
+        _cache = cache;
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
+        _callbackAction = EvictionCallback();
+    }
 
     public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
@@ -44,11 +55,17 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
                 trackInfo.TrackTime = DateTime.UtcNow;
-                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > CheckRightTimeout;
+                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > _checkRightTimeout;
             }
             else
             {
-                tracker.EditingBy.Add(tabId, new TrackInfo(userId, tabId == userId, editingAlone, tenantId));
+                tracker.EditingBy.Add(tabId, new TrackInfo
+                {
+                    UserId = userId,
+                    NewScheme = tabId == userId,
+                    EditingAlone = editingAlone,
+                    TenantId = tenantId
+                });
             }
         }
         else
@@ -75,8 +92,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
             }
             if (userId != Guid.Empty)
             {
-                var listForRemove = tracker.EditingBy
-                                           .Where(b => tracker.EditingBy[b.Key].UserId == userId);
+                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
 
                 foreach (var editTab in listForRemove)
                 {
@@ -89,30 +105,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
             }
         }
 
-        SetTracker(fileId, null);
-    }
-
-    public void RemoveAllOther<T>(Guid userId, T fileId)
-    {
-        var tracker = GetTracker(fileId);
-        if (tracker != null)
-        {
-            var listForRemove = tracker.EditingBy
-                                       .Where(b => b.Value.UserId != userId);
-
-            if (listForRemove.Count() != tracker.EditingBy.Count)
-            {
-                foreach (var forRemove in listForRemove)
-                {
-                    tracker.EditingBy.Remove(forRemove.Key);
-                }
-
-                SetTracker(fileId, tracker);
-
-                return;
-            }
-        }
-        SetTracker(fileId, null);
+        RemoveTracker(fileId);
     }
 
     public bool IsEditing<T>(T fileId)
@@ -120,8 +113,8 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
         var tracker = GetTracker(fileId);
         if (tracker != null)
         {
-            var listForRemove = tracker.EditingBy
-                                       .Where(e => !e.Value.NewScheme && (DateTime.UtcNow - e.Value.TrackTime).Duration() > TrackTimeout);
+            var now = DateTime.UtcNow;
+            var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout);
 
             foreach (var editTab in listForRemove)
             {
@@ -130,7 +123,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
 
             if (tracker.EditingBy.Count == 0)
             {
-                SetTracker(fileId, null);
+                RemoveTracker(fileId);
 
                 return false;
             }
@@ -140,7 +133,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
             return true;
         }
 
-        SetTracker(fileId, null);
+        RemoveTracker(fileId);
 
         return false;
     }
@@ -169,7 +162,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
         }
         else
         {
-            SetTracker(fileId, null);
+            RemoveTracker(fileId);
         }
     }
 
@@ -184,7 +177,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            return cache.Get<FileTracker>(Tracker + fileId);
+            return _cache.Get<FileTracker>(Tracker + fileId);
         }
 
         return null;
@@ -192,28 +185,41 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
 
     private void SetTracker<T>(T fileId, FileTracker tracker)
     {
+        if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
+        {
+            _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
+        }
+    }
+    
+    private void RemoveTracker<T>(T fileId)
+    {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            if (tracker != null)
-            {
-                cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
-            }
-            else
-            {
-                cache.Remove(Tracker + fileId);
-            }
+            _cache.Remove(Tracker + fileId);
         }
     }
 
-    private Action<object, object, EvictionReason, object> EvictionCallback<T>(T fileId, FileTracker fileTracker)
+    private Action<object, object, EvictionReason, object> EvictionCallback()
     {
-        return async (_, _, reason, _) =>
+        return (cacheFileId, fileTracker, reason, _) =>
         {
             if (reason != EvictionReason.Expired)
             {
                 return;
             }
 
+            if(int.TryParse(cacheFileId?.ToString(), out var internalFileId))
+            {
+                Callback(internalFileId, fileTracker as FileTracker).Wait();
+            }
+            else
+            {
+                Callback(cacheFileId?.ToString(), fileTracker as FileTracker).Wait();
+            }
+        };
+
+        async Task Callback<T>(T fileId, FileTracker fileTracker)
+        {
             try
             {
                 if (fileTracker.EditingBy == null || !fileTracker.EditingBy.Any())
@@ -222,7 +228,7 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
                 }
 
                 var editedBy = fileTracker.EditingBy.FirstOrDefault();
-                await using var scope = serviceScopeFactory.CreateAsyncScope();
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
 
@@ -234,47 +240,44 @@ public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFa
 
                 if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                 {
-                    cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
+                    _cache.Insert(Tracker + fileId, fileTracker with {}, _cacheTimeout, _callbackAction);
                 }
             }
             catch (Exception e)
             {
-                logger.ErrorWithException(e);
+                _logger.ErrorWithException(e);
             }
-        };
+        }
     }
 }
 
-public class FileTracker
+public record FileTracker
 {
-
-    internal Dictionary<Guid, TrackInfo> EditingBy { get; private set; }
+    internal Dictionary<Guid, TrackInfo> EditingBy { get; }
 
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId)
     {
-        EditingBy = new Dictionary<Guid, TrackInfo> { { tabId, new TrackInfo(userId, newScheme, editingAlone, tenantId) } };
+        EditingBy = new()
+        { 
+            { tabId, new TrackInfo
+                {
+                    UserId = userId,
+                    NewScheme = newScheme,
+                    EditingAlone = editingAlone,
+                    TenantId = tenantId
+                }
+            } 
+        };
     }
 
 
     internal class TrackInfo
     {
-        public DateTime CheckRightTime { get; set; }
-        public DateTime TrackTime { get; set; }
-        public Guid UserId { get; set; }
-        public int TenantId { get; set; }
-        public bool NewScheme { get; set; }
-        public bool EditingAlone { get; set; }
-
-        public TrackInfo() { }
-
-        public TrackInfo(Guid userId, bool newScheme, bool editingAlone, int tenantId)
-        {
-            CheckRightTime = DateTime.UtcNow;
-            TrackTime = DateTime.UtcNow;
-            NewScheme = newScheme;
-            UserId = userId;
-            EditingAlone = editingAlone;
-            TenantId = tenantId;
-        }
+        public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;
+        public DateTime TrackTime { get; set; } = DateTime.UtcNow;
+        public required Guid UserId { get; init; }
+        public required int TenantId { get; init; }
+        public required bool NewScheme { get;  init; }
+        public required bool EditingAlone { get;  init; }
     }
 }

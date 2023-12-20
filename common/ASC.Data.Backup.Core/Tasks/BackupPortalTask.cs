@@ -536,9 +536,6 @@ public class BackupPortalTask(DbFactory dbFactory,
             restoreInfoXml.WriteTo(tmpFile);
             await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => SetStepCompleted());
         }
-
-        SetStepCompleted();
-
         Directory.Delete(subDir, true);
 
         logger.DebugEndBackupStorage();

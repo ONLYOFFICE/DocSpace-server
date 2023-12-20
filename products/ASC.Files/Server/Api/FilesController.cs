@@ -193,7 +193,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFileAsync(T folderId, CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelper.CreateHtmlFileAsync(folderId, inDto.Title, inDto.Content);
+        return await filesControllerHelper.CreateHtmlFileAsync(folderId, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFileAsync(T folderId, CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelper.CreateTextFileAsync(folderId, inDto.Title, inDto.Content);
+        return await filesControllerHelper.CreateTextFileAsync(folderId, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
@@ -448,7 +448,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
 
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(T fileId, OrderRequestDto inDto)
-    {
+{
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
     
@@ -555,7 +555,7 @@ public class FilesControllerCommon(IMapper mapper,
     [HttpPost("@common/html")]
     public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content);
+        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
@@ -570,7 +570,7 @@ public class FilesControllerCommon(IMapper mapper,
     [HttpPost("@my/html")]
     public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content);
+        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
@@ -585,7 +585,7 @@ public class FilesControllerCommon(IMapper mapper,
     [HttpPost("@common/text")]
     public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content);
+        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
@@ -600,7 +600,7 @@ public class FilesControllerCommon(IMapper mapper,
     [HttpPost("@my/text")]
     public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFileRequestDto inDto)
     {
-        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content);
+        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
 
     /// <summary>
