@@ -45,7 +45,5 @@ public class GenericQueueConfiguration {
             if (deadRouting == null || deadRouting.isBlank())
                 throw new IllegalArgumentException("Generic queue configuration must have 'routing' for every declared dead letter queue");
         }
-        if (deadQueue != null && autoDelete)
-            throw new IllegalArgumentException("Queues with dlq, dlx, dlr and auto-delete are not supported");
     }
 }
