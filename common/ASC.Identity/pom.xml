@@ -10,7 +10,6 @@
 	<modules>
 		<module>api</module>
 		<module>authorization</module>
-		<module>configuration</module>
 	</modules>
 
 	<properties>
@@ -20,8 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<spring.boot.version>3.1.2</spring.boot.version>
-
-		<apache.client.version>5.2.1</apache.client.version>
 
 		<mysql.connector.version>8.0.33</mysql.connector.version>
 		<h2.connector.version>2.2.220</h2.connector.version>
@@ -40,6 +37,7 @@
 		</dependency>
 
 		<!-- -->
+
 		<!-- Utility Dependencies -->
 
 		<dependency>
@@ -60,6 +58,7 @@
 		</dependency>
 
 		<!-- -->
+
 		<!-- Test Dependencies -->
 
 		<dependency>
@@ -70,7 +69,6 @@
 		</dependency>
 
 		<!-- -->
-
 	</dependencies>
 
 	<build>
