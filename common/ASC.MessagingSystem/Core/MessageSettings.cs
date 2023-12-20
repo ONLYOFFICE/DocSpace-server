@@ -57,7 +57,7 @@ public class MessageSettings
 
         if (!headers.TryGetValue(XRealIPHeader, out var header))
         {
-            var remoteIpAddress = request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+            var remoteIpAddress = GetIP(request);
 
             if (!string.IsNullOrEmpty(remoteIpAddress))
             {
@@ -90,7 +90,7 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
-        return request.HttpContext.Connection.RemoteIpAddress?.ToString();
+        return request.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)
