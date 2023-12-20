@@ -204,18 +204,20 @@ public class FileTrackerHelper
     {
         return (cacheFileId, fileTracker, reason, _) =>
         {            
-            if (reason != EvictionReason.Expired)
+            if (reason != EvictionReason.Expired || cacheFileId == null)
             {
                 return;
             }
+
+            var fId = cacheFileId.ToString()?.Substring(Tracker.Length);
             
-            if(int.TryParse(cacheFileId?.ToString(), out var internalFileId))
+            if(int.TryParse(fId, out var internalFileId))
             {
                 Callback(internalFileId, fileTracker as FileTracker).Wait();
             }
             else
             {
-                Callback(cacheFileId?.ToString(), fileTracker as FileTracker).Wait();
+                Callback(fId, fileTracker as FileTracker).Wait();
             }
         };
 
