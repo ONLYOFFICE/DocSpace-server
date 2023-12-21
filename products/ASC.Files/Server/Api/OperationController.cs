@@ -109,7 +109,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             DeleteAfter = inDto.DeleteAfter,
-            Ic = true,
+            Copy = true,
             FileStringIds = fileStringIds,
             FolderStringIds = folderStringIds,
             FileIntIds = fileIntIds,
@@ -271,7 +271,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             DeleteAfter = inDto.DeleteAfter,
-            Ic = false,
+            Copy = false,
             FileStringIds = fileStringIds,
             FolderStringIds = folderStringIds,
             FileIntIds = fileIntIds, 

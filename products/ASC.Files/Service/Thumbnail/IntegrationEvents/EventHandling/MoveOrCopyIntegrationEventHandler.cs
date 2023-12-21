@@ -73,7 +73,7 @@ public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOr
 
             var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            await _fileStorageService.EnqueueMoveOrCopyItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, ToJsonElement(@event.DestFolderId), @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content, headers, @event.TaskId);
+            await _fileStorageService.MoveOrCopyItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, ToJsonElement(@event.DestFolderId), @event.ConflictResolveType, @event.Copy, @event.DeleteAfter, @event.Content, headers, @event.TaskId);
         }
     }
 }
