@@ -35,6 +35,7 @@ public class ClientMessage implements Message, Serializable {
     private String tenantUrl;
     private boolean enabled;
     private boolean invalidated;
+    private boolean allowPkce;
     private ZonedDateTime createdOn;
     private String createdBy;
     @Builder.Default

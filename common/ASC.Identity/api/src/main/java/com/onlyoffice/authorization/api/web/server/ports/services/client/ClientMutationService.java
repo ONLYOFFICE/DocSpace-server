@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +37,9 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 public class ClientMutationService implements ClientMutationUsecases {
+    private final String DEFAULT_AUTHENTICATION = "client_secret_post";
+    private final String PKCE_AUTHENTICATION = "none";
+
     private final RabbitMQConfiguration configuration;
 
     private final ClientPersistenceMutationUsecases mutationUsecases;
@@ -174,6 +178,12 @@ public class ClientMutationService implements ClientMutationUsecases {
             var msg = ClientMapper.INSTANCE.fromCommandToMessage(updateClient);
             msg.setClientId(clientId);
             msg.setCommandCode(ClientMessage.ClientCommandCode.UPDATE_CLIENT);
+
+            var authenticationMethods = new HashSet<String>();
+            authenticationMethods.add(DEFAULT_AUTHENTICATION);
+            if (msg.isAllowPkce())
+                authenticationMethods.add(PKCE_AUTHENTICATION);
+            msg.setAuthenticationMethod(String.join(",", authenticationMethods));
 
             var queue = configuration.getQueues().get("client");
             amqpClient.convertAndSend(queue.getExchange(), queue.getRouting(), msg);

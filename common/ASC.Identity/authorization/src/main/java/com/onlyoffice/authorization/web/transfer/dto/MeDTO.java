@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.core.transfer.dto;
+package com.onlyoffice.authorization.web.transfer.dto;
 
 import lombok.*;
 

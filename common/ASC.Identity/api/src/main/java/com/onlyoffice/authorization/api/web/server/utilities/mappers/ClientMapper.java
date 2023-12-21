@@ -104,6 +104,12 @@ public interface ClientMapper {
      * @param client
      * @return
      */
+    @Mappings({
+            @Mapping(
+                    source = "allowPkce",
+                    target = "allowPkce"
+            )
+    })
     ClientMessage fromCommandToMessage(UpdateClientDTO client);
 
     /**

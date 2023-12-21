@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.core.transfer.messaging.wrappers;
+package com.onlyoffice.authorization.web.transfer.messaging.wrappers;
 
 import com.rabbitmq.client.Channel;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.core.transfer.messaging;
+package com.onlyoffice.authorization.web.transfer.messaging;
 
 import lombok.*;
 
