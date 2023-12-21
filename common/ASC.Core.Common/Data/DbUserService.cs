@@ -236,13 +236,14 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        string text,
+        bool withoutGroup)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
 
         return await q.CountAsync();
     }
@@ -257,6 +258,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        bool withoutGroup,
         Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
@@ -272,7 +274,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
 
         var orderedQuery = q.OrderBy(r => r.ActivationStatus);
 
@@ -621,7 +623,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        string text,
+        bool withoutGroup)
     {
         q = q.Where(r => !r.Removed);
 
@@ -643,16 +646,14 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 }
             }
         }
-        else if (combinedGroups != null && combinedGroups.Any())
+        else if (combinedGroups != null && combinedGroups.Count != 0)
         {
             Expression<Func<User, bool>> a = r => false;
 
-            foreach (var cg in combinedGroups)
+            foreach (var (cgIncludeGroups, cgExcludeGroups) in combinedGroups)
             {
                 Expression<Func<User, bool>> b = r => true;
 
-                var cgIncludeGroups = cg.Item1;
-                var cgExcludeGroups = cg.Item2;
                 if (cgIncludeGroups is { Count: > 0 })
                 {
                     foreach (var ig in cgIncludeGroups)
@@ -673,6 +674,17 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             }
 
             q = q.Where(a);
+        }
+
+        if (withoutGroup)
+        {
+            q = from user in q
+                join userGroup in userDbContext.UserGroups.Where(g => 
+                        !g.Removed && !Constants.SystemGroups.Select(gi => gi.ID).Contains(g.UserGroupId)) 
+                    on user.Id equals userGroup.Userid into joinedSet
+                from @group in joinedSet.DefaultIfEmpty()
+                where @group == null
+                select user;
         }
 
         if (!isDocSpaceAdmin && employeeStatus == null)

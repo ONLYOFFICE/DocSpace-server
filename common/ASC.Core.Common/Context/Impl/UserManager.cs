@@ -212,9 +212,10 @@ public class UserManager
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        string text,
+        bool withoutGroup)
     {
-        return _userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        return _userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -226,12 +227,13 @@ public class UserManager
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return _userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, Tenant.OwnerId, sortBy, sortOrderAsc, limit, offset);
+        return _userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup, Tenant.OwnerId, sortBy, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)
@@ -910,7 +912,7 @@ public class UserManager
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
         var group = await _userService.GetGroupAsync(Tenant.Id, groupID) ?? 
-                    ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
+                    ToGroup(Constants.SystemGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)
         {
@@ -939,9 +941,9 @@ public class UserManager
             return Constants.LostGroupInfo;
         }
 
-        if (Constants.BuildinGroups.Any(b => b.ID == g.ID))
+        if (Constants.SystemGroups.Any(b => b.ID == g.ID))
         {
-            return Constants.BuildinGroups.Single(b => b.ID == g.ID);
+            return Constants.SystemGroups.Single(b => b.ID == g.ID);
         }
 
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups);
@@ -958,7 +960,7 @@ public class UserManager
             return;
         }
 
-        if (Constants.BuildinGroups.Any(b => b.ID == id))
+        if (Constants.SystemGroups.Any(b => b.ID == id))
         {
             return;
         }
@@ -1005,7 +1007,7 @@ public class UserManager
         return (await _userService.GetGroupsAsync(Tenant.Id))
             .Where(g => !g.Removed)
             .Select(g => new GroupInfo(g.CategoryId) { ID = g.Id, Name = g.Name, Sid = g.Sid })
-            .Concat(Constants.BuildinGroups)
+            .Concat(Constants.SystemGroups)
             .ToList();
     }
 

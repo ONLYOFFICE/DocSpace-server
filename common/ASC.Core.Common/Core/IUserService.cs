@@ -39,7 +39,8 @@ public interface IUserService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text);
+        string text,
+        bool withoutGroup);
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
         bool isDocSpaceAdmin,
@@ -50,6 +51,7 @@ public interface IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        bool withoutGroup,
         Guid ownerId,
         string sortBy,
         bool sortOrderAsc,

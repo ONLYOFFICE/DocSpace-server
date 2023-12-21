@@ -184,9 +184,10 @@ public class CachedUserService : IUserService, ICachedService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        string text,
+        bool withoutGroup)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -199,13 +200,14 @@ public class CachedUserService : IUserService, ICachedService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        bool withoutGroup,
         Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, ownerId, sortBy, 
+        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup, ownerId, sortBy, 
             sortOrderAsc, limit, offset);
     }
 

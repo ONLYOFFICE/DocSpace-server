@@ -658,7 +658,7 @@ public class UserController(ICache cache,
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null, null);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null, false);
     }
 
     /// <summary>
@@ -681,9 +681,9 @@ public class UserController(ICache cache,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType, bool? withoutGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup);
 
         await foreach (var user in users)
         {
@@ -777,9 +777,9 @@ public class UserController(ICache cache,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("simple/filter")]
-    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType, bool? withoutGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup);
 
         await foreach (var user in users)
         {
@@ -1670,7 +1670,6 @@ public class UserController(ICache cache,
         }
     }
 
-
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)
     {
         if (!await _permissionContext.CheckPermissionsAsync(Constants.Action_EditGroups))
@@ -1735,7 +1734,8 @@ public class UserController(ICache cache,
         IEnumerable<EmployeeType> employeeTypes,
         bool? isDocSpaceAdministrator,
         Payments? payments,
-        AccountLoginType? accountLoginType)
+        AccountLoginType? accountLoginType, 
+        bool? withoutGroup)
     {
         if (coreBaseSettings.Personal)
         {
@@ -1745,60 +1745,13 @@ public class UserController(ICache cache,
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
-        var excludeGroups = new List<Guid>();
-        var includeGroups = new List<List<Guid>>();
-        var combinedGroups = new List<Tuple<List<List<Guid>>, List<Guid>>>();
+        var filter = GroupBasedFilter.Create(groupId.HasValue ? [groupId.Value] : Array.Empty<Guid>(), employeeType, employeeTypes, isDocSpaceAdministrator, payments, withoutGroup, webItemManager);
 
-        if (groupId.HasValue)
-        {
-            includeGroups.Add(new List<Guid> { groupId.Value });
-        }
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
+            _apiContext.FilterValue, withoutGroup ?? false);
 
-        if (employeeType.HasValue)
-        {
-            FilterByUserType(employeeType.Value, includeGroups, excludeGroups);
-        }
-        else if (employeeTypes != null && employeeTypes.Any())
-        {
-            foreach (var et in employeeTypes)
-            {
-                var combinedIncludeGroups = new List<List<Guid>>();
-                var combinedExcludeGroups = new List<Guid>();
-                FilterByUserType(et, combinedIncludeGroups, combinedExcludeGroups);
-                combinedGroups.Add(new(combinedIncludeGroups, combinedExcludeGroups));
-            }
-        }
-
-        if (payments != null)
-        {
-            switch (payments)
-            {
-                case Payments.Paid:
-                    excludeGroups.Add(Constants.GroupUser.ID);
-                    break;
-                case Payments.Free:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
-                    break;
-            }
-        }
-
-        if (isDocSpaceAdministrator.HasValue && isDocSpaceAdministrator.Value)
-        {
-            var adminGroups = new List<Guid>
-            {
-                    Constants.GroupAdmin.ID
-            };
-            var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
-            adminGroups.AddRange(products.Select(r => r.ID));
-
-            includeGroups.Add(adminGroups);
-        }
-
-        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
-            _apiContext.FilterValue);
-
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
-            _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
+            _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
@@ -1810,27 +1763,6 @@ public class UserController(ICache cache,
         }
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
-
-        void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
-        {
-            switch (eType)
-            {
-                case EmployeeType.DocSpaceAdmin:
-                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
-                    break;
-                case EmployeeType.RoomAdmin:
-                    eGroups.Add(Constants.GroupUser.ID);
-                    eGroups.Add(Constants.GroupAdmin.ID);
-                    eGroups.Add(Constants.GroupCollaborator.ID);
-                    break;
-                case EmployeeType.Collaborator:
-                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
-                    break;
-                case EmployeeType.User:
-                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
-                    break;
-            }
-        }
     }
 
     ///// <summary>
