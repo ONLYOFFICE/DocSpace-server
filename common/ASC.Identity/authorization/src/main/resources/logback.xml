@@ -1,0 +1,93 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <springProperty name="LOG_PATH" source="logging.file" defaultValue="logs" />
+
+    <!-- ### Appenders ### -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN} %X|</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>false</includeContext>
+            <customFields>{"applicationContext":"ASC.Identity.Authorization.API", "instanceId":"${HOSTNAME}"}</customFields>
+            <fieldNames>
+                <level>level</level>
+                <logger>sourceContext</logger>
+                <timestamp>date</timestamp>
+                <thread>threadId</thread>
+                <levelValue>[ignore]</levelValue>
+                <protocol>[ignore]</protocol>
+                <status_code>[ignore]</status_code>
+                <requested_url>[ignore]</requested_url>
+                <remote_host>[ignore]</remote_host>
+                <remote_user>[ignore]</remote_user>
+                <content_length>[ignore]</content_length>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <rootCauseFirst>true</rootCauseFirst>
+                <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                <shortenedClassNameLength>25</shortenedClassNameLength>
+            </throwableConverter>
+        </encoder>
+    </appender>
+    <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${LOG_FILE_PATH}.%d{yyyy-MM-dd}
+            </fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>false</includeContext>
+            <customFields>{"applicationContext":"ASC.Identity.Authorization.API", "instanceId":"${HOSTNAME}"}</customFields>
+            <fieldNames>
+                <level>level</level>
+                <logger>sourceContext</logger>
+                <timestamp>date</timestamp>
+                <thread>threadId</thread>
+                <levelValue>[ignore]</levelValue>
+                <protocol>[ignore]</protocol>
+                <status_code>[ignore]</status_code>
+                <requested_url>[ignore]</requested_url>
+                <remote_host>[ignore]</remote_host>
+                <remote_user>[ignore]</remote_user>
+                <content_length>[ignore]</content_length>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <rootCauseFirst>true</rootCauseFirst>
+                <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                <shortenedClassNameLength>25</shortenedClassNameLength>
+            </throwableConverter>
+        </encoder>
+    </appender>
+    <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${GELF_HOST:-localhost}</graylogHost>
+        <graylogPort>${GELF_PORT:-12201}</graylogPort>
+    </appender>
+
+    <appender name="CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+        <appender-ref ref="CONSOLE" />
+    </appender>
+    <appender name="JSON_CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+        <appender-ref ref="JSON_CONSOLE" />
+    </appender>
+    <!-- ###### -->
+
+    <!-- ### Loggers ### -->
+    <springProfile name="development,dev,d">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE_ASYNC"/>
+        </root>
+    </springProfile>
+    <springProfile name="production,prod,p,testing,test,t">
+        <root level="ERROR">
+            <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+        </root>
+    </springProfile>
+    <!-- ###### -->
+</configuration>

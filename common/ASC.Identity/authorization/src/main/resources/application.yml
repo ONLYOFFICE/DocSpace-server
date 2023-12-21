@@ -5,7 +5,6 @@ server:
   servlet:
     session:
       tracking-modes: cookie
-
 spring:
   lifecycle:
     timeout-per-shutdown-phase: 1m
@@ -142,18 +141,21 @@ management:
       post:
         enabled: true
 
-logging:
-  config: classpath:log4j2.xml
-  level:
-    root: INFO
-    org:
-      hibernate:
-        stat: DEBUG
-        SQL: DEBUG
 ---
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile:
+        - development
+        - dev
+        - d
 logging:
-  config: classpath:log4j2-dev.xml
+  level:
+    root: INFO
+    com:
+      onlyoffice: DEBUG
+      hazelcast: DEBUG
+    org:
+      hibernate:
+        stat: DEBUG
+        SQL: DEBUG
