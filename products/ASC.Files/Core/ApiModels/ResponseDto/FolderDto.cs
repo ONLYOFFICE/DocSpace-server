@@ -126,7 +126,9 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
-        SettingsManager settingsManager)
+        SettingsManager settingsManager,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
@@ -160,14 +162,16 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             }
-
-            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            result.UsedSpace = folder.Counter;
-
-            if (quotaRoomSettings.EnableQuota)
+            if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
             {
-                result.IsCustomQuota = folder.Quota > -2;
-                result.QuotaLimit = folder.Quota > -2 ? folder.Quota : quotaRoomSettings.DefaultQuota;
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                result.UsedSpace = folder.Counter;
+
+                if (quotaRoomSettings.EnableQuota)
+                {
+                    result.IsCustomQuota = folder.Quota > -2;
+                    result.QuotaLimit = folder.Quota > -2 ? folder.Quota : quotaRoomSettings.DefaultQuota;
+                }
             }
         }
 

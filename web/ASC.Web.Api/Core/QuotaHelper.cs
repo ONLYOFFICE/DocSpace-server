@@ -50,7 +50,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
     {
         var features = await GetFeatures(quota, getUsed).ToListAsync();
 
-        return new QuotaDto
+        var result =  new QuotaDto
         {
             Id = quota.TenantId,
             Title = Resource.ResourceManager.GetString($"Tariffs_{quota.Name}"),
@@ -65,10 +65,16 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
                 CurrencySymbol = quota.PriceCurrencySymbol
             },
 
-            Features = features,
-            UsersQuota = await settingsManager.LoadAsync<TenantUserQuotaSettings>(),
-            RoomsQuota = await settingsManager.LoadAsync<TenantRoomQuotaSettings>()
+            Features = features
         };
+
+        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            result.UsersQuota = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            result.RoomsQuota = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+        }
+
+        return result;
     }
 
     private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, bool getUsed)

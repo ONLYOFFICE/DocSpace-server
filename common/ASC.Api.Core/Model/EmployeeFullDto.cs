@@ -209,6 +209,7 @@ public class EmployeeFullDtoHelper(
         SettingsManager settingsManager,
         IQuotaService quotaService,
         TenantManager tenantManager,
+        CoreBaseSettings coreBaseSettings,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
     {
@@ -297,20 +298,23 @@ public class EmployeeFullDtoHelper(
 
         await InitAsync(result, userInfo);
 
-        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-
-        if (quotaSettings.EnableQuota)
+        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
-            var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
+            var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
 
-            result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
+            if (quotaSettings.EnableQuota)
+            {
+                var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
 
-            result.QuotaLimit = userQuotaSettings != null ? 
-                                userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
-                                : quotaSettings.DefaultQuota;
+                result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
+
+                result.QuotaLimit = userQuotaSettings != null ?
+                                    userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
+                                    : quotaSettings.DefaultQuota;
+            }
         }
-
+        
         if (userInfo.Sex.HasValue)
         {
             result.Sex = userInfo.Sex.Value ? "male" : "female";
