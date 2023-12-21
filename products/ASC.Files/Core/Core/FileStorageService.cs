@@ -1981,18 +1981,9 @@ public class FileStorageService //: IFileStorageService
 
         if (foldersId.Count > 0 || filesId.Count > 0)
         {
-            return await fileOperationsManager.MoveOrCopyAsync(
-                authContext.CurrentAccount.ID,
-                await tenantManager.GetCurrentTenantAsync(),
-                foldersId,
-                filesId,
-                destFolderId,
-                copy,
-                resolve,
-                !deleteAfter,
-                GetHttpHeaders(),
-                await externalShare.GetCurrentShareDataAsync(),
-                content);
+            var (operations, _) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), content);
+
+            return operations;
         }
 
         return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
@@ -2034,14 +2025,18 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<FileOperationResult>> DeleteFileAsync<T>(T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T>() { fileId }, ignoreException,
-            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false);
+        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T>() { fileId }, ignoreException,
+            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask: true);
+
+        return operations;
     }
 
     public async Task<List<FileOperationResult>> DeleteFolderAsync<T>(T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>() { folderId }, new List<T>(), ignoreException,
-            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false);
+        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>() { folderId }, new List<T>(), ignoreException,
+            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask: true);
+
+        return operations;
     }
 
     public async Task<List<FileOperationResult>> DeleteItemsAsync(IEnumerable<JsonElement> files, IEnumerable<JsonElement> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
@@ -2074,8 +2069,10 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<FileOperationResult>> DeleteItemsAsync<T>(IEnumerable<T> files, IEnumerable<T> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately,
-            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false);
+        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately,
+            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask: true);
+
+        return operations;
     }
 
     #endregion

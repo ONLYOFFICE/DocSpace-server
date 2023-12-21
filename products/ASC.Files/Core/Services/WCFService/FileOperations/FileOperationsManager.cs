@@ -152,15 +152,13 @@ public class FileOperationsManager(TempStream tempStream,
 
     #region MoveOrCopy
 
-    public async Task<List<FileOperationResult>> MoveOrCopyAsync(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
+    public async Task<(List<FileOperationResult>, string)> MoveOrCopyAsync(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
         IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool content)
     {
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        var (operations, _) = await MoveOrCopyAsync(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask: true);
-
-        return operations;
+        return await MoveOrCopyAsync(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, externalShareData, content, enqueueTask: true);
     }
 
     public async Task<(List<FileOperationResult>, string)> MoveOrCopyAsync(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers,
@@ -204,13 +202,6 @@ public class FileOperationsManager(TempStream tempStream,
     #endregion
 
     #region Delete
-
-    public List<FileOperationResult> Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
-    {
-        var (operations, _) = Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true);
-        return operations;
-    }
 
     public (List<FileOperationResult>, string) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
         IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
