@@ -1869,7 +1869,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             var index1 = subjects.IndexOf(x.Subject);
             var index2 = subjects.IndexOf(y.Subject);
             if (index1 == 0 || index2 == 0 // UserId
-                || Constants.BuildinGroups.Any(g => g.ID == x.Subject) || Constants.BuildinGroups.Any(g => g.ID == y.Subject)) // System Groups
+                || Constants.SystemGroups.Any(g => g.ID == x.Subject) || Constants.SystemGroups.Any(g => g.ID == y.Subject)) // System Groups
             {
                 return index1.CompareTo(index2);
             }
