@@ -2,6 +2,9 @@ package com.onlyoffice.authorization.api.web.server.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ *
+ */
 public class HttpUtils {
     private static final String[] IP_HEADERS = {
             "X-Forwarded-For",
@@ -20,6 +23,11 @@ public class HttpUtils {
 
     private HttpUtils() {}
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String getRequestIP(HttpServletRequest request) {
         for (var header: IP_HEADERS) {
             var value = request.getHeader(header);
@@ -32,6 +40,11 @@ public class HttpUtils {
         return request.getRemoteAddr();
     }
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String getClientOS(HttpServletRequest request) {
         var browserDetails = request.getHeader("User-Agent");
         var lowerCaseBrowser = browserDetails.toLowerCase();
@@ -50,6 +63,11 @@ public class HttpUtils {
         }
     }
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String getClientBrowser(HttpServletRequest request) {
         var browserDetails = request.getHeader("User-Agent");
         var user = browserDetails.toLowerCase();
@@ -91,6 +109,11 @@ public class HttpUtils {
         return browser;
     }
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String getFullURL(HttpServletRequest request) {
         var requestURL = request.getRequestURL();
         var queryString = request.getQueryString();

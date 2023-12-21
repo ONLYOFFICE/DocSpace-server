@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,11 +26,14 @@ final class UpdateClientCommandHandler extends ScheduledMessagingCommandHandler<
         return ClientMessage.ClientCommandCode.UPDATE_CLIENT.name();
     }
 
+    /**
+     *
+     */
     @Scheduled(fixedDelay = 1000)
     private void persistMessages() {
         if (messages.size() > 0) {
-            MDC.put("number of messages", String.valueOf(messages.size()));
-            log.info("Update client messages");
+            MDC.put("messagesCount", String.valueOf(messages.size()));
+            log.debug("Update client messages");
             MDC.clear();
 
             var ids = mutationUsecases.updateClients(messages

@@ -6,10 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ *
+ * @param <E>
+ */
 @Slf4j
 public abstract class ScheduledMessagingCommandHandler<E> implements MessagingCommandHandler<E> {
     private RabbitMQConfiguration configuration = new RabbitMQConfiguration();
     protected LinkedBlockingQueue<MessageWrapper<E>> messages = new LinkedBlockingQueue<>();
+
+    /**
+     *
+     * @param message
+     */
     public void handle(MessageWrapper<E> message) {
         if (messages.size() > configuration.getPrefetch()) {
             log.warn("Message queue is full");

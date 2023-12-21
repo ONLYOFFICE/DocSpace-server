@@ -25,6 +25,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,14 +42,23 @@ public class ClientCreationService implements ClientCreationUsecases {
     private final Cipher cipher;
     private final AmqpTemplate amqpClient;
 
-    @SneakyThrows
+    /**
+     *
+     * @param message
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 1250)
     public ClientDTO saveClient(ClientMessage message) {
         log.info("Trying to create a new client");
 
         var secret = UUID.randomUUID().toString();
         message.setClientId(UUID.randomUUID().toString());
-        message.setClientSecret(cipher.encrypt(secret));
+        try {
+            message.setClientSecret(cipher.encrypt(secret));
+        } catch (Exception e) {
+            throw new UnsupportedOperationException(String
+                    .format("Could not execute save client operation %s", e.getMessage()));
+        }
 
         MDC.put("clientId", message.getClientId());
         log.info("Credentials have been generated for a new client");
@@ -59,9 +71,14 @@ public class ClientCreationService implements ClientCreationUsecases {
         return ClientMapper.INSTANCE.fromEntityToQuery(client);
     }
 
+    /**
+     *
+     * @param messages
+     * @return
+     */
     @Transactional(timeout = 5000)
     public List<String> saveClients(Iterable<ClientMessage> messages) {
-        log.info("Trying to save new clients");
+        log.info("Trying to save new clients as a batch");
 
         var ids = new ArrayList<String>();
         for (ClientMessage message : messages) {
@@ -75,7 +92,6 @@ public class ClientCreationService implements ClientCreationUsecases {
                 log.debug("Client has been saved", message);
             } catch (RuntimeException e) {
                 ids.add(message.getClientId());
-
                 log.error("Could not create a client", e);
             } finally {
                 MDC.clear();
@@ -85,6 +101,14 @@ public class ClientCreationService implements ClientCreationUsecases {
         return ids;
     }
 
+    /**
+     *
+     * @param clientDTO
+     * @param tenant
+     * @param person
+     * @param tenantUrl
+     * @return
+     */
     public ClientDTO createClientAsync(
             CreateClientDTO clientDTO, TenantDTO tenant,
             PersonDTO person, String tenantUrl
@@ -115,14 +139,17 @@ public class ClientCreationService implements ClientCreationUsecases {
 
             var queue = configuration.getQueues().get("client");
 
+            log.debug("Submitting a client creation task");
+
             amqpClient.convertAndSend(queue.getExchange(),
                     queue.getRouting(),
                     ClientMapper.INSTANCE.fromQueryToMessage(client));
 
+            log.debug("Successfully submitted a client creation task");
+
             client.setClientSecret(secret);
             return client;
         } catch (Exception e) {
-            log.error("Could not create a new client creation task", e);
             throw new EntityCreationException(String
                     .format("could not create a new client creation task: %s", e.getMessage()));
         } finally {

@@ -2,6 +2,9 @@ package com.onlyoffice.authorization.api.web.client.transfer;
 
 import lombok.*;
 
+/**
+ *
+ */
 @Getter
 @Setter
 @Builder

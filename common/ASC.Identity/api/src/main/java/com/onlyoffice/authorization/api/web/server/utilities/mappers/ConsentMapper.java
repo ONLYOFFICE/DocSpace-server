@@ -26,21 +26,60 @@ import java.util.stream.Collectors;
 public interface ConsentMapper {
     ConsentMapper INSTANCE = Mappers.getMapper(ConsentMapper.class);
 
+    /**
+     *
+     * @param consent
+     * @return
+     */
     ConsentMessage toMessage(Consent consent);
 
+    /**
+     *
+     * @param consentMessage
+     * @return
+     */
     Consent toEntity(ConsentMessage consentMessage);
+
+    /**
+     *
+     * @param consent
+     * @return
+     */
     @Mapping(source = "invalidated", target = "invalidated")
     ConsentDTO toDTO(Consent consent);
+
+    /**
+     *
+     * @param consents
+     * @return
+     */
     default Set<ConsentDTO> toDTOs(Set<Consent> consents) {
         var result = new HashSet<ConsentDTO>();
         consents.forEach(c -> result.add(toDTO(c)));
         return result;
     }
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     @Mapping(ignore = true, target = "clientSecret")
     ClientDTO clientToDTO(Client client);
+
+    /**
+     *
+     * @param value
+     * @return
+     */
     default Set<String> map(String value) {
         return Arrays.stream(value.split(",")).collect(Collectors.toSet());
     }
 
+    /**
+     *
+     * @param entity
+     * @param message
+     */
     void update(@MappingTarget Consent entity, ConsentMessage message);
 }

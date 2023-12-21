@@ -13,12 +13,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ConsentRetrieveService implements ConsentRetrieveUsecases {
     private final ConsentPersistenceRetrieveUsecases retrieveUsecases;
 
+    /**
+     *
+     * @param principalName
+     * @return
+     * @throws RuntimeException
+     */
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public Set<ConsentDTO> getAllByPrincipalName(String principalName)
             throws RuntimeException {

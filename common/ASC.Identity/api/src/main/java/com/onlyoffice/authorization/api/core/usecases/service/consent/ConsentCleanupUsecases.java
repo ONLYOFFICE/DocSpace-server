@@ -9,7 +9,22 @@ import com.onlyoffice.authorization.api.web.server.messaging.messages.ConsentMes
  *
  */
 public interface ConsentCleanupUsecases {
+    /**
+     *
+     * @param consentMessage
+     */
     void deleteConsent(ConsentMessage consentMessage);
+
+    /**
+     *
+     * @param consents
+     */
     void deleteConsents(Iterable<ConsentMessage> consents);
+
+    /**
+     *
+     * @param clientId
+     * @param principalName
+     */
     void asyncRevokeConsent(String clientId, String principalName);
 }

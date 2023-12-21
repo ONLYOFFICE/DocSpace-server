@@ -1,6 +1,8 @@
 package com.onlyoffice.authorization.api.configuration;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -9,15 +11,38 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ *
+ */
+@Slf4j
 @Configuration
 @EnableCaching
 public class CachingConfiguration {
+    private final int CACHE_EXPIRATION = 3;
+    private final int CACHE_SIZE = 300;
+    private final TimeUnit CACHE_EXPIRATION_UNIT = TimeUnit.MINUTES;
+
+    /**
+     *
+     * @return
+     */
     @Bean
     public Caffeine caffeineConfig() {
-        return Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES)
-                .maximumSize(300);
+        MDC.put("expiration", String.valueOf(CACHE_EXPIRATION));
+        MDC.put("expirationUnit", CACHE_EXPIRATION_UNIT.name());
+        MDC.put("size", String.valueOf(CACHE_SIZE));
+        log.info("Building an in-memory cache");
+        MDC.clear();
+
+        return Caffeine.newBuilder().expireAfterWrite(CACHE_EXPIRATION, CACHE_EXPIRATION_UNIT)
+                .maximumSize(CACHE_SIZE);
     }
 
+    /**
+     *
+     * @param caffeine
+     * @return
+     */
     @Bean
     public CacheManager cacheManager(Caffeine caffeine) {
         var caffeineCacheManager = new CaffeineCacheManager();

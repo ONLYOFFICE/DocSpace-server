@@ -9,7 +9,22 @@ import com.onlyoffice.authorization.api.web.server.messaging.messages.Authorizat
  *
  */
 public interface AuthorizationCleanupUsecases {
+    /**
+     *
+     * @param a
+     */
     void deleteAuthorization(AuthorizationMessage a);
+
+    /**
+     *
+     * @param authorizations
+     */
     void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations);
+
+    /**
+     *
+     * @param registeredClientId
+     * @return
+     */
     int deleteAuthorizationsByClientId(String registeredClientId);
 }

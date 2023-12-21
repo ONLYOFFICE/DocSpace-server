@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,12 +28,16 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
 
     private final Cipher cipher;
 
+    /**
+     *
+     * @param clientId
+     * @return
+     */
     @Cacheable("clients")
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 1250)
     public ClientDTO getClient(String clientId) {
         MDC.put("clientId", clientId);
-        log.info("Trying to get a client", clientId);
-        MDC.clear();
+        log.info("Trying to get a valid client by clientId");
 
         return retrievalUsecases
                 .findById(clientId)
@@ -41,17 +48,23 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
                         query.setClientSecret(cipher.decrypt(query.getClientSecret()));
                         return query;
                     } catch (Exception e) {
-                        MDC.put("clientId", clientId);
-                        log.error("Could not map a client", e);
-                        MDC.clear();
                         throw new EntityNotFoundException(String.
-                                format("could not find and decrypt client secret: %s", e.getMessage()));
+                                format("Could not find and decrypt client secret: %s", e.getMessage()));
+                    } finally {
+                        MDC.clear();
                     }
                 })
                 .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find client with id %s", clientId)));
+                        .format("Could not find client with id %s", clientId)));
     }
 
+    /**
+     *
+     * @param tenant
+     * @param page
+     * @param limit
+     * @return
+     */
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2250)
     public PaginationDTO getTenantClients(int tenant, int page, int limit) {
         MDC.put("page", String.valueOf(page));

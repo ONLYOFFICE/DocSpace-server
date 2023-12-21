@@ -9,9 +9,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ *
+ */
 @Slf4j
 @ControllerAdvice
 public class EntityCreationExceptionHandler {
+    /**
+     *
+     * @param ex
+     * @param request
+     * @return
+     */
     @ExceptionHandler(EntityCreationException.class)
     public ResponseEntity<ErrorDTO> handleEntityCleanupException(EntityCreationException ex, HttpServletRequest request) {
         log.error(ex.getMessage());

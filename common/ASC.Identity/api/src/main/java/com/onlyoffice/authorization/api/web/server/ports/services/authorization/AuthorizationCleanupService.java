@@ -10,27 +10,40 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthorizationCleanupService implements AuthorizationCleanupUsecases {
     private final AuthorizationPersistenceCleanupUsecases cleanupUsecases;
+
+    /**
+     *
+     * @param authorization
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 1250)
     public void deleteAuthorization(AuthorizationMessage authorization) {
         MDC.put("authorizationId", authorization.getId());
-        log.info("Deleting an authorization");
+        log.info("Removing an authorization");
         MDC.clear();
 
         cleanupUsecases.deleteById(authorization.getId());
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 5000)
+    /**
+     *
+     * @param authorizations
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 3000)
     public void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.info("Deleting authorizations");
+        log.info("Removing authorizations as a batch");
+
         for (AuthorizationMessage authorization : authorizations) {
             try {
                 MDC.put("authorizationId", authorization.getId());
-                log.info("Deleting an authorization");
+                log.debug("Deleting an authorization");
 
                 cleanupUsecases.deleteById(authorization.getId());
             } catch (Exception e) {
@@ -41,16 +54,21 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
         }
     }
 
-    @Transactional(rollbackFor = Exception.class, timeout = 5000)
+    /**
+     *
+     * @param registeredClientId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 3000)
     public int deleteAuthorizationsByClientId(String registeredClientId) {
         MDC.put("clientId", registeredClientId);
-        log.info("Deleting authorizations");
+        log.info("Removing authorizations as a batch by registeredClientId");
 
         try {
             var count = cleanupUsecases.deleteAllByClientId(registeredClientId);
 
-            MDC.put("removed", String.valueOf(count));
-            log.info("Successfully removed authorizations");
+            MDC.put("count", String.valueOf(count));
+            log.debug("Successfully removed authorizations");
 
             return count;
         } catch (RuntimeException e) {

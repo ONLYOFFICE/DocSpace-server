@@ -14,7 +14,6 @@ import com.onlyoffice.authorization.api.web.server.transfer.response.SecretDTO;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -30,6 +29,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,7 +45,12 @@ public class ClientMutationService implements ClientMutationUsecases {
     private final AmqpTemplate amqpClient;
     private final Cipher cipher;
 
-    @SneakyThrows
+    /**
+     *
+     * @param clientId
+     * @param tenant
+     * @return
+     */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2500)
     public SecretDTO regenerateSecret(String clientId, TenantDTO tenant) {
@@ -68,6 +75,12 @@ public class ClientMutationService implements ClientMutationUsecases {
         return SecretDTO.builder().clientSecret(secret).build();
     }
 
+    /**
+     *
+     * @param activationDTO
+     * @param clientId
+     * @return
+     */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
@@ -78,7 +91,6 @@ public class ClientMutationService implements ClientMutationUsecases {
                     activationDTO.getStatus(), ZonedDateTime.now());
             return true;
         } catch (Exception e) {
-            log.error("could not change client's activation", e.getMessage());
             throw new UnsupportedOperationException(String
                     .format("Could not change client's activation %s", e.getMessage()));
         } finally {
@@ -86,6 +98,12 @@ public class ClientMutationService implements ClientMutationUsecases {
         }
     }
 
+    /**
+     *
+     * @param clientDTO
+     * @param clientId
+     * @param tenant
+     */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public void updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
@@ -95,7 +113,7 @@ public class ClientMutationService implements ClientMutationUsecases {
 
         var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant)
                 .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find client with client id %s for %d", clientId, tenant)));
+                        .format("Could not find client with client id %s for %d", clientId, tenant)));
 
         ClientMapper.INSTANCE.update(c, clientDTO);
 
@@ -109,14 +127,25 @@ public class ClientMutationService implements ClientMutationUsecases {
                 .getResponse().getEmail());
     }
 
+    /**
+     *
+     * @param updateClientPair
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 5000)
     public Set<String> updateClients(Iterable<Pair<String, ClientMessage>> updateClientPair) {
+        log.info("Trying to update clients as a batch");
+
         var ids = StreamSupport.stream(updateClientPair.spliterator(), false)
                 .map(c -> c.getFirst())
                 .collect(Collectors.toSet());
 
         var clients = retrievalUsecases.findClientsByClientIdIn(ids);
         clients.forEach(client -> {
+            MDC.put("clientId", client.getClientId());
+            log.debug("Trying to update a client");
+            MDC.clear();
+
             var cl = StreamSupport.stream(updateClientPair.spliterator(), false)
                     .filter(c -> c.getFirst().equalsIgnoreCase(client.getClientId()))
                     .findFirst();
@@ -131,8 +160,16 @@ public class ClientMutationService implements ClientMutationUsecases {
         return ids;
     }
 
+    /**
+     *
+     * @param updateClient
+     * @param clientId
+     */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     public void updateClientAsync(UpdateClientDTO updateClient, String clientId) {
+        MDC.put("clientId", clientId);
+        log.info("Submitting a client update task", updateClient);
+
         try {
             var msg = ClientMapper.INSTANCE.fromCommandToMessage(updateClient);
             msg.setClientId(clientId);
@@ -141,7 +178,6 @@ public class ClientMutationService implements ClientMutationUsecases {
             var queue = configuration.getQueues().get("client");
             amqpClient.convertAndSend(queue.getExchange(), queue.getRouting(), msg);
         } catch (Exception e) {
-            log.error("Could not create a new client update task", e);
             throw new UnsupportedOperationException(String
                     .format("Could not create a new client update task: %s", e.getMessage()));
         } finally {

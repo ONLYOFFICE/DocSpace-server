@@ -20,12 +20,40 @@ import java.net.URI;
  */
 @FeignClient(url = "http://localhost", value = "asc", fallback = APIClientFallback.class)
 public interface APIClient {
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/@self")
     APIClientDTOWrapper<PersonDTO> getMe(URI base, @RequestHeader("Cookie") String cookie);
+
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @param email
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/email")
     APIClientDTOWrapper<PersonDTO> getProfile(URI base, @RequestHeader("Cookie") String cookie, @RequestParam("email") String email);
+
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/portal")
     APIClientDTOWrapper<TenantDTO> getTenant(URI base, @RequestHeader("Cookie") String cookie);
+
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/settings")
     APIClientDTOWrapper<SettingsDTO> getSettings(URI base, @RequestHeader("Cookie") String cookie);
 }

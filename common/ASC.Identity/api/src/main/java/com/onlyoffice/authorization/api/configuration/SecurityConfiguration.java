@@ -22,6 +22,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final CheckAuthAdminCookieFilter adminCookieFilter;
     private final CheckAuthCookieFilter cookieFilter;
+
+    /**
+     *
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @Bean
     SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) throws Exception {
         return http

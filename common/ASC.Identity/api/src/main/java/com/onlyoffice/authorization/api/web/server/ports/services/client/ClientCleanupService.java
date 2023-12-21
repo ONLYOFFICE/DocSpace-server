@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,10 @@ public class ClientCleanupService implements ClientCleanupUsecases {
 
     private final ClientPersistenceCleanupUsecases cleanupUsecases;
 
+    /**
+     *
+     * @param clientId
+     */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     public void deleteClientAsync(String clientId) {
         log.info("Trying to create a new client deletion task");
@@ -48,14 +55,19 @@ public class ClientCleanupService implements ClientCleanupUsecases {
                             .invalidated(true)
                             .build());
         } catch (RuntimeException e) {
-            log.error("Could not create a client deletion task", e);
             throw new EntityCleanupException(String
-                    .format("could not create a client deletion task: %s", e.getMessage()));
+                    .format("Could not create a client deletion task: %s", e.getMessage()));
         } finally {
             MDC.clear();
         }
     }
 
+    /**
+     *
+     * @param id
+     * @param tenant
+     * @return
+     */
     @CacheEvict(cacheNames = "clients", key = "#id")
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean deleteClient(String id, int tenant) {

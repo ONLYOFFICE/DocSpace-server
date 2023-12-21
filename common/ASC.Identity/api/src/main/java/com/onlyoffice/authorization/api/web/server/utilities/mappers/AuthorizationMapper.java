@@ -17,9 +17,24 @@ import org.mapstruct.factory.Mappers;
 public interface AuthorizationMapper {
     AuthorizationMapper INSTANCE = Mappers.getMapper(AuthorizationMapper.class);
 
+    /**
+     *
+     * @param authorization
+     * @return
+     */
     AuthorizationMessage toDTO(Authorization authorization);
 
+    /**
+     *
+     * @param scopeDTO
+     * @return
+     */
     Authorization toEntity(AuthorizationMessage scopeDTO);
 
+    /**
+     *
+     * @param entity
+     * @param dto
+     */
     void update(@MappingTarget Authorization entity, AuthorizationMessage dto);
 }

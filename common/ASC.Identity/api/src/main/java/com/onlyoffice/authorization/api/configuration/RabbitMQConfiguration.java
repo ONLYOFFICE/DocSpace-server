@@ -40,6 +40,11 @@ public class RabbitMQConfiguration {
     private final Map<String, GenericQueueConfiguration> queues = new HashMap<>();
     private int prefetch = 500;
 
+    /**
+     *
+     * @param connectionFactory
+     * @return
+     */
     @Bean
     public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
         var rabbitAdmin = new RabbitAdmin(connectionFactory);
@@ -97,9 +102,15 @@ public class RabbitMQConfiguration {
         return rabbitAdmin;
     }
 
+    /**
+     *
+     * @param mapper
+     * @return
+     */
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper mapper) {
         log.info("Building a json message converter");
+
         var messageConverter = new Jackson2JsonMessageConverter(mapper);
         var classMapper = new DefaultJackson2JavaTypeMapper();
         classMapper.setTrustedPackages("*");
@@ -112,19 +123,31 @@ public class RabbitMQConfiguration {
         return messageConverter;
     }
 
-
+    /**
+     *
+     * @param connectionFactory
+     * @param converter
+     * @return
+     */
     @Bean("rabbitListenerContainerFactory")
     public RabbitListenerContainerFactory<?> rabbitFactory(
             ConnectionFactory connectionFactory,
             MessageConverter converter
     ) {
         log.info("Building a default rabbit listener container factory");
+
         var factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter);
         return factory;
     }
 
+    /**
+     *
+     * @param rabbitConnectionFactory
+     * @param converter
+     * @return
+     */
     @Bean("prefetchRabbitListenerContainerFactory")
     public RabbitListenerContainerFactory<SimpleMessageListenerContainer> prefetchRabbitListenerContainerFactory(
             ConnectionFactory rabbitConnectionFactory,
@@ -133,6 +156,7 @@ public class RabbitMQConfiguration {
         MDC.put("prefetch", String.valueOf(prefetch));
         log.info("Building a prefetch rabbit listener container factory with manual ack", prefetch);
         MDC.clear();
+
         var factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(rabbitConnectionFactory);
         factory.setMessageConverter(converter);
@@ -141,11 +165,18 @@ public class RabbitMQConfiguration {
         return factory;
     }
 
+    /**
+     *
+     * @param connectionFactory
+     * @param converter
+     * @return
+     */
     public AmqpTemplate rabbitTemplate(
             ConnectionFactory connectionFactory,
             MessageConverter converter
     ) {
         log.info("Building an amqp template");
+
         var rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter);
         return rabbitTemplate;

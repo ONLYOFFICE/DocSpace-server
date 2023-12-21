@@ -26,6 +26,13 @@ public class SocketNotificationListener {
     private final String CLIENT_CHANGED_EVENT = "client_changed";
 
     private final SocketIOServer server;
+
+    /**
+     *
+     * @param message
+     * @param channel
+     * @param tag
+     */
     @RabbitHandler
     public void receiveConfirmation(
             @Payload SocketNotification message,

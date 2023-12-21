@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,11 +30,14 @@ final class CreateClientCommandHandler extends ScheduledMessagingCommandHandler<
         return ClientMessage.ClientCommandCode.CREATE_CLIENT.name();
     }
 
+    /**
+     *
+     */
     @Scheduled(fixedDelay = 1000)
     private void persistMessages() {
         if (messages.size() > 0) {
-            MDC.put("number of messages", String.valueOf(messages.size()));
-            log.info("Persisting client messages");
+            MDC.put("messagesCount", String.valueOf(messages.size()));
+            log.debug("Persisting client messages");
             MDC.clear();
 
             var ids = creationUsecases.saveClients(messages.stream()

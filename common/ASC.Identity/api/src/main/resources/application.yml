@@ -7,8 +7,6 @@ server:
   port: ${SERVER_PORT:9090}
   error:
     include-message: always
-    include-binding-errors: always
-    include-stacktrace: always
     include-exception: false
     whitelabel:
       enabled: false
@@ -53,10 +51,6 @@ application:
       name: openid
       group: openid
       type: openid
-
-springdoc:
-  api-docs:
-    path: /api/2.0/oauth/info
 
 spring:
   lifecycle:
@@ -144,8 +138,6 @@ spring:
     sql-migration-separator: __
     sql-migration-suffixes: .sql
     locations: classpath:migration/mysql
-  application:
-    name: ASC.Identity.Authorization.API
   profiles:
     active: ${PROFILE:dev}
   jpa:
@@ -258,6 +250,9 @@ management:
       post:
         enabled: true
 
+springdoc:
+  api-docs:
+    path: /api/2.0/oauth/info
 ---
 spring:
   config:
@@ -269,6 +264,8 @@ spring:
 logging:
   level:
     root: INFO
+    com:
+      onlyoffice: DEBUG
     org:
       hibernate:
         stat: DEBUG

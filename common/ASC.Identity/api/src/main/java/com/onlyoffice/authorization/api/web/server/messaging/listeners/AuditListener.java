@@ -4,6 +4,9 @@ import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessa
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+/**
+ *
+ */
 @Component
 @RabbitListener(
         queues = "${spring.cloud.messaging.rabbitmq.queues.audit.queue}",

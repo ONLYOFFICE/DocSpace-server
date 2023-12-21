@@ -6,6 +6,9 @@ import lombok.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+/**
+ *
+ */
 @Builder
 @Getter
 @Setter

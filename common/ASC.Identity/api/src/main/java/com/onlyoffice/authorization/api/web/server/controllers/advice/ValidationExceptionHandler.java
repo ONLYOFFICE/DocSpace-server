@@ -8,9 +8,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ *
+ */
 @ControllerAdvice
 @Slf4j
 public class ValidationExceptionHandler {
+    /**
+     *
+     * @param e
+     * @return
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDTO> handleValidationException(MethodArgumentNotValidException e) {
         log.error(e.getMessage());

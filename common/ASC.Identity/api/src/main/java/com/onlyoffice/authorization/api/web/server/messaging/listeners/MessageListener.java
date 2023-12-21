@@ -10,9 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 
+/**
+ *
+ * @param <P>
+ */
 public abstract class MessageListener<P extends Message> {
     @Autowired
     private MessagingCommandHandlerRegistry registry;
+
+    /**
+     *
+     * @param message
+     * @param channel
+     * @param tag
+     */
     @RabbitHandler
     public void receiveMessage(
             @Payload P message,

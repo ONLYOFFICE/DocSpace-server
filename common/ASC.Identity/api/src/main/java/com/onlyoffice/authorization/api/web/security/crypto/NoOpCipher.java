@@ -15,17 +15,29 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class NoOpCipher implements Cipher {
+    /**
+     *
+     * @param plainMessage
+     * @return
+     */
     public String encrypt(String plainMessage) {
-        MDC.put("plain_message", plainMessage);
-        log.info("Trying to encrypt plain message");
+        MDC.put("plainMessage", plainMessage);
+        log.debug("Trying to encrypt plain message");
         MDC.clear();
+
         return plainMessage;
     }
 
+    /**
+     *
+     * @param cipherMessage
+     * @return
+     */
     public String decrypt(String cipherMessage) {
-        MDC.put("cipher_message", cipherMessage);
-        log.info("Trying to decrypt cipher message");
+        MDC.put("cipherMessage", cipherMessage);
+        log.debug("Trying to decrypt cipher message");
         MDC.clear();
+
         return cipherMessage;
     }
 }

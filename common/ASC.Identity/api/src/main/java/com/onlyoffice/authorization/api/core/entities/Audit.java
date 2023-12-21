@@ -5,6 +5,9 @@ import lombok.Builder;
 
 import java.time.ZonedDateTime;
 
+/**
+ *
+ */
 @Entity
 @Builder
 @Table(name = "audit_events")

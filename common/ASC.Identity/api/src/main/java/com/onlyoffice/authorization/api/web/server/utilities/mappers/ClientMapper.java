@@ -24,15 +24,30 @@ import java.util.stream.Collectors;
 public interface ClientMapper {
     ClientMapper INSTANCE = Mappers.getMapper(ClientMapper.class);
 
+    /**
+     *
+     * @param value
+     * @return
+     */
     default Set<String> map(String value) {
         return Arrays.stream(Strings.split(value, ',')).collect(Collectors.toSet());
     }
 
+    /**
+     *
+     * @param value
+     * @return
+     */
     default String map(Set<String> value) {
         if (value == null) return null;
         return String.join(",", value);
     }
 
+    /**
+     *
+     * @param message
+     * @return
+     */
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
@@ -56,7 +71,19 @@ public interface ClientMapper {
             )
     })
     Client fromMessageToEntity(ClientMessage message);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     ClientInfoDTO fromClientToInfoDTO(ClientDTO client);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     @Mappings({
             @Mapping(
                     source = "authenticationMethods",
@@ -64,23 +91,59 @@ public interface ClientMapper {
             )
     })
     ClientMessage fromQueryToMessage(ClientDTO client);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     ClientDTO fromCommandToQuery(CreateClientDTO client);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     ClientMessage fromCommandToMessage(UpdateClientDTO client);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     @Mappings({
             @Mapping(source = "enabled", target = "enabled"),
             @Mapping(source = "authenticationMethod", target = "authenticationMethods")
     })
     ClientDTO fromEntityToQuery(Client client);
+
+    /**
+     *
+     * @param client
+     * @return
+     */
     @Mappings({
             @Mapping(source = "enabled", target = "enabled"),
     })
     Client fromQueryToEntity(ClientDTO client);
+
+    /**
+     *
+     * @param entity
+     * @param clientDTO
+     */
     @Mappings({
             @Mapping(target = "enabled", ignore = true),
             @Mapping(target = "invalidated", ignore = true),
             @Mapping(target = "tenant", ignore = true)
     })
     void update(@MappingTarget Client entity, UpdateClientDTO clientDTO);
+
+    /**
+     *
+     * @param entity
+     * @param secondEntity
+     */
     @Mappings({
             @Mapping(target = "enabled", ignore = true),
             @Mapping(target = "invalidated", ignore = true),

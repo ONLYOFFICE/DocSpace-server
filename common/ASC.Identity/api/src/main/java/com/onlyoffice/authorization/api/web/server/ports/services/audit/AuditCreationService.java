@@ -13,19 +13,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuditCreationService implements AuditCreationUsecases {
     private final AuditPersistenceCreationUsecases auditUsecases;
-    @Transactional(timeout = 5000)
+
+    /**
+     *
+     * @param audits
+     * @return
+     */
+    @Transactional(timeout = 3000)
     public Set<String> saveAudits(Iterable<AuditMessage> audits) {
+        log.info("Saving audits as a batch");
+
         var ids = new HashSet<String>();
         for (AuditMessage audit : audits) {
             try {
                 MDC.put("auditUserId", audit.getUserId());
                 MDC.put("auditIp", audit.getIp());
-                log.info("Saving an audit");
+                log.debug("Saving an audit");
 
                 auditUsecases.saveAudit(AuditMapper.INSTANCE.toEntity(audit));
             } catch (Exception e) {

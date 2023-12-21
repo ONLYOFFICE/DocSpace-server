@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,11 +25,14 @@ final class LogAuditCommandHandler extends ScheduledMessagingCommandHandler<Audi
         return AuditMessage.AuditCommandCode.LOG_AUDIT.name();
     }
 
+    /**
+     *
+     */
     @Scheduled(fixedDelay = 1000)
     private void persistMessages() {
         if (messages.size() > 0) {
-            MDC.put("number of messages", String.valueOf(messages.size()));
-            log.info("Persisting audit messages");
+            MDC.put("messagesCount", String.valueOf(messages.size()));
+            log.debug("Persisting audit messages");
             MDC.clear();
 
             var ids = auditUsecases.saveAudits(messages

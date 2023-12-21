@@ -16,9 +16,41 @@ import java.util.Set;
  *
  */
 public interface ClientMutationUsecases {
+    /**
+     *
+     * @param clientId
+     * @param tenant
+     * @return
+     */
     SecretDTO regenerateSecret(String clientId, TenantDTO tenant);
+
+    /**
+     *
+     * @param activationDTO
+     * @param clientId
+     * @return
+     */
     boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId);
+
+    /**
+     *
+     * @param clientDTO
+     * @param clientId
+     * @param tenant
+     */
     void updateClient(UpdateClientDTO clientDTO, String clientId, int tenant);
+
+    /**
+     *
+     * @param updateClientPair
+     * @return
+     */
     Set<String> updateClients(Iterable<Pair<String, ClientMessage>> updateClientPair);
+
+    /**
+     *
+     * @param updateClient
+     * @param clientId
+     */
     void updateClientAsync(UpdateClientDTO updateClient, String clientId);
 }

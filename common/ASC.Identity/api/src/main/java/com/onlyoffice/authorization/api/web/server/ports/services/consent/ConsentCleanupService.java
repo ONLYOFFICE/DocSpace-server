@@ -17,6 +17,9 @@ import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,10 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
 
     private final ConsentPersistenceCleanupUsecases cleanupUsecases;
 
+    /**
+     *
+     * @param consentMessage
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 1500)
     public void deleteConsent(ConsentMessage consentMessage) {
         MDC.put("principalName", consentMessage.getPrincipalName());
@@ -38,6 +45,10 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
                 consentMessage.getPrincipalName()));
     }
 
+    /**
+     *
+     * @param consents
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 2500)
     public void deleteConsents(Iterable<ConsentMessage> consents) {
         log.info("Trying to delete all consents");
@@ -47,7 +58,17 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     *
+     * @param clientId
+     * @param principalName
+     */
     public void asyncRevokeConsent(String clientId, String principalName) {
+        MDC.put("clientId", clientId);
+        MDC.put("principalName", principalName);
+        log.info("Submitting a consent revocation task");
+        MDC.clear();
+
         var queue = configuration.getQueues().get("consent");
         amqpTemplate.convertAndSend(
                 queue.getExchange(),

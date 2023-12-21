@@ -17,7 +17,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SocketCommandLineRunner implements CommandLineRunner {
     private final SocketIOServer server;
-    @Override
+
+    /**
+     *
+     * @param args
+     * @throws Exception
+     */
     public void run(String... args) throws Exception {
         server.start();
     }

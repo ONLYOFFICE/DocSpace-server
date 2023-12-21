@@ -4,6 +4,9 @@ import lombok.Getter;
 
 import java.util.stream.Stream;
 
+/**
+ *
+ */
 @Getter
 public enum Action {
     CREATE_CLIENT(9901),

@@ -15,7 +15,17 @@ import org.springframework.data.repository.CrudRepository;
 public interface ConsentRepository extends CrudRepository<Consent, Consent.ConsentId>,
         ConsentPersistenceCreationUsecases, ConsentPersistenceRetrieveUsecases,
         ConsentPersistenceCleanupUsecases {
+    /**
+     *
+     * @param id
+     */
     void deleteById(Consent.ConsentId id);
+
+    /**
+     *
+     * @param entity
+     * @return
+     */
     default Consent saveConsent(Consent entity) {
         return this.save(entity);
     }

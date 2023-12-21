@@ -1,5 +1,8 @@
 package com.onlyoffice.authorization.api.core.exceptions;
 
+/**
+ *
+ */
 public class EntityCleanupException extends RuntimeException {
     public EntityCleanupException() {
     }

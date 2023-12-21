@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,7 +27,14 @@ public class CheckAscCookieCommonProcessor {
 
     private final APIClient apiClient;
 
+    /**
+     *
+     * @param request
+     * @throws BadCredentialsException
+     */
     public void processAscCookies(HttpServletRequest request) throws BadCredentialsException {
+        log.debug("Trying to authenticate an incoming request", request);
+
         var cookies = request.getCookies();
         if (cookies == null || cookies.length < 1)
             throw new BadCredentialsException("Could not find any authentication cookie");

@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,11 +25,14 @@ final class CreateAuthorizationCommandHandler extends ScheduledMessagingCommandH
         return AuthorizationMessage.AuthorizationCommandCode.CREATE_AUTHORIZATION.name();
     }
 
+    /**
+     *
+     */
     @Scheduled(fixedDelay = 1000)
     private void persistMessages() {
         if (messages.size() > 0) {
-            MDC.put("number of messages", String.valueOf(messages.size()));
-            log.info("Persisting authorization messages");
+            MDC.put("messagesCount", String.valueOf(messages.size()));
+            log.debug("Persisting authorization messages");
             MDC.clear();
 
             var ids = creationUsecases.saveAuthorizations(messages

@@ -7,10 +7,12 @@ import com.onlyoffice.authorization.api.web.security.context.TenantContextContai
 import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessage;
 import com.onlyoffice.authorization.api.web.server.utilities.HttpUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -18,6 +20,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.ZonedDateTime;
 
+/**
+ *
+ */
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -25,6 +31,10 @@ public class AuditActionAspect {
     private final RabbitMQConfiguration configuration;
     private final AmqpTemplate amqpClient;
 
+    /**
+     *
+     * @param joinPoint
+     */
     @AfterReturning("@annotation(com.onlyoffice.authorization.api.extensions.annotations.AuditAction)")
     public void afterReturningAdvice(JoinPoint joinPoint) {
         var signature = (MethodSignature) joinPoint.getSignature();
@@ -36,18 +46,22 @@ public class AuditActionAspect {
         var person = PersonContextContainer.context.get().getResponse();
 
         var queue = configuration.getQueues().get("audit");
+        var msg = AuditMessage.builder()
+                .ip(HttpUtils.getRequestIP(request))
+                .browser(HttpUtils.getClientBrowser(request))
+                .platform(HttpUtils.getClientOS(request))
+                .date(ZonedDateTime.now())
+                .tenantId(tenant.getTenantId())
+                .userId(person.getId())
+                .page(HttpUtils.getFullURL(request))
+                .actionEnum(annotation.action())
+                .build();
+
+        log.debug("Sending an audit message", msg);
+
         amqpClient.convertAndSend(
                 queue.getExchange(),
                 queue.getRouting(),
-                AuditMessage.builder()
-                        .ip(HttpUtils.getRequestIP(request))
-                        .browser(HttpUtils.getClientBrowser(request))
-                        .platform(HttpUtils.getClientOS(request))
-                        .date(ZonedDateTime.now())
-                        .tenantId(tenant.getTenantId())
-                        .userId(person.getId())
-                        .page(HttpUtils.getFullURL(request))
-                        .actionEnum(annotation.action())
-                        .build());
+                msg);
     }
 }

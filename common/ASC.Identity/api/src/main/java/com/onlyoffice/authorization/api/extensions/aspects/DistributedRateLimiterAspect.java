@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+/**
+ *
+ */
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -21,6 +24,13 @@ public class DistributedRateLimiterAspect {
     private final String X_RATE_RESET = "X-Ratelimit-Reset";
 
     private final RedissonClient redissonClient;
+
+    /**
+     *
+     * @param joinPoint
+     * @return
+     * @throws Throwable
+     */
     @Around("@annotation(com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter)")
     public Object rateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         var signature = (MethodSignature) joinPoint.getSignature();

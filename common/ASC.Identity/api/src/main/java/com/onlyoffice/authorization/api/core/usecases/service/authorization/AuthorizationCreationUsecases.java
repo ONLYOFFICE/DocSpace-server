@@ -11,6 +11,16 @@ import java.util.List;
  *
  */
 public interface AuthorizationCreationUsecases {
+    /**
+     *
+     * @param authorizationMessage
+     */
     void saveAuthorization(AuthorizationMessage authorizationMessage);
+
+    /**
+     *
+     * @param authorizations
+     * @return
+     */
     List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations);
 }

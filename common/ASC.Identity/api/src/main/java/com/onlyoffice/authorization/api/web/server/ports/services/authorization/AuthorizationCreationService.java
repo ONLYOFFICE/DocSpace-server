@@ -25,10 +25,14 @@ import java.util.List;
 public class AuthorizationCreationService implements AuthorizationCreationUsecases {
     private final AuthorizationPersistenceCreationUsecases creationUsecases;
 
+    /**
+     *
+     * @param authorizationMessage
+     */
     @Transactional(rollbackFor = Exception.class, timeout = 1250)
     public void saveAuthorization(AuthorizationMessage authorizationMessage) {
         MDC.put("authorizationId", authorizationMessage.getId());
-        log.info("Saving an authorization");
+        log.info("Persisting an authorization");
         MDC.clear();
 
         creationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE
@@ -42,13 +46,13 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      */
     @Transactional(timeout = 5000)
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.info("Saving authorizations");
+        log.info("Persisting authorizations as a batch");
 
         var ids = new ArrayList<String>();
         for (AuthorizationMessage authorization : authorizations) {
             try {
                 MDC.put("authorizationId", authorization.getId());
-                log.info("Saving an authorization");
+                log.debug("Saving an authorization");
 
                 creationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorization));
             } catch (Exception e) {

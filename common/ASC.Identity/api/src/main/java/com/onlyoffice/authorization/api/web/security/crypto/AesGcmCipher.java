@@ -48,21 +48,34 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
 
     private final ApplicationConfiguration configuration;
 
+    /**
+     *
+     * @param length
+     * @return
+     */
     private byte[] getRandomNonce(int length) {
         var nonce = new byte[length];
         new SecureRandom().nextBytes(nonce);
 
         MDC.put("nonce", Arrays.toString(nonce));
-        log.debug("RANDOM NONCE");
+        log.debug("Generating random nonce");
         MDC.clear();
 
         return nonce;
     }
 
+    /**
+     *
+     * @param password
+     * @param salt
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
     private SecretKey getSecretKey(String password, byte[] salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
         MDC.put("password", password);
-        log.debug("SECRET PASSWORD");
+        log.debug("Generating secret key");
         MDC.clear();
 
         var spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
@@ -70,17 +83,39 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
         return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), ALGORITHM_TYPE);
     }
 
+    /**
+     *
+     * @param mode
+     * @param secretKey
+     * @param iv
+     * @return
+     * @throws InvalidKeyException
+     * @throws InvalidAlgorithmParameterException
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     */
     private Cipher initCipher(int mode, SecretKey secretKey, byte[] iv)
             throws InvalidKeyException, InvalidAlgorithmParameterException,
             NoSuchPaddingException, NoSuchAlgorithmException {
+        MDC.put("algorithm", ALGORITHM);
+        MDC.put("tag", String.valueOf(TAG_LENGTH_BIT));
+        log.debug("Initializing a new cipher");
+        MDC.clear();
+
         var cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(mode, secretKey, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
         return cipher;
     }
 
+    /**
+     *
+     * @param plainMessage
+     * @return
+     * @throws Exception
+     */
     public String encrypt(String plainMessage) throws Exception {
-        MDC.put("plain_message", plainMessage);
-        log.info("Trying to encrypt plain message");
+        MDC.put("plainMessage", plainMessage);
+        log.debug("Trying to encrypt plain message");
         MDC.clear();
 
         var salt = getRandomNonce(SALT_LENGTH_BYTE);
@@ -96,17 +131,23 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
 
         var encrypted = Base64.getEncoder().encodeToString(cipherByte);
 
-        MDC.put("plain_message", plainMessage);
-        MDC.put("encrypted_message", encrypted);
-        log.info("Managed to encrypt plain text message");
+        MDC.put("plainMessage", plainMessage);
+        MDC.put("encryptedMessage", encrypted);
+        log.debug("Managed to encrypt plain text message");
         MDC.clear();
 
         return encrypted;
     }
 
+    /**
+     *
+     * @param cipherMessage
+     * @return
+     * @throws Exception
+     */
     public String decrypt(String cipherMessage) throws Exception {
-        MDC.put("cipher_message", cipherMessage);
-        log.info("Trying to decrypt cipher message");
+        MDC.put("cipherMessage", cipherMessage);
+        log.debug("Trying to decrypt cipher message");
         MDC.clear();
 
         var decodedCipherByte = Base64.getDecoder().decode(cipherMessage.getBytes(UTF_8));
@@ -128,9 +169,9 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.web.securi
 
         var decrypted = new String(decryptedMessageByte, UTF_8);
 
-        MDC.put("cipher_message", cipherMessage);
-        MDC.put("decrypted_message", decrypted);
-        log.info("Managed to decrypt cipher text");
+        MDC.put("cipherMessage", cipherMessage);
+        MDC.put("decryptedMessage", decrypted);
+        log.debug("Decrypted cipher message");
         MDC.clear();
 
         return decrypted;

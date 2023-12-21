@@ -18,6 +18,12 @@ import java.util.concurrent.TimeoutException;
 @ControllerAdvice
 @Slf4j
 public class TimeLimiterExceptionHandler {
+    /**
+     *
+     * @param ex
+     * @param request
+     * @return
+     */
     @ExceptionHandler(TimeoutException.class)
     public ResponseEntity handleTimeoutException(TimeoutException ex, HttpServletRequest request) {
         log.error(ex.getMessage());

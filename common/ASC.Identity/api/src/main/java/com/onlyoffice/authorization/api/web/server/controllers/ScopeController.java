@@ -36,6 +36,9 @@ public class ScopeController {
     private final ApplicationConfiguration configuration;
     private Set<ScopeDTO> scopes;
 
+    /**
+     *
+     */
     @PostConstruct
     public void init() {
         scopes = configuration.getScopes()
@@ -58,36 +61,50 @@ public class ScopeController {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping
     @Retry(name = "getScopesRetryRateLimiter")
     @DistributedRateLimiter(name = "identityFetchScope")
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
-        var context = TenantContextContainer.context.get();
-        if (context == null)
+        var tenant = TenantContextContainer.context.get();
+        if (tenant == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+
+        MDC.put("tenantId", String.valueOf(tenant.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenant.getResponse().getTenantAlias());
         log.info("Received a request to list scopes");
         MDC.clear();
+
         return ResponseEntity.ok(this.scopes);
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @GetMapping("/{name}")
     @Retry(name = "getScopesRetryRateLimiter")
     @DistributedRateLimiter(name = "identityFetchScope")
     public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
-        var context = TenantContextContainer.context.get();
-        if (context == null)
+        var tenant = TenantContextContainer.context.get();
+        if (tenant == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         MDC.put("scope", name);
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("tenantId", String.valueOf(tenant.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenant.getResponse().getTenantAlias());
         log.info("Received get a specific scope");
         MDC.clear();
+
         var scope = scopes.stream()
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("could not find scope with this name"));
+                .orElseThrow(() -> new EntityNotFoundException("Could not find scope with this name"));
+
         return ResponseEntity.ok(scope);
     }
 }

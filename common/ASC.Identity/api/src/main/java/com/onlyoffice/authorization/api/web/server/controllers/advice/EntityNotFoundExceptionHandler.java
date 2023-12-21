@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class EntityNotFoundExceptionHandler {
+    /**
+     *
+     * @param ex
+     * @param request
+     * @return
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorDTO> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
         log.error(ex.getMessage());

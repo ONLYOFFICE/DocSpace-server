@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
@@ -27,9 +28,19 @@ import java.util.regex.Pattern;
 public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     private final CheckAscCookieCommonProcessor ascCookieCommonProcessor;
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param chain
+     * @throws ServletException
+     * @throws IOException
+     */
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-        log.debug("Validating admin user");
+        MDC.put("requestURI", request.getRequestURI());
+        log.debug("Validating admin user", request);
+        MDC.clear();
         try {
             ascCookieCommonProcessor.processAscCookies(request);
             if (!PersonContextContainer.context.get().getResponse().getIsAdmin()) {
@@ -43,7 +54,12 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
         }
     }
 
-    @Override
+    /**
+     *
+     * @param request current HTTP request
+     * @return
+     * @throws ServletException
+     */
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
         var path = request.getRequestURI();

@@ -19,7 +19,21 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Constraint(validatedBy = URLCollectionValidator.class)
 public @interface URLCollection {
+    /**
+     *
+     * @return
+     */
     String message() default "url collection has invalid entries";
+
+    /**
+     *
+     * @return
+     */
     Class<?>[] groups() default {};
+
+    /**
+     *
+     * @return
+     */
     Class<? extends Payload>[] payload() default {};
 }

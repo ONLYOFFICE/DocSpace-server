@@ -10,9 +10,18 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 public class APIClientFallback implements APIClient {
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     public APIClientDTOWrapper<PersonDTO> getMe(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());
@@ -21,6 +30,13 @@ public class APIClientFallback implements APIClient {
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @param email
+     * @return
+     */
     public APIClientDTOWrapper<PersonDTO> getProfile(URI base, String cookie, String email) {
         MDC.put("URL", base.toString());
         MDC.put("Email", email);
@@ -30,6 +46,12 @@ public class APIClientFallback implements APIClient {
         return APIClientDTOWrapper.<PersonDTO>builder().build();
     }
 
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     public APIClientDTOWrapper<TenantDTO> getTenant(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());
@@ -38,6 +60,12 @@ public class APIClientFallback implements APIClient {
         return APIClientDTOWrapper.<TenantDTO>builder().build();
     }
 
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     public APIClientDTOWrapper<SettingsDTO> getSettings(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());

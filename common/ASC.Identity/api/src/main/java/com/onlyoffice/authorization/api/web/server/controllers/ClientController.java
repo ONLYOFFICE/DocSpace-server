@@ -45,7 +45,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -82,6 +81,9 @@ public class ClientController {
 
     private List<String> allowedScopes = new ArrayList<>();
 
+    /**
+     *
+     */
     @PostConstruct
     public void init() {
         allowedScopes = applicationConfiguration.getScopes().stream()
@@ -89,6 +91,9 @@ public class ClientController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *
+     */
     private void setLoggerContextAttributes() {
         var tenant = TenantContextContainer.context.get().getResponse();
         var person = PersonContextContainer.context.get().getResponse();
@@ -99,6 +104,16 @@ public class ClientController {
         MDC.put("personName", person.getUserName());
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param ascAuth
+     * @param address
+     * @param page
+     * @param limit
+     * @return
+     */
     @GetMapping
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
@@ -121,12 +136,10 @@ public class ClientController {
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Received a new get clients request for tenant with page and limit");
+        MDC.clear();
 
         PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant
                 .getTenantId(), page, limit);
-
-        log.debug("Got clients");
-        MDC.clear();
 
         var tasks = new HashSet<Pair<ClientDTO, CompletableFuture<APIClientDTOWrapper<PersonDTO>>>>();
         pagination.getData().forEach(c -> {
@@ -144,9 +157,17 @@ public class ClientController {
 
         tasks.forEach(task -> {
             var client = task.getFirst();
+
+            MDC.put("client", client.getClientId());
+            MDC.put("zone", zone.toString());
+            log.debug("Setting date according to the tenant timezone");
+            MDC.clear();
+
             client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
             client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
             try {
+                MDC.put("clientId", client.getClientId());
+                log.debug("Updating creator avatar");
                 var result = task.getSecond().get();
                 if (result != null && result.getResponse() != null) {
                     var profile = result.getResponse();
@@ -154,6 +175,7 @@ public class ClientController {
                     client.setCreatorDisplayName(String
                             .format("%s %s", profile.getFirstName(), profile.getLastName()).trim());
                 }
+                MDC.clear();
             } catch (ExecutionException | InterruptedException e) {
                 MDC.put("profile", client.getModifiedBy());
                 log.error("Could not get user's profile");
@@ -195,15 +217,30 @@ public class ClientController {
         return ResponseEntity.ok(pagination);
     }
 
+    /**
+     *
+     * @param clientId
+     * @return
+     */
     @GetMapping("/{clientId}/info")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
+        MDC.put("clientId", clientId);
+        log.info("Received a new get client info request");
+        MDC.clear();
+
         return ResponseEntity.ok(ClientMapper.INSTANCE
                 .fromClientToInfoDTO(retrieveUsecases.getClient(clientId)));
     }
 
+    /**
+     *
+     * @param request
+     * @param clientId
+     * @return
+     */
     @DeleteMapping("/{clientId}/revoke")
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
@@ -224,6 +261,10 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping("/consents")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
@@ -233,21 +274,28 @@ public class ClientController {
                 .getResponse().getTimezone());
 
         setLoggerContextAttributes();
+        MDC.put("zone", zone.toString());
         log.info("Received a new get clients info");
-        log.debug("Trying to retrieve all clients by principal name");
 
         var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
                 .context.get().getResponse().getEmail());
 
         result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
 
-        MDC.put("number of clients", String.valueOf(result.size()));
-        log.debug("Found clients");
+        MDC.put("clients", String.valueOf(result.size()));
+        log.debug("Successfully retrieved client consents");
         MDC.clear();
 
         return ResponseEntity.ok(result);
     }
 
+    /**
+     *
+     * @param response
+     * @param address
+     * @param clientId
+     * @return
+     */
     @GetMapping("/{clientId}")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
@@ -261,8 +309,9 @@ public class ClientController {
                 .getResponse().getTimezone());
 
         setLoggerContextAttributes();
+        MDC.put("clientId", clientId);
+        MDC.put("zone", zone.toString());
         log.info("Received a new get client request for tenant");
-        log.debug("Trying to retrieve client");
         MDC.clear();
 
         var client = retrieveUsecases.getClient(clientId);
@@ -291,11 +340,19 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
 
-        log.debug("Found client", client);
+        log.debug("Successfully found a client", client);
 
         return ResponseEntity.ok(client);
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param address
+     * @param body
+     * @return
+     */
     @PostMapping
     @AuditAction(action = Action.CREATE_CLIENT)
     @Retry(name = "batchClientRetryRateLimiter")
@@ -312,12 +369,12 @@ public class ClientController {
 
         if (!body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
-            log.error("could not create a new client with the scopes specified");
+            log.error("Could not create a new client with unsupported scopes");
             MDC.clear();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        log.debug("Generating a new client's credentials");
+        log.debug("Submitting create new client message");
 
         var client = creationUsecases.createClientAsync(body, TenantContextContainer
                 .context.get().getResponse(), PersonContextContainer.context.
@@ -346,12 +403,21 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
 
-        log.debug("Successfully submitted a new client broker message", client);
+        log.debug("Successfully submitted create new client message and generated a new client", client);
         MDC.clear();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(client);
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param address
+     * @param clientId
+     * @param body
+     * @return
+     */
     @PutMapping("/{clientId}")
     @AuditAction(action = Action.UPDATE_CLIENT)
     @Retry(name = "updateClientRetryRateLimiter")
@@ -365,17 +431,26 @@ public class ClientController {
             @RequestBody @Valid UpdateClientDTO body
     ) {
         setLoggerContextAttributes();
+        MDC.put("clientId", clientId);
         log.info("Received a new update client request");
-        log.debug("Trying to update client with body", body);
+        log.debug("Submitting update client message", body);
 
         mutationUsecases.updateClientAsync(body, clientId);
 
-        log.debug("Client has been updated");
+        log.debug("Successfully submitted update client message");
         MDC.clear();
 
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param address
+     * @param clientId
+     * @return
+     */
     @PatchMapping("/{clientId}/regenerate")
     @AuditAction(action = Action.REGENERATE_SECRET)
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
@@ -390,9 +465,8 @@ public class ClientController {
         var tenant = TenantContextContainer.context.get().getResponse();
 
         setLoggerContextAttributes();
+        MDC.put("clientId", clientId);
         log.info("Received a new regenerate client's secret request");
-        log.debug("Trying to regenerate client's secret");
-        MDC.clear();
 
         try {
             var regenerate = CompletableFuture.supplyAsync(() -> authorizationCleanupUsecases
@@ -422,15 +496,25 @@ public class ClientController {
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
 
-            log.debug("Regeneration result", regenerate);
+            log.debug("Secret regeneration result", regenerate);
 
             return ResponseEntity.ok(regenerate);
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            log.error("Could not regenerate client's secret");
             return ResponseEntity.internalServerError().build();
+        } finally {
+            MDC.clear();
         }
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param address
+     * @param clientId
+     * @return
+     */
     @DeleteMapping("/{clientId}")
     @AuditAction(action = Action.DELETE_CLIENT)
     @Retry(name = "batchClientRetryRateLimiter")
@@ -443,6 +527,7 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         setLoggerContextAttributes();
+        MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
 
@@ -451,6 +536,15 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param address
+     * @param clientId
+     * @param body
+     * @return
+     */
     @PatchMapping("/{clientId}/activation")
     @AuditAction(action = Action.CHANGE_CLIENT_ACTIVATION)
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
@@ -464,6 +558,7 @@ public class ClientController {
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
         setLoggerContextAttributes();
+        MDC.put("clientId", clientId);
         log.info("Received a new change client activation request for tenant");
         MDC.clear();
 

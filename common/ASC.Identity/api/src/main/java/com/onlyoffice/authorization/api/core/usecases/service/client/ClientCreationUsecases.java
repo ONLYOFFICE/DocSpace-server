@@ -15,8 +15,28 @@ import java.util.List;
  *
  */
 public interface ClientCreationUsecases {
+    /**
+     *
+     * @param message
+     * @return
+     */
     ClientDTO saveClient(ClientMessage message);
+
+    /**
+     *
+     * @param messages
+     * @return
+     */
     List<String> saveClients(Iterable<ClientMessage> messages);
+
+    /**
+     *
+     * @param clientDTO
+     * @param tenant
+     * @param person
+     * @param tenantUrl
+     * @return
+     */
     ClientDTO createClientAsync(CreateClientDTO clientDTO, TenantDTO tenant,
                                 PersonDTO person, String tenantUrl);
 }

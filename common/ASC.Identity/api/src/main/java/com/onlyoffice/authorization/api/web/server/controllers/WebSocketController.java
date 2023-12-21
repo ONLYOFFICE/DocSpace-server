@@ -23,6 +23,10 @@ public class WebSocketController {
         server.addDisconnectListener(onDisconnected());
     }
 
+    /**
+     *
+     * @return
+     */
     private ConnectListener onConnected() {
         return (client) -> {
             var tenant = client.getHandshakeData().getSingleUrlParam("tenant");
@@ -31,13 +35,17 @@ public class WebSocketController {
                 return;
             }
             client.joinRoom(tenant);
-            log.info("client[{}] - Connected to socket", client.getSessionId().toString());
+            log.info("Client[{}] - Connected to socket", client.getSessionId().toString());
         };
     }
 
+    /**
+     *
+     * @return
+     */
     private DisconnectListener onDisconnected() {
         return client -> {
-            log.info("client[{}] - Disconnected from socket", client.getSessionId().toString());
+            log.info("Client[{}] - Disconnected from socket", client.getSessionId().toString());
         };
     }
 }

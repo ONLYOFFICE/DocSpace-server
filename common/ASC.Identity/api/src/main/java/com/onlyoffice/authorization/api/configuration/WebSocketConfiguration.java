@@ -21,6 +21,10 @@ public class WebSocketConfiguration {
     private String host = "127.0.0.1";
     private Integer port = 8585;
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public SocketIOServer socketIOServer() {
         var config = new com.corundumstudio.socketio.Configuration();
