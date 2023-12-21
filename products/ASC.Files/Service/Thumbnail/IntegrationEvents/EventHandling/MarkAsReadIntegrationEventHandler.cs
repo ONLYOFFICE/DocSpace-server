@@ -67,7 +67,7 @@ public class MarkAsReadIntegrationEventHandler : IIntegrationEventHandler<MarkAs
 
             var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            await _fileStorageService.MarkAsRead(@event.FileStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, headers, @event.TaskId);
+            await _fileStorageService.MarkAsReadAsync(@event.FileStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, headers, @event.TaskId);
         }
 
     }

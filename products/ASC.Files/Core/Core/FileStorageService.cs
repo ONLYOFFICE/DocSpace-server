@@ -1524,7 +1524,7 @@ public class FileStorageService //: IFileStorageService
         return operations;
     }
 
-    public async Task<List<FileOperationResult>> MarkAsRead(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers = null, string taskId = null)
+    public async Task<List<FileOperationResult>> MarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers = null, string taskId = null)
     {
         if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
         {
@@ -1536,7 +1536,7 @@ public class FileStorageService //: IFileStorageService
         return operations;
     }
 
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMarkAsRead(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt)
+    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt)
     {
         if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
         {

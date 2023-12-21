@@ -228,7 +228,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMarkAsRead(folderStringIds, fileStringIds, folderIntIds, fileIntIds);
+        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
