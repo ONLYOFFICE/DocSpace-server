@@ -233,13 +233,17 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         await fileMarker.RemoveMarkAsNewAsync(file);
 
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var fileUtility = scope.ServiceProvider.GetService<FileUtility>();
+        var title = file.Title;
         var folderDao = daoFactory.GetFolderDao<T>();
         var watermarkEnabled = await DocSpaceHelper.WatermarkEnabledAsync((File<T>)file, folderDao);
-        if (watermarkEnabled)
+
+        var fileExt = FileUtility.GetFileExtension(title);
+        if (watermarkEnabled && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
         {
             _files[file.Id] = ".pdf";
         }
-        var title = file.Title;
+        
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
@@ -383,8 +387,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
                         newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                        }
                     }
+                }
 
                 if (0 < counter)
                 {
