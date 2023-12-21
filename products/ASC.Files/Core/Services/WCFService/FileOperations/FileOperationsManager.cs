@@ -212,20 +212,7 @@ public class FileOperationsManager(TempStream tempStream,
         return operations;
     }
 
-    public (List<FileOperationResult>, string) PublishDelete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
-    {
-        return Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: false);
-    }
-
-    public List<FileOperationResult> EnqueueDelete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, string taskId = null)
-    {
-        var (operations, _) = Delete(userId, tenant, folders, files, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true, taskId);
-        return operations;
-    }
-
-    private (List<FileOperationResult>, string) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
+    public (List<FileOperationResult>, string) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately,
         IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
         var op = new FileDeleteOperation<T>(serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));

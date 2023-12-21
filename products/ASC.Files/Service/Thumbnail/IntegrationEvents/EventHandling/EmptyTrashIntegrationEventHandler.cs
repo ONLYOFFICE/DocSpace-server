@@ -67,7 +67,7 @@ public class EmptyTrashIntegrationEventHandler : IIntegrationEventHandler<EmptyT
 
             var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            await _fileStorageService.EnqueueEmptyTrashAsync(headers, @event.TaskId);
+            await _fileStorageService.EmptyTrashAsync(headers, @event.TaskId);
         }
 
     }

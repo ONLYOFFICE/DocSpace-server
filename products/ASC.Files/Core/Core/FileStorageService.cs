@@ -2082,12 +2082,14 @@ public class FileStorageService //: IFileStorageService
 
     #region EmptyTrash
 
-    public async Task<List<FileOperationResult>> EmptyTrashAsync()
+    public async Task<List<FileOperationResult>> EmptyTrashAsync(IDictionary<string, StringValues> headers = null, string taskId = null)
     {
         var (foldersId, filesId) = await GetTrashContentAsync();
 
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true,
-            false, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), true);
+        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true,
+            false, headers ?? GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), true, enqueueTask: true, taskId);
+
+        return operations;
     }
 
     public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishEmptyTrashAsync()
@@ -2095,18 +2097,10 @@ public class FileStorageService //: IFileStorageService
         var (foldersId, filesId) = await GetTrashContentAsync();
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.PublishDelete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true,
-            false, headers, await externalShare.GetCurrentShareDataAsync(), true);
+        var (operations, taskId) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true,
+            false, headers, await externalShare.GetCurrentShareDataAsync(), true, enqueueTask: false);
 
         return (operations, taskId, headers);
-    }
-
-    public async Task<List<FileOperationResult>> EnqueueEmptyTrashAsync(IDictionary<string, StringValues> headers = null, string taskId = null)
-    {
-        var (foldersId, filesId) = await GetTrashContentAsync();
-
-        return fileOperationsManager.EnqueueDelete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true,
-            false, headers, await externalShare.GetCurrentShareDataAsync(), true, taskId);
     }
 
     private async Task<(List<int>, List<int>)> GetTrashContentAsync()
