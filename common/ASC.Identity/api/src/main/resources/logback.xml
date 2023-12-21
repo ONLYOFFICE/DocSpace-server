@@ -6,7 +6,7 @@
     <!-- ### Appenders ### -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN} %X</pattern>
+            <pattern>${CONSOLE_LOG_PATTERN} |%X</pattern>
             <charset>utf8</charset>
         </encoder>
     </appender>
