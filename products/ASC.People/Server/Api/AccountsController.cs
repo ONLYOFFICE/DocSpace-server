@@ -39,6 +39,26 @@ public class AccountsController(
     EmployeeFullDtoHelper employeeFullDtoHelper,
     WebItemManager webItemManager) : ControllerBase
 {
+    /// <summary>
+    /// Returns a list of users or groups with full information about them matching the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Search users and groups by extended filter
+    /// </short>
+    /// <category>Search</category>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
+    /// /// <param type="Sustem.Guid[], System" name="groupsIds">List of groups ids</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
+    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
+    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/accounts</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet]
     public async IAsyncEnumerable<object> GetEntriesAsync(EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
@@ -59,8 +79,8 @@ public class AccountsController(
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
         var filter = GroupBasedFilter.Create(groupsIds, employeeType, employeeTypes, isAdministrator, payments, withoutGroup, webItemManager);
 
-        var totalUsersCountTask = userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
-            apiContext.FilterValue, withoutGroup ?? false);
+        var totalUsersCountTask = userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
+            activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false);
 
         var onlyUsers = employeeStatus.HasValue || (groupsIds != null && groupsIds.Length != 0) || activationStatus.HasValue || employeeType.HasValue || 
                         (employeeTypes != null && employeeTypes.Length != 0) || isAdministrator.HasValue || payments.HasValue || accountLoginType.HasValue;
