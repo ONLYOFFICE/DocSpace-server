@@ -135,9 +135,8 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         await filesDbContext.SaveChangesAsync();
 
     }
-    public async Task RecalculateUserQuota(int TenantId, Guid userId)
+    public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await tenantManager.SetCurrentTenantAsync(tenantId);
 
         var size = await GetUserSpaceUsageAsync(userId);

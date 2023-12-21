@@ -34,6 +34,6 @@ public abstract class TenantEntityQuotaSettings
 
     public long DefaultQuota { get; set; } = -2;
 
-    public DateTime LastRecalculateDate { get; set; } = DateTime.MinValue;
+    public DateTime? LastRecalculateDate { get; set; }
 
 }
