@@ -93,32 +93,16 @@ public class FileOperationsManager(TempStream tempStream,
 
     #region MarkAsRead
 
-    public List<FileOperationResult> MarkAsRead(Guid userId, Tenant tenant, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
+    public (List<FileOperationResult>, string) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
     {
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
 
-        var (operations, _) = MarkAsRead(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, headers, externalShareData);
-
-        return operations;
+        return MarkAsRead(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, headers, externalShareData, enqueueTask, taskId);
     }
 
-    public (List<FileOperationResult>, string) PublishMarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
-    {
-        return MarkAsRead(userId, tenant, folderIdsString, fileIdsString, folderIdsInt, fileIdsInt, headers, externalShareData, enqueueTask: false);
-    }
-
-    public List<FileOperationResult> EnqueueMarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, string taskId)
-    {
-        var (operations, _) = MarkAsRead(userId, tenant, folderIdsString, fileIdsString, folderIdsInt, fileIdsInt, headers, externalShareData, enqueueTask: true, taskId);
-
-        return operations;
-    }
-
-    private (List<FileOperationResult>, string) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
+    public (List<FileOperationResult>, string) MarkAsRead(Guid userId, Tenant tenant, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
         IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
     {
         var op1 = new FileMarkAsReadOperation<int>(serviceProvider, new FileMarkAsReadOperationData<int>(folderIdsInt, fileIdsInt, tenant, headers, externalShareData));
@@ -137,29 +121,7 @@ public class FileOperationsManager(TempStream tempStream,
 
     #region Download
 
-    public List<FileOperationResult> Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
-    {
-        var (operations, _) = Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: true);
-
-        return operations;
-    }
-
-    public (List<FileOperationResult>, string) PublishDownload(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData)
-    {
-        return Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: false);
-    }
-
-    public List<FileOperationResult> EnqueueDownload(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, string taskId)
-    {
-        var (operations, _) = Download(userId, tenant, folders, files, headers, externalShareData, enqueueTask: true, taskId);
-
-        return operations;
-    }
-
-    private (List<FileOperationResult>, string) Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
+    public (List<FileOperationResult>, string) Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
         IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
     {
         var operations = _tasks.GetAllTasks()

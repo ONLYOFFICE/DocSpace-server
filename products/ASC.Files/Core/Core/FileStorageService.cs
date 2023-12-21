@@ -1519,7 +1519,21 @@ public class FileStorageService //: IFileStorageService
             return GetTasksStatuses();
         }
 
-        return fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+        var (operations, _) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+
+        return operations;
+    }
+
+    public async Task<List<FileOperationResult>> MarkAsRead(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers = null, string taskId = null)
+    {
+        if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
+        {
+            return GetTasksStatuses();
+        }
+
+        var (operations, _) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers ?? GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), enqueueTask: true, taskId);
+
+        return operations;
     }
 
     public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMarkAsRead(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt)
@@ -1531,19 +1545,9 @@ public class FileStorageService //: IFileStorageService
 
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.PublishMarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, await externalShare.GetCurrentShareDataAsync());
+        var (operations, taskId) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, await externalShare.GetCurrentShareDataAsync(), enqueueTask: false);
 
         return (operations, taskId, headers);
-    }
-
-    public async Task<List<FileOperationResult>> EnqueueMarkAsRead(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers, string taskId)
-    {
-        if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
-        {
-            return GetTasksStatuses();
-        }
-
-        return fileOperationsManager.EnqueueMarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, await externalShare.GetCurrentShareDataAsync(), taskId);
     }
 
     #endregion
@@ -1853,11 +1857,13 @@ public class FileStorageService //: IFileStorageService
 
     #region BulkDownload
 
-    public async Task<List<FileOperationResult>> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files)
+    public async Task<List<FileOperationResult>> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers = null, string taskId = null)
     {
         ErrorIf(folders.Count == 0 && files.Count == 0, FilesCommonResource.ErrorMassage_BadRequest);
 
-        return fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+        var (operations, _) = fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers ?? GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), enqueueTask: true, taskId);
+
+        return operations;
     }
 
     public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishBulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files)
@@ -1866,16 +1872,9 @@ public class FileStorageService //: IFileStorageService
 
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.PublishDownload(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers, await externalShare.GetCurrentShareDataAsync());
+        var (operations, taskId) = fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers, await externalShare.GetCurrentShareDataAsync(), enqueueTask: false);
 
         return (operations, taskId, headers);
-    }
-
-    public async Task<List<FileOperationResult>> EnqueueBulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers, string taskId)
-    {
-        ErrorIf(folders.Count == 0 && files.Count == 0, FilesCommonResource.ErrorMassage_BadRequest);
-
-        return fileOperationsManager.EnqueueDownload(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers, await externalShare.GetCurrentShareDataAsync(), taskId);
     }
 
     #endregion
