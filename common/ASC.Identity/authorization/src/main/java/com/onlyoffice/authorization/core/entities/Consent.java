@@ -14,13 +14,13 @@ import java.util.Objects;
 /**
  *
  */
-@Builder
+@Entity
 @Getter
 @Setter
-@Entity
+@Builder
 @Immutable
-@NoArgsConstructor
 @EqualsAndHashCode
+@NoArgsConstructor
 @AllArgsConstructor
 @IdClass(Consent.ConsentId.class)
 @Table(name = "identity_consents")
@@ -32,16 +32,11 @@ public class Consent {
     @Column(name = "principal_name")
     private String principalName;
     @Column(name = "scopes")
-    @Lob
     private String scopes;
     @Column(name = "modified_at")
     private ZonedDateTime modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
-    @PrePersist
-    private void prePersist() {
-        this.invalidated = false;
-    }
     @Getter
     @Setter
     @AllArgsConstructor

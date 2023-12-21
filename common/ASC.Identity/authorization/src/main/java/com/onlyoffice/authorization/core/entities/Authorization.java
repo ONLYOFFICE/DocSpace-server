@@ -14,16 +14,18 @@ import java.util.Objects;
 /**
  *
  */
-@Data
+@Getter
+@Setter
+@Entity
 @Builder
+@ToString
+@Immutable
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Immutable
-@IdClass(Authorization.AuthorizationId.class)
 @Table(name = "identity_authorizations")
+@IdClass(Authorization.AuthorizationId.class)
 public class Authorization {
-    @Column(unique = true)
+    @Column
     private String id;
     @Id
     @Column(name = "registered_client_id")
@@ -33,15 +35,13 @@ public class Authorization {
     private String principalName;
     @Column(name = "authorization_grant_type")
     private String authorizationGrantType;
-    @Column(name = "authorized_scopes", length = 1000)
+    @Column(name = "authorized_scopes")
     private String authorizedScopes;
-    @Lob
-    @Column(name = "attributes", length = 4000)
+    @Column(name = "attributes")
     private String attributes;
-    @Column(name = "state", length = 500)
+    @Column(name = "state")
     private String state;
-    @Lob
-    @Column(name = "authorization_code_value", length = 4000)
+    @Column(name = "authorization_code_value")
     private String authorizationCodeValue;
     @Column(name = "authorization_code_issued_at")
     private ZonedDateTime authorizationCodeIssuedAt;
@@ -49,38 +49,30 @@ public class Authorization {
     private ZonedDateTime authorizationCodeExpiresAt;
     @Column(name = "authorization_code_metadata")
     private String authorizationCodeMetadata;
-    @Lob
-    @Column(name = "access_token_value", length = 4000)
+    @Column(name = "access_token_value")
     private String accessTokenValue;
     @Column(name = "access_token_issued_at")
     private ZonedDateTime accessTokenIssuedAt;
     @Column(name = "access_token_expires_at")
     private ZonedDateTime accessTokenExpiresAt;
-    @Lob
-    @Column(name = "access_token_metadata", length = 2000)
+    @Column(name = "access_token_metadata")
     private String accessTokenMetadata;
     @Column(name = "access_token_type")
     private String accessTokenType;
-    @Column(name = "access_token_scopes", length = 1000)
+    @Column(name = "access_token_scopes")
     private String accessTokenScopes;
-    @Lob
-    @Column(name = "refresh_token_value", length = 4000)
+    @Column(name = "refresh_token_value")
     private String refreshTokenValue;
     @Column(name = "refresh_token_issued_at")
     private ZonedDateTime refreshTokenIssuedAt;
     @Column(name = "refresh_token_expires_at")
     private ZonedDateTime refreshTokenExpiresAt;
-    @Lob
-    @Column(name = "refresh_token_metadata", length = 2000)
+    @Column(name = "refresh_token_metadata")
     private String refreshTokenMetadata;
     @Column(name = "modified_at")
     private ZonedDateTime modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
-    @PrePersist
-    private void prePersist() {
-        this.invalidated = false;
-    }
     @Getter
     @Setter
     @AllArgsConstructor

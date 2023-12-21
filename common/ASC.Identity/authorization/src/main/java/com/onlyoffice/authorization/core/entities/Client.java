@@ -7,10 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Immutable;
 
 import java.time.ZonedDateTime;
@@ -18,12 +15,14 @@ import java.time.ZonedDateTime;
 /**
  *
  */
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Immutable
+@Getter
+@Setter
 @Entity
+@Builder
+@ToString
+@Immutable
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "identity_clients")
 public class Client {
     @Id
