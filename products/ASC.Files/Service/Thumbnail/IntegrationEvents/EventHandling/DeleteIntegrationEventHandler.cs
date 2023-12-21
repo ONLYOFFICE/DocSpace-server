@@ -67,7 +67,7 @@ public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteInte
 
             var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            await _fileStorageService.EnqueueDeleteItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, false, @event.DeleteAfter, @event.Immediately, headers, @event.TaskId);
+            await _fileStorageService.DeleteItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, false, @event.DeleteAfter, @event.Immediately, headers, @event.TaskId);
         }
 
     }

@@ -216,37 +216,17 @@ public class FileOperationsManager(TempStream tempStream,
         return (QueueTask(userId, op, enqueueTask), op.Id);
     }
 
-    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
+    public (List<FileOperationResult>, string) Delete(Guid userId, Tenant tenant, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        return Delete(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash);
+        return Delete(userId, tenant, folderStringIds, fileStringIds, folderIntIds, fileIntIds, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask, taskId);
     }
 
-    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
-    {
-        var (operations, _) = Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true);
-        return operations;
-    }
-
-    public (List<FileOperationResult>, string) PublishDelete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false)
-    {
-        return Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: false);
-    }
-
-    public List<FileOperationResult> EnqueueDelete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, string taskId = null)
-    {
-        var (operations, _) = Delete(userId, tenant, foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, holdResult, immediately, headers, externalShareData, isEmptyTrash, enqueueTask: true, taskId);
-        return operations;
-    }
-
-    private (List<FileOperationResult>, string) Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
+    public (List<FileOperationResult>, string) Delete(Guid userId, Tenant tenant, IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
         var op1 = new FileDeleteOperation<int>(serviceProvider, new FileDeleteOperationData<int>(foldersIdInt, filesIdInt, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
         var op2 = new FileDeleteOperation<string>(serviceProvider, new FileDeleteOperationData<string>(foldersIdString, filesIdString, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
