@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onlyoffice.authorization.configuration.HazelcastAuthorizationCache;
 import com.onlyoffice.authorization.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.core.entities.Authorization;
 import com.onlyoffice.authorization.core.usecases.repositories.AuthorizationPersistenceQueryUsecases;
@@ -17,6 +16,7 @@ import com.onlyoffice.authorization.core.usecases.service.authorization.Authoriz
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
 import com.onlyoffice.authorization.extensions.runnables.FunctionalRunnable;
 import com.onlyoffice.authorization.web.security.crypto.aes.Cipher;
+import com.onlyoffice.authorization.web.server.caching.DistributedCacheMap;
 import com.onlyoffice.authorization.web.server.messaging.AuthorizationMessage;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
@@ -70,8 +70,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private final AuthorizationPersistenceQueryUsecases queryUsecases;
 
+    private final DistributedCacheMap<String, AuthorizationMessage> cache;
     private final AmqpTemplate amqpTemplate;
-    private final HazelcastAuthorizationCache cache;
     private final Cipher cipher;
 
     @PostConstruct
@@ -101,34 +101,35 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                 authorization.getToken(OAuth2RefreshToken.class);
 
         log.info("Adding authorization to the cache");
-        cache.put(authorization.getId(), authorization);
+
+        var msg = toMessage(authorization);
+        cache.put(authorization.getId(), msg);
         if (state != null && !state.isBlank()) {
             MDC.put("state", state);
             log.debug("Adding authorization with state to the cache");
             MDC.clear();
 
-            cache.put(state, authorization);
+            cache.put(state, msg);
         } else if (authorizationCode != null && authorizationCode.getToken() != null) {
             MDC.put("code", authorizationCode.getToken().getTokenValue());
             log.debug("Adding authorization with code to the cache");
             MDC.clear();
 
-            cache.put(authorizationCode.getToken().getTokenValue(), authorization);
+            cache.put(authorizationCode.getToken().getTokenValue(), msg);
         } else if (accessToken != null && accessToken.getToken() != null) {
             MDC.put("accessToken", accessToken.getToken().getTokenValue());
             log.debug("Adding authorization with access token to the cache");
             MDC.clear();
 
-            cache.put(accessToken.getToken().getTokenValue(), authorization);
+            cache.put(accessToken.getToken().getTokenValue(), msg);
         } else if (refreshToken != null && refreshToken.getToken() != null) {
             MDC.put("refreshToken", refreshToken.getToken().getTokenValue());
             log.debug("Adding authorization with refresh token to the cache");
             MDC.clear();
 
-            cache.put(refreshToken.getToken().getTokenValue(), authorization);
+            cache.put(refreshToken.getToken().getTokenValue(), msg);
         }
 
-        var msg = toMessage(authorization);
         if (msg.getState() != null && !msg.getState().isBlank()) {
             log.info("Setting authorization state cookie");
             Cookie cookie = new Cookie(CLIENT_STATE_COOKIE, msg.getState());
@@ -237,7 +238,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             log.debug("Removing authorization from the cache");
             MDC.clear();
 
-            return authorization;
+            return fromMessage(authorization);
         }
 
         MDC.clear();
@@ -299,7 +300,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             log.debug("Removing authorization from the cache");
             MDC.clear();
 
-            return authorization;
+            return fromMessage(authorization);
         }
 
         Authorization result;
@@ -426,6 +427,62 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                     issuedAt,
                     expiresAt);
             builder.token(refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenMetadata())));
+        }
+
+        return builder.build();
+    }
+
+    private OAuth2Authorization fromMessage(AuthorizationMessage message) {
+        OAuth2Authorization.Builder builder = OAuth2Authorization
+                .withRegisteredClient(RegisteredClient
+                        .withId(message.getRegisteredClientId())
+                        .build()
+                )
+                .id(message.getId())
+                .principalName(message.getPrincipalName())
+                .authorizationGrantType(resolveAuthorizationGrantType(message.getAuthorizationGrantType()))
+                .authorizedScopes(StringUtils.commaDelimitedListToSet(message.getAuthorizedScopes()))
+                .attributes(attributes -> attributes.putAll(parseMap(message.getAttributes())));
+        if (message.getState() != null) {
+            builder.attribute(OAuth2ParameterNames.STATE, message.getState());
+        }
+
+        if (message.getAuthorizationCodeValue() != null) {
+            OAuth2AuthorizationCode authorizationCode = new OAuth2AuthorizationCode(
+                    message.getAuthorizationCodeValue(),
+                    message.getAuthorizationCodeIssuedAt().toInstant(),
+                    message.getAuthorizationCodeExpiresAt().toInstant());
+            builder.token(authorizationCode, metadata -> metadata.putAll(parseMap(message.getAuthorizationCodeMetadata())));
+        }
+
+        if (message.getAccessTokenValue() != null) {
+            Instant issuedAt = null;
+            Instant expiresAt = null;
+            if (message.getAccessTokenIssuedAt() != null)
+                issuedAt = message.getAccessTokenIssuedAt().toInstant();
+            if (message.getAccessTokenExpiresAt() != null)
+                expiresAt = message.getAccessTokenExpiresAt().toInstant();
+            OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                    OAuth2AccessToken.TokenType.BEARER,
+                    message.getAccessTokenValue(),
+                    issuedAt,
+                    expiresAt,
+                    StringUtils.commaDelimitedListToSet(message.getAccessTokenScopes()));
+            builder.token(accessToken, metadata -> metadata.putAll(parseMap(message.getAccessTokenMetadata())));
+        }
+
+        if (message.getRefreshTokenValue() != null) {
+            Instant issuedAt = null;
+            Instant expiresAt = null;
+            if (message.getRefreshTokenIssuedAt() != null)
+                issuedAt = message.getRefreshTokenIssuedAt().toInstant();
+            if (message.getRefreshTokenExpiresAt() != null)
+                expiresAt = message.getRefreshTokenExpiresAt().toInstant();
+            OAuth2RefreshToken refreshToken = new OAuth2RefreshToken(
+                    message.getRefreshTokenValue(),
+                    issuedAt,
+                    expiresAt);
+            builder.token(refreshToken, metadata -> metadata.putAll(parseMap(message.getRefreshTokenMetadata())));
         }
 
         return builder.build();

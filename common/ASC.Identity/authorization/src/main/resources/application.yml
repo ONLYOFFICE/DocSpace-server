@@ -164,7 +164,6 @@ logging:
     root: INFO
     com:
       onlyoffice: DEBUG
-      hazelcast: DEBUG
     org:
       hibernate:
         stat: DEBUG
