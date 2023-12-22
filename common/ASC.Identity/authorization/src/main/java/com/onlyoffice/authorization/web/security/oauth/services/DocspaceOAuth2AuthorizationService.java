@@ -154,7 +154,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                             .setter(msg::setRefreshTokenValue).build()))
                             .get(2, TimeUnit.SECONDS);
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
-            log.error("Could not execute encryption tasks", e);
+            log.warn("Could not execute encryption tasks", e);
             return;
         }
 
@@ -272,7 +272,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                             .build()))
                 .get(2, TimeUnit.SECONDS);
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            log.error("Could not execute decryption tasks", e);
+            log.warn("Could not execute decryption tasks", e);
             return null;
         } finally {
             MDC.clear();
@@ -362,7 +362,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                                     .build()))
                     .get(2, TimeUnit.SECONDS);
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            log.error("Could not execute decryption tasks", e);
+            log.warn("Could not execute decryption tasks", e);
             return null;
         } finally {
             MDC.clear();

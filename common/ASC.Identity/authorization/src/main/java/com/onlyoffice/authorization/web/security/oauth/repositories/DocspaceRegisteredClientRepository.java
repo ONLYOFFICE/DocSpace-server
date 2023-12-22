@@ -75,7 +75,7 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
             cache.put(id, client);
             return client;
         } catch (Exception e) {
-            log.error("Could not find registered client", e);
+            log.warn("Could not find registered client", e);
             return null;
         } finally {
             MDC.clear();
@@ -116,7 +116,7 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
             cache.put(clientId, client);
             return client;
         } catch (Exception e) {
-            log.error("Could not find registered client", e);
+            log.warn("Could not find registered client", e);
             return null;
         } finally {
             MDC.clear();
