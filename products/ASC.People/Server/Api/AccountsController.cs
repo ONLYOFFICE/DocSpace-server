@@ -83,11 +83,6 @@ public class AccountsController(
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
         var filter = GroupBasedFilter.Create(groupsIds, employeeType, employeeTypes, isAdministrator, payments, withoutGroup, webItemManager);
 
-        var totalUsersCountTask = searchArea != SearchArea.Groups 
-            ? userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
-                activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false) :
-            Task.FromResult(0);
-
         var onlyUsers = searchArea == SearchArea.Users || employeeStatus.HasValue || (groupsIds != null && groupsIds.Length != 0) || activationStatus.HasValue || employeeType.HasValue || 
                         (employeeTypes != null && employeeTypes.Length != 0) || isAdministrator.HasValue || payments.HasValue || accountLoginType.HasValue;
 
@@ -113,8 +108,16 @@ public class AccountsController(
             ? userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
                 apiContext.FilterValue, withoutGroup ?? false, apiContext.SortBy, !apiContext.SortDescending, usersLimit, usersOffset)
             : AsyncEnumerable.Empty<UserInfo>();
+        
+        var totalUsersCount = searchArea != SearchArea.Groups 
+            ? await userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
+                activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false) 
+            : 0;
 
-        var usersCount = 0;
+        var totalCount = totalGroupsCount + totalUsersCount;
+        var count = Math.Max(totalCount - (int)apiContext.StartIndex, 0);
+
+        apiContext.SetCount(Math.Min(count, (int)apiContext.Count)).SetTotalCount(totalCount);
         
         foreach (var g in groups)
         {
@@ -123,11 +126,7 @@ public class AccountsController(
 
         await foreach (var user in users)
         {
-            usersCount++;
-
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
-
-        apiContext.SetCount(groupsCount + usersCount).SetTotalCount(totalGroupsCount + await totalUsersCountTask);
     }
 }
