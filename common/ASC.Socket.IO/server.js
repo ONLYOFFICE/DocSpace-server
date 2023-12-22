@@ -96,6 +96,10 @@ const filesHub = require("./app/hubs/files.js")(io);
 
 app.use("/controller", require("./app/controllers")(filesHub));
 
+const usersHub = require("./app/hubs/onlineusers.js")(io);
+
+app.use("/controller", require("./app/controllers")(usersHub));
+
 httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
 
 process.on('unhandledRejection', (reason, p) => {

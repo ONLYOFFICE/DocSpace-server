@@ -1,4 +1,4 @@
-module.exports = (files) => {
+module.exports = (files, users) => {
   const router = require("express").Router(),
     bodyParser = require("body-parser"),
     check = require("../middleware/authService.js")();
@@ -17,6 +17,7 @@ module.exports = (files) => {
   });
 
   router.use("/files", require(`./files.js`)(files));
+  router.use("/onlineusers", require(`./onlineusers.js`)(users));
 
   return router;
 };
