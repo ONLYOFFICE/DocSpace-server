@@ -38,7 +38,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         MobileDetector mobileDetector,
         PersonalSettingsHelper personalSettingsHelper,
         ProviderManager providerManager,
-        Signature signature,
         UserHelpTourHelper userHelpTourHelper,
         UserManagerWrapper userManagerWrapper,
         UserPhotoManager userPhotoManager,
@@ -126,7 +125,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
-        var profile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var profile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -172,7 +171,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             mustChangePassword = true;
         }
 
-        var thirdPartyProfile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var thirdPartyProfile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
             // ignore cancellation

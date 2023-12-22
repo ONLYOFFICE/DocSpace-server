@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.DataOperators;
+namespace ASC.Core.Common;
 
-public interface IDataWriteOperator : IAsyncDisposable
+public static class ArabicNumeralHelper
 {
-    Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action);
-    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action);
-    bool NeedUpload { get; }
-    string Hash { get; }
-    string StoragePath { get; }
-}
+    public static string ConvertNumerals(this DateTime input, string format)
+    {
+        if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
+        {
+            return input.ToString(format, CultureInfo.InvariantCulture);
+        }
+        
+        var result = input.ToString(format, new CultureInfo("ar"));
+        return result
+            .Replace('0', '\u06f0')
+            .Replace('1', '\u06f1')
+            .Replace('2', '\u06f2')
+            .Replace('3', '\u06f3')
+            .Replace('4', '\u06f4')
+            .Replace('5', '\u06f5')
+            .Replace('6', '\u06f6')
+            .Replace('7', '\u06f7')
+            .Replace('8', '\u06f8')
+            .Replace('9', '\u06f9');
 
-public interface IDataReadOperator : IDisposable
-{
-    Stream GetEntry(string key);
-    IEnumerable<string> GetEntries(string key);
-    IEnumerable<string> GetDirectories(string key);
-
+    }
 }

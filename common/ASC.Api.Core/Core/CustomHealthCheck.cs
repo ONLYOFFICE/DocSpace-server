@@ -52,18 +52,11 @@ public static class CustomHealthCheck
     public static IHealthChecksBuilder AddDistibutedCache(
         this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        var redisConfiguration = configuration.GetSection("Redis");
 
         if (redisConfiguration != null)
         {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
-
-            hcBuilder.AddRedis(redisConfiguration.ConfigurationOptions.ToString(),
+            hcBuilder.AddRedis(x => x.GetRequiredService<RedisPersistentConnection>().GetConnection(),
                                name: "redis",
                                tags: new[] { "redis", "services" },
                                timeout: new TimeSpan(0, 0, 15));

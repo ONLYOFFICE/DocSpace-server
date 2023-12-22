@@ -140,7 +140,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
         using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(true.ToString())))
         {
-            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream);
+            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, (t) => { });
         }
 
         var files = new List<BackupFileInfo>();
@@ -534,11 +534,8 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => SetStepCompleted());
         }
-
-        SetStepCompleted();
-
         Directory.Delete(subDir, true);
 
         logger.DebugEndBackupStorage();
@@ -584,10 +581,8 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             await using (var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
             {
-                await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile);
+                await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, task => SetStepCompleted());
             }
-
-            SetStepCompleted();
         }
 
         logger.DebugArchiveDirEnd(subDir);
@@ -656,13 +651,16 @@ public class BackupPortalTask(DbFactory dbFactory,
                         data.WriteXml(file, XmlWriteMode.WriteSchema);
                         data.Clear();
 
-                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file);
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
+                    }
+
+                    void SetProgress(Task task)
+                    {
+                        SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
                     }
 
                     logger.DebugEndSavingTable(table.Name);
                 }
-
-                SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
             }
         }
 
@@ -678,18 +676,15 @@ public class BackupPortalTask(DbFactory dbFactory,
             var filesProcessed = 0;
             var filesCount = group.Count();
 
+            void SetProgress(Task task)
+            {
+                SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+            }
+
             foreach (var file in group)
             {
                 var storage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
-                try
-                {
-                    await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage);
-                }
-                catch(Exception error)
-                {
-                    logger.WarningCanNotBackupFile(file.Module, file.Path, error);
-                }
-                SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+                await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
             }
         }
 
@@ -702,7 +697,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, task => {});
         }
 
         logger.DebugEndBackupStorage();

@@ -29,9 +29,9 @@ namespace ASC.Data.Backup;
 public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     : BaseStartup(configuration, hostEnvironment)
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         var maxRequestLimit = 1024L * 1024L * 1024L;
         services.Configure<KestrelServerOptions>(options =>

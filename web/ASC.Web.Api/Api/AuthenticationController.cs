@@ -462,7 +462,7 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile) : 
+                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;

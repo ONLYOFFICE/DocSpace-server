@@ -31,9 +31,9 @@ namespace ASC.Studio.Notify;
 public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     : BaseWorkerStartup(configuration, hostEnvironment)
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddHttpClient();
 

@@ -30,7 +30,7 @@ internal static partial class DocumentServiceConnectorLogger
     [LoggerMessage(Level = LogLevel.Debug, Message = "DocService convert from {fromExtension} to {toExtension} - {documentUri}, DocServiceConverterUrl:{docServiceConverterUrl}")]
     public static partial void DebugDocServiceConvert(this ILogger<DocumentServiceConnector> logger, string fromExtension, string toExtension, string documentUri, string docServiceConverterUrl);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "DocService command {method} fileId '{fileId}' docKey '{docKey}' callbackUrl '{callbackUrl}' users '{users}' meta '{meta}'")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "DocService command {method} fileId {fileId} docKey {docKey} callbackUrl {callbackUrl} users {users} meta {meta}")]
     public static partial void DebugDocServiceCommand(this ILogger<DocumentServiceConnector> logger, CommandMethod method, string fileId, string docKey, string callbackUrl, string users, string meta);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "DocService builder requestKey {requestKey} async {isAsync}")]

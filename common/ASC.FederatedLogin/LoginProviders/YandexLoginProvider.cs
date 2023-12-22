@@ -49,11 +49,9 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-            RequestHelper requestHelper,
+        RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -82,7 +80,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return LoginProfile.FromError(ex);
         }
     }
 
@@ -112,7 +110,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             EMail = jProfile.Value<string>("default_email"),
             Id = jProfile.Value<string>("id"),

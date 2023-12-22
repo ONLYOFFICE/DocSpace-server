@@ -34,8 +34,11 @@ public class PluginsDto
     /// <type>System.Boolean, System</type>
     public bool Enabled { get; set; }
 
-    /// <summary>The allowed actions with the plugins ("upload", "delete", etc.)</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
-    public IEnumerable<string> Allow { get; set; }
+    /// <summary>Specifies if the plugins can be uploaded or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Upload { get; set; }
 
+    /// <summary>Specifies if the plugins can be deleted or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Delete { get; set; }
 }

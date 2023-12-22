@@ -37,4 +37,5 @@ public class CreateTextOrHtmlFileRequestDto
     /// <summary>File contents</summary>
     /// <type>System.String, System</type>
     public string Content { get; set; }
+    public bool CreateNewIfExist { get; set; }
 }

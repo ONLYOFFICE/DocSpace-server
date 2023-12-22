@@ -66,6 +66,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
     private string _region;
     private string _upgradesPath;
+    private string _serverBaseUri;
 
     public RestoreProgressItem(
         IConfiguration configuration,
@@ -101,6 +102,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         TempFolder = tempFolder;
         _upgradesPath = upgradesPath;
         _region = region;
+        _serverBaseUri = request.ServerBaseUri;
     }
 
     protected override async Task DoJob()
@@ -117,6 +119,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
+
+            _notifyHelper.SetServerBaseUri(_serverBaseUri);
+
             await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
             tenant.SetStatus(TenantStatus.Restoring);
             await _tenantManager.SaveTenantAsync(tenant);

@@ -51,11 +51,9 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -84,7 +82,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return LoginProfile.FromError(ex);
         }
     }
 
@@ -106,7 +104,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
             throw new Exception("userinfo is incorrect");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = oid,
             FirstName = userInfo.Value<string>("firstName"),

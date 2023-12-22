@@ -1072,6 +1072,7 @@ public class FileStorageService //: IFileStorageService
             if (file != null)
             {
                 await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
+                await socketManager.UpdateFileAsync(file);
             }
 
             return file;
@@ -2178,11 +2179,11 @@ public class FileStorageService //: IFileStorageService
                 {
                     if (sync)
                     {
-                        results = results.Append(await fileConverter.ExecSynchronouslyAsync(file, fileInfo.Password));
+                        results = results.Append(await fileConverter.ExecSynchronouslyAsync(file, fileInfo.Password, !fileInfo.CreateNewIfExist));
                     }
                     else
                     {
-                        await fileConverter.ExecAsynchronouslyAsync(file, false, fileInfo.Password);
+                        await fileConverter.ExecAsynchronouslyAsync(file, false, !fileInfo.CreateNewIfExist, fileInfo.Password);
                     }
                 }
                 catch (Exception e)
@@ -2637,9 +2638,9 @@ public class FileStorageService //: IFileStorageService
                     var name = user.DisplayUserName(false, displayUserSettingsHelper);
 
                     if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
-                        {
+                {
                         switch (eventType)
-                            {
+                    {
                                 case EventType.Create:
                                 await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name, 
                                     FileShareExtensions.GetAccessString(ace.Access, true));
@@ -2727,7 +2728,7 @@ public class FileStorageService //: IFileStorageService
         if (result != null)
         {
             linkId = result.Item2.Id;
-    }
+            }
 
         return (await fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
     }
@@ -3246,16 +3247,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         return true;
-    }
-
-    public async Task<bool> UpdateIfExistAsync(bool set)
-    {
-        ErrorIf(await userManager.IsUserAsync(authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
-
-        filesSettingsHelper.UpdateIfExist = set;
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsOverwritingSettingsUpdated);
-
-        return filesSettingsHelper.UpdateIfExist;
     }
 
     public async Task<bool> ForcesaveAsync(bool set)

@@ -126,8 +126,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
         }
-
-        this[Res] += $"folder_{tto}{SplitChar}";
         
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
         if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
@@ -201,7 +199,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             return;
         }
-
+        
+        this[Res] += $"folder_{tto}{SplitChar}";
+        
         var needToMark = new List<FileEntry>();
 
         var moveOrCopyFoldersTask = await MoveOrCopyFoldersAsync(scope, Folders, toFolder, _copy, parentFolders);

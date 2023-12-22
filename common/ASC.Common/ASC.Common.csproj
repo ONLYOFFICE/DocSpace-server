@@ -53,12 +53,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference> -->
-    <PackageReference Include="NLog" Version="5.2.5" />
+    <PackageReference Include="NLog" Version="5.2.7" />
     <PackageReference Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
+    <PackageReference Include="Polly" Version="8.2.0" />
     <PackageReference Include="protobuf-net" Version="3.2.26" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.4" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="9.1.0" />
   </ItemGroup>
   <ItemGroup>

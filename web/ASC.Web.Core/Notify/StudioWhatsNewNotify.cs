@@ -325,7 +325,12 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        return d.ToString(c.TwoLetterISOLanguageName == "ru" ? "d MMMM" : "M", c);
+        if (c.TwoLetterISOLanguageName == "ru")
+        {
+            return d.ToString("d MMMM", c);
+        }
+        
+        return d.ConvertNumerals("M");
     }
 }
 
