@@ -332,18 +332,14 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     {
         var offset = Convert.ToInt32(_apiContext.StartIndex);
         var count = Convert.ToInt32(_apiContext.Count);
-        var counter = 0;
 
-        var totalCountTask = _fileStorageService.GetRoomSharesCountAsync(id, filterType);
-
+        var totalCountTask = await _fileStorageService.GetRoomSharesCountAsync(id, filterType);
+        _apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
+        
         await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, offset, count))
         {
-            counter++;
-
             yield return await _fileShareDtoHelper.Get(ace);
         }
-
-        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 
     /// <summary>
