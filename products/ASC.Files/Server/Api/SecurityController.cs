@@ -173,7 +173,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("file/{fileId}/publickeys")]
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(T fileId)
+    public async Task<List<EncryptionKeyDto>> GetEncryptionAccess(T fileId)
     {
         return await fileStorageService.GetEncryptionAccessAsync(fileId);
     }

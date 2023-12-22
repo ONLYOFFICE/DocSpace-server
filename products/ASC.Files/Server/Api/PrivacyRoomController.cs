@@ -27,13 +27,19 @@
 namespace ASC.Api.Documents;
 
 [ConstraintRoute("int")]
-public class PrivacyRoomControllerInternal(SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper, FileStorageService fileStorageService)
-    : PrivacyRoomController<int>(settingsManager, encryptionKeyPairHelper, fileStorageService);
+public class PrivacyRoomControllerInternal(
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper, 
+    FileStorageService fileStorageService,
+    IMapper mapper)
+    : PrivacyRoomController<int>(settingsManager, encryptionKeyPairHelper, fileStorageService, mapper);
 
-public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper, FileStorageService fileStorageService)
-    : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper, fileStorageService);
+public class PrivacyRoomControllerThirdparty(
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper, 
+    FileStorageService fileStorageService,
+    IMapper mapper)
+    : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper, fileStorageService, mapper);
 
 /// <summary>
 /// Provides access to Private Room.
@@ -43,9 +49,11 @@ public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager,
 [DefaultRoute]
 [ApiController]
 [ControllerName("privacyroom")]
-public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
+public abstract class PrivacyRoomController<T>(
+    SettingsManager settingsManager,
         EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-        FileStorageService fileStorageService)
+        FileStorageService fileStorageService,
+        IMapper mapper)
     : ControllerBase
 {
     /// <summary>
@@ -59,14 +67,16 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <collection>list</collection>
     /// <visible>false</visible>
     [HttpGet("access/{fileId}")]
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
+    public async Task<IEnumerable<EncryptionKeyRequestDto>> GetPublicKeysWithAccess(T fileId)
     {
         if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
             throw new SecurityException();
         }
 
-        return await encryptionKeyPairHelper.GetKeyPairAsync(fileId, fileStorageService);
+        return (await encryptionKeyPairHelper.GetKeyPairAsync(fileId, fileStorageService))
+            .Select(mapper.Map<EncryptionKeyRequestDto>)
+            .ToList();
     }
 }
 
@@ -79,32 +89,9 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         SettingsManager settingsManager,
         EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
         MessageService messageService,
-        ILogger<PrivacyRoomControllerCommon> logger)
+        IMapper mapper)
     : ControllerBase
 {
-
-    /// <summary>
-    /// Returns a key pair for the current user.
-    /// </summary>
-    /// <short>Get encryption keys</short>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
-    /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
-    [HttpGet("keys")]
-    public async Task<EncryptionKeyPairDto> GetKeysAsync()
-    {
-        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
-
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new SecurityException();
-        }
-
-        return await encryptionKeyPairHelper.GetKeyPairAsync();
-    }
-
-
     /// <summary>
     /// Checks if the Private Room settings are enabled or not.
     /// </summary>
@@ -121,17 +108,46 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         return await PrivacyRoomSettings.GetEnabledAsync(settingsManager);
     }
 
-    /// <summary>
-    /// Sets the key pair for the current user.
-    /// </summary>
-    /// <short>Set encryption keys</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
-    /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
-    [HttpPut("keys")]
-    public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
+    // /// <summary>
+    // /// Sets the key pair for the current user.
+    // /// </summary>
+    // /// <short>Set encryption keys</short>
+    // /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
+    // /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
+    // /// <path>api/2.0/privacyroom/keys</path>
+    // /// <httpMethod>PUT</httpMethod>
+    // /// <visible>false</visible>
+    // [HttpPut("keys")]
+    // public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
+    // {
+    //     await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
+    //
+    //     if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+    //     {
+    //         throw new SecurityException();
+    //     }
+    //
+    //     var keyPair = await encryptionKeyPairHelper.GetKeyPairAsync();
+    //     if (keyPair != null)
+    //     {
+    //         if (!string.IsNullOrEmpty(keyPair.PublicKey) && !inDto.Update)
+    //         {
+    //             return new { isset = true };
+    //         }
+    //
+    //         logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
+    //     }
+    //
+    //     await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
+    //
+    //     return new
+    //     {
+    //         isset = true
+    //     };
+    // }
+    
+    [HttpPost("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> SetKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto)
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
@@ -140,23 +156,54 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
             throw new SecurityException();
         }
 
-        var keyPair = await encryptionKeyPairHelper.GetKeyPairAsync();
-        if (keyPair != null)
-        {
-            if (!string.IsNullOrEmpty(keyPair.PublicKey) && !inDto.Update)
-            {
-                return new { isset = true };
-            }
+        return await encryptionKeyPairHelper.SetKeyPairAsync(mapper.Map<IEnumerable<EncryptionKeyDto>>(inDto), false);
+    }
+    
+    [HttpPut("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> ReplaceKeyAsync(EncryptionKeyRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
-            logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
+        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+        {
+            throw new SecurityException();
         }
 
-        await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
+        return await encryptionKeyPairHelper.SetKeyPairAsync([ mapper.Map<EncryptionKeyDto>(inDto) ], true);
+    }
+    
+    /// <summary>
+    /// Returns a key pair for the current user.
+    /// </summary>
+    /// <short>Get encryption keys</short>
+    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
+    /// <path>api/2.0/privacyroom/keys</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
+    [HttpGet("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> GetKeysAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
-        return new
+        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
-            isset = true
-        };
+            throw new SecurityException();
+        }
+
+        return await encryptionKeyPairHelper.GetKeyPairAsync();
+    }
+    
+    [HttpDelete("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeysAsync(IEnumerable<Guid> inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
+
+        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+        {
+            throw new SecurityException();
+        }
+
+        return await encryptionKeyPairHelper.DeleteAsync(inDto);
     }
 
     /// <summary>

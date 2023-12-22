@@ -114,7 +114,7 @@ public class AccountLinker(
 
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 
-            accountLinkContext.AccountLinks.Remove(accountLink);
+        accountLinkContext.AccountLinks.Remove(accountLink);
         await accountLinkContext.SaveChangesAsync();
 
         accountLinkerStorage.RemoveFromCache(obj);

@@ -309,7 +309,7 @@ public class EditorConfiguration<T>
         get => _configuration.Document.Info.Type == EditorType.Embedded ? _embeddedConfig : null;
     }
 
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    public List<EncryptionKeyDto> EncryptionKeys { get; set; }
 
     public string FileChoiceUrl { get; set; }
 

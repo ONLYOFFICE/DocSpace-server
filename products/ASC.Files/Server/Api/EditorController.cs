@@ -84,15 +84,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
-            if (keyPair != null)
-            {
-                configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
-                {
-                    PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey
-                };
-            }
+            configuration.EditorConfig.EncryptionKeys =  await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
         }
 
         if (!file.Encrypted && !file.ProviderEntry)
@@ -202,15 +194,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
-            if (keyPair != null)
-            {
-                configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
-                {
-                    PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey
-                };
-            }
+            configuration.EditorConfig.EncryptionKeys =  await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
         }
 
         if (!file.Encrypted && !file.ProviderEntry)

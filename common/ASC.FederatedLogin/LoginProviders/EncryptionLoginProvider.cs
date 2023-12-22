@@ -29,10 +29,10 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class EncryptionLoginProvider(
     ILogger<EncryptionLoginProvider> logger,
-        SecurityContext securityContext,
-        InstanceCrypto instanceCrypto,
-        AccountLinker accountLinker)
-    {
+    SecurityContext securityContext,
+    InstanceCrypto instanceCrypto,
+    AccountLinker accountLinker)
+{
     public async Task SetKeysAsync(Guid userId, string keys)
     {
         if (string.IsNullOrEmpty(keys))
@@ -42,10 +42,11 @@ public class EncryptionLoginProvider(
 
         var loginProfile = new LoginProfile
         {
-            Provider = ProviderConstants.Encryption,
+            Provider = ProviderConstants.Encryption, 
             Name = instanceCrypto.Encrypt(keys)
         };
 
+        await accountLinker.RemoveProviderAsync(userId.ToString());
         await accountLinker.AddLinkAsync(userId.ToString(), loginProfile);
     }
 
@@ -68,9 +69,14 @@ public class EncryptionLoginProvider(
         }
         catch (Exception ex)
         {
-            var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
-            logger.ErrorWithException(message, ex);
+            logger.ErrorDecrypt(ProviderConstants.Encryption, userId, ex);
             return null;
         }
     }
+}
+
+internal static partial class EncryptionLoginProviderLogger
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Can not decrypt {provider} keys for {userId}")]
+    public static partial void ErrorDecrypt(this ILogger<EncryptionLoginProvider> logger, string provider, Guid userId, Exception exception);
 }

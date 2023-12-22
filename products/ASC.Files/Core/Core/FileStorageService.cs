@@ -2864,13 +2864,13 @@ public class FileStorageService //: IFileStorageService
         return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(fileId) : null;
     }
 
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
+    public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)
     {
         ErrorIf(!await PrivacyRoomSettings.GetEnabledAsync(settingsManager), FilesCommonResource.ErrorMassage_SecurityException);
 
         var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId, this);
 
-        return new List<EncryptionKeyPairDto>(fileKeyPair);
+        return [..fileKeyPair];
     }
 
     public async Task<bool> ChangeExternalShareSettingsAsync(bool enable)

@@ -26,75 +26,108 @@
 
 namespace ASC.Web.Files.Core.Entries;
 
-/// <summary>
-/// </summary>
-public class EncryptionKeyPairDto
+[EnumExtensions]
+[JsonConverter(typeof(EncryptionKeyTypeConverter))]
+public enum EncryptionKeyType
 {
-    /// <summary>Private key</summary>
-    /// <type>System.String, System</type>
-    public string PrivateKeyEnc { get; set; }
+    Private,
+    Public
+}
 
-    /// <summary>Public key</summary>
-    /// <type>System.String, System</type>
-    public string PublicKey { get; set; }
+public class EncryptionKeyTypeConverter : System.Text.Json.Serialization.JsonConverter<EncryptionKeyType>
+{
+    public override EncryptionKeyType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var result))
+        {
+            return (EncryptionKeyType)result;
+        }
 
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
-    public Guid UserId { get; set; }
+        if (reader.TokenType == JsonTokenType.String && EncryptionKeyTypeExtensions.TryParse(reader.GetString(), out var share))
+        {
+            return share;
+        }
+
+        return EncryptionKeyType.Private;
+    }
+
+    public override void Write(Utf8JsonWriter writer, EncryptionKeyType value, JsonSerializerOptions options)
+    {
+        writer.WriteNumberValue((int)value);
+    }
+}
+
+public class EncryptionKeyDto : IMapFrom<EncryptionKeyRequestDto>
+{
+    public Guid Id { get; set; }
+    public string Key { get; set; }
+    public EncryptionKeyType Type { get; set; }
+    public EncryptionKeyValueDto Value { get; set; }
+}
+
+public class EncryptionKeyValueDto: IMapFrom<EncryptionKeyValueRequestDto>
+{
+    public string Version { get; set; }
+    public string Name { get; set; }
+    public DateTime Date { get; set; }
 }
 
 [Scope]
-public class EncryptionKeyPairDtoHelper(UserManager userManager,
-        AuthContext authContext,
-        EncryptionLoginProvider encryptionLoginProvider,
-        FileSecurity fileSecurity,
-        IDaoFactory daoFactory)
+public class EncryptionKeyPairDtoHelper(
+    UserManager userManager,
+    AuthContext authContext,
+    EncryptionLoginProvider encryptionLoginProvider,
+    FileSecurity fileSecurity,
+    IDaoFactory daoFactory)
+{    
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-    public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
+        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
+    };
+    
+    public async Task<List<EncryptionKeyDto>> SetKeyPairAsync(IEnumerable<EncryptionKeyDto> keyPairs, bool replace)
     {
-        ArgumentException.ThrowIfNullOrEmpty(publicKey);
-        ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
-
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         if (!authContext.IsAuthenticated || await userManager.IsUserAsync(user))
         {
             throw new SecurityException();
         }
 
-        var keyPair = new EncryptionKeyPairDto
-        {
-            PrivateKeyEnc = privateKeyEnc,
-            PublicKey = publicKey,
-            UserId = user.Id
-        };
+        var currentAddressString = await GetKeyPairAsync() ?? new List<EncryptionKeyDto>();
 
-        var keyPairString = JsonSerializer.Serialize(keyPair);
-        await encryptionLoginProvider.SetKeysAsync(user.Id, keyPairString);
+        foreach (var keyPair in keyPairs)
+        {
+            var keyPairSettings = currentAddressString.FirstOrDefault(r => r.Id == keyPair.Id);
+            if (keyPairSettings != null)
+            {
+                if (replace)
+                {
+                    keyPairSettings.Value = keyPair.Value;
+                }
+            }
+            else if (!replace)
+            {
+                currentAddressString.Add(keyPair);
+            }
+        }
+        
+        await Save(currentAddressString);
+
+        return currentAddressString;
     }
 
-    public async Task<EncryptionKeyPairDto> GetKeyPairAsync()
+    public async Task<List<EncryptionKeyDto>> GetKeyPairAsync()
     {
         var currentAddressString = await encryptionLoginProvider.GetKeysAsync();
         if (string.IsNullOrEmpty(currentAddressString))
         {
             return null;
         }
-
-        var options = new JsonSerializerOptions
-        {
-            AllowTrailingCommas = true,
-            PropertyNameCaseInsensitive = true
-        };
-        var keyPair = JsonSerializer.Deserialize<EncryptionKeyPairDto>(currentAddressString, options);
-        if (keyPair.UserId != authContext.CurrentAccount.ID)
-        {
-            return null;
-        }
-
-        return keyPair;
+        
+        return JsonSerializer.Deserialize<List<EncryptionKeyDto>>(currentAddressString, _jsonSerializerOptions);
     }
 
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId, FileStorageService FileStorageService)
+    public async Task<List<EncryptionKeyDto>> GetKeyPairAsync<T>(T fileId, FileStorageService fileStorageService)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -120,10 +153,9 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
             throw new NotSupportedException();
         }
 
-        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
+        var tmpFiles = await fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup
-                                        && !share.Id.Equals(FileConstant.ShareLinkId)).ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup && !share.Id.Equals(FileConstant.ShareLinkId)).ToList();
 
         var tasks = fileShares.Select(async share =>
         {
@@ -132,26 +164,38 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
             {
                 return null;
             }
-
-            var options = new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            };
-            var fileKeyPair = JsonSerializer.Deserialize<EncryptionKeyPairDto>(fileKeyPairString, options);
-            if (fileKeyPair.UserId != share.Id)
-            {
-                return null;
-            }
-
-            fileKeyPair.PrivateKeyEnc = null;
-
+            
+            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, _jsonSerializerOptions)
+                .Where(r => r.Id == share.Id)//r.UserId == share.Id
+                .ToList();
+            
             return fileKeyPair;
         });
 
         var fileKeysPair = (await Task.WhenAll(tasks))
-            .Where(keyPair => keyPair != null);
+            .SelectMany(keyPair => keyPair);
 
-        return fileKeysPair;
+        return fileKeysPair.ToList();
+    }
+
+    public async Task<List<EncryptionKeyDto>> DeleteAsync(IEnumerable<Guid> id)
+    {
+        var currentSettings = await GetKeyPairAsync();
+        if(currentSettings == null)
+        {
+            return null;
+        }
+
+        currentSettings.RemoveAll(r => id.Contains(r.Id));
+
+        await Save(currentSettings);
+
+        return currentSettings;
+    }
+
+    private async Task Save(IEnumerable<EncryptionKeyDto> currentSettings)
+    {
+        var keyPairString = JsonSerializer.Serialize(currentSettings);
+        await encryptionLoginProvider.SetKeysAsync(authContext.CurrentAccount.ID, keyPairString);
     }
 }
