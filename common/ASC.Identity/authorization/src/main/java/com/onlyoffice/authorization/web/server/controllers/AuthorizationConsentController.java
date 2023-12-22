@@ -26,6 +26,7 @@ import java.net.URI;
 public class AuthorizationConsentController {
     private final String ASC_AUTH_COOKIE = "asc_auth_key";
     private final String CLIENT_ID = "client_id";
+
     private final APIClient docspaceClient;
     private final AuthorizationPersistenceQueryUsecases authorizationRepository;
     private final ClientPersistenceQueryUsecases queryUsecases;
@@ -44,9 +45,11 @@ public class AuthorizationConsentController {
             var cookie = String.format("%s=%s", "asc_auth_key", authCookie);
             var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie)
                     .getResponse();
+
             MDC.put("client_id", clientId);
             MDC.put("principal_name", me.getEmail());
             log.info("Trying to get consent by principal name and client");
+
             var auth = authorizationRepository.getByPrincipalNameAndRegisteredClientId(me.getEmail(), clientId);
             return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
@@ -58,6 +61,7 @@ public class AuthorizationConsentController {
         } catch (Exception e) {
             MDC.put("message", e.getMessage());
             log.info("Could not redirect to consent page. Redirecting to login");
+
             return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
                     .path("login")
