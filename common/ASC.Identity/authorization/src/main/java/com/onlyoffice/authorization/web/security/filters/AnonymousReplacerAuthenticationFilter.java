@@ -42,8 +42,8 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
         var clientId = request.getParameter(CLIENT_ID_QUERY);
 
         if (clientId == null || clientId.isEmpty()) {
-            log.warn("Query string does not contain client_id is empty");
-            throw new BadCredentialsException("Query string does not contain client_id is empty");
+            log.warn("Query string does not contain client_id");
+            throw new BadCredentialsException("Query string does not contain client_id");
         }
 
         var authCookie = Arrays.stream(request.getCookies())
