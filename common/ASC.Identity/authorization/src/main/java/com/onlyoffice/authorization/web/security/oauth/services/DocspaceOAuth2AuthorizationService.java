@@ -14,6 +14,7 @@ import com.onlyoffice.authorization.core.usecases.repositories.AuthorizationPers
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationCreationUsecases;
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
+import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.extensions.runnables.FunctionalRunnable;
 import com.onlyoffice.authorization.web.security.crypto.aes.Cipher;
 import com.onlyoffice.authorization.web.server.caching.DistributedCacheMap;
@@ -68,7 +69,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private final RabbitMQConfiguration configuration;
 
-    private final AuthorizationPersistenceQueryUsecases queryUsecases;
+    private final AuthorizationPersistenceQueryUsecases authorizationPersistenceQueryUsecases;
+    private final ClientRetrieveUsecases clientRetrieveUsecases;
 
     private final DistributedCacheMap<String, AuthorizationMessage> cache;
     private final AmqpTemplate amqpTemplate;
@@ -243,7 +245,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
         MDC.clear();
 
-        var msg = queryUsecases.getById(id);
+        var msg = authorizationPersistenceQueryUsecases.getById(id);
         if (msg == null)
             return null;
 
@@ -307,31 +309,31 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (tokenType == null) {
             log.debug("Trying to find authorization by any value");
 
-            result = queryUsecases.getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token);
+            result = authorizationPersistenceQueryUsecases.getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token);
         } else if (OAuth2ParameterNames.STATE.equals(tokenType.getValue())) {
             MDC.put("state", token);
             log.debug("Trying to find authorization by state");
             MDC.clear();
 
-            result = queryUsecases.getByState(token);
+            result = authorizationPersistenceQueryUsecases.getByState(token);
         } else if (OAuth2ParameterNames.CODE.equals(tokenType.getValue())) {
             MDC.put("authorizationCode", token);
             log.debug("Trying to find authorization by authorization code");
             MDC.clear();
 
-            result = queryUsecases.getByAuthorizationCodeValue(token);
+            result = authorizationPersistenceQueryUsecases.getByAuthorizationCodeValue(token);
         } else if (OAuth2ParameterNames.ACCESS_TOKEN.equals(tokenType.getValue())) {
             MDC.put("accessToken", token);
             log.debug("Trying to find authorization by access token");
             MDC.clear();
 
-            result = queryUsecases.getByAccessTokenValue(token);
+            result = authorizationPersistenceQueryUsecases.getByAccessTokenValue(token);
         } else if (OAuth2ParameterNames.REFRESH_TOKEN.equals(tokenType.getValue())) {
             MDC.put("refreshToken", token);
             log.debug("Trying to find authorization by refresh token");
             MDC.clear();
 
-            result = queryUsecases.getByRefreshTokenValue(token);
+            result = authorizationPersistenceQueryUsecases.getByRefreshTokenValue(token);
         } else {
             log.debug("Empty authorization");
             return null;
@@ -433,11 +435,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     private OAuth2Authorization fromMessage(AuthorizationMessage message) {
+        var client = clientRetrieveUsecases.getClientByClientId(message.getRegisteredClientId());
+        if (client == null)
+            return null;
         OAuth2Authorization.Builder builder = OAuth2Authorization
-                .withRegisteredClient(RegisteredClient
-                        .withId(message.getRegisteredClientId())
-                        .build()
-                )
+                .withRegisteredClient(client)
                 .id(message.getId())
                 .principalName(message.getPrincipalName())
                 .authorizationGrantType(resolveAuthorizationGrantType(message.getAuthorizationGrantType()))
