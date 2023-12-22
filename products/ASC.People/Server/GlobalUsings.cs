@@ -70,6 +70,7 @@ global using ASC.People.ApiModels.RequestDto;
 global using ASC.People.ApiModels.ResponseDto;
 global using ASC.People.Log;
 global using ASC.People.Resources;
+global using ASC.People.Utils;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;

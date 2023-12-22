@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SearchArea = ASC.People.Utils.SearchArea;
+
 namespace ASC.People.Api;
 
 [Scope]
@@ -50,11 +52,12 @@ public class AccountsController(
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
     /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
-    /// /// <param type="Sustem.Guid[], System" name="groupsIds">List of groups ids</param>
+    /// <param type="Sustem.Guid[], System" name="groupsIds">List of groups ids</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// <param type="ASC.People.Utils.SearchArea, ASC.People.Utils" name="searchArea">Specifies which area to search. Users (0), Groups (1), Any (2)</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/accounts</path>
     /// <httpMethod>GET</httpMethod>
@@ -68,7 +71,8 @@ public class AccountsController(
         [FromQuery] EmployeeType[] employeeTypes,
         [FromQuery] Guid[] groupsIds,
         bool? isAdministrator,
-        bool? withoutGroup)
+        bool? withoutGroup,
+        SearchArea searchArea = SearchArea.Any)
     {
         if (coreBaseSettings.Personal)
         {
@@ -79,14 +83,16 @@ public class AccountsController(
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
         var filter = GroupBasedFilter.Create(groupsIds, employeeType, employeeTypes, isAdministrator, payments, withoutGroup, webItemManager);
 
-        var totalUsersCountTask = userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
-            activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false);
+        var totalUsersCountTask = searchArea != SearchArea.Groups 
+            ? userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
+                activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false) :
+            Task.FromResult(0);
 
-        var onlyUsers = employeeStatus.HasValue || (groupsIds != null && groupsIds.Length != 0) || activationStatus.HasValue || employeeType.HasValue || 
+        var onlyUsers = searchArea == SearchArea.Users || employeeStatus.HasValue || (groupsIds != null && groupsIds.Length != 0) || activationStatus.HasValue || employeeType.HasValue || 
                         (employeeTypes != null && employeeTypes.Length != 0) || isAdministrator.HasValue || payments.HasValue || accountLoginType.HasValue;
 
         var groups = onlyUsers 
-            ? Enumerable.Empty<GroupInfo>() 
+            ? Enumerable.Empty<GroupInfo>()
             : (await userManager.GetDepartmentsAsync()).Select(r => r);
         
         if (!string.IsNullOrEmpty(apiContext.FilterValue))
@@ -103,8 +109,10 @@ public class AccountsController(
         var usersLimit = apiContext.Count - groupsCount;
         var usersOffset =  Math.Max(groupsCount > 0 ? 0 : apiContext.StartIndex - totalGroupsCount, 0);
 
-        var users = userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
-            apiContext.FilterValue, withoutGroup ?? false, apiContext.SortBy, !apiContext.SortDescending, usersLimit, usersOffset);
+        var users = searchArea != SearchArea.Groups
+            ? userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
+                apiContext.FilterValue, withoutGroup ?? false, apiContext.SortBy, !apiContext.SortDescending, usersLimit, usersOffset)
+            : AsyncEnumerable.Empty<UserInfo>();
 
         var usersCount = 0;
         
