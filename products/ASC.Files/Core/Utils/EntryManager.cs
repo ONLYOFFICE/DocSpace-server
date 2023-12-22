@@ -282,7 +282,7 @@ public class EntryManager
     private readonly FilesMessageService _filesMessageService;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SocketManager _socketManager;
-    private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly BaseCommonLinkUtility _commonLinkUtility;
 
     public EntryManager(
         IDaoFactory daoFactory,
@@ -314,7 +314,7 @@ public class EntryManager
         ThumbnailSettings thumbnailSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         SocketManager socketManager,
-        CommonLinkUtility commonLinkUtility)
+        BaseCommonLinkUtility commonLinkUtility)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;

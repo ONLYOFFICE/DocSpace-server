@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Runtime.CompilerServices;
+
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
@@ -31,17 +33,17 @@ public class FileTrackerHelper
 {
     private const string Tracker = "filesTracker";
     private readonly ICache _cache;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FileTrackerHelper> _logger;
     private static readonly TimeSpan _trackTimeout = TimeSpan.FromSeconds(12);
     private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Action<object, object, EvictionReason, object> _callbackAction;
 
-    public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
+    public FileTrackerHelper(ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
     {
         _cache = cache;
-        _serviceScopeFactory = serviceScopeFactory;
+        _serviceProvider = serviceProvider;
         _logger = logger;
         _callbackAction = EvictionCallback();
     }
@@ -60,14 +62,15 @@ public class FileTrackerHelper
             }
             else
             {
-                tracker.EditingBy.Add(tabId, new TrackInfo
-                {
-                    UserId = userId,
-                    NewScheme = tabId == userId,
-                    EditingAlone = editingAlone,
-                    TenantId = tenantId,
-                    BaseUri = baseUri
-                });
+                tracker.EditingBy.Add(tabId,
+                    new TrackInfo
+                    {
+                        UserId = userId,
+                        NewScheme = tabId == userId,
+                        EditingAlone = editingAlone,
+                        TenantId = tenantId,
+                        BaseUri = baseUri
+                    });
             }
         }
         else
@@ -92,6 +95,7 @@ public class FileTrackerHelper
 
                 return;
             }
+
             if (userId != Guid.Empty)
             {
                 var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
@@ -116,7 +120,8 @@ public class FileTrackerHelper
         if (tracker != null)
         {
             var now = DateTime.UtcNow;
-            var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout);
+            var listForRemove = tracker.EditingBy.Where(e =>
+                !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout);
 
             foreach (var editTab in listForRemove)
             {
@@ -172,7 +177,9 @@ public class FileTrackerHelper
     {
         var tracker = GetTracker(fileId);
 
-        return tracker != null && IsEditing(fileId) ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList() : new List<Guid>();
+        return tracker != null && IsEditing(fileId)
+            ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
+            : new List<Guid>();
     }
 
     private FileTracker GetTracker<T>(T fileId)
@@ -189,10 +196,10 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
+            _cache.Insert(Tracker + fileId, tracker with { }, _cacheTimeout, _callbackAction);
         }
     }
-    
+
     private void RemoveTracker<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
@@ -204,22 +211,25 @@ public class FileTrackerHelper
     private Action<object, object, EvictionReason, object> EvictionCallback()
     {
         return (cacheFileId, fileTracker, reason, _) =>
-        {            
+        {
             if (reason != EvictionReason.Expired || cacheFileId == null)
             {
                 return;
             }
 
+            ConfiguredTaskAwaitable t;
             var fId = cacheFileId.ToString()?.Substring(Tracker.Length);
-            
-            if(int.TryParse(fId, out var internalFileId))
+
+            if (int.TryParse(fId, out var internalFileId))
             {
-                Callback(internalFileId, fileTracker as FileTracker).Wait();
+                t = Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false);
             }
             else
             {
-                Callback(fId, fileTracker as FileTracker).Wait();
+                t = Callback(fId, fileTracker as FileTracker).ConfigureAwait(false);
             }
+
+            t.GetAwaiter().GetResult();
         };
 
         async Task Callback<T>(T fileId, FileTracker fileTracker)
@@ -232,22 +242,28 @@ public class FileTrackerHelper
                 }
 
                 var editedBy = fileTracker.EditingBy.FirstOrDefault();
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+
+                await using var scope = _serviceProvider.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
 
                 var commonLinkUtility = scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>();
                 commonLinkUtility.ServerUri = editedBy.Value.BaseUri;
-                
+
                 var helper = scope.ServiceProvider.GetRequiredService<DocumentServiceHelper>();
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
                 var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileAsync(fileId));
-                
-                if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
+                using (_logger.BeginScope(new[]
+                       {
+                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}")
+                       }))
                 {
-                    _cache.Insert(Tracker + fileId, fileTracker with {}, _cacheTimeout, _callbackAction);
+                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
+                    {
+                        _cache.Insert(Tracker + fileId, fileTracker with { }, _cacheTimeout, _callbackAction);
+                    }
                 }
             }
             catch (Exception e)
@@ -265,16 +281,18 @@ public record FileTracker
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
         EditingBy = new()
-        { 
-            { tabId, new TrackInfo
+        {
+            {
+                tabId,
+                new TrackInfo
                 {
                     UserId = userId,
                     NewScheme = newScheme,
                     EditingAlone = editingAlone,
                     TenantId = tenantId,
                     BaseUri = baseUri
-                } 
-            } 
+                }
+            }
         };
     }
 
@@ -285,9 +303,9 @@ public record FileTracker
         public DateTime TrackTime { get; set; } = DateTime.UtcNow;
         public required Guid UserId { get; init; }
         public required int TenantId { get; init; }
-        
+
         public required string BaseUri { get; init; }
-        public required bool NewScheme { get;  init; }
-        public required bool EditingAlone { get;  init; }
+        public required bool NewScheme { get; init; }
+        public required bool EditingAlone { get; init; }
     }
 }
