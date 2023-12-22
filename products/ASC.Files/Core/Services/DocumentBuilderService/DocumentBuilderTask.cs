@@ -63,8 +63,11 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             await using var scope = serviceProvider.CreateAsyncScope();
 
-            var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
-            commonLinkUtility.ServerUri = _baseUri;
+            if (!string.IsNullOrEmpty(_baseUri))
+            {
+                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                commonLinkUtility.ServerUri = _baseUri;
+            }
 
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
