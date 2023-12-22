@@ -32,8 +32,14 @@ public class ClientService implements ClientRetrieveUsecases {
     private final OAuth2RegisteredClientConfiguration configuration;
     private final ClientPersistenceQueryUsecases clientUsecases;
 
+    /**
+     *
+     * @param id
+     * @return
+     * @throws ClientPermissionException
+     */
     public RegisteredClient getClientById(String id) throws ClientPermissionException {
-        MDC.put("client_id", id);
+        MDC.put("clientId", id);
         log.info("Trying to get client by id");
         var client = clientUsecases.getById(id);
         if (client == null)
@@ -45,13 +51,22 @@ public class ClientService implements ClientRetrieveUsecases {
             throw new ClientPermissionException(String
                     .format("client with id %s is disabled", id));
         }
+
         MDC.clear();
+
         return toObject(client);
     }
 
+    /**
+     *
+     * @param clientId
+     * @return
+     * @throws ClientPermissionException
+     */
     public RegisteredClient getClientByClientId(String clientId) throws ClientPermissionException {
-        MDC.put("client_id", clientId);
+        MDC.put("clientId", clientId);
         log.info("Trying to get client by client id");
+
         var client = clientUsecases.getClientByClientId(clientId);
         if (client == null)
             return null;
@@ -62,10 +77,17 @@ public class ClientService implements ClientRetrieveUsecases {
             throw new ClientPermissionException(String
                     .format("client with client_id %s is disabled", clientId));
         }
+
         MDC.clear();
+
         return toObject(client);
     }
 
+    /**
+     *
+     * @param client
+     * @return
+     */
     private RegisteredClient toObject(Client client) {
         return RegisteredClient.withId(client.getClientId())
                 .clientId(client.getClientId())

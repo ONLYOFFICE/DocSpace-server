@@ -8,6 +8,10 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+/**
+ *
+ *
+ */
 public class HttpUtils {
     private static final String[] IP_HEADERS = {
             "X-Forwarded-Host",
@@ -26,6 +30,11 @@ public class HttpUtils {
 
     private HttpUtils() {}
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String getRequestIP(HttpServletRequest request) {
         for (String header: IP_HEADERS) {
             String value = request.getHeader(header);
@@ -39,6 +48,10 @@ public class HttpUtils {
         return request.getRemoteAddr();
     }
 
+    /**
+     *
+     * @return
+     */
     public static String getIpAddress() {
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
