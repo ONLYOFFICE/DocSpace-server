@@ -108,22 +108,9 @@ resilience4j:
         slidingWindowType: COUNT_BASED
   bulkhead:
     instances:
-      docspaceBulkhead:
+      asc:
         maxConcurrentCalls: 100
         maxWaitDuration: 400ms
-  ratelimiter:
-    configs:
-      default:
-        limitRefreshPeriod: 1s
-        limitForPeriod: 1000
-        timeoutDuration: 500ms
-        registerHealthIndicator: true
-        eventConsumerBufferSize: 100
-    instances:
-      getRateLimiter:
-        baseConfig: default
-      mutateRateLimiter:
-        baseConfig: default
 
 management:
   health:
