@@ -107,7 +107,7 @@ public class WorkspaceMigratingFiles(
         }
         else
         {
-            _folder = rootFolders[0];
+            _folder = rootFolders.Count == 0 ? "0" : rootFolders[0];
         }
 
         foreach (var row in dataFolders.Rows.Cast<DataRow>())
@@ -188,7 +188,7 @@ public class WorkspaceMigratingFiles(
 
     public override async Task MigrateAsync()
     {
-        if (!ShouldImport)
+        if (!ShouldImport || _storage.Folders.Count + _storage.Files.Count == 0)
         {
             return;
         }
