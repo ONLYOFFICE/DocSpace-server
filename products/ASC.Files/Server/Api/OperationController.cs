@@ -79,7 +79,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
             TaskId = currentTaskId,
             Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString()),
-            BaseUri = commonLinkUtility.GetFullAbsolutePath("")
+            BaseUri = commonLinkUtility.ServerRootPath
         });
 
         foreach (var e in tasks)

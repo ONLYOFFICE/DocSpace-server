@@ -819,7 +819,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
 
-        var baseUri = commonLinkUtility.GetFullAbsolutePath("");
+        var baseUri = commonLinkUtility.ServerRootPath;
 
         task.Init(baseUri, tenantId, userId, null, null, null);
 
