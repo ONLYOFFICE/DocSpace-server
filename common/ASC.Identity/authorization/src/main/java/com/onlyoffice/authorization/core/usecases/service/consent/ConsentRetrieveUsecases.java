@@ -9,5 +9,11 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
  *
  */
 public interface ConsentRetrieveUsecases {
+    /**
+     *
+     * @param registeredClientId
+     * @param principalName
+     * @return
+     */
     OAuth2AuthorizationConsent findById(String registeredClientId, String principalName);
 }

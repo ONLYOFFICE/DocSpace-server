@@ -1,3 +1,6 @@
+application:
+  instance:
+    issuer: ${ISSUER_ADDRESS:http://127.0.0.1:8080}
 server:
   shutdown: graceful
   host: ${SERVER_ADDRESS:127.0.0.1}
@@ -30,9 +33,16 @@ spring:
           max-attempts: 3
           max-interval: 3000
           multiplier: 3.0
+  security:
+    oauth2:
+      registeredClient:
+        accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
+        refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
+        authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
+  cloud:
     messaging:
-      configuration:
-        properties:
+      rabbitmq:
+        queues:
           authorization:
             exchange: asc_identity_authorization_exchange
             queue: asc_identity_authorization_queue
@@ -47,19 +57,20 @@ spring:
             deadExchange: asc_identity_consent_dlx
             deadQueue: asc_identity_consent_dlq
             deadRouting: asc_identity_consent_dlr
-  security:
-    oauth2:
-      server:
-        issuer: ${ISSUER_ADDRESS:http://127.0.0.1:8080}
-      registered:
-        client:
-          accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
-          refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
-          authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
-  cloud:
     loadbalancer:
       ribbon:
         enable: false
+    ratelimiter:
+      redis:
+        addresses: ${REDIS_ADDRESSES:localhost:6379}
+        settings:
+          forceSSL: true
+          username: ""
+          password: ""
+        limiters:
+          - name: "identityAuthorizationRateLimiter"
+            limit: 5
+            refresh: 1
     openfeign:
       circuitbreaker:
         enabled: true
@@ -82,20 +93,19 @@ spring:
           time_zone: UTC
         dialect: org.hibernate.dialect.MySQLDialect
 
-caching:
-  redis:
-    addresses: ${REDIS_ADDRESSES:redis://localhost:6379}
-    limiters:
-      -
-        name: "identityAuthorizationLogin"
-        limit: 3
-        refresh: 1
-      -
-        name: "identityAuthorizationConsent"
-        limit: 3
-        refresh: 1
-
 resilience4j:
+  circuitbreaker:
+    instances:
+      asc:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
   bulkhead:
     instances:
       docspaceBulkhead:

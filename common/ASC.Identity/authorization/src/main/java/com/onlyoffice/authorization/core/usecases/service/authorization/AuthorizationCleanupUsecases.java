@@ -9,5 +9,9 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
  *
  */
 public interface AuthorizationCleanupUsecases {
+    /**
+     *
+     * @param authorization
+     */
     void remove(OAuth2Authorization authorization);
 }

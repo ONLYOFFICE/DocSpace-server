@@ -62,6 +62,10 @@ spring:
     ratelimiter:
       redis:
         addresses: ${REDIS_ADDRESSES:localhost:6379}
+        settings:
+          forceSSL: true
+          username: ""
+          password: ""
         limiters:
           - name: "identityFetchClient"
             limit: 5

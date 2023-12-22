@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.api.configuration;
+package com.onlyoffice.authorization.configuration;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
