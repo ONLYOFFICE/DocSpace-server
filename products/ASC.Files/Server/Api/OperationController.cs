@@ -323,7 +323,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <category>Operations</category>
     /// <param type="System.String, System" name="id" method="url">Operation ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">List of file operations</returns>
-    /// <path>api/2.0/files/fileops/terminate/{id?}</path>
+    /// <path>api/2.0/files/fileops/terminate/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]
