@@ -190,7 +190,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var (tasks, _) = await _fileStorageService.DeleteFolderAsync("delete", id, false, inDto.DeleteAfter, true);
+        var tasks = await _fileStorageService.DeleteFolderAsync(id, false, inDto.DeleteAfter, true);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -213,7 +213,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -236,7 +236,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
