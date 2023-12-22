@@ -32,8 +32,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileStorageService fileStorageService,
         IEventBus eventBus,
-        TenantManager tenantManager, 
-        AuthContext authContext)
+        TenantManager tenantManager,
+        AuthContext authContext,
+        CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -68,7 +69,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             folders.Add(folderId, string.Empty);
         }
 
-        var (tasks, currentTaskId) = await fileStorageService.BulkDownloadAsync(folders, files, false);
+        var baseUri = commonLinkUtility.GetFullAbsolutePath("");
+
+        var (tasks, currentTaskId) = await fileStorageService.BulkDownloadAsync(folders, files, enqueueTask: false, baseUri: baseUri);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -76,7 +79,8 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         {
             FileStringIds = files.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
             FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            TaskId = currentTaskId
+            TaskId = currentTaskId,
+            BaseUri = baseUri
         });
 
         foreach (var e in tasks)

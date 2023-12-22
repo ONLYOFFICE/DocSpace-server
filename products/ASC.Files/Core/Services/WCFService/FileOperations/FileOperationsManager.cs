@@ -117,7 +117,7 @@ public class FileOperationsManager(TempStream tempStream,
     }
 
     public (List<FileOperationResult>, string) Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null)
+        ExternalShareData externalShareData, bool enqueueTask = true, string taskId = null, string baseUri = null)
     {
         var operations = _tasks.GetAllTasks()
             .Where(t => new Guid(t[FileOperation.Owner]) == ProcessUserId(userId))
@@ -133,7 +133,7 @@ public class FileOperationsManager(TempStream tempStream,
 
         var op1 = new FileDownloadOperation<int>(serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenant, headers, externalShareData));
         var op2 = new FileDownloadOperation<string>(serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenant, headers, externalShareData));
-        var op = new FileDownloadOperation(serviceProvider, tempStream, op2, op1);
+        var op = new FileDownloadOperation(serviceProvider, tempStream, baseUri, op2, op1);
 
         if (!string.IsNullOrEmpty(taskId))
         {

@@ -1835,12 +1835,12 @@ public class FileStorageService //: IFileStorageService
         return fileOperationsManager.CancelOperations(authContext.CurrentAccount.ID, id);
     }
 
-    public async Task<(List<FileOperationResult>, string)> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, bool enqueueTask = true, string taskId = null)
+    public async Task<(List<FileOperationResult>, string)> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, bool enqueueTask = true, string taskId = null, string baseUri = null)
     {
         ErrorIf(folders.Count == 0 && files.Count == 0, FilesCommonResource.ErrorMassage_BadRequest);
 
         return fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, GetHttpHeaders(),
-            await externalShare.GetCurrentShareDataAsync(), enqueueTask, taskId);
+            await externalShare.GetCurrentShareDataAsync(), enqueueTask, taskId, baseUri);
     }
 
     public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(IEnumerable<JsonElement> filesId, IEnumerable<JsonElement> foldersId, T1 destFolderId)
