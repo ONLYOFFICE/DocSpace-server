@@ -398,9 +398,10 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
     where TFolder : class, TItem
     where TItem : class
 {
-    protected readonly int _tenantId;
+    protected int TenantId => _tenantManager.GetCurrentTenant().Id;
     protected readonly IServiceProvider _serviceProvider;
     protected readonly UserManager _userManager;
+    private readonly TenantManager _tenantManager;
     protected readonly TenantUtil _tenantUtil;
     protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     protected readonly SetupInfo _setupInfo;
@@ -425,12 +426,12 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
     {
         _serviceProvider = serviceProvider;
         _userManager = userManager;
+        _tenantManager = tenantManager;
         _tenantUtil = tenantUtil;
         _dbContextFactory = dbContextFactory;
         _setupInfo = setupInfo;
         _fileUtility = fileUtility;
         _tempPath = tempPath;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
         DaoSelector = regexDaoSelectorBase;
     }
 
@@ -458,7 +459,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
             {
                 Id = id,
                 HashId = result,
-                TenantId = _tenantId
+                TenantId = TenantId
             };
 
             await filesDbContext.ThirdpartyIdMapping.AddAsync(newMapping);

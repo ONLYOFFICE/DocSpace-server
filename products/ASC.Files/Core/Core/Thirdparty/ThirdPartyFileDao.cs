@@ -39,9 +39,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
     private readonly IDaoSelector<TFile, TFolder, TItem> _daoSelector;
     private readonly CrossDao _crossDao;
     private readonly IFileDao<int> _fileDao;
-    private readonly int _tenantId;
+    private readonly TenantManager _tenantManager;
+    private int TenantId =>  _tenantManager.GetCurrentTenant().Id;
 
-    protected ThirdPartyFileDao(UserManager userManager,
+    protected ThirdPartyFileDao(
+        UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<TFile, TFolder, TItem> daoSelector,
         CrossDao crossDao,
@@ -54,8 +56,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         _daoSelector = daoSelector;
         _crossDao = crossDao;
         _fileDao = fileDao;
+        _tenantManager = tenantManager;
         Dao = dao;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
     }
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
@@ -390,10 +392,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteTagLinksAsync(filesDbContext, TenantId, id);
             await Queries.DeleteTagsAsync(filesDbContext);
-            await Queries.DeleteFilesSecuritiesAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteFilesSecuritiesAsync(filesDbContext, TenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, TenantId, id);
 
             await tx.CommitAsync();
         });

@@ -41,8 +41,9 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     private readonly TempStream _tempStream;
     private readonly SetupInfo _setupInfo;
     private readonly IDaoBase<TFile, TFolder, TItem> _dao;
+    private readonly TenantManager _tenantManager;
     private IProviderInfo<TFile, TFolder, TItem> _providerInfo;
-    private readonly int _tenantId;
+    private int TenantId => _tenantManager.GetCurrentTenant().Id;
 
     public ThirdPartyFolderDao(IDbContextFactory<FilesDbContext> dbContextFactory,
         UserManager userManager,
@@ -64,7 +65,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
         _tempStream = tempStream;
         _setupInfo = setupInfo;
         _dao = dao;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
+        _tenantManager = tenantManager;
     }
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
@@ -262,10 +263,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(context, _tenantId, id);
+            await Queries.DeleteTagLinksAsync(context, TenantId, id);
             await Queries.DeleteDbFilesTag(context);
-            await Queries.DeleteSecuritiesAsync(context, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(context, _tenantId, id);
+            await Queries.DeleteSecuritiesAsync(context, TenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(context, TenantId, id);
 
             await tx.CommitAsync();
         });
