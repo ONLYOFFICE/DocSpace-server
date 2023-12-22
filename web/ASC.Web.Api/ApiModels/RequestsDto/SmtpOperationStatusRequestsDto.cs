@@ -58,7 +58,7 @@ public class SmtpOperationStatusRequestsDto
             Error = "",
             Status = "",
             Percents = 0,
-            Completed = true,
+            Completed = true
         };
     }
 }

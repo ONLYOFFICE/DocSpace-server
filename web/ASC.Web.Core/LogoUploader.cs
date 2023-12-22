@@ -62,7 +62,7 @@ public class LogoUploader
                 var data = new byte[logo.Length];
 
                 var reader = new BinaryReader(logo.OpenReadStream());
-                reader.Read(data, 0, (int)logo.Length);
+                _ = reader.Read(data, 0, (int)logo.Length);
                 reader.Close();
 
                 if (logo.ContentType.Contains("image/x-icon"))

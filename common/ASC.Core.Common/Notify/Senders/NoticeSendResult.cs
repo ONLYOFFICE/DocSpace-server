@@ -31,5 +31,5 @@ public enum NoticeSendResult
     OK,
     TryOnceAgain,
     MessageIncorrect,
-    SendingImpossible,
+    SendingImpossible
 }

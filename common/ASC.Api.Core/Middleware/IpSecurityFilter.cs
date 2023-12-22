@@ -27,17 +27,15 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class IpSecurityFilter(ILogger<IpSecurityFilter> logger,
+public class IpSecurityFilter(
+        ILogger<IpSecurityFilter> logger,
         AuthContext authContext,
-        IPSecurity.IPSecurity IPSecurity,
-        SettingsManager settingsManager)
+        IPSecurity.IPSecurity ipSecurity)
     : IAsyncResourceFilter
 {
-    private readonly SettingsManager _settingsManager = settingsManager;
-
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (authContext.IsAuthenticated && !(await IPSecurity.VerifyAsync()))
+        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
         {
             context.Result = new ObjectResult(Resource.ErrorIpSecurity)
             {

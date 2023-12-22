@@ -254,7 +254,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
             // Specifies whether referrals are followed automatically
             // Referrals of any type other than to an LDAP server (for example, a referral URL other than ldap://something) are ignored on automatic referral following.
             // The default is false.
-            ReferralFollowing = true,
+            ReferralFollowing = true
             // The number of seconds to wait for search results.
             // Sets the maximum number of seconds that the server is to wait when returning search results.
             //ServerTimeLimit = 600000, // 10 minutes
@@ -286,10 +286,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
                     {
                         _logger.WarnStartTrySearchSimple();
 
-                        List<LdapObject> simpleResults;
-
-                        if (TrySearchSimple(searchBase, scope, searchFilter, out simpleResults, attributes, limit,
-                            searchConstraints))
+                        if (TrySearchSimple(searchBase, scope, searchFilter, out var simpleResults, attributes, limit, searchConstraints))
                         {
                             if (entries.Count >= simpleResults.Count)
                             {
@@ -386,7 +383,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
             // Specifies whether referrals are followed automatically
             // Referrals of any type other than to an LDAP server (for example, a referral URL other than ldap://something) are ignored on automatic referral following.
             // The default is false.
-            ReferralFollowing = true,
+            ReferralFollowing = true
             // The number of seconds to wait for search results.
             // Sets the maximum number of seconds that the server is to wait when returning search results.
             //ServerTimeLimit = 600000, // 10 minutes
@@ -462,13 +459,12 @@ public class NovellLdapSearcher(IConfiguration configuration,
                 foreach (var control in controls)
                 {
                     /* Is this the LdapPagedResultsResponse control? */
-                    if (!(control is SimplePagedResultsControl))
+                    if (control is not SimplePagedResultsControl)
                     {
                         continue;
                     }
 
-                    var response = new SimplePagedResultsControl(control.Id,
-                        control.Critical, control.GetValue());
+                    var response = new SimplePagedResultsControl(control.Id, control.Critical, control.GetValue());
 
                     cookie = response.Cookie;
                 }

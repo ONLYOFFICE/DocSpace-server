@@ -56,40 +56,41 @@ public class WebPlugin
 [Singleton]
 public class WebPluginCache
 {
-    private readonly ICache _сache;
+    private readonly ICache _cache;
     private readonly ICacheNotify<WebPluginCacheItem> _notify;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
 
     public WebPluginCache(ICacheNotify<WebPluginCacheItem> notify, ICache cache)
     {
-        _сache = cache;
+        _cache = cache;
         _notify = notify;
 
-        _notify.Subscribe(i => _сache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public List<WebPlugin> Get(string key)
     {
-        return _сache.Get<List<WebPlugin>>(key);
+        return _cache.Get<List<WebPlugin>>(key);
     }
 
     public void Insert(string key, object value)
     {
         _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
-        _сache.Insert(key, value, _cacheExpiration);
+        _cache.Insert(key, value, _cacheExpiration);
     }
 
     public void Remove(string key)
     {
         _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
-        _сache.Remove(key);
+        _cache.Remove(key);
     }
 }
 
 [Scope]
-public class WebPluginManager(CoreBaseSettings coreBaseSettings,
+public class WebPluginManager(
+    CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     WebPluginConfigSettings webPluginConfigSettings,
@@ -104,14 +105,14 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
     private const string PluginFileName = "plugin.js";
     private const string AssetsFolderName = "assets";
 
-    private void DemandWebPlugins(string action = null)
+    private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
         if (!webPluginConfigSettings.Enabled)
         {
             throw new SecurityException("Plugins disabled");
         }
 
-        if (!string.IsNullOrWhiteSpace(action) && webPluginConfigSettings.Allow.Any() && !webPluginConfigSettings.Allow.Contains(action))
+        if ((upload && !webPluginConfigSettings.Upload) || (delete && !webPluginConfigSettings.Delete))
         {
             throw new SecurityException("Forbidden action");
         }
@@ -140,7 +141,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
 
     public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system)
     {
-        DemandWebPlugins("upload");
+        DemandWebPlugins(upload: true);
 
         if (system && !coreBaseSettings.Standalone)
         {
@@ -150,10 +151,10 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         if (Path.GetExtension(file.FileName).ToLowerInvariant() != webPluginConfigSettings.Extension)
         {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileExtension);
-            }
+        }
 
         if (file.Length > webPluginConfigSettings.MaxSize)
-    {
+        {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileSize);
         }
 
@@ -251,7 +252,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         var jsVariableRegex = new Regex(@"^[0-9a-zA-Z_$]+$");
 
         if (string.IsNullOrEmpty(webPlugin.PluginName) || !jsVariableRegex.IsMatch(webPlugin.PluginName))
-    {
+        {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginName);
         }
 
@@ -262,34 +263,34 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         if (system)
         {
             if (tenantWebPlugins.Any(x => 
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
-                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                    x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-    }
+            }
 
             if (systemWebPlugins.Any(x => 
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
-                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-    {
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                    !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
         }
         else
         {
             if (systemWebPlugins.Any(x =>
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
-                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                    x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
 
             if (tenantWebPlugins.Any(x =>
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
-                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                    !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-    }
+            }
         }
     }
 
@@ -388,10 +389,10 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         var webPlugin = webPlugins.Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) ?? throw new CustomHttpException(HttpStatusCode.NotFound, Resource.ErrorWebPluginNotFound);
 
         return webPlugin;
-        }
+    }
 
     public async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, string name, bool enabled, string settings)
-        {
+    {
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 
         return await UpdateWebPluginAsync(tenantId, webPlugin, enabled, settings);
@@ -409,14 +410,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         {
             var webPluginState = new WebPluginState(enabled, encryptedSettings);
 
-            if (enabledPlugins.ContainsKey(webPlugin.Name))
-        {
-                enabledPlugins[webPlugin.Name] = webPluginState;
-        }
-        else
-        {
-                enabledPlugins.Add(webPlugin.Name, webPluginState);
-        }
+            enabledPlugins[webPlugin.Name] = webPluginState;
         }
         else
         {
@@ -441,7 +435,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
 
     public async Task<WebPlugin> DeleteWebPluginAsync(int tenantId, string name)
     {
-        DemandWebPlugins("delete");
+        DemandWebPlugins(delete: true);
 
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 

@@ -26,8 +26,6 @@
 
 using Box.V2.Exceptions;
 
-using BoxSDK = Box.V2;
-
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient]

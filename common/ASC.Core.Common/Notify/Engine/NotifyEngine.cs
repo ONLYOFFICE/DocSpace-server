@@ -85,15 +85,9 @@ public class NotifyEngine(Context context,
             sendResponces.AddRange(await SendGroupNotify(request, serviceScope));
         }
 
-        NotifyResult result;
-        if (sendResponces.Count == 0)
-        {
-            result = new NotifyResult(SendResult.OK, sendResponces);
-        }
-        else
-        {
-            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
-        }
+        var result = sendResponces.Count == 0 ? 
+            new NotifyResult(SendResult.OK, sendResponces) : 
+            new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         _logger.Debug(result.ToString());
 
         return result;
@@ -148,7 +142,7 @@ public class NotifyEngine(Context context,
 
                     try
                     {
-                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? new IRecipient[0];
+                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? Array.Empty<IRecipient>();
                         foreach (var recipient in recipients)
                         {
                             try
@@ -308,12 +302,13 @@ public class NotifyEngine(Context context,
         {
             formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
-                noticeMessage, new[]
-                                       {
-                                               new TagValue(Context.SysRecipientId, request.Recipient.ID),
-                                               new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                                               new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
-                                       }
+                noticeMessage, 
+                new ITagValue[]
+               {
+                       new TagValue(Context.SysRecipientId, request.Recipient.ID),
+                       new TagValue(Context.SysRecipientName, request.Recipient.Name),
+                       new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
+               }
                 );
             //Do styling here
             if (!string.IsNullOrEmpty(pattern.Styler))

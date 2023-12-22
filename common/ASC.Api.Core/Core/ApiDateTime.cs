@@ -284,12 +284,12 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
             return true;
         }
 
-        if (obj is not ApiDateTime)
+        if (obj is not ApiDateTime time)
         {
             return false;
         }
 
-        return Equals((ApiDateTime)obj);
+        return Equals(time);
     }
 
     public bool Equals(ApiDateTime other)

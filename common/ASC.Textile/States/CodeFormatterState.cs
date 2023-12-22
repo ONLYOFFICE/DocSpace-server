@@ -77,7 +77,7 @@ public class CodeFormatterState(TextileFormatter f) : FormatterState(f)
             return true;
         }
 
-        _shouldExitNextTime = Regex.IsMatch(input, @"</code>");
+        _shouldExitNextTime = Regex.IsMatch(input, "</code>");
         _shouldFixHtmlEntities = !_shouldExitNextTime;
         return false;
     }

@@ -69,7 +69,4 @@ public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
 }
 
 [Transient]
-public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>
-{
-
-}
+public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>;

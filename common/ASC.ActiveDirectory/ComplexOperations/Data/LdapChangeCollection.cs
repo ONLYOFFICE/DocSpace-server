@@ -118,25 +118,18 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
         Add(change);
     }
 
-    public void SetAddGroupMembersChange(GroupInfo group,
-        List<UserInfo> members)
+    public void SetAddGroupMembersChange(GroupInfo group, IEnumerable<UserInfo> members)
     {
-        var fieldChanges =
-            members.Select(
-                member =>
-                    new LdapItemChange(LdapItemChangeKey.Member, null,
-                        userFormatter.GetUserName(member))).ToList();
+        var fieldChanges = members.Select(member => new LdapItemChange(LdapItemChangeKey.Member, null, userFormatter.GetUserName(member))).ToList();
 
-        var change = new LdapChange(group.Sid, group.Name,
-            LdapChangeType.Group, LdapChangeAction.AddMember, fieldChanges);
+        var change = new LdapChange(group.Sid, group.Name, LdapChangeType.Group, LdapChangeAction.AddMember, fieldChanges);
 
         Add(change);
     }
 
     public void SetSkipGroupChange(GroupInfo group)
     {
-        var change = new LdapChange(group.Sid, group.Name, LdapChangeType.Group,
-            LdapChangeAction.Skip);
+        var change = new LdapChange(group.Sid, group.Name, LdapChangeType.Group, LdapChangeAction.Skip);
 
         Add(change);
     }
@@ -162,17 +155,11 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
         Add(change);
     }
 
-    public void SetRemoveGroupMembersChange(GroupInfo group,
-        List<UserInfo> members)
+    public void SetRemoveGroupMembersChange(GroupInfo group, IEnumerable<UserInfo> members)
     {
-        var fieldChanges =
-            members.Select(
-                member =>
-                    new LdapItemChange(LdapItemChangeKey.Member, null,
-                        userFormatter.GetUserName(member))).ToList();
+        var fieldChanges = members.Select(member => new LdapItemChange(LdapItemChangeKey.Member, null, userFormatter.GetUserName(member))).ToList();
 
-        var change = new LdapChange(group.Sid, group.Name,
-            LdapChangeType.Group, LdapChangeAction.RemoveMember, fieldChanges);
+        var change = new LdapChange(group.Sid, group.Name, LdapChangeType.Group, LdapChangeAction.RemoveMember, fieldChanges);
 
         Add(change);
     }
@@ -183,15 +170,10 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
     {
         try
         {
-            var valueSrc = before != null
-                ? before.GetType().GetProperty(propName).GetValue(before, null) as string
-                : "";
-            var valueDst = after != null
-                ? after.GetType().GetProperty(propName).GetValue(before, null) as string
-                : "";
+            var valueSrc = before != null ? before.GetType().GetProperty(propName).GetValue(before, null) as string : "";
+            var valueDst = after != null ? after.GetType().GetProperty(propName).GetValue(before, null) as string : "";
 
-            LdapItemChangeKey key;
-            if (!Enum.TryParse(propName, out key))
+            if (!Enum.TryParse(propName, out LdapItemChangeKey key))
             {
                 throw new InvalidEnumArgumentException(propName);
             }

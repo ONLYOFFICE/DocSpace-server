@@ -26,7 +26,7 @@
 
 namespace ASC.Feed;
 
-public struct TimeInterval(DateTime fromTime, DateTime toTime)
+public readonly struct TimeInterval(DateTime fromTime, DateTime toTime)
 {
     public DateTime From { get; } = fromTime;
     public DateTime To => toTime != default ? toTime : DateTime.MaxValue;

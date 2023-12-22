@@ -28,20 +28,8 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class OwnerController : BaseSettingsController
-{
-    private readonly MessageService _messageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthContext _authContext;
-    private readonly PermissionContext _permissionContext;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly MessageTarget _messageTarget;
-
-    public OwnerController(
-        MessageService messageService,
+[DefaultRoute("owner")]
+public class OwnerController(MessageService messageService,
         CommonLinkUtility commonLinkUtility,
         StudioNotifyService studioNotifyService,
         ApiContext apiContext,
@@ -53,19 +41,9 @@ public class OwnerController : BaseSettingsController
         DisplayUserSettingsHelper displayUserSettingsHelper,
         MessageTarget messageTarget,
         IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _messageService = messageService;
-        _commonLinkUtility = commonLinkUtility;
-        _studioNotifyService = studioNotifyService;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _authContext = authContext;
-        _permissionContext = permissionContext;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _messageTarget = messageTarget;
-    }
-
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.
     /// </summary>
@@ -77,29 +55,29 @@ public class OwnerController : BaseSettingsController
     /// <returns type="System.Object, System">Message about changing the portal owner</returns>
     /// <path>api/2.0/settings/owner</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("owner")]
+    [HttpPost("")]
     public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var curTenant = await _tenantManager.GetCurrentTenantAsync();
-        var owner = await _userManager.GetUsersAsync(curTenant.OwnerId);
-        var newOwner = await _userManager.GetUsersAsync(inDto.OwnerId);
+        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
+        var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
-        if (await _userManager.IsUserAsync(newOwner))
+        if (await userManager.IsUserAsync(newOwner))
         {
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(_authContext.CurrentAccount.ID) || Guid.Empty.Equals(newOwner.Id))
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || Guid.Empty.Equals(newOwner.Id))
         {
             return new { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
-        var confirmLink = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
-        await _studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
+        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
 
-        await _messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
         return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
@@ -116,14 +94,14 @@ public class OwnerController : BaseSettingsController
     /// <returns></returns>
     /// <path>api/2.0/settings/owner</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("owner")]
+    [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task OwnerAsync(SettingsRequestsDto inDto)
     {
         var newOwner = Constants.LostUser;
         try
         {
-            newOwner = await _userManager.GetUsersAsync(inDto.OwnerId);
+            newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
         }
         catch
         {
@@ -133,15 +111,15 @@ public class OwnerController : BaseSettingsController
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        if (await _userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
+        if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        var curTenant = await _tenantManager.GetCurrentTenantAsync();
+        var curTenant = await tenantManager.GetCurrentTenantAsync();
         curTenant.OwnerId = newOwner.Id;
-        await _tenantManager.SaveTenantAsync(curTenant);
+        await tenantManager.SaveTenantAsync(curTenant);
 
-        await _messageService.SendAsync(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
     }
 }

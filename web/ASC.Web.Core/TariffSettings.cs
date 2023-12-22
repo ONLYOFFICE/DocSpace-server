@@ -45,7 +45,7 @@ public class TariffSettings : ISettings<TariffSettings>
         {
             HideNotifySetting = false,
             HidePricingPageForUsers = false,
-            LicenseAcceptSetting = DateTime.MinValue.ToString(_cultureInfo),
+            LicenseAcceptSetting = DateTime.MinValue.ToString(_cultureInfo)
         };
     }
 

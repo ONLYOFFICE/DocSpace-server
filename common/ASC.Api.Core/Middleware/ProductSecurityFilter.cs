@@ -59,7 +59,7 @@ public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
                     { "files", WebItemManager.DocumentsProductID },
                     { "project", WebItemManager.ProjectsProductID },
                     { "calendar", WebItemManager.CalendarProductID },
-                    { "mail", WebItemManager.MailProductID },
+                    { "mail", WebItemManager.MailProductID }
                 };
     }
 

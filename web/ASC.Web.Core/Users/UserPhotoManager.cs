@@ -69,12 +69,12 @@ public sealed class ResizeWorkerItem : DistributedTask
             return true;
         }
 
-        if (obj is not ResizeWorkerItem)
+        if (obj is not ResizeWorkerItem item)
         {
             return false;
         }
 
-        return Equals((ResizeWorkerItem)obj);
+        return Equals(item);
     }
 
     public bool Equals(ResizeWorkerItem other)
@@ -663,7 +663,7 @@ public class UserPhotoManager(UserManager userManager,
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
 
-        if (!_resizeQueue.GetAllTasks<ResizeWorkerItem>().Any(r => r["key"] == key))
+        if (_resizeQueue.GetAllTasks<ResizeWorkerItem>().All(r => r["key"] != key))
         {
             //Add
             _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);

@@ -119,7 +119,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
     {
         var tenantPath = tenant != null ? TenantPath.CreatePath(tenant.Value) : TenantPath.CreatePath(DefaultTenantName);
 
-        tenant = tenant ?? -2;
+        tenant ??= -2;
 
         var section = storageFactoryConfig.GetStorage(region);
         if (section == null)

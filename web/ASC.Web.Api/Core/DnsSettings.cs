@@ -104,8 +104,8 @@ public class DnsSettings(PermissionContext permissionContext,
         {
             return false;
         }
-        Uri test;
-        if (Uri.TryCreate(domain.Contains(Uri.SchemeDelimiter) ? domain : Uri.UriSchemeHttp + Uri.SchemeDelimiter + domain, UriKind.Absolute, out test))
+
+        if (Uri.TryCreate(domain.Contains(Uri.SchemeDelimiter) ? domain : Uri.UriSchemeHttp + Uri.SchemeDelimiter + domain, UriKind.Absolute, out var test))
         {
             try
             {

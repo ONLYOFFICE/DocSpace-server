@@ -57,7 +57,7 @@ public class CapabilitiesDto
             LdapEnabled = false,
             // Providers = AccountLinkControl.AuthProviders,
             SsoLabel = string.Empty,
-            SsoUrl = string.Empty,
+            SsoUrl = string.Empty
         };
     }
 }

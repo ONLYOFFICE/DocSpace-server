@@ -142,7 +142,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         try
         {
             (var r, total) = await _indexer.SelectWithTotalAsync(expression, true);
-            result = r.Select(r => r.Id).ToList();
+            result = r.Select(entry => entry.Id).ToList();
         }
         catch (Exception e)
         {
@@ -770,14 +770,11 @@ public class FactoryIndexer
             .Select(r => new
             {
                 r.Index,
-                Count = count.ContainsKey(r.Index) ? count[r.Index] : 0,
+                Count = count.GetValueOrDefault(r.Index, 0),
                 DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
-            .Where(r =>
-            {
-                return r.Count > 0;
-            });
+            .Where(r => r.Count > 0);
 
         return new
         {

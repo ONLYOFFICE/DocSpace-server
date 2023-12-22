@@ -57,11 +57,11 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration);
+        containerBuilder.Register(context.Configuration);
     });
 
     var app = builder.Build();

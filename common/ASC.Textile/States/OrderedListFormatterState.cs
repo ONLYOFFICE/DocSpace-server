@@ -29,7 +29,7 @@ namespace Textile.States;
 /// <summary>
 /// Formatting state for a numbered list.
 /// </summary>
-[FormatterState(PatternBegin + @"#+" + PatternEnd)]
+[FormatterState(PatternBegin + "#+" + PatternEnd)]
 public class OrderedListFormatterState(TextileFormatter formatter) : ListFormatterState(formatter)
 {
     protected override void WriteIndent()
@@ -44,11 +44,11 @@ public class OrderedListFormatterState(TextileFormatter formatter) : ListFormatt
 
     protected override bool IsMatchForMe(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + @"," + (maxNestingDepth - 1) + @"})#" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + "," + (maxNestingDepth - 1) + "})#" + Globals.BlockModifiersPattern + @"\s");
     }
 
     protected override bool IsMatchForOthers(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + @"," + (maxNestingDepth - 1) + @"})\*" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + "," + (maxNestingDepth - 1) + @"})\*" + Globals.BlockModifiersPattern + @"\s");
     }
 }

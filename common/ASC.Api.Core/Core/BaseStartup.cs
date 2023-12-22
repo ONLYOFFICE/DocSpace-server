@@ -41,9 +41,9 @@ public abstract class BaseStartup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
 
-    protected virtual bool AddControllersAsServices { get; }
+    protected bool AddControllersAsServices { get; }
     protected virtual bool ConfirmAddScheme { get; }
-    protected virtual bool AddAndUseSession { get; }
+    protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;
@@ -64,7 +64,7 @@ public abstract class BaseStartup
         }
     }
 
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
@@ -102,20 +102,30 @@ public abstract class BaseStartup
             }
         });
 
-        var redisOptions = _configuration.GetSection("Redis").Get<RedisConfiguration>().ConfigurationOptions;
-        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+        var redisConfiguration = _configuration.GetSection("Redis").Get<RedisConfiguration>();
+        IConnectionMultiplexer connectionMultiplexer = null;
+
+        if (redisConfiguration != null)
+        {
+            var configurationOption = redisConfiguration?.ConfigurationOptions;
+
+            configurationOption.ClientName = GetType().Namespace;
+
+            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+            services.AddSingleton(redisConfiguration)
+                    .AddSingleton(redisConnection);
+
+            connectionMultiplexer = redisConnection?.GetConnection();
+        }
 
         services.AddRateLimiter(options =>
         {
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                if (userId == null)
-                {
-                    userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                }
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var permitLimit = 1500;
 
@@ -157,12 +167,8 @@ public abstract class BaseStartup
                 }), 
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                    {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                       if (userId == null)
-                       {
-                           userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                       }
+                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
@@ -245,7 +251,6 @@ public abstract class BaseStartup
         DIHelper.TryAdd<JwtBearerAuthHandler>();
         DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
 
-
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             services.AddCors(options =>
@@ -262,10 +267,12 @@ public abstract class BaseStartup
             });
         }
 
-        services.AddDistributedCache(_configuration);
-        services.AddEventBus(_configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(_configuration);
+        
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(_configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(_configuration)
+                .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
 

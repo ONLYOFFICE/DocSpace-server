@@ -150,7 +150,10 @@ public class S3Storage(TempStream tempStream,
 
     public override Task<Uri> GetCdnPreSignedUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers)
     {
-        if (!_cdnEnabled) return GetInternalUriAsync(domain, path, expire, headers);
+        if (!_cdnEnabled)
+        {
+            return GetInternalUriAsync(domain, path, expire, headers);
+        }
 
         var proto = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? "https" : "http";
 
@@ -290,10 +293,9 @@ public class S3Storage(TempStream tempStream,
             AutoCloseStream = false
         };
 
-        if (!(client is IAmazonS3Encryption))
+        if (client is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
 
@@ -358,10 +360,9 @@ public class S3Storage(TempStream tempStream,
         };
 
         using var s3 = GetClient();
-        if (!(s3 is IAmazonS3Encryption))
+        if (s3 is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
         var response = await s3.InitiateMultipartUploadAsync(request);
@@ -458,7 +459,7 @@ public class S3Storage(TempStream tempStream,
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
 
-        return new S3TarWriteOperator(chunkedUploadSession, sessionHolder);
+            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream);
     }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
@@ -575,9 +576,9 @@ public class S3Storage(TempStream tempStream,
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-            await QuotaUsedDeleteAsync(domain, s3Object.Size);
-        }
-    }
+                    await QuotaUsedDeleteAsync(domain, s3Object.Size);
+                }
+            }
         }
     }
 
@@ -677,7 +678,7 @@ public class S3Storage(TempStream tempStream,
                     {
                         CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
-                        ContentDisposition = "attachment",
+                        ContentDisposition = "attachment"
                     }
         };
 
@@ -1020,7 +1021,7 @@ public class S3Storage(TempStream tempStream,
                 "aes256" => EncryptionMethod.ServerS3,
                 "awskms" => EncryptionMethod.ServerKms,
                 "clientawskms" => EncryptionMethod.ClientKms,
-                _ => EncryptionMethod.None,
+                _ => EncryptionMethod.None
             };
         }
 
@@ -1077,11 +1078,7 @@ public class S3Storage(TempStream tempStream,
             return S3CannedACL.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     private S3CannedACL GetS3Acl(ACL acl)
@@ -1090,7 +1087,7 @@ public class S3Storage(TempStream tempStream,
         {
             ACL.Read => S3CannedACL.PublicRead,
             ACL.Private => S3CannedACL.Private,
-            _ => S3CannedACL.PublicRead,
+            _ => S3CannedACL.PublicRead
         };
     }
 
@@ -1160,7 +1157,8 @@ public class S3Storage(TempStream tempStream,
 
         var policyBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(policyBuilder.ToString()));
         //sign = AWSSDKUtils.HMACSign(policyBase64, _secretAccessKeyId, new HMACSHA1());
-        using var algorithm = new HMACSHA1 { Key = Encoding.UTF8.GetBytes(_secretAccessKeyId) };
+        using var algorithm = new HMACSHA1();
+        algorithm.Key = Encoding.UTF8.GetBytes(_secretAccessKeyId);
         try
         {
             algorithm.Key = Encoding.UTF8.GetBytes(key);
@@ -1211,7 +1209,7 @@ public class S3Storage(TempStream tempStream,
             return s30Objects;
         }
 
-        s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
+        //s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
         return s30Objects;
     }
 
@@ -1285,10 +1283,9 @@ public class S3Storage(TempStream tempStream,
                     CannedACL = GetDomainACL(newdomain)
                 };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 initiateRequest.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
@@ -1347,13 +1344,12 @@ public class S3Storage(TempStream tempStream,
                 DestinationBucket = _bucket,
                 DestinationKey = destinationKey,
                 CannedACL = GetDomainACL(newdomain),
-                MetadataDirective = metadataDirective,
+                MetadataDirective = metadataDirective
             };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
@@ -1366,19 +1362,21 @@ public class S3Storage(TempStream tempStream,
         }
     }
 
-    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey)
+    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
     {
-        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
+        queue.TryDequeue(out var ext);
+        destinationKey += ext;
+        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
 
         using var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
-        var blockSize = 512;
+        const int blockSize = 512;
 
         long prevFileSize = 0;
         try
         {
-            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath);
+            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
         catch { }
@@ -1394,7 +1392,7 @@ public class S3Storage(TempStream tempStream,
         ms.Write(header);
 
         stream.Position = 0;
-        await stream.CopyToAsync(ms);
+        await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
         stream = ms;
@@ -1408,7 +1406,7 @@ public class S3Storage(TempStream tempStream,
             PartNumber = partNumber,
             InputStream = stream
         };
-        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
 
         var completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1417,26 +1415,72 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId,
             PartETags = eTags
         };
-        await s3.CompleteMultipartUploadAsync(completeRequest);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
+        await stream.DisposeAsync();
+        queue.Enqueue(ext);
     }
 
-    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey)
+    public async Task ConcatFileAsync(string pathFile, string destinationDomain, string destinationKey)
     {
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
+
+        using var s3 = GetClient();
+        var obj = await s3.GetObjectMetadataAsync(_bucket, pathFile);
+
+        destinationKey = MakePath(destinationDomain, destinationKey);
+
+        var objectSize = obj.ContentLength;
+
+        var partSize = ChunkSize;
+        long bytePosition = 0;
+
+        for (var i = 1; bytePosition < objectSize; i++)
+        {
+            var copyRequest = new CopyPartRequest
+            {
+                DestinationBucket = _bucket,
+                DestinationKey = destinationKey,
+                SourceBucket = _bucket,
+                SourceKey = pathFile,
+                UploadId = uploadId,
+                FirstByte = bytePosition,
+                LastByte = bytePosition + partSize - 1 >= objectSize ? objectSize - 1 : bytePosition + partSize - 1,
+                PartNumber = partNumber
+            };
+            bytePosition += partSize;
+            eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest)).ETag));
+            partNumber++;
+        }
+
+        var completeRequest = new CompleteMultipartUploadRequest
+        {
+            BucketName = _bucket,
+            Key = destinationKey,
+            UploadId = uploadId,
+            PartETags = eTags
+        };
+         await s3.CompleteMultipartUploadAsync(completeRequest);
+    }
+
+    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
+    {
+        queue.TryDequeue(out var ext);
+        destinationKey += ext;
+        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
         using var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
 
-        var blockSize = 512;
+        const int blockSize = 512;
 
         long prevFileSize = 0;
         try
         {
-            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath);
+            var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
         catch{}
 
-        var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile);
+        var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile, token).ConfigureAwait(false);
         var header = BuilderHeaders.CreateHeader(tarKey, objFile.ContentLength);
 
         using var stream = new MemoryStream();
@@ -1448,8 +1492,6 @@ public class S3Storage(TempStream tempStream,
         stream.Write(header);
         stream.Position = 0;
 
-        prevFileSize = objFile.ContentLength;
-
         var uploadRequest = new UploadPartRequest
         {
             BucketName = _bucket,
@@ -1458,7 +1500,7 @@ public class S3Storage(TempStream tempStream,
             PartNumber = partNumber,
             InputStream = stream
         };
-        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
 
         var completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1468,10 +1510,10 @@ public class S3Storage(TempStream tempStream,
             PartETags = eTags
         };
         
-        await s3.CompleteMultipartUploadAsync(completeRequest);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
 
         /*******/
-        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
+        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);;
 
         var copyRequest = new CopyPartRequest
         {
@@ -1482,7 +1524,7 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId,
             PartNumber = partNumber
         };
-        eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest)).ETag));
+        eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest, token).ConfigureAwait(false)).ETag));
 
         completeRequest = new CompleteMultipartUploadRequest
         {
@@ -1491,10 +1533,12 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId,
             PartETags = eTags
         };
-        await s3.CompleteMultipartUploadAsync(completeRequest);
+        await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
+
+        queue.Enqueue(ext);
     }
 
-    public async Task AddEndAsync(string domain, string key)
+    public async Task AddEndAsync(string domain, string key, bool last = false)
     {
         using var s3 = GetClient();
         var path = MakePath(domain, key);
@@ -1503,8 +1547,19 @@ public class S3Storage(TempStream tempStream,
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(domain, key);
 
         var obj = await s3.GetObjectMetadataAsync(_bucket, path);
+        byte[] buffer = null;
 
-        var buffer = new byte[blockSize - obj.ContentLength % blockSize + blockSize * 2];
+        if (last)
+        {
+            buffer = new byte[blockSize - obj.ContentLength % blockSize + blockSize * 2];
+        }
+        else
+        {
+            if (obj.ContentLength % blockSize != 0)
+            {
+                buffer = new byte[blockSize - obj.ContentLength % blockSize];
+            }
+        }
         var stream = new MemoryStream();
         stream.Write(buffer);
         stream.Position = 0;
@@ -1530,12 +1585,12 @@ public class S3Storage(TempStream tempStream,
         await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task RemoveFirstBlockAsync(string domain, string key)
+    public async Task ReloadFileAsync(string domain, string key, bool removeFirstBlock, bool last = false)
     {
         using var s3 = GetClient();
         var path = MakePath(domain, key);
 
-        var (uploadId, eTags, _) = await InitiateConcatAsync(domain, key, true, true);
+        var (uploadId, eTags, _) = await InitiateConcatAsync(domain, key, removeFirstBlock, last);
         var completeRequest = new CompleteMultipartUploadRequest
         {
             BucketName = _bucket,
@@ -1547,7 +1602,7 @@ public class S3Storage(TempStream tempStream,
         await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task<(string uploadId, List<PartETag> eTags, int partNumber)> InitiateConcatAsync(string domain, string key, bool removeFirstBlock = false, bool lastInit = false)
+    public async Task<(string uploadId, List<PartETag> eTags, int partNumber)> InitiateConcatAsync(string domain, string key, bool removeFirstBlock = false, bool lastInit = false, CancellationToken token = default)
     {
         using var s3 = GetClient();
 
@@ -1558,7 +1613,7 @@ public class S3Storage(TempStream tempStream,
             BucketName = _bucket,
             Key = key
         };
-        var initResponse = await s3.InitiateMultipartUploadAsync(initiateRequest);
+        var initResponse = await s3.InitiateMultipartUploadAsync(initiateRequest, token).ConfigureAwait(false);
 
         var eTags = new List<PartETag>();
         try
@@ -1566,7 +1621,7 @@ public class S3Storage(TempStream tempStream,
             var mb5 = 5 * 1024 * 1024;
             long bytePosition = removeFirstBlock ? mb5 : 0;
 
-            var obj = await s3.GetObjectMetadataAsync(_bucket, key);
+            var obj = await s3.GetObjectMetadataAsync(_bucket, key, token).ConfigureAwait(false);
             var objectSize = obj.ContentLength;
 
             var partSize = ChunkSize;
@@ -1593,7 +1648,7 @@ public class S3Storage(TempStream tempStream,
                     copyRequest.LastByte = objectSize - 1;
                     bytePosition += partSize;
                 }
-                eTags.Add(new PartETag(i, (await s3.CopyPartAsync(copyRequest)).ETag));
+                eTags.Add(new PartETag(i, (await s3.CopyPartAsync(copyRequest, token).ConfigureAwait(false)).ETag));
 
             }
             return (initResponse.UploadId, eTags, partNumber);
@@ -1613,8 +1668,7 @@ public class S3Storage(TempStream tempStream,
                 PartNumber = 1,
                 InputStream = stream
             };
-            eTags.Add(new PartETag(1, (await s3.UploadPartAsync(uploadRequest)).ETag));
-
+            eTags.Add(new PartETag(1, (await s3.UploadPartAsync(uploadRequest, token).ConfigureAwait(false)).ETag));
             return (initResponse.UploadId, eTags, 2);
         }
     }
@@ -1797,7 +1851,7 @@ public class S3Storage(TempStream tempStream,
         None,
         ServerS3,
         ServerKms,
-        ClientKms,
+        ClientKms
         //ClientAes,
         //ClientRsa
     }

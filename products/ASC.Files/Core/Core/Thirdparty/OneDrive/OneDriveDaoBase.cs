@@ -27,22 +27,20 @@
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBase<Item, Item, Item>
+internal class OneDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<Item, Item, Item>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory,
+        setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<Item, Item, Item>
 {
     private OneDriveProviderInfo _providerInfo;
-
-    public OneDriveDaoBase(IServiceProvider serviceProvider, 
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<Item, Item, Item> providerInfo)
     {
@@ -124,10 +122,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFolder is ErrorItem)
+        if (onedriveFolder is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFolder(onedriveFolder as ErrorItem);
+            return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -192,10 +190,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFile is ErrorItem)
+        if (onedriveFile is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFile(onedriveFile as ErrorItem);
+            return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)

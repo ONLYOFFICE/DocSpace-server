@@ -64,15 +64,16 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
     {
         var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
+        var fileSecurity = serviceScope.ServiceProvider.GetRequiredService<FileSecurity>();
         var (fileMarker, globalFolder, daoFactory, settingsManager) = scopeClass;
         var entries = Enumerable.Empty<FileEntry<T>>();
         if (Folders.Count > 0)
         {
-            entries = entries.Concat(await FolderDao.GetFoldersAsync(Folders).ToListAsync());
+            entries = entries.Concat(await fileSecurity.CanReadAsync(FolderDao.GetFoldersAsync(Folders)).Where(r => r.Item2).Select(r => r.Item1).ToListAsync());
         }
         if (Files.Count > 0)
         {
-            entries = entries.Concat(await FileDao.GetFilesAsync(Files).ToListAsync());
+            entries = entries.Concat(await fileSecurity.CanReadAsync(FileDao.GetFilesAsync(Files)).Where(r => r.Item2).Select(r => r.Item1).ToListAsync());
         }
 
         foreach (var entry in entries)
@@ -102,7 +103,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),
+                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))

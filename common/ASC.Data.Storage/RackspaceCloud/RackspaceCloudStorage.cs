@@ -134,8 +134,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var client = GetClient();
 
         var accounMetaData = client.GetAccountMetaData(_region);
-        string secretKey;
-        if (accounMetaData.TryGetValue("Temp-Url-Key", out secretKey))
+        if (accounMetaData.TryGetValue("Temp-Url-Key", out var secretKey))
         {
 
         }
@@ -739,11 +738,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             return ACL.Auto;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override Task<string> GetFileEtagAsync(string domain, string path)

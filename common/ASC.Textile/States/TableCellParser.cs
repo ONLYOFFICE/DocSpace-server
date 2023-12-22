@@ -33,12 +33,12 @@ public class TableCellParser(string input)
         var htmlTag = "td";
 
         var m = Regex.Match(input,
-                                @"^((?<head>_?)" +
+                                "^((?<head>_?)" +
                                 Globals.SpanPattern +
                                 Globals.AlignPattern +
                                 Globals.BlockModifiersPattern +
                                 @"(?<dot>\.)\s?)?" +
-                                @"(?<content>.*)"
+                                "(?<content>.*)"
                                 );
         if (!m.Success)
         {

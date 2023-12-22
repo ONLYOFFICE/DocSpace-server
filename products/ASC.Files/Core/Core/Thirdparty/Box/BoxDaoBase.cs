@@ -27,21 +27,20 @@
 namespace ASC.Files.Thirdparty.Box;
 
 [Scope]
-internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, IDaoBase<BoxFile, BoxFolder, BoxItem>
+internal class BoxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>(serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<BoxFile, BoxFolder, BoxItem>
 {
     private BoxProviderInfo _providerInfo;
-    public BoxDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<BoxFile, BoxFolder, BoxItem> providerInfo)
     {
@@ -120,10 +119,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFolder is ErrorFolder)
+        if (boxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(boxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(boxFolder);
@@ -195,10 +194,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFile is ErrorFile)
+        if (boxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(boxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();

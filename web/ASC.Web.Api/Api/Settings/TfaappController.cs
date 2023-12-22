@@ -28,28 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class TfaappController : BaseSettingsController
-{
-    private readonly MessageService _messageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly SmsProviderManager _smsProviderManager;
-    private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly CookiesManager _cookiesManager;
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly TfaManager _tfaManager;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly MessageTarget _messageTarget;
-    private readonly StudioSmsNotificationSettingsHelper _studioSmsNotificationSettingsHelper;
-    private readonly TfaAppAuthSettingsHelper _tfaAppAuthSettingsHelper;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly Signature _signature;
-    private readonly SecurityContext _securityContext;
-
-    public TfaappController(
-        MessageService messageService,
+public class TfaappController(MessageService messageService,
         StudioNotifyService studioNotifyService,
         ApiContext apiContext,
         UserManager userManager,
@@ -69,27 +48,10 @@ public class TfaappController : BaseSettingsController
         InstanceCrypto instanceCrypto,
         Signature signature,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _smsProviderManager = smsProviderManager;
-        _messageService = messageService;
-        _studioNotifyService = studioNotifyService;
-        _userManager = userManager;
-        _authContext = authContext;
-        _cookiesManager = cookiesManager;
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _tfaManager = tfaManager;
-        _commonLinkUtility = commonLinkUtility;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _messageTarget = messageTarget;
-        _studioSmsNotificationSettingsHelper = studioSmsNotificationSettingsHelper;
-        _tfaAppAuthSettingsHelper = tfaAppAuthSettingsHelper;
-        _instanceCrypto = instanceCrypto;
-        _signature = signature;
-        _securityContext = securityContext;
-    }
-
+        IHttpContextAccessor httpContextAccessor,
+        TenantManager tenantManager)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Returns the current two-factor authentication settings.
     /// </summary>
@@ -104,18 +66,18 @@ public class TfaappController : BaseSettingsController
     {
         var result = new List<TfaSettingsDto>();
 
-        var SmsVisible = _studioSmsNotificationSettingsHelper.IsVisibleSettings;
-        var SmsEnable = SmsVisible && _smsProviderManager.Enabled();
-        var TfaVisible = _tfaAppAuthSettingsHelper.IsVisibleSettings;
+        var SmsVisible = studioSmsNotificationSettingsHelper.IsVisibleSettings;
+        var SmsEnable = SmsVisible && smsProviderManager.Enabled();
+        var TfaVisible = tfaAppAuthSettingsHelper.IsVisibleSettings;
 
-        var tfaAppSettings = await _settingsManager.LoadAsync<TfaAppAuthSettings>();
-        var tfaSmsSettings = await _settingsManager.LoadAsync<StudioSmsNotificationSettings>();
+        var tfaAppSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
+        var tfaSmsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
 
         if (SmsVisible)
         {
             result.Add(new TfaSettingsDto
             {
-                Enabled = tfaSmsSettings.EnableSetting && _smsProviderManager.Enabled(),
+                Enabled = tfaSmsSettings.EnableSetting && smsProviderManager.Enabled(),
                 Id = "sms",
                 Title = Resource.ButtonSmsEnable,
                 Avaliable = SmsEnable,
@@ -152,18 +114,19 @@ public class TfaappController : BaseSettingsController
     ///<path>api/2.0/settings/tfaapp/validate</path>
     ///<httpMethod>POST</httpMethod>
     [HttpPost("tfaapp/validate")]
+    [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
     public async Task<bool> TfaValidateAuthCodeAsync(TfaValidateRequestsDto inDto)
     {
         await ApiContext.AuthByClaimAsync();
-        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
-        _securityContext.Logout();
+        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        securityContext.Logout();
 
-        var result = await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+        var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
 
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
         var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
-        _cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
+        cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
 
         return result;
     }
@@ -179,26 +142,26 @@ public class TfaappController : BaseSettingsController
     [HttpGet("tfaapp/confirm")]
     public async Task<object> TfaConfirmUrlAsync()
     {
-        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (_studioSmsNotificationSettingsHelper.IsVisibleSettings && await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))// && smsConfirm.ToLower() != "true")
+        if (studioSmsNotificationSettingsHelper.IsVisibleSettings && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))// && smsConfirm.ToLower() != "true")
         {
             var confirmType = string.IsNullOrEmpty(user.MobilePhone) ||
                             user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
+            return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
         }
 
-        if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            var confirmType = await TfaAppUserSettings.EnableForUserAsync(_settingsManager, _authContext.CurrentAccount.ID)
+            var confirmType = await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
                 ? ConfirmType.TfaAuth
                 : ConfirmType.TfaActivation;
 
-            (var url, var key) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, confirmType);
-            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
+            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, confirmType);
+            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
             return url;
         }
 
@@ -217,7 +180,7 @@ public class TfaappController : BaseSettingsController
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var result = false;
 
@@ -226,25 +189,25 @@ public class TfaappController : BaseSettingsController
         switch (inDto.Type)
         {
             case "sms":
-                if (!await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
+                if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
                     throw new Exception(Resource.SmsNotAvailable);
                 }
 
-                if (!_smsProviderManager.Enabled())
+                if (!smsProviderManager.Enabled())
                 {
                     throw new MethodAccessException();
                 }
 
-                var smsSettings = await _settingsManager.LoadAsync<StudioSmsNotificationSettings>();
+                var smsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
                 SetSettingsProperty(smsSettings);
-                await _settingsManager.SaveAsync(smsSettings);
+                await settingsManager.SaveAsync(smsSettings);
 
                 action = MessageAction.TwoFactorAuthenticationEnabledBySms;
 
-                if (_tfaAppAuthSettingsHelper.Enable)
+                if (tfaAppAuthSettingsHelper.Enable)
                 {
-                    _tfaAppAuthSettingsHelper.Enable = false;
+                    tfaAppAuthSettingsHelper.Enable = false;
                 }
 
                 result = true;
@@ -252,21 +215,21 @@ public class TfaappController : BaseSettingsController
                 break;
 
             case "app":
-                if (!_tfaAppAuthSettingsHelper.IsVisibleSettings)
+                if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
                     throw new Exception(Resource.TfaAppNotAvailable);
                 }
 
-                var appSettings = await _settingsManager.LoadAsync<TfaAppAuthSettings>();
+                var appSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
                 SetSettingsProperty(appSettings);
-                await _settingsManager.SaveAsync(appSettings);
+                await settingsManager.SaveAsync(appSettings);
 
 
                 action = MessageAction.TwoFactorAuthenticationEnabledByTfaApp;
 
-                if (await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && _studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
                 {
-                    _studioSmsNotificationSettingsHelper.Enable = false;
+                    studioSmsNotificationSettingsHelper.Enable = false;
                 }
 
                 result = true;
@@ -274,14 +237,14 @@ public class TfaappController : BaseSettingsController
                 break;
 
             default:
-                if (_tfaAppAuthSettingsHelper.Enable)
+                if (tfaAppAuthSettingsHelper.Enable)
                 {
-                    _tfaAppAuthSettingsHelper.Enable = false;
+                    tfaAppAuthSettingsHelper.Enable = false;
                 }
 
-                if (await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && _studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
                 {
-                    _studioSmsNotificationSettingsHelper.Enable = false;
+                    studioSmsNotificationSettingsHelper.Enable = false;
                 }
 
                 action = MessageAction.TwoFactorAuthenticationDisabled;
@@ -291,10 +254,10 @@ public class TfaappController : BaseSettingsController
 
         if (result)
         {
-            await _cookiesManager.ResetTenantCookieAsync();
+            await cookiesManager.ResetTenantCookieAsync();
         }
 
-        await _messageService.SendAsync(action);
+        await messageService.SendAsync(action);
         return result;
 
         void SetSettingsProperty<T>(TfaSettingsBase<T> settings) where T : class, ISettings<T>
@@ -339,21 +302,21 @@ public class TfaappController : BaseSettingsController
     public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
     {
         await ApiContext.AuthByClaimAsync();
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!_tfaAppAuthSettingsHelper.IsVisibleSettings ||
-            !(await _settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
-            await TfaAppUserSettings.EnableForUserAsync(_settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
+            !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
+            await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await _userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUser))
         {
             throw new NotSupportedException("Not available.");
         }
 
-        return await _tfaManager.GenerateSetupCodeAsync(currentUser);
+        return await tfaManager.GenerateSetupCodeAsync(currentUser);
     }
 
     /// <summary>
@@ -368,19 +331,19 @@ public class TfaappController : BaseSettingsController
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
     {
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!_tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(_settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await _userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUser))
         {
             throw new NotSupportedException("Not available.");
         }
 
-        return (await _settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>()).CodesSetting.Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(_instanceCrypto, _signature) }).ToList();
+        return (await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>()).CodesSetting.Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
     }
 
     /// <summary>
@@ -395,20 +358,20 @@ public class TfaappController : BaseSettingsController
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
     {
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!_tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(_settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await _userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUser))
         {
             throw new NotSupportedException("Not available.");
         }
 
-        var codes = (await _tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(_instanceCrypto, _signature) }).ToList();
-        await _messageService.SendAsync(MessageAction.UserConnectedTfaApp, _messageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, _displayUserSettingsHelper));
+        var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
+        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -425,37 +388,42 @@ public class TfaappController : BaseSettingsController
     public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {
         var id = inDto?.Id ?? Guid.Empty;
-        var isMe = id.Equals(Guid.Empty) || id.Equals(_authContext.CurrentAccount.ID);
+        var isMe = id.Equals(Guid.Empty) || id.Equals(authContext.CurrentAccount.ID);
 
-        var user = await _userManager.GetUsersAsync(id);
+        var user = await userManager.GetUsersAsync(id);
 
-        if (!isMe && !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
+        if (!isMe && !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        if (!_tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
+        if (!isMe && tenantManager.GetCurrentTenant().OwnerId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+        }
+
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await _userManager.IsOutsiderAsync(user))
+        if (await userManager.IsOutsiderAsync(user))
         {
             throw new NotSupportedException("Not available.");
         }
 
-        await TfaAppUserSettings.DisableForUserAsync(_settingsManager, user.Id);
-        await _messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+        await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
+        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
-        await _cookiesManager.ResetUserCookieAsync(user.Id);
+        await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            (var url, var key) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
-            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
+            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+            await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
             return url;
         }
 
-        await _studioNotifyService.SendMsgTfaResetAsync(user);
+        await studioNotifyService.SendMsgTfaResetAsync(user);
         return string.Empty;
     }
 }

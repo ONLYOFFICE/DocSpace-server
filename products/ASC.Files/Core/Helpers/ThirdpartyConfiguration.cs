@@ -34,16 +34,15 @@ public class ThirdpartyConfigurationData(IConfiguration configuration)
 }
 
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
-public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration,
-    ConsumerFactory consumerFactory)
+public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, ConsumerFactory consumerFactory)
 {
-    private readonly Lazy<BoxLoginProvider> _boxLoginProvider = new(() => consumerFactory.Get<BoxLoginProvider>());
-    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider = new(() => consumerFactory.Get<DropboxLoginProvider>());
-    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider = new(() => consumerFactory.Get<OneDriveLoginProvider>());
-    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider = new(() => consumerFactory.Get<DocuSignLoginProvider>());
-    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider = new(() => consumerFactory.Get<GoogleLoginProvider>());
+    private readonly Lazy<BoxLoginProvider> _boxLoginProvider = new(consumerFactory.Get<BoxLoginProvider>);
+    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider = new(consumerFactory.Get<DropboxLoginProvider>);
+    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider = new(consumerFactory.Get<OneDriveLoginProvider>);
+    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider = new(consumerFactory.Get<DocuSignLoginProvider>);
+    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider = new(consumerFactory.Get<GoogleLoginProvider>);
 
-    public List<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
+    private List<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
     public bool SupportInclusion(IDaoFactory daoFactory)
     {

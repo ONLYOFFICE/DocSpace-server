@@ -53,7 +53,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
         {
             ItemID = w.ID,
             SortOrder = _webItemManager.GetSortOrder(w),
-            Disabled = false,
+            Disabled = false
         };
         settings.SettingsCollection.Add(opt);
     });

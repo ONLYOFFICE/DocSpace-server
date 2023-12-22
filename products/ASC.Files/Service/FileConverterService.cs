@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -35,7 +35,7 @@ internal class FileConverterService<T>(
         IServiceScopeFactory serviceScopeFactory,
         ILogger<FileConverterService<T>> logger)
     : BackgroundService
-{
+    {
     private readonly int _timerDelay = 1000;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -86,8 +86,10 @@ internal class FileConverterService<T>(
             {
                 converter.Processed = "1";
 
-                var fileId = JsonDocument.Parse(converter.Source).RootElement.GetProperty("id").Deserialize<T>();
-                var fileVersion = JsonDocument.Parse(converter.Source).RootElement.GetProperty("version").Deserialize<int>();
+                var parsed = JsonDocument.Parse(converter.Source).RootElement;
+                var fileId = parsed.GetProperty("id").Deserialize<T>();
+                var fileVersion = parsed.GetProperty("version").Deserialize<int>();
+                var updateIfExist = parsed.GetProperty("updateIfExist").Deserialize<bool>();
 
                 int operationResultProgress;
                 var password = converter.Password;
@@ -150,21 +152,19 @@ internal class FileConverterService<T>(
 
                     logger.ErrorConvertFileWithUrl(file.Id.ToString(), fileUri, exception);
 
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = exception.Message;
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = exception.Message;
 
                         if (password1)
                         {
-                            operationResult.Result = "password";
+                            converter.Result = "password";
                         }
                     }
 
@@ -175,21 +175,19 @@ internal class FileConverterService<T>(
 
                 if (operationResultProgress < 100)
                 {
-                    var operationResult = converter;
-
-                    if (DateTime.UtcNow - operationResult.StartDateTime > TimeSpan.FromMinutes(10))
+                    if (DateTime.UtcNow - converter.StartDateTime > TimeSpan.FromMinutes(10))
                     {
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
 
                         logger.ErrorCheckConvertFilesStatus(file.Id.ToString(), file.ContentLength);
                     }
                     else
                     {
-                        operationResult.Processed = "";
+                        converter.Processed = "";
                     }
 
-                    operationResult.Progress = operationResultProgress;
+                    converter.Progress = operationResultProgress;
 
                     logger.DebugCheckConvertFilesStatusIterationContinue();
 
@@ -202,7 +200,7 @@ internal class FileConverterService<T>(
 
                 try
                 {
-                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl, convertedFileType);
+                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl, convertedFileType, updateIfExist);
                 }
                 catch (Exception e)
                 {
@@ -214,11 +212,9 @@ internal class FileConverterService<T>(
                 }
                 finally
                 {
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
@@ -228,16 +224,16 @@ internal class FileConverterService<T>(
                             var folder = await folderDao.GetFolderAsync(newFile.ParentId);
                             var folderTitle = await fileSecurity.CanReadAsync(folder) ? folder.Title : null;
 
-                            operationResult.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
+                            converter.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
                         }
 
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Processed = "1";
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Processed = "1";
 
                         if (!string.IsNullOrEmpty(operationResultError))
                         {
-                            operationResult.Error = operationResultError;
+                            converter.Error = operationResultError;
                         }
                     }
                 }

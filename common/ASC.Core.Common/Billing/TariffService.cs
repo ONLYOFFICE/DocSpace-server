@@ -52,7 +52,6 @@ public class TariffServiceStorage
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     internal readonly ICache Cache;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceProvider _serviceProvider;
     internal readonly ICacheNotify<TariffCacheItem> Notify;
     private TimeSpan _cacheExpiration;
 
@@ -62,7 +61,6 @@ public class TariffServiceStorage
 
         Cache = cache;
         _coreBaseSettings = coreBaseSettings;
-        _serviceProvider = serviceProvider;
         Notify = notify;
         Notify.Subscribe(i =>
         {
@@ -75,7 +73,7 @@ public class TariffServiceStorage
 
         Notify.Subscribe(i =>
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();
             var tariff = tariffService.GetBillingInfoAsync(i.TenantId, i.TariffId).Result;
             if (tariff != null)
@@ -665,7 +663,7 @@ public class TariffService : ITariffService
 
                 foreach (var q in tariffInfo.Quotas)
                 {
-                    await dbContext.AddOrUpdateAsync(q => q.TariffRows, new DbTariffRow
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = efTariff.Id,
                         Quota = q.Id,

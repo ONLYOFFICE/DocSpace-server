@@ -140,7 +140,7 @@ public class BillingClient
         return urls;
     }
 
-    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
+    public string GetPaymentUrl(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
         var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
@@ -189,7 +189,7 @@ public class BillingClient
         return paymentUrl;
     }
 
-    public bool ChangePayment(string portalId, string[] products, int[] quantity)
+    public bool ChangePayment(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
@@ -220,9 +220,9 @@ public class BillingClient
         {
             return productIds.Select(productId =>
             {
-                if (pricesPaymentSystem.TryGetValue(productId, out var prices))
+                if (pricesPaymentSystem.TryGetValue(productId, out var pricesByProduct))
                 {
-                    return new { ProductId = productId, Prices = prices };
+                    return new { ProductId = productId, Prices = pricesByProduct };
                 }
                 return new { ProductId = productId, Prices = new Dictionary<string, decimal>() };
             })
@@ -249,7 +249,7 @@ public class BillingClient
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
-            Method = HttpMethod.Post,
+            Method = HttpMethod.Post
         };
 
         if (!string.IsNullOrEmpty(_configuration.Key))

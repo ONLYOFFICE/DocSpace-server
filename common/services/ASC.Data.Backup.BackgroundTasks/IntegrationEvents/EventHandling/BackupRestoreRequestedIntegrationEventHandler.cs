@@ -27,22 +27,21 @@
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRestoreRequestedIntegrationEventHandler(BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRestoreRequestedIntegrationEventHandler> logger,
+public class BackupRestoreRequestedIntegrationEventHandler(
+        BackupAjaxHandler backupAjaxHandler,
+        ILogger logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         AuthManager authManager,
         BackupWorker backupWorker)
     : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
 {
-    private readonly ILogger _logger = logger;
-
     public async Task Handle(BackupRestoreRequestIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
             if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
             {
@@ -55,7 +54,8 @@ public class BackupRestoreRequestedIntegrationEventHandler(BackupAjaxHandler bac
             await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
                                             @event.StorageType,
                                             @event.StorageParams,
-                                            @event.Notify);
+                                            @event.Notify,
+                                            @event.ServerBaseUri);
 
             await Task.CompletedTask;
         }

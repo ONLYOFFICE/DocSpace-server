@@ -59,8 +59,8 @@ public abstract class PhraseBlockModifier : BlockModifier
                                         modifier +
                                         Globals.BlockModifiersPattern +
                                         @"(:(?<cite>(\S+)))?" +
-                                        @"(?<content>[^" + compressedModifier + "]*)" +
-                                        @"(?<end>" + punctuationPattern + @"*)" +
+                                        "(?<content>[^" + compressedModifier + "]*)" +
+                                        "(?<end>" + punctuationPattern + "*)" +
                                         modifier +
                                         @"(?=[\]\)}]|" + punctuationPattern + @"+|\s|$)",
                                     pmme.MatchEvaluator

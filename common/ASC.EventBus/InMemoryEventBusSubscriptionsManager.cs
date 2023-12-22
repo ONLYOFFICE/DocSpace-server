@@ -69,14 +69,7 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
                 $"Handler Type {handlerType.Name} already registered for '{eventName}'", nameof(handlerType));
         }
 
-        if (isDynamic)
-        {
-            _handlers[eventName].Add(SubscriptionInfo.Dynamic(handlerType));
-        }
-        else
-        {
-            _handlers[eventName].Add(SubscriptionInfo.Typed(handlerType));
-        }
+        _handlers[eventName].Add(isDynamic ? SubscriptionInfo.Dynamic(handlerType) : SubscriptionInfo.Typed(handlerType));
     }
 
 
@@ -103,7 +96,7 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
         if (subsToRemove != null)
         {
             _handlers[eventName].Remove(subsToRemove);
-            if (!_handlers[eventName].Any())
+            if (_handlers[eventName].Count == 0)
             {
                 _handlers.Remove(eventName);
                 var eventType = _eventTypes.SingleOrDefault(e => e.Name == eventName);

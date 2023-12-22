@@ -248,7 +248,7 @@ public class EmployeeFullDtoHelper(
         var result = new EmployeeFullDto
         {
             FirstName = userInfo.FirstName,
-            LastName = userInfo.LastName,
+            LastName = userInfo.LastName
         };
 
         await FillGroupsAsync(result, userInfo);
@@ -288,7 +288,7 @@ public class EmployeeFullDtoHelper(
             IsCollaborator = currentType is EmployeeType.Collaborator,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
-            Shared = shared,
+            Shared = shared
         };
 
         await InitAsync(result, userInfo);

@@ -47,12 +47,7 @@ public class TempStream(TempPath tempPath)
 
     public Stream Create()
     {
-        return Create(out _);
-    }
-
-    public Stream Create(out string path, string ext = "")
-    {
-        path = tempPath.GetTempFileName(ext);
+        var path = tempPath.GetTempFileName("");
         return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose);
     }
 }

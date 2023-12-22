@@ -37,7 +37,7 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
     {
         logger.InformationThumbnailWorkerRunnig();
 
-        stoppingToken.Register(() => logger.InformationThumbnailWorkerStopping());
+        stoppingToken.Register(logger.InformationThumbnailWorkerStopping);
 
         logger.TraceProcedureStart();
 

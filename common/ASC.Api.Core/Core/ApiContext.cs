@@ -38,14 +38,7 @@ public class ApiContext : ICloneable
     {
         set
         {
-            if (_httpContextAccessor.HttpContext.Items.ContainsKey(nameof(TotalCount)))
-            {
-                _httpContextAccessor.HttpContext.Items[nameof(TotalCount)] = value;
-            }
-            else
-            {
-                _httpContextAccessor.HttpContext.Items.Add(nameof(TotalCount), value);
-            }
+            _httpContextAccessor.HttpContext.Items[nameof(TotalCount)] = value;
         }
     }
 

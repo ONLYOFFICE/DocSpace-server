@@ -273,7 +273,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
     }
 
-    public async override Task DeleteFilesAsync(string domain, List<string> paths)
+    public override async Task DeleteFilesAsync(string domain, List<string> paths)
     {
         if (paths.Count == 0)
         {
@@ -685,11 +685,10 @@ public class GoogleCloudStorage(TempStream tempStream,
                                                                Convert.ToInt64(totalBytes));
 
         const int MAX_RETRIES = 100;
-        int millisecondsTimeout;
 
         for (var i = 0; i < MAX_RETRIES; i++)
         {
-            millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
+            var millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
 
             try
             {
@@ -843,11 +842,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             return PredefinedObjectAcl.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override async Task<string> GetFileEtagAsync(string domain, string path)

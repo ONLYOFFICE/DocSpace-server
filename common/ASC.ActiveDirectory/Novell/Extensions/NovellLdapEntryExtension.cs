@@ -27,7 +27,7 @@
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
 [Singleton]
-public class NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
+public class NovellLdapEntryExtension(ILogger logger)
 {
     public object GetAttributeValue(LdapEntry ldapEntry, string attributeName, bool getBytes = false)
     {
@@ -74,7 +74,7 @@ public class NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
         return attribute?.StringValueArray;
     }
 
-    private string DecodeSid(byte[] sid)
+    private static string DecodeSid(IReadOnlyList<byte> sid)
     {
         var strSid = new StringBuilder("S-");
 

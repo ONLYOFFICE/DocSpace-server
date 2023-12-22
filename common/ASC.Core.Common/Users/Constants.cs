@@ -83,8 +83,8 @@ public sealed class Constants(IConfiguration configuration)
             GroupUser,
             GroupManager,
             GroupAdmin,
-            GroupCollaborator,
-        };
+            GroupCollaborator
+    };
 
     public static readonly UserInfo LostUser = new()
     {

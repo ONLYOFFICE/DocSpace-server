@@ -69,7 +69,7 @@ public class EFLogger(ILogger logger) : ILogger
                 }
 
                 logger.Log(LogLevel.Debug,
-                        default(EventId),
+                        default,
                         ev,
                         exception,
                         EFLogEvent.Formatter);

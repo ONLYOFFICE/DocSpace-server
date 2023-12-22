@@ -81,7 +81,7 @@ public abstract class PatternFormatter : IPatternFormatter
 
     protected virtual void AfterFormat(INoticeMessage message) { }
 
-    protected virtual string[] SearchTags(string text)
+    protected string[] SearchTags(string text)
     {
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(_tagSearchPattern))
         {

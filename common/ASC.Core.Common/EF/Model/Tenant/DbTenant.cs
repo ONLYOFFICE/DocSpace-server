@@ -78,7 +78,7 @@ public class DbTenant : IMapFrom<Tenant>
                 TenantId = dest.Id,
                 AffiliateId = dest.AffiliateId,
                 PartnerId = dest.PartnerId,
-                Campaign = dest.Campaign,
+                Campaign = dest.Campaign
             }))
             .ForMember(dest => dest.MappedDomain, opt => opt.MapFrom(dest => !string.IsNullOrEmpty(dest.MappedDomain) ? dest.MappedDomain.ToLowerInvariant() : null));
     }

@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -63,9 +63,9 @@ public class FileMarkerCache
 
 [Singleton]
 public class FileMarkerHelper(IServiceProvider serviceProvider,
-    ILogger<FileMarkerHelper> logger,
-    IDistributedTaskQueueFactory queueFactory)
-{
+        ILogger<FileMarkerHelper> logger,
+        IDistributedTaskQueueFactory queueFactory)
+    {
     private const string CustomDistributedTaskQueueName = "file_marker";
     private readonly ILogger _logger = logger;
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CustomDistributedTaskQueueName);
@@ -93,21 +93,20 @@ public class FileMarkerHelper(IServiceProvider serviceProvider,
 
 [Scope]
 public class FileMarker(TenantManager tenantManager,
-    UserManager userManager,
-    IDaoFactory daoFactory,
-    GlobalFolder globalFolder,
-    FileSecurity fileSecurity,
-    AuthContext authContext,
-    IServiceProvider serviceProvider,
-    FilesSettingsHelper filesSettingsHelper,
-    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-    FileMarkerCache fileMarkerCache,
-    FileMarkerHelper fileMarkerHelper)
+        UserManager userManager,
+        IDaoFactory daoFactory,
+        GlobalFolder globalFolder,
+        FileSecurity fileSecurity,
+        AuthContext authContext,
+        IServiceProvider serviceProvider,
+        FilesSettingsHelper filesSettingsHelper,
+        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+        FileMarkerCache fileMarkerCache, 
+        IDistributedLockProvider distributedLockProvider,
+        FileMarkerHelper fileMarkerHelper)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
-
-    private static readonly SemaphoreSlim _semaphore = new(1);
-
+    private const string LockKey = "file_marker";
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
@@ -361,10 +360,10 @@ public class FileMarker(TenantManager tenantManager,
         var newTags = new List<Tag>();
         var updateTags = new List<Tag>();
 
-        try
-        {
-            await _semaphore.WaitAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
+        await using (await distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(5)))
+        {
             foreach (var userId in userEntriesData.Keys)
             {
                 if (await tagDao.GetNewTagsAsync(userId, obj.FileEntry).AnyAsync())
@@ -387,10 +386,6 @@ public class FileMarker(TenantManager tenantManager,
             {
                 await tagDao.SaveTagsAsync(newTags, obj.CurrentAccountId);
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
 
         await SendChangeNoticeAsync(updateTags.Concat(newTags).ToList(), socketManager);
@@ -714,7 +709,7 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         tags = tags
-            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id))
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
                 .Distinct()
                 .ToList();
 
@@ -800,7 +795,7 @@ public class FileMarker(TenantManager tenantManager,
             {
                 entryTags.Add(entry, tag);
             }
-            //todo: RemoveMarkAsNew(tag);
+                //todo: RemoveMarkAsNew(tag);
         }
 
         return entryTags;
@@ -822,7 +817,7 @@ public class FileMarker(TenantManager tenantManager,
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
                                     : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
-        totalTags = totalTags.Where(e => e != parentFolderTag).ToList();
+        totalTags = totalTags.Where(e => !Equals(e, parentFolderTag)).ToList();
 
         foreach (var e in entries)
         {

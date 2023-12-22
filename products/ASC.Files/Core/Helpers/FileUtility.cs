@@ -192,7 +192,7 @@ public enum Accessibility
     WebComment,
     CoAuhtoring,
     CanConvert,
-    MustConvert,
+    MustConvert
 }
 
 [Scope]
@@ -240,9 +240,7 @@ public class FileUtility
     public string GetInternalExtension(string fileName)
     {
         var extension = GetFileExtension(fileName);
-        return InternalExtension.TryGetValue(GetFileTypeByExtention(extension), out var internalExtension)
-                   ? internalExtension
-                   : extension;
+        return InternalExtension.GetValueOrDefault(GetFileTypeByExtention(extension), extension);
     }
 
     public string GetGoogleDownloadableExtension(string googleExtension)
@@ -690,8 +688,8 @@ public class FileUtility
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
-                ".pot", ".potm", ".potx",
-            }.ToImmutableList();
+                ".pot", ".potm", ".potx"
+    }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }
@@ -720,9 +718,6 @@ public class FileUtility
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, IEnumerable<FilesConverts>> Folders =
-        Microsoft.EntityFrameworkCore.EF.CompileQuery((FilesDbContext ctx) => ctx.FilesConverts);
-
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }

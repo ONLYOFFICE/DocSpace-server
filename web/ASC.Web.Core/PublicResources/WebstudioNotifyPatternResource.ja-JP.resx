@@ -101,84 +101,92 @@
     <value>DocSpaceのユーザーがアップデートされました: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>$UserNameさん、こんにちは!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
 
 ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
 
-* 招待されたルームで他のユーザーと一緒に作業する：*リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど*。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *さまざまな形式のファイルの操作*：テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *リアルタイムまたは段落ロックの2つの共同編集モードで、文書の共同編集*：変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *任意のクラウドストレージ*を接続し、アプリを切り替えることなく作業する。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE Team
-"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>$UserNameさん、こんにちは!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
 
 ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
 
-* 招待されたルームで他のユーザーと一緒に作業できます： *リアルタイムで共著を行うためのコラボレーションルームや、目的に応じて柔軟に設定できるカスタムルーム*。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *さまざまな形式のファイルの操作*：テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cリアルタイムまたは段落ロックの2つの共同編集モードで、文書の共同編集*：変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *任意のクラウドストレージ*を接続し、アプリを切り替えることなく作業する。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE Team
-"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>$UserNameさん、こんにちは!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
 
 ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
 
-* 招待されたルームで他のユーザーと一緒に作業できます： *リアルタイムで共著を行うためのコラボレーションルームや、目的に応じて柔軟に設定できるカスタムルーム*。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *さまざまな形式のファイルの操作*：テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cリアルタイムまたは段落ロックの2つの共同編集モードで、文書の共同編集*：変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *任意のクラウドストレージ*を接続し、アプリを切り替えることなく作業する。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE Team
-"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>$UserNameさん、こんにちは!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
 
 ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
 
-* 招待されたルームで他のユーザーと一緒に作業できます： *リアルタイムで共著を行うためのコラボレーションルームや、目的に応じて柔軟に設定できるカスタムルーム*。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *さまざまな形式のファイルの操作*：テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cリアルタイムまたは段落ロックの2つの共同編集モードで、文書の共同編集*：変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *任意のクラウドストレージ*を接続し、アプリを切り替えることなく作業する。
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE Team
-"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
+$TrulyYours</value>
  </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpaceへようこそ!</value>
@@ -201,75 +209,71 @@ $activity
 #end</value>
 </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
-ONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様
 
 社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブであるONLYOFFICE DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+ 
 メールのご確認をお願いします。リンクの有効期限は7日間です：
- 
+ 
 $OrangeButton
- 
-ドキュメントコラボレーションの新時代をどうぞお楽しみください！
- 
-ONLYOFFICE Team
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+ 
+*ドキュメントコラボレーションの新時代をどうぞお楽しみください！*
+ 
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
-ONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様!
 
 社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブであるONLYOFFICE DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 メールのご確認をお願いします。リンクの有効期限は7日間です：
- 
+ 
 $OrangeButton
- 
-ドキュメントコラボレーションの新時代をどうぞお楽しみください！
- 
-ONLYOFFICE Team
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+
+*ドキュメントコラボレーションの新時代をどうぞお楽しみください!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
-ONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様
 
 社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブであるONLYOFFICE DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 メールのご確認をお願いします。リンクの有効期限は7日間です：
- 
+
 $OrangeButton
- 
-ドキュメントコラボレーションの新時代をどうぞお楽しみください！
- 
-ONLYOFFICE Team
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+
+*ドキュメントコラボレーションの新時代をどうぞお楽しみください！*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
-ONLYOFFICE DocSpaceをご利用いただきありがとうございます。
 
-社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブであるONLYOFFICE DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+$UserName 様
+
+社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブであるONLYOFFICE DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです。"${__VirtualRootPath}":"${__VirtualRootPath}"
+
 メールのご確認をお願いします。リンクの有効期限は7日間です：
- 
 $OrangeButton
- 
+
 現在のプランはSTARTUPです。このプランは完全無料で以下のものが含まれています：
- 
-* 管理者1人、パワーユーザー2人
-* 最大12ルーム
-* 各ルームのユーザー数は無制限
-* ディスク領域 2 GB
- 
-ドキュメントコラボレーションの新時代をどうぞお楽しみください！
- 
-ONLYOFFICE Team
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;管理者1人、パワーユーザー2人&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;最大12ルーム&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;各ルームのユーザー数は無制限&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;ディスク領域 2 GB &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*ドキュメントコラボレーションの新時代をどうぞお楽しみください！*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.ポータルサイトのアドレス変更
@@ -290,102 +294,129 @@ $OrangeButton
 パスワードを変更したくないですか？このメッセージは無視してください</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. ONLYOFFICEの&lt;span style="color:#FF6F3D;"&gt;無料&lt;/span&gt;アプリを入手しましょう
+
+
+$UserName 様
 
 無料のONLYOFFICEアプリを入手して、どのデバイスからでも文書の管理をしましょう。
- 
-# Windows、Linux、Macでオフラインで文書を管理するには、"ONLYOFFICE Desktop Editors": "https://www.onlyoffice.com/ja/download-desktop.aspx" をダウンロードしてください。
- 
-#モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;オフラインで文書編集する場合、ONLYOFFICEデスクトップエディタ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;モバイルデバイスで文書編集する場合、ONLYOFFICE Documentsアプリ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. 効率的な文書作業の&lt;span style="color:#FF6F3D;"&gt;5つのヒント&lt;/span&gt;
+
+
+$UserName 様
 
 いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。ここでは、ドキュメントでの作業をより効果的にするためのヒントをご紹介します。
- 
-*#1. 使い方を選ぶ。*リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。
- 
-*#2. 手持ちのあらゆるコンテンツに対応。*テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。
- 
-*#3. 共同作業をより効率的に。*リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。
- 
-*#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. 使い方を選ぶ。&lt;/b&gt; &lt;br/&gt;リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. 手持ちのあらゆるコンテンツに対応。&lt;/b&gt;テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. 共同作業をより効率的に。&lt;/b&gt; &lt;br/&gt;リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. 安全に共同作業を。&lt;/b&gt; &lt;br/&gt;柔軟な権限とユーザー役割により、スペース全体または個別のルームへのアクセスを微調整できます。&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. AIヘルパープラグインを使いこなす。&lt;/b&gt;&lt;br/&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. 効率的な文書作業の&lt;span style="color:#FF6F3D;"&gt;5つのヒント&lt;/span&gt;
+
+
+$UserName 様
 
 いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。ここでは、ドキュメントでの作業をより効果的にするためのヒントをご紹介します。
- 
-*#1. 使い方を選ぶ。*リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。
- 
-*#2. 手持ちのあらゆるコンテンツに対応。*テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。
- 
-*#3. 共同作業をより効率的に。*リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。
- 
-*#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. 使い方を選ぶ。&lt;/b&gt; &lt;br/&gt;リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. 手持ちのあらゆるコンテンツに対応。&lt;/b&gt;テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. 共同作業をより効率的に。&lt;/b&gt; &lt;br/&gt;リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. 安全に共同作業を。&lt;/b&gt; &lt;br/&gt;柔軟な権限とユーザー役割により、スペース全体または個別のルームへのアクセスを微調整できます。&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. AIヘルパープラグインを使いこなす。&lt;/b&gt;&lt;br/&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. 効率的な文書作業の&lt;span style="color:#FF6F3D;"&gt;5つのヒント&lt;/span&gt;
+
+
+$UserName 様
 
 いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。ここでは、ドキュメントでの作業をより効果的にするためのヒントをご紹介します。
- 
-*#1. 使い方を選ぶ。*リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。
- 
-*#2. 手持ちのあらゆるコンテンツに対応。*テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。
- 
-*#3. 共同作業をより効率的に。*リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。
- 
-*#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. 使い方を選ぶ。&lt;/b&gt; &lt;br/&gt;リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. 手持ちのあらゆるコンテンツに対応。&lt;/b&gt;テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. 共同作業をより効率的に。&lt;/b&gt; &lt;br/&gt;リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. 安全に共同作業を。&lt;/b&gt; &lt;br/&gt;柔軟な権限とユーザー役割により、スペース全体または個別のルームへのアクセスを微調整できます。&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. AIヘルパープラグインを使いこなす。&lt;/b&gt;&lt;br/&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. 効率的な文書作業の&lt;span style="color:#FF6F3D;"&gt;5つのヒント&lt;/span&gt;
+
+
+$UserName 様
 
 いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。ここでは、ドキュメントでの作業をより効果的にするためのヒントをご紹介します。
- 
-*#1. 使い方を選ぶ。*リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。
- 
-*#2. 手持ちのあらゆるコンテンツに対応。*テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。
- 
-*#3. 共同作業をより効率的に。*リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。
- 
-*#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. 使い方を選ぶ。&lt;/b&gt; &lt;br/&gt;リアルタイムで共同編集ができるコラボレーションルームや、用途に合わせて自由に設定できるカスタムルームなど、必要なワークフローを構築することができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. 手持ちのあらゆるコンテンツに対応。&lt;/b&gt;テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルをルーム内に保存して作業することができます。&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. 共同作業をより効率的に。&lt;/b&gt; &lt;br/&gt;リアルタイム編集と段落ロック編集の2つの編集モードで、ドキュメントを効率的に共同編集できます。変更点を追跡し、内蔵のチャットを使用してリアルタイムで通信したり、オーディオおよびビデオ通話を行うことができます。&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. 安全に共同作業を。&lt;/b&gt; &lt;br/&gt;柔軟な権限とユーザー役割により、スペース全体または個別のルームへのアクセスを微調整できます。&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. AIヘルパープラグインを使いこなす。&lt;/b&gt;&lt;br/&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceのビジネス向けサブスクリプションのご案内
 
-いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様!
 
 このメールでは、ユーザー体験をより快適にするために、3つの簡単な質問をさせていただきます。
- 
-* ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？
- 
-* 多くのドキュメントを扱うために、たくさんのルームを作成したいですか？
- 
-* ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？
- 
-ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
- 
-ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
- 
-_ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;多くのドキュメントを扱うために、たくさんのルームを作成したいですか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
+
+ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>$UserName 様
@@ -396,194 +427,212 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予期間が有効になってい
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceのビジネス向けサブスクリプションのご案内
 
-いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様!
 
 このメールでは、ユーザー体験をより快適にするために、3つの簡単な質問をさせていただきます。
- 
-* ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？
- 
-* 多くのドキュメントを扱うために、たくさんのルームを作成したいですか？
- 
-* ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？
- 
-ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
- 
-ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
- 
-_ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;多くのドキュメントを扱うために、たくさんのルームを作成したいですか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
+
+ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceのビジネス向けサブスクリプションのご案内
 
-いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様!
 
 このメールでは、ユーザー体験をより快適にするために、3つの簡単な質問をさせていただきます。
- 
-* ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？
- 
-* 多くのドキュメントを扱うために、たくさんのルームを作成したいですか？
- 
-* ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？
- 
-ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
- 
-ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
- 
-_ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;多くのドキュメントを扱うために、たくさんのルームを作成したいですか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
+
+ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceのビジネス向けサブスクリプションのご案内
 
-いつもONLYOFFICE DocSpaceをご利用いただきありがとうございます。
+
+$UserName 様!
 
 このメールでは、ユーザー体験をより快適にするために、3つの簡単な質問をさせていただきます。
- 
-* ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？
- 
-* 多くのドキュメントを扱うために、たくさんのルームを作成したいですか？
- 
-* ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？
- 
-ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
- 
-ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
- 
-_ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceで、大きなチームや多くの顧客やパートナーとコラボレーションしていらっしゃいますか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;多くのドキュメントを扱うために、たくさんのルームを作成したいですか？ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpaceを自社ブランドで利用したいですか？&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+ONLYOFFICE DocSpaceの管理者数を自由に設定でき、ブランディングも可能なBUSINESSプランをぜひお選びください。
+
+ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照ください。このページには、Stripeカスタマーポータルへのリンクがあり、すべてのお支払いに関する詳細を簡単にまとめてあります。
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>こんにちは！
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
+
+
+こんにちは！
 
 ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待されました。リンクをクリックして、招待を受け入れてください：
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>こんにちは！
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
+
+
+こんにちは！
 
 ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待されました。リンクをクリックして、招待を受け入れてください：
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>こんにちは！
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+
+
+こんにちは！
 
 ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待されました。リンクをクリックして、招待を受け入れてください：
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>こんにちは！
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
+
+
+こんにちは！
 
 ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待されました。リンクをクリックして、招待を受け入れてください：
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
- 
-ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイルは、"${__VirtualRootPath}":"${__VirtualRootPath}"に正常に追加されました。これで、次のことができるようになりました：
- 
-* 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
- 
-* *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディア*など、さまざまな形式のファイルを扱うことができます。
- 
-* *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書の共同編集*が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
- 
-* *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
+
+ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://www.onlyoffice.com/ja"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
- 
-ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイルは、"${__VirtualRootPath}":"${__VirtualRootPath}"に正常に追加されました。これで、次のことができるようになりました：
- 
-* 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
- 
-* *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディア*など、さまざまな形式のファイルを扱うことができます。
- 
-* *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書の共同編集*が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
- 
-* *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
+
+ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://www.onlyoffice.com/ja"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
- 
-ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイルは、"${__VirtualRootPath}":"${__VirtualRootPath}"に正常に追加されました。これで、次のことができるようになりました：
- 
-* 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
- 
-* *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディア*など、さまざまな形式のファイルを扱うことができます。
- 
-* *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書の共同編集*が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
- 
-* *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
+
+ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://www.onlyoffice.com/ja"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>$UserName 様
- 
-ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイルは、"${__VirtualRootPath}":"${__VirtualRootPath}"に正常に追加されました。これで、次のことができるようになりました：
- 
-* 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
- 
-* *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディア*など、さまざまな形式のファイルを扱うことができます。
- 
-* *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書の共同編集*が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
- 
-* *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+$UserNameさん、こんにちは!
+
+ONLYOFFICE DocSpaceへようこそ！$UserNameさんのプロフィールは次のルームに追加されました："${__VirtualRootPath}":"${__VirtualRootPath}"。次の操作ができるようになりました：
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;招待されたルームで他のユーザーと一緒に作業する：&lt;b&gt;リアルタイムの共同執筆が可能なコラボレーションルームや、目的に応じた柔軟な設定が可能なカスタムルームなど&lt;/b&gt;。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;さまざまな形式のファイルの操作&lt;/b&gt;:テキスト文書、スプレッドシート、スライド、デジタルフォーム、PDF、電子書籍、マルチメディアなど。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;リアルタイムまたは段落ロックの2つの共同編集モードで、&lt;b&gt;文書の共同編集文書の共同編集&lt;/b&gt;:変更点を追跡し、内蔵のチャットや音声・ビデオ通話を使用してリアルタイムでコミュニケーション。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;AIヘルパープラグインを使いこなす：&lt;/b&gt;テキストの要約や翻訳、画像やキーワードの生成、単語の分析など&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+ヘルプが必要な場合は、"ヘルプセンター":"${__HelpLink}"を閲覧してください。または"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://www.onlyoffice.com/ja"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのメッセージが届いています。
@@ -595,101 +644,97 @@ ONLYOFFICE チーム
 $Body</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. ONLYOFFICEの&lt;span style="color:#FF6F3D;"&gt;無料&lt;/span&gt;アプリを入手しましょう
+
+
+$UserName 様
 
 無料のONLYOFFICEアプリを入手して、どのデバイスからでも文書の管理をしましょう。
- 
-# Windows、Linux、Macでオフラインで文書を管理するには、"ONLYOFFICE Desktop Editors": "https://www.onlyoffice.com/ja/download-desktop.aspx" をダウンロードしてください。
- 
-#モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;オフラインで文書編集する場合、ONLYOFFICEデスクトップエディタ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;モバイルデバイスで文書編集する場合、ONLYOFFICE Documentsアプリ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. ONLYOFFICEの&lt;span style="color:#FF6F3D;"&gt;無料&lt;/span&gt;アプリを入手しましょう
+
+
+$UserName 様
 
 無料のONLYOFFICEアプリを入手して、どのデバイスからでも文書の管理をしましょう。
- 
-# Windows、Linux、Macでオフラインで文書を管理するには、"ONLYOFFICE Desktop Editors": "https://www.onlyoffice.com/ja/download-desktop.aspx" をダウンロードしてください。
- 
-#モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;オフラインで文書編集する場合、ONLYOFFICEデスクトップエディタ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;モバイルデバイスで文書編集する場合、ONLYOFFICE Documentsアプリ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>こんにちは！
-このメールアドレスを使って、新しい「ONLYOFFICE Personal」:"$PortalUrl" アカウントを登録しようとする試みがありました。もしそれがあなたであったなら、そのアカウントはすでに存在していることをお知らせいたします。
-パスワードを紛失した場合は、「パスワード回復ページ」:"$LinkToRecovery"で回復することができます。
+このメールアドレスを使って、新しい"ONLYOFFICE Personal":"$PortalUrl" アカウントを登録しようとする試みがありました。もしそれがあなたであったなら、そのアカウントはすでに存在していることをお知らせいたします。
+パスワードを紛失した場合は、"パスワード回復ページ":"$LinkToRecovery"で回復することができます。
 もし、新しいアカウントを登録しようとしなかった場合、おそらく他の人が間違って登録したのでしょう。この場合、このメールは無視してください。
- 
+
 良い一日をお過ごしください！
 ONLYOFFICE チーム</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>ONLYOFFICE DocSpaceは正常に無効化されました。なお、お客様のデータは、当社の「プライバシーポリシー」: "https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0 "に従ってすべて削除されます。
- 
-もし可能でしたら、退会の理由をお聞かせいただけませんか？
- 
-$OrangeButton
- 
-ONLYOFFICEをご利用いただき誠にありがとうございました。
+    <value>h1. ONLYOFFICE DocSpaceが&lt;span style="color:#FF6F3D;"&gt;無効化&lt;/span&gt;されました
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
+
+ONLYOFFICE DocSpaceは正常に無効化されました。なお、お客様のデータは、当社の"プライバシーポリシー":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" に従ってすべて削除されます。
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;もし可能でしたら、退会の理由をお聞かせいただけませんか？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*ご利用いただきありがとうございました。*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>$UserName 様
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceを設定してください
+
+
+$UserName 様
 
 ONLYOFFICE DocSpaceのセキュリティ設定を調整することで、より安全性を高めることができます：
- 
-* パスワードの強度を設定。 
- 
-* 二要素認証とシングルサインオンを有効にする。
- 
-* 信頼できるメールドメインとセッションの有効期間を決定。
- 
-* 特定のIPアドレスからのアクセスを制限。
- 
-* 管理者メッセージの許可または制限。 
- 
-* 管理者のアクセス権を管理。
- 
-* データのバックアップを行う。
- 
-$OrangeButton
- 
-ONLYOFFICE DocSpaceの設定や管理については、「ヘルプセンター」: "https://helpcenter.onlyoffice.com/"をご覧ください。また、機能についての質問も受け付けております。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;パスワードの強度を設定。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;二要素認証とシングルサインオンを有効にする。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;信頼できるメールドメインとセッションの有効期間を決定。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;特定のIPアドレスからのアクセスを制限。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;管理者メッセージの許可または制限。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;管理者のアクセス権を管理。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;データのバックアップを行う。&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+$OrangeButton
+
+ONLYOFFICE DocSpaceの設定や管理については、"ヘルプセンター":"${__HelpLink}"をご覧ください。また、機能についての質問も受け付けております。
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" に半年以上入っていないようです。
- 
-もうご利用にならないとのことで、「プライバシーポリシー」: "https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0 "に従い、ONLYOFFICE DocSpaceとすべてのデータを削除します。
- 
-ONLYOFFICE DocSpaceのご利用を停止することにした理由は何でしょうか？もし可能でしたら、ぜひお聞かせください。
- 
-$OrangeButton
- 
-もし、これが間違いだと思い、ONLYOFFICE DocSpaceのご利用を継続したい場合は、お手数ですが、弊社の"サポートチーム":"https://www.onlyoffice.com/support-contact-form.aspx"までご連絡ください。
+    <value>h1. ONLYOFFICE DocSpaceが &lt;span style="color:#FF6F3D;"&gt;削除&lt;/span&gt;されます
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+
+ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" に半年以上入っていないようです。
+
+もうご利用にならないとのことで、"プライバシーポリシー":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従い、ONLYOFFICE DocSpaceとすべてのデータを削除します。
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;ONLYOFFICE DocSpaceのご利用を停止することにした理由は何でしょうか？もし可能でしたら、ぜひお聞かせください。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+もし、これが間違いだと思い、ONLYOFFICE DocSpaceのご利用を継続したい場合は、お手数ですが、弊社の"サポートチーム":"${__SupportLink}"までご連絡ください。
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>こんにちは！
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+
+
+こんにちは！
 
 ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待されました。リンクをクリックして、招待を承諾してください：
- 
+
 $OrangeButton
- 
+
 招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>$UserName 様
@@ -700,8 +745,7 @@ ONLYOFFICE DocSpaceのすべての利点を使用し続けるために、今Busi
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>$UserName 様
@@ -712,8 +756,7 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予期間は終了しています
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>$UserName 様
@@ -724,8 +767,7 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予が明日までとなります
 
 $OrangeButton
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>こんにちは！
@@ -736,8 +778,7 @@ $OrangeButton
  
 招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE Personalアカウントのパスワードを変更したいですか？下のボタンをクリックして確認してください。
@@ -840,5 +881,765 @@ $OrangeButton
   </data>
   <data name="ButtonVisitPaymentsSection" xml:space="preserve">
     <value>お支払い方法について</value>
+  </data>
+  <data name="pattern_personal_after_registration1" xml:space="preserve">
+    <value>h1.ONLYOFFICE Personalへようこそ
+
+クラウド上にパーソナルオフィスが作成されました。
+
+h3.バーチャルなワークスペースで、ドキュメントの編集や保存ができ、どこからでも作業でき、友人や同僚にもアクセスできます。
+
+h3.まずはONLYOFFICEでできることをご紹介します：
+
+- テキスト文書、スプレッドシート、プレゼンテーションの作成、閲覧、編集。
+
+- すべての一般的なフォーマットで作業できます。MS Officeファイルとの高い互換性。
+
+- すぐに記入できるフォーム":"https://www.onlyoffice.com/ja/form-creator.aspx"の作成と共同編集。
+
+- オンラインで文書を共有し、共同作業。
+
+- さまざまなプラグインを使用して、追加機能を適用できます。
+
+- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja" を使って、パーソナルクラウドに簡単にアクセスできます。
+
+無料の"デスクトップエディター":"https://www.onlyoffice.com/ja/download-desktop.aspx"を使ってオフラインでドキュメントを編集したり、"iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972"または"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"デバイス用のモバイル編集スイートを入手することもできます。
+
+$TrulyYours</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>何卒よろしくお願いいたします、ONLYOFFICEサポートチーム</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>フルプレイリストを見る</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>ONLYOFFICE チーム</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>ビデオガイドでONLYOFFICE DocSpaceをマスター</value>
+  </data>
+  <data name="pattern_activate_email" xml:space="preserve">
+    <value>h1.ポータル"${__VirtualRootPath}":"$InviteLink"用のメールをアクティブにしましょう
+
+こんにちは！
+
+ポータル"${__VirtualRootPath}":"$InviteLink"への参加を開始するには、メールアドレスを有効化する必要があります。これはセキュリティ上の理由から行われます。
+
+$OrangeButton
+
+このリンクの有効期間は7日だけです。期間内に電子メールの有効化を完了してください。</value>
+  </data>
+  <data name="pattern_backup_created" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのバックアップが作成されました
+
+$OwnerName 様
+
+$OwnerName様の"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルのデータを含むバックアップファイルが作成されました。
+
+バックアップ手順の詳細については、「データのバックアップ」:"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block"ユーザーガイドをご参照ください。
+
+
+ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}"までご連絡ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})ポータルのバックアップが作成されました
+
+$OwnerName 様
+
+お客様の [${__VirtualRootPath}](${__VirtualRootPath}) ポータルのデータを含むバックアップファイルが作成されました。
+
+バックアップ手順の詳細については、[データバックアップ](${__HelpLink}/tipstricks/data-backup-restore.aspx)ユーザーガイドをご参照ください。
+
+ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) までお気軽にお問い合わせください。
+
+何卒よろしくお願いいたします。
+ONLYOFFICE™ サポートチーム
+[www.onlyoffice.com](http://onlyoffice.com/ja)</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>${LetterLogoText}アカウントのメールアドレスを変更しますか？
+
+下のボタンをクリックして、クラウドにログイン*してください。
+
+$OrangeButton
+
+このリンクは7日間有効です。
+
+*このブラウザで${LetterLogoText}にサインインしていない場合は、確認のために旧メールアドレスを使用する必要があります。お忘れになった場合は、ポータル管理者までご連絡ください。
+
+メールアドレスを変更したくないですか? このメッセージを無視してください。</value>
+  </data>
+  <data name="pattern_change_phone" xml:space="preserve">
+    <value>h1.携帯電話変更お問い合わせ
+
+${LetterLogoText}ポータルへのログインに使用する携帯電話の変更をリクエストされました。
+
+以下のリンクから携帯電話をご変更ください：
+
+$OrangeButton
+
+携帯電話を変更したくない場合、または間違ってこのメールを受け取った場合は、無視するか、ポータル管理者までご連絡し、詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>h1.セキュリティ通知
+
+${LetterLogoText}ポータルにログインするために使用している認証アプリの設定がリセットされました。
+
+以下のボタンをクリックして、ポータルログインページに移動し、認証アプリを設定してください：
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータル所有者変更
+
+$OwnerName 様
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの所有者を $UserName に変更したいとのリクエストがありました。
+
+以下のリンクから操作をご確認ください：
+
+$OrangeButton
+
+*ご注意*: このリンクは 7 日間のみ有効です。期間内にポータル所有者の変更手続きを完了してください。</value>
+  </data>
+  <data name="pattern_dns_change" xml:space="preserve">
+    <value>h1.ポータルアドレスの変更
+
+$OwnerName 様
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" のポータルアドレスを "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end に変更したいとのリクエストがありました。
+
+以下のリンクから操作をご確認ください：
+
+$OrangeButton
+
+*ご注意*: このリンクは 7 日間のみ有効です。期間内にポータル所有者の変更手続きを完了してください。</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
+
+
+$UserName 様
+
+ゲストユーザーとして "${__VirtualRootPath}":"${__VirtualRootPath}" に招待されています。リンクをクリックして招待をお受け入れください：
+
+$OrangeButton
+
+リンクの有効期間は7日です。
+ 
+ウェブオフィスを使用するためのヒントをお送りします。プロファイルページでいつでも購読をキャンセルしたり、再度有効にすることができます。</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceへようこそ!</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
+
+
+$UserName 様
+
+$__AuthorName さんは、$UserName さんをゲストユーザーとして "${__VirtualRootPath}":"${__VirtualRootPath}" に招待しています。リンクをクリックして招待をお受け入れください：
+
+$OrangeButton
+
+リンクの有効期間は7日です。
+
+ウェブオフィスを使用するためのヒントをお送りします。プロファイルページでいつでも購読をキャンセルしたり、再度有効にすることができます。</value>
+  </data>
+  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのメッセーぎがあります
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})ポータルからのメッセーぎがあります
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_join" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"$InviteLink" ポータルへの招待
+
+こんにちは、
+
+${LetterLogoText}の"${__VirtualRootPath}":"$InviteLink"ポータルへの参加をリクエストされました。ポータルに参加して、同僚や友人とすぐに共同作業を始めましょう。
+
+招待を受けるには、このリンクから名前とパスワードを入力してください：
+
+$OrangeButton
+
+*ご注意*: このリンクは48時間のみ有効です。期間内に操作を完了してください。</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>$UserName 様
+
+      管理者は"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルに新しい&lt;b&gt;$Address&lt;/b&gt;メールボックスを作成しました。
+
+      他のメールクライアントには、以下の設定を使用してください：
+      ログイン: &lt;b&gt;$Login&lt;/b&gt;
+      パスワード: "&lt;b&gt;パスワードを設定する&lt;/b&gt;":"$MyStaffLink"
+
+      受信メール（IMAP）： 
+      サーバー： &lt;b&gt;$Server&lt;/b&gt;
+      ポート: &lt;b&gt;$ImapPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+      送信メール (SMTP)： 
+      サーバー： &lt;b&gt;$Server&lt;/b&gt;
+      ポート ポート: &lt;b&gt;$SmtpPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      認証が必要: &lt;b&gt;はい&lt;/b&gt;
+
+      間違ってこのメールを受け取った場合は、無視するか、ポータル管理者に連絡して詳細を確認してください。</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>$UserName 様
+
+      &lt;b&gt;$Address&lt;/b&gt;メールボックスのパスワードが変更されました。
+
+      間違ってこのメールを受け取った場合は、無視するか、ポータル管理者に連絡して詳細を確認してください。</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>$UserName 様
+
+      管理者は、"${__VirtualRootPath}":"${__VirtualRootPath}" ポータルに、$UserName様のための新しい &lt;b&gt;$Address&lt;/b&gt; メールボックスを作成しました。
+
+      間違ってこのメールを受け取った場合は、無視するか、ポータル管理者に連絡して詳細を確認してください。</value>
+  </data>
+  <data name="pattern_migration_error" xml:space="preserve">
+    <value>h1.別の地域ポータルの移行エラー
+
+$RegionName地域への移行中にエラーが発生しました。後でもう一度お試しください。
+お客様のポータルは現在、旧アドレス"$PortalUrl":"$PortalUrl"で利用可能です。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
+
+$TrulyYours
+
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を設定してください。^</value>
+  </data>
+  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <value>h1.別の地域ポータルの移行エラー
+
+他の地域への移行中にエラーが発生しました。後でもう一度お試しください。
+お客様のポータルは現在、旧アドレス"$PortalUrl":"$PortalUrl"で利用可能です。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
+
+$TrulyYours
+
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL "を設定してください。^</value>
+  </data>
+  <data name="pattern_migration_start" xml:space="preserve">
+    <value>h1.別の地域へのポータル移行が開始されました
+
+$RegionName地域へのポータル移行が開始されました。データ量によっては時間がかかる場合もあります。
+
+*ご注意*: 移行プロセス中、ポータルは利用できません。移行完了後、ポータルURLは変更され、すべての共有ドキュメントリンクにアクセスできなくなります。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.ポータルの移行
+h1."$PortalUrl":"$PortalUrl"
+
+ポータルは新しいドメインに移行されました。サインインに使用するパスワードを指定して、ポータルへのアクセスを復元してください。
+
+以下のリンクに従って、アカウントのパスワードを設定してください：
+$OrangeButton
+
+*ご注意*: このリンクは7日間のみ有効です。期間内にアクセスリストアの手続きを完了してください。
+
+間違ってこのメールを受け取った場合は、無視するか、"$PortalUrl":"$PortalUrl "ポータル管理者に連絡して詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+
+
+こんにちは！
+
+ゲストユーザーとして "${__VirtualRootPath}":"${__VirtualRootPath}" に招待されています。リンクをクリックして招待を承認してください：
+
+"$ActivateUrl":"$ActivateUrl"
+
+リンクは7日間のみ有効です。
+
+ウェブオフィスを使用するためのヒントをお送りします。お客様のプロフィールページでいつでも購読をキャンセルしたり、再度有効にすることができます。</value>
+  </data>
+  <data name="pattern_personal_activate" xml:space="preserve">
+    <value>$UserName 様
+ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}" の登録に成功しました。
+
+Dropbox、Google Drive、OneDrive、Boxなど、お好きなクラウドストレージを接続して、どこからでもアクセスできるドキュメント用のワークスペースを作成できます。
+
+ONLYOFFICE Personalの詳細は"公式ブログ":"$TagBlogLink "をご覧ください。
+
+引き続きどうぞよろしくお願いいたします。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_personal_change_email_v115" xml:space="preserve">
+    <value>ONLYOFFICEアカウントのメールアドレスを変更したいですか？
+
+下のボタンをクリックして、クラウドにログイン*してください。
+
+$OrangeButton
+
+リンクは7日間有効です。
+
+*このブラウザでONLYOFFICEにサインインしていない場合、確認のために旧メールアドレスを使用する必要があります。
+
+メールアドレスを変更したくないですか？このメッセージは無視してください。</value>
+  </data>
+  <data name="pattern_personal_confirmation" xml:space="preserve">
+    <value>こんにちは、
+
+ONLYOFFICEソリューションの個人用アカウントを登録しました。"こちら":"$InviteLink"をクリックして登録を確認し、パスワードを作成してください。
+
+リンクが開けない場合は、以下の"$InviteLink":"$InviteLink "をコピーし、ブラウザのアドレスバーに貼り付けてください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_personal_profile_delete" xml:space="preserve">
+    <value>personal.onlyoffice.comのアカウント停止のリクエストがありました。リンクに従ってリクエストを完了してください（リンクは7日間有効です）： 
+
+$OrangeButton
+
+*ご注意*： 削除後、お客様のアカウントとそれに関連するすべてのデータは、当社の"プライバシーステートメント":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従って永久に消去されます。
+
+"アカウント削除の詳細":"${__HelpLink}/adminration/configuration.aspx"
+
+手続きをお進めにならない場合は、このメールを無視してください。
+
+ご質問がある場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までご連絡ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルの無効化
+
+$OwnerName 様
+
+お客様の "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの一時的な停止のリクエストがありました。以下のリンクから操作をご確認ください：
+
+$OrangeButton
+
+*ご注意*: このリンクは 7 日間のみ有効です。この期間内にポータルの無効化プロセスを完了してください。
+
+以下のリンクをクリックすると、いつでもポータルを再アクティブ化できます：
+p=. "ポータルの再起動":"$ActivateUrl" (このリンクには期限はありません)
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>ポータルの無効化 [${__VirtualRootPath}](${__VirtualRootPath})
+
+$OwnerName 様
+
+お客様の [${__VirtualRootPath}](${__VirtualRootPath}) ポータルの一時的な停止をリクエストしました。以下のリンクから操作をご確認ください：
+
+$OrangeButton
+
+_ご注意_: このリンクは7日間のみ有効です。期間内にポータルの無効化プロセスを完了してください。
+
+以下のリンクをクリックすると、いつでもポータルを再アクティブ化できます：
+[ポータルの再アクティブ化]($ActivateUrl) (このリンクには期限はありません)
+
+ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
+
+よろしくお願いいたします
+ONLYOFFICE™ サポートチーム
+[www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
+  </data>
+  <data name="pattern_portal_delete" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"スペースの削除
+
+$OwnerName 様
+ "${__VirtualRootPath}":"${__VirtualRootPath}" スペースの永久削除のリクエストがありました。
+
+*重要！スペースに保存されているすべてのデータ、および登録情報は失われ、回復することはできません。
+
+#if($AutoRenew == "True")
+スペースを削除する前に、自動課金がオフになっていることを確認してください。自動課金の状態は "Avangateアカウント":"https://secure.avangate.com/myaccount/"で確認できます。
+#end
+
+それでもなお "${__VirtualRootPath}":"${__VirtualRootPath}" スペースを削除したい場合は、以下のリンクから操作を確認してください：
+
+$OrangeButton
+
+*ご注意*: このリンクは7日間のみ有効です。この期間内にポータルの削除を完了してください。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>効率的な文書作業の5つのヒント</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>効率的な文書作業の5つのヒント</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>効率的な文書作業の5つのヒント</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>効率的な文書作業の5つのヒント</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceを設定してください</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのビジネス向けサブスクリプションのご案内</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのビジネス向けサブスクリプションのご案内</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのビジネス向けサブスクリプションのご案内</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのビジネス向けサブスクリプションのご案内</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>ONLYOFFICEの無料アプリを入手しましょう</value>
+  </data>
+  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
+    <value>ONLYOFFICEの無料アプリを入手しましょう</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>ONLYOFFICEの無料アプリを入手しましょう</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceが無効化&lt;/span&gt;されました</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceが削除されます</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ビデオガイド&lt;/span&gt;でONLYOFFICE DocSpaceをマスターしましょう
+
+
+$UserName 様
+
+ONLYOFFICE DocSpaceを簡単にマスターできるよう、ビデオチュートリアルをご用意しました。ビデオガイドをご覧いただき、シームレスで効果的な作業を実現してください。
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;ONLYOFFICE DocSpaceとは？&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: ハンズオンツアー&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;主なアクティビティ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;ルームの作成&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;ファイルの作成とアップロード&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;ファイルのコピー、移動、名前の変更、削除、ダウンロード&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;ファイルの並べ替えとフィルター/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;ファイルバージョンの復元&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;ホットキーの使用&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;アーカイブルーム&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;ユーザーとプロファイルの管理&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;ユーザーの招待&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;ユーザーの役割の管理&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;プロフィールの管理&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;アクティブなセッションからのログアウト&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;管理&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;セキュリティ設定の管理&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;バックアップと復元&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})ポータルの削除
+
+$OwnerName 様
+
+お客様に[${__VirtualRootPath}](${__VirtualRootPath}) ポータルの永久削除リクエストをいただきました。
+
+_重要！ポータルに保存されているすべてのデータ、および登録情報は失われ、回復することはできません。_
+
+#if($AutoRenew == "True")
+ポータルを削除する前に、自動課金がオフになっていることをご確認ください。自動課金の状態は[Avangateアカウント](https://secure.avangate.com/myaccount/")で確認できます。
+#end
+
+それでもなお [${__VirtualRootPath}](${__VirtualRootPath}) ポータルを削除したい場合は、以下のリンクをたどって操作をご確認ください：
+
+$OrangeButton
+
+_ご注意_: このリンクは7日間のみ有効です。期間内にポータルの削除を完了してください。
+
+ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
+
+どうぞよろしくお願いいたします。
+ONLYOFFICE™ サポートチーム
+[www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのプロファイルの削除
+
+お客様に、"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからお客様のプロフィールを永久に削除するリクエストをいただきました。
+
+プロフィールを削除したい場合は、以下のリンクに従って操作をご確認ください：
+
+$OrangeButton
+
+*ご注意*：このリンクは7日間のみ有効です。期間内にプロファイルの削除を完了してください。</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>"$FromUserName":"$FromUserLink"ユーザーがプロフィールを削除しました。すべてのユーザーのファイルはまだそのユーザーに割り当てられており、ディスク領域を占有しています。
+
+他のユーザーと共有されている文書を他のアクティブなユーザーに割り当て直すか、削除してポータルのディスク領域を解放することができます。
+
+"このリンク":"$FromUserLink"を通じてユーザープロフィールに移動し、文書を別のユーザーに再割り当てするか、削除してください。</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1."$__VirtualRootPath":"$__VirtualRootPath"のプロフィールが変更されました。
+
+$UserName 様
+
+"$__VirtualRootPath":"$__VirtualRootPath"にあるお客様のユーザープロフィールの詳細は、"$__AuthorName":"$__AuthorUrl"によって変更されました。
+
+お客様のプロフィールを確認するには、以下のリンクをたどってください："$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})のプロフィールが変更されました。
+
+$UserName 様
+
+お客様の [${__VirtualRootPath}](${__VirtualRootPath}) ユーザープロフィールの詳細は、[$__AuthorName]($__AuthorUrl) によって変更されました。
+
+お客様のプロフィールを確認するには、以下のリンクをたどってください：
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーから"$ToUserName":"$ToUserLink"ユーザーへのデータ再割り当て処理は正常に完了しました。</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザから"$ToUserName":"$ToUserLink"ユーザへのデータ再割り当て処理は失敗しました。
+
+例外メッセージ： $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーのデータ削除が完了しました。
+
+個人データの削除により、$DocsSpaceが解放されました</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーのデータ削除処理に失敗しました。
+
+例外メッセージ： $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.エンタープライズライセンスのリクエスト
+
+h3.名
+$UserName
+
+h3.姓
+$UserLastName
+
+h3.役職
+$Position
+
+h3.メールアドレス
+"$UserEmail":"mailto:$UserEmail"
+
+h3.電話番号
+$Phone
+
+h3.会社ウェブサイト
+$Website
+
+h3.会社名
+$CompanyTitle
+
+h3.会社規模
+$CompanySize
+
+h3.リクエスト内容
+$Body
+
+h3.ポータルアドレス
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.SAAS料金表リクエスト "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.名
+$UserName
+
+h3.姓
+$UserLastName
+
+h3.役職
+$Position
+
+h3.メールアドレス
+"$UserEmail":"mailto:$UserEmail"
+
+h3.電話番号
+$Phone
+
+h3.会社ウェブサイト
+$Website
+
+h3.会社名
+$CompanyTitle
+
+h3.会社規模
+$CompanySize
+
+h3.リクエスト内容
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.ポータルの復元
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+ポータルが復元されました。アクセスするには、新しいパスワードを設定する必要があります：
+
+$OrangeButton
+
+*ご注意*：このリンクは7日間のみ有効です。
+
+間違ってこのメールを受け取った場合は、無視するか、"${__VirtualRootPath}":"${__VirtualRootPath}" ポータル管理者に連絡して詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.ポータル復旧開始
+
+ポータルのリストアが開始されました。データ量により時間がかかる場合があります。
+
+*ご注意*：復元作業中はポータルをご利用いただけません。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお気軽にお問い合わせください。
+
+$TrulyYours
+
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を管理してください。^</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+
+
+こんにちは！
+
+ゲストユーザーとして "${__VirtualRootPath}":"${__VirtualRootPath}"に招待されています。リンクをクリックして招待をご承認ください：
+
+$OrangeButton
+
+ONLYOFFICEの最新情報やお役立ち情報をお届けします。お客様のプロフィールページでいつでも購読をキャンセルすることができます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのプロフィール変更通知
+
+"$__AuthorName":"$__AuthorUrl" が "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのプロフィール詳細を変更しました。
+
+
+プロフィールの更新に関する通知を受信したくない場合は、"購読設定":"$RecipientSubscriptionConfigURL "を管理してください</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>(${__VirtualRootPath})](${__VirtualRootPath}) ポータルのプロフィール変更通知
+
+[$__AuthorName]($__AuthorUrl)が[${__VirtualRootPath}](${__VirtualRootPath})ポータルのプロフィール詳細を変更しました。</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>SMTPテストメッセージ
+
+このメッセージはSMTP設定をテストするために自動的に生成されました。このメッセージが表示されている場合は、設定が正しく、ポータルで使用できることを意味します。
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理は失敗しました。
+
+一部のファイルが復号化できませんでした。"コントロールパネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでファイルの復号プロセスが開始されました。
+
+復号化には時間がかかるため、ポータルは一時的に利用できなくなります。復号化が終わり次第、再びデータを操作できるようになります。</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理が正常に完了しました。
+
+お客様のポータルは再び利用可能です。</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでのファイル暗号化処理は失敗しました。
+
+一部のファイルを暗号化できませんでした。"管理パネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでファイル暗号化プロセスが開始されました。
+
+暗号化には時間がかかるため、ポータルは一時的に利用できなくなります。暗号化が終わり次第、再びデータを操作できるようになります。</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル暗号化処理が正常に完了しました。
+
+お客様のポータルは再び利用可能です。</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルに新しいユーザーが追加されました
+
+"$__AuthorName":"$__AuthorUrl" が "${__VirtualRootPath}":"${__VirtualRootPath}" のポータルに参加しました。
+
+
+新しいユーザに関する通知を受信したくない場合は、"購読設定":"$RecipientSubscriptionConfigURL "を管理してください</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>新しいユーザーが [${__VirtualRootPath}](${__VirtualRootPath}) ポータルに追加されました。
+[$__AuthorName]($__AuthorUrl)が[${__VirtualRootPath}](${__VirtualRootPath})のポータルに参加しました。</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>$UserName 様
+
+お客様の企業の安全でセキュアなウェブオフィスに招待されました。そのアドレスは "${__VirtualRootPath}":"${__VirtualRootPath}" です。このリンクをブックマークに追加することをお勧めします。
+
+以下のリンクから招待を受け、企業アカウントのログイン名とパスワードを使ってサインインしてください。
+
+$OrangeButton
+
+リンクは7日間のみ有効です。</value>
   </data>
 </root>

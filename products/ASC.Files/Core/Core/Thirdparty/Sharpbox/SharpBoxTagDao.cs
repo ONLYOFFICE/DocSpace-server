@@ -36,10 +36,9 @@ internal class SharpBoxTagDao(IServiceProvider serviceProvider,
         ILogger<SharpBoxDaoBase> monitor,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IThirdPartyTagDao
+        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

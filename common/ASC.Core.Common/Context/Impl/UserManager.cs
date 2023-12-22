@@ -49,7 +49,6 @@ public class UserManagerConstants
 [Scope]
 public class UserManager
 {    
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private IDictionary<Guid, UserInfo> SystemUsers => _userManagerConstants.SystemUsers;
 
     private readonly IHttpContextAccessor _accessor;
@@ -70,12 +69,9 @@ public class UserManager
     private readonly UserFormatter _userFormatter;
     private readonly QuotaSocketManager _quotaSocketManager;
     private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
+    private readonly IDistributedLockProvider _distributedLockProvider;
+    
     private Tenant Tenant => _tenantManager.GetCurrentTenant();
-
-    public UserManager()
-    {
-
-    }
 
     public UserManager(
         IUserService service,
@@ -93,8 +89,8 @@ public class UserManager
         TenantQuotaFeatureCheckerCount<CountUserFeature> activeUsersFeatureChecker,
         UserFormatter userFormatter,
         QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper
-        )
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _userService = service;
         _tenantManager = tenantManager;
@@ -113,6 +109,7 @@ public class UserManager
         _userFormatter = userFormatter;
         _quotaSocketManager = quotaSocketManager;
         _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public UserManager(
@@ -132,8 +129,9 @@ public class UserManager
         IHttpContextAccessor httpContextAccessor,
         UserFormatter userFormatter,
         QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
-        : this(service, tenantManager, permissionContext, userManagerConstants, coreBaseSettings, coreSettings, instanceCrypto, radicaleClient, cardDavAddressbook, log, cache, tenantQuotaFeatureChecker, activeUsersFeatureChecker, userFormatter, quotaSocketManager, tenantQuotaFeatureStatHelper)
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+        IDistributedLockProvider distributedLockProvider)
+        : this(service, tenantManager, permissionContext, userManagerConstants, coreBaseSettings, coreSettings, instanceCrypto, radicaleClient, cardDavAddressbook, log, cache, tenantQuotaFeatureChecker, activeUsersFeatureChecker, userFormatter, quotaSocketManager, tenantQuotaFeatureStatHelper, distributedLockProvider)
     {
         _accessor = httpContextAccessor;
     }
@@ -373,7 +371,7 @@ public class UserManager
                     user.FirstName ?? string.Empty,
                     user.Title ?? string.Empty,
                     user.Location ?? string.Empty,
-                    user.Email ?? string.Empty,
+                    user.Email ?? string.Empty
             };
             if (IsPropertiesContainsWords(properties, words))
             {
@@ -467,15 +465,20 @@ public class UserManager
             throw new InvalidOperationException("User already exist.");
         }
 
+        IDistributedLockHandle lockHandle = null;
+
         try
         {
-            await _semaphore.WaitAsync();
             if (type is EmployeeType.User)
             {
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
+                
                 await _activeUsersFeatureChecker.CheckAppend();
             }
             else if (paidUserQuotaCheck)
             {
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
+                
                 await _countPaidUserChecker.CheckAppend();
             }
 
@@ -489,7 +492,10 @@ public class UserManager
         }
         finally
         {
-            _semaphore.Release();
+            if (lockHandle != null)
+            {
+                await lockHandle.ReleaseAsync();
+            }
         }
     }
 
@@ -903,12 +909,8 @@ public class UserManager
 
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
-        var group = await _userService.GetGroupAsync(Tenant.Id, groupID);
-
-        if (group == null)
-        {
-            group = ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
-        }
+        var group = await _userService.GetGroupAsync(Tenant.Id, groupID) ?? 
+                    ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)
         {
@@ -951,7 +953,7 @@ public class UserManager
 
     public async Task DeleteGroupAsync(Guid id)
     {
-        if (Constants.LostGroupInfo.Equals(id))
+        if (Constants.LostGroupInfo.ID.Equals(id))
         {
             return;
         }

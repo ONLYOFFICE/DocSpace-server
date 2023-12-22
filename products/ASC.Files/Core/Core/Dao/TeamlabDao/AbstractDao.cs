@@ -161,8 +161,51 @@ public class AbstractDao
             SearchType.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
             SearchType.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
             SearchType.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
-            _ => query,
+            _ => query
         };
+    }
+
+    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, IEnumerable<string> text, SearchType searchType) where T : IDbSearch
+    {
+        var lowerText = text.Select(GetSearchText);
+
+        switch (searchType)
+        {
+            case SearchType.Start:
+                {
+                    Expression<Func<T, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Title.ToLower().StartsWith(t));
+                    }
+                    return query.Where(exp);
+                }
+            case SearchType.End:
+                {
+                    Expression<Func<T, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Title.ToLower().EndsWith(t));
+                    }
+                    return query.Where(exp);
+                }
+            case SearchType.Any:
+                {
+                    Expression<Func<T, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Title.ToLower().Contains(t));
+                    }
+                    return query.Where(exp);
+                }
+            default:
+                {
+                    return query;
+                }
+        }
     }
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
@@ -227,7 +270,7 @@ public class AbstractDao
     internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
     {        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.ClearFileOrderAsync(filesDbContext, tenantId, parentFolderId, entryType);
         

@@ -31,14 +31,11 @@ namespace ASC.Web.Studio.Core.Notify;
 [Scope]
 public class StudioNotifyHelper
 {
-    public readonly string Helplink;
     public readonly string SiteLink;
     public readonly StudioNotifySource NotifySource;
-    public readonly ISubscriptionProvider SubscriptionProvider;
-    public readonly IRecipientProvider RecipientsProvider;
+    private readonly ISubscriptionProvider _subscriptionProvider;
+    private readonly IRecipientProvider _recipientsProvider;
 
-    private readonly int _countMailsToNotActivated;
-    private readonly string _notificationImagePath;
     private readonly UserManager _userManager;
     private readonly SettingsManager _settingsManager;
     private readonly CommonLinkUtility _commonLinkUtility;
@@ -46,13 +43,13 @@ public class StudioNotifyHelper
     private readonly TenantExtra _tenantExtra;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly WebImageSupplier _webImageSupplier;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<StudioNotifyHelper> _logger;
 
     public StudioNotifyHelper(
         StudioNotifySource studioNotifySource,
         UserManager userManager,
         SettingsManager settingsManager,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager,
@@ -62,7 +59,6 @@ public class StudioNotifyHelper
         IConfiguration configuration,
         ILogger<StudioNotifyHelper> logger)
     {
-        Helplink = commonLinkUtility.GetHelpLink(settingsManager, additionalWhiteLabelSettingsHelper, false);
         SiteLink = commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
         NotifySource = studioNotifySource;
         _userManager = userManager;
@@ -72,12 +68,10 @@ public class StudioNotifyHelper
         _tenantExtra = tenantExtra;
         _coreBaseSettings = coreBaseSettings;
         _webImageSupplier = webImageSupplier;
-        SubscriptionProvider = NotifySource.GetSubscriptionProvider();
-        RecipientsProvider = NotifySource.GetRecipientsProvider();
+        _configuration = configuration;
+        _subscriptionProvider = NotifySource.GetSubscriptionProvider();//TODO: remove from constructor
+        _recipientsProvider = NotifySource.GetRecipientsProvider();
         _logger = logger;
-
-        int.TryParse(configuration["core:notify:countspam"], out _countMailsToNotActivated);
-        _notificationImagePath = configuration["web:notification:image:path"];
     }
 
 
@@ -126,7 +120,7 @@ public class StudioNotifyHelper
 
     public async Task<IRecipient> ToRecipientAsync(Guid userId)
     {
-        return await RecipientsProvider.GetRecipientAsync(userId.ToString());
+        return await _recipientsProvider.GetRecipientAsync(userId.ToString());
     }
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
@@ -147,8 +141,9 @@ public class StudioNotifyHelper
                          Select(email => email.ToLower()).
                          Select(e => new DirectRecipient(e, null, new[] { e }, checkActivation)));
 
+        int.TryParse(_configuration["core:notify:countspam"], out var countMailsToNotActivated);
         if (!checkActivation
-            && _countMailsToNotActivated > 0
+            && countMailsToNotActivated > 0
             && _tenantExtra.Saas && !_coreBaseSettings.Personal)
         {
             var tenant = await _tenantManager.GetCurrentTenantAsync();
@@ -158,7 +153,7 @@ public class StudioNotifyHelper
                 var spamEmailSettings = await _settingsManager.LoadAsync<SpamEmailSettings>();
                 var sended = spamEmailSettings.MailsSended;
 
-                var mayTake = Math.Max(0, _countMailsToNotActivated - sended);
+                var mayTake = Math.Max(0, countMailsToNotActivated - sended);
                 var tryCount = res.Count;
                 if (mayTake < tryCount)
                 {
@@ -175,15 +170,16 @@ public class StudioNotifyHelper
     }
 
     public string GetNotificationImageUrl(string imageFileName)
-    {
-        if (string.IsNullOrEmpty(_notificationImagePath))
+    { 
+        var notificationImagePath = _configuration["web:notification:image:path"];
+        if (string.IsNullOrEmpty(notificationImagePath))
         {
             return
                 _commonLinkUtility.GetFullAbsolutePath(
                     _webImageSupplier.GetAbsoluteWebPath("notifications/" + imageFileName));
         }
 
-        return _notificationImagePath.TrimEnd('/') + "/" + imageFileName;
+        return notificationImagePath.TrimEnd('/') + "/" + imageFileName;
     }
 
 
@@ -194,7 +190,7 @@ public class StudioNotifyHelper
 
     public async Task<bool> IsSubscribedToNotifyAsync(IRecipient recipient, INotifyAction notifyAction)
     {
-        return recipient != null && await SubscriptionProvider.IsSubscribedAsync(_logger, notifyAction, recipient, null);
+        return recipient != null && await _subscriptionProvider.IsSubscribedAsync(_logger, notifyAction, recipient, null);
     }
 
     public async Task SubscribeToNotifyAsync(Guid userId, INotifyAction notifyAction, bool subscribe)
@@ -211,11 +207,11 @@ public class StudioNotifyHelper
 
         if (subscribe)
         {
-            await SubscriptionProvider.SubscribeAsync(notifyAction, null, recipient);
+            await _subscriptionProvider.SubscribeAsync(notifyAction, null, recipient);
         }
         else
         {
-            await SubscriptionProvider.UnSubscribeAsync(notifyAction, null, recipient);
+            await _subscriptionProvider.UnSubscribeAsync(notifyAction, null, recipient);
         }
     }
 }

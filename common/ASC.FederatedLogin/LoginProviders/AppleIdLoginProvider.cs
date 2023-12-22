@@ -53,12 +53,10 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         IHttpContextAccessor httpContextAccessor,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _httpContextAccessor = httpContextAccessor;
         _requestHelper = requestHelper;
@@ -78,7 +76,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return LoginProfile.FromError(ex);
         }
     }
 
@@ -106,11 +104,11 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private LoginProfile GetProfileFromClaims(ClaimsPrincipal claims)
     {
-        return new LoginProfile(Signature, InstanceCrypto)
+        return new LoginProfile
         {
             Id = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             EMail = claims.FindFirst(ClaimTypes.Email)?.Value,
-            Provider = ProviderConstants.AppleId,
+            Provider = ProviderConstants.AppleId
         };
     }
 

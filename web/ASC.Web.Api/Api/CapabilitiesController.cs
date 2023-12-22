@@ -30,31 +30,18 @@ namespace ASC.Web.Api.Controllers;
 /// Portal capabilities API.
 /// </summary>
 /// <name>capabilities</name>
-[DefaultRoute, DefaultRoute("{.format}")]
+[DefaultRoute, Route("api/2.0/capabilities.json")]
 [ApiController]
 [AllowAnonymous]
-public class CapabilitiesController : ControllerBase
-{
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly TenantManager _tenantManager;
-    private readonly ProviderManager _providerManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly ILogger _log;
-
-
-    public CapabilitiesController(
-        CoreBaseSettings coreBaseSettings,
+public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,
         SettingsManager settingsManager,
         ILogger<CapabilitiesController> logger)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _tenantManager = tenantManager;
-        _providerManager = providerManager;
-        _settingsManager = settingsManager;
-        _log = logger;
-    }
+    : ControllerBase
+{
+    private readonly ILogger _log = logger;
+
 
     ///<summary>
     ///Returns the information about portal capabilities.
@@ -69,11 +56,11 @@ public class CapabilitiesController : ControllerBase
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
-        var quota = await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync());
+        var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,
-            OauthEnabled = _coreBaseSettings.Standalone || quota.Oauth,
+            OauthEnabled = coreBaseSettings.Standalone || quota.Oauth,
             Providers = new List<string>(0),
             SsoLabel = string.Empty,
             SsoUrl = string.Empty
@@ -81,7 +68,7 @@ public class CapabilitiesController : ControllerBase
 
         try
         {
-            if (_coreBaseSettings.Standalone
+            if (coreBaseSettings.Standalone
                     || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
                         && quota.Ldap)
             {
@@ -103,11 +90,11 @@ public class CapabilitiesController : ControllerBase
                 result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
                 {
                     if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
-                                                                    && _coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
+                                                                    && coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
                     {
                         return false;
                     }
-                    var provider = _providerManager.GetLoginProvider(loginProvider);
+                    var provider = providerManager.GetLoginProvider(loginProvider);
                     return provider is { IsEnabled: true };
                 })
                 .ToList();
@@ -120,11 +107,11 @@ public class CapabilitiesController : ControllerBase
 
         try
         {
-            if (_coreBaseSettings.Standalone
+            if (coreBaseSettings.Standalone
                     || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
                         && quota.Sso)
             {
-                var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
+                var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
 
                 if (settings.EnableSso.GetValueOrDefault())
                 {

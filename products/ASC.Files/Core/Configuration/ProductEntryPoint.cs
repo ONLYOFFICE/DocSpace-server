@@ -29,7 +29,7 @@ namespace ASC.Web.Files.Configuration;
 [Scope]
 public class ProductEntryPoint : Product
 {
-    internal const string ProductPath = "/";
+    private const string ProductPath = "/";
 
     private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -94,14 +94,6 @@ public class ProductEntryPoint : Product
 
     public override void Init()
     {
-        List<string> adminOpportunities() => (_coreBaseSettings.CustomMode
-                                                           ? CustomModeResource.ProductAdminOpportunitiesCustomMode
-                                                           : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
-
-        List<string> userOpportunities() => (_coreBaseSettings.CustomMode
-                                     ? CustomModeResource.ProductUserOpportunitiesCustomMode
-                                     : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
-
         _productContext =
             new ProductContext
             {
@@ -111,30 +103,22 @@ public class ProductEntryPoint : Product
                 DefaultSortOrder = 10,
                 //SubscriptionManager = SubscriptionManager,
                 SpaceUsageStatManager = _filesSpaceUsageStatManager,
-                AdminOpportunities = adminOpportunities,
-                UserOpportunities = userOpportunities,
-                CanNotBeDisabled = true,
+                AdminOpportunities = AdminOpportunities,
+                UserOpportunities = UserOpportunities,
+                CanNotBeDisabled = true
             };
 
         _notifyConfiguration?.Configure();
+        return;
+
+        List<string> UserOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductUserOpportunitiesCustomMode
+            : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
+
         //SearchHandlerManager.Registry(new SearchHandler());
-    }
-
-    public string GetModuleResource(string ResourceClassTypeName, string ResourseKey)
-    {
-        if (string.IsNullOrEmpty(ResourseKey))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            return (string)Type.GetType(ResourceClassTypeName).GetProperty(ResourseKey, BindingFlags.Static | BindingFlags.Public).GetValue(null, null);
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
+        List<string> AdminOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductAdminOpportunitiesCustomMode
+            : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
     }
 
     public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
@@ -181,23 +165,15 @@ public class ProductEntryPoint : Product
                 Data = e.Date
             };
 
-            if (e.Action != (int)MessageAction.UserFileUpdated)
-            {
-                activityInfo.FileTitle = e.Description[0];
-            }
-            else
-            {
-                activityInfo.FileTitle = e.Description[1];
-            }
+            activityInfo.FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1];
 
-            if (e.Action == (int)MessageAction.RoomCreated && !docSpaceAdmin)
+            switch (e.Action)
             {
-                continue;
-            }
-
-            if (e.Action is (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated)
-            {
-                activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                case (int)MessageAction.RoomCreated when !docSpaceAdmin:
+                    continue;
+                case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                    break;
             }
 
             var obj = e.Description.LastOrDefault();
@@ -205,24 +181,26 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
-            if (e.Action is (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated)
+            switch (e.Action)
             {
-                if (docSpaceAdmin)
-                {
-                    result.Add(activityInfo);
-                }
+                case (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            result.Add(activityInfo);
+                        }
 
-                continue;
-            }
-
-            if (e.Action == (int)MessageAction.UsersUpdatedType)
-            {
-                if (docSpaceAdmin)
-                {
-                    activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
-                    result.Add(activityInfo);
-                }
-                continue;
+                        continue;
+                    }
+                case (int)MessageAction.UsersUpdatedType:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
+                            result.Add(activityInfo);
+                        }
+                        continue;
+                    }
             }
 
             var roomId = additionalInfo.RoomId;

@@ -56,7 +56,7 @@ public class FileShareDto
         {
             Access = FileShare.ReadWrite,
             IsLocked = false,
-            IsOwner = true,
+            IsOwner = true
             //SharedTo = EmployeeWraper.GetSample()
         };
     }
@@ -95,7 +95,7 @@ public class FileShareDtoHelper(UserManager userManager,
         {
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
-            CanEditAccess = aceWrapper.CanEditAccess,
+            CanEditAccess = aceWrapper.CanEditAccess
         };
 
         if (aceWrapper.SubjectGroup)

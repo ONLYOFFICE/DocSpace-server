@@ -61,11 +61,9 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-            RequestHelper requestHelper,
+        RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -107,10 +105,10 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = jProfile.Value<string>("resourceName").Replace("people/", ""),
-            Provider = ProviderConstants.Google,
+            Provider = ProviderConstants.Google
         };
 
         var emailsArr = jProfile.Value<JArray>("emailAddresses");

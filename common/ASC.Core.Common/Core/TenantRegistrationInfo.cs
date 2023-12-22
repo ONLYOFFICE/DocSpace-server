@@ -45,4 +45,5 @@ public class TenantRegistrationInfo
     public bool Spam { get; init; }
     public bool Calls { get; init; }
     public string Campaign { get; set; }
+    public bool LimitedAccessSpace { get; set; }
 }

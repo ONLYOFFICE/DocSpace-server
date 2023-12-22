@@ -99,7 +99,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         return this;
     }
 
-    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, TValue[] values)
+    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, IEnumerable<TValue> values)
     {
         foreach (var v in values)
         {
@@ -391,8 +391,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
         foreach (var field in fields)
         {
-            var field1 = field;
-            qcWildCard = qcWildCard || Wrap(field1, (a, w) => w.Match(r => r.Field(a).Query(value.ToLower())));
+            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Match(r => r.Field(a).Query(value.ToLower())));
         }
 
         return qcWildCard;

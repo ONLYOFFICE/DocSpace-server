@@ -74,7 +74,10 @@ public class SecurityContext(UserManager userManager,
 
     public async Task<bool> AuthenticateMe(string cookie)
     {
-        if (string.IsNullOrEmpty(cookie)) return false;
+        if (string.IsNullOrEmpty(cookie))
+        {
+            return false;
+        }
 
         if (!cookieStorage.DecryptCookie(cookie, out var tenant, out var userid, out var indexTenant, out var expire, out var indexUser, out var loginEventId))
         {
@@ -347,7 +350,7 @@ public class AuthContext
         HttpContextAccessor = httpContextAccessor;
     }
 
-    public IAccount CurrentAccount => Principal?.Identity is IAccount ? (IAccount)Principal.Identity : Constants.Guest;
+    public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;
 

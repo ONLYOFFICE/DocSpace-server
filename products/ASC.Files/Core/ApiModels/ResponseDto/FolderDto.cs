@@ -177,14 +177,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (folder.Order != 0)
         {
-            if (!string.IsNullOrEmpty(order))
-            {
-                result.Order = string.Join('.', order, folder.Order);
-            }
-            else
-            {
-                result.Order = folder.Order.ToString();
-            }
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
         return result;

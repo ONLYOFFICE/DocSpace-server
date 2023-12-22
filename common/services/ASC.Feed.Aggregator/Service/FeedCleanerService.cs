@@ -38,13 +38,11 @@ public class FeedCleanerService(FeedSettings feedSettings,
     {
         _logger.InformationFeedCleanerRunning();
 
-        var cfg = _feedSettings;
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(cfg.RemovePeriod, stoppingToken);
+            await Task.Delay(_feedSettings.RemovePeriod, stoppingToken);
 
-            await RemoveFeedsAsync(cfg.AggregateInterval);
+            await RemoveFeedsAsync(_feedSettings.AggregateInterval);
         }
 
         _logger.InformationFeedCleanerStopping();

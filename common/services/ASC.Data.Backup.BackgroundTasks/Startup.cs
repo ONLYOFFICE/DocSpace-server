@@ -29,9 +29,9 @@ namespace ASC.Data.Backup.BackgroundTasks;
 public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     : BaseStartup(configuration, hostEnvironment)
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public async override Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {

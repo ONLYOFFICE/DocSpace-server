@@ -73,8 +73,8 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
                 new RelationInfo("core_user", "id", "feed_users", "user_id", typeof(CoreModuleSpecifics)),
 
                 new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
-                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"]))),
-            };
+                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
+        };
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
@@ -92,16 +92,15 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     {
         if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
         {
-            preparedRow = null;
-
-            return false;
+            return (false, null);
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using AuthConstants = ASC.Common.Security.Authorizing.AuthConstants;
-
 namespace ASC.Migration.PersonalToDocspace.Creator;
 
 [Scope]
@@ -168,9 +166,9 @@ public class MigrationCreator
             }
             return user.Id;
         }
-        catch (ArgumentException e)
+        catch (ArgumentException)
         {
-            throw e;
+            throw;
         }
         catch (Exception)
         {
@@ -194,7 +192,7 @@ public class MigrationCreator
             using var userDbContextToregion = _creatorDbContext.CreateDbContext<UserDbContext>(_toRegion);
             var usersCount = userDbContextToregion.Users
                 .Join(userDbContextToregion.UserGroups, u => u.Id, ug => ug.Userid, (u, ug) => new { u, ug })
-                .Where(q => q.u.TenantId == tenant.Id && q.ug.UserGroupId == AuthConstants.DocSpaceAdmin.ID).Count();
+                .Where(q => q.u.TenantId == tenant.Id && q.ug.UserGroupId == Common.Security.Authorizing.Constants.DocSpaceAdmin.ID).Count();
             if (usersCount > qouta.CountRoomAdmin)
             {
                 throw new ArgumentException("user count exceed");
@@ -287,7 +285,7 @@ public class MigrationCreator
             data.WriteXml(file, XmlWriteMode.WriteSchema);
             data.Clear();
 
-            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file);
+            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, t => { });
         }
     }
 
@@ -384,7 +382,7 @@ public class MigrationCreator
                 {
                     var f = (BackupFileInfo)state;
                     using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
-                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream);
+                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, t => { });
                 }, file, 5);
             }
             Console.WriteLine($"end backup fileGroup: {group.Key}");
@@ -399,7 +397,7 @@ public class MigrationCreator
         using (var tmpFile = _tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => { });
         }
         Console.WriteLine($"end backup storage");
     }

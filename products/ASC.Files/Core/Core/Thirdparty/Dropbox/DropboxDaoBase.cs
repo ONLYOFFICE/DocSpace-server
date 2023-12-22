@@ -27,21 +27,21 @@
 namespace ASC.Files.Thirdparty.Dropbox;
 
 [Scope]
-internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>, IDaoBase<FileMetadata, FolderMetadata, Metadata>
+internal class DropboxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>(serviceProvider, userManager, tenantManager,
+            tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+        IDaoBase<FileMetadata, FolderMetadata, Metadata>
 {
     private DropboxProviderInfo _providerInfo;
-    public DropboxDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager, 
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo, 
-        FileUtility fileUtility, 
-        TempPath tempPath,
-        AuthContext authContext, 
-        RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<FileMetadata, FolderMetadata, Metadata> providerInfo)
     {
@@ -128,10 +128,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFolder is ErrorFolder)
+        if (dropboxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(dropboxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(dropboxFolder);
@@ -200,10 +200,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFile is ErrorFile)
+        if (dropboxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(dropboxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();

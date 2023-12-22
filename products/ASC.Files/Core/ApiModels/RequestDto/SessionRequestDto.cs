@@ -49,4 +49,5 @@ public class SessionRequestDto
     /// <summary>Specifies whether to encrypt a file or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Encrypted { get; set; }
+    public bool CreateNewIfExist { get; set; }
 }

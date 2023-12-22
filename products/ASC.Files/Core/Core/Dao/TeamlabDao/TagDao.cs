@@ -1,65 +1,57 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Data;
 
-internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
+internal abstract class BaseTagDao<T>(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    CoreBaseSettings coreBaseSettings,
+    CoreConfiguration coreConfiguration,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider,
+    IMapper mapper)
+    : AbstractDao(dbContextManager,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        coreBaseSettings,
+        coreConfiguration,
+        settingsManager,
+        authContext,
+        serviceProvider), ITagDao<T>
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
-    private readonly IMapper _mapper;
-
-    protected BaseTagDao(
-        UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache,
-        IMapper mapper)
-        : base(dbContextManager,
-              userManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider)
-    {
-        _mapper = mapper;
-    }
-
     public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         var filesId = new HashSet<string>();
@@ -151,7 +143,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
         await foreach (var tag in q.AsAsyncEnumerable())
         {
-            yield return _mapper.Map<DbFilesTag, TagInfo>(tag);
+            yield return mapper.Map<DbFilesTag, TagInfo>(tag);
         }
     }
 
@@ -163,7 +155,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
         await foreach (var tag in q)
         {
-            yield return _mapper.Map<DbFilesTag, TagInfo>(tag);
+            yield return mapper.Map<DbFilesTag, TagInfo>(tag);
         }
     }
 
@@ -171,13 +163,13 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var tagDb = _mapper.Map<TagInfo, DbFilesTag>(tagInfo);
+        var tagDb = mapper.Map<TagInfo, DbFilesTag>(tagInfo);
         tagDb.TenantId = tenantId;
 
         var tag = await filesDbContext.Tag.AddAsync(tagDb);
         await filesDbContext.SaveChangesAsync();
 
-        return _mapper.Map<DbFilesTag, TagInfo>(tag.Entity);
+        return mapper.Map<DbFilesTag, TagInfo>(tag.Entity);
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -195,12 +187,11 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return result;
         }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        try
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-            await _semaphore.WaitAsync();
-
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -268,10 +259,6 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
                 await tx.CommitAsync();
             });
         }
-        finally
-        {
-            _semaphore.Release();
-        }
 
         return result;
     }
@@ -289,11 +276,11 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return result;
         }
-
-        try
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
-            await _semaphore.WaitAsync();
-
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -312,10 +299,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
                 await tx.CommitAsync();
             });
         }
-        finally
-        {
-            _semaphore.Release();
-        }
+        
         return result;
     }
 
@@ -390,11 +374,11 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return;
         }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        try
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
-            await _semaphore.WaitAsync();
-            
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -404,7 +388,6 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
                 await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
-                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
                 foreach (var tagsGroup in tags.GroupBy(t => new { t.EntryId, t.EntryType }))
                 {
@@ -417,10 +400,6 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
                 await tx.CommitAsync();
             });
         }
-        finally
-        {
-            _semaphore.Release();
-        }
     }
 
     public async Task UpdateNewTags(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -430,27 +409,28 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
             return;
         }
 
-        await _semaphore.WaitAsync();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-            var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
-
-            foreach (var tag in tags)
+            await strategy.ExecuteAsync(async () =>
             {
-                await UpdateNewTagsInDbAsync(tag, createOn, createdBy);
-            }
+                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-            await tx.CommitAsync();
-        });
+                var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
 
-        _semaphore.Release();
+                foreach (var tag in tags)
+                {
+                    await UpdateNewTagsInDbAsync(tag, createOn, createdBy);
+                }
+
+                await tx.CommitAsync();
+            });
+        }
     }
 
     public async Task UpdateNewTags(Tag tag)
@@ -459,14 +439,15 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return;
         }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await _semaphore.WaitAsync();
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
+        {
+            var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
 
-        var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
-
-        await UpdateNewTagsInDbAsync(tag, createOn);
-
-        _semaphore.Release();
+            await UpdateNewTagsInDbAsync(tag, createOn);
+        }
     }
 
     private async ValueTask UpdateNewTagsInDbAsync(Tag tag, DateTime createOn, Guid createdBy = default)
@@ -485,7 +466,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         await Queries.UpdateTagLinkAsync(filesDbContext, tenantId, tagId, tagEntryType, mappedId,
             createdBy != Guid.Empty ? createdBy : _authContext.CurrentAccount.ID,
             createOn, tag.Count);
-        }
+    }
 
     public async Task RemoveTagsAsync(Tag tag)
     {
@@ -493,26 +474,22 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return;
         }
-
-        try
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
-            await _semaphore.WaitAsync();
-
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
             await strategy.ExecuteAsync(async () =>
             {
-                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await dbContext.Database.BeginTransactionAsync();
                 await RemoveTagInDbAsync(tag);
 
                 await tx.CommitAsync();
             });
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
@@ -537,26 +514,27 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         {
             return;
         }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await _semaphore.WaitAsync();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
-            await using var ctx = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await ctx.Database.BeginTransactionAsync();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-            foreach (var t in tags)
+            await strategy.ExecuteAsync(async () =>
             {
-                await RemoveTagInDbAsync(t);
-            }
+                await using var ctx = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await ctx.Database.BeginTransactionAsync();
 
-            await tx.CommitAsync();
-        });
+                foreach (var t in tags)
+                {
+                    await RemoveTagInDbAsync(t);
+                }
 
-        _semaphore.Release();
+                await tx.CommitAsync();
+            });
+        }
     }
     
     public async Task RemoveTagsAsync(IEnumerable<int> tagsIds)
@@ -644,8 +622,8 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
     protected async ValueTask<Tag> ToTagAsync(TagLinkData r)
     {
-        var result = _mapper.Map<DbFilesTag, Tag>(r.Tag);
-        _mapper.Map(r.Link, result);
+        var result = mapper.Map<DbFilesTag, Tag>(r.Tag);
+        mapper.Map(r.Link, result);
 
         result.EntryId = await MappingIDAsync(r.Link.EntryId);
 
@@ -656,6 +634,11 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture));
+    }
+
+    private static string GetLockKey(int tenantId)
+    {
+        return $"tags_{tenantId}";
     }
 }
 
@@ -672,22 +655,22 @@ internal class TagDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
-        IMapper mapper)
+        IMapper mapper,
+        IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<int>(userManager,
-    dbContextManager,
-    tenantManager,
-    tenantUtil,
-    setupInfo,
-    maxTotalSizeStatistic,
-    coreBaseSettings,
-    coreConfiguration,
-    settingsManager,
-    authContext,
-    serviceProvider,
-    cache,
-    mapper)
-{
+              dbContextManager,
+              tenantManager,
+              tenantUtil,
+              setupInfo,
+              maxTotalSizeStatistic,
+              coreBaseSettings,
+              coreConfiguration,
+              settingsManager,
+              authContext,
+              serviceProvider,
+              distributedLockProvider,
+              mapper)
+    {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
         if (parentFolder == null || EqualityComparer<int>.Default.Equals(parentFolder.Id, 0))
@@ -804,23 +787,23 @@ internal class ThirdPartyTagDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
         IMapper mapper,
-        IThirdPartyTagDao thirdPartyTagDao)
+        IThirdPartyTagDao thirdPartyTagDao,
+        IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<string>(userManager,
-    dbContextManager,
-    tenantManager,
-    tenantUtil,
-    setupInfo,
-    maxTotalSizeStatistic,
-    coreBaseSettings,
-    coreConfiguration,
-    settingsManager,
-    authContext,
-    serviceProvider,
-    cache,
-    mapper)
-{
+              dbContextManager,
+              tenantManager,
+              tenantUtil,
+              setupInfo,
+              maxTotalSizeStatistic,
+              coreBaseSettings,
+              coreConfiguration,
+              settingsManager,
+              authContext,
+              serviceProvider,
+              distributedLockProvider,
+              mapper)
+    {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         return thirdPartyTagDao.GetNewTagsAsync(subject, parentFolder, deepSearch);
@@ -893,8 +876,8 @@ static file class Queries
                         root = ctx.Folders
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId && x.tree.FolderId == r.file.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })
@@ -927,8 +910,8 @@ static file class Queries
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId)
                             .Where(x => x.tree.FolderId == r.folder.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })

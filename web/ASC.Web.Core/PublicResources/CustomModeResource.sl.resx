@@ -164,7 +164,7 @@ h3. Za hiter začetek nekaj opravil, ki jih lahko opravljate v ONLYOFFICE:
 
 - Za uporabo dodatnih funkcij uporabite različne vtičnike.
 
-- Enostavno dostopajte do osebnega oblaka prek "Chrome razširitve":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Enostavno dostopajte do osebnega oblaka prek "Chrome razširitve":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=sl".
 
 Dokumente lahko urejate tudi brez povezave z našimi brezplačnimi "desktop urejevalniki":"https://www.onlyoffice.com/download-desktop.aspx" ali pridobite program za mobilno urejanje za vašo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ali "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" napravo.
 
@@ -186,7 +186,7 @@ Ne želite spremeniti vašega emaila? Prezrite to sporočilo.</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Zahtevali ste ukinitev vašega računa na personal.onlyoffice.com. Sledite povezavi za dokončanje zahteve (povezava je aktivna 7 dni): 
 
-Potrdite ukinitev računa
+$OrangeButton
 
 *Opomba*: Po izbrisu bodo vaš račun in vsi z njim povezani podatki trajno izbrisani v skladu z našo "Politiko zasebnosti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

@@ -40,10 +40,9 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFolderDao<string>
+        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
 {
     public Task<Folder<string>> GetFolderAsync(string folderId)
     {
@@ -132,7 +131,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
             SortedByType.AZ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? folders.OrderBy(x => x.ModifiedOn) : folders.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? folders.OrderBy(x => x.CreateOn) : folders.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title)
         };
 
         return folders;
@@ -229,12 +228,12 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteTagsAsync(filesDbContext);
-            await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+            await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+            await Queries.DeleteTagsAsync(dbContext);
+            await Queries.DeleteSecuritiesAsync(dbContext, _tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
             await tx.CommitAsync();
         });
 

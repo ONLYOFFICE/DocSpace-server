@@ -218,11 +218,11 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             DocumentFields = new List<NameValue>
                             {
                                 new() {Name = FilesLinkUtility.FolderId, Value = folderId},
-                                new() {Name = FilesLinkUtility.FileTitle, Value = file.Title},
+                                new() {Name = FilesLinkUtility.FileTitle, Value = file.Title}
                             },
             DocumentId = "1", //file.ID.ToString(),
             FileExtension = FileUtility.GetFileExtension(file.Title),
-            Name = documentName,
+            Name = documentName
         };
 
         return (document, file);
@@ -238,7 +238,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
                             //new EnvelopeEvent {EnvelopeEventStatusCode = DocuSignStatus.Delivered.ToString()},
                             new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed)},
                             new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined)},
-                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided)},
+                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided)}
                 },
             IncludeDocumentFields = "true",
             //RecipientEvents = new List<RecipientEvent>
@@ -250,7 +250,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             //        new RecipientEvent {RecipientEventStatusCode = "AuthenticationFailed"},
             //        new RecipientEvent {RecipientEventStatusCode = "AutoResponded"},
             //    },
-            Url = baseCommonLinkUtility.GetFullAbsolutePath(DocuSignHandlerService.Path(filesLinkUtility) + "?" + FilesLinkUtility.Action + "=webhook"),
+            Url = baseCommonLinkUtility.GetFullAbsolutePath(DocuSignHandlerService.Path(filesLinkUtility) + "?" + FilesLinkUtility.Action + "=webhook")
         };
 
         logger.DebugDocuSingHookUrl(eventNotification.Url);
@@ -266,7 +266,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
                 {
                     Email = user.Email,
                     Name = user.DisplayUserName(false, displayUserSettingsHelper),
-                    RecipientId = user.Id.ToString(),
+                    RecipientId = user.Id.ToString()
                 });
             }
             catch (Exception ex)
@@ -281,7 +281,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             {
                 TextCustomFields = new List<TextCustomField>
                     {
-                        new() {Name = UserField, Value = authContext.CurrentAccount.ID.ToString()},
+                        new() {Name = UserField, Value = authContext.CurrentAccount.ID.ToString()}
                     }
             },
             Documents = new List<Document> { document },
@@ -290,9 +290,9 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             EventNotification = eventNotification,
             Recipients = new Recipients
             {
-                Signers = signers,
+                Signers = signers
             },
-            Status = "created",
+            Status = "created"
         };
 
         var envelopesApi = new EnvelopesApi(apiClient);
@@ -396,5 +396,5 @@ public enum DocuSignStatus
     Delivered,
     Completed,
     Declined,
-    Voided,
+    Voided
 }

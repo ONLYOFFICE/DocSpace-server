@@ -38,13 +38,11 @@ public class FeedAggregatorService(FeedSettings feedSettings,
     {
         _logger.InformationAggregatorServiceRunning();
 
-        var cfg = _feedSettings;
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            await AggregateFeedsAsync(cfg.AggregateInterval);
+            await AggregateFeedsAsync(_feedSettings.AggregateInterval);
 
-            await Task.Delay(cfg.AggregatePeriod, stoppingToken);
+            await Task.Delay(_feedSettings.AggregatePeriod, stoppingToken);
         }
 
         _logger.InformationAggregatorServiceStopping();
@@ -86,11 +84,10 @@ public class FeedAggregatorService(FeedSettings feedSettings,
     {
         try
         {
-            var cfg = _feedSettings;
             await using var scope = _serviceScopeFactory.CreateAsyncScope();
             var cache = scope.ServiceProvider.GetService<ICache>();
             var baseCommonLinkUtility = scope.ServiceProvider.GetService<BaseCommonLinkUtility>();
-            baseCommonLinkUtility.Initialize(cfg.ServerRoot);
+            baseCommonLinkUtility.Initialize(_feedSettings.ServerRoot);
 
             var start = DateTime.UtcNow;
             _logger.DebugStartCollectiongFeeds();
@@ -165,7 +162,7 @@ public class FeedAggregatorService(FeedSettings feedSettings,
                     }
                 }
 
-                await feedAggregateDataProvider.SaveFeedsAsync(result, module.GetType().Name, toTime, cfg.PortionSize);
+                await feedAggregateDataProvider.SaveFeedsAsync(result, module.GetType().Name, toTime, _feedSettings.PortionSize);
 
                 foreach (var res in result)
                 {

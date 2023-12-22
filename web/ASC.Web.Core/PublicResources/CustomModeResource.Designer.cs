@@ -92,7 +92,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///- Work with all popular formats. Highest compatibility with MS Office files.
         ///
-        ///- Create and co-edit &quot;ready-to-fill-out forms&quot;:&quot;https://www.only [rest of string was truncated]&quot;;.
+        ///- Create and co-edit &quot;ready-to-fill-out forms&quot;:&quot;http [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_personal_custom_mode_after_registration1 {
             get {
@@ -152,11 +152,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to You have requested a termination of your account at personal.onlyoffice.com. Follow the link to complete the request (the link is active for a 7-day period): 
         ///
-        ///Confirm account termination
+        ///$OrangeButton
         ///
         ///*Note*: After the deletion, your account and all data associated with it will be erased permanently in accordance with our &quot;Privacy statement&quot;:&quot;https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0&quot;.
         ///
-        ///&quot;Read more about account  [rest of string was truncated]&quot;;.
+        ///&quot;Read more about account terminati [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_personal_custom_mode_profile_delete {
             get {

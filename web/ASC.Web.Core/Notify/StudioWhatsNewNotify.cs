@@ -323,16 +323,14 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
     private static string DateToString(DateTime d, WhatsNewType type, CultureInfo c)
     {
-        if (type == WhatsNewType.DailyFeed)
-        {
-            d = d.AddDays(-1);
-        }
-        else
-        {
-            d = d.AddHours(-1);
-        }
+        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        return d.ToString(c.TwoLetterISOLanguageName == "ru" ? "d MMMM" : "M", c);
+        if (c.TwoLetterISOLanguageName == "ru")
+        {
+            return d.ToString("d MMMM", c);
+        }
+        
+        return d.ConvertNumerals("M");
     }
 }
 
