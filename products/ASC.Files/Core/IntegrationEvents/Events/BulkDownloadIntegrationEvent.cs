@@ -46,5 +46,8 @@ public record BulkDownloadIntegrationEvent : IntegrationEvent
     public string TaskId { get; set; }
 
     [ProtoMember(4)]
+    public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(5)]
     public string BaseUri { get; set; }
 }
