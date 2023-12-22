@@ -74,7 +74,10 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
                     return;
                 }
 
-                _commonLinkUtility.ServerUri = @event.BaseUri;
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    _commonLinkUtility.ServerUri = @event.BaseUri;
+                }
 
                 await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
