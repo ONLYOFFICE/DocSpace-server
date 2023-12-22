@@ -14,6 +14,19 @@
 	<name>authorization</name>
 	<description>ONLYOFFICE Docspace Authorization Server</description>
 	<properties>
+		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
+
+		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
+
+		<redisson.caching.version>3.23.1</redisson.caching.version>
+
+		<spring.oauth2.server.version>1.2.0</spring.oauth2.server.version>
+		<bouncycastle.version>1.70</bouncycastle.version>
+
+		<resilience4j.version>2.1.0</resilience4j.version>
+
+		<guava.version>32.1.3-jre</guava.version>
+
 		<logback.gelf.version>5.0.1</logback.gelf.version>
 		<logback.logstash.version>7.4</logback.logstash.version>
 	</properties>
@@ -33,17 +46,8 @@
 	<dependencies>
 		<!-- Spring Server Dependencies -->
 		<dependency>
-			<groupId>org.redisson</groupId>
-			<artifactId>redisson-spring-boot-starter</artifactId>
-			<version>3.23.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
 		<!-- -->
@@ -52,12 +56,12 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
-			<version>4.0.4</version>
+			<version>${spring.cloud.feign.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
-			<version>3.0.3</version>
+			<version>${resilience4j.circuit.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -69,8 +73,8 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
 			<version>${mysql.connector.version}</version>
 		</dependency>
 		<dependency>
@@ -94,6 +98,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson-spring-boot-starter</artifactId>
+			<version>${redisson.caching.version}</version>
+		</dependency>
 
 		<!-- -->
 
@@ -102,7 +111,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-authorization-server</artifactId>
-			<version>1.2.0</version>
+			<version>${spring.oauth2.server.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,7 +124,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.70</version>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -133,23 +142,23 @@
 
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-retry</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-ratelimiter</artifactId>
-			<version>2.1.0</version>
+			<version>${resilience4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-bulkhead</artifactId>
-			<version>2.1.0</version>
+			<version>${resilience4j.version}</version>
 		</dependency>
+
+		<!-- -->
+
+		<!-- Utility Dependencies -->
+
 		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-timelimiter</artifactId>
-			<version>2.1.0</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -169,16 +178,6 @@
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>${logback.logstash.version}</version>
-		</dependency>
-
-		<!-- -->
-
-		<!-- Utility Dependencies -->
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>32.1.3-jre</version>
 		</dependency>
 
 		<!-- -->
