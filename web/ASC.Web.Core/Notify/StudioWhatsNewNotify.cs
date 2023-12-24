@@ -218,7 +218,7 @@ public class StudioWhatsNewNotify
 
         var user = _userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data;
+        var date = activityInfo.Data.ConvertNumerals("g");
         var userName = user.DisplayUserName(_displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
