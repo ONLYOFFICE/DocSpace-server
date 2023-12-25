@@ -43,7 +43,6 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Users.Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -54,8 +53,7 @@ public class LicenseReader
         ITariffService tariffService,
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
-        ILogger<LicenseReader> logger,
-        Users.Constants constants)
+        ILogger<LicenseReader> logger)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -63,7 +61,6 @@ public class LicenseReader
         LicensePath = licenseReaderConfig.LicensePath;
         _licensePathTemp = LicensePath + ".tmp";
         _logger = logger;
-        _constants = constants;
     }
 
     public async Task SetCustomerIdAsync(string value)
