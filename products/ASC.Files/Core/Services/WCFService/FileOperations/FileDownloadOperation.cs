@@ -38,14 +38,16 @@ internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dicti
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
+    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
         : base(serviceProvider, f1, f2)
     {
         _tempStream = tempStream;
+        _baseUri = baseUri;
         this[OpType] = (int)FileOperationType.Download;
     }
 
     private readonly TempStream _tempStream;
+    private readonly string _baseUri;
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -59,6 +61,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            commonLinkUtility.ServerUri = _baseUri;
+        }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;

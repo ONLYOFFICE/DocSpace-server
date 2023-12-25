@@ -39,7 +39,7 @@ public record BulkDownloadIntegrationEvent : IntegrationEvent
     [ProtoMember(1)]
     public Dictionary<string, string> FolderStringIds { get; set; }
 
-    [ProtoMember(2)] 
+    [ProtoMember(2)]
     public Dictionary<string, string> FileStringIds { get; set; }
 
     [ProtoMember(3)]
@@ -47,4 +47,7 @@ public record BulkDownloadIntegrationEvent : IntegrationEvent
 
     [ProtoMember(4)]
     public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(5)]
+    public string BaseUri { get; set; }
 }
