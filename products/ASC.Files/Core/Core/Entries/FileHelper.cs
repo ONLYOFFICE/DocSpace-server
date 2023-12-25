@@ -58,12 +58,7 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
 
     public string GetDownloadUrl<T>(FileEntry<T> fileEntry)
     {
-        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id, CheckWatermarkEnable(fileEntry).Result);
-    }
-    public async Task<bool> CheckWatermarkEnable<T>(FileEntry<T> fileEntry)
-    {
         var folderDao = daoFactory.GetFolderDao<T>();
-        var watermarkEnabled = await DocSpaceHelper.WatermarkEnabledAsync((File<T>)fileEntry, folderDao);
-        return watermarkEnabled;
+        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id, DocSpaceHelper.WatermarkEnabledAsync((File<T>)fileEntry, folderDao).Result);
     }
 }

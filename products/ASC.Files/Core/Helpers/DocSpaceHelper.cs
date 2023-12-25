@@ -69,15 +69,8 @@ public static class DocSpaceHelper
 
         if(room != null)
         {
-            if (string.IsNullOrEmpty(room.SettingsWatermark))
-            {
-                return false;
-            }
-            else
-            {
-                var watermarkSettings = JsonSerializer.Deserialize<WatermarkSettings>(room.SettingsWatermark);
-                return watermarkSettings == null ? false : watermarkSettings.Enabled;
-            }
+            var watermarkEnabled = string.IsNullOrEmpty(room.SettingsWatermark) ? false : JsonSerializer.Deserialize<WatermarkSettings>(room.SettingsWatermark).Enabled;
+            return watermarkEnabled;
         }
         return false;
     }
