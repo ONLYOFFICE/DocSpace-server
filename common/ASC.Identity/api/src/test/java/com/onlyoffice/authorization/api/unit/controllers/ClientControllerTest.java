@@ -258,6 +258,7 @@ public class ClientControllerTest {
                                                 .websiteUrl("https://example.com")
                                                 .redirectUris(Set.of("https://example.com"))
                                                 .logoutRedirectUri("https://example.com")
+                                                .allowedOrigins(Set.of("https://example.com"))
                                                 .scopes(Set.of("accounts:read"))
                                                 .build()).
                                         getJson())
