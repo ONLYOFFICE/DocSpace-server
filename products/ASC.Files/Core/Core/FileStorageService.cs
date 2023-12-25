@@ -2552,7 +2552,7 @@ public class FileStorageService //: IFileStorageService
             }
             
             var data = await _externalShare.GetLinkDataAsync(entry, parentLink.Id);
-            parentLink.Link = data.Url;
+            parentLink.Link = await _urlShortener.GetShortenLinkAsync(data.Url);
 
             return parentLink;
         }
