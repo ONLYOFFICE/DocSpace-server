@@ -107,16 +107,6 @@ spring:
             deadExchange: asc_identity_consent_dlx
             deadQueue: asc_identity_consent_dlq
             deadRouting: asc_identity_consent_dlr
-          socket:
-            exchange: asc_identity_socket_exchange
-            queue: ${random.uuid}
-            routing: asc_identity_socket_routing
-            deadExchange: asc_identity_socket_dlx
-            deadQueue: asc_identity_socket_dlq
-            deadRouting: asc_identity_socket_dlr
-            nonDurable: true
-            autoDelete: true
-            fanOut: true
     openfeign:
       circuitbreaker:
         enabled: true

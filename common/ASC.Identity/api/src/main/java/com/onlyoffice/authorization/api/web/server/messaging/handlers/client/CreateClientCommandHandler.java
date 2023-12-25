@@ -4,7 +4,6 @@ import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.web.server.messaging.handlers.ScheduledMessagingCommandHandler;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
-import com.onlyoffice.authorization.api.web.server.messaging.messages.SocketNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -43,24 +42,15 @@ final class CreateClientCommandHandler extends ScheduledMessagingCommandHandler<
             var ids = creationUsecases.saveClients(messages.stream()
                     .map(msg -> msg.getData())
                     .collect(Collectors.toList()));
-            var queue = configuration.getQueues().get("socket");
 
             messages.removeIf(w -> {
                 var tag = w.getTag();
                 var channel = w.getChannel();
 
                 try {
-                    if (!ids.contains(w.getData().getClientId())) {
+                    if (!ids.contains(w.getData().getClientId()))
                         channel.basicAck(tag, true);
-                        amqpClient.convertAndSend(
-                                queue.getExchange(),
-                                "",
-                                SocketNotification.builder()
-                                        .tenant(w.getData().getTenant())
-                                        .clientId(w.getData().getClientId())
-                                        .build()
-                        );
-                    } else
+                    else
                         channel.basicNack(tag, false, true);
                 } catch (IOException e) {
                     log.error("Could not persist clients", e);

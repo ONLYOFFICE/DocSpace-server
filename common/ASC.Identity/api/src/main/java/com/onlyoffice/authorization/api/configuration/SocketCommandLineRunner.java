@@ -24,6 +24,6 @@ public class SocketCommandLineRunner implements CommandLineRunner {
      * @throws Exception
      */
     public void run(String... args) throws Exception {
-        server.start();
+//        server.start();
     }
 }
