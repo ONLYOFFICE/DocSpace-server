@@ -59,6 +59,6 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
     public string GetDownloadUrl<T>(FileEntry<T> fileEntry)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
-        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id, DocSpaceHelper.WatermarkEnabledAsync((File<T>)fileEntry, folderDao).Result);
+        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id, DocSpaceHelper.IsWatermarkEnabled((File<T>)fileEntry, folderDao).Result);
     }
 }
