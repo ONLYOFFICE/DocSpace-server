@@ -36,6 +36,9 @@ public class EntryProperties
     /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
     public FormFillingProperties FormFilling { get; set; }
 
+    /// <summary>Specifies if the file is form or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsForm { get; set; }
     public static EntryProperties Deserialize(string data, ILogger logger)
     {
         try

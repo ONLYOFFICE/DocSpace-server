@@ -80,7 +80,9 @@ public class Configuration<T>
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
-        { FileType.Presentation, "slide" }
+        { FileType.Presentation, "slide" },
+        { FileType.Pdf, "pdf" }
+
     };
 
     private FileType _fileTypeCache = FileType.Unknown;
@@ -802,6 +804,21 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
         get { return _configuration.EditorConfig.ModeWrite ? null : "markup"; }
     }
 
+    public bool IsForm
+    {
+        get
+        {
+            var properties = daoFactory.GetFileDao<T>().GetProperties(_configuration.Document.Info.GetFile().Id).Result;
+
+            if (properties != null)
+            {
+                return properties.IsForm;
+            }
+
+            return false;
+        }
+    }
+
     public bool SubmitForm
     {
         get
@@ -826,6 +843,15 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
 
                     return properties is { FormFilling.CollectFillForm: true };
                 }
+            }
+
+            var title = _configuration.Document.Info.GetFile().Title;
+            var fileExst = FileUtility.GetFileExtension(title);
+            var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+
+            if (fileType == FileType.Pdf)
+            {
+                return true;
             }
             return false;
         }
