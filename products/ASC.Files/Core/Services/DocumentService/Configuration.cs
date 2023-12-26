@@ -825,6 +825,17 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
         {
             if (_configuration.EditorConfig.ModeWrite)
             {
+                var title = _configuration.Document.Info.GetFile().Title;
+                var fileExst = FileUtility.GetFileExtension(title);
+                var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+
+                if (fileType == FileType.Pdf)
+                {
+                    var fileProperties = daoFactory.GetFileDao<T>().GetProperties(_configuration.Document.Info.GetFile().Id).Result;
+
+                    return fileProperties is { IsForm: true };
+                }
+
                 var linkDao = daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;
 
@@ -844,15 +855,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
                     return properties is { FormFilling.CollectFillForm: true };
                 }
             }
-
-            var title = _configuration.Document.Info.GetFile().Title;
-            var fileExst = FileUtility.GetFileExtension(title);
-            var fileType = FileUtility.GetFileTypeByExtention(fileExst);
-
-            if (fileType == FileType.Pdf)
-            {
-                return true;
-            }
+            
             return false;
         }
     }
