@@ -250,6 +250,11 @@ internal abstract class SecurityBaseDao<T>(
                     .Select(s => s.Security);
             }
         }
+        else if (filterType == ShareFilterType.ExternalLink)
+        {
+            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+            q = q.OrderBy(predicate).ThenByDescending(s => s.SubjectType);
+        }
         else
         {
             var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
