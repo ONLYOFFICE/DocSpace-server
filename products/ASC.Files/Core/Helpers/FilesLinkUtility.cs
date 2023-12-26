@@ -289,9 +289,9 @@ public class FilesLinkUtility
         get { return FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}"; }
     }
 
-    public string GetFileDownloadUrl(object fileId, bool watermarkEnabled)
+    public string GetFileDownloadUrl(object fileId)
     {
-        return GetFileDownloadUrl(fileId, 0, watermarkEnabled ? ".pdf" : string.Empty);
+        return GetFileDownloadUrl(fileId, 0, string.Empty);
     }
 
     public string GetFileDownloadUrl(object fileId, int fileVersion, string convertToExtension)
@@ -377,7 +377,7 @@ public class FilesLinkUtility
             return GetFileWebEditorUrl(fileId, fileVersion);
         }
 
-        return GetFileDownloadUrl(fileId, false);
+        return GetFileDownloadUrl(fileId);
     }
 
     public string FileRedirectPreviewUrlString
