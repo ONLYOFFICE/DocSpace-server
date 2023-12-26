@@ -275,7 +275,7 @@ public class Builder<T>(ThumbnailSettings settings,
             PageSize = new SpreadsheetLayout.LayoutPageSize()
         };
 
-        var (operationResultProgress, url, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);
+        var (operationResultProgress, url, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, null, false);
 
         operationResultProgress = Math.Min(operationResultProgress, 100);
         return (operationResultProgress, url);

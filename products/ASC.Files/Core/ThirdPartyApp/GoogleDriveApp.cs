@@ -267,7 +267,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
                 var key = DocumentServiceConnector.GenerateRevisionId(downloadUrl);
 
-                var resultTuple = await _documentServiceConnector.GetConvertedUriAsync(downloadUrl, fileType, currentType, key, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+                var resultTuple = await _documentServiceConnector.GetConvertedUriAsync(downloadUrl, fileType, currentType, key, null, CultureInfo.CurrentUICulture.Name, null, null, null, false);
                 downloadUrl = resultTuple.ConvertedDocumentUri;
 
                 stream = null;
@@ -800,7 +800,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             var key = DocumentServiceConnector.GenerateRevisionId(downloadUrl);
 
-            var resultTuple = await _documentServiceConnector.GetConvertedUriAsync(downloadUrl, fromExt, toExt, key, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+            var resultTuple = await _documentServiceConnector.GetConvertedUriAsync(downloadUrl, fromExt, toExt, key, null, CultureInfo.CurrentUICulture.Name, null, null, null, false);
             downloadUrl = resultTuple.ConvertedDocumentUri;
 
         }

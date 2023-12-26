@@ -111,7 +111,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
-        return JsonSerializer.Deserialize<WatermarkSettings>(roomSettings.Watermark);
+        return string.IsNullOrEmpty(roomSettings.Watermark) ? new WatermarkSettings() :
+            JsonSerializer.Deserialize<WatermarkSettings>(roomSettings.Watermark);
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {

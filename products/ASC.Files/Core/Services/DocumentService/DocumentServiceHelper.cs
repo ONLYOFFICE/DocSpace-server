@@ -337,6 +337,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public Options GetOptions<T>(WatermarkSettings watermarkSettings, Folder<T> room)
     {
+        if(watermarkSettings == null || !watermarkSettings.Enabled)
+        {
+            return null;
+        }
         var runs = new List<Run>();
         var paragrahs = new List<Paragraph>();
         var userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);

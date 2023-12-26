@@ -84,9 +84,9 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
                     (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
+            }
+            else
+            {
                 fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
@@ -232,12 +232,21 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        var folderDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFolderDao<T>();
+        var fileUtility = scope.ServiceProvider.GetService<FileUtility>();
         var title = file.Title;
+
+        var fileExt = FileUtility.GetFileExtension(title);
+        if (await DocSpaceHelper.IsWatermarkEnabled((File<T>)file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
+        {
+            _files[file.Id] = ".pdf";
+        }
+        
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
                 title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+        }
 
         var entriesPathId = new ItemNameValueCollection<T>();
         entriesPathId.Add(path + title, file.Id);
@@ -376,8 +385,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
                         newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                        }
                     }
+                }
 
                 if (0 < counter)
                 {
