@@ -300,11 +300,9 @@ internal abstract class SecurityBaseDao<T>(
 
         await foreach (var r in q.ToAsyncEnumerable())
         {
-            var group = mapper.Map<DbGroup, Group>(r.Group);
-            
             yield return new GroupInfoWithShared
             { 
-                GroupInfo = new GroupInfo(group.CategoryId) { Name = group.Name, Sid = group.Sid, ID = group.Id },
+                GroupInfo = mapper.Map<DbGroup, GroupInfo>(r.Group),
                 Shared = r.Shared 
             };
         }
