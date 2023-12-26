@@ -255,7 +255,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FilesMessageService filesMessageService,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    SocketManager socketManager)
+    SocketManager socketManager,
+    CommonLinkUtility commonLinkUtility)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1465,7 +1466,7 @@ public class EntryManager(IDaoFactory daoFactory,
         bool checkRight;
         if (fileTracker.GetEditingBy(fileId).Contains(userId))
         {
-            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1500,7 +1501,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
         }
 
-        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
             fileTracker.ChangeRight(fileId, userId, false);

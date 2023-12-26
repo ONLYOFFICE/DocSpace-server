@@ -190,7 +190,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var (tasks, _) = await _fileStorageService.DeleteFolderAsync("delete", id, false, inDto.DeleteAfter, true);
+        var tasks = await _fileStorageService.DeleteFolderAsync(id, false, inDto.DeleteAfter, true);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -213,7 +213,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -236,7 +236,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -817,11 +817,15 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
 
-        task.Init(tenantId, userId, null, null, null);
+        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null, null, null);
 
         var taskProgress = documentBuilderTaskManager.StartTask(task, false);
 
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri);
 
         eventBus.Publish(evt);
 
@@ -849,7 +853,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, true);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
 
         eventBus.Publish(evt);
     }

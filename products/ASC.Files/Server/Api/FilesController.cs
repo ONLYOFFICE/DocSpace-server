@@ -226,7 +226,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(T fileId, [FromBody] DeleteRequestDto inDto)
     {
-        var (tasks, _) = await fileStorageService.DeleteFileAsync("delete", fileId, false, inDto.DeleteAfter, inDto.Immediately);
+        var tasks = await fileStorageService.DeleteFileAsync(fileId, false, inDto.DeleteAfter, inDto.Immediately);
 
         foreach (var e in tasks)
         {

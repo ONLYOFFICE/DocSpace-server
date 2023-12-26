@@ -109,7 +109,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileStorageService.DeleteItemsAsync("delete", filesList, foldersList, true, false, true);
+            await fileStorageService.DeleteItemsAsync(filesList, foldersList, true, false, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 
