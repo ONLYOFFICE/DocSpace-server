@@ -75,7 +75,7 @@ public class SocketManager : SocketServiceClient
 
         var data = await SerializeFolder(folder);
 
-        if (userIds.Any())
+        if (userIds != null && userIds.Any())
         {
             foreach (var chunk in userIds.Chunk(1000))
             {
