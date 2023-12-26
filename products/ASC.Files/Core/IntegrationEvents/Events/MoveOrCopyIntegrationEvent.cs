@@ -40,7 +40,7 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
     public bool DeleteAfter { get; set; }
 
     [ProtoMember(2)]
-    public bool Ic { get; set; }
+    public bool Copy { get; set; }
 
     [ProtoMember(3)]
     public List<string> FolderStringIds { get; set; }
@@ -65,4 +65,7 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
 
     [ProtoMember(10)]
     public string TaskId { get; set;}
+
+    [ProtoMember(11)]
+    public IDictionary<string, string> Headers {  get; set; }
 }

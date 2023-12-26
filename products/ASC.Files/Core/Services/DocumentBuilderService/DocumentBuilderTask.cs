@@ -29,14 +29,16 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 [Transient]
 public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
 {
+    private string _baseUri;
     private int _tenantId;
     private Guid _userId;
     private string _script;
     private string _tempFileName;
     private string _outputFileName;
 
-    public void Init(int tenantId, Guid userId, string script, string tempFileName, string outputFileName)
+    public void Init(string baseUri, int tenantId, Guid userId, string script, string tempFileName, string outputFileName)
     {
+        _baseUri = baseUri;
         _tenantId = tenantId;
         _userId = userId;
         _script = script;
@@ -61,13 +63,20 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             await using var scope = serviceProvider.CreateAsyncScope();
 
+            if (!string.IsNullOrEmpty(_baseUri))
+            {
+                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                commonLinkUtility.ServerUri = _baseUri;
+            }
+
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
+
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
             logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<T>>>();
-            
+
             var documentBuilderTask = scope.ServiceProvider.GetService<DocumentBuilderTask>();
-            
+
             CancellationToken.ThrowIfCancellationRequested();
 
             Percentage = 30;
