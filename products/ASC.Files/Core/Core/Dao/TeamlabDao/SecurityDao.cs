@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Group = ASC.Core.Group;
 using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.Data;
@@ -272,6 +273,80 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield return await ToFileShareRecordAsync(r);
         }
+    }
+
+    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count)
+    {
+        if (entry == null || count == 0)
+        {
+            yield break;
+        }
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var mappedId = (await (MappingIDAsync(entry.Id))).ToString();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        await foreach (var r in q.ToAsyncEnumerable())
+        {
+            var group = mapper.Map<DbGroup, Group>(r.Group);
+            
+            yield return new GroupInfoWithShared
+            { 
+                GroupInfo = new GroupInfo(group.CategoryId) { Name = group.Name, Sid = group.Sid, ID = group.Id },
+                Shared = r.Shared 
+            };
+        }
+    }
+
+    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared)
+    {
+        if (entry == null)
+        {
+            return 0;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var mappedId = (await MappingIDAsync(entry.Id)).ToString();
+
+        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    private static IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext)
+    {
+        var q = filesDbContext.Groups.Where(g => g.TenantId == tenantId && !g.Removed);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            q = q.Where(g => g.Name.Contains(text));
+        }
+
+        var q1 = excludeShared
+            ? q.Where(g => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == g.Id))
+                .OrderBy(g => g.Name)
+                .Select(g => new GroupWithShared {Group = g, Shared = false})
+            : from @group in q
+            join security in filesDbContext.Security.Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType)
+                on @group.Id equals security.Subject into joinedSet
+            from s in joinedSet.DefaultIfEmpty()
+            orderby @group.Name
+            select new GroupWithShared { Group = @group, Shared = s != null };
+
+        return q1;
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
@@ -762,9 +837,21 @@ public class UserInfoWithShared
     public bool Shared { get; init; }
 }
 
+public class GroupInfoWithShared
+{
+    public GroupInfo GroupInfo { get; init; }
+    public bool Shared { get; init; }
+}
+
 public class UserWithShared
 {
     public User User { get; init; }
+    public bool Shared { get; init; }
+}
+
+public class GroupWithShared
+{
+    public DbGroup Group { get; init; }
     public bool Shared { get; init; }
 }
 

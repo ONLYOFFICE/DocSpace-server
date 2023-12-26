@@ -1286,6 +1286,16 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await daoFactory.GetSecurityDao<T>().GetUsersWithSharedCountAsync(entry, text, employeeStatus, activationStatus, excludeShared);
     }
 
+    public IAsyncEnumerable<GroupInfoWithShared> GetGroupInfoWithSharedAsync<T>(FileEntry<T> entry, string text, bool excludeShared, int offset, int count)
+    {
+        return daoFactory.GetSecurityDao<T>().GetGroupsWithSharedAsync(entry, text, excludeShared, offset, count);
+    }
+
+    public Task<int> GetGroupsWithSharedCountAsync<T>(FileEntry<T> entry, string text, bool excludeShared)
+    {
+        return daoFactory.GetSecurityDao<T>().GetGroupsWithSharedCountAsync(entry, text, excludeShared);
+    }
+
     public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<int>();

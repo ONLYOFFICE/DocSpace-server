@@ -1851,9 +1851,8 @@ public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFu
 public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
         FileSecurity fileSecurity, 
         ApiContext apiContext, 
-        IDaoFactory daoFactory)
-    : ApiControllerBase
-    {
+        IDaoFactory daoFactory) : ApiControllerBase
+{
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {

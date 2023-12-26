@@ -130,3 +130,82 @@ public class AccountsController(
         }
     }
 }
+
+
+[ConstraintRoute("int")]
+public class AccountsControllerAdditionalInternal(
+    IDaoFactory daoFactory,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    GroupFullDtoHelper groupFullDtoHelper,
+    ApiContext apiContext,
+    FileSecurity fileSecurity)
+    : AccountsControllerAdditional<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+
+public class AccountsControllerAdditionalThirdParty(
+    IDaoFactory daoFactory,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    GroupFullDtoHelper groupFullDtoHelper,
+    ApiContext apiContext,
+    FileSecurity fileSecurity)
+    : AccountsControllerAdditional<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+
+[Scope]
+[DefaultRoute]
+[ApiController]
+[ControllerName("accounts")]
+public class AccountsControllerAdditional<T>(
+    IDaoFactory daoFactory,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    GroupFullDtoHelper groupFullDtoHelper,
+    ApiContext apiContext,
+    FileSecurity fileSecurity)
+{
+    [HttpGet("room/{id}")]
+    public async IAsyncEnumerable<object> GetEntriesWithSharedAsync(T id,
+        EmployeeStatus? employeeStatus,
+        EmployeeActivationStatus? activationStatus,
+        bool? excludeShared,
+        SearchArea searchArea = SearchArea.Any)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var requestCount = Convert.ToInt32(apiContext.Count);
+        
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        var totalGroupsTask = searchArea != SearchArea.Users 
+            ? fileSecurity.GetGroupsWithSharedCountAsync(room, apiContext.FilterValue, excludeShared ?? false)
+            : Task.FromResult(0);
+
+        var totalUsersTask = searchArea != SearchArea.Groups
+            ? fileSecurity.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false)
+            : Task.FromResult(0);
+
+        var groups = searchArea != SearchArea.Users
+            ? await fileSecurity.GetGroupInfoWithSharedAsync(room, apiContext.FilterValue, excludeShared ?? false, offset, requestCount).ToListAsync()
+            : [];
+
+        var totalGroups = await totalGroupsTask;
+
+        var usersCount = requestCount - groups.Count;
+        var usersOffset = Math.Max(groups.Count > 0 ? 0 : offset - totalGroups, 0);
+
+        var usersWithShared = searchArea != SearchArea.Groups
+            ? fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, usersOffset, usersCount)
+            : AsyncEnumerable.Empty<UserInfoWithShared>();
+
+        var totalUsers = await totalUsersTask;
+        var total = totalGroups + totalUsers;
+
+        apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), requestCount)).SetTotalCount(total);
+
+        await foreach (var item in groups.ToAsyncEnumerable())
+        {
+            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
+        }
+
+        await foreach (var item in usersWithShared)
+        {
+            yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
+        }
+    }
+}

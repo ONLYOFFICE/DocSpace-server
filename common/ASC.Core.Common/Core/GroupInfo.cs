@@ -28,7 +28,7 @@ namespace ASC.Core.Users;
 
 public class GroupInfo : IRole, IRecipientsGroup
 {
-    public Guid ID { get; internal init; }
+    public Guid ID { get; init; }
     public string Name { get; set; }
     public Guid CategoryID { get; init; }
     public GroupInfo Parent { get; internal set; }

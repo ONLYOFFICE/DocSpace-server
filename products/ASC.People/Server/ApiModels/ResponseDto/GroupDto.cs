@@ -53,6 +53,8 @@ public class GroupDto
     /// <summary>List of members</summary>
     /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
     public List<EmployeeDto> Members { get; set; }
+    
+    public bool? Shared { get; set; }
 
     public static GroupDto GetSample()
     {
@@ -71,7 +73,7 @@ public class GroupDto
 [Scope]
 public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
 {
-    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers)
+    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers, bool? shared = null)
     {
         var result = new GroupDto
         {
@@ -79,7 +81,8 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper emplo
             Category = group.CategoryID,
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await employeeWraperHelper.GetAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID)))
+            Manager = await employeeWraperHelper.GetAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
+            Shared = shared
         };
 
         if (!includeMembers)
