@@ -116,6 +116,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var userManager = scope.ServiceProvider.GetService<UserManager>();
 
         //TODO: check on each iteration?
         var toFolder = await folderDao.GetFolderAsync(tto);
@@ -211,19 +212,19 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         needToMark.AddRange(moveOrCopyFilesTask);
 
-        if (toFolder.FolderType != FolderType.Archive)
+        foreach (var folder in moveOrCopyFoldersTask)
         {
-            foreach (var folder in moveOrCopyFoldersTask)
+            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
-                if (!DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                    needToMark.AddRange(await GetFilesAsync(scope, folder));
-                }
-
-                await socketManager.CreateFolderAsync(folder);
+                needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
-        }
 
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder);
+            var admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0).Select(r=> r.Id).ToListAsync();
+            admins.Add(CurrentTenant.OwnerId);
+            await socketManager.CreateFolderAsync(folder, admins.Concat(whoCanRead).Distinct().ToList());
+        }
+        
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)
         {

@@ -146,9 +146,17 @@
     modifyFolder(room, "create", fileId, "file", data);
   }
 
-  function createFolder({ folderId, room, data } = {}) {
+  function createFolder({ folderId, room, data, userIds } = {}) {
     logger.info(`create new folder ${folderId} in room ${room}`);
-    modifyFolder(room, "create", folderId, "folder", data);
+    logger.info(`create new folder length ${userIds.length}`);
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "create", folderId, "folder", data));
+    } 
+    else 
+    {
+      modifyFolder(room, "create", folderId, "folder", data);
+    }
   }
 
   function updateFile({ fileId, room, data } = {}) {

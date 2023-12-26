@@ -69,13 +69,38 @@ public class SocketManager : SocketServiceClient
         await MakeRequest("create-file", new { room, fileId = file.Id, data });
     }
 
-    public async Task CreateFolderAsync<T>(Folder<T> folder)
+    public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> userIds = null)
     {
         var room = await GetFolderRoomAsync(folder.ParentId);
 
         var data = await SerializeFolder(folder);
 
-        await MakeRequest("create-folder", new { room, folderId = folder.Id, data });
+        if (userIds.Any())
+        {
+            foreach (var chunk in userIds.Chunk(1000))
+            {
+                await MakeRequest("create-folder", 
+                    new
+                    {
+                        room, 
+                        folderId = folder.Id, 
+                        data,
+                        userIds = chunk
+                    }); 
+            }
+
+        }
+        else
+        {
+            await MakeRequest("create-folder", 
+                new
+                {
+                    room, 
+                    folderId = folder.Id, 
+                    data
+                });
+        }
+
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
