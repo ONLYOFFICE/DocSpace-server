@@ -211,7 +211,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var moveOrCopyFilesTask = await MoveOrCopyFilesAsync(scope, Files, toFolder, _copy, parentFolders);
 
         needToMark.AddRange(moveOrCopyFilesTask);
-
+        
+        var admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0).Select(r=> r.Id).ToListAsync();
+        admins.Add(CurrentTenant.OwnerId);
+        
         foreach (var folder in moveOrCopyFoldersTask)
         {
             if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
@@ -220,8 +223,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
 
             var whoCanRead = await fileSecurity.WhoCanReadAsync(folder);
-            var admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0).Select(r=> r.Id).ToListAsync();
-            admins.Add(CurrentTenant.OwnerId);
             await socketManager.CreateFolderAsync(folder, admins.Concat(whoCanRead).Distinct().ToList());
         }
         
