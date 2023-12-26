@@ -558,6 +558,13 @@ public class FileSharing
 
         await foreach (var record in records)
         {
+            if (record.SubjectType == SubjectType.InvitationLink && record.Options is { IsExpired: true })
+            {
+                record.Share = FileShare.None;
+                await _daoFactory.GetSecurityDao<T>().SetShareAsync(record);
+                continue;
+            }
+            
             yield return await ToAceAsync(entry, record, canEditAccess);
         }
     }
