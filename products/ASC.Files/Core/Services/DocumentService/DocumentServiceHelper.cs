@@ -301,7 +301,8 @@ public class DocumentServiceHelper
                         ChangeHistory = rightChangeHistory,
                         ModifyFilter = rightModifyFilter,
                         Print = rightToDownload,
-                        Download = rightToDownload
+                        Download = rightToDownload,
+                        Copy = rightToDownload
                     }
                 },
             EditorConfig =
