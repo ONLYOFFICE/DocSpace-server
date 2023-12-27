@@ -810,15 +810,6 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
         {
             if (_configuration.EditorConfig.ModeWrite)
             {
-                var title = _configuration.Document.Info.GetFile().Title;
-                var fileExst = FileUtility.GetFileExtension(title);
-                var fileType = FileUtility.GetFileTypeByExtention(fileExst);
-
-                if (fileType == FileType.Pdf)
-                {
-                    return true;
-                }
-
                 var linkDao = daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;
 
