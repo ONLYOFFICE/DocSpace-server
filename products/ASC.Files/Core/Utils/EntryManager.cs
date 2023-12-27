@@ -1304,20 +1304,24 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
 
-            if (room.FolderType == FolderType.FillingFormsRoom)
+            if (roomId != -1)
             {
-                var properties = await formFillingReportCreator.UpdateFormFillingReport(file, formsDataUrl);
+                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
 
-                if (properties != null)
+                if (room.FolderType == FolderType.FillingFormsRoom)
                 {
-                    await fileMarker.RemoveMarkAsNewForAllAsync(file);
-                    file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                    var properties = await formFillingReportCreator.UpdateFormFillingReport(file, formsDataUrl);
+
+                    if (properties != null)
+                    {
+                        await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                        file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                    }
                 }
             }
+            
         }
-
 
         using (var tmpStream = new MemoryStream())
         {
