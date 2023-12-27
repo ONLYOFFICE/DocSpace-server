@@ -1574,13 +1574,14 @@ internal class FileDao(
         file.Version = dbFile.Version;
         file.ContentLength = dbFile.ContentLength;
 
-        if (!await IsExistOnStorageAsync(file) || file.ContentLength > settings.MaxContentLength)
+        if (!await IsExistOnStorageAsync(file) || file.ContentLength > settings.MaxFileSize)
         {
             return dbFile;
         }
 
-        await using var stream = await GetFileStreamAsync(file);
-
+        byte[] buffer;
+        await using(var stream = await GetFileStreamAsync(file))
+        {
         if (stream == null)
         {
             return dbFile;
@@ -1588,9 +1589,12 @@ internal class FileDao(
 
         using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
+            buffer = ms.GetBuffer();
+        }
+        
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(ms.GetBuffer())
+            Data = Convert.ToBase64String(buffer)
             };
 
         return dbFile;

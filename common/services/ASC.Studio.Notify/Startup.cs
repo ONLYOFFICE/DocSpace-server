@@ -28,9 +28,17 @@ using ASC.Web.Studio.IntegrationEvents;
 
 namespace ASC.Studio.Notify;
 
-public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    : BaseWorkerStartup(configuration, hostEnvironment)
+public class Startup : BaseWorkerStartup
 {
+    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+        : base(configuration, hostEnvironment)
+    {
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }        
+    }
+
     public override async Task ConfigureServices(IServiceCollection services)
     {
         await base.ConfigureServices(services);

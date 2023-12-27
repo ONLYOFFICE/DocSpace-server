@@ -256,7 +256,7 @@ public class EntryManager(IDaoFactory daoFactory,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     SocketManager socketManager,
-    CommonLinkUtility commonLinkUtility)
+        BaseCommonLinkUtility commonLinkUtility)
 {
     private const string UpdateList = "filesUpdateList";
 

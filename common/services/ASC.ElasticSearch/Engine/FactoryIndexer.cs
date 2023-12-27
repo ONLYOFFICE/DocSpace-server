@@ -156,7 +156,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         return (true, result, total);
     }
 
-    public async Task<bool> CanIndexByContentAsync(T t)
+    public virtual async Task<bool> CanIndexByContentAsync(T t)
     {
         return await SupportAsync(t) && await searchSettingsHelper.CanIndexByContentAsync<T>();
     }

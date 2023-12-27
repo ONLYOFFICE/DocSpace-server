@@ -34,8 +34,9 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FilesController<int>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        FileShareDtoHelper fileShareDtoHelper)
+    : FilesController<int>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, fileShareDtoHelper);
 
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -44,8 +45,9 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FilesController<string>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        FileShareDtoHelper fileShareDtoHelper)
+    : FilesController<string>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, fileShareDtoHelper)
     {
     /// <summary>
     /// Returns the detailed information about a third-party file with the ID specified in the request.
@@ -72,7 +74,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper, 
+        FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -437,10 +440,28 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         return fileStorageService.SetFileProperties(fileId, mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
     }
+    
+    /// <summary>
+    /// Returns the primary external link with the identifier specified in the request.
+    /// </summary>
+    /// <short>Returns primary external link</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("file/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
+        
+        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
+
 
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(T fileId, OrderRequestDto inDto)
-{
+    {
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
 }

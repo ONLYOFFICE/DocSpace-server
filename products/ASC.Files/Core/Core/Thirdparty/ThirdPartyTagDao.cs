@@ -36,7 +36,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
     where TFolder : class, TItem
     where TItem : class
 {
-    public int TenantID { get; private set; } = tenantManager.GetCurrentTenant().Id;
+    private int TenantId => tenantManager.GetCurrentTenant().Id;
     private string PathPrefix { get; set; }
 
     public void Init(string pathPrefix)
@@ -56,7 +56,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantID, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 
