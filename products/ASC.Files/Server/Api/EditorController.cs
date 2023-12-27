@@ -356,7 +356,7 @@ public class EditorController : ApiControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("docservice")]
-    public async Task<IEnumerable<string>> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
+    public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {        
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
@@ -375,12 +375,7 @@ public class EditorController : ApiControllerBase
 
         await _documentServiceConnector.CheckDocServiceUrlAsync();
 
-        return new[]
-        {
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl
-        };
+        return await GetDocServiceUrlAsync(false);
     }
 
     /// <summary>
@@ -396,7 +391,7 @@ public class EditorController : ApiControllerBase
     /// <visible>false</visible>
     [AllowAnonymous]
     [HttpGet("docservice")]
-    public async Task<object> GetDocServiceUrlAsync(bool version)
+    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(bool version)
     {
         var url = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.DocServiceApiUrl);
 
@@ -407,14 +402,14 @@ public class EditorController : ApiControllerBase
             dsVersion = await _documentServiceConnector.GetVersionAsync();
         }
 
-        return new
+        return new DocServiceUrlDto
         {
-            version = dsVersion,
-            docServiceUrlApi = url,
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl,
-            _filesLinkUtility.IsDefault
+            Version = dsVersion,
+            DocServiceUrlApi = url,
+            DocServiceUrl = _filesLinkUtility.DocServiceUrl,
+            DocServiceUrlInternal =_filesLinkUtility.DocServiceUrlInternal,
+            DocServicePortalUrl = _filesLinkUtility.DocServicePortalUrl,
+            IsDefault = _filesLinkUtility.IsDefault
         };
     }
 }
