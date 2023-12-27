@@ -92,13 +92,14 @@ class CachedQuotaService : IQuotaService
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        var quotas = Cache.Get<IEnumerable<TenantQuota>>(QuotaServiceCache.KeyQuota + (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key);
+        var cacheKey = QuotaServiceCache.KeyQuota + (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+        var quotas = Cache.Get<IEnumerable<TenantQuota>>(cacheKey);
         if (quotas == null)
         {
             quotas = await Service.GetTenantQuotasAsync();
             if (QuotaServiceCache.QuotaCacheEnabled)
             {
-                Cache.Insert(QuotaServiceCache.KeyQuota, quotas, DateTime.UtcNow.Add(_cacheExpiration));
+                Cache.Insert(cacheKey, quotas, DateTime.UtcNow.Add(_cacheExpiration));
             }
         }
 
