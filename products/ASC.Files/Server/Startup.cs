@@ -34,6 +34,11 @@ public class Startup : BaseStartup
         : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override void ConfigureServices(IServiceCollection services)
