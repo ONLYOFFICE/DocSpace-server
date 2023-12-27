@@ -152,7 +152,8 @@ public class WebItemSecurity(UserManager userManager,
                 }
                 else if (webitem is IModule)
                 {
-                    result = await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
+                    result = 
+                        await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
                         await IsAvailableForUserAsync(webItemManager.GetParentItemID(webitem.ID), @for);
                 }
                 else
