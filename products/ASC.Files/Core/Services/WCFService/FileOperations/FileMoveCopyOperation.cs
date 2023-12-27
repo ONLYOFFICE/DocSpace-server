@@ -210,20 +210,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var moveOrCopyFilesTask = await MoveOrCopyFilesAsync(scope, Files, toFolder, _copy, parentFolders);
 
         needToMark.AddRange(moveOrCopyFilesTask);
-
-        if (toFolder.FolderType != FolderType.Archive)
+        
+        foreach (var folder in moveOrCopyFoldersTask)
         {
-            foreach (var folder in moveOrCopyFoldersTask)
+            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
-                if (!DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                    needToMark.AddRange(await GetFilesAsync(scope, folder));
-                }
-
-                await socketManager.CreateFolderAsync(folder);
+                needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
+            await socketManager.CreateFolderAsync(folder);
         }
-
+        
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)
         {

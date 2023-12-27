@@ -29,14 +29,14 @@ public class QuotaSocketManager : SocketServiceClient
 {
     private readonly TenantManager _tenantManager;
 
-    public override string Hub => "files";
+    protected override string Hub => "files";
 
     public QuotaSocketManager(
         ILogger<SocketServiceClient> logger, 
         IHttpClientFactory clientFactory, 
-        MachinePseudoKeys mashinePseudoKeys,
+        MachinePseudoKeys machinePseudoKeys,
         TenantManager tenantManager,
-        IConfiguration configuration) : base(logger, clientFactory, mashinePseudoKeys, configuration)
+        IConfiguration configuration) : base(logger, clientFactory, machinePseudoKeys, configuration)
     {
         _tenantManager = tenantManager;
     }
