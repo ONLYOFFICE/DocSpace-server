@@ -1,5 +1,4 @@
-﻿const logger = require("../log");
-module.exports = (io) => {
+﻿module.exports = (io) => {
   const logger = require("../log.js");
   const moment = require("moment");
   const filesIO = io; //TODO: Restore .of("/files");
