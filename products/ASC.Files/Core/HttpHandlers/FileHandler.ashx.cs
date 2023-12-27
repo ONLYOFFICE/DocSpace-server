@@ -651,7 +651,7 @@ public class FileHandlerService
                 version = 0;
             }
             var doc = context.Request.Query[FilesLinkUtility.DocShareKey];
-            var share = context.Request.Query[FilesLinkUtility.FolderShareKey];
+            var share = context.Request.Query[FilesLinkUtility.ShareKey];
 
             await fileDao.InvalidateCacheAsync(id);
 
