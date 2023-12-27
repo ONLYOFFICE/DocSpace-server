@@ -2539,6 +2539,24 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (entry.FileEntryType == FileEntryType.File && entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            var room = await _daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).
+                FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            
+            var parentLink = await _fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+                .FirstOrDefaultAsync();
+            if (parentLink == null)
+            {
+                return null;
+            }
+            
+            var data = await _externalShare.GetLinkDataAsync(entry, parentLink.Id);
+            parentLink.Link = await _urlShortener.GetShortenLinkAsync(data.Url);
+
+            return parentLink;
+        }
+
         var link = await _fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, 0, 1)
             .FirstOrDefaultAsync();
 

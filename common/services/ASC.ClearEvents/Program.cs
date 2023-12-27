@@ -57,10 +57,15 @@ try
     builder.Host.ConfigureDefault();
 
     builder.Services.AddClearEventsServices(builder.Configuration);
-
+    
     builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
     {
         builder.Register(context.Configuration, false, false);
+
+        if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            context.Configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     });
 
     var app = builder.Build();

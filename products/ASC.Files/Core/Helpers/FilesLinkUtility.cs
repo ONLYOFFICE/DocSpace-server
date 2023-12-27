@@ -39,7 +39,6 @@ public class FilesLinkUtility
     private readonly CoreSettings _coreSettings;
     private readonly IConfiguration _configuration;
     private readonly InstanceCrypto _instanceCrypto;
-    private readonly ExternalShare _externalShare;
 
     public FilesLinkUtility(
         CommonLinkUtility commonLinkUtility,
@@ -47,8 +46,7 @@ public class FilesLinkUtility
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         IConfiguration configuration,
-        InstanceCrypto instanceCrypto,
-        ExternalShare externalShare)
+        InstanceCrypto instanceCrypto)
     {
         _commonLinkUtility = commonLinkUtility;
         _baseCommonLinkUtility = baseCommonLinkUtility;
@@ -56,7 +54,6 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
-        _externalShare = externalShare;
         _filesUploaderURL = _configuration["files:uploader:url"] ?? "~";
     }
 
@@ -78,7 +75,7 @@ public class FilesLinkUtility
     public const string AuthKey = "stream_auth";
     public const string Anchor = "anchor";
     public const string Size = "size";
-    public const string FolderShareKey = "share";
+    public const string ShareKey = "share";
 
     public string FileHandlerPath
     {
@@ -289,18 +286,14 @@ public class FilesLinkUtility
 
     public string GetFileDownloadUrl(object fileId, int fileVersion, string convertToExtension)
     {
-        var url = string.Format(FileDownloadUrlString, HttpUtility.UrlEncode(fileId.ToString()))
+        return string.Format(FileDownloadUrlString, HttpUtility.UrlEncode(fileId.ToString()))
                + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty)
                + (string.IsNullOrEmpty(convertToExtension) ? string.Empty : "&" + OutType + "=" + convertToExtension);
-
-        return GetUrlWithShare(url);
     }
 
     public string GetFileWebMediaViewUrl(object fileId)
     {
-        var url = FilesBaseAbsolutePath + "#preview/" + HttpUtility.UrlEncode(fileId.ToString());
-
-        return GetUrlWithShare(url);
+        return FilesBaseAbsolutePath + "#preview/" + HttpUtility.UrlEncode(fileId.ToString());
     }
 
     public string FileWebViewerUrlString
@@ -320,10 +313,8 @@ public class FilesLinkUtility
 
     public string GetFileWebEditorUrl<T>(T fileId, int fileVersion = 0)
     {
-        var url = string.Format(FileWebEditorUrlString, HttpUtility.UrlEncode(fileId.ToString()))
+        return string.Format(FileWebEditorUrlString, HttpUtility.UrlEncode(fileId.ToString()))
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
-
-        return GetUrlWithShare(url);
     }
 
     public string GetFileWebEditorTryUrl(FileType fileType)
@@ -363,8 +354,7 @@ public class FilesLinkUtility
         {
             if (fileUtility.ExtsMustConvert.Contains(FileUtility.GetFileExtension(fileTitle)))
             {
-                var url = string.Format(FileWebViewerUrlString, HttpUtility.UrlEncode(fileId.ToString()));
-                return GetUrlWithShare(url);
+                return string.Format(FileWebViewerUrlString, HttpUtility.UrlEncode(fileId.ToString()));
             }
 
             return GetFileWebEditorUrl(fileId, fileVersion);
@@ -390,10 +380,8 @@ public class FilesLinkUtility
 
     public string GetFileThumbnailUrl(object fileId, int fileVersion)
     {
-        var url = string.Format(FileThumbnailUrlString, HttpUtility.UrlEncode(fileId.ToString()))
+        return string.Format(FileThumbnailUrlString, HttpUtility.UrlEncode(fileId.ToString()))
                + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
-
-        return GetUrlWithShare(url);
     }
 
 
@@ -497,22 +485,5 @@ public class FilesLinkUtility
     private string GetSettingsKey(string key)
     {
         return "DocKey_" + key;
-    }
-
-    private string GetUrlWithShare(string url)
-    {
-        if (_externalShare.GetLinkId() == Guid.Empty)
-        {
-            return url;
-        }
-
-        var key = _externalShare.GetKey();
-
-        if (!string.IsNullOrEmpty(key))
-        {
-            url += $"&{FolderShareKey}={key}";
-        }
-
-        return url;
     }
 }

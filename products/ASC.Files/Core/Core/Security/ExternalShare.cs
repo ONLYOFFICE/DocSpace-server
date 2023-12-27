@@ -34,6 +34,8 @@ public class ExternalShare
     private readonly CookiesManager _cookiesManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly FilesLinkUtility _filesLinkUtility;
+    private readonly FileUtility _fileUtility;
     private Guid _linkId;
     private Guid _sessionId;
     private string _passwordKey;
@@ -44,22 +46,41 @@ public class ExternalShare
         IDaoFactory daoFactory, 
         CookiesManager cookiesManager,
         IHttpContextAccessor httpContextAccessor,
-        CommonLinkUtility commonLinkUtility)
+        CommonLinkUtility commonLinkUtility, 
+        FilesLinkUtility filesLinkUtility, 
+        FileUtility fileUtility)
     {
         _global = global;
         _daoFactory = daoFactory;
         _cookiesManager = cookiesManager;
         _httpContextAccessor = httpContextAccessor;
         _commonLinkUtility = commonLinkUtility;
+        _filesLinkUtility = filesLinkUtility;
+        _fileUtility = fileUtility;
     }
     
-    public async Task<LinkData> GetLinkDataAsync(Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
+        string url = null;
+        
+        switch (entry)
+        {
+            case File<T> file:
+                url = _fileUtility.CanWebView(file.Title)
+                    ? _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id)
+                    : file.DownloadUrl;
+
+                url += $"&{FilesLinkUtility.ShareKey}={key}";
+                break;
+            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+                url = $"rooms/share?key={key}";
+                break;
+        }
         
         return new LinkData
         {
-            Url = _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}"),
+            Url = _commonLinkUtility.GetFullAbsolutePath(url),
             Token = key
         };
     }
@@ -134,7 +155,7 @@ public class ExternalShare
 
         if (string.IsNullOrEmpty(key))
         {
-            key = _httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.FolderShareKey);
+            key = _httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.ShareKey);
         }
 
         return string.IsNullOrEmpty(key) ? null : key;
@@ -265,6 +286,28 @@ public class ExternalShare
     public async Task SetAnonymousSessionKeyAsync()
     {
         await _cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
+    }
+    
+    public string GetUrlWithShare(string url, string key = null)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return url;
+        }
+
+        key ??= GetKey();
+
+        if (string.IsNullOrEmpty(key))
+        {
+            return url;
+        }
+
+        var uriBuilder = new UriBuilder(url);
+        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+        query[FilesLinkUtility.ShareKey] = key;
+        uriBuilder.Query = query.ToString() ?? string.Empty;
+
+        return uriBuilder.ToString();
     }
     
     private async Task<string> CreateShareKeyAsync(Guid linkId)
