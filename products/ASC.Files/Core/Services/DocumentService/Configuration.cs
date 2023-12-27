@@ -804,23 +804,6 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
         get { return _configuration.EditorConfig.ModeWrite ? null : "markup"; }
     }
 
-    public bool IsForm
-    {
-        get
-        {
-            var title = _configuration.Document.Info.GetFile().Title;
-            var fileExst = FileUtility.GetFileExtension(title);
-            var fileType = FileUtility.GetFileTypeByExtention(fileExst);
-
-            if (fileType == FileType.Pdf)
-            {
-                return true;
-            }
-
-            return false;
-        }
-    }
-
     public bool SubmitForm
     {
         get
