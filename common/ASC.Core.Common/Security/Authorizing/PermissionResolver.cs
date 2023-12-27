@@ -41,7 +41,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
     public async Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action)
     {
         var denyActions = await GetDenyActionsAsync(subject, action, objectId, securityObjProvider);
-        return denyActions != null;
+        return denyActions == null;
     }
 
     public async Task DemandAsync(ISubject subject, IAction action)
