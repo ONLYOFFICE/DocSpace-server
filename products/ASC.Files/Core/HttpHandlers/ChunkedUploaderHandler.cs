@@ -115,25 +115,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var fileExst = FileUtility.GetFileExtension(resumedSession.File.Title);
                         var fileType = FileUtility.GetFileTypeByExtention(fileExst);
 
-                        if (fileType == FileType.Pdf)
-                        {
-                            var fileDao = daoFactory.GetFileDao<T>();
-                            var properties = await daoFactory.GetFileDao<T>().GetProperties(resumedSession.File.Id);
-                            if(properties == null)
-                            {
-                                properties = new EntryProperties();
-                                properties.FormFilling = serviceProvider.GetService<FormFillingProperties>();
-                            }
-                            var folderDao = daoFactory.GetFolderDao<T>();
-                            var folder = await folderDao.GetFolderAsync(resumedSession.File.ParentId);
-                            if (folder.FolderType == FolderType.FillingFormsRoom)
-                            {
-                                properties.FormFilling.CollectFillForm = true;
-                            }
-                            properties.IsForm = true;
-                            await fileDao.SaveProperties(resumedSession.File.Id, properties);
-                        }
-
                         await socketManager.CreateFileAsync(resumedSession.File);
                     }
                     else

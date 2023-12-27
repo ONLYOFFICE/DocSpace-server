@@ -808,11 +808,13 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
     {
         get
         {
-            var properties = daoFactory.GetFileDao<T>().GetProperties(_configuration.Document.Info.GetFile().Id).Result;
+            var title = _configuration.Document.Info.GetFile().Title;
+            var fileExst = FileUtility.GetFileExtension(title);
+            var fileType = FileUtility.GetFileTypeByExtention(fileExst);
 
-            if (properties != null)
+            if (fileType == FileType.Pdf)
             {
-                return properties.IsForm;
+                return true;
             }
 
             return false;
@@ -831,9 +833,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
 
                 if (fileType == FileType.Pdf)
                 {
-                    var fileProperties = daoFactory.GetFileDao<T>().GetProperties(_configuration.Document.Info.GetFile().Id).Result;
-
-                    return fileProperties is { IsForm: true };
+                    return true;
                 }
 
                 var linkDao = daoFactory.GetLinkDao();
