@@ -195,8 +195,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             if (isRoom)
                             {
-                                var room = await roomLogoManager.DeleteAsync(folder.Id, checkPermissions);
-                                await socketManager.UpdateFolderAsync(room);
+                                await roomLogoManager.DeleteAsync(folder.Id, checkPermissions);
                                 aces = await fileSharing.GetSharedInfoAsync(folder);
                             }
                             
