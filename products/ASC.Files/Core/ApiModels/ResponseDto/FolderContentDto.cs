@@ -155,7 +155,7 @@ public class FolderContentDtoHelper
 
         var filesTask = GetFilesDto(files).ToListAsync();
         var foldersTask = GetFoldersDto(folders).ToListAsync();
-        var currentTask = _folderDtoHelper.GetAsync(folderItems.FolderInfo);
+        var currentTask = GetFoldersDto(new [] { folderItems.FolderInfo }).FirstOrDefaultAsync();
 
         var isEnableBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -166,7 +166,7 @@ public class FolderContentDtoHelper
             Total = folderItems.Total,
             New = isEnableBadges ? folderItems.New : 0,
             Count = folderItems.Entries.Count,
-            Current = await currentTask
+            Current = (FolderDto<T>)(await currentTask)
         };
 
         var tasks = await Task.WhenAll(filesTask.AsTask(), foldersTask.AsTask());
