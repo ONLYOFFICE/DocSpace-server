@@ -374,10 +374,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
                                 else if (await FolderDao.IsEmptyAsync(folder.Id))
                                 {
-                                    await FolderDao.DeleteFolderAsync(folder.Id);
-
-                                    await socketManager.DeleteFolder(folder);
-
+                                    await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
                                     if (ProcessedFolder(folderId))
                                     {
                                         sb.Append($"folder_{newFolder.Id}{SplitChar}");
@@ -464,17 +461,23 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         await _semaphore.WaitAsync();
                                         await countRoomChecker.CheckAppend();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
-
+                                        
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
+                                        
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                     }
                                     else if (isRoom && toFolder.FolderType == FolderType.Archive)
                                     {
                                         await _semaphore.WaitAsync();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
+
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
                                         
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
@@ -649,7 +652,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                                var newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId);
+                                TTo newFileId = default;
+                                await socketManager.DeleteFileAsync(file, action: async () => newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId));
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 await filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
@@ -670,8 +674,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     needToMark.Add(newFile);
                                 }
-
-                                await socketManager.DeleteFileAsync(file);
 
                                 await socketManager.CreateFileAsync(newFile);
 
@@ -762,14 +764,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             this[Err] = message;
                                         }
                                         else
-                                        {
-                                            await FileDao.DeleteFileAsync(file.Id);
+                                        {                                            
+                                            await socketManager.DeleteFileAsync(file, action: async () =>
+                                            {
+                                                await FileDao.DeleteFileAsync(file.Id);
 
-                                            await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                                await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                            });
 
                                             await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
-
-                                            await socketManager.DeleteFileAsync(file);
 
                                             if (ProcessedFile(fileId))
                                             {

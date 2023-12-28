@@ -71,9 +71,9 @@ public class SocketManager : SocketServiceClient
         await MakeRequest("create-file", file, true);
     }
 
-    public async Task CreateFolderAsync<T>(Folder<T> folder)
+    public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {         
-        await MakeRequest("create-folder", folder, true);
+        await MakeRequest("create-folder", folder, true, users);
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
@@ -86,14 +86,14 @@ public class SocketManager : SocketServiceClient
         await MakeRequest("update-folder", folder, true);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
     {        
-        await MakeRequest("delete-file", file);
+        await MakeRequest("delete-file", file, action: action);
     }
 
-    public async Task DeleteFolder<T>(Folder<T> folder)
+    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
-        await MakeRequest("delete-folder", folder);
+        await MakeRequest("delete-folder", folder, users: users, action: action);
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
@@ -127,10 +127,16 @@ public class SocketManager : SocketServiceClient
         SendNotAwaitableRequest("mark-as-new-folder", result);
     }
 
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false)
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
         var room = await GetFolderRoomAsync(entry.ParentId);
-        var whoCanRead = await GetWhoCanRead(entry);
+        var whoCanRead = users ?? await GetWhoCanRead(entry);
+
+        if (action != null)
+        {
+            await action();
+        }
+        
         var data = "";
 
         if (withData)
