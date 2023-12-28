@@ -199,15 +199,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 await socketManager.UpdateFolderAsync(room);
                                 aces = await fileSharing.GetSharedInfoAsync(folder);
                             }
-
-                            await FolderDao.DeleteFolderAsync(folder.Id);
-
-                            if (isRoom && folder.ProviderEntry)
+                            
+                            await socketManager.DeleteFolder(folder, action: async () =>
                             {
-                                await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                            }
+                                await FolderDao.DeleteFolderAsync(folder.Id);
 
-                            await socketManager.DeleteFolder(folder);
+                                if (isRoom && folder.ProviderEntry)
+                                {
+                                    await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
+                                }
+                            });
 
                             if (isRoom)
                             {
@@ -242,16 +243,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     await socketManager.UpdateFolderAsync(room);
                                     aces = await fileSharing.GetSharedInfoAsync(folder);
                                 }
-
-                                await FolderDao.DeleteFolderAsync(folder.Id);
-
-                                if (isRoom && folder.ProviderEntry)
+                                
+                                await socketManager.DeleteFolder(folder, action: async () =>
                                 {
-                                    await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                                }
+                                    await FolderDao.DeleteFolderAsync(folder.Id);
 
-                                await socketManager.DeleteFolder(folder);
-
+                                    if (isRoom && folder.ProviderEntry)
+                                    {
+                                        await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
+                                    }
+                                });
+                                
                                 if (isNeedSendActions)
                                 {
                                     if (isRoom)
@@ -267,9 +269,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             }
                             else
                             {
-                                await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken);
-                                await socketManager.DeleteFolder(folder);
-
+                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
+                                
                                 if (isNeedSendActions)
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, _headers, folder.Title);

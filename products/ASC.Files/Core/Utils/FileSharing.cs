@@ -48,7 +48,8 @@ public class FileSharingAceHelper
     private readonly UserManagerWrapper _userManagerWrapper;
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly IUrlShortener _urlShortener;
-    
+    private readonly SocketManager _socketManager;
+
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
@@ -70,7 +71,8 @@ public class FileSharingAceHelper
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         CountPaidUserChecker countPaidUserChecker,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        SocketManager socketManager)
     {
         _fileSecurity = fileSecurity;
         _coreBaseSettings = coreBaseSettings;
@@ -89,6 +91,7 @@ public class FileSharingAceHelper
         _userManagerWrapper = userManagerWrapper;
         _countPaidUserChecker = countPaidUserChecker;
         _urlShortener = urlShortener;
+        _socketManager = socketManager;
     }
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
@@ -260,6 +263,18 @@ public class FileSharingAceHelper
             }
 
             await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            if (room != null)
+            {
+                if (share == FileShare.None)
+                {
+                    await _socketManager.DeleteFolder(room, new [] { w.Id });
+                }
+                else if(existedShare == null)
+                {
+                    await _socketManager.CreateFolderAsync(room, new [] { w.Id });
+                }
+            }
+
             changed = true;
             handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
 

@@ -374,10 +374,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
                                 else if (await FolderDao.IsEmptyAsync(folder.Id))
                                 {
-                                    await FolderDao.DeleteFolderAsync(folder.Id);
-
-                                    await socketManager.DeleteFolder(folder);
-
+                                    await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
                                     if (ProcessedFolder(folderId))
                                     {
                                         sb.Append($"folder_{newFolder.Id}{SplitChar}");
@@ -464,17 +461,23 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         await _semaphore.WaitAsync();
                                         await countRoomChecker.CheckAppend();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
-
+                                        
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
+                                        
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                     }
                                     else if (isRoom && toFolder.FolderType == FolderType.Archive)
                                     {
                                         await _semaphore.WaitAsync();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
+
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
                                         
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
