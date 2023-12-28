@@ -194,7 +194,7 @@ public class OсMigratingFiles(
             }
         }
 
-        if (!ShouldImportSharedFiles)
+        if (!ShouldImportSharedFiles && !ShouldImportSharedFolders)
         {
             return;
         }
@@ -202,6 +202,10 @@ public class OсMigratingFiles(
         {
             var list = new List<AceWrapper>();
             var entryIsFile = _files.Exists(el => el.FileId == item.Value);
+            if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+            {
+                continue;
+            }
             var entry = entryIsFile ? _files.Find(el => el.FileId == item.Value) : _folders.Find(el => el.FileId == item.Value);
             if (entry.Share.Count == 0)
             {

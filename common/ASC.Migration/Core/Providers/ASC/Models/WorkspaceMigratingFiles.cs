@@ -238,13 +238,18 @@ public class WorkspaceMigratingFiles(
             }
         }
 
-        if (_type != FolderType.USER || !ShouldImportSharedFiles)
+        if (_type != FolderType.USER || (!ShouldImportSharedFiles && !ShouldImportSharedFolders))
         {
             return;
         }
         
         foreach (var security in _securities)
         {
+            var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
+            if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+            {
+                continue;
+            }
             var list = new List<AceWrapper>
             {
                 new AceWrapper
@@ -255,7 +260,6 @@ public class WorkspaceMigratingFiles(
                 }
             };
 
-            var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
             var aceCollection = new AceCollection<int>
             {
                 Files = entryIsFile ? new List<int> { matchingIds[security.EntryId] } : [],

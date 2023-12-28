@@ -33,6 +33,7 @@ public abstract class MigratingFiles : ImportableEntity
     public abstract long BytesTotal { get; }
     
     public bool ShouldImportSharedFiles { get; set; } = true;
+    public bool ShouldImportSharedFolders { get; set; } = true;
 
     public virtual MigratingApiFiles ToApiInfo()
     {

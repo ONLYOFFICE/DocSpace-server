@@ -189,7 +189,7 @@ public class GwsMigratingFiles(
                 }
             }
 
-            if (!ShouldImportSharedFiles)
+            if (!ShouldImportSharedFiles && !ShouldImportSharedFolders)
             {
                 return;
             }
@@ -201,73 +201,80 @@ public class GwsMigratingFiles(
 
             foreach (var kv in entries)
             {
-                if (TryReadInfoFile(kv.Key, out var info))
+                if (!TryReadInfoFile(kv.Key, out var info))
                 {
-                    var list = new List<AceWrapper>();
-                    foreach (var shareInfo in info.Permissions)
+                    continue;
+                }
+
+                if (kv.Value is File<int> && !ShouldImportSharedFiles || kv.Value is not File<int> && !ShouldImportSharedFolders)
+                {
+                    continue;
+                }
+                    
+                var list = new List<AceWrapper>();
+                foreach (var shareInfo in info.Permissions)
+                {
+                    if (shareInfo.Type is "user" or "group")
                     {
-                        if (shareInfo.Type is "user" or "group")
+                        var shareType = GetPortalShare(shareInfo);
+                        _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
+                        _groups.TryGetValue(shareInfo.Name, out var groupToShare);
+                        if (shareType == null || (userToShare == null && groupToShare == null))
                         {
-                            var shareType = GetPortalShare(shareInfo);
-                            _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
-                            _groups.TryGetValue(shareInfo.Name, out var groupToShare);
-                            if (shareType == null || (userToShare == null && groupToShare == null))
-                            {
-                                continue;
-                            }
-
-                            Func<FileEntry<int>, Guid, Task<bool>> checkRights = null;
-                            switch (shareType)
-                            {
-                                case ASCShare.ReadWrite:
-                                    checkRights = fileSecurity.CanEditAsync;
-                                    break;
-                                case ASCShare.Comment:
-                                    checkRights = fileSecurity.CanCommentAsync;
-                                    break;
-                                case ASCShare.Read:
-                                    checkRights = fileSecurity.CanReadAsync;
-                                    break;
-                                default: // unused
-                                    break;
-                            }
-                            var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
-
-                            if (checkRights != null && await checkRights(kv.Value, entryGuid))
-                            {
-                                continue; // already have rights, skip
-                            }
-
-                            list.Add(new AceWrapper
-                            {
-                                Access = shareType.Value,
-                                Id = entryGuid,
-                                SubjectGroup = false
-                            });
+                            continue;
                         }
-                    }
 
-                    if (list.Count == 0)
-                    {
-                        continue;
-                    }
+                        Func<FileEntry<int>, Guid, Task<bool>> checkRights = null;
+                        switch (shareType)
+                        {
+                            case ASCShare.ReadWrite:
+                                checkRights = fileSecurity.CanEditAsync;
+                                break;
+                            case ASCShare.Comment:
+                                checkRights = fileSecurity.CanCommentAsync;
+                                break;
+                            case ASCShare.Read:
+                                checkRights = fileSecurity.CanReadAsync;
+                                break;
+                            default: // unused
+                                break;
+                        }
+                        var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
 
-                    var aceCollection = new AceCollection<int>
-                    {
-                        Files = kv.Value is File<int> ? new List<int> { kv.Value.Id } : new List<int>(),
-                        Folders = kv.Value is File<int> ? new List<int>() : new List<int> { kv.Value.Id },
-                        Aces = list,
-                        Message = null
-                    };
+                        if (checkRights != null && await checkRights(kv.Value, entryGuid))
+                        {
+                            continue; // already have rights, skip
+                        }
 
-                    try
-                    {
-                        await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                        list.Add(new AceWrapper
+                        {
+                            Access = shareType.Value,
+                            Id = entryGuid,
+                            SubjectGroup = false
+                        });
                     }
-                    catch (Exception ex)
-                    {
-                        Log($"Couldn't change file permissions for {kv.Value.Id}", ex);
-                    }
+                }
+
+                if (list.Count == 0)
+                {
+                    continue;
+                }
+
+                var aceCollection = new AceCollection<int>
+                {
+                    Files = kv.Value is File<int> ? new List<int> { kv.Value.Id } : new List<int>(),
+                    Folders = kv.Value is File<int> ? new List<int>() : new List<int> { kv.Value.Id },
+                    Aces = list,
+                    Message = null
+                };
+
+                try
+                {
+                    await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                }
+                catch (Exception ex)
+                {
+                    Log($"Couldn't change file permissions for {kv.Value.Id}", ex);
                 }
             }
         }

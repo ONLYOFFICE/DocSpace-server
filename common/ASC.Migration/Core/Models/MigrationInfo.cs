@@ -69,18 +69,12 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             user.ShouldImport = apiUser.ShouldImport;
             user.MigratingFiles.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
             user.MigratingFiles.ShouldImportSharedFiles = user.MigratingFiles.ShouldImport && apiInfo.ImportSharedFiles;
+            user.MigratingFiles.ShouldImportSharedFolders = user.MigratingFiles.ShouldImport && apiInfo.ImportSharedFolders;
         }
 
-        foreach (var apiGroup in apiInfo.Groups)
+        foreach (var group in Groups)
         {
-            if (!Groups.Exists(g => apiGroup.GroupName == g.GroupName))
-            {
-                continue;
-            }
-
-            var group = Groups.Find(g => apiGroup.GroupName == g.GroupName);
-            group.ShouldImport = apiGroup.ShouldImport;
+            group.ShouldImport = apiInfo.ImportGroups;
         }
-        
     }
 }

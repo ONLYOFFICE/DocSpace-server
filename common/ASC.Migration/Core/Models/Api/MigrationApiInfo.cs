@@ -48,18 +48,24 @@ public class MigrationApiInfo
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
 
     [ProtoMember(8)]
-    public bool ImportPersonalFiles { get; set; } = true;
+    public bool ImportPersonalFiles { get; set; } 
     [ProtoMember(9)]
-    public bool ImportSharedFiles { get; set; } = true;
+    public bool ImportSharedFiles { get; set; }
     
     [ProtoMember(10)]
-    public bool ImportCommonFiles { get; set; } = true;
+    public bool ImportSharedFolders { get; set; } 
     
     [ProtoMember(11)]
-    public bool ImportProjectFiles { get; set; } = true;
+    public bool ImportCommonFiles { get; set; }
     
     [ProtoMember(12)]
-    public int SuccessedUsers { get; set; }
+    public bool ImportProjectFiles { get; set; } 
+    
     [ProtoMember(13)]
+    public bool ImportGroups { get; set; }
+    
+    [ProtoMember(14)]
+    public int SuccessedUsers { get; set; }
+    [ProtoMember(15)]
     public int FailedUsers { get; set; }
 }
