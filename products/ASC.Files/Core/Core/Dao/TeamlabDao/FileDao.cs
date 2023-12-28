@@ -693,7 +693,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
     private async Task DeleteVersionStreamAsync(File<int> file)
     {
-        await (await _globalStore.GetStoreAsync()).DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        _tenantQuotaController.Init(tenantId, ThumbnailTitle);
+        var store = await _storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, _tenantQuotaController);
+        await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream)
