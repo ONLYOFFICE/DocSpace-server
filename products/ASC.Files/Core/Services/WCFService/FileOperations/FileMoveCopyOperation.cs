@@ -693,7 +693,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     needToMark.Add(newFile);
                                 }
 
-                                if (fileType == FileType.OForm)
+                                if (fileType == FileType.Pdf)
                                 {
                                     await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
                                     await FileDao.SaveProperties(file.Id, null);

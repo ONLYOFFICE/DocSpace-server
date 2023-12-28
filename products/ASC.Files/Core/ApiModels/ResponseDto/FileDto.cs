@@ -197,7 +197,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         var fileExst = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(fileExst);
 
-        if (fileType == FileType.OForm)
+        if (fileType == FileType.Pdf)
         {
             var linkDao = daoFactory.GetLinkDao();
             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
