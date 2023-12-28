@@ -916,9 +916,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var dataStore = await _storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, (IQuotaController)null);
+
                 foreach (var size in _thumbnailSettings.Sizes)
                 {
-                    await (await _globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                    await dataStore.CopyAsync(String.Empty,
                                          GetUniqThumbnailPath(file, size.Width, size.Height),
                                          String.Empty,
                                          GetUniqThumbnailPath(copy, size.Width, size.Height));
