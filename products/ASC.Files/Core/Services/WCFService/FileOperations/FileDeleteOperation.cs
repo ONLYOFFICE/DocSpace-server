@@ -311,7 +311,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await FileDao.MoveFileAsync(file.Id, _trashId);
+                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId));
+                    
                     if (isNeedSendActions)
                     {
                         await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
@@ -323,14 +324,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
                     }
 
-                    await socketManager.DeleteFileAsync(file);
+
                 }
                 else
                 {
                     try
                     {
-                        await FileDao.DeleteFileAsync(file.Id);
-
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id));
+                        
                         if (_headers != null)
                         {
                             if (isNeedSendActions)
@@ -342,8 +343,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         {
                             await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
                         }
-
-                        await socketManager.DeleteFileAsync(file);
                     }
                     catch (Exception ex)
                     {
