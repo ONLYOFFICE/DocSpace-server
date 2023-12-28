@@ -60,11 +60,13 @@ public class FormFillingReportCreator
             if (properties.FormFilling.ResultsFileID != null)
             {
                 var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
+                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
 
                 var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
                 await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
                 await _socketManager.DeleteFileAsync(form);
+                await _socketManager.UpdateFileAsync(sourceFile);
                 await linkDao.DeleteLinkAsync(sourceId);
 
                 return properties;

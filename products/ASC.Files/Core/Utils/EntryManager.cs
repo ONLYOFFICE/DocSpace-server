@@ -1104,6 +1104,8 @@ public class EntryManager(IDaoFactory daoFactory,
             await socketManager.CreateFileAsync(linkedFile);
 
             await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
+
+            await socketManager.UpdateFileAsync(sourceFile);
         }
 
         return (linkedFile, folderIfNew);
