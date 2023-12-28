@@ -723,7 +723,7 @@ public class TariffService : ITariffService
         }
 
         var delay = 0;
-        var setDelay = true;
+        var setDelay = !_coreBaseSettings.Standalone;
 
         if (_trialEnabled)
         {

@@ -112,7 +112,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId, archiveFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
+        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -137,7 +137,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId, archiveFolderId)
+        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId)
             .Where(p => !string.IsNullOrEmpty(p.FolderId) && (p.Owner == authContext.CurrentAccount.ID || roomsIds.Contains(p.FolderId)))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
@@ -476,7 +476,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folders.Where(x => providerKey == x.ProviderKey);
     }
 
-    private async IAsyncEnumerable<IProviderInfo> GetProvidersAsync(IEnumerable<string> parentsIds, string virtualRoomsFolderId, string archiveFolderId)
+    private async IAsyncEnumerable<IProviderInfo> GetProvidersAsync(IEnumerable<string> parentsIds, string virtualRoomsFolderId)
     {
         IAsyncEnumerable<IProviderInfo> providers;
 

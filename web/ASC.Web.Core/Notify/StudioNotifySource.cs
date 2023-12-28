@@ -92,9 +92,6 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.MailboxCreated,
                 Actions.MailboxWithoutSettingsCreated,
 
-                Actions.MailboxCreated,
-                Actions.MailboxWithoutSettingsCreated,
-
                 Actions.PersonalCustomModeAfterRegistration1,
                 Actions.PersonalCustomModeConfirmation,
                 Actions.PersonalCustomModePasswordChangeV115,

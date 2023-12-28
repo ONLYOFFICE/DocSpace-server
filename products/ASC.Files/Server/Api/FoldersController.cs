@@ -83,7 +83,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
     {
-        var (tasks, _) = await fileStorageService.DeleteFolderAsync("delete", folderId, false, inDto.DeleteAfter, inDto.Immediately);
+        var tasks = await fileStorageService.DeleteFolderAsync(folderId, false, inDto.DeleteAfter, inDto.Immediately);
 
         foreach (var e in tasks)
         {
@@ -121,7 +121,9 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
         ApplyFilterOption? applyFilterOption, string extension)
     {
-        var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, extension);
+
+        var split = extension == null ? new string[] { } : extension.Split(",");
+        var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, split);
 
         return folder.NotFoundIfNull();
     }

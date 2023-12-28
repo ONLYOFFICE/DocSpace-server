@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -38,6 +38,7 @@ public class SettingsController(MessageService messageService,
         WebItemManagerSecurity webItemManagerSecurity,
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
         TenantUtil tenantUtil,
+        CoreSettings coreSettings,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
@@ -61,10 +62,11 @@ public class SettingsController(MessageService messageService,
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        UserFormatter userFormatter)
+        UserFormatter userFormatter, 
+        IDistributedLockProvider distributedLockProvider)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
-{
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    {
+    
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -93,14 +95,15 @@ public class SettingsController(MessageService messageService,
             Personal = coreBaseSettings.Personal,
             DocSpace = !coreBaseSettings.DisableDocSpace,
             Standalone = coreBaseSettings.Standalone,
-            BaseDomain = coreBaseSettings.Basedomain,
+            BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
-            UserNameRegex = userFormatter.UserNameRegex.ToString()
+            UserNameRegex = userFormatter.UserNameRegex.ToString(),
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -113,7 +116,7 @@ public class SettingsController(MessageService messageService,
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
             var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZone;
+            settings.Timezone = timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
             settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -123,6 +126,7 @@ public class SettingsController(MessageService messageService,
             settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
             settings.DocumentationEmail = setupInfo.DocumentationEmail;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
+            settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
             settings.Firebase = new FirebaseDto
             {
@@ -158,7 +162,15 @@ public class SettingsController(MessageService messageService,
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(configuration["plugins:upload"], out var pluginsUpload))
+            {
+                settings.Plugins.Upload = pluginsUpload;
+            }
+
+            if (bool.TryParse(configuration["plugins:delete"], out var pluginsDelete))
+            {
+                settings.Plugins.Delete = pluginsDelete;
+            }
 
             var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
@@ -293,9 +305,9 @@ public class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -326,7 +338,7 @@ public class SettingsController(MessageService messageService,
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -494,9 +506,8 @@ public class SettingsController(MessageService messageService,
 
         if (inDto.Theme != null)
         {
-            try
+            await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
-                await _semaphore.WaitAsync();
                 var theme = inDto.Theme;
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
@@ -538,12 +549,7 @@ public class SettingsController(MessageService messageService,
                     }
                 }
 
-
                 await settingsManager.SaveAsync(settings);
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 
@@ -710,7 +716,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("statistics/spaceusage/{id}")]
+    [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -989,6 +995,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
+    /// <visible>false</visible>
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1004,6 +1011,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

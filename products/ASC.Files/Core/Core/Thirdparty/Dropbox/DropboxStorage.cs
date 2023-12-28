@@ -135,7 +135,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         try
         {
             var path = new PathOrLink.Path(fileId);
-            var size = Convert(width, height);
+            var size = Convert(width);
             var arg = new ThumbnailV2Arg(path, size: size);
 
             var response = await _dropboxClient.Files.GetThumbnailV2Async(arg);
@@ -147,7 +147,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-    private ThumbnailSize Convert(int width, int height)
+    private ThumbnailSize Convert(int width)
     {
         if (width > 368)
         {

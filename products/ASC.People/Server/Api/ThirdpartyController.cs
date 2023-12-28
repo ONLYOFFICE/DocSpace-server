@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -38,7 +38,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         MobileDetector mobileDetector,
         PersonalSettingsHelper personalSettingsHelper,
         ProviderManager providerManager,
-        Signature signature,
         UserHelpTourHelper userHelpTourHelper,
         UserManagerWrapper userManagerWrapper,
         UserPhotoManager userPhotoManager,
@@ -51,10 +50,11 @@ public class ThirdpartyController(AccountLinker accountLinker,
         TenantManager tenantManager,
         InvitationLinkService invitationLinkService,
         FileSecurity fileSecurity,
-        UsersInRoomChecker usersInRoomChecker)
+        UsersInRoomChecker usersInRoomChecker, 
+        IDistributedLockProvider distributedLockProvider)
     : ApiControllerBase
-{
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    {
+    
 
     /// <summary>
     /// Returns a list of the available third-party accounts.
@@ -125,7 +125,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
-        var profile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var profile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -171,7 +171,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             mustChangePassword = true;
         }
 
-        var thirdPartyProfile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var thirdPartyProfile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
             // ignore cancellation
@@ -240,11 +240,10 @@ public class ThirdpartyController(AccountLinker accountLinker,
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-
-            try
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
-                await _semaphore.WaitAsync();
                 if (success)
                 {
                     await usersInRoomChecker.CheckAppend();
@@ -255,10 +254,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
                     await usersInRoomChecker.CheckAppend();
                     await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
     }

@@ -29,14 +29,14 @@ namespace ASC.FederatedLogin.LoginProviders;
 [Scope]
 public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
 {
-    public override string AccessTokenUrl => "https://graph.facebook.com/v2.7/oauth/access_token";
+    public override string AccessTokenUrl => "https://graph.facebook.com/oauth/access_token";
     public override string RedirectUri => this["facebookRedirectUrl"];
     public override string ClientID => this["facebookClientId"];
     public override string ClientSecret => this["facebookClientSecret"];
-    public override string CodeUrl => "https://www.facebook.com/v2.7/dialog/oauth/";
+    public override string CodeUrl => "https://www.facebook.com/dialog/oauth/";
     public override string Scopes => "email,public_profile";
 
-    private const string FacebookProfileUrl = "https://graph.facebook.com/v2.7/me?fields=email,id,birthday,link,first_name,last_name,gender,timezone,locale";
+    private const string FacebookProfileUrl = "https://graph.facebook.com/me?fields=email,id,birthday,link,first_name,last_name,gender";
     
     private readonly RequestHelper _requestHelper;
     
@@ -49,11 +49,9 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -68,7 +66,7 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         return RequestProfile(accessToken);
     }
 
-    internal LoginProfile ProfileFromFacebook(string facebookProfile)
+    private LoginProfile ProfileFromFacebook(string facebookProfile)
     {
         var jProfile = JObject.Parse(facebookProfile);
         if (jProfile == null)
@@ -76,7 +74,7 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             BirthDay = jProfile.Value<string>("birthday"),
             Link = jProfile.Value<string>("link"),
@@ -85,8 +83,6 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
             Gender = jProfile.Value<string>("gender"),
             EMail = jProfile.Value<string>("email"),
             Id = jProfile.Value<string>("id"),
-            TimeZone = jProfile.Value<string>("timezone"),
-            Locale = jProfile.Value<string>("locale"),
             Provider = ProviderConstants.Facebook,
             Avatar = "http://graph.facebook.com/" + jProfile.Value<string>("id") + "/picture?type=large"
         };

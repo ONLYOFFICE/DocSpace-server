@@ -51,7 +51,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region Backup
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -60,7 +60,9 @@ public class BackupAjaxHandler(BackupService backupService,
             TenantId = await GetCurrentTenantIdAsync(),
             UserId = securityContext.CurrentAccount.ID,
             StorageType = storageType,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            Dump = dump,
+            ServerBaseUri = serverBaseUri
         };
 
         switch (storageType)
@@ -81,21 +83,21 @@ public class BackupAjaxHandler(BackupService backupService,
 
         await messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        return backupService.StartBackup(backupRequest, enqueueTask, taskId);
+        return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
         await DemandPermissionsBackupAsync();
 
-        return backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 
-        return backupService.GetBackupProgress(tenantId);
+        return await backupService.GetBackupProgress(tenantId);
     }
 
     public async Task DeleteBackupAsync(Guid id)
@@ -135,13 +137,18 @@ public class BackupAjaxHandler(BackupService backupService,
         }
     }
 
-    public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams)
+    public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams, bool dump)
     {
         await DemandPermissionsBackupAsync();
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup"))
         {
             throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
+        }
+
+        if(!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
         }
 
         ValidateCronSettings(cronParams);
@@ -152,7 +159,8 @@ public class BackupAjaxHandler(BackupService backupService,
             Cron = cronParams.ToString(),
             NumberOfBackupsStored = backupsStored,
             StorageType = storageType,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            Dump = dump
         };
 
         switch (storageType)
@@ -190,7 +198,8 @@ public class BackupAjaxHandler(BackupService backupService,
             StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
             CronParams = new CronParams(response.Cron),
             BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
-            LastBackupTime = response.LastBackupTime
+            LastBackupTime = response.LastBackupTime,
+            Dump = response.Dump
         };
 
         if (response.StorageType == BackupStorageType.CustomCloud)
@@ -217,7 +226,8 @@ public class BackupAjaxHandler(BackupService backupService,
                 Cron = schedule.CronParams.ToString(),
                 NumberOfBackupsStored = schedule.BackupsStored ?? 0,
                 StorageType = schedule.StorageType,
-                StorageParams = schedule.StorageParams
+                StorageParams = schedule.StorageParams,
+                Dump = schedule.Dump
             };
 
             await backupService.CreateScheduleAsync(Schedule);
@@ -252,7 +262,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify)
+    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = await GetCurrentTenantIdAsync();
@@ -260,7 +270,8 @@ public class BackupAjaxHandler(BackupService backupService,
         {
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))
@@ -286,7 +297,7 @@ public class BackupAjaxHandler(BackupService backupService,
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var result = backupService.GetRestoreProgress(tenant.Id);
+        var result = await backupService.GetRestoreProgress(tenant.Id);
 
         return result;
     }
@@ -331,7 +342,7 @@ public class BackupAjaxHandler(BackupService backupService,
         await DemandPermissionsTransferAsync();
 
         await messageService.SendAsync(MessageAction.StartTransferSetting);
-        backupService.StartTransfer(
+        await backupService.StartTransferAsync(
             new StartTransferRequest
             {
                 TenantId = await GetCurrentTenantIdAsync(),
@@ -343,7 +354,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     public async Task<BackupProgress> GetTransferProgressAsync()
     {
-        return backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
     }
 
     private async Task DemandPermissionsTransferAsync()
@@ -412,6 +423,7 @@ public class BackupAjaxHandler(BackupService backupService,
         /// <summary>Last backup creation time</summary>
         /// <type>System.DateTime, System</type>
         public DateTime LastBackupTime { get; set; }
+        public bool Dump { get; set; }
     }
 
     public class CronParams

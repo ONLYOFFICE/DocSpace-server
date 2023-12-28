@@ -26,25 +26,22 @@
 
 namespace ASC.Files.Thirdparty.Sharpbox;
 
-internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
+internal abstract class SharpBoxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    SetupInfo setupInfo,
+    ILogger<SharpBoxDaoBase> monitor,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>(serviceProvider,
+        userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath,
+        regexDaoSelectorBase)
 {
     internal SharpBoxProviderInfo SharpBoxProviderInfo { get; private set; }
-    protected SharpBoxDaoBase(
-        IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        ILogger<SharpBoxDaoBase> monitor,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-        _logger = monitor;
-    }
 
     public void Init(string pathPrefix, IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> providerInfo)
     {
@@ -155,7 +152,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-            var oldIds = Queries.IdsAsync(dbContext, _tenantId, oldValue);
+            var oldIds = Queries.IdsAsync(dbContext, TenantId, oldValue);
 
             await foreach (var oldId in oldIds)
             {
@@ -163,7 +160,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
                 {
@@ -175,7 +172,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                 dbContext.RemoveRange(mappingForDelete);
                 await dbContext.AddRangeAsync(mappingForInsert);
 
-                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
                 {
@@ -191,7 +188,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                 dbContext.RemoveRange(securityForDelete);
                 await dbContext.AddRangeAsync(securityForInsert);
 
-                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
                 {
@@ -208,7 +205,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                 await dbContext.AddRangeAsync(linkForInsert);
 
 
-                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var filesSourceForInsert = filesSourceForDelete.Select(l => new DbFilesLink
                 {
@@ -221,7 +218,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                 dbContext.RemoveRange(filesSourceForDelete);
                 await dbContext.AddRangeAsync(filesSourceForInsert);
 
-                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var filesLinkedForInsert = filesLinkedForDelete.Select(l => new DbFilesLink
                 {
@@ -269,7 +266,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
             }
             catch (Exception ex)
             {
-                _logger.ErrorSharpboxMakeId(ex);
+                monitor.ErrorSharpboxMakeId(ex);
             }
         }
         else if (entry != null)
@@ -432,7 +429,6 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
     }
 
     private string _rootFolderId;
-    private readonly ILogger<SharpBoxDaoBase> _logger;
 
     protected string RootFolderMakeId()
     {

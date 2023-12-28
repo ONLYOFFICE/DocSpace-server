@@ -29,22 +29,20 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
-internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObject>
+internal class SharePointDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
 {
     internal SharePointProviderInfo SharePointProviderInfo { get; private set; }
-
-    public SharePointDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext, 
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<File, Folder, ClientObject> providerInfo)
     {
@@ -134,7 +132,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
 
-            var oldIds = Queries.IdsAsync(dbContext, _tenantId, oldValue);
+            var oldIds = Queries.IdsAsync(dbContext, TenantId, oldValue);
 
             await foreach (var oldId in oldIds)
             {
@@ -142,7 +140,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, TenantId, oldHashId).ToListAsync();
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
                 {
                     TenantId = m.TenantId,
@@ -154,7 +152,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
                 await dbContext.AddRangeAsync(mappingForInsert);
 
                 var securityForDelete =
-                    await Queries.DbFilesSecuritiesAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                    await Queries.DbFilesSecuritiesAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
                 {
@@ -171,7 +169,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
                 await dbContext.AddRangeAsync(securityForInsert);
 
                 var linkForDelete =
-                    await Queries.DbFilesTagLinksAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+                    await Queries.DbFilesTagLinksAsync(dbContext, TenantId, oldHashId).ToListAsync();
 
                 var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
                 {

@@ -34,15 +34,20 @@ public class Startup : BaseStartup
         : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {

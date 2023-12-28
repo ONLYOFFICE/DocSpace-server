@@ -54,7 +54,8 @@ public class BackupRestoreRequestedIntegrationEventHandler(
             await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
                                             @event.StorageType,
                                             @event.StorageParams,
-                                            @event.Notify);
+                                            @event.Notify,
+                                            @event.ServerBaseUri);
 
             await Task.CompletedTask;
         }

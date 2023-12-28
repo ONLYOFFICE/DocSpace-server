@@ -182,7 +182,7 @@ public class AuthenticationController(UserManager userManager,
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser))
+        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
@@ -462,7 +462,7 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile) : 
+                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;

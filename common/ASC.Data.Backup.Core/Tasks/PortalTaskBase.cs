@@ -71,7 +71,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     public abstract Task RunJob();
 
-    internal virtual IEnumerable<IModuleSpecifics> GetModulesToProcess()
+    internal IEnumerable<IModuleSpecifics> GetModulesToProcess()
     {
         return ModuleProvider.AllModules.Where(module => !_ignoredModules.Contains(module.ModuleName));
     }
@@ -118,7 +118,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "whitelabel",
                     "customnavigation",
                     "userPhotos",
-                    "room_logos"
+                    "room_logos",
+                    "webplugins"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))
@@ -188,14 +189,14 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
-    protected virtual void OnProgressChanged(ProgressChangedEventArgs eventArgs)
+    protected void OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
         ProgressChanged?.Invoke(this, eventArgs);
     }
 
     #endregion
 
-    protected Dictionary<string, string> ParseConnectionString(string connectionString)
+    private Dictionary<string, string> ParseConnectionString(string connectionString)
     {
         var result = new Dictionary<string, string>();
 

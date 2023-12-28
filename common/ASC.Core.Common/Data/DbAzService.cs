@@ -51,9 +51,8 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         foreach (var a in tenantAces)
         {
             var key = string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object);
-            if (commonAces.TryGetValue(key, out var common))
+            if (commonAces.Remove(key, out var common))
             {
-                commonAces.Remove(key);
                 if (common.AceType == a.AceType)
                 {
                     tenantAces.Remove(a);

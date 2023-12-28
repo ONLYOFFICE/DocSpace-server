@@ -271,7 +271,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                         ChangeHistory = rightChangeHistory,
                         ModifyFilter = rightModifyFilter,
                         Print = rightToDownload,
-                        Download = rightToDownload
+                        Download = rightToDownload,
+                        Copy = rightToDownload
                     },
                     Options = options,
             },
@@ -299,7 +300,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return (file, configuration, locatedInPrivateRoom);
         }
 
-        configuration.Document.SharedLinkParam = FilesLinkUtility.FolderShareKey;
+        configuration.Document.SharedLinkParam = FilesLinkUtility.ShareKey;
         configuration.Document.SharedLinkKey = externalShare.GetKey();
 
         return (file, configuration, locatedInPrivateRoom);
