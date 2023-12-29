@@ -42,7 +42,7 @@ module.exports = async (io) => {
         { 
           await client.set(`rooms-${_roomId}-${userId}`, JSON.stringify(status));
         }
-        onlineIO.to(_roomId).emit("s:leave-in-room", { roomPart, userId });
+        onlineIO.to(_roomId).emit("s:leave-in-room", { userId });
       });
   
       socket.on("enter", async ({ roomPart }) => {
@@ -59,7 +59,7 @@ module.exports = async (io) => {
         }
         await client.set(`rooms-${roomId}-${userId}`, JSON.stringify(user));
         _roomId = roomId
-        onlineIO.to(roomId).emit("enter-in-room", { roomPart, userId });
+        onlineIO.to(roomId).emit("enter-in-room", { userId });
       });
 
       socket.on("leave", async ({ roomPart }) => {
@@ -84,7 +84,7 @@ module.exports = async (io) => {
           await client.set(`rooms-${tenantId}-${roomId}-${userId}`, JSON.stringify(status));
         }
         _roomId = undefined;
-        onlineIO.to(roomId).emit("leave-in-room", { roomPart, userId });
+        onlineIO.to(roomId).emit("leave-in-room", { userId });
       });
 
       socket.on("subscribe", ({ roomPart }) => {
