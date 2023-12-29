@@ -3,7 +3,7 @@ const config = require("../../config");
 
 module.exports = async (io) => {
     const logger = require("../log.js");
-    const onlineIO = io;
+    const onlineIO = io.of("/onlineusers");;
 
     const client = await redis.createClient(config).connect();
 
