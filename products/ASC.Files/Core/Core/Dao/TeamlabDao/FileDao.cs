@@ -654,7 +654,10 @@ internal class FileDao(
 
     private async Task DeleteVersionStreamAsync(File<int> file)
     {
-        await (await globalStore.GetStoreAsync()).DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        tenantQuotaController.Init(tenantId, ThumbnailTitle);
+        var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+        await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream)
@@ -883,9 +886,12 @@ internal class FileDao(
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var dataStore = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, (IQuotaController)null);
+
                 foreach (var size in thumbnailSettings.Sizes)
                 {
-                    await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                    await dataStore.CopyAsync(String.Empty,
                                          GetUniqThumbnailPath(file, size.Width, size.Height),
                                          String.Empty,
                                          GetUniqThumbnailPath(copy, size.Width, size.Height));

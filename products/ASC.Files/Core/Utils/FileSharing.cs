@@ -45,7 +45,8 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
         CountPaidUserChecker countPaidUserChecker,
         IUrlShortener urlShortener, 
         IDistributedLockProvider distributedLockProvider,
-        TenantManager tenantManager)
+        TenantManager tenantManager,
+        SocketManager socketManager)
     {
     
 
@@ -229,6 +230,18 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
             }
 
             await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            if (room != null)
+            {
+                if (share == FileShare.None)
+                {
+                    await socketManager.DeleteFolder(room, new [] { w.Id });
+                }
+                else if(existedShare == null)
+                {
+                    await socketManager.CreateFolderAsync(room, new [] { w.Id });
+                }
+            }
+
             changed = true;
             handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
 
