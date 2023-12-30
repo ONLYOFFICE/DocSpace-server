@@ -3,7 +3,7 @@ const config = require("../../config");
 
 module.exports = async (io) => {
     const logger = require("../log.js");
-    const onlineIO = io.of("/onlineusers");;
+    const onlineIO = io.of("/onlineusers");
 
     const client = await redis.createClient(config).connect();
 
@@ -23,7 +23,7 @@ module.exports = async (io) => {
         if(!_roomId){
           return;
         }
-        var status = await client.get(`rooms-${tenantId}-${_roomId}-${userId}`);
+        var status = await client.get(`rooms-${_roomId}-${userId}`);
         if (!status) 
         {
           status = {statuses: {}, count: 1};
@@ -62,26 +62,71 @@ module.exports = async (io) => {
         onlineIO.to(roomId).emit("enter-in-room", { userId });
       });
 
+      socket.on("addStatus", async ({ roomPart, status }) => {
+        const roomId = getRoom(roomPart);
+        var user = await client.get(`rooms-${roomId}-${userId}`);
+        if (!user) 
+        {
+          return;
+        }
+        
+        user = JSON.parse(user);
+        user.statuses.push(status); 
+        await client.set(`rooms-${roomId}-${userId}`, JSON.stringify(user));
+        onlineIO.to(roomId).emit("user-status", { userId, status });
+      });
+
+      socket.on("removeStatus", async ({ roomPart, status }) => {
+        const roomId = getRoom(roomPart);
+        var user = await client.get(`rooms-${roomId}-${userId}`);
+        if (!user) 
+        {
+          return;
+        }
+        
+        user = JSON.parse(user);
+        
+        const start = user.statuses.indexOf(status);
+        if(start > 0)
+        {
+          user.statuses.splice(start, 1);
+          await client.set(`rooms-${roomId}-${userId}`, JSON.stringify(user));
+
+          var newStatus = user.statuses.pop();
+          onlineIO.to(roomId).emit("user-status", { userId, newStatus });
+        }
+      });
+
+      socket.on("getStatuses", async ({ roomPart, userIds }) => {
+        const roomId = getRoom(roomPart);
+        var users = [];
+        for (const userId of userIds) {
+          var user = await client.get(`rooms-${roomId}-${userId}`);
+          users.push({userIds, status: user.status.pop()});
+        }
+        onlineIO.emit("statuses", { users });
+      });
+
       socket.on("leave", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
-        var status = await client.get(`rooms-${tenantId}-${roomId}-${userId}`);
-        if (!status) 
+        var user = await client.get(`rooms-${roomId}-${userId}`);
+        if (!user) 
         {
-          status = {statuses: {}, count: 1};
+          user = {statuses: {}, count: 1};
         }
         else
         {
-          status = JSON.parse(status); 
-          status.count--;
+          user = JSON.parse(user); 
+          user.count--;
         }
         
-        if(status.count <= 0)
+        if(user.count <= 0)
         {
-          await client.del(`rooms-${tenantId}-${roomId}-${userId}`);
+          await client.del(`rooms-${roomId}-${userId}`);
         }
         else
         { 
-          await client.set(`rooms-${tenantId}-${roomId}-${userId}`, JSON.stringify(status));
+          await client.set(`rooms-${roomId}-${userId}`, JSON.stringify(user));
         }
         _roomId = undefined;
         onlineIO.to(roomId).emit("leave-in-room", { userId });
