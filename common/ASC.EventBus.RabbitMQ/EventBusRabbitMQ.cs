@@ -305,11 +305,6 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             _logger.ErrorProcessingMessage(message, ex);
         }
-
-        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
-        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
-        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
-
     }
 
     private IModel CreateConsumerChannel()
