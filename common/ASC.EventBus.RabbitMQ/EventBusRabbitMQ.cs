@@ -305,6 +305,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             _logger.ErrorProcessingMessage(message, ex);
         }
+
+        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+
     }
 
     private IModel CreateConsumerChannel()
@@ -342,18 +347,35 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += (_, ea) =>
-        {
-            _logger.WarningRecreatingConsumerChannel(ea.Exception);
-
-            _consumerChannel.Dispose();
-            _consumerChannel = CreateConsumerChannel();
-            _consumerTag = String.Empty;
-
-            StartBasicConsume();
-        };
-
+        channel.CallbackException += RecreateChannel;
+       
         return channel;
+    }
+
+
+    private async void RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    {
+        _logger.WarningRecreatingConsumerChannel(e.Exception);
+
+        _consumerChannel.Dispose();
+
+        while (!_consumerChannel.IsOpen)
+        {
+            try
+            {
+                await Task.Run(() => { 
+                    _consumerChannel = CreateConsumerChannel();
+                    _consumerTag = String.Empty;
+
+                    StartBasicConsume();
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.ErrorCreatingConsumerChannel(exception);
+            }
+        }
+        _logger.InfoCreatedConsumerChannel();
     }
 
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
