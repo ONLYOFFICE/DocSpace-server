@@ -39,8 +39,6 @@ public class Startup : BaseWorkerStartup
     {
         await base.ConfigureServices(services);
 
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
-
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 
         DIHelper.TryAdd<NotifySenderService>();

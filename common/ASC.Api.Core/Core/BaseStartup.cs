@@ -40,13 +40,9 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
-
-    protected bool AddControllersAsServices { get; }
-    protected virtual bool ConfirmAddScheme { get; }
+    
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
-    protected bool LoadProducts { get; set; } = true;
-    protected bool LoadConsumers { get; } = true;
     protected bool WebhooksEnabled { get; init; }
 
     protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
@@ -57,11 +53,6 @@ public abstract class BaseStartup
         _corsOrigin = _configuration["core:cors"];
 
         DIHelper = new DIHelper();
-
-        if (bool.TryParse(_configuration["core:products"], out var loadProducts))
-        {
-            LoadProducts = loadProducts;
-        }
     }
 
     public virtual async Task ConfigureServices(IServiceCollection services)
@@ -278,11 +269,6 @@ public abstract class BaseStartup
 
         DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
-        if (LoadProducts)
-        {
-            DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
-        }
-
         services.AddOptions();
 
         services.AddMvcCore(config =>
@@ -461,7 +447,7 @@ public abstract class BaseStartup
 
     public void ConfigureContainer(ContainerBuilder builder)
     {
-        builder.Register(_configuration, LoadProducts, LoadConsumers);
+        builder.Register(_configuration);
     }
 }
 

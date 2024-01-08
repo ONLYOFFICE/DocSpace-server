@@ -42,8 +42,6 @@ public class Startup : BaseWorkerStartup
         await base.ConfigureServices(services);
         services.AddHttpClient();
 
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
-
         if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
             disableElastic = false;
