@@ -56,7 +56,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         }
         
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        folder.Shared = await Queries.SharedAsync(filesDbContext, _tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+        folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
         return folder;
     }
