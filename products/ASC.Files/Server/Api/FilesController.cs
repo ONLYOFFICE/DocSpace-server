@@ -445,10 +445,27 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         return fileStorageService.SetFileProperties(fileId, mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
     }
+    
+    /// <summary>
+    /// Returns the primary external link with the identifier specified in the request.
+    /// </summary>
+    /// <short>Returns primary external link</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("file/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
+        
+        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
 
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(T fileId, OrderRequestDto inDto)
-{
+    {
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
     
@@ -493,23 +510,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate ?? default);
-        
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
-    }
-    
-    /// <summary>
-    /// Returns the primary external link with the identifier specified in the request.
-    /// </summary>
-    /// <short>Returns primary external link</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
-    /// <path>api/2.0/files/file/{id}/link</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/{id}/link")]
-    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
-    {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
         
         return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
     }

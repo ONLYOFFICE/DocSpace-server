@@ -377,10 +377,10 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+                await Queries.DeleteTagLinksAsync(dbContext, TenantId, id);
                 await Queries.DeleteTagsAsync(dbContext);
-                await Queries.DeleteSecuritiesAsync(dbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
+                await Queries.DeleteSecuritiesAsync(dbContext, TenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, TenantId, id);
                 await tx.CommitAsync();
         });
 

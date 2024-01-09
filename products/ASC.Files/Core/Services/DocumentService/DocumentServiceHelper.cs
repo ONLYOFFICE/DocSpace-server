@@ -267,7 +267,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                         ChangeHistory = rightChangeHistory,
                         ModifyFilter = rightModifyFilter,
                         Print = rightToDownload,
-                        Download = rightToDownload
+                        Download = rightToDownload,
+                        Copy = rightToDownload
                     }
                 },
             EditorConfig =

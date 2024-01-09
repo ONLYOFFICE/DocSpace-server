@@ -31,6 +31,10 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

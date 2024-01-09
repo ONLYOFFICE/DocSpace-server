@@ -41,7 +41,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
     internal IDaoBase<TFile, TFolder, TItem> Dao { get; } = dao;
     internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
 
-    private readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
+    private int TenantId =>  tenantManager.GetCurrentTenant().Id;
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
     {
@@ -371,10 +371,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         {
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+            await Queries.DeleteTagLinksAsync(dbContext, TenantId, id);
             await Queries.DeleteTagsAsync(dbContext);
-            await Queries.DeleteFilesSecuritiesAsync(dbContext, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
+            await Queries.DeleteFilesSecuritiesAsync(dbContext, TenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, TenantId, id);
 
             await tx.CommitAsync();
         });

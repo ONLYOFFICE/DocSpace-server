@@ -28,14 +28,16 @@ namespace ASC.Web.Files.Utils;
 
 public class SocketManager(ILogger<SocketServiceClient> logger,
         IHttpClientFactory clientFactory,
-        MachinePseudoKeys mashinePseudoKeys,
+        MachinePseudoKeys machinePseudoKeys,
         IConfiguration configuration,
         FileDtoHelper filesWrapperHelper,
         TenantManager tenantManager,
-        FolderDtoHelper folderDtoHelper)
-    : SocketServiceClient(logger, clientFactory, mashinePseudoKeys, configuration)
-    {
-    public override string Hub => "files";
+        FolderDtoHelper folderDtoHelper,
+        FileSecurity fileSecurity,
+        UserManager userManager)
+    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+{
+    protected override string Hub => "files";
 
     public async Task StartEditAsync<T>(T fileId)
     {
@@ -51,52 +53,32 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     public async Task CreateFileAsync<T>(File<T> file)
     {
-        var room = await GetFolderRoomAsync(file.ParentId);
-
-        var data = await SerializeFile(file);
-
-        await MakeRequest("create-file", new { room, fileId = file.Id, data });
+        await MakeRequest("create-file", file, true);
     }
 
-    public async Task CreateFolderAsync<T>(Folder<T> folder)
+    public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        var room = await GetFolderRoomAsync(folder.ParentId);
-
-        var data = await SerializeFolder(folder);
-
-        await MakeRequest("create-folder", new { room, folderId = folder.Id, data });
+        await MakeRequest("create-folder", folder, true, users);
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
     {
-        var room = await GetFolderRoomAsync(file.ParentId);
-
-        var data = await SerializeFile(file);
-
-        await MakeRequest("update-file", new { room, fileId = file.Id, data });
+        await MakeRequest("update-file", file, true);
     }
 
     public async Task UpdateFolderAsync<T>(Folder<T> folder)
     {
-        var room = await GetFolderRoomAsync(folder.ParentId);
-
-        var data = await SerializeFolder(folder);
-
-        await MakeRequest("update-folder", new { room, folderId = folder.Id, data });
+        await MakeRequest("update-folder", folder, true);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
     {
-        var room = await GetFolderRoomAsync(file.ParentId);
-
-        await MakeRequest("delete-file", new { room, fileId = file.Id });
+        await MakeRequest("delete-file", file, action: action);
     }
 
-    public async Task DeleteFolder<T>(Folder<T> folder)
+    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
-        var room = await GetFolderRoomAsync(folder.ParentId);
-
-        await MakeRequest("delete-folder", new { room, folderId = folder.Id });
+        await MakeRequest("delete-folder", folder, users: users, action: action);
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
@@ -109,7 +91,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             result.Add(new { room, fileId = g.Key });
         }
         
-        SendNotAwaitableRequest("markasnew-file", result);
+        SendNotAwaitableRequest("mark-as-new-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
@@ -127,7 +109,36 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
                 });
         }
         
-        SendNotAwaitableRequest("markasnew-folder", result);
+        SendNotAwaitableRequest("mark-as-new-folder", result);
+    }
+
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
+    {        
+        var room = await GetFolderRoomAsync(entry.ParentId);
+        var whoCanRead = users ?? await GetWhoCanRead(entry);
+
+        if (action != null)
+        {
+            await action();
+        }
+        
+        var data = "";
+
+        if (withData)
+        {
+            data = await Serialize(entry);
+        }
+        
+        foreach (var userIds in whoCanRead.Chunk(1000))
+        {             
+            await base.MakeRequest(method, new
+            {
+                room, 
+                entry.Id,
+                data,
+                userIds,
+            });
+        }
     }
 
     private async Task<string> GetFileRoomAsync<T>(T fileId)
@@ -144,13 +155,41 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         return $"{tenantId}-DIR-{folderId}";
     }
 
-    private async Task<string> SerializeFile<T>(File<T> file)
+    private async Task<string> Serialize<T>(FileEntry<T> entry)
     {
-        return JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default);
+        return entry switch
+        {
+            File<T> file => JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
+            Folder<T> folder => JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            _ => string.Empty
+        };
     }
 
-    private async Task<string> SerializeFolder<T>(Folder<T> folder)
+    private List<Guid> _admins;
+    private async Task<IEnumerable<Guid>> GetAdmins()
     {
-        return JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default);
+        if (_admins != null)
+        {
+            return _admins;
+        }
+
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+            .Select(r=> r.Id)
+            .ToListAsync();
+        
+        _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+
+        return _admins;
+}
+    
+    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
+        var userIds = whoCanRead
+            .Concat(await GetAdmins())
+            .Distinct()
+            .ToList();
+
+        return userIds;
     }
 }

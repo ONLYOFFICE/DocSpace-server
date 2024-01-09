@@ -602,6 +602,7 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
+    public bool Copy { get; set; } = true;
 }
 
 /// <summary>

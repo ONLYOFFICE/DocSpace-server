@@ -2550,6 +2550,24 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (entry.FileEntryType == FileEntryType.File && entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).
+                FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+                .FirstOrDefaultAsync();
+            if (parentLink == null)
+            {
+                return null;
+            }
+            
+            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id);
+            parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
+
+            return parentLink;
+        }
+
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, 0, 1)
             .FirstOrDefaultAsync();
 
@@ -2589,10 +2607,10 @@ public class FileStorageService //: IFileStorageService
                 if (!result.Changed)
                 {
                         continue;
-                    }
+                }
 
                 foreach (var (eventType, ace) in result.HandledAces)
-                    {
+                {
                     if (ace.IsLink)
                     {
                         continue;
@@ -2605,32 +2623,31 @@ public class FileStorageService //: IFileStorageService
                     var name = user.DisplayUserName(false, displayUserSettingsHelper);
 
                     if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                        switch (eventType)
                     {
-                                case EventType.Create:
-                                await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name, 
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
-                                    break;
-                                case EventType.Remove:
-                                await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name, 
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
-                                    break;
-                                case EventType.Update:
-                                await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, name,
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
-                                    break;
-                            }
-                        }
-                        else
+                        switch (eventType)
                         {
-
+                            case EventType.Create:
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name, 
+                                FileShareExtensions.GetAccessString(ace.Access, true));
+                                break;
+                            case EventType.Remove:
+                            await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name, 
+                                FileShareExtensions.GetAccessString(ace.Access, true));
+                                break;
+                            case EventType.Update:
+                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, name,
+                                FileShareExtensions.GetAccessString(ace.Access, true));
+                                break;
+                        }
+                    }
+                    else
+                    {
                         await filesMessageService.SendAsync(
                             entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor,entry,
                             entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
-                        }
                     }
                 }
+            }
             catch (Exception e)
             {
                 throw GenerateException(e);

@@ -57,8 +57,8 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "StartBasicConsume can't call on _consumerChannel == null")]
     public static partial void ErrorStartBasicConsumeCantCall(this ILogger<EventBusRabbitMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "----- ERROR Processing message \"{message}\"")]
-    public static partial void WarningProcessingMessage(this ILogger<EventBusRabbitMQ> logger, string message, Exception exception);
+    [LoggerMessage(Level = LogLevel.Error, Message = "----- ERROR Processing message \"{message}\"")]
+    public static partial void ErrorProcessingMessage(this ILogger<EventBusRabbitMQ> logger, string message, Exception exception);
 
     [LoggerMessage(Level = LogLevel.Trace, Message = "Creating RabbitMQ consumer channel")]
     public static partial void TraceCreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
@@ -72,9 +72,15 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(Level = LogLevel.Warning, Message = "No subscription for RabbitMQ event: {eventName}")]
     public static partial void WarningNoSubscription(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Reject RabbitMQ event: {eventName}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: Before reject event: {eventName}.  Message {message}")]
+    public static partial void DebugBeforeRejectEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, string message);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: Before nack event: {eventName}. Message {message}")]
+    public static partial void DebugBeforeNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, string message);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: reject event: {eventName}")]
     public static partial void DebugRejectEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Nack RabbitMQ event: {eventName}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: nack event: {eventName}")]
     public static partial void DebugNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 }
