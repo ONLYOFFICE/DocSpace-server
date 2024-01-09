@@ -45,6 +45,10 @@ public class Startup
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
         _standalone = _configuration["core:base-domain"] == "localhost";
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public async Task ConfigureServices(IServiceCollection services)

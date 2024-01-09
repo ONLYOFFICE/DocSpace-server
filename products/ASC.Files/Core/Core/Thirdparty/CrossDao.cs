@@ -191,8 +191,7 @@ internal class CrossDao //Additional SharpBox
             {
                 var id = fromConverter(fromFolderId);
                 var folder = await fromFolderDao.GetFolderAsync(id);
-                await fromFolderDao.DeleteFolderAsync(id);
-                await socketManager.DeleteFolder(folder);
+                await socketManager.DeleteFolder(folder, action: async () => await fromFolderDao.DeleteFolderAsync(id));
             }
         }
 

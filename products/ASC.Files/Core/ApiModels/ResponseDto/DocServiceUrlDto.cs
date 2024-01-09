@@ -24,33 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Studio.IntegrationEvents;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-namespace ASC.Studio.Notify;
-
-public class Startup : BaseWorkerStartup
-{
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }        
-    }
-
-    public override async Task ConfigureServices(IServiceCollection services)
-    {
-        await base.ConfigureServices(services);
-
-        services.AddHttpClient();
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
-        services.AddHostedService<ServiceLauncher>();
-        DIHelper.TryAdd<ServiceLauncher>();
-        NotifyConfigurationExtension.Register(DIHelper);
-        DIHelper.TryAdd<EmailSenderSink>();
-        DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
-    }
+public class DocServiceUrlDto
+{   
+    /// <type>System.String, System</type>
+    public required string Version { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrlApi { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrl { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrlInternal { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServicePortalUrl { get; set; }
+    
+    /// <type>System.Boolean, System</type>
+    public required bool IsDefault { get; set; }
 }

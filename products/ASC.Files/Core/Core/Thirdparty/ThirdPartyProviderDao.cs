@@ -414,7 +414,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
     where TFolder : class, TItem
     where TItem : class
 {
-    protected readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
+    protected int TenantId => tenantManager.GetCurrentTenant().Id;
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly UserManager _userManager = userManager;
     protected readonly TenantUtil _tenantUtil = tenantUtil;
@@ -452,7 +452,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             {
                 Id = id,
                 HashId = result,
-                TenantId = _tenantId
+                TenantId = TenantId
             };
 
             await filesDbContext.ThirdpartyIdMapping.AddAsync(newMapping);

@@ -148,7 +148,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FileSharingHelper fileSharingHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime, 
+        ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
@@ -214,9 +215,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            result.ViewUrl = commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
+            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
 
-            result.WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version));
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)));
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -224,7 +225,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}";
+                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"); 
             }
         }
         catch (Exception)
