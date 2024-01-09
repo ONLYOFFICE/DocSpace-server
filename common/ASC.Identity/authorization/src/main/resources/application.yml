@@ -1,30 +1,125 @@
 application:
   instance:
     issuer: ${ISSUER_ADDRESS:http://127.0.0.1:8080}
+management:
+  endpoint:
+    env:
+      post:
+        enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
+resilience4j:
+  bulkhead:
+    instances:
+      asc:
+        maxConcurrentCalls: 100
+        maxWaitDuration: 400ms
+  circuitbreaker:
+    instances:
+      asc:
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+        waitDurationInOpenState: 5s
 server:
-  shutdown: graceful
   host: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
   servlet:
     session:
       tracking-modes: cookie
+  shutdown: graceful
 spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 1m
   application:
     name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
-  profiles:
-    active: ${PROFILE:dev}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
+    loadbalancer:
+      ribbon:
+        enable: false
+    messaging:
+      rabbitmq:
+        queues:
+          authorization:
+            deadExchange: asc_identity_authorization_dlx
+            deadQueue: asc_identity_authorization_dlq
+            deadRouting: asc_identity_authorization_dlr
+            exchange: asc_identity_authorization_exchange
+            queue: asc_identity_authorization_queue
+            routing: asc_identity_authorization_routing
+          consent:
+            deadExchange: asc_identity_consent_dlx
+            deadQueue: asc_identity_consent_dlq
+            deadRouting: asc_identity_consent_dlr
+            exchange: asc_identity_consent_exchange
+            queue: asc_identity_consent_queue
+            routing: asc_identity_consent_routing
+    openfeign:
+      circuitbreaker:
+        alphanumeric-ids: true
+        enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 1500
+            readTimeout: 3000
+    ratelimiter:
+      redis:
+        addresses: ${REDIS_ADDRESSES:localhost:6379}
+        limiters:
+          - limit: 5
+            name: identityAuthorizationRateLimiter
+            refresh: 1
+        settings:
+          forceSSL: true
+          password: ''
+          username: ''
   datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: ${JDBC_PASSWORD:dev}
     url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
     username: ${JDBC_USER_NAME:dev}
-    password: ${JDBC_PASSWORD:dev}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          time_zone: UTC
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
+  profiles:
+    active: ${PROFILE:dev}
   rabbitmq:
     host: ${RABBIT_HOST:localhost}
-    port: ${RABBIT_PORT:5672}
-    username: ${RABBIT_USER_NAME:guest}
-    password: ${RABBIT_PASSWORD:guest}
     listener:
       simple:
         retry:
@@ -32,113 +127,27 @@ spring:
           initial-interval: 1000
           max-attempts: 3
           max-interval: 3000
-          multiplier: 3.0
+          multiplier: 3
+    password: ${RABBIT_PASSWORD:guest}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER_NAME:guest}
   security:
     oauth2:
       registeredClient:
         accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
-        refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
         authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
-  cloud:
-    messaging:
-      rabbitmq:
-        queues:
-          authorization:
-            exchange: asc_identity_authorization_exchange
-            queue: asc_identity_authorization_queue
-            routing: asc_identity_authorization_routing
-            deadExchange: asc_identity_authorization_dlx
-            deadQueue: asc_identity_authorization_dlq
-            deadRouting: asc_identity_authorization_dlr
-          consent:
-            exchange: asc_identity_consent_exchange
-            queue: asc_identity_consent_queue
-            routing: asc_identity_consent_routing
-            deadExchange: asc_identity_consent_dlx
-            deadQueue: asc_identity_consent_dlq
-            deadRouting: asc_identity_consent_dlr
-    loadbalancer:
-      ribbon:
-        enable: false
-    ratelimiter:
-      redis:
-        addresses: ${REDIS_ADDRESSES:localhost:6379}
-        settings:
-          forceSSL: true
-          username: ""
-          password: ""
-        limiters:
-          - name: "identityAuthorizationRateLimiter"
-            limit: 5
-            refresh: 1
-    openfeign:
-      circuitbreaker:
-        enabled: true
-        alphanumeric-ids: true
-      client:
-        config:
-          default:
-            connectTimeout: 1500
-            readTimeout: 3000
-    config:
-      enabled: false
-    discovery:
-      client:
-        composite-indicator:
-          enabled: false
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          time_zone: UTC
-        dialect: org.hibernate.dialect.MySQLDialect
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      asc:
-        registerHealthIndicator: true
-        eventConsumerBufferSize: 10
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
-  bulkhead:
-    instances:
-      asc:
-        maxConcurrentCalls: 100
-        maxWaitDuration: 400ms
-
-management:
-  health:
-    livenessState:
-      enabled: true
-    readinessState:
-      enabled: true
-    diskspace:
-      enabled: false
-    refresh:
-      enabled: false
-  endpoints:
-    web:
-      base-path:
-      path-mapping:
-        health: /health
-      exposure:
-        include: 'health'
-  endpoint:
-    health:
-      probes:
-        enabled: true
-      show-details: 'always'
-    env:
-      post:
-        enabled: true
+        refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
 
 ---
+logging:
+  level:
+    com:
+      onlyoffice: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
 spring:
   config:
     activate:
@@ -146,12 +155,3 @@ spring:
         - development
         - dev
         - d
-logging:
-  level:
-    root: INFO
-    com:
-      onlyoffice: DEBUG
-    org:
-      hibernate:
-        stat: DEBUG
-        SQL: DEBUG
