@@ -66,8 +66,8 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
      * @param secret
      * @param modifiedOn
      */
-    @Query("UPDATE Client c SET c.clientSecret=:secret, c.modifiedOn=:modifiedOn WHERE c.clientId=:clientId AND c.tenant=:tenant")
     @Modifying
+    @Query("UPDATE Client c SET c.clientSecret=:secret, c.modifiedOn=:modifiedOn WHERE c.clientId=:clientId AND c.tenant=:tenant")
     void regenerateClientSecretByClientId(@Param("clientId") String clientId,
                                           @Param("tenant") int tenant,
                                           @Param("secret") String secret,
@@ -79,8 +79,8 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
      * @param enabled
      * @param modifiedOn
      */
-    @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId=:clientId")
     @Modifying
+    @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId=:clientId")
     void changeActivation(@Param("clientId") String clientId,
                           @Param(value = "enabled") boolean enabled,
                           @Param(value = "modifiedOn") ZonedDateTime modifiedOn);
