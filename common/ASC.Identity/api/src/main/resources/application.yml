@@ -1,189 +1,103 @@
-server:
-  shutdown: graceful
-  socket:
-    host: ${SOCKET_SERVER_HOST:127.0.0.1}
-    port: ${SOCKET_SERVER_PORT:8585}
-  host: ${SERVER_HOST:127.0.0.1}
-  port: ${SERVER_PORT:9090}
-  error:
-    include-message: always
-    include-exception: false
-    whitelabel:
-      enabled: false
-
 application:
+  scopes:
+    - group: accounts
+      name: accounts:read
+      type: read
+    - group: accounts
+      name: accounts:write
+      type: write
+    - group: rooms
+      name: rooms:read
+      type: read
+    - group: rooms
+      name: rooms:write
+      type: write
+    - group: profiles
+      name: accounts.self:read
+      type: read
+    - group: profiles
+      name: accounts.self:write
+      type: write
+    - group: files
+      name: files:read
+      type: read
+    - group: files
+      name: files:write
+      type: write
+    - group: openid
+      name: openid
+      type: openid
   security:
     cipherSecret: ${CIPHER_SECRET:secret}
-  scopes:
-    -
-      name: accounts:read
-      group: accounts
-      type: read
-    -
-      name: accounts:write
-      group: accounts
-      type: write
-    -
-      name: rooms:read
-      group: rooms
-      type: read
-    -
-      name: rooms:write
-      group: rooms
-      type: write
-    -
-      name: accounts.self:read
-      group: profiles
-      type: read
-    -
-      name: accounts.self:write
-      group: profiles
-      type: write
-    -
-      name: files:read
-      group: files
-      type: read
-    -
-      name: files:write
-      group: files
-      type: write
-    -
-      name: openid
-      group: openid
-      type: openid
-
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 1m
-  cloud:
-    loadbalancer:
-      ribbon:
-        enable: false
-    ratelimiter:
-      redis:
-        addresses: ${REDIS_ADDRESSES:localhost:6379}
-        settings:
-          forceSSL: true
-          username: ""
-          password: ""
-        limiters:
-          - name: "identityFetchClient"
-            limit: 5
-            refresh: 1
-          - name: "identityMutateClient"
-            limit: 2
-            refresh: 1
-          - name: "identityFetchScope"
-            limit: 5
-            refresh: 1
-    messaging:
-      rabbitmq:
-        queues:
-          audit:
-            exchange: asc_identity_audit_exchange
-            queue: asc_identity_audit_queue
-            routing: asc_identity_audit_routing
-            deadExchange: asc_identity_audit_dlx
-            deadQueue: asc_identity_audit_dlq
-            deadRouting: asc_identity_audit_dlr
-          authorization:
-            exchange: asc_identity_authorization_exchange
-            queue: asc_identity_authorization_queue
-            routing: asc_identity_authorization_routing
-            deadExchange: asc_identity_authorization_dlx
-            deadQueue: asc_identity_authorization_dlq
-            deadRouting: asc_identity_authorization_dlr
-          client:
-            exchange: asc_identity_client_exchange
-            queue: asc_identity_client_queue
-            routing: asc_identity_client_routing
-            deadExchange: asc_identity_client_dlx
-            deadQueue: asc_identity_client_dlq
-            deadRouting: asc_identity_client_dlr
-          consent:
-            exchange: asc_identity_consent_exchange
-            queue: asc_identity_consent_queue
-            routing: asc_identity_consent_routing
-            deadExchange: asc_identity_consent_dlx
-            deadQueue: asc_identity_consent_dlq
-            deadRouting: asc_identity_consent_dlr
-    openfeign:
-      circuitbreaker:
+management:
+  endpoint:
+    env:
+      post:
         enabled: true
-        alphanumeric-ids: true
-      client:
-        config:
-          default:
-            connectTimeout: 1500
-            readTimeout: 3000
-    discovery:
-      client:
-        composite-indicator:
-          enabled: false
-  flyway:
-    enabled: true
-    baselineOnMigrate: true
-    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
-    user: ${JDBC_USER_NAME:dev}
-    password: ${JDBC_PASSWORD:dev}
-    schemas: ${JDBC_DATABASE:docspace}
-    sql-migration-prefix: V
-    repeatable-sql-migration-prefix: R
-    sql-migration-separator: __
-    sql-migration-suffixes: .sql
-    locations: classpath:migration/mysql
-  profiles:
-    active: ${PROFILE:dev}
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        generate_statistics: false
-        jdbc:
-          time_zone: UTC
-          batch_size: 100
-        order_inserts: true
-        dialect: org.hibernate.dialect.MySQLDialect
-  datasource:
-    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
-    username: ${JDBC_USER_NAME:dev}
-    password: ${JDBC_PASSWORD:dev}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  rabbitmq:
-    host: ${RABBIT_HOST:localhost}
-    port: ${RABBIT_PORT:5672}
-    username: ${RABBIT_USER_NAME:guest}
-    password: ${RABBIT_PASSWORD:guest}
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 3
-          max-interval: 3000
-          multiplier: 3.0
-
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
 resilience4j:
   circuitbreaker:
     instances:
       asc:
-        registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
         eventConsumerBufferSize: 10
         failureRateThreshold: 50
         minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
         permittedNumberOfCallsInHalfOpenState: 3
+        registerHealthIndicator: true
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
+        waitDurationInOpenState: 5s
+  ratelimiter:
+    configs:
+      default:
+        eventConsumerBufferSize: 100
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1000ms
+        registerHealthIndicator: true
+        timeoutDuration: 500ms
+    instances:
+      batchClientRateLimiter:
+        baseConfig: default
+        limitForPeriod: 500
+      getClientRateLimiter:
+        baseConfig: default
+      getScopesRateLimiter:
+        baseConfig: default
+      regenerateClientSecretRateLimiter:
+        baseConfig: default
+        limitForPeriod: 15
+      updateClientRateLimiter:
+        baseConfig: default
+        limitForPeriod: 15
   retry:
     instances:
+      batchClientRetryRateLimiter:
+        maxRetryAttempts: 2
+        waitDuration: 1s
       getClientRetryRateLimiter:
         maxRetryAttempts: 2
         waitDuration: 1s
-      batchClientRetryRateLimiter:
+      getScopesRetryRateLimiter:
         maxRetryAttempts: 2
         waitDuration: 1s
       regenerateClientSecretRetryRateLimiter:
@@ -192,62 +106,143 @@ resilience4j:
       updateClientRetryRateLimiter:
         maxRetryAttempts: 4
         waitDuration: 1s
-      getScopesRetryRateLimiter:
-        maxRetryAttempts: 2
-        waitDuration: 1s
-  ratelimiter:
-    configs:
-      default:
-        limitRefreshPeriod: 1000ms
-        limitForPeriod: 1000
-        timeoutDuration: 500ms
-        registerHealthIndicator: true
-        eventConsumerBufferSize: 100
-    instances:
-      batchClientRateLimiter:
-        baseConfig: default
-        limitForPeriod: 500
-      getClientRateLimiter:
-        baseConfig: default
-      regenerateClientSecretRateLimiter:
-        baseConfig: default
-        limitForPeriod: 15
-      updateClientRateLimiter:
-        baseConfig: default
-        limitForPeriod: 15
-      getScopesRateLimiter:
-        baseConfig: default
-
-management:
-  health:
-    livenessState:
-      enabled: true
-    readinessState:
-      enabled: true
-    diskspace:
+server:
+  error:
+    include-exception: false
+    include-message: always
+    whitelabel:
       enabled: false
-    refresh:
-      enabled: false
-  endpoints:
-    web:
-      base-path:
-      path-mapping:
-        health: /health
-      exposure:
-        include: 'health'
-  endpoint:
-    health:
-      probes:
+  host: ${SERVER_HOST:127.0.0.1}
+  port: ${SERVER_PORT:9090}
+  shutdown: graceful
+  socket:
+    host: ${SOCKET_SERVER_HOST:127.0.0.1}
+    port: ${SOCKET_SERVER_PORT:8585}
+spring:
+  cloud:
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
+    loadbalancer:
+      ribbon:
+        enable: false
+    messaging:
+      rabbitmq:
+        queues:
+          audit:
+            deadExchange: asc_identity_audit_dlx
+            deadQueue: asc_identity_audit_dlq
+            deadRouting: asc_identity_audit_dlr
+            exchange: asc_identity_audit_exchange
+            queue: asc_identity_audit_queue
+            routing: asc_identity_audit_routing
+          authorization:
+            deadExchange: asc_identity_authorization_dlx
+            deadQueue: asc_identity_authorization_dlq
+            deadRouting: asc_identity_authorization_dlr
+            exchange: asc_identity_authorization_exchange
+            queue: asc_identity_authorization_queue
+            routing: asc_identity_authorization_routing
+          client:
+            deadExchange: asc_identity_client_dlx
+            deadQueue: asc_identity_client_dlq
+            deadRouting: asc_identity_client_dlr
+            exchange: asc_identity_client_exchange
+            queue: asc_identity_client_queue
+            routing: asc_identity_client_routing
+          consent:
+            deadExchange: asc_identity_consent_dlx
+            deadQueue: asc_identity_consent_dlq
+            deadRouting: asc_identity_consent_dlr
+            exchange: asc_identity_consent_exchange
+            queue: asc_identity_consent_queue
+            routing: asc_identity_consent_routing
+    openfeign:
+      circuitbreaker:
+        alphanumeric-ids: true
         enabled: true
-      show-details: 'always'
-    env:
-      post:
-        enabled: true
-
+      client:
+        config:
+          default:
+            connectTimeout: 1500
+            readTimeout: 3000
+    ratelimiter:
+      redis:
+        addresses: ${REDIS_ADDRESSES:localhost:6379}
+        limiters:
+          - limit: 5
+            name: identityFetchClient
+            refresh: 1
+          - limit: 2
+            name: identityMutateClient
+            refresh: 1
+          - limit: 5
+            name: identityFetchScope
+            refresh: 1
+        settings:
+          forceSSL: true
+          password: ''
+          username: ''
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: ${JDBC_PASSWORD:dev}
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
+    username: ${JDBC_USER_NAME:dev}
+  flyway:
+    baselineOnMigrate: true
+    enabled: true
+    locations: classpath:migration/mysql
+    password: ${JDBC_PASSWORD:dev}
+    repeatable-sql-migration-prefix: R
+    schemas: ${JDBC_DATABASE:docspace}
+    sql-migration-prefix: V
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
+    user: ${JDBC_USER_NAME:dev}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        generate_statistics: false
+        jdbc:
+          batch_size: 100
+          time_zone: UTC
+        order_inserts: true
+    show-sql: false
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
+  profiles:
+    active: ${PROFILE:dev}
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 3000
+          multiplier: 3
+    password: ${RABBIT_PASSWORD:guest}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER_NAME:guest}
 springdoc:
   api-docs:
     path: /api/2.0/oauth/info
 ---
+logging:
+  level:
+    com:
+      onlyoffice: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
 spring:
   config:
     activate:
@@ -255,12 +250,3 @@ spring:
         - development
         - dev
         - d
-logging:
-  level:
-    root: INFO
-    com:
-      onlyoffice: DEBUG
-    org:
-      hibernate:
-        stat: DEBUG
-        SQL: DEBUG
