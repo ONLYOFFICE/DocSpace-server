@@ -179,8 +179,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
 
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
-            var room = await DocSpaceHelper.GetRoomId(file, folderDao);
-            options = GetOptions( await folderDao.GetWatermarkSettings(room), room);
+            var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
+            options = GetOptions(watermarkSettings, room);
         }
 
         if (file.Encrypted
@@ -337,7 +337,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public Options GetOptions<T>(WatermarkSettings watermarkSettings, Folder<T> room)
     {
-        if(watermarkSettings == null || !watermarkSettings.Enabled)
+        if (watermarkSettings == null || !watermarkSettings.Enabled)
         {
             return null;
         }

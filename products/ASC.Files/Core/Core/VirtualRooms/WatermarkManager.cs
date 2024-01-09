@@ -65,17 +65,18 @@ public class WatermarkManager
 
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
     {
-        var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
+        var room = await folderDao.GetFolderAsync(roomId);
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
             throw new ItemNotFoundException();
+        }
+
+        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
         var watermarkSettings = new WatermarkSettings()
@@ -98,20 +99,20 @@ public class WatermarkManager
 
         return watermarkSettings;
     }
-    
+
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            throw new ItemNotFoundException();
+        }
 
         if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
-        {
-            throw new ItemNotFoundException();  
-        }
+        var folderDao = _daoFactory.GetFolderDao<T>();
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 
@@ -120,13 +121,9 @@ public class WatermarkManager
 
     public async Task<Folder<T>> DeleteWatermarkAsync<T>(T roomId)
     {
-        var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
+        var room = await folderDao.GetFolderAsync(roomId);
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
@@ -135,7 +132,7 @@ public class WatermarkManager
 
         if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
         await folderDao.DeleteWatermarkSettings(room);

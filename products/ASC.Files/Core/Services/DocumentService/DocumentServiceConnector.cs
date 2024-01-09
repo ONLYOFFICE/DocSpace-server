@@ -68,7 +68,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 region,
                 thumbnail,
                 spreadsheetLayout,
-                options, 
+                options,
                 isAsync,
                 fileUtility.SignatureSecret,
                 clientFactory);

@@ -380,8 +380,8 @@ public class FileConverter(FileUtility fileUtility,
         fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
 
         var folderDao = daoFactory.GetFolderDao<T>();
-        var watermarkSettings = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
-        var options = documentServiceHelper.GetOptions(watermarkSettings.Item1, watermarkSettings.Item2);
+        var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
+        var options = documentServiceHelper.GetOptions(watermarkSettings, room);
 
         var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, options, false);
         var convertUri = uriTuple.ConvertedDocumentUri;
