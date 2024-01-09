@@ -35,7 +35,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -379,11 +378,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
      * @return
      */
     private OAuth2Authorization toObject(Authorization entity) {
+        var client = clientRetrieveUsecases.getClientByClientId(entity.getRegisteredClientId());
+        if (client == null)
+            return null;
         OAuth2Authorization.Builder builder = OAuth2Authorization
-                .withRegisteredClient(RegisteredClient
-                        .withId(entity.getRegisteredClientId())
-                        .build()
-                )
+                .withRegisteredClient(client)
                 .id(entity.getId())
                 .principalName(entity.getPrincipalName())
                 .authorizationGrantType(resolveAuthorizationGrantType(entity.getAuthorizationGrantType()))

@@ -40,7 +40,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  *
@@ -133,7 +133,7 @@ public class OAuth2AuthorizationServerConfiguration {
             if (authority != null)
                 context.getClaims()
                         .issuer(String.format("%s/oauth2", authority.getAuthority()))
-                        .audience(List.of(authority.getAuthority()));
+                        .audience(Arrays.asList(authority.getAuthority()));
             context
                     .getJwsHeader()
                     .algorithm(SignatureAlgorithm.ES256);

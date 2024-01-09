@@ -3,11 +3,11 @@
  */
 package com.onlyoffice.authorization.web.server.ports.services;
 
+import com.onlyoffice.authorization.configuration.OAuth2RegisteredClientConfiguration;
 import com.onlyoffice.authorization.core.entities.Client;
 import com.onlyoffice.authorization.core.exceptions.ClientPermissionException;
 import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
-import com.onlyoffice.authorization.configuration.OAuth2RegisteredClientConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
