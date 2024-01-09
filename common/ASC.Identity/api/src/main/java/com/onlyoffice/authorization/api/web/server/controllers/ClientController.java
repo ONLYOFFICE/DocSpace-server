@@ -255,7 +255,7 @@ public class ClientController {
         log.info("Received a new user revocation request");
         MDC.clear();
 
-        consentCleanupUsecases.asyncRevokeConsent(clientId, PersonContextContainer.context
+        consentCleanupUsecases.revokeConsentAsync(clientId, PersonContextContainer.context
                 .get().getResponse().getEmail());
 
         return ResponseEntity.status(HttpStatus.OK).build();

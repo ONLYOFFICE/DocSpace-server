@@ -63,7 +63,7 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
      * @param clientId
      * @param principalName
      */
-    public void asyncRevokeConsent(String clientId, String principalName) {
+    public void revokeConsentAsync(String clientId, String principalName) {
         MDC.put("clientId", clientId);
         MDC.put("principalName", principalName);
         log.info("Submitting a consent revocation task");

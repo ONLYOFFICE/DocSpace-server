@@ -26,5 +26,5 @@ public interface ConsentCleanupUsecases {
      * @param clientId
      * @param principalName
      */
-    void asyncRevokeConsent(String clientId, String principalName);
+    void revokeConsentAsync(String clientId, String principalName);
 }
