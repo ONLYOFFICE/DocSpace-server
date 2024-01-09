@@ -71,10 +71,10 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
      * @throws ServletException
      */
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        var first = Pattern.compile("/oauth2/token");
+        var first = Pattern.compile("/oauth2/authorize");
         var second = Pattern.compile("/oauth2/login");
         var path = request.getRequestURI();
-        return first.matcher(path).find() || (second.matcher(path).find() && request
-                .getMethod().equalsIgnoreCase(HttpMethod.GET.name()));
+        return !first.matcher(path).find() && !(second.matcher(path).find() && request
+                .getMethod().equalsIgnoreCase(HttpMethod.POST.name()));
     }
 }
