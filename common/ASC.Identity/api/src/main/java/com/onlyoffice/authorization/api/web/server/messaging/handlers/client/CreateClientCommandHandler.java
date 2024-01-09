@@ -1,13 +1,11 @@
 package com.onlyoffice.authorization.api.web.server.messaging.handlers.client;
 
-import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.web.server.messaging.handlers.ScheduledMessagingCommandHandler;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +19,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 final class CreateClientCommandHandler extends ScheduledMessagingCommandHandler<ClientMessage> {
-    private final RabbitMQConfiguration configuration;
     private final ClientCreationUsecases creationUsecases;
-    private final AmqpTemplate amqpClient;
 
     public String getCode() {
         return ClientMessage.ClientCommandCode.CREATE_CLIENT.name();
