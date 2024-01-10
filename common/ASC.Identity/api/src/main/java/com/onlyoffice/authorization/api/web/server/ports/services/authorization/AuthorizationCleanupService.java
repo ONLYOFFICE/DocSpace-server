@@ -23,7 +23,10 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
      *
      * @param authorization
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 1250)
+    @Transactional(
+            timeout = 1250,
+            rollbackFor = Exception.class
+    )
     public void deleteAuthorization(AuthorizationMessage authorization) {
         MDC.put("authorizationId", authorization.getId());
         log.info("Removing an authorization");
@@ -36,7 +39,10 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
      *
      * @param authorizations
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
+    @Transactional(
+            timeout = 3000,
+            rollbackFor = Exception.class
+    )
     public void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations) {
         log.info("Removing authorizations as a batch");
 
@@ -46,8 +52,8 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
                 log.debug("Deleting an authorization");
 
                 cleanupUsecases.deleteById(authorization.getId());
-            } catch (Exception e) {
-                log.error("Could not remove an authorization", e);
+            } catch (RuntimeException e) {
+                throw new EntityCleanupException("Could not remove an authorization", e);
             } finally {
                 MDC.clear();
             }
@@ -59,7 +65,10 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
      * @param registeredClientId
      * @return
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 3000)
+    @Transactional(
+            timeout = 3000,
+            rollbackFor = Exception.class
+    )
     public int deleteAuthorizationsByClientId(String registeredClientId) {
         MDC.put("clientId", registeredClientId);
         log.info("Removing authorizations as a batch by registeredClientId");
