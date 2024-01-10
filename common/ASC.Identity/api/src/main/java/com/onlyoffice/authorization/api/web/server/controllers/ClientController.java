@@ -5,6 +5,7 @@ package com.onlyoffice.authorization.api.web.server.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.core.entities.Action;
+import com.onlyoffice.authorization.api.core.exceptions.EntityCreationException;
 import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
@@ -492,8 +493,7 @@ public class ClientController {
 
             return ResponseEntity.ok(regenerate);
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Could not regenerate client's secret");
-            return ResponseEntity.internalServerError().build();
+            throw new EntityCreationException("Could not regenerate client's secret", e);
         } finally {
             MDC.clear();
         }
