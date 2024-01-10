@@ -2,10 +2,14 @@ package com.onlyoffice.authorization.api.web.server.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Optional;
+
 /**
  *
  */
 public class HttpUtils {
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
     private static final String[] IP_HEADERS = {
             "X-Forwarded-For",
             "X-Forwarded-Host",
@@ -23,12 +27,28 @@ public class HttpUtils {
 
     private HttpUtils() {}
 
+    private static Optional<String> getRequestAddress(HttpServletRequest request, String header) {
+        var ip = request.getHeader(header);
+        if (ip == null || ip.isBlank())
+            return Optional.empty();
+        return Optional.of(String.format("%s://%s",
+                request.getScheme(), ip));
+    }
+
+    public static Optional<String> getRequestHostAddress(HttpServletRequest request) {
+        return getRequestAddress(request, X_FORWARDED_HOST);
+    }
+
+    public static Optional<String> getRequestClientAddress(HttpServletRequest request) {
+        return getRequestAddress(request, X_FORWARDED_FOR);
+    }
+
     /**
      *
      * @param request
      * @return
      */
-    public static String getRequestIP(HttpServletRequest request) {
+    public static String getFirstRequestIP(HttpServletRequest request) {
         for (var header: IP_HEADERS) {
             var value = request.getHeader(header);
             if (value == null || value.isEmpty())

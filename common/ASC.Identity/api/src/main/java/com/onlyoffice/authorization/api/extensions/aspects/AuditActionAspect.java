@@ -47,7 +47,7 @@ public class AuditActionAspect {
 
         var queue = configuration.getQueues().get("audit");
         var msg = AuditMessage.builder()
-                .ip(HttpUtils.getRequestIP(request))
+                .ip(HttpUtils.getFirstRequestIP(request))
                 .browser(HttpUtils.getClientBrowser(request))
                 .platform(HttpUtils.getClientOS(request))
                 .date(ZonedDateTime.now())

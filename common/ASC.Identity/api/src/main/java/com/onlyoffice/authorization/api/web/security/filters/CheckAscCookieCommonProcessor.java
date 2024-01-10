@@ -4,6 +4,7 @@ import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.SettingsContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
+import com.onlyoffice.authorization.api.web.server.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class CheckAscCookieCommonProcessor {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
-    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
 
     private final APIClient apiClient;
 
@@ -39,13 +39,6 @@ public class CheckAscCookieCommonProcessor {
         if (cookies == null || cookies.length < 1)
             throw new BadCredentialsException("Could not find any authentication cookie");
 
-        var addressCookie = Arrays.stream(cookies)
-                .filter(c -> c.getName().equalsIgnoreCase(X_DOCSPACE_ADDRESS))
-                .findFirst();
-
-        if (addressCookie.isEmpty())
-            throw new BadCredentialsException("Could not find asc address cookie");
-
         var authCookie = Arrays.stream(cookies)
                 .filter(c -> c.getName().equalsIgnoreCase(AUTH_COOKIE_NAME))
                 .findFirst();
@@ -53,7 +46,8 @@ public class CheckAscCookieCommonProcessor {
         if (authCookie.isEmpty())
             throw new BadCredentialsException("Could not find asc auth cookie");
 
-        var address = URI.create(addressCookie.get().getValue());
+        var address = URI.create(HttpUtils.getRequestHostAddress(request)
+                .orElseThrow(() -> new BadCredentialsException("Could not extract asc address")));
         var ascCookie = String.format("%s=%s", authCookie.get().getName(),
                 authCookie.get().getValue());
 

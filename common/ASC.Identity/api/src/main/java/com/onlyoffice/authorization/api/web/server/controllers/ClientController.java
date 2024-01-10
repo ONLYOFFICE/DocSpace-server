@@ -24,6 +24,7 @@ import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClient
 import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.*;
+import com.onlyoffice.authorization.api.web.server.utilities.HttpUtils;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -66,7 +67,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 public class ClientController {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
-    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
 
     private final ApplicationConfiguration applicationConfiguration;
     private final APIClient apiClient;
@@ -109,7 +109,6 @@ public class ClientController {
      * @param request
      * @param response
      * @param ascAuth
-     * @param address
      * @param page
      * @param limit
      * @return
@@ -122,10 +121,10 @@ public class ClientController {
             HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = AUTH_COOKIE_NAME) String ascAuth,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestParam(value = "page") @Min(value = 0) int page,
             @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
+        var address = URI.create(HttpUtils.getRequestHostAddress(request).get());
         var tenant = TenantContextContainer.context.get().getResponse();
         var zone = ZoneId.of(SettingsContextContainer.context.get()
                 .getResponse().getTimezone());
@@ -147,7 +146,7 @@ public class ClientController {
             log.debug("Creating a task to get user's profile");
 
             tasks.add(Pair.of(c, CompletableFuture.supplyAsync(() -> apiClient
-                    .getProfile(URI.create(address), cookie, c.getModifiedBy()))));
+                    .getProfile(address, cookie, c.getModifiedBy()))));
 
             MDC.clear();
         });
@@ -185,32 +184,32 @@ public class ClientController {
 
         for (final var client : pagination.getData()) {
             client.add(linkTo(methodOn(ClientController.class)
-                    .getClient(response, address, client.getClientId()))
+                    .getClient(response, client.getClientId()))
                     .withRel(HttpMethod.GET.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("get_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(request, response, address, client.getClientId(), null))
+                    .updateClient(request, response, client.getClientId(), null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(request, response, address, client.getClientId()))
+                    .deleteClient(request, response, client.getClientId()))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .regenerateSecret(request, response, address, client.getClientId()))
+                    .regenerateSecret(request, response, client.getClientId()))
                     .withRel(HttpMethod.PATCH.name())
                     .withTitle("regenerate_secret"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(request, response, address, client.getClientId(), null))
+                    .activateClient(request, response, client.getClientId(), null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
         }
 
         pagination.add(linkTo(methodOn(ClientController.class)
-                .postClient(request, response, address,null))
+                .postClient(request, response, null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
 
@@ -292,7 +291,6 @@ public class ClientController {
     /**
      *
      * @param response
-     * @param address
      * @param clientId
      * @return
      */
@@ -302,7 +300,6 @@ public class ClientController {
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<ClientDTO> getClient(
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         var zone = ZoneId.of(SettingsContextContainer.context.get()
@@ -318,24 +315,24 @@ public class ClientController {
         client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
         client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(null, response, address, clientId, null))
+                .updateClient(null, response, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(null, response, address, clientId))
+                .deleteClient(null, response, clientId))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(null, response, address, client.getClientId()))
+                .regenerateSecret(null, response, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(null, response, address,null))
+                .postClient(null, response, null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(null, response, address, clientId, null))
+                .activateClient(null, response, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -349,7 +346,6 @@ public class ClientController {
      *
      * @param request
      * @param response
-     * @param address
      * @param body
      * @return
      */
@@ -361,7 +357,6 @@ public class ClientController {
     public ResponseEntity<ClientDTO> postClient(
             HttpServletRequest request,
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestBody @Valid CreateClientDTO body
     ) {
         setLoggerContextAttributes();
@@ -378,27 +373,27 @@ public class ClientController {
 
         var client = creationUsecases.createClientAsync(body, TenantContextContainer
                 .context.get().getResponse(), PersonContextContainer.context.
-                get().getResponse(), address);
+                get().getResponse(), HttpUtils.getRequestHostAddress(request).get());
         client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, address, client.getClientId()))
+                .getClient(response, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(request, response, address, client.getClientId(),null))
+                .updateClient(request, response, client.getClientId(),null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(request, response, address, client.getClientId()))
+                .deleteClient(request, response, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(request, response, address, client.getClientId()))
+                .regenerateSecret(request, response, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(request, response, address, client.getClientId(), null))
+                .activateClient(request, response, client.getClientId(), null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -413,7 +408,6 @@ public class ClientController {
      *
      * @param request
      * @param response
-     * @param address
      * @param clientId
      * @param body
      * @return
@@ -426,7 +420,6 @@ public class ClientController {
     public ResponseEntity updateClient(
             HttpServletRequest request,
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid UpdateClientDTO body
     ) {
@@ -447,7 +440,6 @@ public class ClientController {
      *
      * @param request
      * @param response
-     * @param address
      * @param clientId
      * @return
      */
@@ -459,7 +451,6 @@ public class ClientController {
     public ResponseEntity<SecretDTO> regenerateSecret(
             HttpServletRequest request,
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = TenantContextContainer.context.get().getResponse();
@@ -474,24 +465,25 @@ public class ClientController {
                     .thenApplyAsync((r) -> mutationUsecases.regenerateSecret(clientId, tenant))
                     .get();
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .getClient(response, address, clientId))
+                    .getClient(response, clientId))
                     .withRel(HttpMethod.GET.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("get_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(request, response, address, clientId, null))
+                    .updateClient(request, response, clientId, null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(request, response, address, clientId))
+                    .deleteClient(request, response, clientId))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
+                    .postClient(request, response, null))
+                    .withRel(HttpMethod.POST.name())
                     .withTitle("create_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(request, response, address, clientId, null))
+                    .activateClient(request, response, clientId, null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
@@ -511,7 +503,6 @@ public class ClientController {
      *
      * @param request
      * @param response
-     * @param address
      * @param clientId
      * @return
      */
@@ -523,7 +514,6 @@ public class ClientController {
     public ResponseEntity deleteClient(
             HttpServletRequest request,
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         setLoggerContextAttributes();
@@ -540,7 +530,6 @@ public class ClientController {
      *
      * @param request
      * @param response
-     * @param address
      * @param clientId
      * @param body
      * @return
@@ -553,7 +542,6 @@ public class ClientController {
     public ResponseEntity activateClient(
             HttpServletRequest request,
             HttpServletResponse response,
-            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
