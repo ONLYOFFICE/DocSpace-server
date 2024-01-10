@@ -69,7 +69,10 @@ public class ClientCleanupService implements ClientCleanupUsecases {
      * @return
      */
     @CacheEvict(cacheNames = "clients", key = "#id")
-    @Transactional(rollbackFor = Exception.class, timeout = 2000)
+    @Transactional(
+            timeout = 2000,
+            rollbackFor = Exception.class
+    )
     public boolean deleteClient(String id, int tenant) {
         MDC.put("tenantId", String.valueOf(tenant));
         MDC.put("clientId", id);
