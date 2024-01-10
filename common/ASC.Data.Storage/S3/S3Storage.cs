@@ -38,7 +38,7 @@ public class S3Storage(TempStream tempStream,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
         CoreBaseSettings coreBaseSettings,
-        ICache cache)
+        AscDistributedCache cache)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportCdnUri => true;

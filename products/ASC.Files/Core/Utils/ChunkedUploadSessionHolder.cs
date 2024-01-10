@@ -24,45 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Storage.ChunkedUploader;
+
 namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class ChunkedUploadSessionHolder(GlobalStore globalStore,
     SetupInfo setupInfo,
     TempPath tempPath,
-    FileHelper fileHelper,
-    ICache cache)
+    AscDistributedCache cache,
+    FileHelper fileHelper)
 {
     
     private CommonChunkedUploadSessionHolder _holder;
     private CommonChunkedUploadSessionHolder _currentHolder;
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
 
-    public void StoreSession<T>(ChunkedUploadSession<T> s)
+    public async Task StoreSessionAsync<T>(ChunkedUploadSession<T> s)
     {
-        cache.Insert(s.Id, s, SlidingExpiration);
+        await cache.InsertAsync(s.Id, s, SlidingExpiration);
     }
 
-    public void RemoveSession<T>(ChunkedUploadSession<T> s)
+    public async Task RemoveSessionAsync<T>(ChunkedUploadSession<T> s)
     {
-        cache.Remove(s.Id);
+        await cache.RemoveAsync(s.Id);
 
         var count = s.BytesTotal / setupInfo.ChunkUploadSize;
         count += s.BytesTotal % setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
         for (var i = 1; i <= count; i++)
         {
-            cache.Remove($"{s.Id} - {i}");
+            await cache.RemoveAsync($"{s.Id} - {i}");
         }
     }
 
     public async Task<Dictionary<int, Chunk>> GetChunksAsync<T>(ChunkedUploadSession<T> s)
     {
-        return (await CommonSessionHolderAsync()).GetChunks(s);
+        return await (await CommonSessionHolderAsync()).GetChunksAsync(s);
     }
     
-    public ChunkedUploadSession<T> GetSession<T>(string sessionId)
+    public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
-        return cache.Get<ChunkedUploadSession<T>>(sessionId);
+        var session = await cache.GetAsync<ChunkedUploadSession<T>>(sessionId);
+        session.File.FileHelper = fileHelper;
+        session.TransformItems();
+        return session;
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)

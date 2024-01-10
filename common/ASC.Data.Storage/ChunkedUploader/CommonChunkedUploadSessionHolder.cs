@@ -29,7 +29,7 @@ namespace ASC.Core.ChunkedUploader;
 public class CommonChunkedUploadSessionHolder(TempPath tempPath,
     IDataStore dataStore,
     string domain,
-    ICache cache,
+    AscDistributedCache cache,
     long maxChunkUploadSize = 10 * 1024 * 1024)
 {
     public IDataStore DataStore { get; set; } = dataStore;
@@ -55,7 +55,7 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
         chunkedUploadSession.UploadId = uploadId;
     }
     
-    public Dictionary<int, Chunk> GetChunks(CommonChunkedUploadSession uploadSession)
+    public async Task<Dictionary<int, Chunk>> GetChunksAsync(CommonChunkedUploadSession uploadSession)
     {
         var count = uploadSession.BytesTotal / MaxChunkUploadSize;
         count += uploadSession.BytesTotal % MaxChunkUploadSize > 0 ? 1L : 0L;
@@ -63,7 +63,7 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
         var dict = new Dictionary<int, Chunk>();
         for (var i = 1; i <= count; i++)
         {
-            dict.Add(i, cache.Get<Chunk>($"{uploadSession.Id} - {i}"));
+            dict.Add(i, await cache.GetAsync<Chunk>($"{uploadSession.Id} - {i}"));
         }
 
         return dict;
@@ -71,8 +71,8 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
 
     public virtual async Task<string> FinalizeAsync(CommonChunkedUploadSession uploadSession)
     {
-        var chunks = GetChunks(uploadSession);
-        var uploadSize = chunks.Sum(c => c.Value == null ? 0 : c.Value.Length);
+        var chunks = await GetChunksAsync(uploadSession);
+        var uploadSize = chunks.Sum(c => c.Value?.Length ?? 0);
         if (uploadSize != uploadSession.BytesTotal)
         {
             throw new ArgumentException("uploadSize != bytesTotal");
@@ -115,11 +115,11 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
         var uploadId = uploadSession.UploadId;
 
         var eTag = await DataStore.UploadChunkAsync(domain, path, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
-        StoreChunk(uploadSession, chunkNumber, eTag, length);
+        await StoreChunkAsync(uploadSession, chunkNumber, eTag, length);
         return (Path.GetFileName(path), eTag);
     }
 
-    public virtual void StoreChunk(CommonChunkedUploadSession uploadSession, int chunkNumber, string eTag, long length)
+    public virtual async Task StoreChunkAsync(CommonChunkedUploadSession uploadSession, int chunkNumber, string eTag, long length)
     {
         var chunk = new Chunk
         {
@@ -127,7 +127,7 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
             Length = length
         };
 
-        cache.Insert($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
+        await cache.InsertAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
     }
 
     public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,

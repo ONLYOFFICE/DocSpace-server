@@ -27,16 +27,21 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Id} into {FolderId}")]
-public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChunkedUploadSession(bytesTotal)
+public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 {
     public T FolderId { get; set; }
-    public File<T> File { get; set; } = file;
+    public File<T> File { get; set; }
     public bool Encrypted { get; set; }
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
     [NonSerialized]
     public bool CheckQuota = true;
+    
+    public ChunkedUploadSession(File<T> file, long bytesTotal) : base(bytesTotal)
+    {
+        File = file;
+    }
 
     public override object Clone()
     {

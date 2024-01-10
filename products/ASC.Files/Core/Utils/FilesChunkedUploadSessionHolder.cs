@@ -30,7 +30,7 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
 {
     private readonly IDaoFactory _daoFactory;
 
-    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, TempPath tempPath, IDataStore dataStore, string domain, ICache cache, long maxChunkUploadSize = 10485760)
+    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, TempPath tempPath, IDataStore dataStore, string domain, AscDistributedCache cache, long maxChunkUploadSize = 10485760)
         : base(tempPath, dataStore, domain, cache, maxChunkUploadSize)
     {
         _daoFactory = daoFactory;

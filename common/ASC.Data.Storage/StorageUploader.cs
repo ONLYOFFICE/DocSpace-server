@@ -34,7 +34,7 @@ public class StorageUploader(
     IDistributedTaskQueueFactory queueFactory,
     ILogger<StorageUploader> logger, 
     IDistributedLockProvider distributedLockProvider,
-    ICache cache)
+    AscDistributedCache cache)
 {
     protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
@@ -87,7 +87,7 @@ public class MigrateOperation : DistributedTaskProgress
     private readonly IServiceProvider _serviceProvider;
     private readonly StorageFactoryConfig _storageFactoryConfig;
     private readonly TempStream _tempStream;
-    private readonly ICache _cache;
+    private readonly AscDistributedCache _cache;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
 
     static MigrateOperation()
@@ -104,7 +104,7 @@ public class MigrateOperation : DistributedTaskProgress
         StorageFactoryConfig storageFactoryConfig,
         TempStream tempStream,
         ILogger<StorageUploader> logger,
-        ICache cache)
+        AscDistributedCache cache)
     {
         Id = id;
         Status = DistributedTaskStatus.Created;

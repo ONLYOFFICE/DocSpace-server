@@ -74,7 +74,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!TryAuthorize(request))
+            if (!(await TryAuthorizeAsync(request)))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
@@ -152,7 +152,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         }
     }
 
-    private bool TryAuthorize<T>(ChunkedRequestHelper<T> request)
+    private async Task<bool> TryAuthorizeAsync<T>(ChunkedRequestHelper<T> request)
     {
         if (!authContext.IsAuthenticated)
         {
@@ -166,7 +166,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
         if (!string.IsNullOrEmpty(request.UploadId))
         {
-            var uploadSession = chunkedUploadSessionHolder.GetSession<T>(request.UploadId);
+            var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);
             if (uploadSession != null && authContext.CurrentAccount.ID == uploadSession.UserId)
             {
                 return true;

@@ -34,7 +34,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         StorageFactory storageFactory,
         IServiceProvider serviceProvider,
         TempPath tempPath,
-        ICache cache)
+        AscDistributedCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private int _tenantId;

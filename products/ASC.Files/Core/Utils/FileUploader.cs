@@ -253,14 +253,14 @@ public class FileUploader(
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
         
-        chunkedUploadSessionHolder.StoreSession(uploadSession);
+        await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
         return uploadSession;
     }
 
     public async Task<ChunkedUploadSession<T>> UploadChunkAsync<T>(string uploadId, Stream stream, long chunkLength, int? chunkNumber = null)
     {
-        var uploadSession = chunkedUploadSessionHolder.GetSession<T>(uploadId);
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         uploadSession.Expired = DateTime.UtcNow + ChunkedUploadSessionHolder.SlidingExpiration;
 
         if (chunkLength <= 0)
@@ -280,7 +280,7 @@ public class FileUploader(
     
     public async Task<ChunkedUploadSession<T>> FinalizeUploadSessionAsync<T>(string uploadId)
     {
-        var uploadSession = chunkedUploadSessionHolder.GetSession<T>(uploadId);
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
@@ -289,21 +289,21 @@ public class FileUploader(
         await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
 
         await fileMarker.MarkAsNewAsync(uploadSession.File);
-        chunkedUploadSessionHolder.RemoveSession(uploadSession);
+        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
     }
 
     public async Task AbortUploadAsync<T>(string uploadId)
     {
-        await AbortUploadAsync(chunkedUploadSessionHolder.GetSession<T>(uploadId));
+        await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
     }
 
     private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
-        chunkedUploadSessionHolder.RemoveSession(uploadSession);
+        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
     }
 
     private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)

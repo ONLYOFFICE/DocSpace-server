@@ -31,7 +31,7 @@ public class CrossModuleTransferUtility(ILogger option,
     TempPath tempPath,
     IDataStore source,
     IDataStore destination,
-    ICache cache)
+    AscDistributedCache cache)
 {
     private readonly IDataStore _source = source ?? throw new ArgumentNullException(nameof(source));
     private readonly IDataStore _destination = destination ?? throw new ArgumentNullException(nameof(destination));
