@@ -24,7 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Net.NetworkInformation;
+using System.Security;
+
 using AutoMapper;
+
+using Microsoft.Extensions.Configuration;
 
 namespace ASC.Webhooks.Core;
 
@@ -42,6 +47,7 @@ public class DbWorker
     private readonly TenantManager _tenantManager;
     private readonly AuthContext _authContext;
     private readonly IMapper _mapper;
+    private readonly IConfiguration _configuration;
 
     private int Tenant
     {
@@ -55,12 +61,14 @@ public class DbWorker
         IDbContextFactory<WebhooksDbContext> dbContextFactory,
         TenantManager tenantManager,
         AuthContext authContext,
-        IMapper mapper)
+        IMapper mapper,
+        IConfiguration configuration)
     {
         _dbContextFactory = dbContextFactory;
         _tenantManager = tenantManager;
         _authContext = authContext;
         _mapper = mapper;
+        _configuration = configuration;
     }
 
     public async Task<WebhooksConfig> AddWebhookConfig(string uri, string name, string secretKey, bool? enabled, bool? ssl)
@@ -72,6 +80,26 @@ public class DbWorker
         if (objForCreate != null)
         {
             return objForCreate;
+        }
+
+        try
+        {
+            if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && NetworkInterface.GetIsNetworkAvailable())
+            {
+                foreach (var netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    var ipProps = netInterface.GetIPProperties();
+
+                    if (ipProps.UnicastAddresses.Any(addr => addr.Address.ToString() == parsedUri.Host))
+                    {
+                        throw new SecurityException();
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
         var toAdd = new WebhooksConfig
