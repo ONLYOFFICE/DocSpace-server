@@ -385,7 +385,7 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
         }
 
         if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
-                CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dateTime))
+                CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
         {
             return new ApiDateTime(dateTime, TimeSpan.Zero);
         }
