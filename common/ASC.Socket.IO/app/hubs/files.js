@@ -141,34 +141,82 @@
     filesIO.to(room).emit("s:modify-folder", { cmd, id, type, data });
   }
 
-  function createFile({ fileId, room, data } = {}) {
-    logger.info(`create new file ${fileId} in room ${room}`);
-    modifyFolder(room, "create", fileId, "file", data);
+  function createFile({ id, room, data, userIds } = {}) {
+    logger.info(`create new file ${id} in room ${room}`);
+
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "create", id, "file", data));
+    }
+    else
+    {
+      modifyFolder(room, "create", id, "file", data);
+    }
   }
 
-  function createFolder({ folderId, room, data } = {}) {
-    logger.info(`create new folder ${folderId} in room ${room}`);
-    modifyFolder(room, "create", folderId, "folder", data);
+  function createFolder({ id, room, data, userIds } = {}) {
+    logger.info(`create new folder ${id} in room ${room}`);
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "create", id, "folder", data));
+    } 
+    else 
+    {
+      modifyFolder(room, "create", id, "folder", data);
+    }
   }
 
-  function updateFile({ fileId, room, data } = {}) {
-    logger.info(`update file ${fileId} in room ${room}`);
-    modifyFolder(room, "update", fileId, "file", data);
+  function updateFile({ id, room, data, userIds } = {}) {
+    logger.info(`update file ${id} in room ${room}`);
+    
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "update", id, "file", data));
+    }
+    else
+    {
+      modifyFolder(room, "update", id, "file", data);
+    }
   }
 
-  function updateFolder({ folderId, room, data } = {}) {
-    logger.info(`update folder ${folderId} in room ${room}`);
-    modifyFolder(room, "update", folderId, "folder", data);
+  function updateFolder({ id, room, data, userIds } = {}) {
+    logger.info(`update folder ${id} in room ${room}`);
+    modifyFolder(room, "update", id, "folder", data);
+
+    if(userIds)
+    {
+      userIds.forEach(userId =>  modifyFolder(`${room}-${userId}`, "update", id, "folder", data));
+    }
+    else
+    {
+      modifyFolder(room, "update", id, "folder", data);
+    }
   }
 
-  function deleteFile({ fileId, room } = {}) {
-    logger.info(`delete file ${fileId} in room ${room}`);
-    modifyFolder(room, "delete", fileId, "file");
+  function deleteFile({ id, room, userIds } = {}) {
+    logger.info(`delete file ${id} in room ${room}`);
+
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file"));
+    }
+    else
+    {
+      modifyFolder(room, "delete", id, "file");
+    }
   }
 
-  function deleteFolder({ folderId, room } = {}) {
-    logger.info(`delete file ${folderId} in room ${room}`);
-    modifyFolder(room, "delete", folderId, "folder");
+  function deleteFolder({ id, room, userIds } = {}) {
+    logger.info(`delete folder ${id} in room ${room}`);
+    
+    if(userIds)
+    {
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder"));
+    }
+    else
+    {
+      modifyFolder(room, "delete", id, "folder");
+    }
   }
 
   function markAsNewFile({ fileId, count, room } = {}) {

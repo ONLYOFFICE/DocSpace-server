@@ -77,10 +77,9 @@ public class MessageFactory(AuthContext authContext,
                 var userAgent = MessageSettings.GetUAHeader(headers);
                 var referer = MessageSettings.GetReferer(headers);
 
-                if (httpContextAccessor.HttpContext != null)
-                {
-                    message.Ip = MessageSettings.GetIP(httpContextAccessor.HttpContext.Request);
-                }
+                message.Ip = httpContextAccessor?.HttpContext != null
+                    ? MessageSettings.GetIP(httpContextAccessor.HttpContext.Request)
+                    : MessageSettings.GetIP(headers);
 
                 message.UAHeader = userAgent;
                 message.Page = referer;

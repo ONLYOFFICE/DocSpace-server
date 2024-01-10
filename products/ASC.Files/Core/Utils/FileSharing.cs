@@ -46,7 +46,8 @@ public class FileSharingAceHelper(
     CountPaidUserChecker countPaidUserChecker,
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    SocketManager socketManager)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
@@ -239,6 +240,18 @@ public class FileSharingAceHelper(
             }
 
             await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            if (room != null)
+            {
+                if (share == FileShare.None)
+                {
+                    await socketManager.DeleteFolder(room, new [] { w.Id });
+                }
+                else if(existedShare == null)
+                {
+                    await socketManager.CreateFolderAsync(room, new [] { w.Id });
+                }
+            }
+
             changed = true;
             handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
 
@@ -606,7 +619,7 @@ public class FileSharing(
 
                 var link = r.SubjectType == SubjectType.InvitationLink
                     ? invitationLinkService.GetInvitationLink(r.Subject, authContext.CurrentAccount.ID)
-                    : (await externalShare.GetLinkDataAsync(r.Subject)).Url;
+                    : (await externalShare.GetLinkDataAsync(entry, r.Subject)).Url;
 
                 w.Link = await urlShortener.GetShortenLinkAsync(link);
                 w.SubjectGroup = true;
@@ -911,7 +924,7 @@ public class FileSharing(
         yield return owner;
     }
 
-    private async Task<AceWrapper> ToAceAsync(FileEntry entry, FileShareRecord record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord record, bool canEditAccess)
     {
         var w = new AceWrapper
         {
@@ -954,7 +967,7 @@ public class FileSharing(
         }
         else
         {
-            var linkData = await externalShare.GetLinkDataAsync(record.Subject);
+            var linkData = await externalShare.GetLinkDataAsync(entry, record.Subject);
             link = linkData.Url;
             w.RequestToken = linkData.Token;
         }

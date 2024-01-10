@@ -65,7 +65,9 @@ public class MarkAsReadIntegrationEventHandler : IIntegrationEventHandler<MarkAs
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _fileStorageService.MarkAsReadAsync(@event.FileStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, true, @event.TaskId);
+            var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+
+            await _fileStorageService.MarkAsReadAsync(@event.FileStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, headers, @event.TaskId);
         }
 
     }

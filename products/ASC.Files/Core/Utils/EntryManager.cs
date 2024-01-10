@@ -255,7 +255,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FilesMessageService filesMessageService,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    SocketManager socketManager)
+    SocketManager socketManager,
+        BaseCommonLinkUtility commonLinkUtility)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1442,7 +1443,7 @@ public class EntryManager(IDaoFactory daoFactory,
         bool checkRight;
         if (fileTracker.GetEditingBy(fileId).Contains(userId))
         {
-            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1477,7 +1478,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
         }
 
-        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
             fileTracker.ChangeRight(fileId, userId, false);
@@ -1809,58 +1810,4 @@ public class EntryManager(IDaoFactory daoFactory,
             fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
         }
     }
-
-    //Long operation
-    public async Task DeleteSubitemsAsync<T>(T parentId, IFolderDao<T> folderDao, IFileDao<T> fileDao, ILinkDao linkDao)
-    {
-        var folders = folderDao.GetFoldersAsync(parentId);
-        await foreach (var folder in folders)
-        {
-            await DeleteSubitemsAsync(folder.Id, folderDao, fileDao, linkDao);
-
-            logger.InformationDeleteFolder(folder.Id.ToString(), parentId.ToString());
-            await folderDao.DeleteFolderAsync(folder.Id);
-            await socketManager.DeleteFolder(folder);
         }
-
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, null, true);
-        await foreach (var file in files)
-        {
-            logger.InformationDeletefile(file.Id.ToString(), parentId.ToString());
-            await fileDao.DeleteFileAsync(file.Id);
-            await socketManager.DeleteFileAsync(file);
-
-            await linkDao.DeleteAllLinkAsync(file.Id.ToString());
-        }
-    }
-
-    public async Task MoveSharedItemsAsync<T>(T parentId, T toId, IFolderDao<T> folderDao, IFileDao<T> fileDao)
-    {
-        var folders = folderDao.GetFoldersAsync(parentId);
-        await foreach (var folder in folders)
-        {
-            var shares = await fileSecurity.GetSharesAsync(folder);
-            var shared = folder.Shared
-                         && shares.Any(record => record.Share != FileShare.Restrict);
-            if (shared)
-            {
-                logger.InformationMoveSharedFolder(folder.Id.ToString(), parentId.ToString(), toId.ToString());
-                await folderDao.MoveFolderAsync(folder.Id, toId, null);
-            }
-            else
-            {
-                await MoveSharedItemsAsync(folder.Id, toId, folderDao, fileDao);
-            }
-        }
-
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, null, true)
-            .WhereAwait(async file => file.Shared &&
-            (await fileSecurity.GetSharesAsync(file)).Any(record => record.Subject != FileConstant.ShareLinkId && record.Share != FileShare.Restrict));
-
-        await foreach (var file in files)
-        {
-            logger.InformationMoveSharedFile(file.Id.ToString(), parentId.ToString(), toId.ToString());
-            await fileDao.MoveFileAsync(file.Id, toId);
-        }
-    }
-}
