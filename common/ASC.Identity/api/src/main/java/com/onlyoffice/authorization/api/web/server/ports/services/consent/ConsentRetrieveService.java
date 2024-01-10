@@ -28,7 +28,7 @@ public class ConsentRetrieveService implements ConsentRetrieveUsecases {
      * @return
      * @throws RuntimeException
      */
-    @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
+    @Transactional(timeout = 2000, readOnly = true)
     public Set<ConsentDTO> getAllByPrincipalName(String principalName)
             throws RuntimeException {
         MDC.put("principalName", principalName);

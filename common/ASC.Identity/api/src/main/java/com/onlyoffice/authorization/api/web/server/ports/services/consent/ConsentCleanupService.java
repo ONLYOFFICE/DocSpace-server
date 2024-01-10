@@ -33,7 +33,10 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
      *
      * @param consentMessage
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 1500)
+    @Transactional(
+            timeout = 1500,
+            rollbackFor = Exception.class
+    )
     public void deleteConsent(ConsentMessage consentMessage) {
         MDC.put("principalName", consentMessage.getPrincipalName());
         MDC.put("clientId", consentMessage.getRegisteredClientId());
@@ -49,7 +52,10 @@ public class ConsentCleanupService implements ConsentCleanupUsecases {
      *
      * @param consents
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 2500)
+    @Transactional(
+            timeout = 2500,
+            rollbackFor = Exception.class
+    )
     public void deleteConsents(Iterable<ConsentMessage> consents) {
         log.info("Trying to delete all consents");
         cleanupUsecases.deleteAll(StreamSupport

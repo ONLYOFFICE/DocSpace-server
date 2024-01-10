@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -24,7 +25,11 @@ public class ConsentCreationService implements ConsentCreationUsecases {
      *
      * @param consentMessage
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 1250)
+    @Transactional(
+            timeout = 1250,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public void saveConsent(ConsentMessage consentMessage) {
         MDC.put("principalName", consentMessage.getPrincipalName());
         MDC.put("clientId", consentMessage.getRegisteredClientId());
@@ -41,7 +46,11 @@ public class ConsentCreationService implements ConsentCreationUsecases {
      *
      * @param consents
      */
-    @Transactional(timeout = 5000)
+    @Transactional(
+            timeout = 5000,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public void saveConsents(Iterable<ConsentMessage> consents) {
         log.info("Trying to save consents as a batch");
         for (ConsentMessage consent : consents) {
