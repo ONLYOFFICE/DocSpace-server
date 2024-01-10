@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClientRetrieveService implements ClientRetrieveUsecases {
     private final ClientPersistenceRetrievalUsecases retrievalUsecases;
-
-    private final CacheManager cacheManager;
     private final Cipher cipher;
 
     /**
@@ -76,9 +73,6 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
 
         var data = retrievalUsecases.findAllByTenant(tenant, Pageable
                 .ofSize(limit).withPage(page));
-
-        data.forEach(client -> cacheManager.getCache("clients")
-                .put(client.getClientId(), client));
 
         var builder = PaginationDTO
                 .<ClientDTO>builder()
