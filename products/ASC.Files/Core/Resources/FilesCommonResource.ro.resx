@@ -390,7 +390,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
     <value>Fișierul a fost creat în dosarul "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Documentul OFORM spre completare este gata. A fost salvat în {0}</value>
+    <value>Documentul PDF spre completare este gata. A fost salvat în {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Copia fișierului OFORM a fost creată în folderul {0}. Completați formularul și încărcați rezultatul în formatul PDF sau DOCX.</value>

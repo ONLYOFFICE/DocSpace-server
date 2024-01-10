@@ -299,7 +299,7 @@
     <value>Файл создан в папке "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Заполняемый документ OFORM готов. Он сохранен в папке {0}</value>
+    <value>Заполняемый документ PDF готов. Он сохранен в папке {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Копия файла OFORM создана в папке {0}. Заполните форму и скачайте результат как файл в формате PDF или DOCX.</value>

@@ -402,7 +402,7 @@
     <value>Σφάλμα έναρξης επεξεργασίας αρχείου</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Το έγγραφο OFORM με δυνατότητα συμπλήρωσης είναι έτοιμο. Έχει αποθηκευτεί στο {0}</value>
+    <value>Το έγγραφο PDF με δυνατότητα συμπλήρωσης είναι έτοιμο. Έχει αποθηκευτεί στο {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Το αντίγραφο OFORM δημιουργείται στον φάκελο {0}. Συμπληρώστε τη φόρμα και κατεβάστε το αποτέλεσμα ως αρχείο PDF ή DOCX.</value>

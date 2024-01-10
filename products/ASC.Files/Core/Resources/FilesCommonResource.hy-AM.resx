@@ -412,7 +412,7 @@
     <value>Թղթապանակում ստեղծված ֆայլ"{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Լրացվող OFORM փաստաթուղթը պատրաստ է: Այն պահվում է {0}-ում</value>
+    <value>Լրացվող PDF փաստաթուղթը պատրաստ է: Այն պահվում է {0}-ում</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>OFORM-ի պատճենը ստեղծվում է {0} պանակում: Խնդրում ենք լրացնել ձևը և ներբեռնել արդյունքը որպես PDF կամ DOCX ֆայլ.</value>

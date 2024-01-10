@@ -401,7 +401,7 @@
     <value>Szukaj w treści dokumentów</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Dokument OFORM jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
+    <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Kopia OFORM jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
