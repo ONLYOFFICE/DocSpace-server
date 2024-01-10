@@ -33,27 +33,32 @@ final class LogAuditCommandHandler extends ScheduledMessagingCommandHandler<Audi
         if (messages.size() > 0) {
             MDC.put("messagesCount", String.valueOf(messages.size()));
             log.debug("Persisting audit messages");
-            MDC.clear();
 
-            var ids = auditUsecases.saveAudits(messages
-                    .stream().map(s -> s.getData())
-                    .collect(Collectors.toSet()));
+            try {
+                var ids = auditUsecases.saveAudits(messages
+                        .stream().map(s -> s.getData())
+                        .collect(Collectors.toSet()));
 
-            messages.removeIf(m -> {
-                var tag = m.getTag();
-                var channel = m.getChannel();
+                messages.removeIf(m -> {
+                    var tag = m.getTag();
+                    var channel = m.getChannel();
 
-                try {
-                    if (!ids.contains(m.getData().getTag()))
-                        channel.basicAck(tag, true);
-                    else
-                        channel.basicNack(tag, false, true);
-                } catch (IOException e) {
-                    log.error("Could not persist audits", e);
-                } finally {
-                    return true;
-                }
-            });
+                    try {
+                        if (!ids.contains(m.getData().getTag()))
+                            channel.basicAck(tag, true);
+                        else
+                            channel.basicNack(tag, false, true);
+                    } catch (IOException e) {
+                        log.error("Could not persist audits", e);
+                    } finally {
+                        return true;
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Could not commit audit messages transaction");
+            } finally {
+                MDC.clear();
+            }
         }
     }
 }

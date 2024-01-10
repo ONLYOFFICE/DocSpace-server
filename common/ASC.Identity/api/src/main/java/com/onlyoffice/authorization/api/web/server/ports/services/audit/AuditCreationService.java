@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -27,7 +29,10 @@ public class AuditCreationService implements AuditCreationUsecases {
      * @param audits
      * @return
      */
-    @Transactional(timeout = 3000)
+    @Transactional(
+            timeout = 3000,
+            propagation = Propagation.REQUIRES_NEW
+    )
     public Set<String> saveAudits(Iterable<AuditMessage> audits) {
         log.info("Saving audits as a batch");
 
@@ -46,6 +51,7 @@ public class AuditCreationService implements AuditCreationUsecases {
                 MDC.clear();
             }
         }
+
         return ids;
     }
 }
