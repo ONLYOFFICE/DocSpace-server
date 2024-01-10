@@ -29,11 +29,6 @@ public class AuditCreationService implements AuditCreationUsecases {
      * @param audits
      * @return
      */
-    @Transactional(
-            timeout = 3000,
-            propagation = Propagation.REQUIRES_NEW,
-            rollbackFor = Exception.class
-    )
     public Set<String> saveAudits(Iterable<AuditMessage> audits) {
         log.info("Saving audits as a batch");
 
