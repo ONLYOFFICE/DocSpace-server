@@ -173,14 +173,15 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             return _admins;
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
-            .Select(r=> r.Id)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, false, null, true, 0, 0)
+            .Select(r => r.Id)
             .ToListAsync();
         
         _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-}
+    }
     
     private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
     {
