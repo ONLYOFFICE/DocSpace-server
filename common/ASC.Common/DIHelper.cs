@@ -142,16 +142,6 @@ public class DIHelper()
         ServiceCollection = serviceCollection;
     }
 
-    public void RegisterProducts(IConfiguration configuration, string path)
-    {
-        var types = AutofacExtension.FindAndLoad(configuration, path);
-
-        foreach (var t in types.Select(Type.GetType).Where(r => r != null))
-        {
-            TryAdd(t);
-        }
-    }
-
     public void AddControllers()
     {
         foreach (var a in Assembly.GetEntryAssembly().GetTypes().Where(r => r.IsAssignableTo<ControllerBase>() && !r.IsAbstract))

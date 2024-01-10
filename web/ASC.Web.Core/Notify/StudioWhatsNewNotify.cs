@@ -70,7 +70,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         var products = webItemManager.GetItemsAll<IProduct>();
 
-        if (webItemManager.GetItemsAll<IProduct>().Count == 0)
+        if (products.Count == 0)
         {
             _log.InformationNoProducts();
             return;
@@ -80,9 +80,9 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var tenants = await GetChangedTenantsAsync(scheduleDate, whatsNewType);
 
-        foreach (var tenantid in tenants)
+        foreach (var tenantId in tenants)
         {
-            await SendMsgWhatsNewAsync(tenantid, scheduleDate, whatsNewType, products);
+            await SendMsgWhatsNewAsync(tenantId, scheduleDate, whatsNewType, products);
         }
     }
 
@@ -98,11 +98,11 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         };
     }
 
-    private async Task SendMsgWhatsNewAsync(int tenantid, DateTime scheduleDate, WhatsNewType whatsNewType, List<IProduct> products)
+    private async Task SendMsgWhatsNewAsync(int tenantId, DateTime scheduleDate, WhatsNewType whatsNewType, List<IProduct> products)
     {
         try
         {
-            var tenant = await tenantManager.GetTenantAsync(tenantid);
+            var tenant = await tenantManager.GetTenantAsync(tenantId);
             if (tenant == null ||
                 tenant.Status != TenantStatus.Active ||
                 !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
@@ -112,14 +112,14 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
             tenantManager.SetCurrentTenant(tenant);
 
-            if (TariffState.NotPaid <= (await tariffService.GetTariffAsync(tenantid)).State)
+            if (TariffState.NotPaid <= (await tariffService.GetTariffAsync(tenantId)).State)
             {
                 return;
             }
 
             var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
-            _log.InformationStartSendWhatsNewIn(tenant.GetTenantDomain(coreSettings), tenantid);
+            _log.InformationStartSendWhatsNewIn(tenant.GetTenantDomain(coreSettings), tenantId);
             foreach (var user in await userManager.GetUsersAsync())
             {
                 _log.Debug($"SendMsgWhatsNew start checking subscription: {user.Email}");//temp
