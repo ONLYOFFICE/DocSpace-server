@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      */
     @Transactional(
             timeout = 1500,
+            isolation = Isolation.REPEATABLE_READ,
             rollbackFor = Exception.class
     )
     public void saveAuthorization(AuthorizationMessage authorizationMessage) {
@@ -49,6 +51,7 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      */
     @Transactional(
             timeout = 5000,
+            isolation = Isolation.REPEATABLE_READ,
             rollbackFor = Exception.class
     )
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
