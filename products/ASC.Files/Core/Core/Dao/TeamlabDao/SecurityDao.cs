@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Group = ASC.Core.Group;
 using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.Data;
@@ -189,6 +188,93 @@ internal abstract class SecurityBaseDao<T>(
         }
 
         return InternalGetPureShareRecordsAsync(entry);
+    }
+
+    public async IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count)
+    {
+        if (entry == null)
+        {
+            yield break;
+        }
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var mappedId = (await MappingIDAsync(entry.Id)).ToString();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var groupShare = await filesDbContext.Security
+            .Where(s => s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType && s.Subject == groupId)
+            .Select(s => s.Share)
+            .FirstOrDefaultAsync();
+
+        if (groupShare == FileShare.None)
+        {
+            yield break;
+        }
+
+        var usersQuery = filesDbContext.UserGroup.Where(g => g.TenantId == tenantId && g.UserGroupId == groupId && g.Userid != entry.CreateBy)
+            .Join(filesDbContext.Users, ug => ug.Userid, u => u.Id,
+                (ug, u) => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName,
+                    u.Email
+                });
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            usersQuery = usersQuery.Where(u => u.FirstName.Contains(text) || u.LastName.Contains(text) || u.Email.Contains(text));
+        }
+
+        var q = from user in usersQuery
+            join security in filesDbContext.Security on user.Id equals security.Subject into joinedSet
+            from s in joinedSet.DefaultIfEmpty()
+            where s == null || (s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType)
+            orderby user.FirstName
+            select new GroupMemberSecurityRecord
+            {
+                UserId = user.Id,
+                UserShare = s != null ? s.Share : FileShare.None,
+                GroupShare = groupShare
+            };
+
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        await foreach (var record in q.ToAsyncEnumerable())
+        {
+            yield return record;
+        }
+    }
+
+    public async Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text)
+    {
+        if (entry == null)
+        {
+            return 0;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = filesDbContext.UserGroup.Where(g => g.TenantId == tenantId && g.UserGroupId == groupId && g.Userid != entry.CreateBy);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            return await q.Join(filesDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
+                .Where(u => u.FirstName.Contains(text) || u.LastName.Contains(text) || u.Email.Contains(text)).CountAsync();
+        }
+
+        return await q.CountAsync();
     }
 
     public async Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)

@@ -24,28 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.MessagingSystem;
-using ASC.Web.Core;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class SecurityControllerInternal(FileStorageService fileStorageService,
         SecurityControllerHelper securityControllerHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        ApiContext apiContext,
+        IDaoFactory daoFactory,
+        FileSharing fileSharing,
+        EmployeeFullDtoHelper employeeFullDtoHelper)
+    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper);
 
 public class SecurityControllerThirdparty(FileStorageService fileStorageService,
         SecurityControllerHelper securityControllerHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        ApiContext apiContext,
+        IDaoFactory daoFactory,
+        FileSharing fileSharing,
+        EmployeeFullDtoHelper employeeFullDtoHelper)
+    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper);
 
 public abstract class SecurityController<T>(FileStorageService fileStorageService,
         SecurityControllerHelper securityControllerHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ApiContext apiContext,
+        IDaoFactory daoFactory,
+        FileSharing fileSharing,
+        EmployeeFullDtoHelper employeeFullDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -193,6 +202,30 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
     {
         return await fileStorageService.SendEditorNotifyAsync(fileId, mentionMessage);
+    }
+    
+    [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
+    public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFolderSecurityAsync(T folderId, Guid groupId)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, groupId, apiContext.FilterValue);
+
+        apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
+
+        await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, groupId, apiContext.FilterValue, offset, count))
+        {
+            yield return new GroupMemberSecurityDto
+            {
+                User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
+                GroupAccess = memberSecurity.GroupShare,
+                CanEditAccess = memberSecurity.CanEditAccess,
+                UserAccess = memberSecurity.UserShare != FileShare.None ? memberSecurity.UserShare : null,
+                Overridden = memberSecurity.UserShare != FileShare.None
+            };
+        }
     }
 }
 
