@@ -275,6 +275,7 @@ public class PortalController : ControllerBase
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await _tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
