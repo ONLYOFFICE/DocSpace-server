@@ -281,23 +281,30 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
-        var zone = ZoneId.of(SettingsContextContainer.context.get()
-                .getResponse().getTimezone());
+        try {
+            var zone = ZoneId.of(SettingsContextContainer.context.get()
+                    .getResponse().getTimezone());
 
-        setLoggerContextAttributes();
-        MDC.put("zone", zone.toString());
-        log.info("Received a new get clients info");
+            setLoggerContextAttributes();
+            MDC.put("zone", zone.toString());
+            log.info("Received a new get clients info");
 
-        var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
-                .context.get().getResponse().getEmail());
+            var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
+                    .context.get().getResponse().getEmail());
 
-        result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
+            result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
 
-        MDC.put("clients", String.valueOf(result.size()));
-        log.debug("Successfully retrieved client consents");
-        MDC.clear();
+            MDC.put("clients", String.valueOf(result.size()));
+            log.debug("Successfully retrieved client consents");
 
-        return ResponseEntity.ok(result);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            throw new EntityNotFoundException(String
+                    .format("Could not fetch consents for %s", PersonContextContainer
+                            .context.get().getResponse().getEmail()), e);
+        } finally {
+            MDC.clear();
+        }
     }
 
     /**
@@ -314,44 +321,50 @@ public class ClientController {
             HttpServletResponse response,
             @PathVariable @NotEmpty String clientId
     ) {
-        var zone = ZoneId.of(SettingsContextContainer.context.get()
-                .getResponse().getTimezone());
+        try {
+            var zone = ZoneId.of(SettingsContextContainer.context.get()
+                    .getResponse().getTimezone());
 
-        setLoggerContextAttributes();
-        MDC.put("clientId", clientId);
-        MDC.put("zone", zone.toString());
-        log.info("Received a new get client request for tenant");
-        MDC.clear();
+            setLoggerContextAttributes();
+            MDC.put("clientId", clientId);
+            MDC.put("zone", zone.toString());
+            log.info("Received a new get client request for tenant");
 
-        var client = retrieveUsecases.getClient(clientId);
-        client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
-        client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
-        client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(null, response, clientId, null))
-                .withRel(HttpMethod.PUT.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(null, response, clientId))
-                .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(null, response, client.getClientId()))
-                .withRel(HttpMethod.PATCH.name())
-                .withTitle("regenerate_secret"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .postClient(null, response, null))
-                .withRel(HttpMethod.POST.name())
-                .withTitle("create_client"));
-        client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(null, response, clientId, null))
-                .withRel(HttpMethod.PATCH.name())
-                .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("activate_client"));
+            var client = retrieveUsecases.getClient(clientId);
+            client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
+            client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .updateClient(null, response, clientId, null))
+                    .withRel(HttpMethod.PUT.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("update_client"));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .deleteClient(null, response, clientId))
+                    .withRel(HttpMethod.DELETE.name())
+                    .withTitle("delete_client"));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .regenerateSecret(null, response, client.getClientId()))
+                    .withRel(HttpMethod.PATCH.name())
+                    .withTitle("regenerate_secret"));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .postClient(null, response, null))
+                    .withRel(HttpMethod.POST.name())
+                    .withTitle("create_client"));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .activateClient(null, response, clientId, null))
+                    .withRel(HttpMethod.PATCH.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("activate_client"));
 
-        log.debug("Successfully found a client", client);
+            log.debug("Successfully found a client", client);
 
-        return ResponseEntity.ok(client);
+            return ResponseEntity.ok(client);
+        } catch (RuntimeException e) {
+            throw new EntityNotFoundException(String
+                    .format("Could not find client with clientId %s", clientId), e);
+        } finally {
+            MDC.clear();
+        }
     }
 
     /**
@@ -556,15 +569,21 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
-        setLoggerContextAttributes();
-        MDC.put("clientId", clientId);
-        log.info("Received a new change client activation request for tenant");
-        MDC.clear();
+        try {
+            setLoggerContextAttributes();
+            MDC.put("clientId", clientId);
+            log.info("Received a new change client activation request for tenant");
 
-        if (mutationUsecases.changeActivation(body, clientId))
-            return ResponseEntity.status(HttpStatus.OK).build();
+            if (mutationUsecases.changeActivation(body, clientId))
+                return ResponseEntity.status(HttpStatus.OK).build();
 
-        return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            throw new UnsupportedOperationException(String
+                    .format("Could not change client's activation with clientId %s", clientId), e);
+        } finally {
+            MDC.clear();
+        }
     }
 }
 
