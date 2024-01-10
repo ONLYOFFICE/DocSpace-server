@@ -21,6 +21,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
@@ -56,7 +57,11 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @return
      */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
-    @Transactional(rollbackFor = Exception.class, timeout = 2500)
+    @Transactional(
+            timeout = 1500,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public SecretDTO regenerateSecret(String clientId, TenantDTO tenant) {
         var secret = UUID.randomUUID().toString();
 
@@ -86,7 +91,11 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @return
      */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
-    @Transactional(rollbackFor = Exception.class, timeout = 2000)
+    @Transactional(
+            timeout = 1500,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
         log.info("Changing client's activation", clientId, activationDTO.getStatus());
 
@@ -109,7 +118,11 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param tenant
      */
     @CacheEvict(cacheNames = "clients", key = "#clientId")
-    @Transactional(rollbackFor = Exception.class, timeout = 2000)
+    @Transactional(
+            timeout = 1750,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public void updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
         MDC.put("clientId", clientId);
         log.info("Trying to update a client");
@@ -136,7 +149,11 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param updateClientPair
      * @return
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 5000)
+    @Transactional(
+            timeout = 5000,
+            isolation = Isolation.REPEATABLE_READ,
+            rollbackFor = Exception.class
+    )
     public Set<String> updateClients(Iterable<Pair<String, ClientMessage>> updateClientPair) {
         log.info("Trying to update clients as a batch");
 
