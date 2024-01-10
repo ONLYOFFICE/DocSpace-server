@@ -33,7 +33,7 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
      * @return
      */
     @Cacheable("clients")
-    @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 1250)
+    @Transactional(timeout = 1250, readOnly = true)
     public ClientDTO getClient(String clientId) {
         MDC.put("clientId", clientId);
         log.info("Trying to get a valid client by clientId");
@@ -64,7 +64,7 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
      * @param limit
      * @return
      */
-    @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2250)
+    @Transactional(timeout = 2250, readOnly = true)
     public PaginationDTO getTenantClients(int tenant, int page, int limit) {
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));

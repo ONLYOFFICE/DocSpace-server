@@ -30,6 +30,7 @@ import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMappe
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -131,90 +132,95 @@ public class ClientController {
                 .getResponse().getTimezone());
         var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
 
-        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
-        MDC.put("tenantAlias", tenant.getTenantAlias());
-        MDC.put("page", String.valueOf(page));
-        MDC.put("limit", String.valueOf(limit));
-        log.info("Received a new get clients request for tenant with page and limit");
-        MDC.clear();
-
-        PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant
-                .getTenantId(), page, limit);
-
-        var tasks = new HashSet<Pair<ClientDTO, CompletableFuture<APIClientDTOWrapper<PersonDTO>>>>();
-        pagination.getData().forEach(c -> {
-            MDC.put("profile", c.getModifiedBy());
-            log.debug("Creating a task to get user's profile");
-
-            tasks.add(Pair.of(c, CompletableFuture.supplyAsync(() -> apiClient
-                    .getProfile(address, cookie, c.getModifiedBy()))));
-
-            MDC.clear();
-        });
-
-        CompletableFuture.allOf(tasks.stream().map(Pair::getSecond).collect(Collectors.toSet())
-                .toArray(new CompletableFuture[tasks.size()]));
-
-        tasks.forEach(task -> {
-            var client = task.getFirst();
-
-            MDC.put("client", client.getClientId());
-            MDC.put("zone", zone.toString());
-            log.debug("Setting date according to the tenant timezone");
+        try {
+            MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+            MDC.put("tenantAlias", tenant.getTenantAlias());
+            MDC.put("page", String.valueOf(page));
+            MDC.put("limit", String.valueOf(limit));
+            log.info("Received a new get clients request for tenant with page and limit");
             MDC.clear();
 
-            client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
-            client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
-            try {
-                MDC.put("clientId", client.getClientId());
-                log.debug("Updating creator avatar");
-                var result = task.getSecond().get();
-                if (result != null && result.getResponse() != null) {
-                    var profile = result.getResponse();
-                    client.setCreatorAvatar(profile.getAvatarSmall());
-                    client.setCreatorDisplayName(String
-                            .format("%s %s", profile.getFirstName(), profile.getLastName()).trim());
+            PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant
+                    .getTenantId(), page, limit);
+
+            var tasks = new HashSet<Pair<ClientDTO, CompletableFuture<APIClientDTOWrapper<PersonDTO>>>>();
+            pagination.getData().forEach(c -> {
+                MDC.put("profile", c.getModifiedBy());
+                log.debug("Creating a task to get user's profile");
+
+                tasks.add(Pair.of(c, CompletableFuture.supplyAsync(() -> apiClient
+                        .getProfile(address, cookie, c.getModifiedBy()))));
+
+                MDC.clear();
+            });
+
+            CompletableFuture.allOf(tasks.stream().map(Pair::getSecond).collect(Collectors.toSet())
+                    .toArray(new CompletableFuture[tasks.size()]));
+
+            tasks.forEach(task -> {
+                var client = task.getFirst();
+
+                MDC.put("client", client.getClientId());
+                MDC.put("zone", zone.toString());
+                log.debug("Setting date according to the tenant timezone");
+                MDC.clear();
+
+                client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
+                client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
+                try {
+                    MDC.put("clientId", client.getClientId());
+                    log.debug("Updating creator avatar");
+                    var result = task.getSecond().get();
+                    if (result != null && result.getResponse() != null) {
+                        var profile = result.getResponse();
+                        client.setCreatorAvatar(profile.getAvatarSmall());
+                        client.setCreatorDisplayName(String
+                                .format("%s %s", profile.getFirstName(), profile.getLastName()).trim());
+                    }
+                    MDC.clear();
+                } catch (ExecutionException | InterruptedException e) {
+                    MDC.put("profile", client.getModifiedBy());
+                    log.error("Could not get user's profile");
+                    MDC.clear();
                 }
-                MDC.clear();
-            } catch (ExecutionException | InterruptedException e) {
-                MDC.put("profile", client.getModifiedBy());
-                log.error("Could not get user's profile");
-                MDC.clear();
+            });
+
+            for (final var client : pagination.getData()) {
+                client.add(linkTo(methodOn(ClientController.class)
+                        .getClient(response, client.getClientId()))
+                        .withRel(HttpMethod.GET.name())
+                        .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                        .withTitle("get_client"));
+                client.add(linkTo(methodOn(ClientController.class)
+                        .updateClient(request, response, client.getClientId(), null))
+                        .withRel(HttpMethod.PUT.name())
+                        .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                        .withTitle("update_client"));
+                client.add(linkTo(methodOn(ClientController.class)
+                        .deleteClient(request, response, client.getClientId()))
+                        .withRel(HttpMethod.DELETE.name())
+                        .withTitle("delete_client"));
+                client.add(linkTo(methodOn(ClientController.class)
+                        .regenerateSecret(request, response, client.getClientId()))
+                        .withRel(HttpMethod.PATCH.name())
+                        .withTitle("regenerate_secret"));
+                client.add(linkTo(methodOn(ClientController.class)
+                        .activateClient(request, response, client.getClientId(), null))
+                        .withRel(HttpMethod.PATCH.name())
+                        .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                        .withTitle("activate_client"));
             }
-        });
 
-        for (final var client : pagination.getData()) {
-            client.add(linkTo(methodOn(ClientController.class)
-                    .getClient(response, client.getClientId()))
-                    .withRel(HttpMethod.GET.name())
-                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                    .withTitle("get_client"));
-            client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(request, response, client.getClientId(), null))
-                    .withRel(HttpMethod.PUT.name())
-                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                    .withTitle("update_client"));
-            client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(request, response, client.getClientId()))
-                    .withRel(HttpMethod.DELETE.name())
-                    .withTitle("delete_client"));
-            client.add(linkTo(methodOn(ClientController.class)
-                    .regenerateSecret(request, response, client.getClientId()))
-                    .withRel(HttpMethod.PATCH.name())
-                    .withTitle("regenerate_secret"));
-            client.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(request, response, client.getClientId(), null))
-                    .withRel(HttpMethod.PATCH.name())
-                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                    .withTitle("activate_client"));
+            pagination.add(linkTo(methodOn(ClientController.class)
+                    .postClient(request, response, null))
+                    .withRel(HttpMethod.POST.name())
+                    .withTitle("create_client"));
+
+            return ResponseEntity.ok(pagination);
+        } catch (RuntimeException e) {
+            throw new EntityNotFoundException(String
+                    .format("Could not find clients for tenant %s", tenant.getTenantId()), e);
         }
-
-        pagination.add(linkTo(methodOn(ClientController.class)
-                .postClient(request, response, null))
-                .withRel(HttpMethod.POST.name())
-                .withTitle("create_client"));
-
-        return ResponseEntity.ok(pagination);
     }
 
     /**
@@ -227,12 +233,17 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
-        MDC.put("clientId", clientId);
-        log.info("Received a new get client info request");
-        MDC.clear();
-
-        return ResponseEntity.ok(ClientMapper.INSTANCE
+        try {
+            MDC.put("clientId", clientId);
+            log.info("Received a new get client info request");
+            return ResponseEntity.ok(ClientMapper.INSTANCE
                 .fromClientToInfoDTO(retrieveUsecases.getClient(clientId)));
+        } catch (RuntimeException e) {
+            throw new EntityNotFoundException(String
+                    .format("Could not find client with clientId %s", clientId), e);
+        } finally {
+            MDC.clear();
+        }
     }
 
     /**
