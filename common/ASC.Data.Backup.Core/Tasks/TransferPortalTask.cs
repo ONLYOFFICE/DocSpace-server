@@ -34,7 +34,8 @@ public class TransferPortalTask(DbFactory dbFactory,
         StorageFactoryConfig storageFactoryConfig,
         ModuleProvider moduleProvider,
         TempStream tempStream,
-        TempPath tempPath)
+        TempPath tempPath,
+        ICache cache)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public const string DefaultDirectoryName = "backup";
@@ -145,7 +146,7 @@ public class TransferPortalTask(DbFactory dbFactory,
         {
             var baseStorage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
             var destStorage = await StorageFactory.GetStorageAsync(columnMapper.GetTenantMapping(), group.Key, ToRegion);
-            var utility = new CrossModuleTransferUtility(options, tempStream, tempPath, baseStorage, destStorage);
+            var utility = new CrossModuleTransferUtility(options, tempStream, tempPath, baseStorage, destStorage, cache);
 
             foreach (var file in group)
             {

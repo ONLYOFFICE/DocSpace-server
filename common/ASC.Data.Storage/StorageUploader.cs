@@ -33,7 +33,8 @@ public class StorageUploader(
     ICacheNotify<MigrationProgress> cacheMigrationNotify,
     IDistributedTaskQueueFactory queueFactory,
     ILogger<StorageUploader> logger, 
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    ICache cache)
 {
     protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
@@ -48,7 +49,7 @@ public class StorageUploader(
                 return;
             }
 
-            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger);
+            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger, cache);
             _queue.EnqueueTask(migrateOperation);
         }
     }
@@ -86,6 +87,7 @@ public class MigrateOperation : DistributedTaskProgress
     private readonly IServiceProvider _serviceProvider;
     private readonly StorageFactoryConfig _storageFactoryConfig;
     private readonly TempStream _tempStream;
+    private readonly ICache _cache;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
 
     static MigrateOperation()
@@ -101,7 +103,8 @@ public class MigrateOperation : DistributedTaskProgress
         StorageSettings settings,
         StorageFactoryConfig storageFactoryConfig,
         TempStream tempStream,
-        ILogger<StorageUploader> logger)
+        ILogger<StorageUploader> logger,
+        ICache cache)
     {
         Id = id;
         Status = DistributedTaskStatus.Created;
@@ -115,6 +118,7 @@ public class MigrateOperation : DistributedTaskProgress
         _modules = storageFactoryConfig.GetModuleList(_configPath, true);
         StepCount = _modules.Count();
         _logger = logger;
+        _cache = cache;
     }
 
     public object Clone()
@@ -144,7 +148,7 @@ public class MigrateOperation : DistributedTaskProgress
                 var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
-                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store);
+                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store, _cache);
 
                 string[] files;
                 foreach (var domain in domains)

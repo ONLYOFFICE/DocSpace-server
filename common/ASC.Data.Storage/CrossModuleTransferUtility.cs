@@ -30,7 +30,8 @@ public class CrossModuleTransferUtility(ILogger option,
     TempStream tempStream,
     TempPath tempPath,
     IDataStore source,
-    IDataStore destination)
+    IDataStore destination,
+    ICache cache)
 {
     private readonly IDataStore _source = source ?? throw new ArgumentNullException(nameof(source));
     private readonly IDataStore _destination = destination ?? throw new ArgumentNullException(nameof(destination));
@@ -52,17 +53,18 @@ public class CrossModuleTransferUtility(ILogger option,
         else
         {
             var session = new CommonChunkedUploadSession(stream.Length);
-            var holder = new CommonChunkedUploadSessionHolder(tempPath, _destination, destDomain);
+            var holder = new CommonChunkedUploadSessionHolder(tempPath, _destination, destDomain, cache);
             await holder.InitAsync(session);
             try
             {
                 Stream memstream = null;
+                var i = 1;
                 try
                 {
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        await holder.UploadChunkAsync(session, memstream, _chunkSize);
+                        await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
                         await memstream.DisposeAsync();
                     }
                 }

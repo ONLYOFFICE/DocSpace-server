@@ -37,7 +37,8 @@ public class S3Storage(TempStream tempStream,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        CoreBaseSettings coreBaseSettings)
+        CoreBaseSettings coreBaseSettings,
+        ICache cache)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportCdnUri => true;
@@ -459,7 +460,7 @@ public class S3Storage(TempStream tempStream,
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
 
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream);
+        return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream, cache);
     }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
