@@ -33,27 +33,32 @@ final class CreateAuthorizationCommandHandler extends ScheduledMessagingCommandH
         if (messages.size() > 0) {
             MDC.put("messagesCount", String.valueOf(messages.size()));
             log.debug("Persisting authorization messages");
-            MDC.clear();
 
-            var ids = creationUsecases.saveAuthorizations(messages
-                    .stream().map(s -> s.getData())
-                    .collect(Collectors.toSet()));
+            try {
+                var ids = creationUsecases.saveAuthorizations(messages
+                        .stream().map(s -> s.getData())
+                        .collect(Collectors.toSet()));
 
-            messages.removeIf(m -> {
-                var tag = m.getTag();
-                var channel = m.getChannel();
+                messages.removeIf(m -> {
+                    var tag = m.getTag();
+                    var channel = m.getChannel();
 
-                try {
-                    if (!ids.contains(m.getData().getId()))
-                        channel.basicAck(tag, true);
-                    else
-                        channel.basicNack(tag, false, true);
-                } catch (IOException e) {
-                    log.error("Could not persist authorizations", e);
-                } finally {
-                    return true;
-                }
-            });
+                    try {
+                        if (!ids.contains(m.getData().getId()))
+                            channel.basicAck(tag, true);
+                        else
+                            channel.basicNack(tag, false, true);
+                    } catch (IOException e) {
+                        log.error("Could not persist authorizations", e);
+                    } finally {
+                        return true;
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Could not commit authorization messages transaction");
+            } finally {
+                MDC.clear();
+            }
         }
     }
 }

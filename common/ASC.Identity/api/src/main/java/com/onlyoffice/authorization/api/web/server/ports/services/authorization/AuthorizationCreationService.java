@@ -29,7 +29,10 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      *
      * @param authorizationMessage
      */
-    @Transactional(rollbackFor = Exception.class, timeout = 1250)
+    @Transactional(
+            timeout = 1500,
+            rollbackFor = Exception.class
+    )
     public void saveAuthorization(AuthorizationMessage authorizationMessage) {
         MDC.put("authorizationId", authorizationMessage.getId());
         log.info("Persisting an authorization");
@@ -44,7 +47,10 @@ public class AuthorizationCreationService implements AuthorizationCreationUsecas
      * @param authorizations
      * @return a list of failed ids
      */
-    @Transactional(timeout = 5000)
+    @Transactional(
+            timeout = 5000,
+            rollbackFor = Exception.class
+    )
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
         log.info("Persisting authorizations as a batch");
 
