@@ -43,8 +43,8 @@ public class LinkRequestDto
     public FileShare Access { get; set; }
 
     /// <summary>Link expiration date</summary>
-    /// <type>System.DateTime, System</type>
-    public DateTime? ExpirationDate { get; set; }
+    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>Link type</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
