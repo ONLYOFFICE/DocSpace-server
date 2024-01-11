@@ -48,6 +48,7 @@ public class DbWorker
     private readonly AuthContext _authContext;
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
+    private readonly CoreBaseSettings _coreBaseSettings;
 
     private int Tenant
     {
@@ -62,13 +63,15 @@ public class DbWorker
         TenantManager tenantManager,
         AuthContext authContext,
         IMapper mapper,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        CoreBaseSettings coreBaseSettings)
     {
         _dbContextFactory = dbContextFactory;
         _tenantManager = tenantManager;
         _authContext = authContext;
         _mapper = mapper;
         _configuration = configuration;
+        _coreBaseSettings = coreBaseSettings;
     }
 
     public async Task<WebhooksConfig> AddWebhookConfig(string uri, string name, string secretKey, bool? enabled, bool? ssl)
@@ -82,9 +85,10 @@ public class DbWorker
             return objForCreate;
         }
 
+        var parsed = Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri); 
         try
         {
-            if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && NetworkInterface.GetIsNetworkAvailable())
+            if (!_coreBaseSettings.Standalone && parsed && NetworkInterface.GetIsNetworkAvailable())
             {
                 foreach (var netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -97,11 +101,18 @@ public class DbWorker
                 }
             }
         }
-        catch (Exception)
+        catch (NetworkInformationException)
         {
             // ignored
         }
 
+        var restrictions = _configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? new List<string>();
+        
+        if (parsed && restrictions.Contains(parsedUri.Host))
+        {
+            throw new SecurityException();
+        }
+        
         var toAdd = new WebhooksConfig
         {
             TenantId = Tenant,
