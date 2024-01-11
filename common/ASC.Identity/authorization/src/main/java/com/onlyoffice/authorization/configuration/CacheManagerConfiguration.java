@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CacheManagerConfiguration {
+    /**
+     *
+     * @return
+     */
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager() {
@@ -21,7 +25,7 @@ public class CacheManagerConfiguration {
                         name,
                         CacheBuilder.newBuilder()
                                 .expireAfterWrite(120, TimeUnit.SECONDS)
-                                .maximumSize(100)
+                                .maximumSize(3000)
                                 .build().asMap(),
                         false);
             }
