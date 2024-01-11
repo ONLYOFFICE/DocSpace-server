@@ -33,7 +33,7 @@ public class ClientCleanupService implements ClientCleanupUsecases {
      *
      * @param clientId
      */
-    @CacheEvict(cacheNames = "clients", key = "#clientId")
+    @CacheEvict(cacheNames = {"clients"}, key = "#clientId")
     public void deleteClientAsync(String clientId) {
         log.info("Trying to create a new client deletion task");
 
@@ -68,7 +68,7 @@ public class ClientCleanupService implements ClientCleanupUsecases {
      * @param tenant
      * @return
      */
-    @CacheEvict(cacheNames = "clients", key = "#id")
+    @CacheEvict(cacheNames = {"clients"}, key = "#id")
     @Transactional(
             timeout = 2000,
             rollbackFor = Exception.class
