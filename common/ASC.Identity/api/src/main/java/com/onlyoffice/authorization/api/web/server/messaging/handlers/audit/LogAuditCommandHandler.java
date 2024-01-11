@@ -1,15 +1,18 @@
 package com.onlyoffice.authorization.api.web.server.messaging.handlers.audit;
 
 import com.onlyoffice.authorization.api.core.usecases.service.audit.AuditCreationUsecases;
-import com.onlyoffice.authorization.api.web.server.messaging.handlers.ScheduledMessagingCommandHandler;
+import com.onlyoffice.authorization.api.web.server.messaging.handlers.MessagingCommandHandler;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.AuditMessage;
+import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -18,47 +21,49 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-final class LogAuditCommandHandler extends ScheduledMessagingCommandHandler<AuditMessage> {
+final class LogAuditCommandHandler implements MessagingCommandHandler<AuditMessage> {
     private final AuditCreationUsecases auditUsecases;
 
-    public String getCode() {
-        return AuditMessage.AuditCommandCode.LOG_AUDIT.name();
+    /**
+     *
+     * @param messages
+     * @param channel
+     */
+    public void handle(List<Message<AuditMessage>> messages, Channel channel) {
+        if (messages.size() > 0) {
+            MDC.put("messagesCount", String.valueOf(messages.size()));
+            log.debug("Persisting audit messages");
+            MDC.clear();
+
+            try {
+                var ids = auditUsecases.saveAudits(messages
+                        .stream().map(s -> s.getPayload())
+                        .collect(Collectors.toSet()));
+
+                messages.forEach(m -> {
+                    var dTag = m.getHeaders().get(AmqpHeaders.DELIVERY_TAG);
+                    if (dTag instanceof Long tag) {
+                        try {
+                            if (!ids.contains(m.getPayload().getTag()))
+                                channel.basicAck(tag, true);
+                            else
+                                channel.basicNack(tag, false, true);
+                        } catch (IOException e) {
+                            log.error("Could not send audit ack/nack signal to the broker", e);
+                        }
+                    }
+                });
+            } catch (RuntimeException e) {
+                log.error("Could not persist a batch of audits due to timeout");
+            }
+        }
     }
 
     /**
      *
+     * @return
      */
-    @Scheduled(fixedDelay = 1000)
-    private void persistMessages() {
-        if (messages.size() > 0) {
-            MDC.put("messagesCount", String.valueOf(messages.size()));
-            log.debug("Persisting audit messages");
-
-            try {
-                var ids = auditUsecases.saveAudits(messages
-                        .stream().map(s -> s.getData())
-                        .collect(Collectors.toSet()));
-
-                messages.removeIf(m -> {
-                    var tag = m.getTag();
-                    var channel = m.getChannel();
-
-                    try {
-                        if (!ids.contains(m.getData().getTag()))
-                            channel.basicAck(tag, true);
-                        else
-                            channel.basicNack(tag, false, true);
-                    } catch (IOException e) {
-                        log.error("Could not persist audits", e);
-                    } finally {
-                        return true;
-                    }
-                });
-            } catch (Exception e) {
-                log.error("Could not commit audit messages transaction");
-            } finally {
-                MDC.clear();
-            }
-        }
+    public String getCode() {
+        return AuditMessage.AuditCommandCode.LOG_AUDIT.name();
     }
 }

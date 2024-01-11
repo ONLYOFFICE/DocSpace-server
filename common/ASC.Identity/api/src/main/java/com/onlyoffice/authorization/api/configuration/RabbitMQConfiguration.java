@@ -39,6 +39,7 @@ import java.util.Map;
 public class RabbitMQConfiguration {
     private final Map<String, GenericQueueConfiguration> queues = new HashMap<>();
     private int prefetch = 500;
+    private int batchSize = 20;
 
     /**
      *
@@ -148,13 +149,14 @@ public class RabbitMQConfiguration {
      * @param converter
      * @return
      */
-    @Bean("prefetchRabbitListenerContainerFactory")
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> prefetchRabbitListenerContainerFactory(
+    @Bean("batchRabbitListenerContainerFactory")
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> batchRabbitListenerContainerFactory(
             ConnectionFactory rabbitConnectionFactory,
             MessageConverter converter
     ) {
         MDC.put("prefetch", String.valueOf(prefetch));
-        log.info("Building a prefetch rabbit listener container factory with manual ack", prefetch);
+        MDC.put("batch", String.valueOf(batchSize));
+        log.info("Building a batch rabbit listener container factory with manual ack");
         MDC.clear();
 
         var factory = new SimpleRabbitListenerContainerFactory();
@@ -162,6 +164,9 @@ public class RabbitMQConfiguration {
         factory.setMessageConverter(converter);
         factory.setPrefetchCount(prefetch);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setBatchListener(true);
+        factory.setBatchSize(batchSize);
+        factory.setConsumerBatchEnabled(true);
         return factory;
     }
 

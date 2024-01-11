@@ -138,8 +138,8 @@ public class ClientControllerTest {
                                 .queryParam("limit", "5")
                                 .cookie(new Cookie[]{
                                         new Cookie("asc_auth_key", "zxc"),
-                                        new Cookie("x-docspace-address", "http://127.0.0.1")
                                 })
+                                .header("X-Forwarded-Host", "127.0.0.1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -197,8 +197,8 @@ public class ClientControllerTest {
                         MockMvcRequestBuilders.get("/api/2.0/clients/mock")
                                 .cookie(new Cookie[]{
                                         new Cookie("asc_auth_key", "zxc"),
-                                        new Cookie("x-docspace-address", "http://127.0.0.1")
                                 })
+                                .header("X-Forwarded-Host", "127.0.0.1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -262,9 +262,9 @@ public class ClientControllerTest {
                                                 .scopes(Set.of("accounts:read"))
                                                 .build()).
                                         getJson())
+                                .header("X-Forwarded-Host", "127.0.0.1")
                                 .cookie(new Cookie[]{
                                         new Cookie("asc_auth_key", "zxc"),
-                                        new Cookie("x-docspace-address", "http://127.0.0.1")
                                 })
                 ).andReturn().getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());

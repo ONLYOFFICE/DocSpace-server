@@ -1,7 +1,10 @@
 package com.onlyoffice.authorization.api.web.server.messaging.handlers;
 
-import com.onlyoffice.authorization.api.web.server.messaging.messages.MessageWrapper;
+import com.rabbitmq.client.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+
+import java.util.List;
 
 /**
  *
@@ -10,9 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public interface MessagingCommandHandler<E> {
     /**
      *
-     * @param message
+     * @param messages
+     * @param channel
      */
-    void handle(MessageWrapper<E> message);
+    void handle(List<Message<E>> messages, Channel channel);
 
     /**
      *

@@ -79,6 +79,10 @@ public class ClientCreationService implements ClientCreationUsecases {
      * @param messages
      * @return
      */
+    @Transactional(
+            timeout = 5000,
+            rollbackFor = Exception.class
+    )
     public List<String> saveClients(Iterable<ClientMessage> messages) {
         log.info("Trying to save new clients as a batch");
 

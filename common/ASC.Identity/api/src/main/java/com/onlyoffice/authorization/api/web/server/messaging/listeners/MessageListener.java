@@ -2,13 +2,12 @@ package com.onlyoffice.authorization.api.web.server.messaging.listeners;
 
 import com.onlyoffice.authorization.api.web.server.messaging.handlers.MessagingCommandHandlerRegistry;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.Message;
-import com.onlyoffice.authorization.api.web.server.messaging.messages.MessageWrapper;
 import com.rabbitmq.client.Channel;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.Payload;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -20,23 +19,20 @@ public abstract class MessageListener<P extends Message> {
 
     /**
      *
-     * @param message
+     * @param messages
      * @param channel
-     * @param tag
      */
-    @RabbitHandler
     public void receiveMessage(
-            @Payload P message,
-            Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long tag
+            List<org.springframework.messaging.Message<P>> messages,
+            Channel channel
     ) {
-        var command = registry.getCommand(message.getCode());
-        if (command.isPresent())
-            command.get().handle(MessageWrapper
-                    .builder()
-                    .channel(channel)
-                    .tag(tag)
-                    .data(message)
-                    .build());
+        Map<String, List<org.springframework.messaging.Message<P>>> groups = messages.stream()
+                .collect(Collectors.groupingBy(m -> m.getPayload().getCode()));
+
+        groups.forEach((code, group) -> {
+            var command = registry.getCommand(code);
+            if (command.isPresent())
+                command.get().handle(group, channel);
+        });
     }
 }
