@@ -307,6 +307,7 @@ public class MessageService
 public class AdditionalNotificationInfo
 {
     public int RoomId { get; set; }
+    public string RoomIdString { get; set; }
     public string RoomTitle { get; set; }
     public string RoomOldTitle { get; set; }
     public string RootFolderTitle { get; set; }

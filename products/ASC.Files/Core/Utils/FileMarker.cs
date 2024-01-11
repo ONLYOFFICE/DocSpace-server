@@ -677,7 +677,7 @@ public class FileMarker(TenantManager tenantManager,
         var providerTagDao = daoFactory.GetTagDao<string>();
         var tags = await (tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder, true) ?? AsyncEnumerable.Empty<Tag>()).ToListAsync();
 
-        if (!tags.Any())
+        if (tags.Count == 0)
         {
             yield break;
         }
@@ -761,6 +761,8 @@ public class FileMarker(TenantManager tenantManager,
         {
             yield return r;
         }
+
+        yield break;
 
         async IAsyncEnumerable<FileEntry> GetResultAsync<TEntry>(Dictionary<FileEntry<TEntry>, Tag> entryTags)
         {

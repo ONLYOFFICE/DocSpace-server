@@ -1745,10 +1745,16 @@ public class EntryManager(IDaoFactory daoFactory,
         var renamed = false;
         if (!string.Equals(file.Title, title))
         {
-            var newFileID = await fileDao.FileRenameAsync(file, title);
+            var oldFileId = file.Id;
+            var newFileId = await fileDao.FileRenameAsync(file, title);
 
-            file = await fileDao.GetFileAsync(newFileID);
+            file = await fileDao.GetFileAsync(newFileId);
             file.Access = fileAccess;
+            
+            if (file.MutableId)
+            {
+                file.PreviousId = oldFileId;
+            }
 
             await documentServiceHelper.RenameFileAsync(file, fileDao);
 
