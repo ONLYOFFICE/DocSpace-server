@@ -32,6 +32,7 @@ namespace ASC.Web.Api.Controllers;
 /// Feed API.
 /// </summary>
 /// <name>feed</name>
+/// <visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]

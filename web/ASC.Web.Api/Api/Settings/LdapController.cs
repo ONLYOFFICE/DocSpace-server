@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+/// <visible>false</visible>
 public class LdapController : BaseSettingsController
 {
     private readonly SettingsManager _settingsManager;

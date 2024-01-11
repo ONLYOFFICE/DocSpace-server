@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+/// <visible>false</visible>
 public class VersionController : BaseSettingsController
 {
     private readonly TenantManager _tenantManager;

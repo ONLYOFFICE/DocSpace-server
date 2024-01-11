@@ -30,6 +30,7 @@ namespace ASC.Employee.Core.Controllers;
 /// Groups API.
 ///</summary>
 ///<name>group</name>
+///<visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]
