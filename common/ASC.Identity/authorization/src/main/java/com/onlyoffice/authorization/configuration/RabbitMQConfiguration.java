@@ -9,14 +9,9 @@ import com.onlyoffice.authorization.web.server.messaging.ConsentMessage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -38,7 +33,6 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "spring.cloud.messaging.rabbitmq")
 public class RabbitMQConfiguration {
     private final Map<String, GenericQueueConfiguration> queues = new HashMap<>();
-    private int prefetch = 500;
 
     /**
      *
@@ -59,48 +53,6 @@ public class RabbitMQConfiguration {
         messageConverter.setClassMapper(classMapper);
         messageConverter.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
         return messageConverter;
-    }
-
-    /**
-     *
-     * @param connectionFactory
-     * @param converter
-     * @return
-     */
-    @Bean("rabbitListenerContainerFactory")
-    public RabbitListenerContainerFactory<?> rabbitFactory(
-            ConnectionFactory connectionFactory,
-            MessageConverter converter
-    ) {
-        log.info("Building a default rabbit listener container factory");
-
-        var factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(converter);
-        return factory;
-    }
-
-    /**
-     *
-     * @param rabbitConnectionFactory
-     * @param converter
-     * @return
-     */
-    @Bean("prefetchRabbitListenerContainerFactory")
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> prefetchRabbitListenerContainerFactory(
-            ConnectionFactory rabbitConnectionFactory,
-            MessageConverter converter
-    ) {
-        MDC.put("prefetch", String.valueOf(prefetch));
-        log.info("Building a prefetch rabbit listener container factory with manual ack", prefetch);
-        MDC.clear();
-
-        var factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(rabbitConnectionFactory);
-        factory.setMessageConverter(converter);
-        factory.setPrefetchCount(prefetch);
-        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        return factory;
     }
 
     /**
