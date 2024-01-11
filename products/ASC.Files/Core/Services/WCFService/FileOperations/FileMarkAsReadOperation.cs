@@ -26,13 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant,
-        IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
-        bool holdResult = true)
-    : FileOperationData<T>(folders, files, tenant, externalShareData, holdResult)
-{
-    public IDictionary<string, StringValues> Headers { get; } = headers;
-}
+class FileMarkAsReadOperationData<T>(
+    IEnumerable<T> folders,
+    IEnumerable<T> files,
+    Tenant tenant,
+    IDictionary<string, StringValues> headers,
+    bool holdResult = true)
+    : FileOperationData<T>(folders, files, tenant, headers, holdResult);
 
 [Transient]
 class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>

@@ -26,15 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDeleteOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant,
-        ExternalShareData externalShareData, bool holdResult = true,
+internal class FileDeleteOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, bool holdResult = true,
         bool ignoreException = false, bool immediately = false, IDictionary<string, StringValues> headers = null,
         bool isEmptyTrash = false)
-    : FileOperationData<T>(folders, files, tenant, externalShareData, holdResult)
+    : FileOperationData<T>(folders, files, tenant, headers, holdResult)
 {
     public bool IgnoreException { get; } = ignoreException;
     public bool Immediately { get; } = immediately;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
     public bool IsEmptyTrash { get; } = isEmptyTrash;
 }
 
@@ -75,7 +73,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         tenantManager.SetCurrentTenant(CurrentTenant);
 
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
+        externalShare.Init(Headers);
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 

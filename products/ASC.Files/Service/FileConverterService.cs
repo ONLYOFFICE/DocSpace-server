@@ -114,9 +114,9 @@ internal class FileConverterService<T>(
                 {
                     var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
 
-                    if (!string.IsNullOrEmpty(converter.ExternalShareData))
+                    if (converter.Headers != null)
                     {
-                        externalShare.SetCurrentShareData(JsonSerializer.Deserialize<ExternalShareData>(converter.ExternalShareData));
+                        externalShare.Init(converter.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
                     }
 
                     var user = await userManager.GetUsersAsync(converter.Account);
