@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.web.security.crypto.aes;
+package com.onlyoffice.authorization.web.security.crypto.cipher;
 
 import com.onlyoffice.authorization.configuration.ApplicationConfiguration;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import java.util.Base64;
 @Component
 @RequiredArgsConstructor
 @Profile(value = {"prod", "production", "p", "testing", "t", "test"})
-public class AesGcmCipher implements com.onlyoffice.authorization.web.security.crypto.aes.Cipher {
+public class AesGcmCipher implements com.onlyoffice.authorization.web.security.crypto.cipher.Cipher {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final String FACTORY_INSTANCE = "PBKDF2WithHmacSHA256";
     private static final int TAG_LENGTH_BIT = 128;

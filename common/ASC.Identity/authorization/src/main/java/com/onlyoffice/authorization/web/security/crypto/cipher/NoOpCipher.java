@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.web.security.crypto.aes;
+package com.onlyoffice.authorization.web.security.crypto.cipher;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;

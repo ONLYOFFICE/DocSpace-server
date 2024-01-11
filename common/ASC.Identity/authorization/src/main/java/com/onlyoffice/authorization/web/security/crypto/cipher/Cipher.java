@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.web.security.crypto.aes;
+package com.onlyoffice.authorization.web.security.crypto.cipher;
 
 /**
  *
