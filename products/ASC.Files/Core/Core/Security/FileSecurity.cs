@@ -1301,6 +1301,23 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.Copy:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing && isAuthenticated)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                break;
             case FilesSecurityActions.Duplicate:
                 switch (e.RootFolderType)
                 {
