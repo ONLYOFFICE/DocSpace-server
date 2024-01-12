@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 public class CachingConfiguration {
     private final int CACHE_EXPIRATION = 3;
-    private final int CACHE_SIZE = 300;
+    private final int CACHE_SIZE = 3000;
     private final TimeUnit CACHE_EXPIRATION_UNIT = TimeUnit.MINUTES;
 
     /**
