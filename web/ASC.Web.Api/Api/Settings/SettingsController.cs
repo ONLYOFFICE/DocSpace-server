@@ -332,6 +332,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.QuotaUsageDto, ASC.Web.Api">Space usage and limits for upload</returns>
     /// <path>api/2.0/settings/quota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -349,6 +350,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
     /// <path>api/2.0/settings/userquotasettings</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("userquotasettings")]
     public async Task<object> SaveUserQuotaSettingsAsync(UserQuotaSettingsRequestsDto inDto)
     {
@@ -454,6 +456,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -471,6 +474,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
