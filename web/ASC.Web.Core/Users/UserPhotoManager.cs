@@ -565,19 +565,12 @@ public class UserPhotoManager
 
     private async Task SetUserPhotoThumbnailSettingsAsync(Guid userId, int width, int height)
     {
-        var settings = await _settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userId);
-
-        if (!settings.IsDefault)
-        {
-            return;
-        }
-
         var max = Math.Max(Math.Max(width, height), SmallFotoSize.Width);
         var min = Math.Max(Math.Min(width, height), SmallFotoSize.Width);
 
         var pos = (max - min) / 2;
 
-        settings = new UserPhotoThumbnailSettings(
+        var settings = new UserPhotoThumbnailSettings(
             width >= height ? new Point(pos, 0) : new Point(0, pos),
             new Size(min, min));
 
