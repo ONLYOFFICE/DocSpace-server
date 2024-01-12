@@ -1782,6 +1782,17 @@ public class FileSecurity : IFileSecurity
         return result;
     }
 
+    public async IAsyncEnumerable<FileShareRecord> GetUserRecordsAsync<T>(Guid userId)
+    {
+        var securityDao = _daoFactory.GetSecurityDao<T>();
+        var currentUserSubjects = await GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
+
+        await foreach (var record in securityDao.GetSharesAsync(currentUserSubjects))
+        {
+            yield return record;
+        }
+    }
+
     public static void CorrectSecurityByLockedStatus<T>(FileEntry<T> entry)
     {
         if (entry is not File<T> file || file.Security == null || file.LockedBy == null)
