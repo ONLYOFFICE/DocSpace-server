@@ -3,7 +3,7 @@
  */
 package com.onlyoffice.authorization.web.security.oauth.providers;
 
-import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
+import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.web.clients.APIClient;
 import com.onlyoffice.authorization.web.security.oauth.authorities.TenantAuthority;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
     private final String ASC_AUTH_COOKIE = "asc_auth_key";
 
     private final APIClient apiClient;
-    private final ClientPersistenceQueryUsecases queryUsecases;
+    private final ClientRetrieveUsecases retrieveUsecases;
 
     /**
      *
@@ -60,7 +60,7 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
             log.info("Trying to get client by client id");
             MDC.clear();
 
-            return queryUsecases.getClientByClientId(clientId);
+            return retrieveUsecases.getClientByClientId(clientId);
         }).thenApplyAsync((client -> {
             MDC.put("cookie", authCookie.getValue());
             log.debug("Trying to validate an ASC authorization");

@@ -3,11 +3,6 @@
  */
 package com.onlyoffice.authorization.web.security.oauth.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onlyoffice.authorization.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.core.entities.Authorization;
 import com.onlyoffice.authorization.core.usecases.repositories.AuthorizationPersistenceQueryUsecases;
@@ -19,39 +14,29 @@ import com.onlyoffice.authorization.extensions.runnables.FunctionalRunnable;
 import com.onlyoffice.authorization.web.security.crypto.cipher.Cipher;
 import com.onlyoffice.authorization.web.server.caching.DistributedCacheMap;
 import com.onlyoffice.authorization.web.server.messaging.AuthorizationMessage;
-import jakarta.annotation.PostConstruct;
+import com.onlyoffice.authorization.web.server.utilities.AuthorizationMapper;
+import com.onlyoffice.authorization.web.server.utilities.ClientMapper;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 /**
  *
@@ -64,26 +49,18 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
         AuthorizationCreationUsecases, AuthorizationCleanupUsecases {
     private final String AUTHORIZATION_QUEUE = "authorization";
     private final String CLIENT_STATE_COOKIE = "client_state";
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final RabbitMQConfiguration configuration;
+    private final AuthorizationMapper authorizationMapper;
+    private final ClientMapper clientMapper;
 
     private final AuthorizationPersistenceQueryUsecases authorizationPersistenceQueryUsecases;
     private final ClientRetrieveUsecases clientRetrieveUsecases;
 
-    private final DistributedCacheMap<String, AuthorizationMessage> cache;
-    private final AmqpTemplate amqpTemplate;
     private final Cipher cipher;
+    private final AmqpTemplate amqpTemplate;
+    private final DistributedCacheMap<String, AuthorizationMessage> cache;
 
-    @PostConstruct
-    public void init() {
-        ClassLoader classLoader = AscOAuth2AuthorizationService.class.getClassLoader();
-        List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
-        objectMapper.registerModules(securityModules);
-        objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
 
     /**
      *
@@ -103,7 +80,7 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
 
         log.info("Adding authorization to the cache");
 
-        var msg = toMessage(authorization);
+        var msg = authorizationMapper.toMessage(authorization);
         cache.put(authorization.getId(), msg);
         if (state != null && !state.isBlank()) {
             MDC.put("state", state);
@@ -210,7 +187,7 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
             cache.delete(refreshToken.getToken().getTokenValue());
         }
 
-        var msg = toMessage(authorization);
+        var msg = authorizationMapper.toMessage(authorization);
         msg.setAccessTokenValue("***");
         msg.setRefreshTokenValue("***");
         msg.setInvalidated(true);
@@ -239,7 +216,10 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
             log.debug("Removing authorization from the cache");
             MDC.clear();
 
-            return fromMessage(authorization);
+            var client = clientRetrieveUsecases.getClientByClientId(authorization
+                    .getRegisteredClientId());
+            return authorizationMapper.fromMessage(authorization, clientMapper
+                    .toRegisteredClient(client));
         }
 
         MDC.clear();
@@ -252,6 +232,8 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
         log.info("Found authorization in the database");
 
         try {
+            var clientFuture = CompletableFuture.supplyAsync(() -> clientRetrieveUsecases
+                    .getClientByClientId(authorization.getRegisteredClientId()));
             CompletableFuture.allOf(
                     CompletableFuture.runAsync(FunctionalRunnable
                             .builder()
@@ -270,16 +252,14 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
                             .action(cipher::decrypt)
                             .extractor(msg::getRefreshTokenValue)
                             .setter(msg::setRefreshTokenValue)
-                            .build()))
-                .get(2, TimeUnit.SECONDS);
+                            .build()), clientFuture).get(2, TimeUnit.SECONDS);
+            return authorizationMapper.fromEntity(msg, clientMapper.toRegisteredClient(clientFuture.get()));
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
             log.warn("Could not execute decryption tasks", e);
             return null;
         } finally {
             MDC.clear();
         }
-
-        return toObject(msg);
     }
 
     /**
@@ -301,7 +281,9 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
             log.debug("Removing authorization from the cache");
             MDC.clear();
 
-            return fromMessage(authorization);
+            var client = clientRetrieveUsecases.getClientByClientId(authorization
+                    .getRegisteredClientId());
+            return authorizationMapper.fromMessage(authorization, clientMapper.toRegisteredClient(client));
         }
 
         Authorization result;
@@ -342,6 +324,8 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
             return null;
 
         try {
+            var clientFuture = CompletableFuture.supplyAsync(() -> clientRetrieveUsecases
+                    .getClientByClientId(authorization.getRegisteredClientId()));
             CompletableFuture.allOf(
                             CompletableFuture.runAsync(FunctionalRunnable
                                     .builder()
@@ -360,254 +344,16 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
                                     .action(cipher::decrypt)
                                     .extractor(result::getRefreshTokenValue)
                                     .setter(result::setRefreshTokenValue)
-                                    .build()))
+                                    .build()),
+                            clientFuture)
                     .get(2, TimeUnit.SECONDS);
+            return authorizationMapper.fromEntity(result, clientMapper
+                    .toRegisteredClient(clientFuture.get()));
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
             log.warn("Could not execute decryption tasks", e);
             return null;
         } finally {
             MDC.clear();
         }
-
-        return toObject(result);
-    }
-
-    /**
-     *
-     * @param entity
-     * @return
-     */
-    private OAuth2Authorization toObject(Authorization entity) {
-        var client = clientRetrieveUsecases.getClientByClientId(entity.getRegisteredClientId());
-        if (client == null)
-            return null;
-        OAuth2Authorization.Builder builder = OAuth2Authorization
-                .withRegisteredClient(client)
-                .id(entity.getId())
-                .principalName(entity.getPrincipalName())
-                .authorizationGrantType(resolveAuthorizationGrantType(entity.getAuthorizationGrantType()))
-                .authorizedScopes(StringUtils.commaDelimitedListToSet(entity.getAuthorizedScopes()))
-                .attributes(attributes -> attributes.putAll(parseMap(entity.getAttributes())));
-        if (entity.getState() != null) {
-            builder.attribute(OAuth2ParameterNames.STATE, entity.getState());
-        }
-
-        if (entity.getAuthorizationCodeValue() != null) {
-            OAuth2AuthorizationCode authorizationCode = new OAuth2AuthorizationCode(
-                    entity.getAuthorizationCodeValue(),
-                    entity.getAuthorizationCodeIssuedAt().toInstant(),
-                    entity.getAuthorizationCodeExpiresAt().toInstant());
-            builder.token(authorizationCode, metadata -> metadata.putAll(parseMap(entity.getAuthorizationCodeMetadata())));
-        }
-
-        if (entity.getAccessTokenValue() != null) {
-            Instant issuedAt = null;
-            Instant expiresAt = null;
-            if (entity.getAccessTokenIssuedAt() != null)
-                issuedAt = entity.getAccessTokenIssuedAt().toInstant();
-            if (entity.getAccessTokenExpiresAt() != null)
-                expiresAt = entity.getAccessTokenExpiresAt().toInstant();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                    OAuth2AccessToken.TokenType.BEARER,
-                    entity.getAccessTokenValue(),
-                    issuedAt,
-                    expiresAt,
-                    StringUtils.commaDelimitedListToSet(entity.getAccessTokenScopes()));
-            builder.token(accessToken, metadata -> metadata.putAll(parseMap(entity.getAccessTokenMetadata())));
-        }
-
-        if (entity.getRefreshTokenValue() != null) {
-            Instant issuedAt = null;
-            Instant expiresAt = null;
-            if (entity.getRefreshTokenIssuedAt() != null)
-                issuedAt = entity.getRefreshTokenIssuedAt().toInstant();
-            if (entity.getRefreshTokenExpiresAt() != null)
-                expiresAt = entity.getRefreshTokenExpiresAt().toInstant();
-            OAuth2RefreshToken refreshToken = new OAuth2RefreshToken(
-                    entity.getRefreshTokenValue(),
-                    issuedAt,
-                    expiresAt);
-            builder.token(refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenMetadata())));
-        }
-
-        return builder.build();
-    }
-
-    private OAuth2Authorization fromMessage(AuthorizationMessage message) {
-        var client = clientRetrieveUsecases.getClientByClientId(message.getRegisteredClientId());
-        if (client == null)
-            return null;
-        OAuth2Authorization.Builder builder = OAuth2Authorization
-                .withRegisteredClient(client)
-                .id(message.getId())
-                .principalName(message.getPrincipalName())
-                .authorizationGrantType(resolveAuthorizationGrantType(message.getAuthorizationGrantType()))
-                .authorizedScopes(StringUtils.commaDelimitedListToSet(message.getAuthorizedScopes()))
-                .attributes(attributes -> attributes.putAll(parseMap(message.getAttributes())));
-        if (message.getState() != null) {
-            builder.attribute(OAuth2ParameterNames.STATE, message.getState());
-        }
-
-        if (message.getAuthorizationCodeValue() != null) {
-            OAuth2AuthorizationCode authorizationCode = new OAuth2AuthorizationCode(
-                    message.getAuthorizationCodeValue(),
-                    message.getAuthorizationCodeIssuedAt().toInstant(),
-                    message.getAuthorizationCodeExpiresAt().toInstant());
-            builder.token(authorizationCode, metadata -> metadata.putAll(parseMap(message.getAuthorizationCodeMetadata())));
-        }
-
-        if (message.getAccessTokenValue() != null) {
-            Instant issuedAt = null;
-            Instant expiresAt = null;
-            if (message.getAccessTokenIssuedAt() != null)
-                issuedAt = message.getAccessTokenIssuedAt().toInstant();
-            if (message.getAccessTokenExpiresAt() != null)
-                expiresAt = message.getAccessTokenExpiresAt().toInstant();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                    OAuth2AccessToken.TokenType.BEARER,
-                    message.getAccessTokenValue(),
-                    issuedAt,
-                    expiresAt,
-                    StringUtils.commaDelimitedListToSet(message.getAccessTokenScopes()));
-            builder.token(accessToken, metadata -> metadata.putAll(parseMap(message.getAccessTokenMetadata())));
-        }
-
-        if (message.getRefreshTokenValue() != null) {
-            Instant issuedAt = null;
-            Instant expiresAt = null;
-            if (message.getRefreshTokenIssuedAt() != null)
-                issuedAt = message.getRefreshTokenIssuedAt().toInstant();
-            if (message.getRefreshTokenExpiresAt() != null)
-                expiresAt = message.getRefreshTokenExpiresAt().toInstant();
-            OAuth2RefreshToken refreshToken = new OAuth2RefreshToken(
-                    message.getRefreshTokenValue(),
-                    issuedAt,
-                    expiresAt);
-            builder.token(refreshToken, metadata -> metadata.putAll(parseMap(message.getRefreshTokenMetadata())));
-        }
-
-        return builder.build();
-    }
-
-    /**
-     *
-     * @param authorization
-     * @return
-     */
-    private AuthorizationMessage toMessage(OAuth2Authorization authorization) {
-        AuthorizationMessage message = AuthorizationMessage
-                .builder()
-                .id(authorization.getId())
-                .registeredClientId(authorization.getRegisteredClientId())
-                .principalName(authorization.getPrincipalName())
-                .authorizationGrantType(authorization.getAuthorizationGrantType().getValue())
-                .authorizedScopes(StringUtils.collectionToDelimitedString(authorization.getAuthorizedScopes(), ","))
-                .attributes(writeMap(authorization.getAttributes()))
-                .state(authorization.getAttribute(OAuth2ParameterNames.STATE))
-                .build();
-
-        OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
-                authorization.getToken(OAuth2AuthorizationCode.class);
-        setTokenValues(
-                authorizationCode,
-                message::setAuthorizationCodeValue,
-                message::setAuthorizationCodeIssuedAt,
-                message::setAuthorizationCodeExpiresAt,
-                message::setAuthorizationCodeMetadata
-        );
-
-        OAuth2Authorization.Token<OAuth2AccessToken> accessToken =
-                authorization.getToken(OAuth2AccessToken.class);
-        setTokenValues(
-                accessToken,
-                message::setAccessTokenValue,
-                message::setAccessTokenIssuedAt,
-                message::setAccessTokenExpiresAt,
-                message::setAccessTokenMetadata
-        );
-
-        if (accessToken != null && accessToken.getToken().getScopes() != null) {
-            message.setAccessTokenScopes(StringUtils.collectionToDelimitedString(accessToken.getToken().getScopes(), ","));
-        }
-
-        OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken =
-                authorization.getToken(OAuth2RefreshToken.class);
-
-        setTokenValues(
-                refreshToken,
-                message::setRefreshTokenValue,
-                message::setRefreshTokenIssuedAt,
-                message::setRefreshTokenExpiresAt,
-                message::setRefreshTokenMetadata
-        );
-
-        return message;
-    }
-
-    /**
-     *
-     * @param token
-     * @param tokenValueConsumer
-     * @param issuedAtConsumer
-     * @param expiresAtConsumer
-     * @param metadataConsumer
-     */
-    private void setTokenValues(
-            OAuth2Authorization.Token<?> token,
-            Consumer<String> tokenValueConsumer,
-            Consumer<ZonedDateTime> issuedAtConsumer,
-            Consumer<ZonedDateTime> expiresAtConsumer,
-            Consumer<String> metadataConsumer) {
-        if (token != null) {
-            OAuth2Token oAuth2Token = token.getToken();
-            tokenValueConsumer.accept(oAuth2Token.getTokenValue());
-            issuedAtConsumer.accept(ZonedDateTime.ofInstant(oAuth2Token.getIssuedAt(), ZoneId.systemDefault()));
-            expiresAtConsumer.accept(ZonedDateTime.ofInstant(oAuth2Token.getExpiresAt(), ZoneId.systemDefault()));
-            metadataConsumer.accept(writeMap(token.getMetadata()));
-        }
-    }
-
-    /**
-     *
-     * @param data
-     * @return
-     */
-    private Map<String, Object> parseMap(String data) {
-        if (data == null || data.isBlank())
-            return Map.of();
-        try {
-            return objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     *
-     * @param metadata
-     * @return
-     */
-    private String writeMap(Map<String, Object> metadata) {
-        try {
-            return objectMapper.writeValueAsString(metadata);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     *
-     * @param authorizationGrantType
-     * @return
-     */
-    private static AuthorizationGrantType resolveAuthorizationGrantType(String authorizationGrantType) {
-        if (AuthorizationGrantType.AUTHORIZATION_CODE.getValue().equals(authorizationGrantType)) {
-            return AuthorizationGrantType.AUTHORIZATION_CODE;
-        } else if (AuthorizationGrantType.CLIENT_CREDENTIALS.getValue().equals(authorizationGrantType)) {
-            return AuthorizationGrantType.CLIENT_CREDENTIALS;
-        } else if (AuthorizationGrantType.REFRESH_TOKEN.getValue().equals(authorizationGrantType)) {
-            return AuthorizationGrantType.REFRESH_TOKEN;
-        }
-        return new AuthorizationGrantType(authorizationGrantType);
     }
 }

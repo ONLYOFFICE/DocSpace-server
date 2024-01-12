@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Primary;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ *
+ */
 @Configuration
 public class CacheManagerConfiguration {
     /**
@@ -26,7 +29,7 @@ public class CacheManagerConfiguration {
                 return new ConcurrentMapCache(
                         name,
                         CacheBuilder.newBuilder()
-                                .expireAfterWrite(120, TimeUnit.SECONDS)
+                                .expireAfterWrite(60, TimeUnit.SECONDS)
                                 .maximumSize(3000)
                                 .build().asMap(),
                         false);

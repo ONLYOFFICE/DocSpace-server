@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class RateLimiterExceptionHandler {
+    /**
+     *
+     * @param ex
+     * @param request
+     * @return
+     */
     @ExceptionHandler(value = {RequestNotPermitted.class, DistributedRateLimiterException.class})
     public ResponseEntity handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
         log.error(ex.getMessage());
