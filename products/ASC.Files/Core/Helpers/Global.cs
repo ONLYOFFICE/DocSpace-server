@@ -323,11 +323,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderVirtualRoomsAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
     {
-        if (coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
         var key = $"vrooms/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (DocSpaceFolderCache.TryGetValue(key, out var result))
@@ -347,11 +342,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderArchiveAsync(IDaoFactory daoFactory)
     {
-        if (coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
         var key = $"archive/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (!DocSpaceFolderCache.TryGetValue(key, out var result))

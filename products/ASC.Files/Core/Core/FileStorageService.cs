@@ -1801,7 +1801,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderId = thirdPartyParams.Corporate && !coreBaseSettings.Personal ? await globalFolderHelper.FolderCommonAsync
-            : thirdPartyParams.RoomsStorage && !coreBaseSettings.DisableDocSpace ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
+            : thirdPartyParams.RoomsStorage ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
 
         var parentFolder = await folderDaoInt.GetFolderAsync(folderId);
 
