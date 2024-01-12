@@ -208,6 +208,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))

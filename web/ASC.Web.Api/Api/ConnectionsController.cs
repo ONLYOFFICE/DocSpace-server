@@ -161,8 +161,10 @@ public class ConnectionsController(UserManager userManager,
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)
-            && !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID))
+        var currentUserId = securityContext.CurrentAccount.ID;
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
         {
             throw new SecurityException("Method not available");
         }
