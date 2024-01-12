@@ -32,7 +32,7 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
      * @param clientId
      * @return
      */
-    @Cacheable(cacheNames = {"clients"})
+    @Cacheable(cacheNames = {"identityClients"})
     @Transactional(timeout = 1250, readOnly = true)
     public ClientDTO getClient(String clientId) {
         MDC.put("clientId", clientId);

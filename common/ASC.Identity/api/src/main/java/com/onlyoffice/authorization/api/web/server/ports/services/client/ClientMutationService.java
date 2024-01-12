@@ -56,7 +56,7 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param tenant
      * @return
      */
-    @CacheEvict(cacheNames = {"clients"}, key = "#clientId")
+    @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
     @Transactional(
             timeout = 1500,
             isolation = Isolation.REPEATABLE_READ,
@@ -90,7 +90,7 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param clientId
      * @return
      */
-    @CacheEvict(cacheNames = {"clients"}, key = "#clientId")
+    @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
     @Transactional(
             timeout = 1500,
             isolation = Isolation.REPEATABLE_READ,
@@ -117,7 +117,7 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param clientId
      * @param tenant
      */
-    @CacheEvict(cacheNames = {"clients"}, key = "#clientId")
+    @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
     @Transactional(
             timeout = 1750,
             isolation = Isolation.REPEATABLE_READ,
@@ -186,7 +186,7 @@ public class ClientMutationService implements ClientMutationUsecases {
      * @param updateClient
      * @param clientId
      */
-    @CacheEvict(cacheNames = {"clients"}, key = "#clientId")
+    @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
     public void updateClientAsync(UpdateClientDTO updateClient, String clientId) {
         MDC.put("clientId", clientId);
         log.info("Submitting a client update task", updateClient);
