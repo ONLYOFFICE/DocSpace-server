@@ -446,7 +446,7 @@ public class FileStorageService //: IFileStorageService
             await CheckEncryptionKeysAsync(aces);
         }
 
-        var result = roomType switch
+        var (room, folderType) = roomType switch
         {
             RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
             RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
@@ -461,12 +461,19 @@ public class FileStorageService //: IFileStorageService
 
         if (@private)
         {
-            await SetAcesForPrivateRoomAsync(result.Item1, aces, notify, sharingMessage);
+            await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
         }
 
-        await providerDao.UpdateProviderInfoAsync(providerInfo.ProviderId, title, result.Item1.Id.ToString(), result.Item2, @private);
+        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+        {
+            Id = providerInfo.ProviderId,
+            Title = title,
+            FolderId = room.Id.ToString(),
+            FolderType = folderType,
+            Private = @private
+        });
 
-        return result.Item1;
+        return room;
     }
 
     private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
@@ -574,9 +581,15 @@ public class FileStorageService //: IFileStorageService
         if (!string.Equals(folder.Title, title, StringComparison.OrdinalIgnoreCase))
         {
             var oldTitle = folder.Title;
-            var newFolderID = await folderDao.RenameFolderAsync(folder, title);
-            folder = await folderDao.GetFolderAsync(newFolderID);
+            var oldId = folder.Id;
+            var newFolderId = await folderDao.RenameFolderAsync(folder, title);
+            folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
+
+            if (folder.MutableId)
+            {
+                folder.PreviousId = oldId;
+            }
 
             if (DocSpaceHelper.IsRoom(folder.FolderType))
             {
@@ -3068,7 +3081,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<int>(), new[] { roomId });
+        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<T>(), new[] { roomId });
         var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
                                         && aceWrapper.Access != FileShare.Restrict)
                                       .Select(aceWrapper => aceWrapper.Id);

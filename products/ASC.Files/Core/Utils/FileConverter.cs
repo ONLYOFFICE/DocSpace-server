@@ -110,7 +110,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                 {
                     var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
 
-            return String.Compare(file.Id.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Compare(file.Id?.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
                 });
     }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Configuration;
+
 namespace ASC.Files.Service;
 public class Startup : BaseWorkerStartup
 {
@@ -41,8 +43,6 @@ public class Startup : BaseWorkerStartup
     {
         await base.ConfigureServices(services);
         services.AddHttpClient();
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
 
         if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
@@ -114,7 +114,8 @@ public class Startup : BaseWorkerStartup
 
 
         services.AddBaseDbContextPool<FilesDbContext>();
-
+        services.AddScoped<IWebItem, ProductEntryPoint>();
+        
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);

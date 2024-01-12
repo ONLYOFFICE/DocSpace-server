@@ -76,37 +76,37 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
         }
     }
 
-    public async Task SendSaasTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendSaasTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendSaasLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendEnterpriseTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendEnterpriseTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendEnterpriseLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendOpensourceTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendOpensourceTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendOpensourceLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendLettersPersonalAsync(DateTime scheduleDate)
+    private async Task SendLettersPersonalAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendPersonalLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
+    private async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.DailyFeed);
     }
 
-    public async Task SendRoomsActivityAsync(DateTime scheduleDate)
+    private async Task SendRoomsActivityAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.RoomsActivity);

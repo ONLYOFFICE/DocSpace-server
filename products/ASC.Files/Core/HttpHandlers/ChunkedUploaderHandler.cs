@@ -124,6 +124,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
             }
         }
+        catch (System.Text.Json.JsonException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);

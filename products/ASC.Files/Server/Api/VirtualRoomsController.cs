@@ -107,7 +107,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("rooms/thirdparty/{id}")]
+    [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateRoomRequestDto inDto)
     {
         ErrorIfNotDocSpace();
