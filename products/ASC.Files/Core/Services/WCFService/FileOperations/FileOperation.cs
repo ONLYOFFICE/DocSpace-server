@@ -261,7 +261,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         }
         catch (AuthorizingException authError)
         {
-            this[Err] = FilesCommonResource.ErrorMassage_SecurityException;
+            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
             Logger.ErrorWithException(new SecurityException(this[Err], authError));
         }
         catch (AggregateException ae)

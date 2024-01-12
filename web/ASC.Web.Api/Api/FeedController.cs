@@ -188,12 +188,12 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
 
             if (entry == null)
             {
-                throw new ItemNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
             if (!await fileSecurity.CanReadAsync(entry))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
         }
     }

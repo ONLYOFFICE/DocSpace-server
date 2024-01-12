@@ -286,7 +286,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         var thirdFile = await Dao.GetFileAsync(file.Id);
         if (thirdFile == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (thirdFile is IErrorItem errorFile)

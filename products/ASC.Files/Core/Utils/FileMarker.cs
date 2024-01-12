@@ -654,7 +654,7 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (folder == null)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         return InternalMarkedItemsAsync(folder);
@@ -664,12 +664,12 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (!await fileSecurity.CanReadAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
         if (folder.RootFolderType == FolderType.TRASH && !Equals(folder.Id, await globalFolder.GetFolderTrashAsync(daoFactory)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();

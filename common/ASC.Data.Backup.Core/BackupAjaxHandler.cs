@@ -128,12 +128,12 @@ public class BackupAjaxHandler(BackupService backupService,
 
         if (folder == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
     }
 

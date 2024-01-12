@@ -58,13 +58,13 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
     {
         if (entry == null)
         {
-            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) && 
             !await fileSharingHelper.CanSetAccessAsync(entry) && advancedSettings is not { InvitationLink: true })
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
         var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
@@ -216,12 +216,12 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
             {
                 if (w.Access == FileShare.ReadWrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
                 if (coreBaseSettings.Personal && !fileUtility.CanWebView(entry.Title) && w.Access != FileShare.Restrict)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_BadRequest);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_BadRequest);
                 }
 
                 share = w.Access == FileShare.Restrict || !filesSettingsHelper.ExternalShare
@@ -441,7 +441,7 @@ public class FileSharing(Global global,
     {
         if (entry == null)
         {
-            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
         
         if (!await fileSecurity.CanReadAsync(entry))
@@ -463,7 +463,7 @@ public class FileSharing(Global global,
     {
         if (entry == null)
         {
-            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
         
         if (!await CheckAccessAsync(entry, filterType))
@@ -498,7 +498,7 @@ public class FileSharing(Global global,
     {
         if (entry == null)
         {
-            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
         
         if (!await CheckAccessAsync(entry, filterType))
@@ -518,7 +518,7 @@ public class FileSharing(Global global,
     {
         if (entry == null)
         {
-            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         if (!await fileSecurity.CanReadAsync(entry))
@@ -526,7 +526,7 @@ public class FileSharing(Global global,
             logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString());
 
             return new List<AceWrapper>();
-            //throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            //throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         var linkAccess = FileShare.Restrict;
@@ -715,7 +715,7 @@ public class FileSharing(Global global,
     {
         if (!authContext.IsAuthenticated)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         var result = new List<AceWrapper>();

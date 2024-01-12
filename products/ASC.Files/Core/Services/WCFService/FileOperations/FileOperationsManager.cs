@@ -130,7 +130,7 @@ public class FileOperationsManager(TempStream tempStream,
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running && o.Id != taskId))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_ManyDownloads);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
         }
 
         var (folderIntIds, folderStringIds) = GetIds(folders);

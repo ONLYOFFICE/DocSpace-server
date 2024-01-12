@@ -43,7 +43,7 @@ internal class CrossDao //Additional SharpBox
 
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMassage_FileSizeMove : FilesCommonResource.ErrorMassage_FileSizeCopy,
+            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMessage_FileSizeMove : FilesCommonResource.ErrorMessage_FileSizeCopy,
                                               FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
         

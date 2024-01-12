@@ -292,7 +292,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         var comments = new List<string>();
         if (fileData.Status is TrackerStatus.Corrupted or TrackerStatus.CorruptedForceSave)
         {
-            comments.Add(FilesCommonResource.ErrorMassage_SaveCorrupted);
+            comments.Add(FilesCommonResource.ErrorMessage_SaveCorrupted);
         }
 
         var forceSave = fileData.Status is TrackerStatus.ForceSave or TrackerStatus.CorruptedForceSave;
@@ -333,7 +333,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             logger.InformationDocServiceSaveError(userId, ex);
             if (!userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-                comments.Add(FilesCommonResource.ErrorMassage_SaveAnonymous);
+                comments.Add(FilesCommonResource.ErrorMessage_SaveAnonymous);
             }
         }
 
@@ -344,7 +344,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         {
             try
             {
-                comments.Add(FilesCommonResource.ErrorMassage_SaveUrlLost);
+                comments.Add(FilesCommonResource.ErrorMessage_SaveUrlLost);
 
                 file = await entryManager.CompleteVersionFileAsync(fileId, 0, false, false);
 
