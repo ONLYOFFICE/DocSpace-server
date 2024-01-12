@@ -123,42 +123,33 @@ public class WebItemSecurity(UserManager userManager,
         // can read or administrator
         var securityObj = WebItemSecurityObject.Create(id, webItemManager);
 
-        if (coreBaseSettings.Personal
-            && securityObj.WebItemId != WebItemManager.DocumentsProductID)
+        var webItem = webItemManager[securityObj.WebItemId];
+        if (webItem != null)
         {
-            // only files visible in your-docs portal
-            result = false;
-        }
-        else
-        {
-            var webItem = webItemManager[securityObj.WebItemId];
-            if (webItem != null)
+            if ((
+                webItem.ID == WebItemManager.PeopleProductID ||
+                webItem.ID == WebItemManager.BirthdaysProductID) &&
+                await userManager.IsUserAsync(@for))
             {
-                if ((
-                    webItem.ID == WebItemManager.PeopleProductID ||
-                    webItem.ID == WebItemManager.BirthdaysProductID) &&
-                    await userManager.IsUserAsync(@for))
-                {
-                    // hack: people and birthday products not visible for collaborators
-                    result = false;
-                }
-                else if (webItem is IModule)
-                {
-                    result = 
-                        await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
-                        await IsAvailableForUserAsync(webItemManager.GetParentItemId(webItem.ID), @for);
-                }
-                else
-                {
-                    var hasUsers = (await authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != Constants.GroupEveryone.ID);
-                    result = await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) ||
-                             (hasUsers && await IsProductAdministratorAsync(securityObj.WebItemId, @for));
-                }
+                // hack: people and birthday products not visible for collaborators
+                result = false;
+            }
+            else if (webItem is IModule)
+            {
+                result =
+                    await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
+                    await IsAvailableForUserAsync(webItemManager.GetParentItemId(webItem.ID), @for);
             }
             else
             {
-                result = false;
+                var hasUsers = (await authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != Constants.GroupEveryone.ID);
+                result = await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) ||
+                         (hasUsers && await IsProductAdministratorAsync(securityObj.WebItemId, @for));
             }
+        }
+        else
+        {
+            result = false;
         }
 
         dic = webItemSecurityCache.Get(tenant.Id);

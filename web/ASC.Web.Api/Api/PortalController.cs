@@ -229,7 +229,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
-        return coreBaseSettings.Personal ? 1 : (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
+        return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
     /// <summary>
@@ -424,11 +424,6 @@ public class PortalController(ILogger<PortalController> logger,
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
-        }
-
-        if (coreBaseSettings.Personal)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
         }
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

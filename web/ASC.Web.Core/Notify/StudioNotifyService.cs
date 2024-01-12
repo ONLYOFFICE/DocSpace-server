@@ -89,9 +89,7 @@ public class StudioNotifyService(UserManager userManager,
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", GetCulture(userInfo));
 
-        var action = coreBaseSettings.Personal
-                         ? (coreBaseSettings.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalPasswordChangeV115)
-                     : Actions.PasswordChangeV115;
+        var action = Actions.PasswordChangeV115;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 action,
@@ -114,9 +112,7 @@ public class StudioNotifyService(UserManager userManager,
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
-        var action = coreBaseSettings.Personal
-                         ? (coreBaseSettings.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalEmailChangeV115)
-                     : Actions.EmailChangeV115;
+        var action = Actions.EmailChangeV115;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 action,
@@ -218,10 +214,7 @@ public class StudioNotifyService(UserManager userManager,
 
     public async ValueTask UserHasJoinAsync()
     {
-        if (!coreBaseSettings.Personal)
-        {
-            await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
-        }
+        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
     public async Task SendJoinMsgAsync(string email, EmployeeType emplType)
@@ -249,20 +242,7 @@ public class StudioNotifyService(UserManager userManager,
         INotifyAction notifyAction;
         var footer = "social";
 
-        if (coreBaseSettings.Personal)
-        {
-            if (coreBaseSettings.CustomMode)
-            {
-                notifyAction = Actions.PersonalCustomModeAfterRegistration1;
-                footer = "personalCustomMode";
-            }
-            else
-            {
-                notifyAction = Actions.PersonalAfterRegistration1;
-                footer = "personal";
-            }
-        }
-        else if (tenantExtra.Enterprise)
+        if (tenantExtra.Enterprise)
         {
             var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
             notifyAction = defaultRebranding
@@ -451,13 +431,9 @@ public class StudioNotifyService(UserManager userManager,
     {
         var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.ProfileRemove, authContext.CurrentAccount.ID, authContext.CurrentAccount.ID);
         var culture = GetCulture(user);
-        var orangeButtonText = coreBaseSettings.Personal ?
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture) :
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", culture);
 
-        var action = coreBaseSettings.Personal
-                         ? (coreBaseSettings.CustomMode ? Actions.PersonalCustomModeProfileDelete : Actions.PersonalProfileDelete)
-                     : Actions.ProfileDelete;
+        var action = Actions.ProfileDelete;
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(

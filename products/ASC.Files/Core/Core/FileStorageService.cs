@@ -1800,7 +1800,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMassage_BadRequest);
         }
 
-        var folderId = thirdPartyParams.Corporate && !coreBaseSettings.Personal ? await globalFolderHelper.FolderCommonAsync
+        var folderId = thirdPartyParams.Corporate ? await globalFolderHelper.FolderCommonAsync
             : thirdPartyParams.RoomsStorage ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
 
         var parentFolder = await folderDaoInt.GetFolderAsync(folderId);
@@ -1822,7 +1822,7 @@ public class FileStorageService //: IFileStorageService
         MessageAction messageAction;
         if (string.IsNullOrEmpty(thirdPartyParams.ProviderId))
         {
-            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || (!filesSettingsHelper.EnableThirdParty && !coreBaseSettings.Personal))
+            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !filesSettingsHelper.EnableThirdParty)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
@@ -1916,7 +1916,7 @@ public class FileStorageService //: IFileStorageService
         var thirdparty = await GetBackupThirdPartyAsync();
         if (thirdparty == null)
         {
-            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || (!filesSettingsHelper.EnableThirdParty && !coreBaseSettings.Personal))
+            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !filesSettingsHelper.EnableThirdParty)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
@@ -2996,7 +2996,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
     {
-        if (!authContext.IsAuthenticated || coreBaseSettings.Personal)
+        if (!authContext.IsAuthenticated)
         {
             return null;
         }
@@ -3715,7 +3715,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<MentionWrapper>> ProtectUsersAsync<T>(T fileId)
     {
-        if (!authContext.IsAuthenticated || coreBaseSettings.Personal)
+        if (!authContext.IsAuthenticated)
         {
             return null;
         }

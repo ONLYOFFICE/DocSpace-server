@@ -31,7 +31,6 @@ public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
     private string _basedomain;
-    private bool? _personal;
     private bool? _customMode;
     private string _serverRoot;
 
@@ -54,11 +53,6 @@ public class CoreBaseSettings(IConfiguration configuration)
     }
 
     public bool Standalone => _standalone ?? (bool)(_standalone = Configuration["core:base-domain"] == "localhost");
-
-    public bool Personal =>
-        //TODO:if (CustomMode && HttpContext.Current != null && HttpContext.Current.Request.SailfishApp()) return true;
-        _personal ?? (bool)(_personal =
-            string.Equals(Configuration["core:personal"], "true", StringComparison.OrdinalIgnoreCase));
 
     public bool CustomMode => _customMode ?? (bool)(_customMode =
         string.Equals(Configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase));

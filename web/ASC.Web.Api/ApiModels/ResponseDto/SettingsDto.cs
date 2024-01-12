@@ -78,10 +78,6 @@ public class SettingsDto
     /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? ThirdpartyEnable { get; set; }
 
-    /// <summary>Specifies if this is a Personal portal or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Personal { get; set; }
-
     /// <summary>Specifies if this is a DocSpace portal or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DocSpace { get; set; }

@@ -552,8 +552,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if ((parent.Id.Equals(await globalFolderHelper.FolderMyAsync) || parent.Id.Equals(await globalFolderHelper.FolderCommonAsync))
             && thirdpartyConfiguration.SupportInclusion(daoFactory)
-            && (filesSettingsHelper.EnableThirdParty
-                || coreBaseSettings.Personal))
+            && (filesSettingsHelper.EnableThirdParty))
         {
             var providerDao = daoFactory.ProviderDao;
             if (providerDao == null)
