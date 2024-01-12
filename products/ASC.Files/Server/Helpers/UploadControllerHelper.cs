@@ -66,11 +66,11 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         var toFolder = await folderDao.GetFolderAsync(folderId);
         if (toFolder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         var result = new List<string>();

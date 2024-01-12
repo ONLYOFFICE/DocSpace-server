@@ -89,7 +89,7 @@ public class NotifyClient(WorkContext notifyContext,
             recipient,
             true,
             new TagValue(NotifyConstants.TagMailsCount, countMails),
-            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMassage_MailMergeCount, countError) : string.Empty)
+            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMessage_MailMergeCount, countError) : string.Empty)
             );
     }
 

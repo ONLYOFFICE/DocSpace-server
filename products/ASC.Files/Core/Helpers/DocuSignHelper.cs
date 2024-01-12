@@ -178,15 +178,15 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         if (!await fileSecurity.CanReadAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         if (!_supportedFormats.Contains(FileUtility.GetFileExtension(file.Title)))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
         if (file.ContentLength > MaxFileSize)
         {
@@ -338,7 +338,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             }
             else
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
         }
 

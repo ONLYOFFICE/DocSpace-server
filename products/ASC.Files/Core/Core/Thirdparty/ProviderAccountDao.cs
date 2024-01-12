@@ -144,7 +144,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
         if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
         {
-            throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, providerKey));
+            throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
 
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
@@ -280,7 +280,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
-                throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, key));
+                throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
         }
 
@@ -351,7 +351,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, newAuthData, securityContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
             {
-                throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, key));
+                throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
         }
 
@@ -610,7 +610,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 if (token == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 return new AuthData(token: token.ToJson());
@@ -621,7 +621,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 if (token == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 return new AuthData(token: token.ToJson());
@@ -632,7 +632,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 if (token == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 return new AuthData(token: token.ToJson());
@@ -657,7 +657,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 if (token == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 return new AuthData(token: token.ToJson());
@@ -670,14 +670,14 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 if (token == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 accessToken = AppLimit.CloudComputing.SharpBox.Common.Net.oAuth20.OAuth20Token.FromJson(token.ToJson());
 
                 if (accessToken == null)
                 {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMassage_SecurityException_Auth, provider));
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
                 }
 
                 config = CloudStorage.GetCloudConfigurationEasy(nSupportedCloudConfigurations.SkyDrive);
