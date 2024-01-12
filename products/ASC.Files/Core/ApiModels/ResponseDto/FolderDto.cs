@@ -166,20 +166,16 @@ public class FolderDtoHelper : FileEntryDtoHelper
             
             result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             
-            if (folder.CreateBy == _authContext.CurrentAccount.ID)
+            if (folder.CreateBy == _authContext.CurrentAccount.ID ||
+                !await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
             {
                 result.InRoom = true;
             }
             else
             {
-                if (currentUserRecords == null && await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
-                {
-                    currentUserRecords = await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
-                }
-                if (currentUserRecords != null)
-                {
-                    result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
-                }
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
+
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }
         }
 
