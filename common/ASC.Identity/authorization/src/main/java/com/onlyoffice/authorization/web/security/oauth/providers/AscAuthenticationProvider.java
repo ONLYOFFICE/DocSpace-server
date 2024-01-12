@@ -69,7 +69,7 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
             var cookie = String.format("%s=%s", authCookie.getName(),
                     authCookie.getValue());
 
-            MDC.put("tenant_url", client.getTenantUrl());
+            MDC.put("tenantUrl", client.getTenantUrl());
             log.info("Trying to get current user profile");
             MDC.clear();
 

@@ -36,7 +36,7 @@ public class AuthorizationConsentController {
             @CookieValue(name = ASC_AUTH_COOKIE) String authCookie,
             @RequestParam(name = CLIENT_ID) String clientId
     ) {
-        MDC.put("client_id", clientId);
+        MDC.put("clientId", clientId);
         log.info("Got a new consent request");
         log.debug("Trying to get client by client id");
 
@@ -46,8 +46,8 @@ public class AuthorizationConsentController {
             var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie)
                     .getResponse();
 
-            MDC.put("client_id", clientId);
-            MDC.put("principal_name", me.getEmail());
+            MDC.put("clientId", clientId);
+            MDC.put("principalName", me.getEmail());
             log.info("Trying to get consent by principal name and client");
 
             var auth = authorizationRepository.getByPrincipalNameAndRegisteredClientId(me.getEmail(), clientId);

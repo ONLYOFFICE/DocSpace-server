@@ -32,7 +32,7 @@ public class LoginController {
             HttpServletRequest request,
             @RequestParam(name = CLIENT_ID) String clientId
     ) {
-        MDC.put("client_id", clientId);
+        MDC.put("clientId", clientId);
         log.info("Get login request");
         MDC.clear();
 
