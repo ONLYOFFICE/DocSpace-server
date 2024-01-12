@@ -42,7 +42,7 @@ public class CacheManagerConfiguration {
                 return new ConcurrentMapCache(
                         name,
                         CacheBuilder.newBuilder()
-                                .expireAfterWrite(60, TimeUnit.SECONDS)
+                                .expireAfterWrite(30, TimeUnit.SECONDS)
                                 .maximumSize(1500)
                                 .build().asMap(),
                         false);
