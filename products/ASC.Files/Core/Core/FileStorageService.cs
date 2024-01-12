@@ -454,7 +454,7 @@ public class FileStorageService //: IFileStorageService
             _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom)
         };
 
-        if (result.Item1.Id.Equals(result.Item1.RootId))
+        if (room.Id.Equals(room.RootId))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
         }
@@ -1795,7 +1795,10 @@ public class FileStorageService //: IFileStorageService
         var folderDaoInt = daoFactory.GetFolderDao<int>();
         var folderDao = GetFolderDao<string>();
 
-        ArgumentNullException.ThrowIfNull(thirdPartyParams, FilesCommonResource.ErrorMassage_BadRequest);
+        if (thirdPartyParams == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_BadRequest);
+        }
 
         var folderId = thirdPartyParams.Corporate && !coreBaseSettings.Personal ? await globalFolderHelper.FolderCommonAsync
             : thirdPartyParams.RoomsStorage && !coreBaseSettings.DisableDocSpace ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
@@ -1826,7 +1829,10 @@ public class FileStorageService //: IFileStorageService
 
             thirdPartyParams.CustomerTitle = Global.ReplaceInvalidCharsAndTruncate(thirdPartyParams.CustomerTitle);
 
-            ArgumentException.ThrowIfNullOrEmpty(thirdPartyParams.CustomerTitle, FilesCommonResource.ErrorMassage_InvalidTitle);
+            if (string.IsNullOrEmpty(thirdPartyParams.CustomerTitle))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMassage_InvalidTitle);
+            }
 
             try
             {
@@ -1892,7 +1898,10 @@ public class FileStorageService //: IFileStorageService
             return null;
         }
 
-        ArgumentNullException.ThrowIfNull(thirdPartyParams, FilesCommonResource.ErrorMassage_BadRequest);
+        if (thirdPartyParams == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_BadRequest);
+        }
         if (!filesSettingsHelper.EnableThirdParty)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
@@ -1913,8 +1922,11 @@ public class FileStorageService //: IFileStorageService
             }
 
             thirdPartyParams.CustomerTitle = Global.ReplaceInvalidCharsAndTruncate(thirdPartyParams.CustomerTitle);
-            ArgumentException.ThrowIfNullOrEmpty(thirdPartyParams.CustomerTitle, FilesCommonResource.ErrorMassage_InvalidTitle);
-            
+            if (string.IsNullOrEmpty(thirdPartyParams.CustomerTitle))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMassage_InvalidTitle);
+            }
+
             try
             {
                 curProviderId = await providerDao.SaveProviderInfoAsync(thirdPartyParams.ProviderKey, thirdPartyParams.CustomerTitle, thirdPartyParams.AuthData, folderType);
@@ -3217,8 +3229,10 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
         }
-        ArgumentNullException.ThrowIfNull(mentionMessage, FilesCommonResource.ErrorMassage_BadRequest);
-        ArgumentNullException.ThrowIfNull(mentionMessage.Emails, FilesCommonResource.ErrorMassage_BadRequest);
+        if (mentionMessage == null || mentionMessage.Emails == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_BadRequest);
+        }
 
         var showSharingSettings = false;
         bool? canShare = null;
