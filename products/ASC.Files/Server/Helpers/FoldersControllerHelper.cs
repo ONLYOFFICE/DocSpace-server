@@ -37,9 +37,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FolderDtoHelper folderDtoHelper,
         UserManager userManager,
         SecurityContext securityContext,
-        GlobalFolderHelper globalFolderHelper,
-        CoreBaseSettings coreBaseSettings,
-        FileUtility fileUtility)
+        GlobalFolderHelper globalFolderHelper)
     : FilesHelperBase(filesSettingsHelper,
     fileUploader,
     socketManager,
@@ -71,24 +69,23 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash, bool withoutAdditionalFolder)
+    public async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var IsUser = await userManager.IsUserAsync(user);
-        var IsOutsider = await userManager.IsOutsiderAsync(user);
+        var isUser = await userManager.IsUserAsync(user);
+        var isOutsider = await userManager.IsOutsiderAsync(user);
 
-        if (IsOutsider)
+        if (isOutsider)
         {
             withoutTrash = true;
-            withoutAdditionalFolder = true;
         }
 
-        if (!IsUser)
+        if (!isUser)
         {
             yield return await globalFolderHelper.FolderMyAsync;
         }
 
-        if (!withoutTrash && !IsUser)
+        if (!withoutTrash && !isUser)
         {
             yield return await globalFolderHelper.FolderTrashAsync;
         }

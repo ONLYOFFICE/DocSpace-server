@@ -370,8 +370,7 @@ public class FileSharingHelper(Global global,
         GlobalFolderHelper globalFolderHelper,
         FileSecurity fileSecurity,
         AuthContext authContext,
-        UserManager userManager,
-        CoreBaseSettings coreBaseSettings)
+        UserManager userManager)
     {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
