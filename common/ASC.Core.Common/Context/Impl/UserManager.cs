@@ -432,14 +432,7 @@ public class UserManager
 
     public async Task<UserInfo> UpdateUserInfoWithSyncCardDavAsync(UserInfo u)
     {
-        var oldUserData = await _userService.GetUserByUserName(await _tenantManager.GetCurrentTenantIdAsync(), u.UserName);
-
         var newUser = await UpdateUserInfoAsync(u);
-
-        if (_coreBaseSettings.DisableDocSpace)
-        {
-            await SyncCardDavAsync(u, oldUserData, newUser);
-        }
 
         return newUser;
     }

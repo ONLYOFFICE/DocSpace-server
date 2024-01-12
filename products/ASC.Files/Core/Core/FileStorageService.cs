@@ -1654,7 +1654,7 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(thirdPartyParams == null, FilesCommonResource.ErrorMassage_BadRequest);
 
         var folderId = thirdPartyParams.Corporate && !coreBaseSettings.Personal ? await globalFolderHelper.FolderCommonAsync
-            : thirdPartyParams.RoomsStorage && !coreBaseSettings.DisableDocSpace ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
+            : thirdPartyParams.RoomsStorage ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
 
         var parentFolder = await folderDaoInt.GetFolderAsync(folderId);
 

@@ -395,21 +395,10 @@ public class FileSharingHelper(Global global,
             return false;
         }
 
-        if (coreBaseSettings.DisableDocSpace)
+        if (entry.RootFolderType == FolderType.USER && Equals(entry.RootId, await globalFolderHelper.FolderMyAsync))
         {
-            if (entry.RootFolderType == FolderType.USER && Equals(entry.RootId, await globalFolderHelper.FolderMyAsync) || await fileSecurity.CanShareAsync(entry))
-            {
-                return true;
-            }
+            return false;
         }
-        else
-        {
-            if (entry.RootFolderType == FolderType.USER && Equals(entry.RootId, await globalFolderHelper.FolderMyAsync))
-            {
-                return false;
-            }
-        }
-
 
         return entry.RootFolderType == FolderType.Privacy
                 && entry is File<T>
