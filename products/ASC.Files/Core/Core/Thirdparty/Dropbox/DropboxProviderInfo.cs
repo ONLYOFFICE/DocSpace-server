@@ -33,4 +33,5 @@ internal class DropboxProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper
 {
     public override Selector Selector { get; } = Selectors.Dropbox;
     public override ProviderFilter ProviderFilter { get; } = ProviderFilter.DropBox;
+    public override bool MutableEntityId => true;
 }

@@ -62,7 +62,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
         else
         {
             var folder = await Dao.GetFolderAsync(file.ParentId);
-            driveFile = storage.FileConstructor(file.Title, null, folder.Id);
+            driveFile = GoogleDriveStorage.FileConstructor(file.Title, null, folder.Id);
         }
 
         var googleDriveSession = await storage.CreateResumableSessionAsync(driveFile, contentLength);

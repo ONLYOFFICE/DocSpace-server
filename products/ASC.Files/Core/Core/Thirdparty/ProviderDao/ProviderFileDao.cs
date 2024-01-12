@@ -488,7 +488,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        return fileDao.GetThumbnailAsync(fileId, width, height);
+        return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
     public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)

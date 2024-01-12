@@ -88,58 +88,13 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
             yield return await globalFolderHelper.FolderMyAsync;
         }
 
-        if (coreBaseSettings.DisableDocSpace)
-        {
-            if (!coreBaseSettings.Personal &&
-                !await userManager.IsOutsiderAsync(user))
-            {
-                yield return await globalFolderHelper.FolderShareAsync;
-            }
-
-            if (!withoutAdditionalFolder)
-            {
-                if (_filesSettingsHelper.FavoritesSection)
-                {
-                    yield return await globalFolderHelper.FolderFavoritesAsync;
-                }
-
-                if (_filesSettingsHelper.RecentSection)
-                {
-                    yield return await globalFolderHelper.FolderRecentAsync;
-                }
-
-                if (!IsUser &&
-                    !coreBaseSettings.Personal &&
-                    PrivacyRoomSettings.IsAvailable())
-                {
-                    yield return await globalFolderHelper.FolderPrivacyAsync;
-                }
-            }
-
-            if (!coreBaseSettings.Personal)
-            {
-                yield return await globalFolderHelper.FolderCommonAsync;
-            }
-
-            if (!IsUser &&
-                !withoutAdditionalFolder &&
-                fileUtility.ExtsWebTemplate.Count > 0 &&
-                _filesSettingsHelper.TemplatesSection)
-            {
-                yield return await globalFolderHelper.FolderTemplatesAsync;
-            }
-        }
-
         if (!withoutTrash && !IsUser)
         {
             yield return await globalFolderHelper.FolderTrashAsync;
         }
 
-        if (!coreBaseSettings.DisableDocSpace)
-        {
-            yield return await globalFolderHelper.FolderVirtualRoomsAsync;
-            yield return await globalFolderHelper.FolderArchiveAsync;
-        }
+        yield return await globalFolderHelper.FolderVirtualRoomsAsync;
+        yield return await globalFolderHelper.FolderArchiveAsync;
     }
 
     public async Task<FolderDto<T>> RenameFolderAsync<T>(T folderId, string title)

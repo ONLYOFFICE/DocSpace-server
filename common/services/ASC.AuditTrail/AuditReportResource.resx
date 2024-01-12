@@ -795,4 +795,7 @@
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>File Opened For Change: {0}</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal Renamed</value>
+  </data>
 </root>

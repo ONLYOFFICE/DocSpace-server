@@ -37,11 +37,13 @@ internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisp
     public bool HasLogo { get; set; }
     public bool Private { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public FolderType FolderType { get; set; }
     public Guid Owner { get; set; }
     public int ProviderId { get; set; }
     public string CustomerTitle { get; set; }
     public string FolderId { get; set; }
+    public string Color { get; set; }
 
     public string ProviderKey
     {
@@ -54,6 +56,7 @@ internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisp
 
     public Selector Selector { get; } = Selectors.SharpBox;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.None;
+    public bool MutableEntityId => true;
 
     internal CloudStorage Storage
     {
