@@ -89,6 +89,7 @@ public class ExternalLinkHelper
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
+        result.LinkId = linkId;
 
         if (_securityContext.IsAuthenticated)
         {
