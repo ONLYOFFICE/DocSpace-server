@@ -20,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -28,7 +32,7 @@ import java.util.Arrays;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true, timeout = 2000)
-public class DocspaceOAuth2AuthorizationConsentService implements OAuth2AuthorizationConsentService,
+public class AscOAuth2AuthorizationConsentService implements OAuth2AuthorizationConsentService,
         ConsentRetrieveUsecases {
     private final String CONSENT_QUEUE = "consent";
 
@@ -46,19 +50,27 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
     public void save(OAuth2AuthorizationConsent authorizationConsent) {
         MDC.put("clientId", authorizationConsent.getRegisteredClientId());
         MDC.put("principalName", authorizationConsent.getPrincipalName());
-        log.info("Trying to save an authorization consent");
-        MDC.clear();
-
-        cacheManager.getCache(CONSENT_QUEUE).put(String
-                .format("%s:%s", authorizationConsent.getRegisteredClientId(),
-                        authorizationConsent.getPrincipalName()), authorizationConsent);
 
         log.info("Publishing an authorization save consent message");
 
-        this.amqpTemplate.convertAndSend(
-                configuration.getQueues().get(CONSENT_QUEUE).getExchange(),
-                configuration.getQueues().get(CONSENT_QUEUE).getRouting(),
-                toMessage(authorizationConsent));
+        try {
+            CompletableFuture.allOf(
+                    CompletableFuture.runAsync(() -> amqpTemplate.convertAndSend(
+                            configuration.getQueues().get(CONSENT_QUEUE).getExchange(),
+                            configuration.getQueues().get(CONSENT_QUEUE).getRouting(),
+                            toMessage(authorizationConsent))
+                    ),
+                    CompletableFuture.runAsync(() -> cacheManager.getCache(CONSENT_QUEUE)
+                            .put(String.format("%s:%s", authorizationConsent.getRegisteredClientId(),
+                                    authorizationConsent.getPrincipalName()),
+                                    authorizationConsent))
+                    )
+                    .get(2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("Could not save an oauth2 authorization consent", e);
+        } finally {
+            MDC.clear();
+        }
     }
 
     /**
@@ -68,18 +80,30 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
     public void remove(OAuth2AuthorizationConsent authorizationConsent) {
         MDC.put("clientId", authorizationConsent.getRegisteredClientId());
         MDC.put("principalName", authorizationConsent.getPrincipalName());
-        log.info("Trying to remove authorization consent");
-        MDC.clear();
 
         var msg = toMessage(authorizationConsent);
         msg.setInvalidated(true);
 
         log.info("Submitting an authorization consent delete message");
 
-        this.amqpTemplate.convertAndSend(
-                configuration.getQueues().get(CONSENT_QUEUE).getExchange(),
-                configuration.getQueues().get(CONSENT_QUEUE).getRouting(),
-                msg);
+        try {
+            CompletableFuture.allOf(
+                            CompletableFuture.runAsync(() -> amqpTemplate.convertAndSend(
+                                    configuration.getQueues().get(CONSENT_QUEUE).getExchange(),
+                                    configuration.getQueues().get(CONSENT_QUEUE).getRouting(),
+                                    msg)
+                            ),
+                            CompletableFuture.runAsync(() -> cacheManager
+                                    .getCache(CONSENT_QUEUE).evictIfPresent(String
+                                            .format("%s:%s", authorizationConsent.getRegisteredClientId(),
+                                            authorizationConsent.getPrincipalName())))
+                    )
+                    .get(2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("Could not remove an oauth2 authorization consent", e);
+        } finally {
+            MDC.clear();
+        }
     }
 
     /**
@@ -112,6 +136,9 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
                 registeredClientId, principalName);
         if (consent == null)
             return null;
+
+        cacheManager.getCache(CONSENT_QUEUE).putIfAbsent(String
+                .format("%s:%s", registeredClientId, principalName), consent);
 
         return toObject(consent);
     }

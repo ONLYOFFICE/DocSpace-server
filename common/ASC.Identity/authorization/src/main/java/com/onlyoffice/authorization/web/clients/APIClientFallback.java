@@ -8,9 +8,18 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 public class APIClientFallback implements APIClient {
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     public APIClientDTOWrapper<PersonDTO> getMe(URI base, String cookie) {
         MDC.put("URL", base.toString());
         MDC.put("Fallback", APIClientFallback.class.getName());

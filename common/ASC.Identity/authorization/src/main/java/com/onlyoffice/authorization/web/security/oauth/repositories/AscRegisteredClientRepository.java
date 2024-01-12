@@ -5,7 +5,7 @@ package com.onlyoffice.authorization.web.security.oauth.repositories;
 
 import com.onlyoffice.authorization.core.exceptions.EntityNotFoundException;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
-import com.onlyoffice.authorization.web.security.crypto.aes.Cipher;
+import com.onlyoffice.authorization.web.security.crypto.cipher.Cipher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @RequiredArgsConstructor
 @Transactional(readOnly = true, timeout = 2000)
-public class DocspaceRegisteredClientRepository implements RegisteredClientRepository {
+public class AscRegisteredClientRepository implements RegisteredClientRepository {
     private final String CACHE_NAME = "registered_clients";
 
     private final Cipher cipher;

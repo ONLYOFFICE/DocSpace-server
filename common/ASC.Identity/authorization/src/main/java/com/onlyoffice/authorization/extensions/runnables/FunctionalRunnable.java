@@ -18,6 +18,9 @@ public class FunctionalRunnable implements Runnable {
     private final Supplier<String> extractor;
     private final Consumer<String> setter;
 
+    /**
+     *
+     */
     @SneakyThrows
     public void run() {
         if (action == null || extractor == null || setter == null)

@@ -16,7 +16,7 @@ import com.onlyoffice.authorization.core.usecases.service.authorization.Authoriz
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.extensions.runnables.FunctionalRunnable;
-import com.onlyoffice.authorization.web.security.crypto.aes.Cipher;
+import com.onlyoffice.authorization.web.security.crypto.cipher.Cipher;
 import com.onlyoffice.authorization.web.server.caching.DistributedCacheMap;
 import com.onlyoffice.authorization.web.server.messaging.AuthorizationMessage;
 import jakarta.annotation.PostConstruct;
@@ -60,7 +60,7 @@ import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true, timeout = 2000)
-public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationService, AuthorizationRetrieveUsecases,
+public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService, AuthorizationRetrieveUsecases,
         AuthorizationCreationUsecases, AuthorizationCleanupUsecases {
     private final String AUTHORIZATION_QUEUE = "authorization";
     private final String CLIENT_STATE_COOKIE = "client_state";
@@ -77,7 +77,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     @PostConstruct
     public void init() {
-        ClassLoader classLoader = DocspaceOAuth2AuthorizationService.class.getClassLoader();
+        ClassLoader classLoader = AscOAuth2AuthorizationService.class.getClassLoader();
         List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
         objectMapper.registerModules(securityModules);
         objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
@@ -589,7 +589,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
      */
     private String writeMap(Map<String, Object> metadata) {
         try {
-            return this.objectMapper.writeValueAsString(metadata);
+            return objectMapper.writeValueAsString(metadata);
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }

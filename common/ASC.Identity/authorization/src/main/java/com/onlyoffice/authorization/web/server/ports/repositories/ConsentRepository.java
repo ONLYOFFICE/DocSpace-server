@@ -37,7 +37,7 @@ public interface ConsentRepository extends Repository<Consent, Consent.ConsentId
      * @throws RuntimeException
      */
     default Consent getByRegisteredClientIdAndPrincipalName(String registeredClientId, String principalName) throws RuntimeException {
-        return this.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
+        return findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
                 .orElse(null);
     }
 }

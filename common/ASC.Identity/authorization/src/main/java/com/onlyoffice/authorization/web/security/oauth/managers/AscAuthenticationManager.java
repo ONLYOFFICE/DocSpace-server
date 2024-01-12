@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ASCAuthenticationManager implements AuthenticationManager {
+public class AscAuthenticationManager implements AuthenticationManager {
     private final String UNSUPPORTED_ERROR = "Authentication type is not supported by any authentication provider";
     private final List<AuthenticationProvider> providers;
 

@@ -32,10 +32,10 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DocspaceAuthenticationProvider implements AuthenticationProvider {
+public class AscAuthenticationProvider implements AuthenticationProvider {
     private final String ASC_AUTH_COOKIE = "asc_auth_key";
 
-    private final APIClient docspaceClient;
+    private final APIClient apiClient;
     private final ClientPersistenceQueryUsecases queryUsecases;
 
     /**
@@ -73,7 +73,7 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
             log.info("Trying to get current user profile");
             MDC.clear();
 
-            return Pair.of(client, docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie));
+            return Pair.of(client, apiClient.getMe(URI.create(client.getTenantUrl()), cookie));
         }));
 
         try {

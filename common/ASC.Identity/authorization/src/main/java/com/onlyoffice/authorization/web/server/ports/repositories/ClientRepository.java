@@ -36,7 +36,7 @@ public interface ClientRepository extends Repository<Client, String>,
      * @throws EntityNotFoundException
      */
     default Client getById(String id) throws EntityNotFoundException {
-        return this.findById(id)
+        return findById(id)
                 .orElse(null);
     }
 
@@ -47,7 +47,7 @@ public interface ClientRepository extends Repository<Client, String>,
      * @throws RuntimeException
      */
     default Client getClientByClientId(String clientId) throws RuntimeException {
-        return this.findClientByClientId(clientId)
+        return findClientByClientId(clientId)
                 .orElse(null);
     }
 }

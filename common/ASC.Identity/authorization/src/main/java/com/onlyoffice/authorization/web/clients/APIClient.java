@@ -17,6 +17,12 @@ import java.net.URI;
  */
 @FeignClient(url = "http://localhost", value = "asc", fallback = APIClientFallback.class)
 public interface APIClient {
+    /**
+     *
+     * @param base
+     * @param cookie
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/@self")
     APIClientDTOWrapper<PersonDTO> getMe(URI base, @RequestHeader("Cookie") String cookie);
 }

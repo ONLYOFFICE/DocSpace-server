@@ -7,5 +7,11 @@ package com.onlyoffice.authorization.extensions.functional;
  */
 @FunctionalInterface
 public interface CheckedFunction<T, R> {
+    /**
+     *
+     * @param t
+     * @return
+     * @throws Exception
+     */
     R apply(T t) throws Exception;
 }

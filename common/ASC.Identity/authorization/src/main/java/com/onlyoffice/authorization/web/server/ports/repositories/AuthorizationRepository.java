@@ -79,7 +79,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws EntityNotFoundException
      */
     default Authorization getById(String id) throws EntityNotFoundException {
-        return this.findById(id)
+        return findById(id)
                 .orElse(null);
     }
 
@@ -91,7 +91,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws RuntimeException
      */
     default Authorization getByPrincipalNameAndRegisteredClientId(String principalName, String registeredClientId) throws RuntimeException {
-        return this.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
+        return findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
                 .orElse(null);
     }
 
@@ -102,7 +102,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws EntityNotFoundException
      */
     default Authorization getByState(String state) throws EntityNotFoundException {
-        return this.findByState(state)
+        return findByState(state)
                 .orElse(null);
     }
 
@@ -113,7 +113,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws EntityNotFoundException
      */
     default Authorization getByAuthorizationCodeValue(String authorizationCode) throws EntityNotFoundException {
-        return this.findByAuthorizationCodeValue(authorizationCode)
+        return findByAuthorizationCodeValue(authorizationCode)
                 .orElse(null);
     }
 
@@ -124,7 +124,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws EntityNotFoundException
      */
     default Authorization getByAccessTokenValue(String accessToken) throws EntityNotFoundException {
-        return this.findByAccessTokenValue(accessToken)
+        return findByAccessTokenValue(accessToken)
                 .orElse(null);
     }
 
@@ -135,7 +135,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @throws EntityNotFoundException
      */
     default Authorization getByRefreshTokenValue(String refreshToken) throws EntityNotFoundException {
-        return this.findByRefreshTokenValue(refreshToken)
+        return findByRefreshTokenValue(refreshToken)
                 .orElse(null);
     }
 
@@ -145,7 +145,7 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
      * @return
      */
     default Authorization getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(String token) {
-        return this.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token)
+        return findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token)
                 .orElse(null);
     }
 }

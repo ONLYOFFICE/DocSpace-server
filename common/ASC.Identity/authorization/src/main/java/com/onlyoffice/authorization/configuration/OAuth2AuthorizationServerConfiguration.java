@@ -9,7 +9,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.onlyoffice.authorization.web.security.crypto.jwks.JwksKeyPairGenerator;
 import com.onlyoffice.authorization.web.security.filters.AnonymousReplacerAuthenticationFilter;
 import com.onlyoffice.authorization.web.security.filters.DistributedRateLimiterFilter;
-import com.onlyoffice.authorization.web.security.oauth.providers.DocspaceAuthenticationProvider;
+import com.onlyoffice.authorization.web.security.oauth.providers.AscAuthenticationProvider;
 import jakarta.servlet.RequestDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -54,7 +54,7 @@ public class OAuth2AuthorizationServerConfiguration {
 
     private final ApplicationConfiguration applicationConfiguration;
     private final OAuth2SecurityFormConfiguration formConfiguration;
-    private final DocspaceAuthenticationProvider authenticationProvider;
+    private final AscAuthenticationProvider authenticationProvider;
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final AuthenticationFailureHandler authenticationFailureHandler;
@@ -62,6 +62,11 @@ public class OAuth2AuthorizationServerConfiguration {
     private final DistributedRateLimiterFilter distributedRateLimiterFilter;
     private final AnonymousReplacerAuthenticationFilter authenticationFilter;
 
+    /**
+     *
+     * @param http
+     * @return
+     */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @SneakyThrows
@@ -90,6 +95,10 @@ public class OAuth2AuthorizationServerConfiguration {
         return http.build();
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
@@ -97,6 +106,10 @@ public class OAuth2AuthorizationServerConfiguration {
                 .build();
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public ClientSettings clientSettings() {
         return ClientSettings.builder()
@@ -105,22 +118,41 @@ public class OAuth2AuthorizationServerConfiguration {
                 .build();
     }
 
+    /**
+     *
+     * @param jwkSource
+     * @return
+     */
     @Bean
     public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
 
+    /**
+     *
+     * @param jwkSource
+     * @return
+     */
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+    /**
+     *
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
     @Bean
     public JWKSource<SecurityContext> jwkSource() throws NoSuchAlgorithmException {
         JWKSet jwkSet = new JWKSet(generator.generateKey());
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
         return context -> {
@@ -140,6 +172,10 @@ public class OAuth2AuthorizationServerConfiguration {
         };
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();

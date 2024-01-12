@@ -25,6 +25,14 @@ public class DistributedRateLimiterFilter extends OncePerRequestFilter {
 
     private final RedissonClient redissonClient;
 
+    /**
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     * @throws ServletException
+     * @throws IOException
+     */
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var limiter = redissonClient.getRateLimiter(RATE_LIMITER_NAME);
         if (limiter == null) {
