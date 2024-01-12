@@ -72,6 +72,7 @@ public class LdapController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP settings</returns>
     /// <path>api/2.0/settings/ldap</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("ldap")]
     public async Task<LdapSettingsDto> GetLdapSettingsAsync()
     {
@@ -111,6 +112,7 @@ public class LdapController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapCronSettingsDto, ASC.Web.Api">LDAP cron settings</returns>
     /// <path>api/2.0/settings/ldap/cron</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("ldap/cron")]
     public async Task<LdapCronSettingsDto> GetLdapCronSettingsAsync()
     {
@@ -138,6 +140,7 @@ public class LdapController : BaseSettingsController
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapCronRequestDto, ASC.Web.Api" name="inDto">LDAP cron request parameters</param>
     /// <httpMethod>POST</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpPost("ldap/cron")]
     public async Task SetLdapCronSettingsAsync(LdapCronRequestDto inDto)
     {
@@ -185,6 +188,7 @@ public class LdapController : BaseSettingsController
     /// <path>api/2.0/settings/ldap/sync</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
+    /// <visible>false</visible>
     [HttpGet("ldap/sync")]
     public async Task<LdapStatusDto> SyncLdapAsync()
     {
@@ -211,6 +215,7 @@ public class LdapController : BaseSettingsController
     /// <path>api/2.0/settings/ldap/sync/test</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
+    /// <visible>false</visible>
     [HttpGet("ldap/sync/test")]
     public async Task<LdapStatusDto> TestLdapSync()
     {
@@ -236,6 +241,7 @@ public class LdapController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("ldap")]
     public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto inDto)
     {
@@ -268,6 +274,7 @@ public class LdapController : BaseSettingsController
     /// <path>api/2.0/settings/ldap/save/test</path>
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
+    /// <visible>false</visible>
     [HttpPost("ldap/save/test")]
     public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings inDto)
     {
@@ -292,6 +299,7 @@ public class LdapController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap/status</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("ldap/status")]
     public async Task<LdapStatusDto> GetLdapOperationStatusAsync()
     {
@@ -314,6 +322,7 @@ public class LdapController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not</returns>
     /// <path>api/2.0/settings/ldap/default</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("ldap/default")]
     public async Task<LdapSettingsDto> GetDefaultLdapSettingsAsync()
     {
