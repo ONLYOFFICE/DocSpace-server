@@ -250,9 +250,17 @@ public class ConnectionsController : ControllerBase
     {
         try
         {
-            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+            var currentUserId = _securityContext.CurrentAccount.ID;
+            var loginEvent = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
+            
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await _userManager.IsDocSpaceAdminAsync(currentUserId))
+            {
+                throw new SecurityException("Method not available");
+            }
+            
+            var user = await _userManager.GetUsersAsync(currentUserId);
             var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
-
+            
             await _dbLoginEventsManager.LogOutEventAsync(loginEventId);
 
             await _messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
