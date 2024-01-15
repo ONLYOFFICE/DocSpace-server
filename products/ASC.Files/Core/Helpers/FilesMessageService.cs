@@ -83,9 +83,9 @@ public class FilesMessageService
         await SendAsync(action, entry, null, userId, FileShare.None, description);
     }
 
-    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, params string[] description)
+    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
     {
-        description = description.Append(FileShareExtensions.GetAccessString(userRole)).ToArray();
+        description = description.Append(FileShareExtensions.GetAccessString(userRole, useRoomFormat)).ToArray();
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
