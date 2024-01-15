@@ -523,7 +523,7 @@ public class PortalController : ControllerBase
 
         var localhost = _coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
