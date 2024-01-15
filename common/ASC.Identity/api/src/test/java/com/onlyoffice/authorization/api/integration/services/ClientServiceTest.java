@@ -93,13 +93,27 @@ public class ClientServiceTest extends ContainerBase {
 
     @Test
     void shouldDeleteClient() {
-        assertTrue(clientCleanupService.deleteClient("client", 1));
+        assertTrue(clientCleanupService.deleteClient( TenantDTO
+                .builder()
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), "client"));
     }
 
     @Test
     void shouldChangeClientActivation() {
-        clientMutationService.changeActivation(ChangeClientActivationDTO
-                .builder().status(false).build(), "client");
+        clientMutationService.changeActivation(TenantDTO
+                        .builder()
+                        .tenantId(1)
+                        .name("mock")
+                        .tenantAlias("mock")
+                        .build(),
+                ChangeClientActivationDTO
+                        .builder()
+                        .status(false)
+                        .build(),
+                "client");
 
         var c = clientRetrieveService.getClient("client");
         assertFalse(c.isEnabled());
@@ -108,10 +122,12 @@ public class ClientServiceTest extends ContainerBase {
     @Test
     void shouldRegenerateClientSecret() {
         var secret = clientRetrieveService.getClient("client").getClientSecret();
-        var newSecret = clientMutationService.regenerateSecret("client", TenantDTO
+        var newSecret = clientMutationService.regenerateSecret(TenantDTO
                 .builder()
-                        .tenantId(1)
-                .build());
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), "client");
         assertNotNull(newSecret.getClientSecret());
         assertNotEquals(newSecret.getClientSecret(), secret);
     }

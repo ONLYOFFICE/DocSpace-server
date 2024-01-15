@@ -82,7 +82,12 @@ public class ClientListenerTest extends ContainerBase {
     @Test
     @SneakyThrows
     void shouldCreateClientAsync() {
-        var client = clientCreationService.createClientAsync(CreateClientDTO
+        var client = clientCreationService.createClientAsync(TenantDTO
+                .builder()
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), CreateClientDTO
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
@@ -91,11 +96,6 @@ public class ClientListenerTest extends ContainerBase {
                 .logoutRedirectUri("http://example.com")
                 .description("mock")
                 .termsUrl("mock")
-                .build(), TenantDTO
-                .builder()
-                .tenantId(1)
-                .name("mock")
-                .tenantAlias("mock")
                 .build(), PersonDTO
                 .builder()
                 .id(UUID.randomUUID().toString())
@@ -109,29 +109,36 @@ public class ClientListenerTest extends ContainerBase {
     @Test
     @SneakyThrows
     void shouldCreateDeleteClientAsyncTask() {
-        var client = clientCreationService.createClientAsync(CreateClientDTO
-                .builder()
-                .name("mock")
-                .scopes(Set.of("mock"))
-                .redirectUris(Set.of("http://example.com"))
-                .allowedOrigins(Set.of("http://example.com"))
-                .logoutRedirectUri("http://example.com")
-                .description("mock")
-                .termsUrl("mock")
-                .build(), TenantDTO
-                .builder()
-                .tenantId(1)
-                .name("mock")
-                .tenantAlias("mock")
-                .build(), PersonDTO
-                .builder()
-                .id(UUID.randomUUID().toString())
-                .build(), "http://127.0.0.1");
+        var client = clientCreationService.createClientAsync(TenantDTO
+                        .builder()
+                        .tenantId(1)
+                        .name("mock")
+                        .tenantAlias("mock")
+                        .build(),
+                CreateClientDTO
+                        .builder()
+                        .name("mock")
+                        .scopes(Set.of("mock"))
+                        .redirectUris(Set.of("http://example.com"))
+                        .allowedOrigins(Set.of("http://example.com"))
+                        .logoutRedirectUri("http://example.com")
+                        .description("mock")
+                        .termsUrl("mock")
+                        .build(),
+                PersonDTO
+                        .builder()
+                        .id(UUID.randomUUID().toString())
+                        .build(), "http://127.0.0.1");
         Thread.sleep(2500);
         var c = clientRetrieveService.getClient(client.getClientId());
         assertNotNull("expected to get a non null client", c);
         assertEquals("expected to get matching client ids", client.getClientId(), c.getClientId());
 
-        clientCleanupService.deleteClientAsync(c.getClientId());
+        clientCleanupService.deleteClientAsync(TenantDTO
+                .builder()
+                .tenantId(1)
+                .name("mock")
+                .tenantAlias("mock")
+                .build(), c.getClientId());
     }
 }

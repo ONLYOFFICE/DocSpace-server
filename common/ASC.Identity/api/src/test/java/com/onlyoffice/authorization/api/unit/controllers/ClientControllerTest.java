@@ -67,6 +67,12 @@ public class ClientControllerTest {
 
     @Test
     void canRetrieve() throws Exception {
+        var tenant = TenantDTO
+                .builder()
+                .tenantId(1)
+                .tenantAlias("tenant")
+                .name("tenant")
+                .build();
         given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
                         .<PersonDTO>builder()
@@ -103,12 +109,7 @@ public class ClientControllerTest {
                         .<TenantDTO>builder()
                         .status(200)
                         .statusCode(200)
-                        .response(TenantDTO
-                                .builder()
-                                .tenantId(1)
-                                .tenantAlias("tenant")
-                                .name("tenant")
-                                .build())
+                        .response(tenant)
                         .build());
         given(apiClient.getSettings(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
@@ -120,7 +121,7 @@ public class ClientControllerTest {
                                 .timezone("Europe/Moscow")
                                 .build())
                         .build());
-        given(clientService.getTenantClients(1, 0, 5))
+        given(clientService.getTenantClients(tenant, 0, 5))
                 .willReturn(PaginationDTO.builder()
                         .data(List.of(ClientDTO.builder()
                                 .modifiedBy("admin@admin.com")
@@ -147,6 +148,12 @@ public class ClientControllerTest {
 
     @Test
     void canRetrieveByIdAndTenant() throws Exception {
+        var tenant = TenantDTO
+                .builder()
+                .tenantId(1)
+                .tenantAlias("tenant")
+                .name("tenant")
+                .build();
         given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
                         .<PersonDTO>builder()
@@ -168,12 +175,7 @@ public class ClientControllerTest {
                         .<TenantDTO>builder()
                         .status(200)
                         .statusCode(200)
-                        .response(TenantDTO
-                                .builder()
-                                .tenantId(1)
-                                .tenantAlias("tenant")
-                                .name("tenant")
-                                .build())
+                        .response(tenant)
                         .build());
         given(apiClient.getSettings(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
                 .willReturn(APIClientDTOWrapper
@@ -185,7 +187,7 @@ public class ClientControllerTest {
                                 .timezone("Europe/Moscow")
                                 .build())
                         .build());
-        given(clientService.getClient("mock"))
+        given(clientService.getTenantClient(tenant, "mock"))
                 .willReturn(ClientDTO
                         .builder()
                         .clientId("mock")
