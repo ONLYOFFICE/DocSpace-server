@@ -94,7 +94,7 @@ public class FileSharingAceHelper
         _socketManager = socketManager;
     }
 
-    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
+    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true)
     {
         if (entry == null)
         {
@@ -263,7 +263,7 @@ public class FileSharingAceHelper
             }
 
             await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
-            if (room != null)
+            if (socket && room != null)
             {
                 if (share == FileShare.None)
                 {
