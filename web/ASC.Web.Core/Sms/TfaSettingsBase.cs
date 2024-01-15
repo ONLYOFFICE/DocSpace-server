@@ -84,7 +84,7 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         if (settings.TrustedIps != null && settings.TrustedIps.Any())
         {
             var requestIP = MessageSettings.GetIP(httpContextAccessor.HttpContext.Request);
-            if (!string.IsNullOrWhiteSpace(requestIP) && settings.TrustedIps.Any(trustedIp => IPSecurity.IPSecurity.MatchIPs(requestIP, trustedIp)))
+            if (!string.IsNullOrWhiteSpace(requestIP) && settings.TrustedIps.Any(trustedIp => IPAddressRange.MatchIPs(requestIP, trustedIp)))
             {
                 return false;
             }

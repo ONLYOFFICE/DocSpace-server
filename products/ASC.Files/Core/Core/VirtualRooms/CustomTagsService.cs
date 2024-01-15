@@ -37,7 +37,7 @@ public class CustomTagsService(IDaoFactory daoFactory,
     {
         if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         ArgumentException.ThrowIfNullOrEmpty(name);
@@ -68,7 +68,7 @@ public class CustomTagsService(IDaoFactory daoFactory,
     {
         if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         if (!names.Any())

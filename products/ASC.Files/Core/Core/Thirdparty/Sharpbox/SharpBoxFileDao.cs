@@ -261,7 +261,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         if (fileToDownload == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (fileToDownload is ErrorEntry errorEntry)
@@ -340,7 +340,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
                 var response = (HttpWebResponse)webException.Response;
                 if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
                 throw;
             }
@@ -517,7 +517,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         if (entry == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var oldFileId = MakeId(entry);

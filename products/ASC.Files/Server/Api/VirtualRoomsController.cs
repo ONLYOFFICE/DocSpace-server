@@ -29,7 +29,6 @@ namespace ASC.Files.Api;
 [ConstraintRoute("int")]
 public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -41,7 +40,6 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
             fileOperationDtoHelper,
-            coreBaseSettings,
             customTagsService,
             roomLogoManager,
             fileStorageService,
@@ -72,7 +70,6 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
 
 public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -84,7 +81,6 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
             fileOperationDtoHelper,
-            coreBaseSettings,
             customTagsService,
             roomLogoManager,
             fileStorageService,
@@ -117,7 +113,6 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 [DefaultRoute("rooms")]
 public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -308,7 +303,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title,
-                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access, inDto.ExpirationDate ?? default, inDto.Password, inDto.DenyDownload),
+                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate, inDto.Password, inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 
@@ -511,7 +506,6 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
 public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         GlobalFolderHelper globalFolderHelper,
-        CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,

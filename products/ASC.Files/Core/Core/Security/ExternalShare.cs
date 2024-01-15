@@ -343,6 +343,10 @@ public class ValidationInfo
     /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
+    
+    /// <summary>Link ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid LinkId { get; set; }
 }
 
 public class ExternalShareData(Guid linkId, Guid sessionId, string passwordKey)

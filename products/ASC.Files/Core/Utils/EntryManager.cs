@@ -268,17 +268,17 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (parent == null)
         {
-            throw new ArgumentNullException(nameof(parent), FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new ArgumentNullException(nameof(parent), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (parent.ProviderEntry && !filesSettingsHelper.EnableThirdParty)
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFolder);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
         if (parent.RootFolderType == FolderType.Privacy && (!PrivacyRoomSettings.IsAvailable() || !await PrivacyRoomSettings.GetEnabledAsync(settingsManager)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFolder);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
         var entries = new List<FileEntry>();
@@ -1024,12 +1024,12 @@ public class EntryManager(IDaoFactory daoFactory,
             folderIfNew = await folderDao.GetFolderAsync(folderId);
             if (folderIfNew == null)
             {
-                throw new Exception(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new Exception(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
             if (!await fileSecurity.CanFillFormsAsync(folderIfNew))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
 
             var ext = FileUtility.GetFileExtension(sourceFile.Title);
@@ -1167,12 +1167,12 @@ public class EntryManager(IDaoFactory daoFactory,
             var sourceFile = await fileSourceDao.GetFileAsync(sourceId);
             if (sourceFile == null)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound, draft.Id.ToString());
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, draft.Id.ToString());
             }
 
             if (!fileUtility.CanWebRestrictedEditing(sourceFile.Title))
             {
-                throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+                throw new Exception(FilesCommonResource.ErrorMessage_NotSupportedFormat);
             }
 
             var properties = await fileSourceDao.GetProperties(sourceFile.Id);
@@ -1180,7 +1180,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 || properties.FormFilling == null
                 || !properties.FormFilling.CollectFillForm)
             {
-                throw new Exception(FilesCommonResource.ErrorMassage_BadRequest);
+                throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
             }
             var folderId = IdConverter.Convert<TSource>(properties.FormFilling.ToFolderId);
             if (!Equals(folderId, default(TSource)))
@@ -1277,27 +1277,27 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (checkRight && !editLink && (!await fileSecurity.CanFillFormsAsync(file) || !await fileSecurity.CanEditAsync(file)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         if (checkRight && await FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && forcesave is null or ForcesaveType.None && fileTracker.IsEditing(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_SecurityException_UpdateEditingFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var currentExt = file.ConvertedExtension;
@@ -1456,7 +1456,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         if (!editLink
             && (!await fileSecurity.CanEditAsync(file, userId)
@@ -1465,16 +1465,16 @@ public class EntryManager(IDaoFactory daoFactory,
                 && !await fileSecurity.CanFillFormsAsync(file, userId)
                 && !await fileSecurity.CanCommentAsync(file, userId)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
         if (await FileLockedForMeAsync(file.Id, userId))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
@@ -1500,7 +1500,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (fromFile == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (fromFile.Version != version)
@@ -1511,49 +1511,49 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (!finalize)
             {
-                throw new Exception(FilesCommonResource.ErrorMassage_FileUpdateToVersion);
+                throw new Exception(FilesCommonResource.ErrorMessage_FileUpdateToVersion);
             }
         }
 
         if (fromFile == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (checkRight && !editLink && (!await fileSecurity.CanEditHistoryAsync(fromFile) || await userManager.IsUserAsync(authContext.CurrentAccount.ID)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         if (await FileLockedForMeAsync(fromFile.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && fileTracker.IsEditing(fromFile.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_SecurityException_UpdateEditingFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (fromFile.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         if (fromFile.ProviderEntry)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         if (fromFile.Encrypted)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new Exception(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
 
         var exists = cache.Get<string>(UpdateList + fileId) != null;
         if (exists)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
 
         cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
@@ -1649,27 +1649,27 @@ public class EntryManager(IDaoFactory daoFactory,
             : await fileDao.GetFileAsync(fileId);
         if (fileVersion == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (checkRight && (!await fileSecurity.CanEditHistoryAsync(fileVersion) || await userManager.IsUserAsync(authContext.CurrentAccount.ID)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         if (await FileLockedForMeAsync(fileVersion.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (fileVersion.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         if (fileVersion.ProviderEntry)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_BadRequest);
+            throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         var lastVersionFile = await fileDao.GetFileAsync(fileVersion.Id);
@@ -1703,32 +1703,32 @@ public class EntryManager(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanRenameAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_RenameFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFile);
         }
 
         if (!await fileSecurity.CanDeleteAsync(file) && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_RenameFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFile);
         }
 
         if (await FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.ProviderEntry && fileTracker.IsEditing(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         title = Global.ReplaceInvalidCharsAndTruncate(title);

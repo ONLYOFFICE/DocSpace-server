@@ -774,7 +774,7 @@ internal class FolderDao(
 
             if (exists)
             {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMassage_FolderCopyError);
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderCopyError);
             }
 
             var conflict = await Queries.FolderIdAsync(filesDbContext, tenantId, folderId, to);

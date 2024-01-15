@@ -281,7 +281,7 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(securityContext.CurrentAccount.ID))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         var thirdPartyParams = new ThirdPartyParams
