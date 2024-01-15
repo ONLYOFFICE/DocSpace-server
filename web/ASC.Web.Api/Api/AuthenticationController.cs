@@ -513,29 +513,6 @@ public class AuthenticationController(UserManager userManager,
             }
 
             var isNew = false;
-            if (coreBaseSettings.Personal)
-            {
-                if (await userManager.UserExistsAsync(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
-                {
-                    try
-                    {
-                        await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                        await userManager.DeleteUserAsync(userInfo.Id);
-                        userInfo = Constants.LostUser;
-                    }
-                    finally
-                    {
-                        securityContext.Logout();
-                    }
-                }
-
-                if (!await userManager.UserExistsAsync(userInfo.Id))
-                {
-                    userInfo = await JoinByThirdPartyAccount(loginProfile);
-
-                    isNew = true;
-                }
-            }
 
             if (isNew)
             {

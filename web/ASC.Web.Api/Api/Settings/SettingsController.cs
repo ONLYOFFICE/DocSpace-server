@@ -92,7 +92,6 @@ public class SettingsController(MessageService messageService,
         {
             Culture = tenant.GetCulture().ToString(),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
-            Personal = coreBaseSettings.Personal,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
             BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,

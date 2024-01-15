@@ -151,12 +151,6 @@ public class ProductSecurityInterceptor(TenantManager tenantManager,
     {
         try
         {
-            // culture
-            if (coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID)
-            {
-                return false;
-            }
-
             await tenantManager.GetCurrentTenantAsync();
 
             var u = await userManager.SearchUserAsync(r.Recipient.ID);

@@ -342,15 +342,6 @@ internal class FileDao(
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
 
-        if (checkQuota && _coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
-        }
-
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
@@ -526,15 +517,6 @@ internal class FileDao(
         if (maxChunkedUploadSize < file.ContentLength)
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
-        if (_coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();

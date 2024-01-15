@@ -232,10 +232,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         }
 
         userHelpTourHelper.IsNewUser = true;
-        if (coreBaseSettings.Personal)
-        {
-            personalSettingsHelper.IsNewUser = true;
-        }
 
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
@@ -299,12 +295,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
-        if (coreBaseSettings.Personal)
-        {
-            user.ActivationStatus = EmployeeActivationStatus.Activated;
-            user.CultureName = coreBaseSettings.CustomMode ? "ru-RU" : CultureInfo.CurrentUICulture.Name;
-        }
 
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }

@@ -288,16 +288,11 @@ public class FilesSettingsHelper(SettingsManager settingsManager,
     {
         set
         {
-            //if (_coreBaseSettings.Personal)
-            //{
-            //    throw new NotSupportedException();
-            //}
-
             //var setting = _settingsManager.Load<FilesSettings>();
             //setting.StoreForcesaveSetting = value;
             //_settingsManager.Save(setting);
         }
-        get => false;//!_coreBaseSettings.Personal && _settingsManager.Load<FilesSettings>().StoreForcesaveSetting;
+        get => false;//_settingsManager.Load<FilesSettings>().StoreForcesaveSetting;
     }
 
     public bool RecentSection
