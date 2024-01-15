@@ -90,7 +90,7 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
 
             return authenticationToken;
         } catch (InterruptedException | ExecutionException e) {
-            throw new BadCredentialsException("Could not get any response from an ASC service");
+            throw new BadCredentialsException(e.getMessage());
         }
     }
 
