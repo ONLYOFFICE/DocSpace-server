@@ -37,7 +37,8 @@ public class LoginController {
         MDC.clear();
 
         return String.format("redirect:%s", UriComponentsBuilder
-                .fromUriString(HttpUtils.getRequestIP(request))
+                .fromUriString(String.format("%s://%s", request.getScheme(),
+                                HttpUtils.getRequestIP(request)))
                 .path("login")
                 .queryParam("client_id", clientId)
                 .queryParam("type", "oauth2")

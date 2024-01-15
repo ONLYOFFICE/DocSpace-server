@@ -29,9 +29,11 @@ public class AuthorizationConsentController {
     ) {
         MDC.put("clientId", clientId);
         log.info("Got a new consent request");
+        MDC.clear();
 
         return String.format("redirect:%s", UriComponentsBuilder
-                .fromUriString(HttpUtils.getRequestIP(request))
+                .fromUriString(String.format("%s://%s", request.getScheme(),
+                        HttpUtils.getRequestIP(request)))
                 .path("login")
                 .queryParam("type", "oauth2")
                 .queryParam("client_id", clientId)
