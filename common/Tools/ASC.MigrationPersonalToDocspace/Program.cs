@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using CommandLine;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis;
 
 var options = new WebApplicationOptions
 {
@@ -32,13 +34,14 @@ var options = new WebApplicationOptions
     ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
 };
 
-var param = Parser.Default.ParseArguments<Options>(args).Value;
-/*var param = new Options()
+//var param = Parser.Default.ParseArguments<Options>(args).Value;
+var param = new Options()
 {
     FromRegion = "personal",
     ToRegion = "personal",
-    FromAlias = "localhost"
-};*/
+    FromAlias = "localhost",
+    UserName = "administrator"
+};
 
 var builder = WebApplication.CreateBuilder(options);
 
@@ -72,8 +75,15 @@ builder.Services.RegisterFeature()
     .AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies())
     .AddMemoryCache()
     .AddSingleton<IEventBus, MockEventBusRabbitMQ>()
-    .AddCacheNotify(config);
+    .AddCacheNotify(config)
+    .AddDistributedLock(config);
 
+var redisConfiguration = config.GetSection("Redis").Get<RedisConfiguration>();
+var configurationOption = redisConfiguration?.ConfigurationOptions;
+configurationOption.ClientName = "migration to docspace";
+var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+builder.Services.AddSingleton(redisConfiguration)
+        .AddSingleton(redisConnection);
 
 var diHelper = new DIHelper();
 diHelper.Configure(builder.Services);
