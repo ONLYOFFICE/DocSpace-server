@@ -28,7 +28,7 @@ public interface AuthorizationRepository extends CrudRepository<Authorization, A
      * @return
      */
     @Modifying
-    @Query("DELETE FROM Authorization a WHERE a.registeredClientId=:registeredClientId")
+    @Query("DELETE FROM Authorization a WHERE a.registeredClientId = :registeredClientId")
     int deleteAllByRegisteredClientId(@Param("registeredClientId") String registeredClientId);
 
     /**

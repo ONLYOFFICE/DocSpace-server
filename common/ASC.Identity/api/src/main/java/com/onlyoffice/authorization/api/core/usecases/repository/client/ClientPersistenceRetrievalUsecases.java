@@ -43,4 +43,12 @@ public interface ClientPersistenceRetrievalUsecases {
      * @return
      */
     Set<Client> findClientsByClientIdIn(Iterable<String> clientIds);
+
+    /**
+     *
+     * @param clientId
+     * @param tenant
+     * @return
+     */
+    boolean existsByClientIdAndTenant(String clientId, int tenant);
 }

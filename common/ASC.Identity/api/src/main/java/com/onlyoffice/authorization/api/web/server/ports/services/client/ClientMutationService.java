@@ -52,8 +52,8 @@ public class ClientMutationService implements ClientMutationUsecases {
 
     /**
      *
-     * @param clientId
      * @param tenant
+     * @param clientId
      * @return
      */
     @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
@@ -62,7 +62,7 @@ public class ClientMutationService implements ClientMutationUsecases {
             isolation = Isolation.REPEATABLE_READ,
             rollbackFor = Exception.class
     )
-    public SecretDTO regenerateSecret(String clientId, TenantDTO tenant) {
+    public SecretDTO regenerateSecret(TenantDTO tenant, String clientId) {
         var secret = UUID.randomUUID().toString();
 
         MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
@@ -74,7 +74,7 @@ public class ClientMutationService implements ClientMutationUsecases {
         MDC.clear();
 
         try {
-            mutationUsecases.regenerateClientSecretByClientId(clientId, tenant.getTenantId(),
+            mutationUsecases.regenerateClientSecretByClientId(tenant.getTenantId(), clientId,
                     cipher.encrypt(secret), ZonedDateTime.now());
         } catch (Exception e) {
             throw new UnsupportedOperationException(String
@@ -86,6 +86,7 @@ public class ClientMutationService implements ClientMutationUsecases {
 
     /**
      *
+     * @param tenant
      * @param activationDTO
      * @param clientId
      * @return
@@ -96,11 +97,14 @@ public class ClientMutationService implements ClientMutationUsecases {
             isolation = Isolation.REPEATABLE_READ,
             rollbackFor = Exception.class
     )
-    public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
+    public boolean changeActivation(TenantDTO tenant, ChangeClientActivationDTO activationDTO, String clientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Changing client's activation", clientId, activationDTO.getStatus());
 
         try {
-            mutationUsecases.changeActivation(clientId,
+            mutationUsecases.changeActivation(tenant.getTenantId(), clientId,
                     activationDTO.getStatus(), ZonedDateTime.now());
             return true;
         } catch (Exception e) {
@@ -113,9 +117,9 @@ public class ClientMutationService implements ClientMutationUsecases {
 
     /**
      *
+     * @param tenant
      * @param clientDTO
      * @param clientId
-     * @param tenant
      */
     @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
     @Transactional(
@@ -123,12 +127,14 @@ public class ClientMutationService implements ClientMutationUsecases {
             isolation = Isolation.REPEATABLE_READ,
             rollbackFor = Exception.class
     )
-    public void updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
+    public void updateClient(TenantDTO tenant, UpdateClientDTO clientDTO, String clientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Trying to update a client");
         MDC.clear();
 
-        var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant)
+        var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant.getTenantId())
                 .orElseThrow(() -> new EntityNotFoundException(String
                         .format("Could not find client with client id %s for %d", clientId, tenant)));
 
@@ -170,7 +176,7 @@ public class ClientMutationService implements ClientMutationUsecases {
             var cl = StreamSupport.stream(updateClientPair.spliterator(), false)
                     .filter(c -> c.getFirst().equalsIgnoreCase(client.getClientId()))
                     .findFirst();
-            if (cl == null || cl.isEmpty())
+            if (cl == null || cl.isEmpty() || cl.get().getSecond().getTenant() != client.getTenant())
                 return;
             ClientMapper.INSTANCE.update(client, ClientMapper.INSTANCE
                     .fromMessageToEntity(cl.get().getSecond()));
@@ -183,17 +189,21 @@ public class ClientMutationService implements ClientMutationUsecases {
 
     /**
      *
+     * @param tenant
      * @param updateClient
      * @param clientId
      */
     @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
-    public void updateClientAsync(UpdateClientDTO updateClient, String clientId) {
+    public void updateClientAsync(TenantDTO tenant, UpdateClientDTO updateClient, String clientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Submitting a client update task", updateClient);
 
         try {
             var msg = ClientMapper.INSTANCE.fromCommandToMessage(updateClient);
             msg.setClientId(clientId);
+            msg.setTenant(tenant.getTenantId());
             msg.setCommandCode(ClientMessage.ClientCommandCode.UPDATE_CLIENT);
 
             var authenticationMethods = new HashSet<String>();

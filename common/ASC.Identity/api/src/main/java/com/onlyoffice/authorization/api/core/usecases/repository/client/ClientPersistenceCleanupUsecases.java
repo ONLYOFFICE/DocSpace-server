@@ -6,9 +6,9 @@ package com.onlyoffice.authorization.api.core.usecases.repository.client;
 public interface ClientPersistenceCleanupUsecases {
     /**
      *
-     * @param id
      * @param tenant
+     * @param clientId
      * @return
      */
-    int deleteByClientIdAndTenant(String id, int tenant);
+    int deleteByTenantAndClientId(int tenant, String clientId);
 }

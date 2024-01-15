@@ -10,9 +10,9 @@ import java.util.Set;
 public interface ConsentPersistenceRetrieveUsecases {
     /**
      *
+     * @param tenant
      * @param principalName
-     * @param tenantUrl
      * @return
      */
-    Set<Consent> findAllByPrincipalNameAndTenantUrl(String principalName, String tenantUrl);
+    Set<Consent> findAllByTenantAndPrincipalName(int tenant, String principalName);
 }

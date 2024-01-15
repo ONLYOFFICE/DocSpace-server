@@ -2,7 +2,9 @@ package com.onlyoffice.authorization.api.web.server.ports.services.authorization
 
 import com.onlyoffice.authorization.api.core.exceptions.EntityCleanupException;
 import com.onlyoffice.authorization.api.core.usecases.repository.authorization.AuthorizationPersistenceCleanupUsecases;
+import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCleanupUsecases;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.AuthorizationMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthorizationCleanupService implements AuthorizationCleanupUsecases {
     private final AuthorizationPersistenceCleanupUsecases cleanupUsecases;
+    private final ClientPersistenceRetrievalUsecases clientUsecases;
 
     /**
      *
@@ -80,6 +83,40 @@ public class AuthorizationCleanupService implements AuthorizationCleanupUsecases
             log.debug("Successfully removed authorizations");
 
             return count;
+        } catch (RuntimeException e) {
+            throw new EntityCleanupException("Could not remove authorizations by client id", e);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    /**
+     *
+     * @param tenant
+     * @param registeredClientId
+     * @return
+     */
+    @Transactional(
+            timeout = 3000,
+            rollbackFor = Exception.class
+    )
+    public int deleteTenantAuthorizationsByClientId(TenantDTO tenant, String registeredClientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
+        MDC.put("clientId", registeredClientId);
+        log.info("Removing authorizations as a batch by registeredClientId");
+
+        try {
+            if (clientUsecases.existsByClientIdAndTenant(registeredClientId, tenant.getTenantId())) {
+                var count = cleanupUsecases.deleteAllByClientId(registeredClientId);
+
+                MDC.put("count", String.valueOf(count));
+                log.debug("Successfully removed authorizations");
+
+                return count;
+            }
+
+            return 0;
         } catch (RuntimeException e) {
             throw new EntityCleanupException("Could not remove authorizations by client id", e);
         } finally {

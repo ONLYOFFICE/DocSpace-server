@@ -3,21 +3,24 @@
  */
 package com.onlyoffice.authorization.api.core.usecases.service.client;
 
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
+
 /**
  *
  */
 public interface ClientCleanupUsecases {
     /**
      *
+     * @param tenant
      * @param clientId
      */
-    void deleteClientAsync(String clientId);
+    void deleteClientAsync(TenantDTO tenant, String clientId);
 
     /**
      *
-     * @param id
      * @param tenant
+     * @param id
      * @return
      */
-    boolean deleteClient(String id, int tenant);
+    boolean deleteClient(TenantDTO tenant, String id);
 }

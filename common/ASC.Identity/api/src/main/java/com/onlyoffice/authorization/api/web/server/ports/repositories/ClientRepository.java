@@ -31,7 +31,7 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
      * @param id
      * @return
      */
-    @Query("SELECT c FROM Client c WHERE c.clientId=:id AND c.invalidated=false")
+    @Query("SELECT c FROM Client c WHERE c.clientId = :id AND c.invalidated=false")
     Optional<Client> findById(@Param("id") String id);
 
     /**
@@ -67,21 +67,23 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
      * @param modifiedOn
      */
     @Modifying
-    @Query("UPDATE Client c SET c.clientSecret=:secret, c.modifiedOn=:modifiedOn WHERE c.clientId=:clientId AND c.tenant=:tenant")
-    void regenerateClientSecretByClientId(@Param("clientId") String clientId,
-                                          @Param("tenant") int tenant,
-                                          @Param("secret") String secret,
-                                          @Param("modifiedOn") ZonedDateTime modifiedOn);
+    @Query("UPDATE Client c SET c.clientSecret = :secret, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenant = :tenant")
+    void regenerateClientSecretByClientId(@Param("tenant") int tenant,
+                                    @Param("clientId") String clientId,
+                                    @Param("secret") String secret,
+                                    @Param("modifiedOn") ZonedDateTime modifiedOn);
 
     /**
      *
      * @param clientId
+     * @param tenant
      * @param enabled
      * @param modifiedOn
      */
     @Modifying
-    @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId=:clientId")
-    void changeActivation(@Param("clientId") String clientId,
+    @Query("UPDATE Client c set c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenant = :tenant")
+    void changeActivation(@Param("tenant") int tenant,
+                          @Param("clientId") String clientId,
                           @Param(value = "enabled") boolean enabled,
                           @Param(value = "modifiedOn") ZonedDateTime modifiedOn);
 

@@ -31,12 +31,12 @@ public interface ClientCreationUsecases {
 
     /**
      *
-     * @param clientDTO
      * @param tenant
+     * @param clientDTO
      * @param person
      * @param tenantUrl
      * @return
      */
-    ClientDTO createClientAsync(CreateClientDTO clientDTO, TenantDTO tenant,
+    ClientDTO createClientAsync(TenantDTO tenant, CreateClientDTO clientDTO,
                                 PersonDTO person, String tenantUrl);
 }

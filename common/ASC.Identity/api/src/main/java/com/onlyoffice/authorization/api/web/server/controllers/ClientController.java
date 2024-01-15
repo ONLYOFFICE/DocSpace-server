@@ -140,8 +140,8 @@ public class ClientController {
             log.info("Received a new get clients request for tenant with page and limit");
             MDC.clear();
 
-            PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant
-                    .getTenantId(), page, limit);
+            PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant,
+                    page, limit);
 
             var tasks = new HashSet<Pair<ClientDTO, CompletableFuture<APIClientDTOWrapper<PersonDTO>>>>();
             pagination.getData().forEach(c -> {
@@ -192,12 +192,12 @@ public class ClientController {
                         .withMedia(MediaType.APPLICATION_JSON_VALUE)
                         .withTitle("get_client"));
                 client.add(linkTo(methodOn(ClientController.class)
-                        .updateClient(request, response, client.getClientId(), null))
+                        .updateClient(client.getClientId(), null))
                         .withRel(HttpMethod.PUT.name())
                         .withMedia(MediaType.APPLICATION_JSON_VALUE)
                         .withTitle("update_client"));
                 client.add(linkTo(methodOn(ClientController.class)
-                        .deleteClient(request, response, client.getClientId()))
+                        .deleteClient(client.getClientId()))
                         .withRel(HttpMethod.DELETE.name())
                         .withTitle("delete_client"));
                 client.add(linkTo(methodOn(ClientController.class)
@@ -205,7 +205,7 @@ public class ClientController {
                         .withRel(HttpMethod.PATCH.name())
                         .withTitle("regenerate_secret"));
                 client.add(linkTo(methodOn(ClientController.class)
-                        .activateClient(request, response, client.getClientId(), null))
+                        .activateClient(client.getClientId(), null))
                         .withRel(HttpMethod.PATCH.name())
                         .withMedia(MediaType.APPLICATION_JSON_VALUE)
                         .withTitle("activate_client"));
@@ -248,7 +248,6 @@ public class ClientController {
 
     /**
      *
-     * @param request
      * @param clientId
      * @return
      */
@@ -257,10 +256,7 @@ public class ClientController {
     @RateLimiter(name = "batchClientRateLimiter")
     @AuditAction(action = Action.REVOKE_USER_CLIENT)
     @DistributedRateLimiter(name = "identityMutateClient")
-    public ResponseEntity revokeUserClient(
-            HttpServletRequest request,
-            @PathVariable @NotEmpty String clientId
-    ) {
+    public ResponseEntity revokeUserClient(@PathVariable @NotEmpty String clientId) {
         setLoggerContextAttributes();
         MDC.put("clientId", clientId);
         log.info("Received a new user revocation request");
@@ -274,14 +270,13 @@ public class ClientController {
 
     /**
      *
-     * @param request
      * @return
      */
     @GetMapping("/consents")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
-    public ResponseEntity<Set<ConsentDTO>> getClientsInfo(HttpServletRequest request) {
+    public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
         try {
             var zone = ZoneId.of(SettingsContextContainer.context.get()
                     .getResponse().getTimezone());
@@ -290,8 +285,9 @@ public class ClientController {
             MDC.put("zone", zone.toString());
             log.info("Received a new get clients info");
 
-            var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
-                    .context.get().getResponse().getEmail(), HttpUtils.getRequestHostAddress(request).get());
+            var result = consentRetrieveUsecases.getAllByPrincipalName(TenantContextContainer
+                    .context.get().getResponse(), PersonContextContainer.context.get()
+                    .getResponse().getEmail());
 
             result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
 
@@ -331,16 +327,17 @@ public class ClientController {
             MDC.put("zone", zone.toString());
             log.info("Received a new get client request for tenant");
 
-            var client = retrieveUsecases.getClient(clientId);
+            var client = retrieveUsecases.getTenantClient(TenantContextContainer.context
+                    .get().getResponse(), clientId);
             client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
             client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
             client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(null, response, clientId, null))
+                    .updateClient(clientId, null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(null, response, clientId))
+                    .deleteClient(clientId))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             client.add(linkTo(methodOn(ClientController.class)
@@ -352,7 +349,7 @@ public class ClientController {
                     .withRel(HttpMethod.POST.name())
                     .withTitle("create_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(null, response, clientId, null))
+                    .activateClient(clientId, null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
@@ -397,8 +394,8 @@ public class ClientController {
 
         log.debug("Submitting create new client message");
 
-        var client = creationUsecases.createClientAsync(body, TenantContextContainer
-                .context.get().getResponse(), PersonContextContainer.context.
+        var client = creationUsecases.createClientAsync(TenantContextContainer
+                .context.get().getResponse(), body, PersonContextContainer.context.
                 get().getResponse(), HttpUtils.getRequestHostAddress(request).get());
         client.add(linkTo(methodOn(ClientController.class)
                 .getClient(response, client.getClientId()))
@@ -406,12 +403,12 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(request, response, client.getClientId(),null))
+                .updateClient(client.getClientId(),null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(request, response, client.getClientId()))
+                .deleteClient(client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
@@ -419,7 +416,7 @@ public class ClientController {
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(request, response, client.getClientId(), null))
+                .activateClient(client.getClientId(), null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -432,8 +429,6 @@ public class ClientController {
 
     /**
      *
-     * @param request
-     * @param response
      * @param clientId
      * @param body
      * @return
@@ -444,8 +439,6 @@ public class ClientController {
     @RateLimiter(name = "updateClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity updateClient(
-            HttpServletRequest request,
-            HttpServletResponse response,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid UpdateClientDTO body
     ) {
@@ -454,7 +447,8 @@ public class ClientController {
         log.info("Received a new update client request");
         log.debug("Submitting update client message", body);
 
-        mutationUsecases.updateClientAsync(body, clientId);
+        mutationUsecases.updateClientAsync(TenantContextContainer.context
+                .get().getResponse(), body, clientId);
 
         log.debug("Successfully submitted update client message");
         MDC.clear();
@@ -487,8 +481,8 @@ public class ClientController {
 
         try {
             var regenerate = CompletableFuture.supplyAsync(() -> authorizationCleanupUsecases
-                            .deleteAuthorizationsByClientId(clientId))
-                    .thenApplyAsync((r) -> mutationUsecases.regenerateSecret(clientId, tenant))
+                            .deleteTenantAuthorizationsByClientId(tenant, clientId))
+                    .thenApplyAsync((r) -> mutationUsecases.regenerateSecret(tenant, clientId))
                     .get();
             regenerate.add(linkTo(methodOn(ClientController.class)
                     .getClient(response, clientId))
@@ -496,12 +490,12 @@ public class ClientController {
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("get_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(request, response, clientId, null))
+                    .updateClient(clientId, null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(request, response, clientId))
+                    .deleteClient(clientId))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
@@ -509,7 +503,7 @@ public class ClientController {
                     .withRel(HttpMethod.POST.name())
                     .withTitle("create_client"));
             regenerate.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(request, response, clientId, null))
+                    .activateClient(clientId, null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
@@ -526,8 +520,6 @@ public class ClientController {
 
     /**
      *
-     * @param request
-     * @param response
      * @param clientId
      * @return
      */
@@ -536,25 +528,20 @@ public class ClientController {
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
-    public ResponseEntity deleteClient(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable @NotEmpty String clientId
-    ) {
+    public ResponseEntity deleteClient(@PathVariable @NotEmpty String clientId) {
         setLoggerContextAttributes();
         MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
 
-        cleanupUsecases.deleteClientAsync(clientId);
+        cleanupUsecases.deleteClientAsync(TenantContextContainer.context
+                .get().getResponse(), clientId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
      *
-     * @param request
-     * @param response
      * @param clientId
      * @param body
      * @return
@@ -565,8 +552,6 @@ public class ClientController {
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity activateClient(
-            HttpServletRequest request,
-            HttpServletResponse response,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
@@ -575,7 +560,8 @@ public class ClientController {
             MDC.put("clientId", clientId);
             log.info("Received a new change client activation request for tenant");
 
-            if (mutationUsecases.changeActivation(body, clientId))
+            if (mutationUsecases.changeActivation(TenantContextContainer.context
+                    .get().getResponse(), body, clientId))
                 return ResponseEntity.status(HttpStatus.OK).build();
 
             return ResponseEntity.badRequest().build();

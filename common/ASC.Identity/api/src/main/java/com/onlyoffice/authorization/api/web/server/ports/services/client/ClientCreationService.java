@@ -12,7 +12,6 @@ import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClient
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.ClientMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -109,14 +108,14 @@ public class ClientCreationService implements ClientCreationUsecases {
 
     /**
      *
-     * @param clientDTO
      * @param tenant
+     * @param clientDTO
      * @param person
      * @param tenantUrl
      * @return
      */
     public ClientDTO createClientAsync(
-            CreateClientDTO clientDTO, TenantDTO tenant,
+            TenantDTO tenant, CreateClientDTO clientDTO,
             PersonDTO person, String tenantUrl
     ) {
         MDC.put("tenantId", String.valueOf(tenant.getTenantId()));

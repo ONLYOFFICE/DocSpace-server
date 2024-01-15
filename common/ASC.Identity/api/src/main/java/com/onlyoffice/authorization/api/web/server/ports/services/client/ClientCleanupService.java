@@ -4,6 +4,7 @@ import com.onlyoffice.authorization.api.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.EntityCleanupException;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.security.context.PersonContextContainer;
 import com.onlyoffice.authorization.api.web.server.messaging.messages.ClientMessage;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,14 @@ public class ClientCleanupService implements ClientCleanupUsecases {
 
     /**
      *
+     * @param tenant
      * @param clientId
      */
     @CacheEvict(cacheNames = {"identityClients"}, key = "#clientId")
-    public void deleteClientAsync(String clientId) {
+    public void deleteClientAsync(TenantDTO tenant, String clientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Trying to create a new client deletion task");
 
         try {
@@ -44,7 +49,7 @@ public class ClientCleanupService implements ClientCleanupUsecases {
                     queue.getRouting(),
                     ClientMessage
                             .builder()
-                            .tenant(0)
+                            .tenant(tenant.getTenantId())
                             .clientId(clientId)
                             .clientSecret(UUID.randomUUID().toString())
                             .scopes(Set.of("***"))
@@ -64,8 +69,8 @@ public class ClientCleanupService implements ClientCleanupUsecases {
 
     /**
      *
-     * @param id
      * @param tenant
+     * @param id
      * @return
      */
     @CacheEvict(cacheNames = {"identityClients"}, key = "#id")
@@ -73,13 +78,14 @@ public class ClientCleanupService implements ClientCleanupUsecases {
             timeout = 2000,
             rollbackFor = Exception.class
     )
-    public boolean deleteClient(String id, int tenant) {
-        MDC.put("tenantId", String.valueOf(tenant));
+    public boolean deleteClient(TenantDTO tenant, String id) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("clientId", id);
         log.info("Deleting a client");
         MDC.clear();
 
-        if (cleanupUsecases.deleteByClientIdAndTenant(id, tenant) < 1)
+        if (cleanupUsecases.deleteByTenantAndClientId(tenant.getTenantId(), id) < 1)
             throw new EntityCleanupException(String
                     .format("could not delete client with client id %s for %d", id, tenant));
 

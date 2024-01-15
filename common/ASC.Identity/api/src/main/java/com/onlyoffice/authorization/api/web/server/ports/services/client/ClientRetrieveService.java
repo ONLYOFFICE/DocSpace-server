@@ -2,6 +2,7 @@ package com.onlyoffice.authorization.api.web.server.ports.services.client;
 
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
 import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.web.server.transfer.response.PaginationDTO;
@@ -57,6 +58,34 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
                         .format("Could not find client with id %s", clientId)));
     }
 
+    @Cacheable(cacheNames = {"identityClients"}, key = "#clientId")
+    @Transactional(timeout = 1250, readOnly = true)
+    public ClientDTO getTenantClient(TenantDTO tenant, String clientId) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
+        MDC.put("clientId", clientId);
+        log.info("Trying to get a tenant client by clientId");
+        MDC.clear();
+
+        return retrievalUsecases
+                .findClientByClientIdAndTenant(clientId, tenant.getTenantId())
+                .filter(c -> !c.isInvalidated())
+                .map(c -> {
+                    try {
+                        var query = ClientMapper.INSTANCE.fromEntityToQuery(c);
+                        query.setClientSecret(cipher.decrypt(query.getClientSecret()));
+                        return query;
+                    } catch (Exception e) {
+                        throw new EntityNotFoundException(String.
+                                format("Could not find and decrypt client secret: %s", e.getMessage()));
+                    } finally {
+                        MDC.clear();
+                    }
+                })
+                .orElseThrow(() -> new EntityNotFoundException(String
+                        .format("Could not find client with id %s", clientId)));
+    }
+
     /**
      *
      * @param tenant
@@ -65,13 +94,15 @@ public class ClientRetrieveService implements ClientRetrieveUsecases {
      * @return
      */
     @Transactional(timeout = 2250, readOnly = true)
-    public PaginationDTO getTenantClients(int tenant, int page, int limit) {
+    public PaginationDTO getTenantClients(TenantDTO tenant, int page, int limit) {
+        MDC.put("tenantId", String.valueOf(tenant.getTenantId()));
+        MDC.put("tenantAlias", tenant.getTenantAlias());
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Trying to get tenant clients", tenant, page, limit);
         MDC.clear();
 
-        var data = retrievalUsecases.findAllByTenant(tenant, Pageable
+        var data = retrievalUsecases.findAllByTenant(tenant.getTenantId(), Pageable
                 .ofSize(limit).withPage(page));
 
         var builder = PaginationDTO

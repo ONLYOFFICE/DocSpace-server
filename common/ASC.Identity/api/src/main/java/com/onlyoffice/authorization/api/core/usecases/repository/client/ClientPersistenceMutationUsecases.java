@@ -11,19 +11,21 @@ import java.time.ZonedDateTime;
 public interface ClientPersistenceMutationUsecases {
     /**
      *
-     * @param clientId
      * @param tenant
+     * @param clientId
      * @param secret
      * @param modifiedOn
      */
-    void regenerateClientSecretByClientId(String clientId, int tenant,
+    void regenerateClientSecretByClientId(int tenant, String clientId,
                                           String secret, ZonedDateTime modifiedOn);
 
     /**
      *
+     * @param tenant
      * @param clientId
      * @param enabled
      * @param modifiedOn
      */
-    void changeActivation(String clientId, boolean enabled, ZonedDateTime modifiedOn);
+    void changeActivation(int tenant, String clientId,
+                          boolean enabled, ZonedDateTime modifiedOn);
 }
