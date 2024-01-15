@@ -179,7 +179,19 @@ public class SocketManager : SocketServiceClient
             _ => string.Empty
         };
     }
+    
+    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanRead = await _fileSecurity.WhoCanReadAsync(entry);
+        var userIds = whoCanRead
+            .Concat(await GetAdmins())
+            .Concat(new []{ entry.CreateBy })
+            .Distinct()
+            .ToList();
 
+        return userIds;
+    }
+    
     private List<Guid> _admins;
     private async Task<IEnumerable<Guid>> GetAdmins()
     {
@@ -195,16 +207,5 @@ public class SocketManager : SocketServiceClient
         _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-    }
-    
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
-    {
-        var whoCanRead = await _fileSecurity.WhoCanReadAsync(entry);
-        var userIds = whoCanRead
-            .Concat(await GetAdmins())
-            .Distinct()
-            .ToList();
-
-        return userIds;
     }
 }
