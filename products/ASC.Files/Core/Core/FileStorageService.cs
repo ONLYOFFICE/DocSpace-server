@@ -2490,6 +2490,20 @@ public class FileStorageService //: IFileStorageService
         return files;
     }
 
+    public async Task DeleteFromRecentAsync<T>(IEnumerable<T> filesIds, bool recentByLinks)
+    {
+        var tagDao = GetTagDao<T>();
+        var fileDao = GetFileDao<T>();
+
+        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
+
+        var tags = recentByLinks
+            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, files).ToListAsync()
+            : files.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
+
+        await tagDao.RemoveTagsAsync(tags);
+    }
+
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
