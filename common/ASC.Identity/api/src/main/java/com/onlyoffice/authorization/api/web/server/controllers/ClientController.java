@@ -274,13 +274,14 @@ public class ClientController {
 
     /**
      *
+     * @param request
      * @return
      */
     @GetMapping("/consents")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     @DistributedRateLimiter(name = "identityFetchClient")
-    public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
+    public ResponseEntity<Set<ConsentDTO>> getClientsInfo(HttpServletRequest request) {
         try {
             var zone = ZoneId.of(SettingsContextContainer.context.get()
                     .getResponse().getTimezone());
@@ -290,7 +291,7 @@ public class ClientController {
             log.info("Received a new get clients info");
 
             var result = consentRetrieveUsecases.getAllByPrincipalName(PersonContextContainer
-                    .context.get().getResponse().getEmail());
+                    .context.get().getResponse().getEmail(), HttpUtils.getRequestHostAddress(request).get());
 
             result.forEach(r -> r.setModifiedAt(r.getModifiedAt().toInstant().atZone(zone)));
 

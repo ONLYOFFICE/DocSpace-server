@@ -11,7 +11,8 @@ public interface ConsentPersistenceRetrieveUsecases {
     /**
      *
      * @param principalName
+     * @param tenantUrl
      * @return
      */
-    Set<Consent> findAllByPrincipalName(String principalName);
+    Set<Consent> findAllByPrincipalNameAndTenantUrl(String principalName, String tenantUrl);
 }

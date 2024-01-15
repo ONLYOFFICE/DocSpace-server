@@ -28,10 +28,14 @@ public interface ConsentRepository extends CrudRepository<Consent, Consent.Conse
     /**
      *
      * @param principalName
+     * @param tenantUrl
      * @return
      */
-    @Query("SELECT c, cl FROM Consent c INNER JOIN c.client cl WHERE c.registeredClientId = cl.clientId AND c.principalName = :principalName AND cl.invalidated = false")
-    Set<Consent> findAllConsentsByPrincipalName(@Param("principalName") String principalName);
+    @Query("SELECT c, cl FROM Consent c INNER JOIN c.client cl WHERE c.registeredClientId = cl.clientId AND c.principalName = :principalName AND cl.tenantUrl = :tenantUrl AND cl.invalidated = false")
+    Set<Consent> findAllConsentsByPrincipalNameAndTenantUrl(
+            @Param("principalName") String principalName,
+            @Param("tenantUrl") String tenantUrl
+    );
 
     /**
      *
@@ -45,9 +49,10 @@ public interface ConsentRepository extends CrudRepository<Consent, Consent.Conse
     /**
      *
      * @param principalName
+     * @param tenantUrl
      * @return
      */
-    default Set<Consent> findAllByPrincipalName(String principalName) {
-        return findAllConsentsByPrincipalName(principalName);
+    default Set<Consent> findAllByPrincipalNameAndTenantUrl(String principalName, String tenantUrl) {
+        return findAllConsentsByPrincipalNameAndTenantUrl(principalName, tenantUrl);
     }
 }

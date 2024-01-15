@@ -11,7 +11,8 @@ public interface ConsentRetrieveUsecases {
     /**
      *
      * @param principalName
+     * @param tenantUrl
      * @return
      */
-    Set<ConsentDTO> getAllByPrincipalName(String principalName);
+    Set<ConsentDTO> getAllByPrincipalName(String principalName, String tenantUrl);
 }

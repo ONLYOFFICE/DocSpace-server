@@ -25,18 +25,19 @@ public class ConsentRetrieveService implements ConsentRetrieveUsecases {
     /**
      *
      * @param principalName
+     * @param tenantUrl
      * @return
      * @throws RuntimeException
      */
     @Transactional(timeout = 2000, readOnly = true)
-    public Set<ConsentDTO> getAllByPrincipalName(String principalName)
+    public Set<ConsentDTO> getAllByPrincipalName(String principalName, String tenantUrl)
             throws RuntimeException {
         MDC.put("principalName", principalName);
         log.info("Trying to get all consents by principal name");
         MDC.clear();
 
         var response = new HashSet<ConsentDTO>();
-        var results = retrieveUsecases.findAllByPrincipalName(principalName);
+        var results = retrieveUsecases.findAllByPrincipalNameAndTenantUrl(principalName, tenantUrl);
         results.forEach(r -> response.add(ConsentMapper.INSTANCE.toDTO(r)));
         return response;
     }
