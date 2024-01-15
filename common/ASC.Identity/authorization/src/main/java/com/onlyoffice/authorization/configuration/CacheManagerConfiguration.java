@@ -30,13 +30,37 @@ public class CacheManagerConfiguration {
                         name,
                         CacheBuilder.newBuilder()
                                 .expireAfterWrite(60, TimeUnit.SECONDS)
-                                .maximumSize(3000)
+                                .maximumSize(1500)
                                 .build().asMap(),
                         false);
             }
         };
     }
 
+    /**
+     *
+     * @return
+     */
+    @Bean("clientCacheManager")
+    public CacheManager clientCacheManager() {
+        return new ConcurrentMapCacheManager() {
+            @Override
+            protected Cache createConcurrentMapCache(String name) {
+                return new ConcurrentMapCache(
+                        name,
+                        CacheBuilder.newBuilder()
+                                .expireAfterWrite(10, TimeUnit.SECONDS)
+                                .maximumSize(500)
+                                .build().asMap(),
+                        false);
+            }
+        };
+    }
+
+    /**
+     *
+     * @return
+     */
     @Bean("ascClientCacheManager")
     public CacheManager ascClientCacheManager() {
         return new ConcurrentMapCacheManager() {
@@ -46,7 +70,7 @@ public class CacheManagerConfiguration {
                         name,
                         CacheBuilder.newBuilder()
                                 .expireAfterWrite(30, TimeUnit.SECONDS)
-                                .maximumSize(1500)
+                                .maximumSize(500)
                                 .build().asMap(),
                         false);
             }

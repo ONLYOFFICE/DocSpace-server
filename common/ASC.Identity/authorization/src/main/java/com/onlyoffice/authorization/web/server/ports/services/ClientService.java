@@ -31,7 +31,7 @@ public class ClientService implements ClientRetrieveUsecases {
      * @return
      * @throws ClientPermissionException
      */
-    @Cacheable(cacheNames = {"identityClients"})
+    @Cacheable(cacheNames = {"identityClients"}, cacheManager = "clientCacheManager")
     public Client getClientById(String id) throws ClientPermissionException {
         try {
             MDC.put("clientId", id);
@@ -67,7 +67,7 @@ public class ClientService implements ClientRetrieveUsecases {
      * @return
      * @throws ClientPermissionException
      */
-    @Cacheable(cacheNames = {"identityClients"})
+    @Cacheable(cacheNames = {"identityClients"}, cacheManager = "clientCacheManager")
     public Client getClientByClientId(String clientId) throws ClientPermissionException {
         try {
             MDC.put("clientId", clientId);
