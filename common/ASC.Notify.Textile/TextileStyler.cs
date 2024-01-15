@@ -181,11 +181,6 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             case "social":
                 InitSocialFooter(settings, out footerSocialContent);
                 break;
-            case "personal":
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
-                break;
-            case "personalCustomMode":
-                break;
             case "opensource":
                 footerContent = NotifyTemplateResource.FooterOpensourceV10;
                 footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;

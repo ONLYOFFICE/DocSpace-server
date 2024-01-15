@@ -82,8 +82,6 @@ public static class Actions
     public static readonly INotifyAction EnterpriseWhitelabelGuestWelcomeV1 = new NotifyAction("enterprise_whitelabel_guest_welcome_v1");
     public static readonly INotifyAction OpensourceGuestWelcomeV1 = new NotifyAction("opensource_guest_welcome_v1");
 
-    public static readonly INotifyAction PersonalCustomModeAlreadyExist = new NotifyAction("personal_custom_mode_already_exist");
-
     public static readonly INotifyAction SaasCustomModeRegData = new NotifyAction("saas_custom_mode_reg_data");
 
     public static readonly INotifyAction StorageEncryptionStart = new NotifyAction("storage_encryption_start");
