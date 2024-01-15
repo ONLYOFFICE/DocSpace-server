@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
+using Page = Nest.Page;
 
 namespace ASC.Files.Core.Security;
 
@@ -1024,7 +1025,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var subjects = new List<Guid>();
                 if (shares == null)
                 {
-                    subjects = await GetUserSubjectsAsync(userId);
+                    subjects = await GetUserSubjectsAsync(userId, e);
                     shares = await GetSharesAsync(e, subjects);
                 }
 
@@ -1077,6 +1078,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             e.RootFolderType == FolderType.Archive ? DefaultArchiveShare :
             DefaultCommonShare;
 
+        e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
 
@@ -1926,32 +1928,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)
     {
-        // priority order
-        // User, Departments, admin, everyone
-
-        var result = new List<Guid> { userId };
-
-        var linkId = await externalShare.GetLinkIdAsync();
-
-        if (linkId != Guid.Empty)
-        {
-            result.Add(linkId);
-        }
-
-        if (userId == FileConstant.ShareLinkId)
-        {
-            return result;
-        }
-
-        result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
-        {
-            result.Add(Constants.GroupAdmin.ID);
-        }
-
-        result.Add(Constants.GroupEveryone.ID);
-
-        return result;
+        return await GetUserSubjectsAsync<int>(userId, null);
     }
 
     public static void CorrectSecurityByLockedStatus<T>(FileEntry<T> entry)
@@ -2019,6 +1996,46 @@ public class FileSecurity(IDaoFactory daoFactory,
                     break;
             }
         }
+
+        return result;
+    }
+    
+    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)
+    {
+        // priority order
+        // User, Departments, admin, everyone
+
+        var result = new List<Guid> { userId };
+        
+        var linkId = await externalShare.GetLinkIdAsync();
+        if (linkId != Guid.Empty)
+        {
+            result.Add(linkId);
+        }
+        
+        if (userId == FileConstant.ShareLinkId)
+        {
+            return result;
+        }
+
+        if (entry is { RootFolderType: FolderType.USER } and not IFolder { FolderType: FolderType.USER } &&
+            entry.RootCreateBy != userId && linkId == Guid.Empty)
+        {
+            var linkTag = await daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink, [entry]).FirstOrDefaultAsync();
+            if (linkTag != null && Guid.TryParse(linkTag.Name, out var linkTagId))
+            {
+                result.Add(linkTagId);
+            }
+        }
+        
+        result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
+        
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
+        {
+            result.Add(Constants.GroupAdmin.ID);
+        }
+
+        result.Add(Constants.GroupEveryone.ID);
 
         return result;
     }
