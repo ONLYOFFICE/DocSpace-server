@@ -81,12 +81,6 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendOpensourceLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    private async Task SendLettersPersonalAsync(DateTime scheduleDate)
-    {
-        using var scope = serviceProvider.CreateScope();
-        await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendPersonalLettersAsync(EMailSenderName, scheduleDate);
-    }
-
     private async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
