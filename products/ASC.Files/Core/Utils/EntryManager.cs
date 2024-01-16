@@ -235,7 +235,6 @@ public class EntryManager(IDaoFactory daoFactory,
         FileMarker fileMarker,
         FileUtility fileUtility,
         GlobalStore globalStore,
-        CoreBaseSettings coreBaseSettings,
         FilesSettingsHelper filesSettingsHelper,
         UserManager userManager,
         ILogger<EntryManager> logger,
@@ -1162,7 +1161,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string doc, string comment = null, bool checkRight = true, bool encrypted = false, ForcesaveType? forcesave = null, bool keepLink = false, string? formsDataUrl = null)
+    public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string doc, string comment = null, bool checkRight = true, bool encrypted = false, ForcesaveType? forcesave = null, bool keepLink = false, string formsDataUrl = null)
     {
         var newExtension = string.IsNullOrEmpty(fileExtension)
                           ? FileUtility.GetFileExtension(downloadUri)

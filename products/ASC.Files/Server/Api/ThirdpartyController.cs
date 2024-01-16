@@ -26,8 +26,7 @@
 
 namespace ASC.Files.Api;
 
-public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
-        EntryManager entryManager,
+public class ThirdpartyController(EntryManager entryManager,
         FilesSettingsHelper filesSettingsHelper,
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,

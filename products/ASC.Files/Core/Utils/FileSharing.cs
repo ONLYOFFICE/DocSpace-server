@@ -28,7 +28,6 @@ namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class FileSharingAceHelper(FileSecurity fileSecurity,
-        CoreBaseSettings coreBaseSettings,
         FileUtility fileUtility,
         UserManager userManager,
         AuthContext authContext,

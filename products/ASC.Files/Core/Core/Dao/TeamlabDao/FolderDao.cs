@@ -40,7 +40,6 @@ internal class FolderDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        GlobalSpace globalSpace,
         IDaoFactory daoFactory,
         SelectorFactory selectorFactory,
         CrossDao crossDao,

@@ -144,7 +144,6 @@ public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workCont
 public class ProductSecurityInterceptor(TenantManager tenantManager,
     WebItemSecurity webItemSecurity,
     UserManager userManager,
-    CoreBaseSettings coreBaseSettings,
     ILogger<ProductSecurityInterceptor> logger)
 {
     public async Task<bool> InterceptAsync(NotifyRequest r, InterceptorPlace p)
