@@ -233,6 +233,9 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<image>
+						<name>identity-authorization</name>
+					</image>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -249,15 +252,6 @@
 							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<image>
-						<name>identity-authorization</name>
-					</image>
 				</configuration>
 			</plugin>
 		</plugins>
