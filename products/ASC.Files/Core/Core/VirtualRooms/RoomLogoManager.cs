@@ -51,6 +51,8 @@ public class RoomLogoManager
     private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     private readonly SecurityContext _securityContext;
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
+    private readonly ExternalShare _externalShare;
+    private readonly BaseCommonLinkUtility _commonLinkUtility;
 
     public RoomLogoManager(
         StorageFactory storageFactory,
@@ -61,7 +63,9 @@ public class RoomLogoManager
         FilesMessageService filesMessageService,
         EmailValidationKeyProvider emailValidationKeyProvider,
         SecurityContext securityContext,
-        FileUtilityConfiguration fileUtilityConfiguration)
+        FileUtilityConfiguration fileUtilityConfiguration, 
+        ExternalShare externalShare, 
+        BaseCommonLinkUtility commonLinkUtility)
     {
         _storageFactory = storageFactory;
         _tenantManager = tenantManager;
@@ -72,6 +76,8 @@ public class RoomLogoManager
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _securityContext = securityContext;
         _fileUtilityConfiguration = fileUtilityConfiguration;
+        _externalShare = externalShare;
+        _commonLinkUtility = commonLinkUtility;
     }
 
     public bool EnableAudit { get; set; } = true;
@@ -199,10 +205,10 @@ public class RoomLogoManager
 
         return new Logo
         {
-            Original = await GetLogoPathAsync(id, SizeName.Original, cacheKey, secure),
-            Large = await GetLogoPathAsync(id, SizeName.Large, cacheKey, secure),
-            Medium = await GetLogoPathAsync(id, SizeName.Medium, cacheKey, secure),
-            Small = await GetLogoPathAsync(id, SizeName.Small, cacheKey, secure)
+            Original = await GetLogoUrlAsync(id, SizeName.Original, cacheKey, secure),
+            Large = await GetLogoUrlAsync(id, SizeName.Large, cacheKey, secure),
+            Medium = await GetLogoUrlAsync(id, SizeName.Medium, cacheKey, secure),
+            Small = await GetLogoUrlAsync(id, SizeName.Small, cacheKey, secure)
         };
     }
 
@@ -251,7 +257,7 @@ public class RoomLogoManager
         }
     }
 
-    private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, Size cropSize)
+    private static async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, Size cropSize)
     {
         imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
@@ -265,12 +271,12 @@ public class RoomLogoManager
         using (var stream = new MemoryStream(imageData))
         {
             await store.SaveAsync(fileName, stream);
-    }
+        }
 
         var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize};
 
         if (imageData is not { Length: > 0 })
-    {
+        {
             throw new Web.Core.Users.UnknownImageFormatException();
         }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
@@ -284,21 +290,21 @@ public class RoomLogoManager
             using var img = await Image.LoadAsync(imageStream);
             foreach (var size in sizes)
             {
-            if (size.Item2 != img.Size)
-            {
-                using var img2 = UserPhotoThumbnailManager.GetImage(img, size.Item2, new UserPhotoThumbnailSettings(position, cropSize));
+                if (size.Item2 != img.Size)
+                {
+                    using var img2 = UserPhotoThumbnailManager.GetImage(img, size.Item2, new UserPhotoThumbnailSettings(position, cropSize));
                     imageData = CommonPhotoManager.SaveToBytes(img2);
-            }
-            else
-            {
+                }
+                else
+                {
                     imageData = CommonPhotoManager.SaveToBytes(img);
-            }
+                }
 
                 var imageFileName = string.Format(LogosPath, ProcessFolderId(id), size.Item1.ToStringLowerFast());
 
                 using var stream2 = new MemoryStream(imageData);
                 await store.SaveAsync(imageFileName, stream2);
-        }
+            }
         }
         catch (ArgumentException error)
         {
@@ -306,19 +312,20 @@ public class RoomLogoManager
         }
     }
 
-    private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
+    private async ValueTask<string> GetLogoUrlAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());
         var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, _emailValidationKeyProvider) } : null;
 
         var store = await GetDataStoreAsync();
+        var relativePath = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 
-        var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
+        var absolutePath = _commonLinkUtility.GetFullAbsolutePath(relativePath + (secure ? "&" : "?") + $"hash={hash}");
 
-        return uri + (secure ? "&" : "?") + $"hash={hash}";
+        return _externalShare.GetUrlWithShare(absolutePath);
     }
 
-    private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
+    private static async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
