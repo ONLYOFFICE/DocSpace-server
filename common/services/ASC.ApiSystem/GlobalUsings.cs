@@ -53,15 +53,19 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.Hosting;
+global using ASC.Core.Common.Quota.Features;
+global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.Feed.Context;
+global using ASC.Files.Core.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.PublicResources;
+global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
@@ -82,5 +86,3 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Newtonsoft.Json.Linq;
 
 global using NLog;
-
-global using ILogger = Microsoft.Extensions.Logging.ILogger;

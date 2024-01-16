@@ -42,7 +42,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
         await using (var scope = serviceScopeFactory.CreateAsyncScope())
         {
-            await using var dbContext = scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContext();
+            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(cancellationToken);
             activeTenantsUsers = await GetTenantsUsersAsync(dbContext);
         }
 
@@ -109,7 +109,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileStorageService.DeleteItemsAsync("delete", filesList, foldersList, true, false, true);
+            await fileStorageService.DeleteItemsAsync(filesList, foldersList, true, false, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 

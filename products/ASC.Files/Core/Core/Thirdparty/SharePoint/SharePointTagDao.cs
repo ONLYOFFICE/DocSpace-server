@@ -38,10 +38,9 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IThirdPartyTagDao
+        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
@@ -55,7 +54,7 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, _tenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

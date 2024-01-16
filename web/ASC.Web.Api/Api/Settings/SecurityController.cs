@@ -103,7 +103,7 @@ public class SecurityController(TenantManager tenantManager,
     /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
     {
         var module = WebItemManager[id];
@@ -301,7 +301,7 @@ public class SecurityController(TenantManager tenantManager,
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("administrator/{productid}")]
+    [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
     {
         var admins = await webItemSecurity.GetProductAdministratorsAsync(productid);
@@ -394,28 +394,11 @@ public class SecurityController(TenantManager tenantManager,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var attemptsCount = inDto.AttemptCount;
-        var checkPeriod = inDto.CheckPeriod;
-        var blockTime = inDto.BlockTime;
-
-        if (attemptsCount < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(attemptsCount));
-        }
-
-        if (checkPeriod < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(checkPeriod));
-        }
-
-        if (blockTime < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(blockTime));
-        }
-
         var settings = new LoginSettings
         {
-            AttemptCount = attemptsCount, CheckPeriod = checkPeriod, BlockTime = blockTime
+            AttemptCount = inDto.AttemptCount, 
+            CheckPeriod = inDto.CheckPeriod, 
+            BlockTime = inDto.BlockTime
         };
 
         await settingsManager.SaveAsync(settings);

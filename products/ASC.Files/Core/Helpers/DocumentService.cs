@@ -327,10 +327,9 @@ public static class DocumentService
             }
 
             using var reader = new StreamReader(stream);
-            dataResponse = await reader.ReadToEndAsync();
+            dataResponse = await reader.ReadToEndAsync(cancellationTokenSource.Token);
         }
-
-
+        
         try
         {
             var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, new JsonSerializerOptions
@@ -484,6 +483,7 @@ public static class DocumentService
         return dataResponse.Equals("true", StringComparison.InvariantCultureIgnoreCase);
     }
 
+    [EnumExtensions]
     public enum CommandMethod
     {
         Info,

@@ -149,7 +149,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
         var searchResult = novellLdapSearcher.Search(userDn, NovellLdapSearcher.LdapScope.Base,
             LdapConstants.OBJECT_FILTER, attributes, 1);
 
-        if (searchResult.Any())
+        if (searchResult.Count != 0)
         {
             return true;
         }
@@ -165,7 +165,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
         var searchResult = novellLdapSearcher.Search(groupDn, NovellLdapSearcher.LdapScope.Base,
             LdapConstants.OBJECT_FILTER, attributes, 1);
 
-        if (searchResult.Any())
+        if (searchResult.Count != 0)
         {
             return true;
         }

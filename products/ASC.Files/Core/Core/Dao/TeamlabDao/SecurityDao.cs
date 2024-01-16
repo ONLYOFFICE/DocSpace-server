@@ -29,39 +29,31 @@ using User = ASC.Core.Common.EF.User;
 namespace ASC.Files.Core.Data;
 
 [Scope]
-internal abstract class SecurityBaseDao<T> : AbstractDao
+internal abstract class SecurityBaseDao<T>(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    CoreBaseSettings coreBaseSettings,
+    CoreConfiguration coreConfiguration,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IMapper mapper)
+    : AbstractDao(dbContextFactory,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        coreBaseSettings,
+        coreConfiguration,
+        settingsManager,
+        authContext,
+        serviceProvider)
 {
-    private readonly IMapper _mapper;
-
-    public SecurityBaseDao(
-        UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache,
-        IMapper mapper)
-        : base(dbContextFactory,
-              userManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider)
-    {
-        _mapper = mapper;
-    }
-
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord> records)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -141,7 +133,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
         else
         {
-            var toInsert = _mapper.Map<FileShareRecord, DbFilesSecurity>(r);
+            var toInsert = mapper.Map<FileShareRecord, DbFilesSecurity>(r);
             toInsert.EntryId = (await MappingIDAsync(r.EntryId, true)).ToString();
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -274,9 +266,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             q = q.Take(count);
         }
 
-        await foreach (var r in q.ToAsyncEnumerable())
+        var records = q.ToAsyncEnumerable().SelectAwait(async r => await ToFileShareRecordAsync(r));
+
+        await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
         {
-            yield return await ToFileShareRecordAsync(r);
+            yield return r;
         }
     }
 
@@ -306,7 +300,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         await foreach (var r in q1.ToAsyncEnumerable())
         {
-            yield return new UserInfoWithShared { UserInfo = _mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
+            yield return new UserInfoWithShared { UserInfo = mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
         }
     }
 
@@ -376,7 +370,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(List<string> files, List<string> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(IEnumerable<string> files, IEnumerable<string> folders)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -459,7 +453,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     internal async Task<FileShareRecord> ToFileShareRecordAsync(DbFilesSecurity r)
     {
-        var result = _mapper.Map<DbFilesSecurity, FileShareRecord>(r);
+        var result = mapper.Map<DbFilesSecurity, FileShareRecord>(r);
         result.EntryId = await MappingIDAsync(r.EntryId);
 
         return result;
@@ -467,7 +461,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     protected FileShareRecord ToFileShareRecord(SecurityTreeRecord r)
     {
-        var result = _mapper.Map<SecurityTreeRecord, FileShareRecord>(r);
+        var result = mapper.Map<SecurityTreeRecord, FileShareRecord>(r);
 
         if (r.FolderId != default)
         {
@@ -510,6 +504,33 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         return q;
     }
+
+    protected async IAsyncEnumerable<FileShareRecord> DeleteExpiredAsync(IAsyncEnumerable<FileShareRecord> records, FilesDbContext filesDbContext)
+    {
+        var expired = new List<Guid>();
+        
+        await foreach (var r in records)
+        {
+            if (r.SubjectType == SubjectType.InvitationLink && r.Options is { IsExpired: true })
+            {
+                expired.Add(r.Subject);
+                continue;
+            }
+            
+            yield return r;
+        }
+
+        if (expired.Count <= 0)
+        {
+            yield break;
+        }
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await filesDbContext.Security
+            .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
+            .ExecuteDeleteAsync();
+    }
 }
 
 [Scope]
@@ -524,10 +545,9 @@ internal class SecurityDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
         IMapper mapper)
     : SecurityBaseDao<int>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic,
-        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper), ISecurityDao<int>
+        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<int>
 {
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
@@ -589,41 +609,12 @@ internal class SecurityDao(UserManager userManager,
             q = q.Where(r => subjects.Contains(r.Subject));
         }
 
-        var records = await q.ToAsyncEnumerable()
+        var records = q.ToAsyncEnumerable()
             .Select(ToFileShareRecord)
             .OrderBy(r => r.Level)
-            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-            .ToListAsync();
+            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer());
 
-        await DeleteExpiredAsync(records, filesDbContext);
-
-        return records;
-    }
-
-    private async Task DeleteExpiredAsync(List<FileShareRecord> records, FilesDbContext filesDbContext)
-    {
-        var expired = new List<Guid>();
-
-        for (var i = 0; i < records.Count; i++)
-        {
-            var r = records[i];
-            if (r.SubjectType != SubjectType.InvitationLink || r.Options is not { IsExpired: true })
-            {
-                continue;
-            }
-
-            expired.Add(r.Subject);
-            records.RemoveAt(i);
-        }
-
-        if (expired.Count > 0)
-        {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-            await filesDbContext.Security
-                .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
-                .ExecuteDeleteAsync();
-        }
+        return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
     }
 }
 
@@ -639,12 +630,10 @@ internal class ThirdPartySecurityDao(UserManager userManager,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        ICache cache,
         IMapper mapper,
         SelectorFactory selectorFactory)
     : SecurityBaseDao<string>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo,
-        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider,
-        cache, mapper), ISecurityDao<string>
+        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<string>
 {
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {
@@ -700,7 +689,7 @@ internal class ThirdPartySecurityDao(UserManager userManager,
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IReadOnlyCollection<FileEntry<string>> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IEnumerable<FileEntry<string>> folders)
     {
         foreach (var folder in folders)
         {

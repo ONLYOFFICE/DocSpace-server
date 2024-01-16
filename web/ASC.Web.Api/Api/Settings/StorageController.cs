@@ -51,11 +51,12 @@ public class StorageController(ILoggerProvider option,
         BackupAjaxHandler backupAjaxHandler,
         ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         EncryptionWorker encryptionWorker,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor), IDisposable
+        IHttpContextAccessor httpContextAccessor, 
+        IDistributedLockProvider distributedLockProvider,
+        TenantExtra tenantExtra)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
-    private readonly SemaphoreSlim _semaphore = new(1);
 
     /// <summary>
     /// Returns a list of all the portal storages.
@@ -71,10 +72,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!coreBaseSettings.Standalone)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var current = await settingsManager.LoadAsync<StorageSettings>();
         var consumers = consumerFactory.GetAll<DataStoreConsumer>();
@@ -121,20 +119,14 @@ public class StorageController(ILoggerProvider option,
             return false;
         }
 
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync("start_storage_encryption"))
         {
-            await _semaphore.WaitAsync();
-
             var activeTenants = await tenantManager.GetTenantsAsync();
 
             if (activeTenants.Count > 0)
             {
                 await StartEncryptionAsync(inDto.NotifyUsers);
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
 
         return true;
@@ -153,6 +145,8 @@ public class StorageController(ILoggerProvider option,
         }
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var storages = await GetAllStoragesAsync();
 
@@ -263,12 +257,9 @@ public class StorageController(ILoggerProvider option,
                 throw new NotSupportedException();
             }
 
-            if (!coreBaseSettings.Standalone)
-            {
-                throw new SecurityException(Resource.ErrorAccessDenied);
-            }
-
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+            await tenantExtra.DemandAccessSpacePermissionAsync();
 
             var settings = await encryptionSettingsHelper.LoadAsync();
 
@@ -328,10 +319,7 @@ public class StorageController(ILoggerProvider option,
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-            if (!coreBaseSettings.Standalone)
-            {
-                throw new SecurityException(Resource.ErrorAccessDenied);
-            }
+            await tenantExtra.DemandAccessSpacePermissionAsync();
 
             var consumer = consumerFactory.GetByKey(inDto.Module);
             if (!consumer.IsSet)
@@ -373,10 +361,7 @@ public class StorageController(ILoggerProvider option,
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-            if (!coreBaseSettings.Standalone)
-            {
-                throw new SecurityException(Resource.ErrorAccessDenied);
-            }
+            await tenantExtra.DemandAccessSpacePermissionAsync();
 
             var settings = await settingsManager.LoadAsync<StorageSettings>();
 
@@ -407,10 +392,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!coreBaseSettings.Standalone)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var current = await settingsManager.LoadAsync<CdnStorageSettings>();
         var consumers = consumerFactory.GetAll<DataStoreConsumer>().Where(r => r.Cdn != null);
@@ -431,10 +413,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!coreBaseSettings.Standalone)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var consumer = consumerFactory.GetByKey(inDto.Module);
         if (!consumer.IsSet)
@@ -478,10 +457,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!coreBaseSettings.Standalone)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         await storageSettingsHelper.ClearAsync(await settingsManager.LoadAsync<CdnStorageSettings>());
     }
@@ -499,6 +475,8 @@ public class StorageController(ILoggerProvider option,
     public async Task<List<StorageDto>> GetAllBackupStorages()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var schedule = await backupAjaxHandler.GetScheduleAsync();
         var current = new StorageSettings();
@@ -538,9 +516,4 @@ public class StorageController(ILoggerProvider option,
     {
         return RegionEndpoint.EnumerableAllRegions;
     }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
-}

@@ -37,7 +37,7 @@ public class BackupRequestedIntegrationEventHandler(
         AuthManager authManager,
         BackupWorker backupWorker)
     : IIntegrationEventHandler<BackupRequestIntegrationEvent>
-    {
+{
     public async Task Handle(BackupRequestIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
@@ -55,18 +55,19 @@ public class BackupRequestedIntegrationEventHandler(
 
             if (@event.IsScheduled)
             {
-                backupWorker.StartScheduledBackup(new BackupSchedule
+                await backupWorker.StartScheduledBackupAsync(new BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,
                     StorageParams = JsonConvert.SerializeObject(@event.StorageParams),
                     StorageType = @event.StorageType,
-                    TenantId = @event.TenantId
+                    TenantId = @event.TenantId,
+                    Dump = @event.Dump
                 });
             }
             else
             {
-                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, true, @event.TaskId);
+                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
             }
         }
     }

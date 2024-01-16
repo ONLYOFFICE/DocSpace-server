@@ -38,14 +38,16 @@ internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dicti
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
+    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
         : base(serviceProvider, f1, f2)
     {
         _tempStream = tempStream;
+        _baseUri = baseUri;
         this[OpType] = (int)FileOperationType.Download;
     }
 
     private readonly TempStream _tempStream;
+    private readonly string _baseUri;
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -59,6 +61,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            commonLinkUtility.ServerUri = _baseUri;
+        }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
@@ -318,7 +326,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, null, true));
 
             await foreach (var file in files)
             {
@@ -406,17 +414,18 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
+                            await fileConverter.ExecAsync(file, convertToExt) :
+                            await fileDao.GetFileStreamAsync(file);
+                        
+                        var t = Task.Run(async () => await compressTo.PutStream(readStream));
+                            
+                        while (!t.IsCompleted)
                         {
-                            //Take from converter
-                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
-                            await compressTo.PutStream(readStream);
+                            PublishChanges();
+                            await Task.Delay(100);
                         }
-                        else
-                        {
-                            await using var readStream = await fileDao.GetFileStreamAsync(file);
-                            await compressTo.PutStream(readStream);
-                        }
+                        
                         compressTo.CloseEntry();
                     }
                     catch (Exception ex)

@@ -632,7 +632,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return null;
         }
 
-        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -684,7 +684,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return null;
         }
 
-        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {

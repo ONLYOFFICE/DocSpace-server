@@ -31,11 +31,9 @@ public class RemovePortalOperation(StorageFactory storageFactory,
         StorageFactoryConfig storageFactoryConfig,
         ITenantService tenantService,
         TenantManager tenantManager,
-        UserManager userManager,
         ILogger<RemovePortalOperation> logger)
     : DistributedTaskProgress
 {
-    private readonly UserManager _userManager = userManager;
     public int TenantId { get; set; }
 
 
