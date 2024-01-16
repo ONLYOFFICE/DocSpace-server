@@ -159,7 +159,7 @@ public static class DocumentService
             Title = title,
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
-            Options = options,
+            Watermark = options == null ? null : options.WatermarkOnDraw,
             Url = documentUri,
             Region = region
         };
@@ -766,9 +766,9 @@ public static class DocumentService
         [JsonPropertyName("spreadsheetLayout")]
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
 
-        [JsonProperty(PropertyName = "options", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("options")]
-        public Options Options { get; set; }
+        [JsonProperty(PropertyName = "watermark", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonPropertyName("watermark")]
+        public WatermarkOnDraw Watermark { get; set; }
 
         [JsonProperty(PropertyName = "url", Required = Required.Always)]
         [JsonPropertyName("url")]
