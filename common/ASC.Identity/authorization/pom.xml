@@ -2,49 +2,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.onlyoffice</groupId>
-		<artifactId>base</artifactId>
-		<version>0.0.1</version>
-	</parent>
-
-	<groupId>com.onlyoffice</groupId>
+	<groupId>com.asc</groupId>
 	<artifactId>authorization</artifactId>
 	<version>0.0.1</version>
 	<name>authorization</name>
-	<description>ONLYOFFICE Docspace Authorization Server</description>
+	<description>ASC Authorization Server</description>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.1.2</version>
+		<relativePath/>
+	</parent>
 	<properties>
-		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
-
-		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
-
-		<redisson.caching.version>3.23.1</redisson.caching.version>
-
-		<spring.oauth2.server.version>1.2.0</spring.oauth2.server.version>
-		<bouncycastle.version>1.70</bouncycastle.version>
-
-		<resilience4j.version>2.1.0</resilience4j.version>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<guava.version>32.1.3-jre</guava.version>
 
+		<h2.connector.version>2.2.220</h2.connector.version>
+
 		<logback.gelf.version>5.0.1</logback.gelf.version>
 		<logback.logstash.version>7.4</logback.logstash.version>
-	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring.boot.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+		<lombok.version>1.18.28</lombok.version>
+
+		<mysql.connector.version>8.0.33</mysql.connector.version>
+
+		<redisson.caching.version>3.23.1</redisson.caching.version>
+
+		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
+		<resilience4j.version>2.1.0</resilience4j.version>
+
+		<spring.boot.version>3.1.2</spring.boot.version>
+		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
+		<spring.oauth2.server.version>1.2.0</spring.oauth2.server.version>
+	</properties>
 
 	<dependencies>
 		<!-- Spring Server Dependencies -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -53,15 +52,26 @@
 		<!-- -->
 
 		<!-- Spring Cloud Dependencies -->
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+			<version>${resilience4j.circuit.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 			<version>${spring.cloud.feign.version}</version>
 		</dependency>
+
+		<!-- -->
+
+		<!-- Spring Metrics Dependencies -->
+
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
-			<version>${resilience4j.circuit.version}</version>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<version>${spring.boot.version}</version>
 		</dependency>
 
 		<!-- -->
@@ -80,8 +90,8 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>${h2.connector.version}</version>
 			<scope>test</scope>
+			<version>${h2.connector.version}</version>
 		</dependency>
 
 		<!-- JPA Caching Dependencies -->
@@ -121,11 +131,6 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
-		</dependency>
 
 		<!-- -->
 
@@ -159,6 +164,17 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.13.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- -->
@@ -199,6 +215,42 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.compiler.plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

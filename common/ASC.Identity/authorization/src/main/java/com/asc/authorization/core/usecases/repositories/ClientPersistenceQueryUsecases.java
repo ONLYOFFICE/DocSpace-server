@@ -1,0 +1,25 @@
+/**
+ *
+ */
+package com.asc.authorization.core.usecases.repositories;
+
+import com.asc.authorization.core.entities.Client;
+
+/**
+ *
+ */
+public interface ClientPersistenceQueryUsecases {
+    /**
+     *
+     * @param id
+     * @return
+     */
+    Client getById(String id);
+
+    /**
+     *
+     * @param clientId
+     * @return
+     */
+    Client getClientByClientId(String clientId);
+}

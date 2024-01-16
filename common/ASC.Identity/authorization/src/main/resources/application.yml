@@ -142,7 +142,7 @@ spring:
 logging:
   level:
     com:
-      onlyoffice: DEBUG
+      asc: DEBUG
     org:
       hibernate:
         SQL: DEBUG
