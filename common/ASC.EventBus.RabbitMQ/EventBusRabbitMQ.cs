@@ -228,37 +228,42 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         var eventName = eventArgs.RoutingKey;
 
-        if (!_subsManager.HasSubscriptionsForEvent(eventName))
-        {
-            _logger.WarningNoSubscription(eventName);
-
-            var messageId = Guid.Parse(eventArgs.BasicProperties.MessageId);
-
-            if (_rejectedEvents.ContainsKey(messageId))
-            {
-                _rejectedEvents.TryRemove(messageId, out _);
-                _consumerChannel.BasicReject(eventArgs.DeliveryTag, requeue: false);
-
-                _logger.DebugRejectEvent(eventName);
-            }
-            else
-            {
-                _rejectedEvents.TryAdd(messageId, eventArgs.Body.Span.ToArray());
-                
-                // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
-                _consumerChannel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
-
-                _logger.DebugNackEvent(eventName);
-            }
-
-            return;
-        }
-
         var @event = GetEvent(eventName, eventArgs.Body.Span.ToArray());
         var message = @event.ToString();
 
         try
         {
+            if (!_subsManager.HasSubscriptionsForEvent(eventName))
+            {
+                _logger.WarningNoSubscription(eventName);
+
+                Guid.TryParse(eventArgs.BasicProperties?.MessageId, out var messageId);
+
+                if (_rejectedEvents.ContainsKey(messageId) || messageId == default(Guid))
+                {
+                    _rejectedEvents.TryRemove(messageId, out _);
+
+                    _logger.DebugBeforeRejectEvent(eventName, message);
+
+                    _consumerChannel.BasicReject(eventArgs.DeliveryTag, requeue: false);
+
+                    _logger.DebugRejectEvent(eventName);
+                }
+                else
+                {
+                    _rejectedEvents.TryAdd(messageId, eventArgs.Body.Span.ToArray());
+
+                    _logger.DebugBeforeNackEvent(eventName, message);
+
+                    // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
+                    _consumerChannel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
+
+                    _logger.DebugNackEvent(eventName);
+                }
+
+                return;
+            }
+
             if (message.ToLowerInvariant().Contains("throw-fake-exception"))
             {
                 throw new InvalidOperationException($"Fake exception requested: \"{message}\"");
@@ -268,9 +273,13 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
             _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
         }
+        catch (AlreadyClosedException ex)
+        {
+            _logger.ErrorProcessingMessage(message, ex);
+        }
         catch (IntegrationEventRejectExeption ex)
         {
-            _logger.WarningProcessingMessage(message, ex);
+            _logger.ErrorProcessingMessage(message, ex);
 
             if (_rejectedEvents.ContainsKey(ex.EventId))
             {
@@ -289,9 +298,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.WarningProcessingMessage(message, ex);
-
-            _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+            _logger.ErrorProcessingMessage(message, ex);
         }
     }
 
@@ -330,18 +337,35 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += (_, ea) =>
-        {
-            _logger.WarningRecreatingConsumerChannel(ea.Exception);
-
-            _consumerChannel.Dispose();
-            _consumerChannel = CreateConsumerChannel();
-            _consumerTag = String.Empty;
-
-            StartBasicConsume();
-        };
-
+        channel.CallbackException += RecreateChannel;
+       
         return channel;
+    }
+
+
+    private async void RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    {
+        _logger.WarningRecreatingConsumerChannel(e.Exception);
+
+        _consumerChannel.Dispose();
+
+        while (!_consumerChannel.IsOpen)
+        {
+            try
+            {
+                await Task.Run(() => { 
+                    _consumerChannel = CreateConsumerChannel();
+                    _consumerTag = String.Empty;
+
+                    StartBasicConsume();
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.ErrorCreatingConsumerChannel(exception);
+            }
+        }
+        _logger.InfoCreatedConsumerChannel();
     }
 
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
@@ -360,7 +384,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             return;
         }
 
-        if (_rejectedEvents.ContainsKey(@event.Id))             
+        if (_rejectedEvents.ContainsKey(@event.Id))
         {
             @event.Redelivered = true;
         }

@@ -462,7 +462,7 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile) : 
+                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
@@ -513,29 +513,6 @@ public class AuthenticationController(UserManager userManager,
             }
 
             var isNew = false;
-            if (coreBaseSettings.Personal)
-            {
-                if (await userManager.UserExistsAsync(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
-                {
-                    try
-                    {
-                        await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                        await userManager.DeleteUserAsync(userInfo.Id);
-                        userInfo = Constants.LostUser;
-                    }
-                    finally
-                    {
-                        securityContext.Logout();
-                    }
-                }
-
-                if (!await userManager.UserExistsAsync(userInfo.Id))
-                {
-                    userInfo = await JoinByThirdPartyAccount(loginProfile);
-
-                    isNew = true;
-                }
-            }
 
             if (isNew)
             {

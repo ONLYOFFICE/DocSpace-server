@@ -26,12 +26,20 @@
 
 namespace ASC.Data.Backup;
 
-public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    : BaseStartup(configuration, hostEnvironment)
+public class Startup : BaseStartup
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+        : base(configuration, hostEnvironment)
     {
-        base.ConfigureServices(services);
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
+    }
+
+    public override async Task ConfigureServices(IServiceCollection services)
+    {
+        await base.ConfigureServices(services);
 
         var maxRequestLimit = 1024L * 1024L * 1024L;
         services.Configure<KestrelServerOptions>(options =>

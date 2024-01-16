@@ -24,7 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Net.NetworkInformation;
+using System.Security;
+
 using AutoMapper;
+
+using Microsoft.Extensions.Configuration;
 
 namespace ASC.Webhooks.Core;
 
@@ -33,7 +38,8 @@ public class DbWorker(
     IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
     AuthContext authContext,
-    IMapper mapper)
+    IMapper mapper,
+    IConfiguration configuration)
 {
     public static readonly IReadOnlyList<string> MethodList = new List<string>
     {
@@ -61,6 +67,13 @@ public class DbWorker(
             return objForCreate;
         }
 
+        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? new List<string>();
+        
+        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
+        {
+            throw new SecurityException();
+        }
+        
         var toAdd = new WebhooksConfig
         {
             TenantId = Tenant,

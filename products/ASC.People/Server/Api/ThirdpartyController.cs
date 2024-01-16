@@ -38,7 +38,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         MobileDetector mobileDetector,
         PersonalSettingsHelper personalSettingsHelper,
         ProviderManager providerManager,
-        Signature signature,
         UserHelpTourHelper userHelpTourHelper,
         UserManagerWrapper userManagerWrapper,
         UserPhotoManager userPhotoManager,
@@ -126,7 +125,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
-        var profile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var profile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -172,7 +171,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             mustChangePassword = true;
         }
 
-        var thirdPartyProfile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
+        var thirdPartyProfile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
             // ignore cancellation
@@ -233,10 +232,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         }
 
         userHelpTourHelper.IsNewUser = true;
-        if (coreBaseSettings.Personal)
-        {
-            personalSettingsHelper.IsNewUser = true;
-        }
 
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
@@ -300,12 +295,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
-        if (coreBaseSettings.Personal)
-        {
-            user.ActivationStatus = EmployeeActivationStatus.Activated;
-            user.CultureName = coreBaseSettings.CustomMode ? "ru-RU" : CultureInfo.CurrentUICulture.Name;
-        }
 
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }

@@ -55,58 +55,39 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
             }
             else if (tenantExtraConfig.Saas)
             {
-                if (coreBaseSettings.Personal)
-                {
-                    if (!coreBaseSettings.CustomMode)
-                    {
-                        workContext.RegisterSendMethod(SendLettersPersonalAsync, cron);
-                    }
-                }
-                else
-                {
-                    workContext.RegisterSendMethod(SendSaasTariffLettersAsync, cron);
-                }
+                workContext.RegisterSendMethod(SendSaasTariffLettersAsync, cron);
             }
         }
 
-        if (!coreBaseSettings.Personal)
-        {
-            workContext.RegisterSendMethod(SendMsgWhatsNewAsync, "0 0 * ? * *"); // every hour
-            workContext.RegisterSendMethod(SendRoomsActivityAsync, "0 0 * ? * *"); //every hour
-        }
+        workContext.RegisterSendMethod(SendMsgWhatsNewAsync, "0 0 * ? * *"); // every hour
+        workContext.RegisterSendMethod(SendRoomsActivityAsync, "0 0 * ? * *"); //every hour
     }
 
-    public async Task SendSaasTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendSaasTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendSaasLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendEnterpriseTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendEnterpriseTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendEnterpriseLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendOpensourceTariffLettersAsync(DateTime scheduleDate)
+    private async Task SendOpensourceTariffLettersAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendOpensourceLettersAsync(EMailSenderName, scheduleDate);
     }
 
-    public async Task SendLettersPersonalAsync(DateTime scheduleDate)
-    {
-        using var scope = serviceProvider.CreateScope();
-        await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendPersonalLettersAsync(EMailSenderName, scheduleDate);
-    }
-
-    public async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
+    private async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.DailyFeed);
     }
 
-    public async Task SendRoomsActivityAsync(DateTime scheduleDate)
+    private async Task SendRoomsActivityAsync(DateTime scheduleDate)
     {
         using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.RoomsActivity);

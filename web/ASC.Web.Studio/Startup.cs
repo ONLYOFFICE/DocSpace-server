@@ -31,6 +31,10 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,9 +65,9 @@ public class Startup : BaseStartup
             });
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddMemoryCache();
         DIHelper.TryAdd<Login>();

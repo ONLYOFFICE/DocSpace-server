@@ -129,10 +129,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
             }
         }
+        catch (System.Text.Json.JsonException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
-            await WriteError(context, FilesCommonResource.ErrorMassage_FileNotFound);
+            await WriteError(context, FilesCommonResource.ErrorMessage_FileNotFound);
         }
         catch (Exception error)
         {

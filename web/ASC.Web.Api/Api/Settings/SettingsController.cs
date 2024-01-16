@@ -92,8 +92,7 @@ public class SettingsController(MessageService messageService,
         {
             Culture = tenant.GetCulture().ToString(),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
-            Personal = coreBaseSettings.Personal,
-            DocSpace = !coreBaseSettings.DisableDocSpace,
+            DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
             BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
@@ -102,7 +101,8 @@ public class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
-            UserNameRegex = userFormatter.UserNameRegex.ToString()
+            UserNameRegex = userFormatter.UserNameRegex.ToString(),
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -115,7 +115,7 @@ public class SettingsController(MessageService messageService,
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
             var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZone;
+            settings.Timezone = timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
             settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -161,7 +161,15 @@ public class SettingsController(MessageService messageService,
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(configuration["plugins:upload"], out var pluginsUpload))
+            {
+                settings.Plugins.Upload = pluginsUpload;
+            }
+
+            if (bool.TryParse(configuration["plugins:delete"], out var pluginsDelete))
+            {
+                settings.Plugins.Delete = pluginsDelete;
+            }
 
             var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
@@ -296,9 +304,9 @@ public class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -329,7 +337,7 @@ public class SettingsController(MessageService messageService,
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -986,6 +994,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
+    /// <visible>false</visible>
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1001,6 +1010,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

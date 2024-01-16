@@ -42,6 +42,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                         bool deleteAfter,
                         string url,
                         string serverRootPath,
+                        bool updateIfExist,
                         ExternalShareData externalShareData = null)
     {
         var cacheKey = GetCacheKey<T>();
@@ -62,7 +63,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
             var queueResult = new FileConverterOperationResult
             {
-                Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version }),
+                Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version, updateIfExist }),
                 OperationType = FileOperationType.Convert,
                 Error = string.Empty,
                 Progress = 0,
@@ -106,11 +107,11 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
         var exist = LoadFromCache(cacheKey);
 
         return exist.LastOrDefault(x =>
-        {
-            var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
+                {
+                    var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
 
-            return String.Compare(file.Id.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
-        });
+            return string.Compare(file.Id?.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+                });
     }
 
     internal bool IsConverting<T>(File<T> file, string cacheKey)
@@ -372,7 +373,7 @@ public class FileConverter(FileUtility fileUtility,
 
         if (file.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -392,7 +393,7 @@ public class FileConverter(FileUtility fileUtility,
         return new ResponseStream(response);
     }
 
-    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc)
+    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -401,11 +402,11 @@ public class FileConverter(FileUtility fileUtility,
             (var readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
             if (file == null)
             {
-                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
             if (!readLink)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
         }
 
@@ -422,7 +423,7 @@ public class FileConverter(FileUtility fileUtility,
 
         var operationResult = new FileConverterOperationResult
         {
-            Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version }),
+            Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version, updateIfExist }),
             OperationType = FileOperationType.Convert,
             Error = string.Empty,
             Progress = 0,
@@ -441,7 +442,7 @@ public class FileConverter(FileUtility fileUtility,
 
         var operationResultError = string.Empty;
 
-        var newFile = await SaveConvertedFileAsync(file, convertUri, convertType);
+        var newFile = await SaveConvertedFileAsync(file, convertUri, convertType, updateIfExist);
         if (newFile != null)
         {
             await socketManager.CreateFileAsync(file);
@@ -463,11 +464,11 @@ public class FileConverter(FileUtility fileUtility,
         return operationResult;
     }
 
-    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, string password = null)
+    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, bool updateIfExist, string password = null)
     {
         if (!MustConvert(file))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
         if (!string.IsNullOrEmpty(file.ConvertedType) || fileUtility.InternalExtension.ContainsValue(FileUtility.GetFileExtension(file.Title)))
         {
@@ -476,8 +477,13 @@ public class FileConverter(FileUtility fileUtility,
 
         await fileMarker.RemoveMarkAsNewAsync(file);
 
-        await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
-            baseCommonLinkUtility.ServerRootPath, await externalShare.GetLinkIdAsync() != Guid.Empty ? await externalShare.GetCurrentShareDataAsync() : null);
+        await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, 
+            authContext.CurrentAccount, 
+            deleteAfter, 
+            _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
+            baseCommonLinkUtility.ServerRootPath, 
+            updateIfExist,
+            await externalShare.GetLinkIdAsync() != Guid.Empty ? await externalShare.GetCurrentShareDataAsync() : null);
     }
 
     public bool IsConverting<T>(File<T> file)
@@ -503,7 +509,7 @@ public class FileConverter(FileUtility fileUtility,
         }
     }
 
-    public async Task<File<T>> SaveConvertedFileAsync<T>(File<T> file, string convertedFileUrl, string convertedFileType)
+    public async Task<File<T>> SaveConvertedFileAsync<T>(File<T> file, string convertedFileUrl, string convertedFileType, bool updateIfExist)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -532,10 +538,10 @@ public class FileConverter(FileUtility fileUtility,
 
             if (Equals(folderId, 0))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
-            if (filesSettingsHelper.UpdateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
+            if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
                 if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await entryManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
@@ -592,7 +598,7 @@ public class FileConverter(FileUtility fileUtility,
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
                     errorString += $" Error {e.Message}";
-            }
+                }
 
             throw new Exception(errorString);
         }
@@ -619,7 +625,7 @@ public class FileConverter(FileUtility fileUtility,
 
         return newFile;
     }
-}
+    }
 
 public static class FileConverterExtension
 {

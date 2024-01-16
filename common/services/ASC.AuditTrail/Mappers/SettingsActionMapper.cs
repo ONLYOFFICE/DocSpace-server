@@ -81,7 +81,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                 {
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
-                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated,
+                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
                     MessageAction.SSOEnabled,MessageAction.SSODisabled,MessageAction.PortalAccessSettingsUpdated,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,

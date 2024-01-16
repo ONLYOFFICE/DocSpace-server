@@ -276,9 +276,15 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         await socketManager.StartEditAsync(fileId);
 
-        if (file != null && fileData.Actions is { Count: > 0 })
+        if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {
+            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId))
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+            }
+
             await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            securityContext.Logout();
         }
     }
 
@@ -287,7 +293,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         var comments = new List<string>();
         if (fileData.Status is TrackerStatus.Corrupted or TrackerStatus.CorruptedForceSave)
         {
-            comments.Add(FilesCommonResource.ErrorMassage_SaveCorrupted);
+            comments.Add(FilesCommonResource.ErrorMessage_SaveCorrupted);
         }
 
         var forceSave = fileData.Status is TrackerStatus.ForceSave or TrackerStatus.CorruptedForceSave;
@@ -328,7 +334,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             logger.InformationDocServiceSaveError(userId, ex);
             if (!userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-                comments.Add(FilesCommonResource.ErrorMassage_SaveAnonymous);
+                comments.Add(FilesCommonResource.ErrorMessage_SaveAnonymous);
             }
         }
 
@@ -339,7 +345,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         {
             try
             {
-                comments.Add(FilesCommonResource.ErrorMassage_SaveUrlLost);
+                comments.Add(FilesCommonResource.ErrorMessage_SaveUrlLost);
 
                 file = await entryManager.CompleteVersionFileAsync(fileId, 0, false, false);
 

@@ -32,16 +32,19 @@ namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
 {
-    protected override bool ConfirmAddScheme { get => true; }
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {

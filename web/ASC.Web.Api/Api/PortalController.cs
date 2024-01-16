@@ -208,6 +208,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
@@ -229,7 +230,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
-        return coreBaseSettings.Personal ? 1 : (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
+        return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
     /// <summary>
@@ -426,11 +427,6 @@ public class PortalController(ILogger<PortalController> logger,
             throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
         }
 
-        if (coreBaseSettings.Personal)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
-
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
@@ -464,6 +460,7 @@ public class PortalController(ILogger<PortalController> logger,
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
 
+            await messageService.SendAsync(MessageAction.PortalRenamed, messageTarget.Create(tenant.Id), oldAlias, newAlias);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)

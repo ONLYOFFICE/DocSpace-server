@@ -671,7 +671,7 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (folder == null)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         return InternalMarkedItemsAsync(folder);
@@ -681,12 +681,12 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (!await fileSecurity.CanReadAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
         if (folder.RootFolderType == FolderType.TRASH && !Equals(folder.Id, await globalFolder.GetFolderTrashAsync(daoFactory)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
@@ -694,7 +694,7 @@ public class FileMarker(TenantManager tenantManager,
         var providerTagDao = daoFactory.GetTagDao<string>();
         var tags = await (tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder, true) ?? AsyncEnumerable.Empty<Tag>()).ToListAsync();
 
-        if (!tags.Any())
+        if (tags.Count == 0)
         {
             yield break;
         }
@@ -726,7 +726,7 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         tags = tags
-            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id))
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
                 .Distinct()
                 .ToList();
 
@@ -778,6 +778,8 @@ public class FileMarker(TenantManager tenantManager,
         {
             yield return r;
         }
+
+        yield break;
 
         async IAsyncEnumerable<FileEntry> GetResultAsync<TEntry>(Dictionary<FileEntry<TEntry>, Tag> entryTags)
         {

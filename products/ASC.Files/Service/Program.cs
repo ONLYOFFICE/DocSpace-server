@@ -54,12 +54,12 @@ try
     builder.Host.ConfigureDefault();
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        containerBuilder.Register(context.Configuration, true, false, "search.json", "feed.json");
+        containerBuilder.Register(context.Configuration, true, "search.json", "feed.json");
     });
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
     var app = builder.Build();
 

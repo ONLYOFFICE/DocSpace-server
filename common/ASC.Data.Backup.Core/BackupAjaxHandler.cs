@@ -51,7 +51,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region Backup
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, bool dump, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -61,7 +61,8 @@ public class BackupAjaxHandler(BackupService backupService,
             UserId = securityContext.CurrentAccount.ID,
             StorageType = storageType,
             StorageParams = storageParams,
-            Dump = dump
+            Dump = dump,
+            ServerBaseUri = serverBaseUri
         };
 
         switch (storageType)
@@ -127,12 +128,12 @@ public class BackupAjaxHandler(BackupService backupService,
 
         if (folder == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
     }
 
@@ -261,7 +262,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify)
+    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = await GetCurrentTenantIdAsync();
@@ -269,7 +270,8 @@ public class BackupAjaxHandler(BackupService backupService,
         {
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))

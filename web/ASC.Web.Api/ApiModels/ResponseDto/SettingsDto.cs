@@ -78,10 +78,6 @@ public class SettingsDto
     /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? ThirdpartyEnable { get; set; }
 
-    /// <summary>Specifies if this is a Personal portal or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Personal { get; set; }
-
     /// <summary>Specifies if this is a DocSpace portal or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DocSpace { get; set; }
@@ -133,6 +129,10 @@ public class SettingsDto
     /// <summary>Link to the help</summary>
     /// <type>System.String, System</type>
     public string HelpLink { get; set; }
+    
+    /// <summary>Link to the forum</summary>
+    /// <type>System.String, System</type>
+    public string ForumLink { get; set; }
 
     /// <summary>API documentation link</summary>
     /// <type>System.String, System</type>

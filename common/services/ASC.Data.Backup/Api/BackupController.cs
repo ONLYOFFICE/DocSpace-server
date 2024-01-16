@@ -39,7 +39,9 @@ public class BackupController(
         SecurityContext securityContext,
         CoreBaseSettings coreBaseSettings,
         TenantExtra tenantExtra,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        CommonLinkUtility commonLinkUtility,
+        CoreSettings coreSettings)
     : ControllerBase
     {
     private readonly Guid _currentUserId = securityContext.CurrentAccount.ID;
@@ -162,16 +164,22 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
+        
 
-        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, inDto.Dump, false);
-
+        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+            ? commonLinkUtility.GetFullAbsolutePath("")
+            : default;
+        
+        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+        
         eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: _tenantId,
              storageParams: storageParams,
              storageType: storageType,
              createBy: _currentUserId,
              dump: inDto.Dump,
-             taskId: taskId
+             taskId: taskId,
+             serverBaseUri: serverBaseUri
         ));
 
         return await backupAjaxHandler.GetBackupProgressAsync();
@@ -271,13 +279,18 @@ public class BackupController(
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
+        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+            ? commonLinkUtility.GetFullAbsolutePath("")
+            : default;
+
         eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: _tenantId,
                              createBy: _currentUserId,
                              storageParams: storageParams,
                              storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
                              notify: inDto.Notify,
-                             backupId: inDto.BackupId
+                             backupId: inDto.BackupId,
+                             serverBaseUri: serverBaseUri
                         ));
 
 

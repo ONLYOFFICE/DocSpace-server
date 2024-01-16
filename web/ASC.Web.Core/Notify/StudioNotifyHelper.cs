@@ -144,7 +144,7 @@ public class StudioNotifyHelper
         int.TryParse(_configuration["core:notify:countspam"], out var countMailsToNotActivated);
         if (!checkActivation
             && countMailsToNotActivated > 0
-            && _tenantExtra.Saas && !_coreBaseSettings.Personal)
+            && _tenantExtra.Saas)
         {
             var tenant = await _tenantManager.GetCurrentTenantAsync();
             var tariff = await _tenantManager.GetTenantQuotaAsync(tenant.Id);

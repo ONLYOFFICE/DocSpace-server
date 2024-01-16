@@ -48,7 +48,8 @@ public class TfaappController(MessageService messageService,
         InstanceCrypto instanceCrypto,
         Signature signature,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        TenantManager tenantManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -392,6 +393,11 @@ public class TfaappController(MessageService messageService,
         var user = await userManager.GetUsersAsync(id);
 
         if (!isMe && !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
+        {
+            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+        }
+
+        if (!isMe && tenantManager.GetCurrentTenant().OwnerId != authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
