@@ -151,7 +151,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         userInfo.WorkFromDate ??= tenantUtil.DateTimeNow();
 
-        if (!coreBaseSettings.Personal && (!fromInviteLink || updateExising))
+        if (!fromInviteLink || updateExising)
         {
             userInfo.ActivationStatus = !afterInvite ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.Activated;
         }
@@ -167,12 +167,6 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         }
 
         await securityContext.SetUserPasswordHashAsync(newUserInfo.Id, passwordHash);
-
-        if (coreBaseSettings.Personal)
-        {
-            await studioNotifyService.SendUserWelcomePersonalAsync(newUserInfo);
-            return newUserInfo;
-        }
 
         if ((newUserInfo.Status & EmployeeStatus.Active) == EmployeeStatus.Active && notify)
         {

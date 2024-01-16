@@ -219,11 +219,6 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
-                if (coreBaseSettings.Personal && !fileUtility.CanWebView(entry.Title) && w.Access != FileShare.Restrict)
-                {
-                    throw new SecurityException(FilesCommonResource.ErrorMessage_BadRequest);
-                }
-
                 share = w.Access == FileShare.Restrict || !filesSettingsHelper.ExternalShare
                     ? FileShare.None
                     : w.Access;

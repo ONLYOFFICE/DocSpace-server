@@ -1012,20 +1012,6 @@ E-pasts: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Saņemiet &lt;span style="color:#FF6F3D;"&gt;bezmaksas&lt;/span&gt; ONLYOFFICE lietojumprogrammas
-
-
-Sveiki, $UserName!
-
-Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jūsu ierīces.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Lai strādātu ar dokumentiem bezsaistē operētājsistēmā, lejupielādējiet ONLYOFFICE Desktop Editors&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Lai rediģētu dokumentus mobilajās ierīcēs, iegūstiet programmu ONLYOFFICE Documents operētājsistēmai&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Saņemiet &lt;span style="color:#FF6F3D;"&gt;bezmaksas&lt;/span&gt; ONLYOFFICE lietojumprogrammas
 
@@ -1039,24 +1025,6 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Lai rediģētu dokumentus mobilajās ierīcēs, iegūstiet programmu ONLYOFFICE Documents operētājsistēmai&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Sveiki!
-Izmantojot šo e-pasta adresi, tika mēģināts reģistrēt jaunu kontu "ONLYOFFICE Personal":"$PortalUrl". Ja tas bijāt jūs, mēs vēlamies jūs informēt, ka konts jau pastāv — pārejiet uz ONLYOFFICE Personal un piesakieties.
-Ja pazaudējāt paroli, varat to atkopt paroles atkopšanas lapā:"$LinkToRecovery".
-Ja nemēģinājāt reģistrēt jaunu kontu, iespējams, kāds cits to izdarīja kļūdas dēļ. Šādā gadījumā ignorējiet šo e-pasta ziņojumu.
-
-Jauku dienu!
-ONLYOFFICE komanda</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Vai vēlaties mainīt paroli savā ONLYOFFICE Personal kontā? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
-
-$OrangeButton 
-
-Saite ir derīga septiņas dienas.
-
-Vai nevēlaties mainīt paroli? Vienkārši ignorējiet šo ziņojumu.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace ir &lt;span style="color:#FF6F3D;"&gt;deaktivizēts&lt;/span&gt;
@@ -1274,9 +1242,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Saņemiet bezmaksas ONLYOFFICE lietojumprogrammas</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Saņemiet bezmaksas ONLYOFFICE lietojumprogrammas</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Saņemiet bezmaksas ONLYOFFICE lietojumprogrammas</value>
   </data>
@@ -1333,21 +1298,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>Pievienojieties ONLYOFFICE DocSpace</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Laipni lūdzam ONLYOFFICE personīgai lietošanai!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Laipni lūdzam ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Piesakieties savā ONLYOFFICE Personal kontā</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Aktivizējiet savu e-pasta adresi</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Personal konta darbības pārtraukšana</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace ir deaktivizēts</value>
@@ -1540,80 +1490,6 @@ Jūs esat uzaicināts pievienoties "${__VirtualRootPath}":"${__VirtualRootPath}"
 Saite ir derīga tikai septiņas dienas.
 
 Jūs saņemsiet vairāk padomu par to, kā izmantot savu tīmekļa biroju. Abonementus jebkurā brīdī varat atcelt savā profila lapā, kā arī atkārtoti iespējot tos.</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Sveiki, $UserName
-Jūs veiksmīgi reģistrējāties ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Pievienojiet savu iecienītāko mākoņkrātuvi: Dropbox, Google Drive, OneDrive vai Box, lai izveidotu vienu darbvietu saviem dokumentiem, kuriem var piekļūt no jebkuras vietas.
-
-Uzziniet vairāk par ONLYOFFICE Personal "mūsu emuārā":"$TagBlogLink".
-
-Priecājamies, ka esat šeit. Sekojiet līdzi!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Laipni lūdzam ONLYOFFICE Personal
-
-Jūs tikko izveidojāt savu personīgo biroju mākonī.
-
-h3.Tā ir virtuāla darbvieta, kurā varat rediģēt un glabāt dokumentus, strādāt ar tiem no jebkuras vietas, nodrošinot piekļuvi draugiem vai kolēģiem.
-
-h3.Lūk, ko jūs varat darīt ONLYOFFICE iesākumam:
-
-- Izveidot, skatīt un rediģēt teksta dokumentus, izklājlapas, prezentācijas.
-
-- Strādājiet ar visiem populārajiem formātiem. Augstākā saderība ar MS Office failiem.
-
-- Izveidojiet un koprediģējiet "aizpildīšanai gatavas veidlapas":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Kopīgojiet dokumentus tiešsaistē un sadarbojieties saistībā ar tiem.
-
-- Izmantojiet dažādus spraudņus, lai izmantotu papildu funkcijas.
-
-- Viegli piekļūstiet savam personiskajam mākonim, izmantojot "Chrome paplašinājumu":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=lv".
-
-Varat arī rediģēt dokumentus bezsaistē, izmantojot mūsu bezmaksas "darbvirsmas redaktorus":"https://www.onlyoffice.com/download-desktop.aspx" vai iegūt mobilo rediģēšanas komplektu savai "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" vai "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" ierīcei.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Vai vēlaties mainīt e-pasta adresi savā ONLYOFFICE kontā?
-
-Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
-
-$OrangeButton
-
-Saite ir derīga septiņas dienas.
-
-*Ja neesat pierakstījies šajā ONLYOFFICE pārlūkprogrammā, apstiprināšanai jāizmanto vecā e-pasta adrese.
-
-Vai nevēlaties mainīt e-pasta adresi? Vienkārši ignorējiet šo ziņojumu.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Sveiki,
-
-Jūs tikko reģistrējāt kontu ONLYOFFICE risinājumā personīgai lietošanai. Noklikšķiniet "šeit":"$InviteLink", lai apstiprinātu reģistrāciju un izveidotu paroli.
-
-Ja nevarat atvērt saiti, nokopējiet šo "$InviteLink":"$InviteLink" un ielīmējiet to pārlūkprogrammas adreses joslā.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Jūs pieprasījāt pārtraukt konta darbību personal.onlyoffice.com. Lai pabeigtu pieprasījumu, izmantojiet saiti (saite ir aktīva septiņas dienas): 
-
-$OrangeButton
-
-*Piezīme*: pēc izdzēšanas jūsu konts un visi ar to saistītie dati tiks neatgriezeniski izdzēsti saskaņā ar mūsu "Paziņojumu par konfidencialitāti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
-
-"Lasīt vairāk par konta darbības izbeigšanu":"${__HelpLink}/administration/configuration.aspx"
-
-Ignorējiet šo e-pasta ziņojumu, ja nevēlaties turpināt. 
-
-Ja jums ir kādi jautājumi, sazinieties ar mums pa e-pastu "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portāla deaktivizēšana

@@ -873,11 +873,6 @@ internal class FolderDao(
     {
         var tmp = long.MaxValue;
 
-        if (_coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            tmp = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager) - await globalSpace.GetUserUsedSpaceAsync();
-        }
-
         return Math.Min(tmp, chunkedUpload ?
             await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic) :
             await _setupInfo.MaxUploadSize(_tenantManager, _maxTotalSizeStatistic));
