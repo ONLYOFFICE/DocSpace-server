@@ -104,10 +104,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                 case ChunkedRequestType.Upload:
                     {
-                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize());
 
                         var chunks = await chunkedUploadSessionHolder.GetChunksAsync(resumedSession);
-                        var bytesUploaded = chunks.Sum(c => c.Value == null ? 0 : c.Value.Length);
+                        var bytesUploaded = chunks.Sum(c => c.Value?.Length ?? 0);
                         if (bytesUploaded == resumedSession.BytesTotal)
                         {
                             if (resumedSession.UseChunks)
@@ -127,10 +127,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                         return;
                     }
-                
+
                 case ChunkedRequestType.UploadAsync:
                     {
-                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize(), request.ChunkNumber);
                         if (resumedSession.UseChunks)
                         {
                             await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
@@ -148,7 +148,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                 case ChunkedRequestType.Finalize:
                     var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);
                     if (session.UseChunks)
-                    { 
+                    {
                         session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                     }
 
@@ -266,7 +266,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
         {
             return ChunkedRequestType.Abort;
         }
-        
+
         if (_request.Query["finalize"] == "true" && !string.IsNullOrEmpty(UploadId))
         {
             return ChunkedRequestType.Finalize;
@@ -350,12 +350,12 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
         }
     }
 
-    public long ChunkSize => File.Length;
+    public async Task<long> ChunkSize() => (await File()).Length;
 
-    public Stream ChunkStream => File.OpenReadStream();
+    public async Task<Stream> ChunkStream() => (await File()).OpenReadStream();
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
-    
+
     private int? _chunkNumber;
     public int? ChunkNumber
     {
@@ -373,20 +373,14 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
         }
     }
 
-    private IFormFile File
+    private async Task<IFormFile> File()
     {
-        get
+        try
         {
-            if (_file != null)
-            {
-                return _file;
-            }
-
-            if (_request.Form.Files.Count > 0)
-            {
-                return _file = _request.Form.Files[0];
-            }
-
+            return _file ??= (await _request.ReadFormAsync(CancellationToken.None)).Files[0];
+        }
+        catch
+        {
             throw new Exception("HttpRequest.Files is empty");
         }
     }
