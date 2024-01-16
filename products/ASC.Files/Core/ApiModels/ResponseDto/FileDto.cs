@@ -202,7 +202,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         {
             var linkDao = daoFactory.GetLinkDao();
             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
-            result.HasDraft = linkedId != null ? true : false;
+            result.HasDraft = linkedId != null;
         }
         
         result.FileExst = fileExst;

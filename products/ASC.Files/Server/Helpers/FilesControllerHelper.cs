@@ -205,11 +205,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return CheckConversionAsync(cheqConversionRequestDto);
     }
 
-    public async Task<T> SignedFormAsync<T>(T formId, string data)
-    {
-        return await _fileStorageService.SignedFormAsync(formId, data);
-    }
-
     public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
     {
         return await _fileStorageService.UpdateCommentAsync(fileId, version, comment);

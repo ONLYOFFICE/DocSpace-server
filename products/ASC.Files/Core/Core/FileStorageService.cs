@@ -1202,22 +1202,6 @@ public class FileStorageService //: IFileStorageService
 
         return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
     }
-    public async Task<T> SignedFormAsync<T>(T formId, string data)
-    {
-        var fileDao = GetFileDao<T>();
-        var folderDao = GetFolderDao<T>();
-
-        var form = await fileDao.GetFileAsync(formId);
-        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(form);
-
-        var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
-
-        if(room.FolderType == FolderType.FillingFormsRoom)
-        {
-            await SaveFormFillingResult(form, data);
-        }
-        return formId;
-    }
     public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
     {
         var fileDao = GetFileDao<T>();

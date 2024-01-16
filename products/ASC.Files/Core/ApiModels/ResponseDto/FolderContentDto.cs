@@ -221,10 +221,6 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                         }
                     }
                 }
-                else if (fol1.FolderType == FolderType.InProcessFormFolder || fol1.FolderType == FolderType.ReadyFormFolder)
-                {
-                    folder.Type = fol1.FolderType;
-                }
                 return folder;
             }
         }
