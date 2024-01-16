@@ -78,12 +78,6 @@ public class MigrationRunner
             using var dbContextToTenant = _creatorDbContext.CreateDbContext<TenantDbContext>(region);
             var toTenant = dbContextToTenant.Tenants.SingleOrDefault(q => q.Alias == toAlias);
 
-            toTenant.Status = TenantStatus.Restoring;
-            toTenant.StatusChanged = DateTime.UtcNow;
-
-            dbContextTenant.Tenants.Update(toTenant);
-            dbContextToTenant.SaveChanges();
-
             columnMapper.SetMapping("tenants_tenants", "id", fromTenant.Id, toTenant.Id);
             columnMapper.Commit();
         }
