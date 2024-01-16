@@ -1,10 +1,13 @@
-FROM maven:3.8.3-openjdk-17 AS MAVEN_BUILD
-WORKDIR /build/
-COPY . .
-WORKDIR /build/authorization
-RUN mvn clean package -DskipTests=true
+FROM openjdk:17-jdk-slim as build
 
-FROM openjdk:17
-WORKDIR /app
-COPY --from=MAVEN_BUILD /build/authorization/target/authorization-0.0.1.jar /app/
-ENTRYPOINT ["java", "-jar", "authorization-0.0.1.jar"]
+COPY .mvn .mvn
+COPY mvnw .
+COPY pom.xml .
+COPY src src
+
+RUN ./mvnw -B -Dmaven.test.skip clean package
+
+FROM openjdk:17-jdk-slim
+
+COPY --from=build target/identity-authorization.jar .
+ENTRYPOINT ["java", "-jar", "identity-authorization.jar"]

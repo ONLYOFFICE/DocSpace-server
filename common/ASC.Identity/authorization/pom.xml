@@ -214,6 +214,7 @@
 		<!-- -->
 	</dependencies>
 	<build>
+		<finalName>identity-authorization</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

@@ -262,6 +262,7 @@
 		<!-- -->
 	</dependencies>
 	<build>
+		<finalName>identity-api</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
