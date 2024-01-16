@@ -20,28 +20,30 @@
 		<maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<mysql.connector.version>8.0.33</mysql.connector.version>
-
-		<spring.boot.version>3.1.2</spring.boot.version>
-		<spring.hateoas.version>2.1.2</spring.hateoas.version>
-		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
-
 		<caffeine.caching.version>3.1.8</caffeine.caching.version>
-		<redisson.caching.version>3.23.1</redisson.caching.version>
-		<spring.caching.version>2.4.0</spring.caching.version>
-
-		<netty.socket.version>1.7.17</netty.socket.version>
-
-		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
-		<resilience4j.version>2.1.0</resilience4j.version>
 
 		<logback.gelf.version>5.0.1</logback.gelf.version>
 		<logback.logstash.version>7.4</logback.logstash.version>
 
-		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 		<lombok.version>1.18.28</lombok.version>
 
+		<mysql.connector.version>8.0.33</mysql.connector.version>
+
+		<netty.socket.version>1.7.17</netty.socket.version>
+
+		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+
+		<redisson.caching.version>3.23.1</redisson.caching.version>
+
+		<resilience4j.circuit.version>3.0.3</resilience4j.circuit.version>
+		<resilience4j.version>2.1.0</resilience4j.version>
+
+		<spring.boot.version>3.1.2</spring.boot.version>
+		<spring.caching.version>2.4.0</spring.caching.version>
+		<spring.cloud.feign.version>4.0.4</spring.cloud.feign.version>
+		<spring.hateoas.version>2.1.2</spring.hateoas.version>
 		<springdoc.version>2.2.0</springdoc.version>
+
 		<testcontainers.version>1.19.1</testcontainers.version>
 	</properties>
 
