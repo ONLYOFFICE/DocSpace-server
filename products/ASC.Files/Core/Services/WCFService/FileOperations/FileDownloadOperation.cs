@@ -239,7 +239,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileExt = FileUtility.GetFileExtension(title);
         if (await DocSpaceHelper.IsWatermarkEnabled((File<T>)file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
         {
-            _files[file.Id] = ".pdf";
+            _files[file.Id] = FileUtility.WatermarkedDocumentExt;
         }
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))

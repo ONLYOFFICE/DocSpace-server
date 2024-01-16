@@ -344,7 +344,7 @@ public class FileConverter(FileUtility fileUtility,
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return false;
+            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -353,7 +353,8 @@ public class FileConverter(FileUtility fileUtility,
             return true;
         }
 
-        return (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExtension) && (await fileUtility.GetExtsConvertibleAsync())[fileExtension].Contains(toExtension);
+        var convertibleExts = await fileUtility.GetExtsConvertibleAsync();
+        return convertibleExts.ContainsKey(fileExtension) && convertibleExts[fileExtension].Contains(toExtension);
     }
 
     public Task<Stream> ExecAsync<T>(File<T> file)

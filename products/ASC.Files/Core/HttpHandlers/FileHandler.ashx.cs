@@ -362,7 +362,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var folderDao = daoFactory.GetFolderDao<T>();
                         if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
                         {
-                            ext = ".pdf";
+                            ext = FileUtility.WatermarkedDocumentExt;
                         }
 
                         long offset = 0;

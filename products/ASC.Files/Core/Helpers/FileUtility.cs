@@ -700,6 +700,9 @@ public class FileUtility
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx"
     }.ToImmutableList();
+
+    public const string WatermarkedDocumentExt = ".pdf";
+
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }
