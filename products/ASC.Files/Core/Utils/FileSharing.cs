@@ -145,25 +145,6 @@ public class FileSharingAceHelper
                     continue;
                 }
 
-                if (w.IsLink && eventType == EventType.Create)
-                {
-                    var (filter, maxCount) = w.SubjectType switch
-                    {
-                        SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
-                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
-                        _ => (ShareFilterType.Link, 0)
-                    };
-                    
-                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
-
-                    if (linksCount >= maxCount)
-                    {
-                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
-                        continue;
-                    }
-                }
-
                 if (w.SubjectType == SubjectType.PrimaryExternalLink && w.FileShareOptions != null)
                 {
                     w.FileShareOptions.ExpirationDate = default;
@@ -262,7 +243,36 @@ public class FileSharingAceHelper
                     : w.Access;
             }
 
-            await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            try
+            {
+                if (w.IsLink && eventType == EventType.Create)
+                {
+                    var (filter, maxCount) = w.SubjectType switch
+                    {
+                        SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
+                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
+                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
+                        _ => (ShareFilterType.Link, 0)
+                    };
+
+                    //TODO: Replace with a distributed lock
+                    await _semaphore.WaitAsync();
+                    
+                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+                    if (linksCount >= maxCount)
+                    {
+                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
+                        continue;
+                    }
+                }
+
+                await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+            
             if (socket && room != null)
             {
                 if (share == FileShare.None)
