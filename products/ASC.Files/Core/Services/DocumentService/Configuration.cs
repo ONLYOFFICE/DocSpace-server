@@ -612,11 +612,22 @@ public class WatermarkOnDraw
         Transparent = 0.4;
         Paragraphs = paragraphs;
     }
-	public double Width { get; set; }
+    [JsonPropertyName("width")]
+    public double Width { get; set; }
+
+    [JsonPropertyName("height")]
     public double Height { get; set; }
-	public string Fill { get; set; }
+
+    [JsonPropertyName("fill")]
+    public string Fill { get; set; }
+
+    [JsonPropertyName("rotate")]
     public int Rotate { get; set; }
+
+    [JsonPropertyName("transparent")]
     public double Transparent { get; set; }
+
+    [JsonPropertyName("paragraphs")]
     public List<Paragraph> Paragraphs { get; set; }
 }
 public class Paragraph
@@ -626,7 +637,10 @@ public class Paragraph
         Runs = runs;
         Align = 2;
     }
+    [JsonPropertyName("align")]
     public int Align { get; set; }
+
+    [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
 public class Run
@@ -637,7 +651,11 @@ public class Run
         Fill = [124, 124, 124];
         Text = text;
     }
+
+    [JsonPropertyName("fill")]
     public int[] Fill { get; set; }
+
+    [JsonPropertyName("text")]
     public string Text { get; set; }
 
     [JsonPropertyName("font-size")]

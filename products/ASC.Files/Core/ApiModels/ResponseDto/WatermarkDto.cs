@@ -67,16 +67,21 @@ public class WatermarkDtoHelper()
 {
     public WatermarkDto Get(WatermarkSettings watermarkSettings)
     {
-        var result = new WatermarkDto();
-        result.Enabled = watermarkSettings.Enabled;
-        result.Additions = watermarkSettings.Additions;
-        result.Text = watermarkSettings.Text;
-        result.Rotate = watermarkSettings.Rotate;
-        result.ImageScale = watermarkSettings.ImageScale;
-        result.ImageUrl = watermarkSettings.ImageUrl;
-        result.ImageHeight = watermarkSettings.ImageHeight;
-        result.ImageWidth = watermarkSettings.ImageWidth;
+        if (watermarkSettings == null)
+        {
+            return null;
+        }
 
-        return result;
+        return new WatermarkDto
+        {
+            Enabled = watermarkSettings.Enabled,
+            Additions = watermarkSettings.Additions,
+            Text = watermarkSettings.Text,
+            Rotate = watermarkSettings.Rotate,
+            ImageScale = watermarkSettings.ImageScale,
+            ImageUrl = watermarkSettings.ImageUrl,
+            ImageHeight = watermarkSettings.ImageHeight,
+            ImageWidth = watermarkSettings.ImageWidth
+        };
     }
 }

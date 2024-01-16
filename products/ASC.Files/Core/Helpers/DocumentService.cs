@@ -74,6 +74,7 @@ public static class DocumentService
     /// <param name="region"></param>
     /// <param name="thumbnail">Thumbnail settings</param>
     /// <param name="spreadsheetLayout"></param>
+    /// <param name="options"></param>
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
     /// <param name="clientFactory"></param>
@@ -96,6 +97,7 @@ public static class DocumentService
         string region,
         ThumbnailData thumbnail,
         SpreadsheetLayout spreadsheetLayout,
+        Options options,
         bool isAsync,
         string signatureSecret,
        IHttpClientFactory clientFactory)
@@ -111,7 +113,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, clientFactory);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -125,6 +127,7 @@ public static class DocumentService
        string region,
        ThumbnailData thumbnail,
        SpreadsheetLayout spreadsheetLayout,
+       Options options,
        bool isAsync,
        string signatureSecret,
        IHttpClientFactory clientFactory)
@@ -156,6 +159,7 @@ public static class DocumentService
             Title = title,
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
+            Watermark = options == null ? null : options.WatermarkOnDraw,
             Url = documentUri,
             Region = region
         };
@@ -761,6 +765,10 @@ public static class DocumentService
         [JsonProperty(PropertyName = "spreadsheetLayout", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("spreadsheetLayout")]
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
+
+        [JsonProperty(PropertyName = "watermark", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonPropertyName("watermark")]
+        public WatermarkOnDraw Watermark { get; set; }
 
         [JsonProperty(PropertyName = "url", Required = Required.Always)]
         [JsonPropertyName("url")]

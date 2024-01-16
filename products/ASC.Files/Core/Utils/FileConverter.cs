@@ -345,7 +345,7 @@ public class FileConverter(FileUtility fileUtility,
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return false;
+            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -354,7 +354,8 @@ public class FileConverter(FileUtility fileUtility,
             return true;
         }
 
-        return (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExtension) && (await fileUtility.GetExtsConvertibleAsync())[fileExtension].Contains(toExtension);
+        var convertibleExts = await fileUtility.GetExtsConvertibleAsync();
+        return convertibleExts.ContainsKey(fileExtension) && convertibleExts[fileExtension].Contains(toExtension);
     }
 
     public Task<Stream> ExecAsync<T>(File<T> file)
@@ -380,7 +381,11 @@ public class FileConverter(FileUtility fileUtility,
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, false);
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
+        var options = documentServiceHelper.GetOptions(watermarkSettings, room);
+
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, options, false);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
@@ -417,7 +422,7 @@ public class FileConverter(FileUtility fileUtility,
 
         fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var convertType = uriTuple.convertedFileType;
 
