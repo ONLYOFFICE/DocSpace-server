@@ -2807,7 +2807,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null)
+    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true)
     {
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
@@ -2829,7 +2829,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -2863,8 +2863,7 @@ public class FileStorageService //: IFileStorageService
                                 FileShareExtensions.GetAccessString(ace.Access, true));
                                 break;
                             case EventType.Update:
-                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, name,
-                                FileShareExtensions.GetAccessString(ace.Access, true));
+                                await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
                                 break;
                         }
                     }
@@ -3408,7 +3407,7 @@ public class FileStorageService //: IFileStorageService
                               Id = createBy
                         }
                     }
-                }, false);
+                }, false, socket: false);
 
                 var folderAccess = folder.Access;
 
@@ -3418,7 +3417,6 @@ public class FileStorageService //: IFileStorageService
                 newFolder = await folderDao.GetFolderAsync(newFolderID);
                 newFolder.Access = folderAccess;
 
-                await socketManager.CreateFolderAsync(newFolder);
                 await entryStatusManager.SetIsFavoriteFolderAsync(folder);
 
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, new[] { newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper) });
@@ -3516,7 +3514,7 @@ public class FileStorageService //: IFileStorageService
         {
             filesSettingsHelper.KeepNewFileName = set;
             await messageService.SendHeadersMessageAsync(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
-    }
+        }
         return set;
     }
 

@@ -54,6 +54,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(T fileId)
     {

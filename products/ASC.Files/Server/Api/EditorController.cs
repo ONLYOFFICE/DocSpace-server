@@ -252,6 +252,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {

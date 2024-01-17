@@ -157,27 +157,27 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
 
         IAsyncEnumerable<Tuple<FileEntry<T1>, bool>> GetFoldersWithRightsAsync<T1>(IEnumerable<T1> ids)
         {
-            if (ids.Any())
+            if (!ids.Any())
             {
-                var folderDao = daoFactory.GetFolderDao<T1>();
-
-                return fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
+                return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
             }
 
-            return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
+            var folderDao = daoFactory.GetFolderDao<T1>();
+            return fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
         }
 
         async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string entriesOrder)
         {
             foreach (var r in fileEntries)
             {
-                if (r is File<int> fol1)
+                switch (r)
                 {
-                    yield return await fileWrapperHelper.GetAsync(fol1, foldersIntWithRights, foldersCount, entriesOrder);
-                }
-                else if (r is File<string> fol2)
-                {
+                    case File<int> fol1:
+                        yield return await fileWrapperHelper.GetAsync(fol1, foldersIntWithRights, foldersCount, entriesOrder);
+                        break;
+                    case File<string> fol2:
                     yield return await fileWrapperHelper.GetAsync(fol2, foldersStringWithRights, foldersCount, entriesOrder);
+                        break;
                 }
             }
         }
@@ -188,40 +188,29 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
 
             foreach (var r in folderEntries)
             {
-                if (r is Folder<int> fol1)
+                switch (r)
                 {
-                    yield return await GetFolder(fol1, foldersIntWithRights, entriesOrder);
-                }
-                else if (r is Folder<string> fol2)
-                {
+                    case Folder<int> fol1:
+                        yield return await GetFolder(fol1, foldersIntWithRights, entriesOrder);
+                        break;
+                    case Folder<string> fol2:
                     yield return await GetFolder(fol2, foldersStringWithRights, entriesOrder);
+                        break;
                 }
             }
 
+            yield break;
+
             async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights, string order1)
             {
-                var folder = await folderWrapperHelper.GetAsync(fol1, foldersWithRights, order1);
-                if (DocSpaceHelper.IsRoom(fol1.FolderType))
+                if (currentUsersRecords == null && 
+                    DocSpaceHelper.IsRoom(fol1.FolderType) && 
+                    await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                 {
-                    if (fol1.CreateBy == authContext.CurrentAccount.ID)
-                    {
-                        folder.InRoom = true;
-                    }
-                    else
-                    {
-                        if (currentUsersRecords == null && await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                        {
-                            var securityDao = daoFactory.GetSecurityDao<T>();
-                            var currentUserSubjects = await fileSecurity.GetUserSubjectsAsync(authContext.CurrentAccount.ID);
-                            currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
-                        }
-                        if (currentUsersRecords != null)
-                        {
-                            folder.InRoom = currentUsersRecords.Exists(c => c.EntryId.Equals(fol1.Id));
-                        }
-                    }
+                    currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>(authContext.CurrentAccount.ID).ToListAsync();
                 }
-                return folder;
+                
+                return await folderWrapperHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords, order1);
             }
         }
     }

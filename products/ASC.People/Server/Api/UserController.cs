@@ -1460,6 +1460,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -1477,6 +1478,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
@@ -1496,6 +1498,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/quota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpPut("quota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
