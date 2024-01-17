@@ -233,7 +233,7 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
 
         try {
             var clientFuture = CompletableFuture.supplyAsync(() -> clientRetrieveUsecases
-                    .getClientByClientId(authorization.getRegisteredClientId()));
+                    .getClientByClientId(msg.getRegisteredClientId()));
             CompletableFuture.allOf(
                     CompletableFuture.runAsync(FunctionalRunnable
                             .builder()
@@ -325,7 +325,7 @@ public class AscOAuth2AuthorizationService implements OAuth2AuthorizationService
 
         try {
             var clientFuture = CompletableFuture.supplyAsync(() -> clientRetrieveUsecases
-                    .getClientByClientId(authorization.getRegisteredClientId()));
+                    .getClientByClientId(result.getRegisteredClientId()));
             CompletableFuture.allOf(
                             CompletableFuture.runAsync(FunctionalRunnable
                                     .builder()
