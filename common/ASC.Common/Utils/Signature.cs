@@ -65,7 +65,7 @@ public class Signature
         {
             signatureResolver?.Invoke(signature);
 
-            var payloadParts = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(signature)).Split('?');
+            var payloadParts = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(signature)).Split('?', 2);
 
             if (GetHashBase64(payloadParts[1].Trim() + secret) == payloadParts[0])
             {
