@@ -42,6 +42,7 @@ public class WebhooksConfigRequestsDto
 
     /// <summary>URI</summary>
     /// <type>System.String, System</type>
+    [Url]
     public string Uri { get; set; }
 
     /// <summary>Secret key</summary>

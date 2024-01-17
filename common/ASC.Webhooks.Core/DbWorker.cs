@@ -84,7 +84,9 @@ public class DbWorker
 
         var restrictions = _configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? new List<string>();
         
-        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
+        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) &&         
+            System.Net.IPAddress.TryParse(parsedUri.Host, out _) && 
+            restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
         {
             throw new SecurityException();
         }
