@@ -462,7 +462,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugBoxAppAddLinker(boxUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), boxUserId, ProviderConstants.Box);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, boxUserId, ProviderConstants.Box);
     }
 
     private async Task<UserInfoWrapper> GetUserInfo(Token token)

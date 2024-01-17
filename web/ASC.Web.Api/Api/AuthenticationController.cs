@@ -577,7 +577,7 @@ public class AuthenticationController(UserManager userManager,
             }
         }
 
-        await accountLinker.AddLinkAsync(userInfo.Id.ToString(), loginProfile);
+        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
 
         return userInfo;
     }

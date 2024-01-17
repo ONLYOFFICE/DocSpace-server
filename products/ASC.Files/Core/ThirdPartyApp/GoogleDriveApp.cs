@@ -615,7 +615,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugGoogleDriveApAddLinker(googleUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), googleUserId, ProviderConstants.Google);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, googleUserId, ProviderConstants.Google);
     }
 
     private async Task<UserInfoWrapper> GetUserInfoAsync(Token token)
