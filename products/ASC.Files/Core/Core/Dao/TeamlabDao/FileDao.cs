@@ -51,6 +51,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
     private readonly TenantQuotaController _tenantQuotaController;
     private readonly FileUtility _fileUtility;
 
+    private const string FilePathPart = "file_";
+    private const string FolderPathPart = "folder_";
+    private const string FileIdGroupName = "id";
+
+    private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
+
     public FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
@@ -924,9 +930,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 foreach (var size in _thumbnailSettings.Sizes)
                 {
-                    await dataStore.CopyAsync(String.Empty,
+                    await dataStore.CopyAsync(string.Empty,
                                          GetUniqThumbnailPath(file, size.Width, size.Height),
-                                         String.Empty,
+                                         string.Empty,
                                          GetUniqThumbnailPath(copy, size.Width, size.Height));
                 }
 
@@ -1019,10 +1025,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
     {
         if (fileId == 0)
         {
-            throw new ArgumentNullException("fileIdObject");
+            throw new ArgumentNullException(nameof(fileId));
         }
 
-        return string.Format("folder_{0}/file_{1}", (fileId / 1000 + 1) * 1000, fileId);
+        var folderId = (fileId / 1000 + 1) * 1000;
+
+        return $"{FolderPathPart}{folderId}/{FilePathPart}{fileId}";
     }
 
     public string GetUniqFilePath(File<int> file)
@@ -1044,6 +1052,17 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return fileId != 0
                    ? string.Format("{0}/v{1}", GetUniqFileDirectory(fileId), version)
                    : null;
+    }
+
+    public static bool TryGetFileId(string path, out int fileId)
+    {
+        fileId = 0;
+        
+        ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
+
+        var match = _pattern.Match(path);
+        
+        return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
     private async Task RecalculateFilesCountAsync(int folderId)
