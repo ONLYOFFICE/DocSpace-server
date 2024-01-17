@@ -42,8 +42,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        AuthManager authManager,
-        SecurityContext securityContext,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider)
 {

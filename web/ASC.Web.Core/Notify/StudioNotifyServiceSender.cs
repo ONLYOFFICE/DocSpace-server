@@ -34,8 +34,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
     IConfiguration configuration,
     WorkContext workContext,
-    TenantExtraConfig tenantExtraConfig,
-    CoreBaseSettings coreBaseSettings)
+    TenantExtraConfig tenantExtraConfig)
 {
     private static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 

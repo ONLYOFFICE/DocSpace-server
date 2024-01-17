@@ -45,7 +45,6 @@ internal class FileDao(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     GlobalStore globalStore,
-    GlobalSpace globalSpace,
     GlobalFolder globalFolder,
     Global global,
     IDaoFactory daoFactory,

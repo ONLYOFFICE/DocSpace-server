@@ -37,7 +37,6 @@ public class FileStorageService //: IFileStorageService
         FileUtility fileUtility,
         FilesLinkUtility filesLinkUtility,
         BaseCommonLinkUtility baseCommonLinkUtility,
-        CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         IHttpContextAccessor httpContextAccessor,
         ILoggerProvider optionMonitor,

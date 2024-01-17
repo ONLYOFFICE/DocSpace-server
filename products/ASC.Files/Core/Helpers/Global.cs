@@ -275,7 +275,7 @@ public class GlobalSpace(FilesSpaceUsageStatManager filesSpaceUsageStatManager, 
 }
 
 [Scope]
-public class GlobalFolder(CoreBaseSettings coreBaseSettings,
+public class GlobalFolder(
     WebItemManager webItemManager,
     WebItemSecurity webItemSecurity,
     AuthContext authContext,
