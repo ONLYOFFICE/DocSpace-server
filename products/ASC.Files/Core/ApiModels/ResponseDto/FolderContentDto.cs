@@ -84,14 +84,14 @@ public class FolderContentDto<T>
 
 [Scope]
 public class FolderContentDtoHelper(FileSecurity fileSecurity,
-        IDaoFactory daoFactory,
-        FileDtoHelper fileWrapperHelper,
-        FolderDtoHelper folderWrapperHelper,
-        BadgesSettingsHelper badgesSettingsHelper,
-        FileSecurityCommon fileSecurityCommon,
-        AuthContext authContext,
-        BreadCrumbsManager breadCrumbsManager)
-    {
+    IDaoFactory daoFactory,
+    FileDtoHelper fileWrapperHelper,
+    FolderDtoHelper folderWrapperHelper,
+    BadgesSettingsHelper badgesSettingsHelper,
+    FileSecurityCommon fileSecurityCommon,
+    AuthContext authContext,
+    BreadCrumbsManager breadCrumbsManager)
+{
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
         var parentInternalIds = new HashSet<int>();

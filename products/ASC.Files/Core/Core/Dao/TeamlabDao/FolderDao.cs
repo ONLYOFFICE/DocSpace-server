@@ -28,37 +28,37 @@ namespace ASC.Files.Core.Data;
 
 [Scope]
 internal class FolderDao(
-        FactoryIndexerFolder factoryIndexer,
-        UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        IDaoFactory daoFactory,
-        SelectorFactory selectorFactory,
-        CrossDao crossDao,
-        IMapper mapper,
-        GlobalStore globalStore,
+    FactoryIndexerFolder factoryIndexer,
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    CoreBaseSettings coreBaseSettings,
+    CoreConfiguration coreConfiguration,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    SelectorFactory selectorFactory,
+    CrossDao crossDao,
+    IMapper mapper,
+    GlobalStore globalStore,
     GlobalFolder globalFolder,
     IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
-              userManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        coreBaseSettings,
+        coreConfiguration,
+        settingsManager,
+        authContext,
         serviceProvider), IFolderDao<int>
-    {
+{
     private const string My = "my";
     private const string Common = "common";
     private const string Share = "share";
@@ -294,7 +294,7 @@ internal class FolderDao(
                                                     ? s.MatchAll(searchText)
                                                     : s.MatchAll(searchText).In(r => r.Id, folderIds.ToArray()));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-            }
+        }
 
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
@@ -1686,7 +1686,7 @@ internal class FolderDao(
         {
             var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-            }
+        }
 
         q = orderBy == null ? q : orderBy.SortedBy switch
         {
@@ -1695,9 +1695,9 @@ internal class FolderDao(
             SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
             SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
-                                    .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
-                                    .OrderBy(r => r.order.Order)
-                                    .Select(r => r.folder),
+                .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
+                .OrderBy(r => r.order.Order)
+                .Select(r => r.folder),
             _ => q.OrderBy(r => r.Title)
         };
 
@@ -1717,13 +1717,13 @@ internal class FolderDao(
         if (roomId != default)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
-            {
-                t.TenantId,
-                t.Type,
-                t.Name,
-                l.EntryId,
-                l.EntryType
-            }), f => f.Id.ToString(), t => t.EntryId, (folder, tag) => new { folder, tag })
+                {
+                    t.TenantId,
+                    t.Type,
+                    t.Name,
+                    l.EntryId,
+                    l.EntryType
+                }), f => f.Id.ToString(), t => t.EntryId, (folder, tag) => new { folder, tag })
                 .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.Folder && filesDbContext.Folders.Where(f =>
                         f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
                             .OrderByDescending(t => t.Level)
