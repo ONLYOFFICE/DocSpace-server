@@ -100,18 +100,13 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
-    {
+        {
             yield return room;
         }
         }
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
     {
-        var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
-
-        foreach (var i in folderFolders)
-        {
-            yield return SharePointProviderInfo.ToFolder(i);
-        }
+        return GetFoldersAsync(parentId);
     }
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
@@ -265,7 +260,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
             dbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
             await dbContext.SaveChangesAsync();
 
-                await tx.CommitAsync();
+            await tx.CommitAsync();
         });
 
 
@@ -345,10 +340,10 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
             string tsId => CanMoveOrCopyAsync(folderIds, tsId),
             _ => throw new NotImplementedException()
         };
-        }
+    }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
-        {
+    {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
@@ -448,7 +443,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;
-}
+    }
 
     public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
     {

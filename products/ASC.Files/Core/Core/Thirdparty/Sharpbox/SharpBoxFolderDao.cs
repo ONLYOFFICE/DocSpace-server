@@ -51,7 +51,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
             return folder;
-    }
+        }
 
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
@@ -98,15 +98,13 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
-    {
+        {
             yield return room;
         }
-        }
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
     {
-        var parentFolder = SharpBoxProviderInfo.Storage.GetFolder(MakePath(parentId));
-
-        return parentFolder.OfType<ICloudDirectoryEntry>().Select(ToFolder).ToAsyncEnumerable();
+        return GetFoldersAsync(parentId);
     }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
@@ -225,7 +223,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
                 if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
-                    }
+                }
                 throw;
             }
         }
@@ -249,7 +247,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
             await Queries.DeleteTagsAsync(dbContext);
             await Queries.DeleteSecuritiesAsync(dbContext, TenantId, id);
             await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, TenantId, id);
-                await tx.CommitAsync();
+            await tx.CommitAsync();
         });
 
         if (folder is not ErrorEntry)
@@ -366,10 +364,10 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
             string tsId => CanMoveOrCopyAsync(folderIds, tsId),
             _ => throw new NotImplementedException()
         };
-        }
+    }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
-        {
+    {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
@@ -489,7 +487,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;
-}
+    }
 
     public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
     {

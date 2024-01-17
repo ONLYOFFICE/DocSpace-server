@@ -242,7 +242,7 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-
+    
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
@@ -364,7 +364,7 @@ internal abstract class ThirdPartyProviderDao
 
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
     }
-
+    
     internal static string[] GetProviderTypes(ProviderFilter providerFilter)
     {
         var filter = providerFilter switch
@@ -413,7 +413,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
-    {
+{
     protected int TenantId => tenantManager.GetCurrentTenant().Id;
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly UserManager _userManager = userManager;
@@ -554,7 +554,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             FilterType.ArchiveOnly or
             FilterType.MediaOnly;
     }
-
+    
     public async Task UpdateIdAsync(string oldValue, string newValue)
     {
         if (oldValue.Equals(newValue))
@@ -675,7 +675,7 @@ internal class ErrorEntry(string error, string errorId)
 {
     public string Error { get; set; } = error;
     public string ErrorId { get; set; } = errorId;
-    }
+}
 
 static file class Queries
 {
