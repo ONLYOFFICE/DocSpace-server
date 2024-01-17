@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,53 +24,54 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.VirtualRooms;
+namespace ASC.Files.Core.Security;
 
 [Scope]
-public class RoomLogoValidator : IDataStoreValidator
+public class FileValidator : IDataStoreValidator
 {
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
-    private readonly SecurityContext _securityContext;
+    private readonly FileUtility _fileUtility;
 
-    public RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity, SecurityContext securityContext)
+    public FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory, FileUtility fileUtility)
     {
-        _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
-        _securityContext = securityContext;
+        _daoFactory = daoFactory;
+        _fileUtility = fileUtility;
     }
-    
+
     public async Task<bool> Validate(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
+        
+        if (FileDao.TryGetFileId(path, out var fileId))
+        {
+            var file = await _daoFactory.GetFileDao<int>().GetFileAsync(fileId);
+            if (file == null)
+            {
+                return false;
+            }
 
-        if (!_securityContext.IsAuthenticated)
+            if (_fileUtility.CanImageView(file.Title) || _fileUtility.CanMediaView(file.Title))
+            {
+                return true;
+            }
+
+            return await _fileSecurity.CanDownloadAsync(file);
+        }
+
+        var pathPart = path.Split(Path.DirectorySeparatorChar).FirstOrDefault();
+        if (string.IsNullOrEmpty(pathPart) || !Guid.TryParse(pathPart, out var id))
         {
             return true;
         }
 
-        var data = path.Split(RoomLogoManager.LogosPathSplitter);
-
-        if (data.Length < 2)
+        var record = await _daoFactory.GetSecurityDao<int>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
+        if (record is { IsLink: true, Options: not null })
         {
-            return false;
+            return !record.Options.DenyDownload;
         }
 
-        var id = data[0];
-
-        if (int.TryParse(id, out var internalId))
-        {
-            return await CheckRoomAccess(internalId);
-        }
-
-        return await CheckRoomAccess(id);
-    }
-    
-    private async Task<bool> CheckRoomAccess<T>(T id)
-    {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-        var folder = await folderDao.GetFolderAsync(id);
-
-        return DocSpaceHelper.IsRoom(folder.FolderType) && await _fileSecurity.CanReadAsync(folder);
+        return true;
     }
 }
