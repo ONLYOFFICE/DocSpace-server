@@ -182,8 +182,8 @@ spring:
             refresh: 1
         settings:
           forceSSL: true
-          password: ''
-          username: ''
+          password: ${REDIS_PASSWORD:}
+          username: ${REDIS_USERNAME:}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: ${JDBC_PASSWORD:dev}
