@@ -209,14 +209,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         needToMark.AddRange(moveOrCopyFilesTask);
 
-            foreach (var folder in moveOrCopyFoldersTask)
+        foreach (var folder in moveOrCopyFoldersTask)
+        {
+        if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
-            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                    needToMark.AddRange(await GetFilesAsync(scope, folder));
-                }
-                await socketManager.CreateFolderAsync(folder);
+                needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
+            await socketManager.CreateFolderAsync(folder);
+        }
 
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)

@@ -55,9 +55,9 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory, Thir
 
 [Scope]
 public class BreadCrumbsManager(IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        AuthContext authContext)
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    AuthContext authContext)
 {
     public async Task<string> GetBreadCrumbsOrderAsync<T>(T folderId)
     {
@@ -221,42 +221,42 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
-            folder.IsFavorite = true;
+                folder.IsFavorite = true;
         }
     }
 }
 
 [Scope]
 public class EntryManager(IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        PathProvider pathProvider,
-        AuthContext authContext,
-        FileMarker fileMarker,
-        FileUtility fileUtility,
-        GlobalStore globalStore,
-        FilesSettingsHelper filesSettingsHelper,
-        UserManager userManager,
-        ILogger<EntryManager> logger,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        ThirdpartyConfiguration thirdpartyConfiguration,
-        DocumentServiceConnector documentServiceConnector,
-        LockerManager lockerManager,
-        BreadCrumbsManager breadCrumbsManager,
-        SettingsManager settingsManager,
-        IServiceProvider serviceProvider,
-        ICache cache,
-        FileTrackerHelper fileTracker,
-        EntryStatusManager entryStatusManager,
-        ThirdPartySelector thirdPartySelector,
-        IHttpClientFactory clientFactory,
-        ThumbnailSettings thumbnailSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    PathProvider pathProvider,
+    AuthContext authContext,
+    FileMarker fileMarker,
+    FileUtility fileUtility,
+    GlobalStore globalStore,
+    FilesSettingsHelper filesSettingsHelper,
+    UserManager userManager,
+    ILogger<EntryManager> logger,
+    FileShareLink fileShareLink,
+    DocumentServiceHelper documentServiceHelper,
+    ThirdpartyConfiguration thirdpartyConfiguration,
+    DocumentServiceConnector documentServiceConnector,
+    LockerManager lockerManager,
+    BreadCrumbsManager breadCrumbsManager,
+    SettingsManager settingsManager,
+    IServiceProvider serviceProvider,
+    ICache cache,
+    FileTrackerHelper fileTracker,
+    EntryStatusManager entryStatusManager,
+    ThirdPartySelector thirdPartySelector,
+    IHttpClientFactory clientFactory,
+    ThumbnailSettings thumbnailSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
     SocketManager socketManager,
-        BaseCommonLinkUtility commonLinkUtility,
-        SecurityContext securityContext,
-        FormFillingReportCreator formFillingReportCreator)
+    BaseCommonLinkUtility commonLinkUtility,
+    SecurityContext securityContext,
+    FormFillingReportCreator formFillingReportCreator)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1517,18 +1517,18 @@ public class EntryManager(IDaoFactory daoFactory,
                 var CopyThumbnailsAsync = async () =>
                 {
                     await using var scope = serviceProvider.CreateAsyncScope();
-                    var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
-                    var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
+                        var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
+                        var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
 
-                    foreach (var size in thumbnailSettings.Sizes)
-                    {
-                        await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                                                                String.Empty,
-                                                                _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
-                    }
+                        foreach (var size in thumbnailSettings.Sizes)
+                        {
+                            await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
+                                                                    _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                                                                    String.Empty,
+                                                                    _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                        }
 
-                    await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+                        await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
                 };
 
                 _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());
@@ -1614,7 +1614,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (!fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
-                lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
+                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
                 //lastVersionFile.VersionGroup++;
             }

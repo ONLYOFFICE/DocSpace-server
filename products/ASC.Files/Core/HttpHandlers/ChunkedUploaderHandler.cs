@@ -110,9 +110,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
                         await filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
-                        var fileExst = FileUtility.GetFileExtension(resumedSession.File.Title);
-                        var fileType = FileUtility.GetFileTypeByExtention(fileExst);
-
                         await socketManager.CreateFileAsync(resumedSession.File);
                     }
                     else

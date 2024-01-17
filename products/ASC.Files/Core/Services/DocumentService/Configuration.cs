@@ -82,7 +82,6 @@ public class Configuration<T>
         { FileType.Spreadsheet, "cell" },
         { FileType.Presentation, "slide" },
         { FileType.Pdf, "pdf" }
-
     };
 
     private FileType _fileTypeCache = FileType.Unknown;
@@ -830,7 +829,6 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
                     return properties is { FormFilling.CollectFillForm: true };
                 }
             }
-            
             return false;
         }
     }

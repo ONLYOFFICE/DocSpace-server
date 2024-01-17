@@ -127,27 +127,27 @@ public class DocumentServiceTracker
 
 [Scope]
 public class DocumentServiceTrackerHelper(SecurityContext securityContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        FilesLinkUtility filesLinkUtility,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        SocketManager socketManager,
-        GlobalStore globalStore,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        IDaoFactory daoFactory,
-        ILogger<DocumentServiceTrackerHelper> logger,
-        DocumentServiceHelper documentServiceHelper,
-        EntryManager entryManager,
-        FileShareLink fileShareLink,
-        FilesMessageService filesMessageService,
-        DocumentServiceConnector documentServiceConnector,
-        NotifyClient notifyClient,
-        MailMergeTaskRunner mailMergeTaskRunner,
-        FileTrackerHelper fileTracker,
-            IHttpClientFactory clientFactory,
-            ThirdPartySelector thirdPartySelector)
-    {
+    UserManager userManager,
+    TenantManager tenantManager,
+    FilesLinkUtility filesLinkUtility,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    SocketManager socketManager,
+    GlobalStore globalStore,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IDaoFactory daoFactory,
+    ILogger<DocumentServiceTrackerHelper> logger,
+    DocumentServiceHelper documentServiceHelper,
+    EntryManager entryManager,
+    FileShareLink fileShareLink,
+    FilesMessageService filesMessageService,
+    DocumentServiceConnector documentServiceConnector,
+    NotifyClient notifyClient,
+    MailMergeTaskRunner mailMergeTaskRunner,
+    FileTrackerHelper fileTracker,
+        IHttpClientFactory clientFactory,
+        ThirdPartySelector thirdPartySelector)
+{
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
         var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
@@ -267,7 +267,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
                 logger.ErrorDocServiceDropFailed(usersDrop);
-            }
+        }
 
         foreach (var removeUserId in users)
         {
