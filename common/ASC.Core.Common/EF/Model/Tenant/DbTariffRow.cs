@@ -37,7 +37,7 @@ public class DbTariffRow : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, TariffId, Quota };
+        return [TenantId, TariffId, Quota];
     }
 }
 public static class DbTariffRowExtension

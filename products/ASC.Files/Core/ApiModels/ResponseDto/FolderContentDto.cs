@@ -207,7 +207,7 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                     DocSpaceHelper.IsRoom(fol1.FolderType) && 
                     await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                 {
-                    currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>(authContext.CurrentAccount.ID).ToListAsync();
+                    currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
                 }
                 
                 return await folderWrapperHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords, order1);

@@ -122,7 +122,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
         ApplyFilterOption? applyFilterOption, string extension)
     {
 
-        var split = extension == null ? new string[] { } : extension.Split(",");
+        var split = extension == null ? [] : extension.Split(",");
         var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, split);
 
         return folder.NotFoundIfNull();

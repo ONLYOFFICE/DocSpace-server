@@ -153,7 +153,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             }
             else
             {
-                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>(authContext.CurrentAccount.ID).ToListAsync();
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
 
                 result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }

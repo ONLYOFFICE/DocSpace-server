@@ -516,7 +516,7 @@ public class FileSharing(Global global,
         {
             logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString());
 
-            return new List<AceWrapper>();
+            return [];
             //throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
@@ -815,16 +815,20 @@ public class FileSharing(Global global,
             result = new List<AceWrapper> { linkAce }.Concat(result).ToList();
         }
 
-        return new List<AceWrapper>(result);
+        return [..result];
     }
 
     public async Task<List<AceShortWrapper>> GetSharedInfoShortFileAsync<T>(T fileID)
     {
         var aces = await GetSharedInfoAsync(new List<T> { fileID }, new List<T>());
 
-        return new List<AceShortWrapper>(aces
-            .Where(aceWrapper => !aceWrapper.Id.Equals(FileConstant.ShareLinkId) || aceWrapper.Access != FileShare.Restrict)
-            .Select(aceWrapper => new AceShortWrapper(aceWrapper)));
+        return
+        [
+            ..aces
+                .Where(aceWrapper =>
+                    !aceWrapper.Id.Equals(FileConstant.ShareLinkId) || aceWrapper.Access != FileShare.Restrict)
+                .Select(aceWrapper => new AceShortWrapper(aceWrapper))
+        ];
     }
     
     private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)

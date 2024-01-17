@@ -181,7 +181,7 @@ public class SettingsDto
         {
             Culture = "en-US",
             Timezone = TimeZoneInfo.Utc.ToString(),
-            TrustedDomains = new List<string> { "mydomain.com" },
+            TrustedDomains = ["mydomain.com"],
             UtcHoursOffset = -8.5,
             UtcOffset = TimeSpan.FromHours(-8.5),
             GreetingSettings = "Web Office Applications",

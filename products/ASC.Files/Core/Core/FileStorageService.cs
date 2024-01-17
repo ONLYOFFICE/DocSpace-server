@@ -128,7 +128,7 @@ public class FileStorageService //: IFileStorageService
         {
             (entries, _) = await entryManager.GetEntriesAsync(
                 await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, new string[] { }, false, false, new OrderBy(SortedByType.AZ, true));
+                false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -271,23 +271,29 @@ public class FileStorageService //: IFileStorageService
         {
             Total = total,
             Entries = entries.ToList(),
-            FolderPathParts = new List<object>(breadCrumbs.Select(f =>
-            {
-                if (f.FileEntryType == FileEntryType.Folder)
+            FolderPathParts =
+            [
+                ..breadCrumbs.Select(f =>
                 {
-                    if (f is Folder<string> f1)
+                    if (f.FileEntryType == FileEntryType.Folder)
                     {
-                        return (object)new { f1.Id, f1.Title, RoomType = DocSpaceHelper.GetRoomType(f1.FolderType) };
+                        if (f is Folder<string> f1)
+                        {
+                            return (object)new
+                            {
+                                f1.Id, f1.Title, RoomType = DocSpaceHelper.GetRoomType(f1.FolderType)
+                            };
+                        }
+
+                        if (f is Folder<int> f2)
+                        {
+                            return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.GetRoomType(f2.FolderType) };
+                        }
                     }
 
-                    if (f is Folder<int> f2)
-                    {
-                        return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.GetRoomType(f2.FolderType) };
-                    }
-                }
-
-                return 0;
-            })),
+                    return 0;
+                })
+            ],
             FolderInfo = parent,
             New = await newTask
         };
@@ -1648,11 +1654,11 @@ public class FileStorageService //: IFileStorageService
 
             var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
 
-            result = new List<FileEntry>(entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false)));
+            result = [..entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
 
             if (result.Count == 0)
             {
-                await MarkAsReadAsync(new List<JsonElement> { JsonDocument.Parse(JsonSerializer.Serialize(folderId)).RootElement }, new List<JsonElement>()); //TODO
+                await MarkAsReadAsync([JsonDocument.Parse(JsonSerializer.Serialize(folderId)).RootElement], []); //TODO
             }
 
             return result;
@@ -2632,7 +2638,7 @@ public class FileStorageService //: IFileStorageService
         var files = fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesId).Where(file => !file.Encrypted)).ToListAsync();
         var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).ToListAsync();
 
-        List<FileEntry<T>> entries = new();
+        List<FileEntry<T>> entries = [];
 
         foreach (var items in await Task.WhenAll(files.AsTask(), folders.AsTask()))
         {
@@ -2660,7 +2666,7 @@ public class FileStorageService //: IFileStorageService
         var files = fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesId)).ToListAsync();
         var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).ToListAsync();
 
-        List<FileEntry<T>> entries = new();
+        List<FileEntry<T>> entries = [];
 
         foreach (var items in await Task.WhenAll(files.AsTask(), folders.AsTask()))
         {
@@ -3290,7 +3296,7 @@ public class FileStorageService //: IFileStorageService
 
         var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId, this);
 
-        return new List<EncryptionKeyPairDto>(fileKeyPair);
+        return [..fileKeyPair];
     }
 
     public async Task<bool> ChangeExternalShareSettingsAsync(bool enable)
@@ -3394,19 +3400,12 @@ public class FileStorageService //: IFileStorageService
                 {
                     Files = Array.Empty<T>(),
                     Folders = new[] { folder.Id },
-                    Aces = new List<AceWrapper>
-                    {
-                        new()
-                        {
-                              Access = FileShare.None,
-                              Id = userInfo.Id
-                        },
-                        new()
-                        {
-                              Access = FileShare.RoomAdmin,
-                              Id = createBy
-                        }
-                    }
+                    Aces =
+                    [
+                        new() { Access = FileShare.None, Id = userInfo.Id },
+
+                        new() { Access = FileShare.RoomAdmin, Id = createBy }
+                    ]
                 }, false, socket: false);
 
                 var folderAccess = folder.Access;
@@ -3419,7 +3418,8 @@ public class FileStorageService //: IFileStorageService
 
                 await entryStatusManager.SetIsFavoriteFolderAsync(folder);
 
-                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, new[] { newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper) });
+                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
+                ]);
             }
 
             yield return newFolder;
@@ -3493,7 +3493,8 @@ public class FileStorageService //: IFileStorageService
 
                 await entryStatusManager.SetFileStatusAsync(newFile);
 
-                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFile, new[] { newFile.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper) });
+                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFile, [newFile.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
+                ]);
             }
             yield return newFile;
         }
@@ -3729,7 +3730,7 @@ public class FileStorageService //: IFileStorageService
         if (file.RootFolderType == FolderType.BUNCH)
         {
             //todo: request project team
-            return new List<MentionWrapper>(users);
+            return [..users];
     }
 
         var acesForObject = await fileSharing.GetSharedInfoAsync(file);
@@ -3762,7 +3763,7 @@ public class FileStorageService //: IFileStorageService
             .OrderBy(user => user.User, UserInfoComparer.Default)
             .ToList();
 
-        return new List<MentionWrapper>(users);
+        return [..users];
     }
 
     private IFolderDao<T> GetFolderDao<T>()

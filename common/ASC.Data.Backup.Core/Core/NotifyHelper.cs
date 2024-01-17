@@ -90,7 +90,7 @@ public class NotifyHelper(UserManager userManager,
         var users =
             notifyAllUsers
                 ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-                : new[] { await userManager.GetUsersAsync(tenant.OwnerId) };
+                : [await userManager.GetUsersAsync(tenant.OwnerId)];
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
@@ -112,7 +112,7 @@ public class NotifyHelper(UserManager userManager,
 
         var users = notifyAllUsers
             ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : new[] { await userManager.GetUsersAsync(tenant.OwnerId) };
+            : [await userManager.GetUsersAsync(tenant.OwnerId)];
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
@@ -137,7 +137,7 @@ public class NotifyHelper(UserManager userManager,
 
         var users = (notify
             ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : new[] { await userManager.GetUsersAsync(tenant.OwnerId) })
+            : [await userManager.GetUsersAsync(tenant.OwnerId)])
             .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
@@ -163,8 +163,8 @@ public class NotifyHelper(UserManager userManager,
 
                     await client.SendNoticeToAsync(
                         action,
-                        new IRecipient[] { user },
-                        new[] { StudioNotifyService.EMailSenderName },
+                        [user],
+                        [StudioNotifyService.EMailSenderName],
                         currentArgs.ToArray());
                 }
             }
@@ -173,7 +173,7 @@ public class NotifyHelper(UserManager userManager,
                 await client.SendNoticeToAsync(
                     action,
                     users.Cast<IRecipient>().ToArray(),
-                    new[] { StudioNotifyService.EMailSenderName },
+                    [StudioNotifyService.EMailSenderName],
                     args.ToArray());
             }
         }

@@ -739,7 +739,7 @@ internal class TagDao(UserManager userManager,
         var result = AsyncEnumerable.Empty<TagLinkData>();
         result = result.Concat(Queries.NewTagsForFoldersAsync(filesDbContext, tenantId, subject, monitorFolderIdsStrings));
 
-        var where = (deepSearch ? monitorFolderIds : new List<object> { parentFolder.Id })
+        var where = (deepSearch ? monitorFolderIds : [parentFolder.Id])
             .Select(r => r.ToString())
             .ToList();
 

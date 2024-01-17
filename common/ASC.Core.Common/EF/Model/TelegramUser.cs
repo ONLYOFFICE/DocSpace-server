@@ -36,7 +36,7 @@ public class TelegramUser : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, PortalUserId };
+        return [TenantId, PortalUserId];
     }
 }
 

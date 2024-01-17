@@ -1609,7 +1609,7 @@ public class UserController(ICache cache,
 
         if (groupId.HasValue)
         {
-            includeGroups.Add(new List<Guid> { groupId.Value });
+            includeGroups.Add([groupId.Value]);
         }
 
         if (employeeType.HasValue)
@@ -1635,7 +1635,7 @@ public class UserController(ICache cache,
                     excludeGroups.Add(Constants.GroupUser.ID);
                     break;
                 case Payments.Free:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    includeGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }
@@ -1674,7 +1674,7 @@ public class UserController(ICache cache,
             switch (eType)
             {
                 case EmployeeType.DocSpaceAdmin:
-                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
                 case EmployeeType.RoomAdmin:
                     eGroups.Add(Constants.GroupUser.ID);
@@ -1682,10 +1682,10 @@ public class UserController(ICache cache,
                     eGroups.Add(Constants.GroupCollaborator.ID);
                     break;
                 case EmployeeType.Collaborator:
-                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    iGroups.Add([Constants.GroupCollaborator.ID]);
                     break;
                 case EmployeeType.User:
-                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    iGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }
