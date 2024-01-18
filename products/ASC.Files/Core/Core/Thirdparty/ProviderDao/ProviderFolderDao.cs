@@ -78,6 +78,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter filesFilter, IEnumerable<int> parentsIds = null)
     {
+        ArgumentNullException.ThrowIfNull(filesFilter);
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
         foreach (var group in _selectorFactory.GetSelectors(roomsIds))
@@ -94,7 +95,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                 .SelectMany(matchedId =>
                 {
                     var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
-                    var folderFilter = new FolderFilter()
+                    var folderFilter = new FolderFilter
                     {
                         FilterType = filesFilter.FilterType,
                         Tags = filesFilter.Tags,
@@ -118,6 +119,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = dbContextFactory.CreateDbContext();
 
@@ -138,6 +140,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FolderFilter folderFilter)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         if (!roomsIds.Any())
         {
             yield break;

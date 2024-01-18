@@ -93,6 +93,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FileFilter fileFilter, bool checkShared = false)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
         if (fileIds == null || !fileIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return AsyncEnumerable.Empty<File<string>>();
@@ -174,6 +175,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FileFilter fileFilter, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
         if (fileFilter.FilterType == FilterType.FoldersOnly)
         {
             yield break;

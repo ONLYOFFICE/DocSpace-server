@@ -128,6 +128,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, bool withSubfolders, FolderFilter folderFilter)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         if (CheckInvalidFilter(folderFilter.FilterType) || folderFilter.Provider != ProviderFilter.None)
         {
             yield break;
@@ -158,6 +159,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         if (CheckInvalidFilter(folderFilter.FilterType) || folderFilter.Provider != ProviderFilter.None)
         {
             yield break;

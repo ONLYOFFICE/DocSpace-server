@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Core;
+
 public class FolderFilter
 {
     public FilterType FilterType { get; set; }

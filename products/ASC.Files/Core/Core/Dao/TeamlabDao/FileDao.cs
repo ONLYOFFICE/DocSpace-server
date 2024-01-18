@@ -155,6 +155,8 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FileFilter fileFilter, bool checkShared = false)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
+
         if (fileIds == null || !fileIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             yield break;
@@ -258,6 +260,8 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FileFilter fileFilter, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
+
         if (fileFilter.FilterType == FilterType.FoldersOnly || count == 0)
         {
             yield break;
@@ -489,6 +493,7 @@ internal class FileDao(
     public async Task<int> GetFilesCountAsync(int parentId, FileFilter fileFilter, 
         bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
         if (fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return 0;
@@ -1095,6 +1100,7 @@ internal class FileDao(
 
     public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FileFilter fileFilter)
     {
+        ArgumentNullException.ThrowIfNull(fileFilter);
         if (parentIds == null || !parentIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return AsyncEnumerable.Empty<File<int>>();

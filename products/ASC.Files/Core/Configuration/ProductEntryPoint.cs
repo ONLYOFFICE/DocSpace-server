@@ -295,7 +295,7 @@ public class ProductEntryPoint : Product
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
         var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-        var folderFilter = new FolderFilter()
+        var folderFilter = new FolderFilter
         {
             FilterType = FilterType.None,
             Tags = null,

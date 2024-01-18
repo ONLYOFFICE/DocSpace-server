@@ -78,6 +78,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         if (CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != ProviderFilter.kDrive && folderFilter.Provider != ProviderFilter.WebDav && folderFilter.Provider != ProviderFilter.Yandex))
         {
             yield break;

@@ -81,6 +81,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
+        ArgumentNullException.ThrowIfNull(folderFilter);
         if (dao.CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != _providerInfo.ProviderFilter))
         {
             yield break;

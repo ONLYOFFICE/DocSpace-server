@@ -356,9 +356,10 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
 
+            fileFilter.FilterType = filterType;
+
             var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, withSubfolders);
-            var files = fileDao.GetFilesAsync(parent.Id, orderBy, new FileFilter{ FilterType = filterType, SubjectGroup = subjectGroup, SubjectID = subjectId, SearchText = searchText,
-                Extension = extension, SearchInContent = searchInContent}, withSubfolders);
+            var files = fileDao.GetFilesAsync(parent.Id, orderBy, fileFilter, withSubfolders);
             //share
             var shared = fileSecurity.GetPrivacyForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders);
 
@@ -393,8 +394,11 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, new FileFilter{ FilterType = filesFilterType, SubjectGroup = subjectGroup, SubjectID = subjectId, SearchText = filesSearchText,
-                Extension = fileExtension, SearchInContent = searchInContent}, withSubfolders, excludeSubject, filesOffset, filesCount, roomId).ToListAsync();
+            fileFilter.FilterType = filesFilterType;
+            fileFilter.SearchText = filesSearchText;
+            fileFilter.Extension = fileExtension;
+
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, fileFilter, withSubfolders, excludeSubject, filesOffset, filesCount, roomId).ToListAsync();
 
             entries = new List<FileEntry>(folders.Count + files.Count);
             entries.AddRange(folders);
@@ -412,9 +416,12 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else
         {
+            fileFilter.FilterType = filesFilterType;
+            fileFilter.SearchText = filesSearchText;
+            fileFilter.Extension = fileExtension;
+
             var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
-            var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, new FileFilter{ FilterType = filesFilterType, SubjectGroup = subjectGroup, SubjectID = subjectId, SearchText = filesSearchText,
-                Extension = fileExtension, SearchInContent = searchInContent}, withSubfolders, excludeSubject);
+            var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, fileFilter, withSubfolders, excludeSubject);
 
             var task1 = fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = fileSecurity.FilterReadAsync(files).ToListAsync();
