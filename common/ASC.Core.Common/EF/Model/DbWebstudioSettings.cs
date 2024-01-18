@@ -37,7 +37,7 @@ public class DbWebstudioSettings : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Id, UserId };
+        return [TenantId, Id, UserId];
     }
 }
 

@@ -33,7 +33,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 {
     private BoxClient _boxClient;
 
-    private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
+    private readonly List<string> _boxFields = ["created_at", "modified_at", "name", "parent", "size"];
 
     public bool IsOpened { get; private set; }
 

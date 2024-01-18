@@ -28,11 +28,11 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class SettingsActionsMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } = new()
-    {
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
         new GeneralActionMapper(),
         new ProductsActionMapper()
-    };
+    ];
 
     public ProductType Product { get; } = ProductType.Settings;
 }

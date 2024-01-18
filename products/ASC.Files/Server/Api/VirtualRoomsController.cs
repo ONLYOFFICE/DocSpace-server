@@ -196,7 +196,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync([movableRoom], [], destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -217,7 +217,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var tasks = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
+        var tasks = await _fileStorageService.MoveOrCopyItemsAsync([movableRoom], [], destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
@@ -570,7 +570,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, new string[] { },
+        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
+            [],
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 

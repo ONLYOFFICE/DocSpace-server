@@ -42,7 +42,7 @@ public class FileShareRecord
     public class ShareComparer : IComparer<FileShare>
     {
         private static readonly int[] _shareOrder =
-        {
+        [
             (int)FileShare.None,
             (int)FileShare.RoomAdmin,
             (int)FileShare.Collaborator,
@@ -58,7 +58,7 @@ public class FileShareRecord
             (int)FileShare.CustomFilter,
             (int)FileShare.Varies,
             (int)FileShare.Restrict
-        };
+        ];
 
         public int Compare(FileShare x, FileShare y)
         {

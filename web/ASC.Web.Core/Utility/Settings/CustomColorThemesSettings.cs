@@ -75,99 +75,56 @@ public class CustomColorThemesSettingsItem
     /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
-    public static List<CustomColorThemesSettingsItem> Default => new()
-    {
+    public static List<CustomColorThemesSettingsItem> Default =>
+    [
         new CustomColorThemesSettingsItem
         {
             Id = 1,
             Name = "blue",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#4781D1",
-                Buttons = "#5299E0"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#4781D1", Buttons = "#5299E0" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
+
         new CustomColorThemesSettingsItem
         {
             Id = 2,
             Name = "orange",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#F97A0B",
-                Buttons = "#FF9933"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#F97A0B", Buttons = "#FF9933" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
+
         new CustomColorThemesSettingsItem
         {
             Id = 3,
             Name = "green",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#2DB482",
-                Buttons = "#22C386"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#2DB482", Buttons = "#22C386" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
+
         new CustomColorThemesSettingsItem
         {
             Id = 4,
             Name = "red",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#F2675A",
-                Buttons = "#F27564"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#F2675A", Buttons = "#F27564" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
+
         new CustomColorThemesSettingsItem
         {
             Id = 5,
             Name = "purple",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#6D4EC2",
-                Buttons = "#8570BD"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#6D4EC2", Buttons = "#8570BD" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
+
         new CustomColorThemesSettingsItem
         {
             Id = 6,
             Name = "light-blue",
-            Main = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#11A4D4",
-                Buttons = "#13B7EC"
-            },
-            Text = new CustomColorThemesSettingsColorItem
-            {
-                Accent = "#FFFFFF",
-                Buttons = "#FFFFFF"
-            }
+            Main = new CustomColorThemesSettingsColorItem { Accent = "#11A4D4", Buttons = "#13B7EC" },
+            Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         }
-    };
+    ];
 }
 
 /// <summary>

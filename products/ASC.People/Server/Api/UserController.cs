@@ -1460,6 +1460,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -1477,6 +1478,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
@@ -1496,6 +1498,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/quota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpPut("quota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1606,7 +1609,7 @@ public class UserController(ICache cache,
 
         if (groupId.HasValue)
         {
-            includeGroups.Add(new List<Guid> { groupId.Value });
+            includeGroups.Add([groupId.Value]);
         }
 
         if (employeeType.HasValue)
@@ -1632,7 +1635,7 @@ public class UserController(ICache cache,
                     excludeGroups.Add(Constants.GroupUser.ID);
                     break;
                 case Payments.Free:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    includeGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }
@@ -1671,7 +1674,7 @@ public class UserController(ICache cache,
             switch (eType)
             {
                 case EmployeeType.DocSpaceAdmin:
-                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
                 case EmployeeType.RoomAdmin:
                     eGroups.Add(Constants.GroupUser.ID);
@@ -1679,10 +1682,10 @@ public class UserController(ICache cache,
                     eGroups.Add(Constants.GroupCollaborator.ID);
                     break;
                 case EmployeeType.Collaborator:
-                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    iGroups.Add([Constants.GroupCollaborator.ID]);
                     break;
                 case EmployeeType.User:
-                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    iGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }

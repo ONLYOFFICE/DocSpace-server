@@ -110,7 +110,7 @@ public class IPSecurity
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
                           ? Array.Empty<string>()
-                          : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                          : requestIps.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
             var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);
 
@@ -144,7 +144,7 @@ public class IPSecurity
         {
             if (!string.IsNullOrEmpty(_myNetworks))
             {
-                var myNetworkIps = _myNetworks.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                var myNetworkIps = _myNetworks.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
                 if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => IPAddressRange.MatchIPs(requestIp, ipAddress))))
                 {

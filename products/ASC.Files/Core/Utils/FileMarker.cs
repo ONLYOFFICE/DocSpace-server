@@ -211,7 +211,7 @@ public class FileMarker(TenantManager tenantManager,
                     }
                     else
                     {
-                        userEntriesData.Add(id, new List<FileEntry> { parentFolder });
+                        userEntriesData.Add(id, [parentFolder]);
                     }
                 }
             }
@@ -259,7 +259,7 @@ public class FileMarker(TenantManager tenantManager,
                         }
                         else
                         {
-                            userEntriesData.Add(userID, new List<FileEntry> { rootFolder });
+                                userEntriesData.Add(userID, [rootFolder]);
                         }
 
                                 RemoveFromCache(rootFolder.Id, userID);
@@ -283,7 +283,7 @@ public class FileMarker(TenantManager tenantManager,
                             }
                             else
                             {
-                                userEntriesData.Add(userID, new List<FileEntry> { commonFolder });
+                                    userEntriesData.Add(userID, [commonFolder]);
                             }
 
                                     RemoveFromCache(commonFolderId, userID);
@@ -319,7 +319,7 @@ public class FileMarker(TenantManager tenantManager,
                             }
                             else
                             {
-                                userEntriesData.Add(userID, new List<FileEntry> { virtualRoomsFolder });
+                                    userEntriesData.Add(userID, [virtualRoomsFolder]);
                             }
 
                                     RemoveFromCache(virtualRoomsFolderId, userID);
@@ -350,7 +350,7 @@ public class FileMarker(TenantManager tenantManager,
                         }
                         else
                         {
-                            userEntriesData.Add(userID, new List<FileEntry> { rootFolder });
+                                userEntriesData.Add(userID, [rootFolder]);
                         }
 
                                 RemoveFromCache(rootFolder.Id, userID);
@@ -368,7 +368,7 @@ public class FileMarker(TenantManager tenantManager,
                 }
                 else
                 {
-                    userEntriesData.Add(userID, new List<FileEntry> { obj.FileEntry });
+                    userEntriesData.Add(userID, [obj.FileEntry]);
                 }
             });
         }
@@ -432,7 +432,7 @@ public class FileMarker(TenantManager tenantManager,
             return;
         }
 
-        userIDs ??= new List<Guid>();
+        userIDs ??= [];
 
         var taskData = new AsyncTaskData<T>
         {

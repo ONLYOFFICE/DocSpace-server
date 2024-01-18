@@ -133,7 +133,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
-            await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID.ToString(), profile);
+            await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID, profile);
             await messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
@@ -212,7 +212,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
                 await SaveContactImage(userId, thirdPartyProfile.Avatar);
             }
 
-            await accountLinker.AddLinkAsync(userId.ToString(), thirdPartyProfile);
+            await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
         }
         finally
         {

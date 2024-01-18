@@ -125,7 +125,7 @@ public class StudioNotifyHelper
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
     {
-        return await RecipientFromEmailAsync(new List<string> { email }, checkActivation);
+        return await RecipientFromEmailAsync([email], checkActivation);
     }
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(List<string> emails, bool checkActivation)
@@ -139,7 +139,7 @@ public class StudioNotifyHelper
 
         res.AddRange(emails.
                          Select(email => email.ToLower()).
-                         Select(e => new DirectRecipient(e, null, new[] { e }, checkActivation)));
+                         Select(e => new DirectRecipient(e, null, [e], checkActivation)));
 
         int.TryParse(_configuration["core:notify:countspam"], out var countMailsToNotActivated);
         if (!checkActivation

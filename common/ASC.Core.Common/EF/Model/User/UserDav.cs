@@ -34,7 +34,7 @@ public class UserDav : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, UserId };
+        return [TenantId, UserId];
     }
 }
 

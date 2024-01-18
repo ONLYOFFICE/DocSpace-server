@@ -81,7 +81,7 @@ public class MessageService
 
     public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
     {
-        await SendRequestMessageAsync(action, description: new[] { d1, string.Join(", ", d2) });
+        await SendRequestMessageAsync(action, description: [d1, string.Join(", ", d2)]);
     }
 
     public async Task SendAsync(string loginName, MessageAction action)
@@ -112,7 +112,7 @@ public class MessageService
     {
         if (TryAddNotificationParam(action, userId, out var parametr))
         {
-            await SendRequestMessageAsync(action, target, description: new[] { d1, parametr });
+            await SendRequestMessageAsync(action, target, description: [d1, parametr]);
         }
         else
         {
@@ -122,7 +122,7 @@ public class MessageService
 
     public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2)
     {
-        await SendRequestMessageAsync(action, target, description: new[] { d1, d2 });
+        await SendRequestMessageAsync(action, target, description: [d1, d2]);
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1)
@@ -134,7 +134,7 @@ public class MessageService
     {
         if (TryAddNotificationParam(action, userIds, out var parametr, userType))
         {
-            await SendRequestMessageAsync(action, target, description: new[] { string.Join(", ", d1), parametr });
+            await SendRequestMessageAsync(action, target, description: [string.Join(", ", d1), parametr]);
         }
         else
         {
@@ -267,7 +267,7 @@ public class MessageService
 
     private bool TryAddNotificationParam(MessageAction action, Guid userId, out string parametr)
     {
-        return TryAddNotificationParam(action, new List<Guid> { userId }, out parametr);
+        return TryAddNotificationParam(action, [userId], out parametr);
     }
 
     private bool TryAddNotificationParam(MessageAction action, List<Guid> userIds, out string parametr, EmployeeType userType = 0)

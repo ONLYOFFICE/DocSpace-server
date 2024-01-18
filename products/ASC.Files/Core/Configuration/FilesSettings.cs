@@ -421,7 +421,7 @@ public class FilesSettingsHelper(SettingsManager settingsManager,
         get
         {
             var setting = LoadForCurrentUser().DefaultSharingAccessRightsSetting;
-            return setting ?? new List<FileShare> { FileShare.Read };
+            return setting ?? [FileShare.Read];
         }
     }
 

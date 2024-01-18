@@ -28,13 +28,13 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class DocumentsActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } = new()
-    {
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
         new FilesActionMapper(),
         new FoldersActionMapper(),
         new RoomsActionMapper(),
         new SettingsActionMapper()
-    };
+    ];
 
     public ProductType Product { get; } = ProductType.Documents;
 }
@@ -51,19 +51,26 @@ internal class FilesActionMapper : IModuleActionMapper
             {
                 EntryType.File, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, new[] { MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted } },
+                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted
+                        ]
+                    },
                     {
-                        ActionType.Update, new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded
-                        }
+                        ]
                     },
-                    { ActionType.Delete, new[] { MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied } },
-                    { ActionType.UpdateAccess, new[] { MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated } },
-                    { ActionType.Download, new[] {  MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded } },
-                    { ActionType.Send, new[] { MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner } }
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
+                        ]
+                    },
+                    { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated
+                        ]
+                    },
+                    { ActionType.Download, [MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded
+                        ]
+                    },
+                    { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
@@ -75,8 +82,8 @@ internal class FilesActionMapper : IModuleActionMapper
             {
                 EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Copy, new[] { MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting } }
+                    { ActionType.Copy, [MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting] },
+                    { ActionType.Move, [MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting] }
                 }
             }
         };
@@ -99,8 +106,10 @@ internal class FoldersActionMapper : IModuleActionMapper
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, new[] { MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead } },
-                    { ActionType.UpdateAccess, new[] { MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList } }
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead] },
+                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
+                        ]
+                    }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
@@ -113,8 +122,8 @@ internal class FoldersActionMapper : IModuleActionMapper
             {
                 EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Copy, new[] { MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting } }
+                    { ActionType.Copy, [MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting] },
+                    { ActionType.Move, [MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting] }
                 }
             }
         };
@@ -134,10 +143,9 @@ internal class RoomsActionMapper : IModuleActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, new[] { MessageAction.RoomCreated } },
+                    { ActionType.Create, [MessageAction.RoomCreated] },
                     {
-                        ActionType.Update, new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.RoomArchived,
                             MessageAction.RoomUnarchived,
                             MessageAction.RoomRenamed,
@@ -154,10 +162,10 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomExternalLinkCreated,
                             MessageAction.RoomExternalLinkUpdated,
                             MessageAction.RoomExternalLinkDeleted
-                        }
+                        ]
                     },
                     {
-                        ActionType.Delete, new [] { MessageAction.RoomDeleted }
+                        ActionType.Delete, [MessageAction.RoomDeleted]
                     }
                 }
             },
