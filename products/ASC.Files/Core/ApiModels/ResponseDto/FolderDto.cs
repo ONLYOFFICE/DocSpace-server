@@ -114,10 +114,11 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime, 
+        FileSecurityCommon fileSecurityCommon)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
 {
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -128,7 +129,6 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
             }
             else
@@ -144,9 +144,18 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
             }
 
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            
+            if (folder.CreateBy == authContext.CurrentAccount.ID ||
+                !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
             {
-                result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+                result.InRoom = true;
+            }
+            else
+            {
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
+
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }
         }
 

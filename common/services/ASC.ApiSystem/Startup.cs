@@ -99,6 +99,7 @@ public class Startup
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
+        _diHelper.TryAdd<FileStorageService>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -145,8 +146,6 @@ public class Startup
         services.AddScoped<CountRoomCheckerStatistic>();
 
         _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
-
-        _diHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 

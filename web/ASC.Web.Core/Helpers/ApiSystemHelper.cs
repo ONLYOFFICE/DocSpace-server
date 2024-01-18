@@ -180,6 +180,8 @@ public class ApiSystemHelper
     {
         using var awsDynamoDbClient = GetDynamoDBClient();
 
+        portalName = portalName.Trim().ToLowerInvariant();
+
         var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
 
         var getItemRequest = new GetItemRequest

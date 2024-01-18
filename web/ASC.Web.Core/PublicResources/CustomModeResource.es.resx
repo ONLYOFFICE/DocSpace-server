@@ -58,68 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1.Bienvenido/a al ONLYOFFICE Personal
-
-Usted acaba de crear su oficina personal en la nube.
-
-h3.Es un espacio de trabajo virtual donde puede editar y almacenar documentos, trabajar con archivos desde cualquier lugar proporcionando acceso a sus amigos o compañeros.
-
-h3.Para un rápido inicio, aprenda lo que puede hacer en ONLYOFFICE:
-
-- Crear, ver y editar documentos de texto, hojas de cálculo y presentaciones.
-
-- Trabajar con todos los formatos de archivos populares. Máxima compatibilidad con los archivos de MS Office.
-
-- Crear y coeditar "formularios listos para rellenar":"https://www.onlyoffice.com/es/form-creator.aspx".
-
-- Compartir y colaborar en documentos en línea.
-
-- Utilizar varios plugins para aplicar funciones adicionales.
-
-- Fácilmente acceder a su nube personal vía "extensión de Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=es".
-
-También puede editar documentos offline con nuestros "editores de escritorio":"https://www.onlyoffice.com/es/download-desktop.aspx" gratuitos o conseguir una suite de edición móvil para su dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" o "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
-    <value>¿Desea cambiar el correo electrónico de su cuenta de oficina en la nube?
-
-Haga clic en el siguiente botón e inicie sesión* en su nube.
-
-$OrangeButton
-
-El enlace es válido durante 7 días.
-
-*Si no ha iniciado sesión en su oficina en la nube en este navegador, tendrá que utilizar su correo electrónico anterior para la confirmación.
-
-¿No desea cambiar su correo electrónico? Simplemente ignore este mensaje.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>Buenos días,
-
-Usted acaba de registrar una cuenta en la solución ONLYOFFICE para uso personal. Haga clic "aquí":"$InviteLink" para confirmar su registro y crear una contraseña.
-
-Si Usted no puede abrir el enlace, por favor, copie lo siguiente "$InviteLink":"$InviteLink" y péguelo en la barra de direcciones de su navegador.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Usted ha solicitado la terminación de su cuenta en personal.onlyoffice.com. Siga este enlace para completar la solicitud (el enlace es activo durante 7 días): 
-
-$OrangeButton
-
-*Tome en cuenta*: Después de la eliminación, su cuenta y todos los datos asociados con esta cuenta se borrarán permanentemente de acuerdo con nuestra "Declaración de privacidad":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Leer más sobre la cancelación de la cuenta":"${__HelpLink}/administration/configuration.aspx"
-
-Si no quiere continuar el proceso, ignore este mensaje. 
-
-Si tiene algunas preguntas, por favor, póngase en contacto con nosotros a través de "${__SupportEmail}":"mailto:${__SupportEmail}"
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Estimado/a $UserName,
 
@@ -143,29 +81,11 @@ La eliminación de datos personales permitió liberar $DocsSpace</value>
   <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
     <value>Crear y editar sus propios documentos y documentos compartidos con los derechos de acceso propios|Dar derechos de acceso a otros usuarios para leer/editar los documentos y carpetas|Enlazar Dropbox, Box y otras cuentas en la sección de 'Mis documentos'</value>
   </data>
-  <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>Bienvenido al ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Por favor, active su correo electrónico</value>
-  </data>
-  <data name="subject_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Terminación de la cuenta ONLYOFFICE Personal</value>
-  </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Eliminación de datos de usuarios se ha completado</value>
   </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>Se ha registrado un nuevo portal</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
-    <value>¿Desea cambiar la contraseña de su cuenta de la oficina en la nube? Haga clic en el botón de abajo para confirmar.
-
-$OrangeButton
-
-El enlace es válido durante 7 días.
-
-¿No desea cambiar su contraseña? Simplemente ignore este mensaje.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>¡Hola, $UserName!

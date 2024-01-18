@@ -45,15 +45,18 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public FolderType RootFolderType { get; set; }
     public FolderType FolderType { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public string CustomerTitle { get; set; }
     public string RootFolderId => $"{Selector.Id}-{ID}";
     public string SpRootFolderId { get; set; } = "/Shared Documents";
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    public string Color { get; set; }
 
     public Selector Selector { get; } = Selectors.SharePoint;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.SharePoint;
+    public bool MutableEntityId => true;
 
     public Task<bool> CheckAccessAsync()
     {
@@ -566,6 +569,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             result.Error = errorFolder.Error;
             result.SettingsPrivate = Private;
             result.SettingsHasLogo = HasLogo;
+            result.SettingsColor = Color;
 
             return result;
         }
@@ -578,7 +582,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.CreateOn = CreateOn;
         result.FolderType = FolderType.DEFAULT;
         result.ModifiedBy = Owner;
-        result.ModifiedOn = CreateOn;
+        result.ModifiedOn = ModifiedOn;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.RootCreateBy = Owner;
@@ -590,7 +594,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.FoldersCount = 0;
         result.SettingsPrivate = Private;
         result.SettingsHasLogo = HasLogo;
-
+        
         SetFolderType(result, isRoot);
 
         return result;

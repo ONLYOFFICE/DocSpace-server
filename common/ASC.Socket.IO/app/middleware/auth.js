@@ -92,8 +92,8 @@ module.exports = (socket, next) => {
       headers,
       basePath,
     })
-      .then((validation) => {
-        if (validation.status !== 0) {
+      .then(({ status, tenantId, linkId } = { }) => {
+        if (status !== 0) {
           const err = new Error("Invalid share key");
           logger.error("WS: share key validation failure:", err);
           return next(err);
@@ -101,7 +101,8 @@ module.exports = (socket, next) => {
 
         logger.info(`WS: share key validation successful: key='${share}' sessionId='sess:${session.id}'`);
         session.anonymous = true;
-        session.portal = { tenantId: validation.tenantId };
+        session.portal = { tenantId };
+        session.user = { id: linkId }
         session.save();
         next();
       })

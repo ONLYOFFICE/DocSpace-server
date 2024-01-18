@@ -85,7 +85,7 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Id, Version };
+        return [TenantId, Id, Version];
     }
 }
 

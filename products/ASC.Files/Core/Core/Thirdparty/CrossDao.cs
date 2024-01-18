@@ -31,7 +31,6 @@ internal class CrossDao //Additional SharpBox
 (IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileConverter fileConverter,
-        ThumbnailSettings thumbnailSettings,
         SocketManager socketManager)
 {
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
@@ -44,17 +43,18 @@ internal class CrossDao //Additional SharpBox
 
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMassage_FileSizeMove : FilesCommonResource.ErrorMassage_FileSizeCopy,
+            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMessage_FileSizeMove : FilesCommonResource.ErrorMessage_FileSizeCopy,
                                               FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
-
+        
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
-        var globalStore = serviceProvider.GetService<GlobalStore>();
 
-        var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFile);
-        var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFile);
-        var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileCopy = (File<TFrom>)fromFile.Clone();
+        
+        var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
+        var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
+        var fromFileLockTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
         var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Favorite).ToListAsync();
         var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Template).ToListAsync();
 
@@ -63,7 +63,7 @@ internal class CrossDao //Additional SharpBox
         toFile.Title = fromFile.Title;
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
-        toFile.ThumbnailStatus = fromFile.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+        toFile.ThumbnailStatus = Thumbnail.Waiting;
 
         fromFile.Id = fromConverter(fromFile.Id);
 
@@ -76,48 +76,36 @@ internal class CrossDao //Additional SharpBox
             toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
         }
 
-        if (fromFile.ThumbnailStatus == Thumbnail.Created)
+        if (!deleteSourceFile)
         {
-            foreach (var size in thumbnailSettings.Sizes)
-            {
-                await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
-                                      fromFileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                                      String.Empty,
-                                      toFileDao.GetUniqThumbnailPath(toFile, size.Width, size.Height));
-            }
-
-            await toFileDao.SetThumbnailStatusAsync(toFile, Thumbnail.Created);
-
-            toFile.ThumbnailStatus = Thumbnail.Created;
+            return toFile;
         }
 
-        if (deleteSourceFile)
+        await foreach (var record in fromFileShareRecords.Where(x => x.EntryType == FileEntryType.File))
         {
-            await foreach (var record in fromFileShareRecords.Where(x => x.EntryType == FileEntryType.File))
-            {
-                record.EntryId = toFile.Id;
-                await securityDao.SetShareAsync(record);
-            }
-
-            var fromFileTags = await fromFileNewTags.ToListAsync();
-            if (fromFileLockTag != null)
-            {
-                fromFileTags.Add(fromFileLockTag);
-            }
-
-            fromFileTags.AddRange(fromFileFavoriteTag);
-            fromFileTags.AddRange(fromFileTemplateTag);
-
-            if (fromFileTags.Count > 0)
-            {
-                fromFileTags.ForEach(x => x.EntryId = toFile.Id);
-
-                await tagDao.SaveTagsAsync(fromFileTags);
-            }
-
-            //Delete source file if needed
-            await fromFileDao.DeleteFileAsync(fromConverter(fromFileId));
+            record.EntryId = toFile.Id;
+            await securityDao.SetShareAsync(record);
         }
+
+        var fromFileTags = await fromFileNewTags.ToListAsync();
+        if (fromFileLockTag != null)
+        {
+            fromFileTags.Add(fromFileLockTag);
+        }
+
+        fromFileTags.AddRange(fromFileFavoriteTag);
+        fromFileTags.AddRange(fromFileTemplateTag);
+
+        if (fromFileTags.Count > 0)
+        {
+            fromFileTags.ForEach(x => x.EntryId = toFile.Id);
+
+            await tagDao.SaveTagsAsync(fromFileTags);
+        }
+
+        //Delete source file if needed
+        await fromFileDao.DeleteFileAsync(fromConverter(fromFileId));
+
 
         return toFile;
     }

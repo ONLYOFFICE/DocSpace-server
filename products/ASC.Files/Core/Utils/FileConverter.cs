@@ -110,7 +110,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                 {
                     var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
 
-            return String.Compare(file.Id.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Compare(file.Id?.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
                 });
     }
 
@@ -380,7 +380,7 @@ public class FileConverter(FileUtility fileUtility,
 
         if (file.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -409,11 +409,11 @@ public class FileConverter(FileUtility fileUtility,
             (var readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
             if (file == null)
             {
-                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
             if (!readLink)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
         }
 
@@ -475,7 +475,7 @@ public class FileConverter(FileUtility fileUtility,
     {
         if (!MustConvert(file))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
         if (!string.IsNullOrEmpty(file.ConvertedType) || fileUtility.InternalExtension.ContainsValue(FileUtility.GetFileExtension(file.Title)))
         {
@@ -545,7 +545,7 @@ public class FileConverter(FileUtility fileUtility,
 
             if (Equals(folderId, 0))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))

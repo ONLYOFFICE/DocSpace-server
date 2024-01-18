@@ -285,6 +285,8 @@ public enum MessageAction
     TwoFactorAuthenticationEnabledBySms = 6037,
     TwoFactorAuthenticationEnabledByTfaApp = 6038,
 
+    PortalRenamed = 6039,
+
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,
     FullTextSearchSetting = 5039,

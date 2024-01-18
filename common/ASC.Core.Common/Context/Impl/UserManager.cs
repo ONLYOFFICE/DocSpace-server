@@ -432,14 +432,7 @@ public class UserManager
 
     public async Task<UserInfo> UpdateUserInfoWithSyncCardDavAsync(UserInfo u)
     {
-        var oldUserData = await _userService.GetUserByUserName(await _tenantManager.GetCurrentTenantIdAsync(), u.UserName);
-
         var newUser = await UpdateUserInfoAsync(u);
-
-        if (_coreBaseSettings.DisableDocSpace)
-        {
-            await SyncCardDavAsync(u, oldUserData, newUser);
-        }
 
         return newUser;
     }
@@ -453,7 +446,7 @@ public class UserManager
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id, type), Constants.Action_AddRemoveUser);
 
-        if (!_coreBaseSettings.Personal && _constants.MaxEveryoneCount <= (await GetUsersByGroupAsync(Constants.GroupEveryone.ID)).Length)
+        if (_constants.MaxEveryoneCount <= (await GetUsersByGroupAsync(Constants.GroupEveryone.ID)).Length)
         {
             throw new TenantQuotaException("Maximum number of users exceeded");
         }
@@ -676,11 +669,6 @@ public class UserManager
 
     private async Task<List<GroupInfo>> GetUserGroupsAsync(Guid userID, IncludeType includeType, Guid? categoryId)
     {
-        if (_coreBaseSettings.Personal)
-        {
-            return new List<GroupInfo> { Constants.GroupManager, Constants.GroupEveryone };
-        }
-
         var httpRequestDictionary = new HttpRequestDictionary<List<GroupInfo>>(_accessor?.HttpContext, "GroupInfo");
         var result = httpRequestDictionary.Get(userID.ToString());
         if (result is { Count: > 0 })

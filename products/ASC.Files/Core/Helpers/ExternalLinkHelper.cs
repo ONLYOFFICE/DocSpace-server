@@ -76,6 +76,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
+        result.LinkId = linkId;
 
         if (securityContext.IsAuthenticated)
         {

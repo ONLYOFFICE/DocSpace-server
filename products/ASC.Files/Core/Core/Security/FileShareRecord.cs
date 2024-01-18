@@ -39,10 +39,10 @@ public class FileShareRecord
     public int Level { get; set; }
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
-    public class ShareComparer : IComparer<FileShare>
+    public class ShareComparer(FolderType rootFolderType) : IComparer<FileShare>
     {
         private static readonly int[] _roomShareOrder =
-        {
+        [
             (int)FileShare.None,
             (int)FileShare.RoomAdmin,
             (int)FileShare.Collaborator,
@@ -58,10 +58,10 @@ public class FileShareRecord
             (int)FileShare.CustomFilter,
             (int)FileShare.Varies,
             (int)FileShare.Restrict
-        };
+        ];
         
         private static readonly int[] _filesShareOrder =
-        {
+        [
             (int)FileShare.None,
             (int)FileShare.Editing,
             (int)FileShare.CustomFilter,
@@ -76,16 +76,11 @@ public class FileShareRecord
             (int)FileShare.RoomAdmin,
             (int)FileShare.Collaborator,
             (int)FileShare.Varies
-        };
+        ];
         
-        private readonly int[] _shareOrder;
-
-        public ShareComparer(FolderType rootFolderType)
-        {
-            _shareOrder = rootFolderType is FolderType.VirtualRooms or FolderType.Archive
-                ? _roomShareOrder
-                : _filesShareOrder;
-        }
+        private readonly int[] _shareOrder = rootFolderType is FolderType.VirtualRooms or FolderType.Archive
+            ? _roomShareOrder
+            : _filesShareOrder;
 
         public int Compare(FileShare x, FileShare y)
         {

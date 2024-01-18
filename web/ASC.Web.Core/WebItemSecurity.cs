@@ -50,7 +50,7 @@ public class WebItemSecurityCache
         _cache.Remove(GetCacheKey(tenantId));
     }
 
-    public string GetCacheKey(int tenantId)
+    private string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
     }
@@ -87,7 +87,6 @@ public class WebItemSecurity(UserManager userManager,
         WebItemManager webItemManager,
         TenantManager tenantManager,
         AuthorizationManager authorizationManager,
-        CoreBaseSettings coreBaseSettings,
         WebItemSecurityCache webItemSecurityCache,
         SettingsManager settingsManager,
         CountPaidUserChecker countPaidUserChecker, 
@@ -123,50 +122,33 @@ public class WebItemSecurity(UserManager userManager,
         // can read or administrator
         var securityObj = WebItemSecurityObject.Create(id, webItemManager);
 
-        if (coreBaseSettings.Personal
-            && securityObj.WebItemId != WebItemManager.DocumentsProductID)
+        var webItem = webItemManager[securityObj.WebItemId];
+        if (webItem != null)
         {
-            // only files visible in your-docs portal
-            result = false;
-        }
-        else
-        {
-            var webitem = webItemManager[securityObj.WebItemId];
-            if (webitem != null)
+            if ((
+                webItem.ID == WebItemManager.PeopleProductID ||
+                webItem.ID == WebItemManager.BirthdaysProductID) &&
+                await userManager.IsUserAsync(@for))
             {
-                if ((webitem.ID == WebItemManager.CRMProductID ||
-                    webitem.ID == WebItemManager.PeopleProductID ||
-                    webitem.ID == WebItemManager.BirthdaysProductID ||
-                    webitem.ID == WebItemManager.MailProductID) &&
-                    await userManager.IsUserAsync(@for))
-                {
-                    // hack: crm, people, birtthday and mail products not visible for collaborators
-                    result = false;
-                }
-                else if ((webitem.ID == WebItemManager.CalendarProductID ||
-                          webitem.ID == WebItemManager.TalkProductID) &&
-                         await userManager.IsOutsiderAsync(@for))
-                {
-                    // hack: calendar and talk products not visible for outsider
-                    result = false;
-                }
-                else if (webitem is IModule)
-                {
-                    result = 
-                        await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
-                        await IsAvailableForUserAsync(webItemManager.GetParentItemID(webitem.ID), @for);
-                }
-                else
-                {
-                    var hasUsers = (await authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != Constants.GroupEveryone.ID);
-                    result = await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) ||
-                             (hasUsers && await IsProductAdministratorAsync(securityObj.WebItemId, @for));
-                }
+                // hack: people and birthday products not visible for collaborators
+                result = false;
+            }
+            else if (webItem is IModule)
+            {
+                result =
+                    await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) &&
+                    await IsAvailableForUserAsync(webItemManager.GetParentItemId(webItem.ID), @for);
             }
             else
             {
-                result = false;
+                var hasUsers = (await authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != Constants.GroupEveryone.ID);
+                result = await permissionContext.PermissionResolver.CheckAsync(await authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) ||
+                         (hasUsers && await IsProductAdministratorAsync(securityObj.WebItemId, @for));
             }
+        }
+        else
+        {
+            result = false;
         }
 
         dic = webItemSecurityCache.Get(tenant.Id);
@@ -202,7 +184,7 @@ public class WebItemSecurity(UserManager userManager,
                 // users from list with no users equals allow to all users
                 enabled = true;
             }
-            subjects = new[] { Constants.GroupEveryone.ID };
+            subjects = [Constants.GroupEveryone.ID];
         }
         foreach (var s in subjects)
         {
@@ -216,7 +198,7 @@ public class WebItemSecurity(UserManager userManager,
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
     {
         var info = (await GetSecurityAsync(id)).ToList();
-        var module = webItemManager.GetParentItemID(new Guid(id)) != Guid.Empty;
+        var module = webItemManager.GetParentItemId(new Guid(id)) != Guid.Empty;
         
         return new WebItemSecurityInfo
         {
@@ -252,11 +234,11 @@ public class WebItemSecurity(UserManager userManager,
         return result;
     }
 
-    public async Task SetProductAdministrator(Guid productid, Guid userid, bool administrator)
+    public async Task SetProductAdministrator(Guid productId, Guid userid, bool administrator)
     {
-        if (productid == Guid.Empty)
+        if (productId == Guid.Empty)
         {
-            productid = Constants.GroupAdmin.ID;
+            productId = Constants.GroupAdmin.ID;
         }
 
         if (administrator)
@@ -271,7 +253,7 @@ public class WebItemSecurity(UserManager userManager,
                     await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
                 }
 
-                if (productid == WebItemManager.PeopleProductID)
+                if (productId == WebItemManager.PeopleProductID)
                 {
                     foreach (var ace in GetPeopleModuleActions(userid))
                     {
@@ -279,14 +261,14 @@ public class WebItemSecurity(UserManager userManager,
                     }
                 }
 
-                await userManager.AddUserIntoGroupAsync(userid, productid);
+                await userManager.AddUserIntoGroupAsync(userid, productId);
             }
         }
         else
         {
-            if (productid == Constants.GroupAdmin.ID)
+            if (productId == Constants.GroupAdmin.ID)
             {
-                var groups = new List<Guid> { WebItemManager.MailProductID };
+                var groups = new List<Guid>();
                 groups.AddRange(webItemManager.GetItemsAll().OfType<IProduct>().Select(p => p.ID));
 
                 foreach (var id in groups)
@@ -295,7 +277,7 @@ public class WebItemSecurity(UserManager userManager,
                 }
             }
 
-            if (productid == Constants.GroupAdmin.ID || productid == WebItemManager.PeopleProductID)
+            if (productId == Constants.GroupAdmin.ID || productId == WebItemManager.PeopleProductID)
             {
                 foreach (var ace in GetPeopleModuleActions(userid))
                 {
@@ -303,38 +285,37 @@ public class WebItemSecurity(UserManager userManager,
                 }
             }
 
-            await userManager.RemoveUserFromGroupAsync(userid, productid);
+            await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
         webItemSecurityCache.Publish(await tenantManager.GetCurrentTenantIdAsync());
     }
 
-    public async Task<bool> IsProductAdministratorAsync(Guid productid, Guid userid)
+    public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)
     {
         return await userManager.IsUserInGroupAsync(userid, Constants.GroupAdmin.ID) ||
-               await userManager.IsUserInGroupAsync(userid, productid);
+               await userManager.IsUserInGroupAsync(userid, productId);
     }
 
-    public async Task<IEnumerable<UserInfo>> GetProductAdministratorsAsync(Guid productid)
+    public async Task<IEnumerable<UserInfo>> GetProductAdministratorsAsync(Guid productId)
     {
         var groups = new List<Guid>();
-        if (productid == Guid.Empty)
+        if (productId == Guid.Empty)
         {
             groups.Add(Constants.GroupAdmin.ID);
             groups.AddRange(webItemManager.GetItemsAll().OfType<IProduct>().Select(p => p.ID));
-            groups.Add(WebItemManager.MailProductID);
         }
         else
         {
-            groups.Add(productid);
+            groups.Add(productId);
         }
 
-        var users = Enumerable.Empty<UserInfo>();
+        var users = new List<UserInfo>();
         foreach (var id in groups)
         {
-            users = users.Union(await userManager.GetUsersByGroupAsync(id));
+            users.AddRange(await userManager.GetUsersByGroupAsync(id));
         }
-        return users.ToList();
+        return users;
     }
 
     private static IEnumerable<AzRecord> GetPeopleModuleActions(Guid userid)
@@ -349,7 +330,7 @@ public class WebItemSecurity(UserManager userManager,
 
     private sealed class WebItemSecurityObject : ISecurityObject
     {
-        public Guid WebItemId { get; private set; }
+        public Guid WebItemId { get; }
         private readonly WebItemManager _webItemManager;
 
         public Type ObjectType
@@ -407,7 +388,7 @@ public class WebItemSecurity(UserManager userManager,
         {
             if (objectId is WebItemSecurityObject s)
             {
-                return Create(_webItemManager.GetParentItemID(s.WebItemId).ToString("N"), _webItemManager) is WebItemSecurityObject parent && parent.WebItemId != s.WebItemId && parent.WebItemId != Guid.Empty ? parent : null;
+                return Create(_webItemManager.GetParentItemId(s.WebItemId).ToString("N"), _webItemManager) is WebItemSecurityObject parent && parent.WebItemId != s.WebItemId && parent.WebItemId != Guid.Empty ? parent : null;
             }
             return null;
         }

@@ -75,7 +75,7 @@ public static class HttpRequestExtensions
                                                       BindingFlags.NonPublic | BindingFlags.SetField |
                                                       BindingFlags.Instance,
                                                       null, request,
-                                                      new object[] { null });
+                                                      [null]);
                     oldUri = url;
                     context.Items["oldUri"] = oldUri;
 

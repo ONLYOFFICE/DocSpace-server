@@ -194,7 +194,7 @@ public class FileMarker(TenantManager tenantManager,
                     }
                     else
                     {
-                        userEntriesData.Add(id, new List<FileEntry> { parentFolder });
+                        userEntriesData.Add(id, [parentFolder]);
                     }
                 }
             }
@@ -242,7 +242,7 @@ public class FileMarker(TenantManager tenantManager,
                             }
                             else
                             {
-                                userEntriesData.Add(userID, new List<FileEntry> { rootFolder });
+                                userEntriesData.Add(userID, [rootFolder]);
                             }
 
                             RemoveFromCache(rootFolder.Id, userID);
@@ -266,7 +266,7 @@ public class FileMarker(TenantManager tenantManager,
                                 }
                                 else
                                 {
-                                    userEntriesData.Add(userID, new List<FileEntry> { commonFolder });
+                                    userEntriesData.Add(userID, [commonFolder]);
                                 }
 
                                 RemoveFromCache(commonFolderId, userID);
@@ -302,7 +302,7 @@ public class FileMarker(TenantManager tenantManager,
                                 }
                                 else
                                 {
-                                    userEntriesData.Add(userID, new List<FileEntry> { virtualRoomsFolder });
+                                    userEntriesData.Add(userID, [virtualRoomsFolder]);
                                 }
 
                                 RemoveFromCache(virtualRoomsFolderId, userID);
@@ -333,7 +333,7 @@ public class FileMarker(TenantManager tenantManager,
                             }
                             else
                             {
-                                userEntriesData.Add(userID, new List<FileEntry> { rootFolder });
+                                userEntriesData.Add(userID, [rootFolder]);
                             }
 
                             RemoveFromCache(rootFolder.Id, userID);
@@ -351,7 +351,7 @@ public class FileMarker(TenantManager tenantManager,
                 }
                 else
                 {
-                    userEntriesData.Add(userID, new List<FileEntry> { obj.FileEntry });
+                    userEntriesData.Add(userID, [obj.FileEntry]);
                 }
             });
         }
@@ -415,7 +415,7 @@ public class FileMarker(TenantManager tenantManager,
             return;
         }
 
-        userIDs ??= new List<Guid>();
+        userIDs ??= [];
 
         var taskData = new AsyncTaskData<T>
         {
@@ -654,7 +654,7 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (folder == null)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         return InternalMarkedItemsAsync(folder);
@@ -664,12 +664,12 @@ public class FileMarker(TenantManager tenantManager,
     {
         if (!await fileSecurity.CanReadAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
         if (folder.RootFolderType == FolderType.TRASH && !Equals(folder.Id, await globalFolder.GetFolderTrashAsync(daoFactory)))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
@@ -677,7 +677,7 @@ public class FileMarker(TenantManager tenantManager,
         var providerTagDao = daoFactory.GetTagDao<string>();
         var tags = await (tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder, true) ?? AsyncEnumerable.Empty<Tag>()).ToListAsync();
 
-        if (!tags.Any())
+        if (tags.Count == 0)
         {
             yield break;
         }
@@ -761,6 +761,8 @@ public class FileMarker(TenantManager tenantManager,
         {
             yield return r;
         }
+
+        yield break;
 
         async IAsyncEnumerable<FileEntry> GetResultAsync<TEntry>(Dictionary<FileEntry<TEntry>, Tag> entryTags)
         {

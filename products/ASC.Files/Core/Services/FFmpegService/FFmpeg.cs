@@ -39,7 +39,7 @@ public class FFmpegService
         {
             if (string.IsNullOrEmpty(_fFmpegPath))
             {
-                return new List<string>();
+                return [];
             }
 
             return _convertableMedia;
@@ -47,7 +47,7 @@ public class FFmpegService
     }
 
     private readonly List<string> _convertableMedia;
-    private readonly List<string> _fFmpegExecutables = new() { "ffmpeg", "avconv" };
+    private readonly List<string> _fFmpegExecutables = ["ffmpeg", "avconv"];
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;

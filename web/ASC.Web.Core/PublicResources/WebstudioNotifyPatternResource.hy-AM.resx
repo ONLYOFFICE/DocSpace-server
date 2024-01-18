@@ -315,9 +315,6 @@
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
   </data>
@@ -395,21 +392,6 @@
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Միացեք ${__VirtualRootPath}-ին</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Բարի գալուստ ONLYOFFICE անձնական օգտագործման համար:</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Բարի գալուստ ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Մուտք գործեք ձեր ONLYOFFICE անձնական հաշիվ</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Անձնական. Խնդրում ենք ակտիվացնել ձեր էլփոստի հասցեն</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Անձնական հաշվի դադարեցում</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootPath} պորտալի ապաակտիվացում</value>
@@ -1141,112 +1123,6 @@ $TrulyYours</value>
 $OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Բարև, $UserName
-Դուք հաջողությամբ գրանցվել եք ONLYOFFICE Personal-ում "${__VirtualRootPath}":"${__VirtualRootPath}":
-
-Միացրեք ձեր սիրած ամպային պահեստը՝ Dropbox, Google Drive, OneDrive կամ Box՝ ձեր փաստաթղթերի համար մեկ աշխատանքային տարածք ստեղծելու համար, որը հասանելի է ցանկացած վայրից:
-
-Իմացեք ավելին ONLYOFFICE Personal-ի մասին "մեր բլոգում":"$TagBlogLink":
-
-Մենք ուրախ ենք, որ դուք այստեղ եք: Մնացեք մեզ հետ!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Բարի գալուստ ONLYOFFICE Personal
-
-Դուք հենց նոր եք ստեղծել ձեր անձնական գրասենյակը ամպի մեջ:
-
-h3.Դա վիրտուալ աշխատանքային տարածք է, որտեղ դուք կարող եք խմբագրել և պահել փաստաթղթերը, աշխատել դրանց հետ ցանկացած վայրից՝ ապահովելով ձեր ընկերներին կամ գործընկերներին հասանելիություն:
-
-h3.Արագ սկսելու համար ահա թե ինչ կարող եք անել ONLYOFFICE-ում.
-
-- Ստեղծեք, դիտեք և խմբագրեք տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ:
-
-- Աշխատեք բոլոր հայտնի ձևաչափերով: Ամենաբարձր համատեղելիությունը MS Office ֆայլերի հետ:
-
-- Ստեղծեք և համատեղ խմբագրեք "լրացնելու պատրաստ ձևեր":"https://www.onlyoffice.com/form-creator.aspx":
-
-- Համօգտագործեք և համագործակցեք փաստաթղթերի վրա առցանց:
-
-- Օգտագործեք տարբեր պլագիններ՝ լրացուցիչ հնարավորություններ կիրառելու համար:
-
-- Հեշտությամբ մուտք գործեք ձեր անձնական ամպը "Chrome ընդլայնման":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US միջոցով":
-
-Դուք կարող եք նաև փաստաթղթերը օֆլայն խմբագրել մեր անվճար "աշխատասեղանի խմբագրիչների":"https://www.onlyoffice.com/download-desktop.aspx" միջոցով կամ ձեռք բերել բջջային խմբագրման փաթեթ ձեր "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" -ի համար կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" սարք:
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Ստացեք &lt;span style="color:#FF6F3D;"&gt;անվճար&lt;/span&gt; ONLYOFFICE հավելվածներ
-
-
-Բարև, $UserName!
-
-Ստացեք անվճար ONLYOFFICE հավելվածներ՝ ձեր ցանկացած սարքից փաստաթղթերի վրա աշխատելու համար:
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Փաստաթղթերի վրա առցանց աշխատելու համար ստացեք ONLYOFFICE Desktop Editors&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Ողջույն!
-Այս էլ.փոստի միջոցով փորձ է արվել գրանցել նոր "ONLYOFFICE Personal":"$PortalUrl" հաշիվ: Եթե դուք էիք, մենք ուզում ենք ձեզ տեղեկացնել, որ հաշիվն արդեն գոյություն ունի — անցեք ONLYOFFICE Personal և մուտք գործեք:
-Եթե կորցրել եք ձեր գաղտնաբառը, կարող եք վերականգնել այն "գաղտնաբառի վերականգնման էջում":"$LinkToRecovery":
-Եթե դուք չեք փորձել գրանցել նոր հաշիվ, հավանաբար ինչ-որ մեկը դա սխալմամբ է արել: Այս դեպքում խնդրում ենք անտեսել այս էլ.
-
-Հաճելի օր!
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE հաշվի էլ.
-
-Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
-
-$OrangeButton
-
-Հղումը գործում է 7 օր։
-
-*Եթե այս դիտարկիչով մուտք չեք գործել ONLYOFFICE, հաստատման համար պետք է օգտագործեք ձեր հին էլ.
-
-Չե՞ք ուզում փոխել ձեր էլ. Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE անձնական հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
-
-$OrangeButton
-
-Հղումը գործում է 7 օր։
-
-Չե՞ք ուզում փոխել ձեր գաղտնաբառը: Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Բարեւ Ձեզ,
-
-Դուք հենց նոր հաշիվ եք գրանցել ONLYOFFICE լուծումում՝ անձնական օգտագործման համար: Սեղմեք "այստեղ":"$InviteLink" գրանցումը հաստատելու և գաղտնաբառ ստեղծելու համար:
-
-Եթե չեք կարող բացել հղումը, խնդրում ենք պատճենեք հետևյալ "$InviteLink":"$InviteLink" և տեղադրեք այն ձեր դիտարկիչի հասցեագոտում:
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com կայքում: Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով).
-
-$OrangeButton
-
-*Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության հայտարարության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0":
-
-"Կարդացեք ավելին հաշվի դադարեցման մասին":"${__HelpLink}/administration/configuration.aspx":
-
-Անտեսեք այս նամակը, եթե չեք ցանկանում շարունակել:
-
-Եթե ունեք հարցեր, դիմեք մեզ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով
 
 $TrulyYours</value>
   </data>

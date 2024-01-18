@@ -45,7 +45,7 @@ internal class FileDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         GlobalStore globalStore,
-        GlobalSpace globalSpace,
+        
         GlobalFolder globalFolder,
         Global global,
         IDaoFactory daoFactory,
@@ -170,7 +170,7 @@ internal class FileDao(
         
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -342,15 +342,6 @@ internal class FileDao(
         if (checkQuota && maxChunkedUploadSize < file.ContentLength)
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
-        if (checkQuota && _coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -528,15 +519,6 @@ internal class FileDao(
         if (maxChunkedUploadSize < file.ContentLength)
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
-        if (_coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -1147,7 +1129,7 @@ internal class FileDao(
         
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -1519,7 +1501,7 @@ internal class FileDao(
             {
                 if (withSubfolders)
                 {
-                    result.In(a => a.Folders.Select(r => r.ParentId), new[] { parentId });
+                    result.In(a => a.Folders.Select(r => r.ParentId), [parentId]);
                 }
                 else
                 {
@@ -1722,7 +1704,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)

@@ -90,7 +90,7 @@ public class WebPathSettings
             {
                 var query = string.Empty;
                 //Rel path
-                if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
+                if (relativePath.IndexOfAny(['?', '=', '&']) != -1)
                 {
                     //Cut it
                     query = relativePath[relativePath.IndexOf('?')..];

@@ -132,13 +132,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     await TrackFile(context);
                     break;
                 default:
-                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMassage_BadRequest);
+                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
             }
 
         }
         catch (InvalidOperationException e)
         {
-            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMassage_BadRequest, e);
+            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMessage_BadRequest, e);
         }
     }
 
@@ -615,12 +615,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
-                    var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                    var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                     logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_SecurityException);
+                    await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
                     return;
                 }
 
@@ -673,7 +673,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     {
                         logger.ErrorDownloadStreamHeader(context.Request.Url(), ex);
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                        await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_SecurityException);
+                        await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
                         return;
                     }
                 }
@@ -778,7 +778,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 {
                     logger.ErrorDownloadStreamHeader(context.Request.Url(), ex);
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_SecurityException);
+                    await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
                     return;
                 }
             }
@@ -794,7 +794,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (!await storeTemplate.IsFileAsync("", path))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_FileNotFound);
+                await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);
                 return;
             }
 
@@ -834,12 +834,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(fileName, auth ?? "", global.StreamUrlExpire);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
-            var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+            var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
             logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_SecurityException);
+            await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
             return;
         }
 
@@ -854,7 +854,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         if (!await store.IsFileAsync(FileConstant.StorageDomainTmp, path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_FileNotFound);
+            await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);
             return;
         }
 
@@ -905,12 +905,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
-                    var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                    var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                     logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    await context.Response.WriteAsync(FilesCommonResource.ErrorMassage_SecurityException);
+                    await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
                     return;
                 }
             }
@@ -1196,13 +1196,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (folder == null)
         {
-            throw new HttpException((int)HttpStatusCode.NotFound, FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new HttpException((int)HttpStatusCode.NotFound, FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var canCreate = await fileSecurity.CanCreateAsync(folder);
         if (!canCreate)
         {
-            throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         File<T> file;
@@ -1397,7 +1397,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (string.IsNullOrEmpty(urlRedirect))
         {
-            throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMassage_BadRequest);
+            throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         context.Response.Redirect(urlRedirect);
@@ -1427,7 +1427,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);
-            throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+            throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         TrackerData fileData;
@@ -1489,7 +1489,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                 {
                     logger.ErrorDocServiceTrackHeaderIsNull();
-                    throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
                 }
                 header = header["Bearer ".Length..];
 

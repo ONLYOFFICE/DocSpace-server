@@ -151,8 +151,8 @@ public class ProductEntryPoint : Product
 
         var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 
-        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key));
-        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key);
+        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key)).ToList();
+        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key).ToList();
 
         var result = new List<ActivityInfo>();
 
@@ -162,10 +162,9 @@ public class ProductEntryPoint : Product
             {
                 UserId = e.UserId,
                 Action = (MessageAction)e.Action,
-                Data = e.Date
+                Data = e.Date,
+                FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1]
             };
-
-            activityInfo.FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1];
 
             switch (e.Action)
             {
@@ -214,7 +213,8 @@ public class ProductEntryPoint : Product
 
                 var isRoomAdmin = userRoomsWithRoleForSend
                     .Where(r => r.Key == roomId.ToString())
-                    .Select(r => r.Value).FirstOrDefault();
+                    .Select(r => r.Value)
+                    .FirstOrDefault();
 
                 if (!CheckRightsToReceive(userId, (MessageAction)e.Action, isRoomAdmin, activityInfo.TargetUsers))
                 {

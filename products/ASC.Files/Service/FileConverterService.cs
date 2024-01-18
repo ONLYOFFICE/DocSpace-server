@@ -129,12 +129,12 @@ internal class FileConverterService<T>(
                     if (!await fileSecurity.CanReadAsync(file) && file.RootFolderType != FolderType.BUNCH)
                     {
                         //No rights in CRM after upload before attach
-                        throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+                        throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
                     }
 
                     if (file.ContentLength > setupInfo.AvailableFileSize)
                     {
-                        throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
                     }
 
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -178,7 +178,7 @@ internal class FileConverterService<T>(
                     if (DateTime.UtcNow - converter.StartDateTime > TimeSpan.FromMinutes(10))
                     {
                         converter.StopDateTime = DateTime.UtcNow;
-                        converter.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
+                        converter.Error = FilesCommonResource.ErrorMessage_ConvertTimeout;
 
                         logger.ErrorCheckConvertFilesStatus(file.Id.ToString(), file.ContentLength);
                     }
