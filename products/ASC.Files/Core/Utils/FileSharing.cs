@@ -181,14 +181,14 @@ public class FileSharingAceHelper(
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
-                IDistributedLockHandle lockHandle = null;
+                IDistributedLockHandle quotaLockHandle = null;
                 var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
                 try
                 {
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
-                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
+                        quotaLockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
 
                         await countPaidUserChecker.CheckAppend();
                     }
@@ -218,9 +218,9 @@ public class FileSharingAceHelper(
                 }
                 finally
                 {
-                    if (lockHandle != null)
+                    if (quotaLockHandle != null)
                     {
-                        await lockHandle.ReleaseAsync();
+                        await quotaLockHandle.ReleaseAsync();
                     }
                 }
 
@@ -260,6 +260,8 @@ public class FileSharingAceHelper(
                     : w.Access;
             }
 
+            IDistributedLockHandle linkLockHandle = null;
+            
             try
             {
                 if (w.IsLink && eventType == EventType.Create)
@@ -274,8 +276,7 @@ public class FileSharingAceHelper(
 
                     if (maxCount > 0)
                     {
-                        //TODO: Replace with a distributed lock
-                        await _semaphore.WaitAsync();
+                        linkLockHandle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
 
                         var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null);
                         if (linksCount >= maxCount)
@@ -290,7 +291,10 @@ public class FileSharingAceHelper(
             }
             finally
             {
-                _semaphore.Release();
+                if (linkLockHandle != null)
+                {
+                    await linkLockHandle.ReleaseAsync();
+                }
             }
 
             if (socket && room != null)
