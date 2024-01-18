@@ -974,7 +974,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
                     var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
-                    if ((fileFolder.FolderType == FolderType.FormFillingFolderDone || fileFolder.FolderType == FolderType.FormFillingFolderInProgress) && file.CreateBy != userId)
+                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                     {
                         return false;
                     }

@@ -84,8 +84,7 @@ public class FileStorageService //: IFileStorageService
         ExternalShare externalShare,
         TenantUtil tenantUtil,
         RoomLogoManager roomLogoManager, 
-        IDistributedLockProvider distributedLockProvider,
-        ExportToCSV exportToCSV)
+        IDistributedLockProvider distributedLockProvider)
     {
 
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
