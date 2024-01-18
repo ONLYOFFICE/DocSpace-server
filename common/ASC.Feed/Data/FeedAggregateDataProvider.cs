@@ -151,7 +151,7 @@ public class FeedAggregateDataProvider(AuthContext authContext,
                 }
                 else
                 {
-                    feeds[feed.GroupId] = new List<FeedResultItem> { feed };
+                    feeds[feed.GroupId] = [feed];
                 }
             }
             filter.Offset += feedsIteration.Count;

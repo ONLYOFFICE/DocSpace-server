@@ -33,7 +33,6 @@ public class StudioNotifyService(UserManager userManager,
         StudioNotifyHelper studioNotifyHelper,
         StudioNotifyServiceHelper studioNotifyServiceHelper,
         TenantExtra tenantExtra,
-        AuthManager authentication,
         AuthContext authContext,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
@@ -61,7 +60,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.UserMessageToSales,
             await studioNotifyHelper.RecipientFromEmailAsync(settings.SalesEmail, false),
-            new[] { EMailSenderName },
+            [EMailSenderName],
             new TagValue(Tags.Body, message),
             new TagValue(Tags.UserEmail, email),
             new TagValue(Tags.UserName, userName));
@@ -94,7 +93,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 action,
                     await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
-                new[] { EMailSenderName },
+                    [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl));
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
@@ -117,7 +116,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 action,
                     await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                new[] { EMailSenderName },
+                    [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
     }
@@ -131,7 +130,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.ActivateEmail,
                     await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                new[] { EMailSenderName },
+                    [EMailSenderName],
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
@@ -156,7 +155,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.SaasRoomInvite,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                new[] { EMailSenderName },
+                [EMailSenderName],
                 tags.ToArray());
     }
 
@@ -179,7 +178,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                new[] { EMailSenderName },
+                [EMailSenderName],
                 tags.ToArray());
     }
 
@@ -194,7 +193,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.PhoneChange,
            await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
@@ -207,7 +206,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.TfaChange,
            await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
@@ -227,7 +226,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.JoinUsers,
                    await studioNotifyHelper.RecipientFromEmailAsync(email, true),
-                new[] { EMailSenderName },
+                   [EMailSenderName],
                 new TagValue(Tags.InviteLink, inviteUrl),
                 TagValues.OrangeButton(orangeButtonText, inviteUrl));
     }
@@ -274,7 +273,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
@@ -328,7 +327,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
@@ -375,7 +374,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
         TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -418,7 +417,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -439,7 +438,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         action,
            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
@@ -449,8 +448,8 @@ public class StudioNotifyService(UserManager userManager,
     {
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.ReassignsCompleted,
-            new[] { await studioNotifyHelper.ToRecipientAsync(recipientId) },
-            new[] { EMailSenderName },
+        [await studioNotifyHelper.ToRecipientAsync(recipientId)],
+        [EMailSenderName],
             new TagValue(Tags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
@@ -462,8 +461,8 @@ public class StudioNotifyService(UserManager userManager,
     {
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.ReassignsFailed,
-            new[] { await studioNotifyHelper.ToRecipientAsync(recipientId) },
-            new[] { EMailSenderName },
+        [await studioNotifyHelper.ToRecipientAsync(recipientId)],
+        [EMailSenderName],
             new TagValue(Tags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
@@ -476,8 +475,8 @@ public class StudioNotifyService(UserManager userManager,
     {
         await studioNotifyServiceHelper.SendNoticeToAsync(
             coreBaseSettings.CustomMode ? Actions.RemoveUserDataCompletedCustomMode : Actions.RemoveUserDataCompleted,
-            new[] { await studioNotifyHelper.ToRecipientAsync(recipientId) },
-            new[] { EMailSenderName },
+            [await studioNotifyHelper.ToRecipientAsync(recipientId)],
+            [EMailSenderName],
             new TagValue(Tags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
             new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
@@ -491,8 +490,8 @@ public class StudioNotifyService(UserManager userManager,
     {
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.RemoveUserDataFailed,
-            new[] { await studioNotifyHelper.ToRecipientAsync(recipientId) },
-            new[] { EMailSenderName },
+        [await studioNotifyHelper.ToRecipientAsync(recipientId)],
+        [EMailSenderName],
             new TagValue(Tags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
             new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
@@ -538,7 +537,7 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
-        new[] { EMailSenderName },
+           [EMailSenderName],
         tagValues.ToArray());
     }
 
@@ -553,8 +552,8 @@ public class StudioNotifyService(UserManager userManager,
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.PortalDeactivate,
-                new IRecipient[] { u },
-                new[] { EMailSenderName },
+                [u],
+                [EMailSenderName],
                 new TagValue(Tags.ActivateUrl, activateUrl),
                 TagValues.OrangeButton(orangeButtonText, deactivateUrl),
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt),
@@ -570,8 +569,8 @@ public class StudioNotifyService(UserManager userManager,
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.PortalDelete,
-                new IRecipient[] { u },
-                new[] { EMailSenderName },
+                [u],
+                [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt),
                 new TagValue(Tags.AutoRenew, showAutoRenewText.ToString()),
@@ -586,8 +585,8 @@ public class StudioNotifyService(UserManager userManager,
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.PortalDeleteSuccessV1,
-                new IRecipient[] { owner },
-                new[] { EMailSenderName },
+                [owner],
+                [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
@@ -604,8 +603,8 @@ public class StudioNotifyService(UserManager userManager,
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.DnsChange,
-                new IRecipient[] { u },
-                new[] { EMailSenderName },
+                [u],
+                [EMailSenderName],
                 new TagValue("ConfirmDnsUpdate", confirmDnsUpdateUrl),//TODO: Tag is deprecated and replaced by TagGreenButton
                 TagValues.OrangeButton(orangeButtonText, confirmDnsUpdateUrl),
                 new TagValue("PortalAddress", AddHttpToUrl(portalAddress)),
@@ -620,8 +619,8 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeToAsync(
         Actions.ConfirmOwnerChange,
         null,
-        new IRecipient[] { owner },
-        new[] { EMailSenderName },
+        [owner],
+        [EMailSenderName],
         TagValues.OrangeButton(orangeButtonText, confirmOwnerUpdateUrl),
             new TagValue(Tags.UserName, newOwner.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
@@ -662,7 +661,7 @@ public class StudioNotifyService(UserManager userManager,
             await studioNotifyServiceHelper.SendNoticeToAsync(
             notifyAction,
                await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
-            new[] { EMailSenderName },
+               [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -694,8 +693,8 @@ public class StudioNotifyService(UserManager userManager,
 
                 await studioNotifyServiceHelper.SendNoticeToAsync(
                     Actions.PortalRename,
-                    new[] { await studioNotifyHelper.ToRecipientAsync(u.Id) },
-                    new[] { EMailSenderName },
+                    [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+                    [EMailSenderName],
                     commonLinkUtility.GetFullAbsolutePath("").Replace(oldAlias, tenant.Alias),
                     new TagValue(Tags.PortalUrl, oldVirtualRootPath),
                     new TagValue(Tags.UserDisplayName, u.DisplayUserName(displayUserSettingsHelper)));
@@ -752,13 +751,13 @@ public class StudioNotifyService(UserManager userManager,
                 return;
             }
 
-            var recipient = new DirectRecipient(salesEmail, null, new[] { salesEmail }, false);
+            var recipient = new DirectRecipient(salesEmail, null, [salesEmail], false);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.SaasCustomModeRegData,
             null,
-            new IRecipient[] { recipient },
-            new[] { EMailSenderName },
+            [recipient],
+            [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(Tags.UserLastName, u.LastName.HtmlEncode()),
             new TagValue(Tags.UserEmail, u.Email.HtmlEncode()),
@@ -818,8 +817,8 @@ public class StudioNotifyService(UserManager userManager,
             await studioNotifyServiceHelper.SendNoticeToAsync(
             action,
             null,
-                new[] { await studioNotifyHelper.ToRecipientAsync(u.Id) },
-            new[] { EMailSenderName },
+            [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+            [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
             new TagValue(Tags.PortalUrl, serverRootPath),
             new TagValue(Tags.ControlPanelUrl, GetControlPanelUrl(serverRootPath)));

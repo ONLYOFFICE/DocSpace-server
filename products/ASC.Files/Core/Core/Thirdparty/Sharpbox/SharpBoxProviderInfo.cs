@@ -154,7 +154,7 @@ internal class SharpBoxStorageDisposableWrapper : IDisposable
                 uri = Uri.UriSchemeHttp + Uri.SchemeDelimiter + uri;
             }
 
-            prms = new object[] { new Uri(uri) };
+            prms = [new Uri(uri)];
         }
 
         var storage = new CloudStorage();

@@ -73,7 +73,7 @@ public class JabberStyler : IPatternStyler
             return;
         }
 
-        var lines = message.Body.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+        var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
 
         for (var i = 0; i < lines.Length - 1; i++)
         {

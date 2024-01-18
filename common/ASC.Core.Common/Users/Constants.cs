@@ -79,13 +79,14 @@ public sealed class Constants(IConfiguration configuration)
         Name = AuthConst.Collaborator.Name
     };
 
-    public static readonly GroupInfo[] BuildinGroups = {
-            GroupEveryone,
+    public static readonly GroupInfo[] BuildinGroups =
+    [
+        GroupEveryone,
             GroupUser,
             GroupManager,
             GroupAdmin,
             GroupCollaborator
-    };
+    ];
 
     public static readonly UserInfo LostUser = new()
     {

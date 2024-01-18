@@ -45,8 +45,8 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 {
     private readonly ILogger _log = optionsMonitor.CreateLogger("ASC.Notify");
 
-    public static readonly List<MessageAction?> DailyActions = new()
-    {
+    public static readonly List<MessageAction?> DailyActions =
+    [
         MessageAction.FileCreated,
         MessageAction.FileUpdatedRevisionComment,
         MessageAction.RoomCreated,
@@ -55,16 +55,16 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         MessageAction.RoomArchived,
         MessageAction.UserCreated,
         MessageAction.UserUpdated
-    };
+    ];
 
-    public static readonly List<MessageAction?> RoomsActivityActions = new()
-    {
-         MessageAction.FileUploaded,
-         MessageAction.UserFileUpdated,
-         MessageAction.RoomCreateUser,
-         MessageAction.RoomUpdateAccessForUser,
-         MessageAction.UsersUpdatedType
-    };
+    public static readonly List<MessageAction?> RoomsActivityActions =
+    [
+        MessageAction.FileUploaded,
+        MessageAction.UserFileUpdated,
+        MessageAction.RoomCreateUser,
+        MessageAction.RoomUpdateAccessForUser,
+        MessageAction.UsersUpdatedType
+    ];
 
     public async Task SendMsgWhatsNewAsync(DateTime scheduleDate, WhatsNewType whatsNewType)
     {

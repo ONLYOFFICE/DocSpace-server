@@ -45,7 +45,6 @@ internal class FileDao(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     GlobalStore globalStore,
-    GlobalSpace globalSpace,
     GlobalFolder globalFolder,
     Global global,
     IDaoFactory daoFactory,
@@ -169,7 +168,7 @@ internal class FileDao(
 
         if (fileFilter.Extension.IsNullOrEmpty())
         {
-            fileFilter.Extension = new string[] { "" };
+            fileFilter.Extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -1119,7 +1118,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -1444,7 +1443,7 @@ internal class FileDao(
             {
                 if (withSubfolders)
                 {
-                    result.In(a => a.Folders.Select(r => r.ParentId), new[] { parentId });
+                    result.In(a => a.Folders.Select(r => r.ParentId), [parentId]);
                 }
                 else
                 {
@@ -1605,7 +1604,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)

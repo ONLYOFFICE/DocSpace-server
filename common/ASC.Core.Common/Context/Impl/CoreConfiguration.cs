@@ -209,7 +209,7 @@ public class CoreSettings
 }
 
 [Scope]
-public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
+public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager)
 {
     public async Task<SmtpSettings> GetDefaultSmtpSettingsAsync()
     {

@@ -42,7 +42,7 @@ public class DbFilesSecurity : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, EntryId, EntryType, Subject };
+        return [TenantId, EntryId, EntryType, Subject];
     }
 }
 

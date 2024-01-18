@@ -36,7 +36,7 @@ public class CompressToArchive(FilesSettingsHelper filesSettings, CompressToTarG
 {
     internal static readonly string TarExt = ".tar.gz";
     internal static readonly string ZipExt = ".zip";
-    private static readonly List<string> _exts = new(2) { TarExt, ZipExt };
+    private static readonly List<string> _exts = [TarExt, ZipExt];
 
     private ICompress _compress;
     private ICompress Compress

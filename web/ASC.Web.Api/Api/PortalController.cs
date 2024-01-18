@@ -166,6 +166,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -321,6 +322,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("thumb")]
     public FileResult GetThumb(string url)
     {
@@ -383,6 +385,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -440,7 +443,7 @@ public class PortalController(ILogger<PortalController> logger,
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 

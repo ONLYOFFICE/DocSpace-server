@@ -50,7 +50,7 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
 
     public override object[] GetKeys()
     {
-        return new object[] { Id };
+        return [Id];
     }
 }
 

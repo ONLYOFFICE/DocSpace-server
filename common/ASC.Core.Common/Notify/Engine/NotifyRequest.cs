@@ -34,14 +34,14 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     public INotifyAction NotifyAction { get; internal set; } = action ?? throw new ArgumentNullException(nameof(action));
     public string ObjectID { get; internal set; } = objectID;
     public IRecipient Recipient { get; internal set; } = recipient ?? throw new ArgumentNullException(nameof(recipient));
-    public List<ITagValue> Arguments { get; internal init; } = new();
+    public List<ITagValue> Arguments { get; internal init; } = [];
     public string CurrentSender { get; internal set; }
     public INoticeMessage CurrentMessage { get; internal set; }
     public Hashtable Properties { get; private set; } = new();
     internal string[] _senderNames;
     internal IPattern[] _patterns;
-    internal List<string> _requaredTags = new();
-    internal List<ISendInterceptor> _interceptors = new();
+    internal List<string> _requaredTags = [];
+    internal List<ISendInterceptor> _interceptors = [];
     internal bool _isNeedCheckSubscriptions = true;
     private readonly ILogger _log = options.CreateLogger("ASC.Notify");
 
@@ -95,7 +95,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
         {
             _senderNames = _senderNames,
             _patterns = _patterns,
-            Arguments = new List<ITagValue>(Arguments),
+            Arguments = [..Arguments],
             _requaredTags = _requaredTags,
             CurrentSender = CurrentSender,
             CurrentMessage = CurrentMessage
