@@ -802,12 +802,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord> shares, bool isOutsider, bool isUser, bool isAuthenticated, bool isDocSpaceAdmin, bool isCollaborator)
     {
-        if (!authContext.IsAuthenticated && e.RootFolderType != FolderType.USER && 
-            action is not (FilesSecurityActions.Read or FilesSecurityActions.Download))
-        {
-            return false;
-        }
-        
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
