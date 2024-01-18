@@ -138,12 +138,7 @@ public class CookiesManager
 
         var name = GetFullCookiesName(type, itemId);
 
-        if (headers.TryGetValue(name, out var value))
-        {
-            return value;
-        }
-
-        return string.Empty;
+        return headers.TryGetValue(name, out var value) ? value : string.Empty;
     }
 
     public string GetCookies(CookiesType type)

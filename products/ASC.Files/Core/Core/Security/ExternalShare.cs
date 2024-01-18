@@ -31,7 +31,7 @@ public class ExternalShare(Global global,
     IDaoFactory daoFactory, 
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
-    CommonLinkUtility commonLinkUtility,
+    BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility)
 {
