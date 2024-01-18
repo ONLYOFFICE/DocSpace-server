@@ -98,15 +98,8 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
                 .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
                 .Select(f => f.Id)
                 .ToListAsync(cancellationToken);
-            var fileFilter = new FileFilter
-            {
-                FilterType = default,
-                SubjectGroup = false,
-                SubjectID = Guid.Empty,
-                SearchText = string.Empty,
-                SearchInContent = false
-            };
-            var filesList = await fileDao.GetFilesAsync(trashId, null, fileFilter)
+
+            var filesList = await fileDao.GetFilesAsync(trashId, null, new FileFilter { })
                 .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
                 .Select(y => y.Id)
                 .ToListAsync(cancellationToken);

@@ -2920,10 +2920,7 @@ public class FileStorageService //: IFileStorageService
             var fileFilter = new FileFilter
             {
                 FilterType = FilterType.FilesOnly,
-                SubjectGroup = false,
-                SubjectID = Guid.Empty,
-                SearchText = path,
-                SearchInContent = false
+                SearchText = path
             };
             var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
@@ -3075,14 +3072,8 @@ public class FileStorageService //: IFileStorageService
         
         var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
-        var fileFilter = new FileFilter
-        {
-            FilterType = FilterType.None,
-            SubjectGroup = false,
-            SubjectID = Guid.Empty,
-            SearchInContent = false
-        };
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), fileFilter).Select(r=> r.Id).ToListAsync();
+        
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), new FileFilter{}).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 
         if (subfolders)

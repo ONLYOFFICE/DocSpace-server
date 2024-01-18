@@ -320,10 +320,6 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
             var fileFilter = new FileFilter
             {
-                FilterType = FilterType.None,
-                SubjectGroup = false,
-                SubjectID = Guid.Empty,
-                SearchText = string.Empty,
                 SearchInContent = true
             };
 

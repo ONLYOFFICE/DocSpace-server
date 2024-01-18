@@ -1342,9 +1342,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             var fileFilter = new FileFilter
             {
-                FilterType = FilterType.None,
-                SubjectGroup = false,
-                SubjectID = Guid.Empty,
                 SearchText = search,
                 SearchInContent = searchInContent
             };
@@ -1441,9 +1438,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             var fileFilter = new FileFilter
             {
-                FilterType = FilterType.None,
-                SubjectGroup = false,
-                SubjectID = Guid.Empty,
                 SearchText = search,
                 SearchInContent = searchInContent
             };

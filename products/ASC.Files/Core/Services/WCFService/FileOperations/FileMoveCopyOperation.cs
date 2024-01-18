@@ -239,11 +239,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         var fileFilter = new FileFilter
         {
-            FilterType = FilterType.FilesOnly,
-            SubjectGroup = false,
-            SubjectID = Guid.Empty,
-            SearchText = string.Empty,
-            SearchInContent = false
+            FilterType = FilterType.FilesOnly
         };
 
         var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
@@ -332,11 +328,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 var fileFilter = new FileFilter
                 {
-                    FilterType = FilterType.FilesOnly,
-                    SubjectGroup = false,
-                    SubjectID = Guid.Empty,
-                    SearchText = string.Empty,
-                    SearchInContent = false
+                    FilterType = FilterType.FilesOnly
                 };
                 var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
                 var (isError, message) = await WithErrorAsync(scope, files, checkPermissions);

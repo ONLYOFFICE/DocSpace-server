@@ -221,11 +221,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     {
                         var fileFilter = new FileFilter
                         {
-                            FilterType = FilterType.FilesOnly,
-                            SubjectGroup = false,
-                            SubjectID = Guid.Empty,
-                            SearchText = string.Empty,
-                            SearchInContent = false
+                            FilterType = FilterType.FilesOnly
                         };
                         var files = await FileDao.GetFilesAsync(folder.Id, new ASC.Files.Core.OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
