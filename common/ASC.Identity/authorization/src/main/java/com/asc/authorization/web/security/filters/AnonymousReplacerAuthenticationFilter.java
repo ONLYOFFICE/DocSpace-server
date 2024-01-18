@@ -41,7 +41,7 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var clientId = request.getParameter(CLIENT_ID_QUERY);
 
-        if (clientId == null || clientId.isEmpty()) {
+        if (clientId == null || clientId.isBlank()) {
             log.warn("Query string does not contain client_id");
             throw new BadCredentialsException("Query string does not contain client_id");
         }
