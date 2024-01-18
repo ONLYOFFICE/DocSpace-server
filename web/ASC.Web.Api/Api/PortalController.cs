@@ -601,7 +601,6 @@ public class PortalController : ControllerBase
             {
                 await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
@@ -666,9 +665,7 @@ public class PortalController : ControllerBase
                         !(await _tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         await _studioNotifyService.SendMsgPortalDeletionAsync(tenant, await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
-
-        await _messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
-    }
+      }
 
     /// <summary>
     /// Restores the current portal.
@@ -749,9 +746,6 @@ public class PortalController : ControllerBase
                 await _securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
-
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
-
         }
         finally
         {
