@@ -405,7 +405,7 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
     <value>Meklēt dokumentu saturā</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Aizpildāmais OFORM dokuments ir gatavs. Tas ir saglabāts {0}</value>
+    <value>Aizpildāmais PDF dokuments ir gatavs. Tas ir saglabāts {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>OFORM kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>

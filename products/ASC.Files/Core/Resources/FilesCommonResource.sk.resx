@@ -396,7 +396,7 @@
     <value>Kópia dokumentu OFORM je vytvorená v priečinku {0}. Vyplňte formulár a stiahnite si výsledok ako súbor PDF alebo DOCX.</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Vyplniteľný dokument OFORM je pripravený. Je uložený v priečinku {0}</value>
+    <value>Vyplniteľný dokument PDF je pripravený. Je uložený v priečinku {0}</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>bor už nie je návrhom na vyplnenie formulára.</value>

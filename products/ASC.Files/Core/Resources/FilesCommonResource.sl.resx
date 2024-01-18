@@ -401,7 +401,7 @@
     <value>Datoteka ustvarjena v mapi "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Dokument OFORM za izpolnjevanje je pripravljen. Shranjen je v {0}</value>
+    <value>Dokument PDF za izpolnjevanje je pripravljen. Shranjen je v {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Kopija OFORM je ustvarjena v mapi {0}. Izpolnite obrazec in prenesite rezultat kot datoteko PDF ali DOCX.</value>

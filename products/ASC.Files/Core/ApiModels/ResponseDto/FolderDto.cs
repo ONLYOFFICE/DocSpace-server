@@ -78,6 +78,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
+    /// <summary>Folder type</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    public FolderType? Type { get; set; }
+
     public bool? InRoom { get; set; }
 
     public static FolderDto<int> GetSample()
@@ -187,6 +191,14 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (folder.Order != 0)
         {
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
+        }
+
+        if (folder.FolderType == FolderType.InProcessFormFolder || 
+            folder.FolderType == FolderType.ReadyFormFolder || 
+            folder.FolderType == FolderType.FormFillingFolderDone || 
+            folder.FolderType == FolderType.FormFillingFolderInProgress)
+        {
+            result.Type = folder.FolderType;
         }
 
         return result;

@@ -556,6 +556,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             RoomType.ReviewRoom => FilterType.ReviewRooms,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
+            RoomType.FormRoom => FilterType.FormRooms,
             _ => FilterType.None
         };
 

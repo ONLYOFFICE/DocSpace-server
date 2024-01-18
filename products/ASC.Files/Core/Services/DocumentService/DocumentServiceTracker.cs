@@ -58,6 +58,7 @@ public class DocumentServiceTracker
         public List<string> Users { get; set; }
         public string UserData { get; set; }
         public bool Encrypted { get; set; }
+        public string FormsDataUrl { get; set; }
 
         [DebuggerDisplay("{Type} - {UserId}")]
         public class Action
@@ -144,8 +145,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-    IHttpClientFactory clientFactory,
-    ThirdPartySelector thirdPartySelector)
+        IHttpClientFactory clientFactory,
+        ThirdPartySelector thirdPartySelector)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
@@ -391,7 +392,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
@@ -421,10 +422,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
             }
 
-            if (fileData.Status == TrackerStatus.ForceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit)
-            {
-                await entryManager.SubmitFillForm(file);
-            }
         }
 
         return new TrackResponse { Message = saveMessage };

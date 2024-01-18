@@ -45,7 +45,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
-{
+    {
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
@@ -103,8 +103,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         {
             yield return room;
         }
+        }
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        return GetFoldersAsync(parentId);
     }
-
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
@@ -115,7 +118,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (CheckInvalidFilter(filterType))
