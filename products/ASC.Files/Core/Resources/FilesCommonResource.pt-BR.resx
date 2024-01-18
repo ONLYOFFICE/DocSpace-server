@@ -296,7 +296,7 @@
     <value>Arquivo criado na pasta "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>O documento OFORM preenchível está pronto. Ele é salvo no {0}</value>
+    <value>O documento PDF preenchível está pronto. Ele é salvo no {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>A cópia do OFORM é criada na pasta {0}. Preencha o formulário e baixe o resultado em arquivo PDF ou DOCX.</value>

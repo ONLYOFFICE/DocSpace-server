@@ -405,7 +405,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Vyhledávání v obsahu dokumentů</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Vyplnitelný dokument OFORM je připraven. Je uložen v {0}</value>
+    <value>Vyplnitelný dokument PDF je připraven. Je uložen v {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Kopie OFORM se vytvoří ve složce {0}. Vyplňte formulář a stáhněte si výsledek ve formátu PDF nebo DOCX.</value>
