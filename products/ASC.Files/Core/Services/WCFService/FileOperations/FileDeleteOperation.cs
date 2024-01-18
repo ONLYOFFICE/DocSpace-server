@@ -225,7 +225,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             SubjectGroup = false,
                             SubjectID = Guid.Empty,
                             SearchText = string.Empty,
-                            Extension = null,
                             SearchInContent = false
                         };
                         var files = await FileDao.GetFilesAsync(folder.Id, new ASC.Files.Core.OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();

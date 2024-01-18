@@ -243,7 +243,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             SubjectGroup = false,
             SubjectID = Guid.Empty,
             SearchText = string.Empty,
-            Extension = null,
             SearchInContent = false
         };
 
@@ -337,7 +336,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     SubjectGroup = false,
                     SubjectID = Guid.Empty,
                     SearchText = string.Empty,
-                    Extension = null,
                     SearchInContent = false
                 };
                 var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();

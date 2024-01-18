@@ -1346,7 +1346,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 SubjectGroup = false,
                 SubjectID = Guid.Empty,
                 SearchText = search,
-                Extension = null,
                 SearchInContent = searchInContent
             };
 
@@ -1446,7 +1445,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 SubjectGroup = false,
                 SubjectID = Guid.Empty,
                 SearchText = search,
-                Extension = null,
                 SearchInContent = searchInContent
             };
             var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), fileFilter).ToListAsync();

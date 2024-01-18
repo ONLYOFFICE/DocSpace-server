@@ -324,7 +324,6 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 SubjectGroup = false,
                 SubjectID = Guid.Empty,
                 SearchText = string.Empty,
-                Extension = null,
                 SearchInContent = true
             };
 

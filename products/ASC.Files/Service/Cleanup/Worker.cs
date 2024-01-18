@@ -104,7 +104,6 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
                 SubjectGroup = false,
                 SubjectID = Guid.Empty,
                 SearchText = string.Empty,
-                Extension = null,
                 SearchInContent = false
             };
             var filesList = await fileDao.GetFilesAsync(trashId, null, fileFilter)

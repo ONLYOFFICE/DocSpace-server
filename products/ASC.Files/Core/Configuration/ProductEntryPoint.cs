@@ -298,14 +298,11 @@ public class ProductEntryPoint : Product
         var folderFilter = new FolderFilter
         {
             FilterType = FilterType.None,
-            Tags = null,
             SubjectId = Guid.Empty,
-            SearchText = null,
             WithoutTags = false,
             ExcludeSubject = false,
             Provider = ProviderFilter.None,
-            SubjectFilter = SubjectFilter.Owner,
-            SubjectEntriesIds = null
+            SubjectFilter = SubjectFilter.Owner
         };
 
         var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, false, folderFilter).ToListAsync();

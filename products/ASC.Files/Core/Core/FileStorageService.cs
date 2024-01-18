@@ -2923,7 +2923,6 @@ public class FileStorageService //: IFileStorageService
                 SubjectGroup = false,
                 SubjectID = Guid.Empty,
                 SearchText = path,
-                Extension = null,
                 SearchInContent = false
             };
             var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter);
@@ -3081,8 +3080,6 @@ public class FileStorageService //: IFileStorageService
             FilterType = FilterType.None,
             SubjectGroup = false,
             SubjectID = Guid.Empty,
-            SearchText = null,
-            Extension = null,
             SearchInContent = false
         };
         var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), fileFilter).Select(r=> r.Id).ToListAsync();
