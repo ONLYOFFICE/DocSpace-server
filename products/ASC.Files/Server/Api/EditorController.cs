@@ -360,12 +360,14 @@ public class EditorController : ApiControllerBase
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {        
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var currentDocServiceUrl = _filesLinkUtility.DocServiceUrl;
+        var currentDocServiceUrlInternal = _filesLinkUtility.DocServiceUrlInternal;
+        var currentDocServicePortalUrl = _filesLinkUtility.DocServicePortalUrl;
         
         _filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         _filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         _filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
-
-        await _messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -374,7 +376,19 @@ public class EditorController : ApiControllerBase
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
-        await _documentServiceConnector.CheckDocServiceUrlAsync();
+        try
+        {        
+            await _documentServiceConnector.CheckDocServiceUrlAsync();
+            
+            await _messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+        }
+        catch (Exception)
+        {        
+            _filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
+            _filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
+            _filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+            throw;
+        }
 
         return await GetDocServiceUrlAsync(false);
     }
