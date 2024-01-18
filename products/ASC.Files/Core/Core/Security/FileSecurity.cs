@@ -58,142 +58,108 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultPrivacyShare = FileShare.Restrict;
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
-    
-    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
-    {
-        {
-            FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.ExternalLink, new HashSet<FileShare>
-                    {
-                        FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
-                    }
-                },
-                {
-                    SubjectType.PrimaryExternalLink, new HashSet<FileShare>
-                    {
-                        FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
-                    }
-                }
-            }.ToFrozenDictionary()
-        }
-    }.ToFrozenDictionary();
 
-    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
-    {
+    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses =
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
         {
-            FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
+                FolderType.USER,
+                new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    SubjectType.User,
-                    [
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
-                        FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
-                    ]
-        },
-        {
-                    SubjectType.InvitationLink,
-                    [
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
-                        FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
-                    ]
-                },
-                {
-                    SubjectType.ExternalLink, [FileShare.Read, FileShare.None]
-                },
-                {
-                    SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None]
+                    {
+                        SubjectType.ExternalLink,
+                        [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                    },
+                    {
+                        SubjectType.PrimaryExternalLink,
+                        [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
                     }
                 }.ToFrozenDictionary()
-        },
-        {
-            FolderType.PublicRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.None]
-                },
-                {
-                    SubjectType.InvitationLink,
-                    [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None]
-                },
-                {
-                    SubjectType.ExternalLink, [FileShare.Read, FileShare.None]
-                },
-                {
-                    SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None]
-                    }
-                }.ToFrozenDictionary()
-        },
-        {
-            FolderType.FillingFormsRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User,
-                    [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None]
-                },
-                {
-                    SubjectType.InvitationLink,
-                    [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None]
-                    }
-                }.ToFrozenDictionary()
-        },
-        {
-            FolderType.EditingRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User,
-                    [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None]
-        },
-        {
-                    SubjectType.InvitationLink,
-                    [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None]
-                    }
-                }.ToFrozenDictionary()
-        },
-        {
-            FolderType.ReviewRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User,
-                    [
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
-                        FileShare.Read, FileShare.None
-                    ]
-        },
-        {
-                    SubjectType.InvitationLink,
-                    [
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
-                        FileShare.Read, FileShare.None
-                    ]
-                    }
-                }.ToFrozenDictionary()
-        },
-        {
-            FolderType.ReadOnlyRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None]
-                },
-                {
-                    SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None]
-                }
             }
-        },
-        {
-            FolderType.FormRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                {
-                    SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None]
+        }.ToFrozenDictionary();
 
-                },
+    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
+        {
+            {
+                FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None]
-                }
-            }.ToFrozenDictionary()
-        }
-    }.ToFrozenDictionary();
+                    {
+                        SubjectType.User, [
+                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
+                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                        ]
+                    },
+                    {
+                        SubjectType.InvitationLink, [
+                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
+                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                        ]
+                    },
+                    { SubjectType.ExternalLink, [FileShare.Read, FileShare.None] },
+                    { SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.PublicRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] },
+                    { SubjectType.ExternalLink, [FileShare.Read, FileShare.None] },
+                    { SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.FillingFormsRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.EditingRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.ReviewRoom, new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    {
+                        SubjectType.User, [
+                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
+                            FileShare.Read, FileShare.None
+                        ]
+                    },
+                    {
+                        SubjectType.InvitationLink, [
+                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
+                            FileShare.Read, FileShare.None
+                        ]
+                    }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.ReadOnlyRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.FormRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            }
+        }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
     {
@@ -220,7 +186,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read,
                 FileShare.None
             ]
-            }
+        }
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
