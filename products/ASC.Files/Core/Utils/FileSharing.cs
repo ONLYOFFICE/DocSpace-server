@@ -239,28 +239,6 @@ public class FileSharingAceHelper(
                 }
             }
 
-            if (w.IsLink && eventType == EventType.Create)
-            {
-                var (filter, maxCount) = w.SubjectType switch
-                {
-                    SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                    SubjectType.ExternalLink when room != null => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
-                    SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
-                    _ => (ShareFilterType.Link, -1)
-                };
-
-                if (maxCount > 0)
-                {
-                    var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null);
-
-                    if (linksCount >= maxCount)
-                    {
-                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
-                        continue;
-                    }
-                }
-            }
-
             var subjects = await fileSecurity.GetUserSubjectsAsync(w.Id);
 
             if (entry.RootFolderType == FolderType.COMMON && subjects.Contains(Constants.GroupAdmin.ID))
