@@ -121,6 +121,20 @@ internal class FolderDao(
         return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
 
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(FolderType type, int parentId)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        var q = await GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
+
+        q = q.Where(f => f.FolderType == type);
+
+        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
+        {
+            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+        }
+
+    }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
         return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
@@ -304,7 +318,8 @@ internal class FolderDao(
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom
+            FolderType.PublicRoom,
+            FolderType.FormRoom
         };
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -703,7 +718,10 @@ internal class FolderDao(
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = folder.FolderType;
+        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
+            folder.FolderType == FolderType.InProcessFormFolder ||
+            folder.FolderType == FolderType.FormFillingFolderDone || 
+            folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
 
@@ -1112,7 +1130,7 @@ internal class FolderDao(
                     folder.Title = key;
                     break;
             }
-            
+
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -1330,7 +1348,8 @@ internal class FolderDao(
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom
+            FolderType.PublicRoom,
+            FolderType.FormRoom
         };
 
         Expression<Func<DbFolder, bool>> filter = f => roomTypes.Contains(f.FolderType);
@@ -1411,7 +1430,8 @@ internal class FolderDao(
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom
+            FolderType.PublicRoom,
+            FolderType.FormRoom
         };
 
         Expression<Func<DbFolder, bool>> filter = f => roomTypes.Contains(f.FolderType);
@@ -1611,6 +1631,7 @@ internal class FolderDao(
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.FormRooms => FolderType.FormRoom,
             _ => FolderType.CustomRoom
         };
     }

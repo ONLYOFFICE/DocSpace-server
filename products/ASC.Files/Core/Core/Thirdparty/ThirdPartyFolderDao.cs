@@ -105,7 +105,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
             yield return room;
         }
     }
-
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        return GetFoldersAsync(parentId);
+    }
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var items = await dao.GetItemsAsync(parentId, true);
@@ -439,7 +442,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-        }
+    }
 
         return newId;
     }
@@ -710,6 +713,7 @@ internal abstract class BaseFolderDao
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.FormRooms => FolderType.FormRoom,
             _ => FolderType.DEFAULT
         };
 

@@ -126,7 +126,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
-        
+
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
         if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
         {
@@ -199,7 +199,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             return;
         }
-        
+
         this[Res] += $"folder_{tto}{SplitChar}";
         
         var needToMark = new List<FileEntry>();
@@ -208,16 +208,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var moveOrCopyFilesTask = await MoveOrCopyFilesAsync(scope, Files, toFolder, _copy, parentFolders);
 
         needToMark.AddRange(moveOrCopyFilesTask);
-        
+
         foreach (var folder in moveOrCopyFoldersTask)
         {
-            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
+        if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
             await socketManager.CreateFolderAsync(folder);
         }
-        
+
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)
         {
@@ -652,6 +652,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         || file.RootFolderType == FolderType.Privacy || file.Encrypted
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
+                    var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
                     if (conflict == null)
                     {
                         File<TTo> newFile = null;
@@ -714,6 +716,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     needToMark.Add(newFile);
                                 }
 
+                                if (fileType == FileType.Pdf)
+                                {
+                                    await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                    await FileDao.SaveProperties(file.Id, null);
+                                }
+                                
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))

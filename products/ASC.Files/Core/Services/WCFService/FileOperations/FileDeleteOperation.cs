@@ -354,6 +354,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
 
                     await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                    await FileDao.SaveProperties(file.Id, null);
                 }
 
                 ProcessedFile(fileId);

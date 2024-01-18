@@ -401,7 +401,7 @@
     <value>Tiedosto luotu kansiossa "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Täytettävä OFORM-asiakirja on valmis. Se on tallennettu {0}:aan</value>
+    <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>OFORM-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>

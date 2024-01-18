@@ -102,6 +102,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool DenyDownload { get; set; }
 
+    /// <summary>Is there a draft or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? HasDraft { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -190,9 +194,19 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
+        var fileExst = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+
+        if (fileType == FileType.Pdf)
+        {
+            var linkDao = daoFactory.GetLinkDao();
+            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            result.HasDraft = linkedId != null;
+        }
         
-        result.FileExst = FileUtility.GetFileExtension(file.Title);
-        result.FileType = FileUtility.GetFileTypeByExtention(result.FileExst);
+        result.FileExst = fileExst;
+        result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;

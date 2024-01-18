@@ -80,7 +80,8 @@ public class Configuration<T>
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
-        { FileType.Presentation, "slide" }
+        { FileType.Presentation, "slide" },
+        { FileType.Pdf, "pdf" }
     };
 
     private FileType _fileTypeCache = FileType.Unknown;
@@ -807,8 +808,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
     {
         get
         {
-            if (_configuration.EditorConfig.ModeWrite
-              && _configuration.Document.Info.GetFile().Access == FileShare.FillForms)
+            if (_configuration.EditorConfig.ModeWrite)
             {
                 var linkDao = daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;
