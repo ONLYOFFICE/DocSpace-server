@@ -35,8 +35,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent)
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FileFilter fileFilter)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -243,7 +242,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
+    public Task<int> GetFilesCountAsync(string parentId, FileFilter fileFilter, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -255,21 +254,17 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, bool withSubfolders, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
-        IEnumerable<string> subjectEntriesIds)
+    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }

@@ -57,17 +57,13 @@ public interface IFolderDao<T>
     /// <returns>root folder</returns>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, bool withSubfolders, FolderFilter folderFilter);
+        
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
+    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
-        bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
-
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
+    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FolderFilter folderFilter);
 
     /// <summary>
     ///     Get a list of folders in current folder.

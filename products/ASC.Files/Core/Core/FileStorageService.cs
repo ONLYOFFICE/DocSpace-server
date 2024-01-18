@@ -3042,8 +3042,16 @@ public class FileStorageService //: IFileStorageService
                     Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
                 };
             }
-
-            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, null, false);
+            var fileFilter = new FileFilter
+            {
+                FilterType = FilterType.FilesOnly,
+                SubjectGroup = false,
+                SubjectID = Guid.Empty,
+                SearchText = path,
+                Extension = null,
+                SearchInContent = false
+            };
+            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
         }
 
@@ -3193,8 +3201,16 @@ public class FileStorageService //: IFileStorageService
         
         var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
-        
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, null, false).Select(r=> r.Id).ToListAsync();
+        var fileFilter = new FileFilter
+        {
+            FilterType = FilterType.None,
+            SubjectGroup = false,
+            SubjectID = Guid.Empty,
+            SearchText = null,
+            Extension = null,
+            SearchInContent = false
+        };
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), fileFilter).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 
         if (subfolders)

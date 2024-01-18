@@ -76,26 +76,25 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult(ToFolder(RootFolder()));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
-        SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
-        if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != ProviderFilter.kDrive && provider != ProviderFilter.WebDav && provider != ProviderFilter.Yandex))
+        if (CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != ProviderFilter.kDrive && folderFilter.Provider != ProviderFilter.WebDav && folderFilter.Provider != ProviderFilter.Yandex))
         {
             yield break;
         }
 
         var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
 
-        rooms = FilterByRoomType(rooms, filterType);
-        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
+        rooms = FilterByRoomType(rooms, folderFilter.FilterType);
+        rooms = FilterBySubject(rooms, folderFilter.SubjectId, folderFilter.ExcludeSubject, folderFilter.SubjectFilter, folderFilter.SubjectEntriesIds);
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            rooms = rooms.Where(x => x.Title.IndexOf(folderFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
+        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.Tags, filesDbContext);
 
         await foreach (var room in rooms)
         {

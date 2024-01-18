@@ -127,39 +127,28 @@ internal class FolderDao(
         return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
-        IEnumerable<int> parentsIds, 
-        FilterType filterType, 
-        IEnumerable<string> tags, 
-        Guid subjectId, 
-        string searchText, 
-        bool withSubfolders, 
-        bool withoutTags,
-        bool excludeSubject, 
-        ProviderFilter provider,
-        SubjectFilter subjectFilter,
-        IEnumerable<string> subjectEntriesIds)
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, bool withSubfolders, FolderFilter folderFilter)
     {
-        if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
+        if (CheckInvalidFilter(folderFilter.FilterType) || folderFilter.Provider != ProviderFilter.None)
         {
             yield break;
         }
 
-        var filter = GetRoomTypeFilter(filterType);
+        var filter = GetRoomTypeFilter(folderFilter.FilterType);
 
-        var searchByTags = tags != null && tags.Any() && !withoutTags;
-        var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
+        var searchByTags = folderFilter.Tags != null && folderFilter.Tags.Any() && !folderFilter.WithoutTags;
+        var searchByTypes = folderFilter.FilterType != FilterType.None && folderFilter.FilterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
-        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds)
-            : await BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
+        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, folderFilter.Tags, folderFilter.SubjectId, searchByTags, folderFilter.WithoutTags, searchByTypes, false, folderFilter.ExcludeSubject, folderFilter.SubjectFilter, folderFilter.SubjectEntriesIds)
+            : await BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, folderFilter.Tags, searchByTags, searchByTypes, folderFilter.WithoutTags, folderFilter.ExcludeSubject, folderFilter.SubjectId, folderFilter.SubjectFilter, folderFilter.SubjectEntriesIds);
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(folderFilter.SearchText));
+            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, folderFilter.SearchText, SearchType.Any);
         }
 
         await foreach (var e in (await FromQueryWithShared(filesDbContext, q)).AsAsyncEnumerable())
@@ -168,41 +157,29 @@ internal class FolderDao(
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
-        IEnumerable<int> roomsIds, 
-        FilterType filterType, 
-        IEnumerable<string> tags, 
-        Guid subjectId, 
-        string searchText, 
-        bool withSubfolders, 
-        bool withoutTags, 
-        bool excludeSubject, 
-        ProviderFilter provider, 
-        SubjectFilter subjectFilter, 
-        IEnumerable<string> subjectEntriesIds, 
-        IEnumerable<int> parentsIds)
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds)
     {
-        if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
+        if (CheckInvalidFilter(folderFilter.FilterType) || folderFilter.Provider != ProviderFilter.None)
         {
             yield break;
         }
 
-        var filter = GetRoomTypeFilter(filterType);
+        var filter = GetRoomTypeFilter(folderFilter.FilterType);
 
-        var searchByTags = tags != null && tags.Any() && !withoutTags;
-        var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
+        var searchByTags = folderFilter.Tags != null && folderFilter.Tags.Any() && !folderFilter.WithoutTags;
+        var searchByTypes = folderFilter.FilterType != FilterType.None && folderFilter.FilterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds.Contains(f.ParentId)));
 
-        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds)
-            : await BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
+        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, folderFilter.Tags, folderFilter.SubjectId, searchByTags, folderFilter.WithoutTags, searchByTypes, false, folderFilter.ExcludeSubject, folderFilter.SubjectFilter, folderFilter.SubjectEntriesIds)
+            : await BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, folderFilter.Tags, searchByTags, searchByTypes, folderFilter.WithoutTags, folderFilter.ExcludeSubject, folderFilter.SubjectId, folderFilter.SubjectFilter, folderFilter.SubjectEntriesIds);
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(folderFilter.SearchText));
 
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
+            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, folderFilter.SearchText, SearchType.Any);
         }
 
         await foreach (var e in (await FromQueryWithShared(filesDbContext, q)).AsAsyncEnumerable())
@@ -1444,14 +1421,12 @@ internal class FolderDao(
         }
     }
 
-    public IAsyncEnumerable<Folder<int>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+    public IAsyncEnumerable<Folder<int>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
 
-    public IAsyncEnumerable<Folder<int>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<int> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
-        string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+    public IAsyncEnumerable<Folder<int>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<int> roomsIds, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }

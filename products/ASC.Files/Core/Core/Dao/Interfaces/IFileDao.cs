@@ -82,16 +82,10 @@ public interface IFileDao<T>
     ///     Gets the file (s) by ID (s) for share
     /// </summary>
     /// <param name="fileIds">id file</param>
-    /// <param name="filterType"></param>
-    /// <param name="subjectGroup"></param>
-    /// <param name="subjectID"></param>
-    /// <param name="searchText"></param>
-    /// <param name="extension"></param>
-    /// <param name="searchInContent"></param>
+    /// <param name="fileFilter"></param>
     /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FileFilter fileFilter, bool checkShared = false);
 
     /// <summary>
     /// 
@@ -105,12 +99,7 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="parentId">folder id</param>
     /// <param name="orderBy"></param>
-    /// <param name="filterType">filterType type</param>
-    /// <param name="subjectGroup"></param>
-    /// <param name="subjectID"></param>
-    /// <param name="searchText"> </param>
-    /// <param name="extension"></param>
-    /// <param name="searchInContent"></param>
+    /// <param name="fileFilter"></param>
     /// <param name="withSubfolders"> </param>
     /// <param name="excludeSubject"> </param>
     /// <param name="offset"></param>
@@ -120,8 +109,7 @@ public interface IFileDao<T>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
-    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FileFilter fileFilter, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
     /// Get stream of file
@@ -263,15 +251,9 @@ public interface IFileDao<T>
     /// Search files in SharedWithMe &amp; Projects
     /// </summary>
     /// <param name="parentIds"></param>
-    /// <param name="filterType"></param>
-    /// <param name="subjectGroup"></param>
-    /// <param name="subjectID"></param>
-    /// <param name="searchText"></param>
-    /// <param name="extension"></param>
-    /// <param name="searchInContent"></param>
+    /// <param name="fileFilter"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent);
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FileFilter fileFilter);
     /// <summary>
     /// Search the list of files containing text
     /// Only in TMFileDao
@@ -312,8 +294,7 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
+    Task<int> GetFilesCountAsync(T parentId, FileFilter fileFilter, bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
 
     Task SetCustomOrder(T fileId, T parentFolderId, int order);
 

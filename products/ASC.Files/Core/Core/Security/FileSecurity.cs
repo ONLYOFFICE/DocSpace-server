@@ -1308,10 +1308,10 @@ public class FileSecurity(IDaoFactory daoFactory,
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
-        var roomsEntries = await folderDao.GetRoomsAsync(rootFoldersIds, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject,
-            provider, subjectFilter, subjectEntries).ToListAsync();
-        var thirdPartyRoomsEntries = await folderThirdPartyDao.GetFakeRoomsAsync(searchArea, filterType, tagNames, subjectId, search, withoutTags, 
-            excludeSubject, provider, subjectFilter, subjectEntries).ToListAsync();
+        var roomsEntries = await folderDao.GetRoomsAsync(rootFoldersIds, withSubfolders, new FolderFilter() { FilterType = filterType, Tags = tagNames, SubjectId = subjectId,
+            SearchText = search, WithoutTags = withoutTags, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter, SubjectEntriesIds = subjectEntries}).ToListAsync();
+        var thirdPartyRoomsEntries = await folderThirdPartyDao.GetFakeRoomsAsync(searchArea, new FolderFilter(){ FilterType = filterType, Tags = tagNames, SubjectId = subjectId, SearchText = search,
+            WithoutTags = withoutTags, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter, SubjectEntriesIds = subjectEntries}).ToListAsync();
 
         entries.AddRange(roomsEntries);
         entries.AddRange(thirdPartyRoomsEntries);
@@ -1320,16 +1320,25 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             List<File<int>> files;
             List<File<string>> thirdPartyFiles;
+            var fileFilter = new FileFilter
+            {
+                FilterType = FilterType.None,
+                SubjectGroup = false,
+                SubjectID = Guid.Empty,
+                SearchText = search,
+                Extension = null,
+                SearchInContent = searchInContent
+            };
 
             if (!string.IsNullOrEmpty(search))
             {
-                files = await fileDao.GetFilesAsync(roomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
-                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(f => f.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+                files = await fileDao.GetFilesAsync(roomsEntries.Select(r => r.Id), fileFilter).ToListAsync();
+                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(f => f.Id), fileFilter).ToListAsync();
             }
             else
             {
-                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => DocSpaceHelper.IsRoom(r.FolderType)).Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
-                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => DocSpaceHelper.IsRoom(r.FolderType)).Select(r => r.Id), fileFilter).ToListAsync();
+                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(r => r.Id), fileFilter).ToListAsync();
             }
 
             entries.AddRange(files);
@@ -1393,16 +1402,24 @@ public class FileSecurity(IDaoFactory daoFactory,
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
-        var rooms = await folderDao.GetRoomsAsync(internalRoomsRecords.Keys, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
-             .Where(r => Filter(r, internalRoomsRecords)).ToListAsync();
-        var thirdPartyRooms = await folderThirdPartyDao.GetFakeRoomsAsync(searchArea, thirdPartyRoomsRecords.Keys, filterType,
-                tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
-            .Where(r => Filter(r, thirdPartyRoomsRecords)).ToListAsync();
+        var rooms = await folderDao.GetRoomsAsync(internalRoomsRecords.Keys, withSubfolders, new FolderFilter{ FilterType = filterType, Tags = tagNames, SubjectId = subjectId, SearchText = search,
+            WithoutTags = withoutTags, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter, SubjectEntriesIds = subjectEntries}, rootFoldersIds).Where(r => Filter(r, internalRoomsRecords)).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetFakeRoomsAsync(searchArea, thirdPartyRoomsRecords.Keys, new FolderFilter{ FilterType = filterType, Tags = tagNames, SubjectId = subjectId,
+            SearchText = search, WithoutTags = withoutTags, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter, SubjectEntriesIds = subjectEntries}).Where(r => Filter(r, thirdPartyRoomsRecords)).ToListAsync();
 
         if (withSubfolders && filterType != FilterType.FoldersOnly)
         {
-            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
-            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+            var fileFilter = new FileFilter
+            {
+                FilterType = FilterType.None,
+                SubjectGroup = false,
+                SubjectID = Guid.Empty,
+                SearchText = search,
+                Extension = null,
+                SearchInContent = searchInContent
+            };
+            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), fileFilter).ToListAsync();
+            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), fileFilter).ToListAsync();
 
             entries.AddRange(files.Where(f => Filter(f, internalRoomsRecords)));
             entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRoomsRecords)));
@@ -1516,7 +1533,16 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var fileFilter = new FileFilter
+            {
+                FilterType = filterType,
+                SubjectGroup = subjectGroup,
+                SubjectID = subjectID,
+                SearchText = searchText,
+                Extension = extension,
+                SearchInContent = searchInContent
+            };
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), fileFilter);
             var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
 
             await foreach (var x in files)
@@ -1556,7 +1582,16 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (filterType != FilterType.FoldersOnly && withSubfolders)
         {
-            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var fileFilter = new FileFilter
+            {
+                FilterType = filterType,
+                SubjectGroup = subjectGroup,
+                SubjectID = subjectID,
+                SearchText = searchText,
+                Extension = extension,
+                SearchInContent = searchInContent
+            };
+            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, fileFilter);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
             entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
         }
@@ -1655,7 +1690,16 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var fileFilter = new FileFilter
+            {
+                FilterType = filterType,
+                SubjectGroup = subjectGroup,
+                SubjectID = subjectID,
+                SearchText = searchText,
+                Extension = extension,
+                SearchInContent = searchInContent
+            };
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), fileFilter);
             var privateFolder = await globalFolder.GetFolderPrivacyAsync<T>(daoFactory);
 
             await foreach (var x in files)
@@ -1695,7 +1739,16 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (filterType != FilterType.FoldersOnly && withSubfolders)
         {
-            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var fileFilter = new FileFilter
+            {
+                FilterType = filterType,
+                SubjectGroup = subjectGroup,
+                SubjectID = subjectID,
+                SearchText = searchText,
+                Extension = extension,
+                SearchInContent = searchInContent
+            };
+            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, fileFilter);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
             entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
         }

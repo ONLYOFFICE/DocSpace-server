@@ -295,7 +295,20 @@ public class ProductEntryPoint : Product
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
         var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, FilterType.None, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+        var folderFilter = new FolderFilter()
+        {
+            FilterType = FilterType.None,
+            Tags = null,
+            SubjectId = Guid.Empty,
+            SearchText = null,
+            WithoutTags = false,
+            ExcludeSubject = false,
+            Provider = ProviderFilter.None,
+            SubjectFilter = SubjectFilter.Owner,
+            SubjectEntriesIds = null
+        };
+
+        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, false, folderFilter).ToListAsync();
 
         foreach (var room in rooms)
         {
