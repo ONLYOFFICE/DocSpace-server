@@ -30,8 +30,8 @@ namespace ASC.Web.Files.Core.Entries;
 [JsonConverter(typeof(EncryptionKeyTypeConverter))]
 public enum EncryptionKeyType
 {
-    Private,
-    Public
+    Sign,
+    Crypt
 }
 
 public class EncryptionKeyTypeConverter : System.Text.Json.Serialization.JsonConverter<EncryptionKeyType>
@@ -43,34 +43,31 @@ public class EncryptionKeyTypeConverter : System.Text.Json.Serialization.JsonCon
             return (EncryptionKeyType)result;
         }
 
-        if (reader.TokenType == JsonTokenType.String && EncryptionKeyTypeExtensions.TryParse(reader.GetString(), out var share))
+        if (reader.TokenType == JsonTokenType.String && EncryptionKeyTypeExtensions.TryParse(reader.GetString(), true, out var share))
         {
             return share;
         }
 
-        return EncryptionKeyType.Private;
+        return EncryptionKeyType.Sign;
     }
 
     public override void Write(Utf8JsonWriter writer, EncryptionKeyType value, JsonSerializerOptions options)
     {
-        writer.WriteNumberValue((int)value);
+        writer.WriteStringValue(value.ToStringFast());
     }
 }
 
 public class EncryptionKeyDto : IMapFrom<EncryptionKeyRequestDto>
 {
-    public Guid Id { get; set; }
-    public string Key { get; set; }
+    public string Id { get; set; }
     public EncryptionKeyType Type { get; set; }
-    public EncryptionKeyValueDto Value { get; set; }
+    public DateTime Date { get; set; }
+    public string Version { get; set; }
+    public string PublicKey { get; set; }
+    public string PrivateKey { get; set; }
+    public string Salt { get; set; }
 }
 
-public class EncryptionKeyValueDto: IMapFrom<EncryptionKeyValueRequestDto>
-{
-    public string Version { get; set; }
-    public string Name { get; set; }
-    public DateTime Date { get; set; }
-}
 
 [Scope]
 public class EncryptionKeyPairDtoHelper(
@@ -97,12 +94,12 @@ public class EncryptionKeyPairDtoHelper(
 
         foreach (var keyPair in keyPairs)
         {
-            var keyPairSettings = currentAddressString.FirstOrDefault(r => r.Id == keyPair.Id);
-            if (keyPairSettings != null)
+            var index = currentAddressString.FindIndex(r=> r.Id == keyPair.Id);
+            if (index > -1)
             {
                 if (replace)
                 {
-                    keyPairSettings.Value = keyPair.Value;
+                    currentAddressString[index] = keyPair;
                 }
             }
             else if (!replace)
@@ -166,7 +163,6 @@ public class EncryptionKeyPairDtoHelper(
             }
             
             var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, _jsonSerializerOptions)
-                .Where(r => r.Id == share.Id)//r.UserId == share.Id
                 .ToList();
             
             return fileKeyPair;
@@ -178,7 +174,7 @@ public class EncryptionKeyPairDtoHelper(
         return fileKeysPair.ToList();
     }
 
-    public async Task<List<EncryptionKeyDto>> DeleteAsync(IEnumerable<Guid> id)
+    public async Task<List<EncryptionKeyDto>> DeleteAsync(string id)
     {
         var currentSettings = await GetKeyPairAsync();
         if(currentSettings == null)
@@ -186,16 +182,15 @@ public class EncryptionKeyPairDtoHelper(
             return null;
         }
 
-        currentSettings.RemoveAll(r => id.Contains(r.Id));
+        currentSettings.RemoveAll(r => r.Id == id);
 
-        await Save(currentSettings);
-
-        return currentSettings;
+        return await Save(currentSettings);
     }
 
-    private async Task Save(IEnumerable<EncryptionKeyDto> currentSettings)
+    private async Task<List<EncryptionKeyDto>> Save(List<EncryptionKeyDto> currentSettings)
     {
         var keyPairString = JsonSerializer.Serialize(currentSettings);
         await encryptionLoginProvider.SetKeysAsync(authContext.CurrentAccount.ID, keyPairString);
+        return currentSettings;
     }
 }

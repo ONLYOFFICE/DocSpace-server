@@ -76,7 +76,7 @@ public class AccountLinker(
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
-        return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
+        return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDbAsync);
     }
 
     public async Task AddLinkAsync(Guid obj, LoginProfile profile)
@@ -108,19 +108,22 @@ public class AccountLinker(
         await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
     }
 
-    public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
+    public async Task RemoveProviderAsync(Guid obj, string provider = null, string hashId = null)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
 
-        var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
+        var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj.ToString(), provider, hashId);
 
-        accountLinkContext.AccountLinks.Remove(accountLink);
-        await accountLinkContext.SaveChangesAsync();
+        if (accountLink != null)
+        {
+            accountLinkContext.AccountLinks.Remove(accountLink);
+            await accountLinkContext.SaveChangesAsync();
 
-        accountLinkerStorage.RemoveFromCache(obj);
+            accountLinkerStorage.RemoveFromCache(obj.ToString());
+        }
     }
 
-    private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
+    private async Task<List<LoginProfile>> GetLinkedProfilesFromDbAsync(string obj)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         //Retrieve by unique id

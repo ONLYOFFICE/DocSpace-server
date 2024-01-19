@@ -28,15 +28,11 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class EncryptionKeyRequestDto
 {
-    public Guid Id { get; set; }
-    public string Key { get; set; }
+    public string Id { get; set; }
     public EncryptionKeyType Type { get; set; }
-    public EncryptionKeyValueRequestDto Value { get; set; }
-}
-
-public class EncryptionKeyValueRequestDto
-{
-    public string Version { get; set; }
-    public string Name { get; set; }
     public DateTime Date { get; set; }
+    public string Version { get; set; }
+    public string PublicKey { get; set; }
+    public string PrivateKey { get; set; }
+    public string Salt { get; set; }
 }
