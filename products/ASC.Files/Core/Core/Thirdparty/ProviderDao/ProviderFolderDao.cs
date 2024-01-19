@@ -76,9 +76,9 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return await folderDao.GetRootFolderByFileAsync(selector.ConvertId(fileId));
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter filesFilter, IEnumerable<int> parentsIds = null)
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
-        ArgumentNullException.ThrowIfNull(filesFilter);
+        ArgumentNullException.ThrowIfNull(folderFilter);
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
         foreach (var group in _selectorFactory.GetSelectors(roomsIds))
@@ -95,24 +95,12 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                 .SelectMany(matchedId =>
                 {
                     var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
-                    var folderFilter = new FolderFilter
-                    {
-                        FilterType = filesFilter.FilterType,
-                        Tags = filesFilter.Tags,
-                        SubjectId = filesFilter.SubjectId,
-                        SearchText = filesFilter.SearchText,
-                        WithoutTags = filesFilter.WithoutTags,
-                        ExcludeSubject = filesFilter.ExcludeSubject,
-                        Provider = filesFilter.Provider,
-                        SubjectFilter = filesFilter.SubjectFilter,
-                        SubjectEntriesIds = filesFilter.SubjectEntriesIds
-                    };
                     return folderDao.GetRoomsAsync(matchedId.Select(selectorLocal.ConvertId).ToList(), withSubfolders, folderFilter);
                 })
                 .Where(r => r != null));
         }
 
-        result = FilterByProvider(result, filesFilter.Provider);
+        result = FilterByProvider(result, folderFilter.Provider);
 
         return result.Distinct();
     }
