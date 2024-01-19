@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -30,7 +30,7 @@ using File = System.IO.File;
 
 namespace ASC.Web.Files.Services.FFmpegService;
 
-[Singletone]
+[Singleton]
 public class FFmpegService
 {
     public List<string> MustConvertable
@@ -39,7 +39,7 @@ public class FFmpegService
         {
             if (string.IsNullOrEmpty(_fFmpegPath))
             {
-                return new List<string>();
+                return [];
             }
 
             return _convertableMedia;
@@ -47,11 +47,11 @@ public class FFmpegService
     }
 
     private readonly List<string> _convertableMedia;
-    private readonly List<string> _fFmpegExecutables = new List<string>() { "ffmpeg", "avconv" };
+    private readonly List<string> _fFmpegExecutables = ["ffmpeg", "avconv"];
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
-    private readonly List<string> _fFmpegFormats;
+    private readonly ImmutableList<string> _fFmpegFormats;
 
     private readonly ILogger<FFmpegService> _logger;
 
@@ -94,7 +94,8 @@ public class FFmpegService
         _fFmpegPath = configuration["files:ffmpeg:value"];
         _fFmpegArgs = configuration["files:ffmpeg:args"] ?? "-i - -preset ultrafast -movflags frag_keyframe+empty_moov -f {0} -";
         _fFmpegThumbnailsArgs = configuration["files:ffmpeg:thumbnails:args"] ?? "-i \"{0}\" -frames:v 1 \"{1}\" -y";
-        _fFmpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>() ?? FileUtility.ExtsVideo;
+        var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
+        _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
         _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? Array.Empty<string>()).ToList();
 
@@ -185,6 +186,6 @@ public class FFmpegService
 
         await ProcessLog(process.StandardError.BaseStream);
 
-        process.WaitForExit();
+        await process.WaitForExitAsync();
     }
 }

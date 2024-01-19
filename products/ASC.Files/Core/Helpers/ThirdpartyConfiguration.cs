@@ -1,66 +1,49 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Helpers;
 
-[Singletone]
-public class ThirdpartyConfigurationData
+[Singleton]
+public class ThirdpartyConfigurationData(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
     private List<string> _thirdPartyProviders;
-    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= _configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ?? new List<string>();
-    public ThirdpartyConfigurationData(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ??
+                                                                        [];
 }
 
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
-public class ThirdpartyConfiguration
+public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, ConsumerFactory consumerFactory)
 {
-    private readonly ThirdpartyConfigurationData _configuration;
-    private readonly Lazy<BoxLoginProvider> _boxLoginProvider;
-    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider;
-    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider;
-    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider;
-    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider;
+    private readonly Lazy<BoxLoginProvider> _boxLoginProvider = new(consumerFactory.Get<BoxLoginProvider>);
+    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider = new(consumerFactory.Get<DropboxLoginProvider>);
+    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider = new(consumerFactory.Get<OneDriveLoginProvider>);
+    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider = new(consumerFactory.Get<DocuSignLoginProvider>);
+    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider = new(consumerFactory.Get<GoogleLoginProvider>);
 
-    public ThirdpartyConfiguration(
-        ThirdpartyConfigurationData configuration,
-        ConsumerFactory consumerFactory)
-    {
-        _configuration = configuration;
-        _boxLoginProvider = new Lazy<BoxLoginProvider>(() => consumerFactory.Get<BoxLoginProvider>());
-        _dropboxLoginProvider = new Lazy<DropboxLoginProvider>(() => consumerFactory.Get<DropboxLoginProvider>());
-        _oneDriveLoginProvider = new Lazy<OneDriveLoginProvider>(() => consumerFactory.Get<OneDriveLoginProvider>());
-        _docuSignLoginProvider = new Lazy<DocuSignLoginProvider>(() => consumerFactory.Get<DocuSignLoginProvider>());
-        _googleLoginProvider = new Lazy<GoogleLoginProvider>(() => consumerFactory.Get<GoogleLoginProvider>());
-    }
-
-    public List<string> ThirdPartyProviders => _configuration.ThirdPartyProviders;
+    private List<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
     public bool SupportInclusion(IDaoFactory daoFactory)
     {
@@ -105,42 +88,42 @@ public class ThirdpartyConfiguration
 
         if (SupportBoxInclusion)
         {
-            result.Add(new List<string> { "Box", _boxLoginProvider.Value.ClientID, _boxLoginProvider.Value.RedirectUri });
+            result.Add(["Box", _boxLoginProvider.Value.ClientID, _boxLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportDropboxInclusion)
         {
-            result.Add(new List<string> { "DropboxV2", _dropboxLoginProvider.Value.ClientID, _dropboxLoginProvider.Value.RedirectUri });
+            result.Add(["DropboxV2", _dropboxLoginProvider.Value.ClientID, _dropboxLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportGoogleDriveInclusion)
         {
-            result.Add(new List<string> { "GoogleDrive", _googleLoginProvider.Value.ClientID, _googleLoginProvider.Value.RedirectUri });
+            result.Add(["GoogleDrive", _googleLoginProvider.Value.ClientID, _googleLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportOneDriveInclusion)
         {
-            result.Add(new List<string> { "OneDrive", _oneDriveLoginProvider.Value.ClientID, _oneDriveLoginProvider.Value.RedirectUri });
+            result.Add(["OneDrive", _oneDriveLoginProvider.Value.ClientID, _oneDriveLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportSharePointInclusion)
         {
-            result.Add(new List<string> { "SharePoint" });
+            result.Add(["SharePoint"]);
         }
 
         if (SupportkDriveInclusion)
         {
-            result.Add(new List<string> { "kDrive" });
+            result.Add(["kDrive"]);
         }
 
         if (SupportYandexInclusion)
         {
-            result.Add(new List<string> { "Yandex" });
+            result.Add(["Yandex"]);
         }
 
         if (SupportWebDavInclusion)
         {
-            result.Add(new List<string> { "WebDav" });
+            result.Add(["WebDav"]);
         }
 
         //Obsolete BoxNet, DropBox, Google, SkyDrive,

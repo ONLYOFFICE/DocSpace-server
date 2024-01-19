@@ -1,30 +1,28 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using MimeMapping = ASC.Common.Web.MimeMapping;
 
 namespace ASC.Web.Files.ThirdPartyApp;
 
@@ -178,11 +176,10 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var token = await _tokenHelper.GetTokenAsync(AppAttr);
         var driveFile = GetDriveFile(fileId, token);
-        var editable = false;
 
         if (driveFile == null)
         {
-            return (null, editable);
+            return (null, false);
         }
 
         var jsonFile = JObject.Parse(driveFile);
@@ -202,7 +199,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             file.CreateByString = owners[0]["displayName"].Value<string>();
         }
 
-        editable = jsonFile["capabilities"]["canEdit"].Value<bool>();
+        var editable = jsonFile["capabilities"]["canEdit"].Value<bool>();
 
         return (file, editable);
     }
@@ -309,21 +306,17 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             httpClient = _clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
 
             _logger.DebugGoogleDriveAppSaveFileStream2(result);
         }
         catch (HttpRequestException e)
         {
             _logger.ErrorGoogleDriveAppSaveFileStream(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
 
             throw;
@@ -376,7 +369,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
                 throw new Exception("Profile is null");
             }
 
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.TenantId, userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
 
             if (isNew)
             {
@@ -465,7 +458,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             var validateResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(fileId + userId, auth, _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                 _logger.ErrorGoogleDriveAppValidate(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
@@ -501,7 +494,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             var contentLength = jsonFile.Value<string>("size");
             _logger.DebugGoogleDriveAppGetFileStreamcontentLength(contentLength);
-            context.Response.Headers.Add("Content-Length", contentLength);
+            context.Response.Headers.Append("Content-Length", contentLength);
 
             _logger.DebugGoogleDriveAppGetFileStreamDownloadUrl(downloadUrl);
             var request = new HttpRequestMessage
@@ -622,7 +615,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugGoogleDriveApAddLinker(googleUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), googleUserId, ProviderConstants.Google);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, googleUserId, ProviderConstants.Google);
     }
 
     private async Task<UserInfoWrapper> GetUserInfoAsync(Token token)
@@ -774,12 +767,8 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
 
             _logger.DebugGoogleDriveAppCreateFileResponse(result);
 
@@ -789,9 +778,9 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             _logger.ErrorGoogleDriveAppCreateFile(e);
 
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
         }
 
@@ -863,9 +852,9 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 _logger.ErrorGoogleDriveAppDownLoadExportLink(e);
 
-                if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+                if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
                 }
             }
         }
@@ -877,7 +866,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 _logger.ErrorGoogleDriveAppConvertUrl(FileSizeComment.FilesSizeToString(jsonFile.Value<int>("size")));
 
-                throw new Exception(FilesCommonResource.ErrorMassage_DocServiceException + " (convert)");
+                throw new Exception(FilesCommonResource.ErrorMessage_DocServiceException + " (convert)");
             }
 
             var toExt = _fileUtility.GetInternalExtension(fileName);

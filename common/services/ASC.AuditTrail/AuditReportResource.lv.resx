@@ -625,13 +625,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Telpa ir izdzēsta</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Saite ir izveidota. Loma: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Saite ir izdzēsta</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Saite ir atjaunināta. Loma: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -717,5 +717,20 @@
   </data>
   <data name="UserUpdatedEmail" xml:space="preserve">
     <value>E-pasta adrese ir atjaunināta</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Pilsēta</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Valsts</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Izveidota ārējā saite: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Izdzēsta ārējā saite: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Atjaunināta ārējā saite: {0}. Loma: {1}</value>
   </data>
 </root>

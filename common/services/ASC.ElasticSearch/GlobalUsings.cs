@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,6 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
-global using System.Data;
 global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Text;
@@ -45,10 +44,7 @@ global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Log;
 global using ASC.ElasticSearch.Service;
 
-global using Autofac;
-
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;

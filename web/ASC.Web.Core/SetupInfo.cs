@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Studio.Core;
 
-[Singletone]
+[Singleton]
 public class SetupInfo
 {
     private static string _webAutotestSecretEmail;
@@ -44,8 +44,6 @@ public class SetupInfo
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
     public List<CultureInfo> EnabledCultures { get; private set; }
-    private List<CultureInfo> EnabledCulturesPersonal { get; set; }
-    public List<KeyValuePair<string, CultureInfo>> PersonalCultures { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -70,7 +68,6 @@ public class SetupInfo
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
-    public string UserForum { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
     public TimeSpan ValidEmailKeyInterval { get; private set; }
@@ -134,19 +131,11 @@ public class SetupInfo
         DownloadForAndroidDocuments = GetAppSettings("web.download.for.android.doc", "https://play.google.com/store/apps/details?id=com.onlyoffice.documents");
 
         EnabledCultures = GetAppSettings("web:cultures", "en-US")
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .OrderBy(l => l.DisplayName)
-            .ToList();
-
-        EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
             .ToList();
 
-        PersonalCultures = GetPersonalCultures();
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
         AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
@@ -160,7 +149,6 @@ public class SetupInfo
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
-        UserForum = GetAppSettings("web.user-forum", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
 
         ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));
@@ -169,18 +157,18 @@ public class SetupInfo
         SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
         _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();
 
-        RecaptchaPublicKey = GetAppSettings("web.recaptcha.public-key", null);
-        RecaptchaPrivateKey = GetAppSettings("web.recaptcha.private-key", "");
-        RecaptchaVerifyUrl = GetAppSettings("web.recaptcha.verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
+        RecaptchaPublicKey = GetAppSettings("web:recaptcha:public-key", null);
+        RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
+        RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
 
-        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
         ShareFacebookUrl = GetAppSettings("web.share.facebook", "");
         ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");
         FontOpenSansUrl = GetAppSettings("web.font.opensans.url", "");
         StartProductList = GetAppSettings("web.start.product.list", "");
-        SsoSamlLoginUrl = GetAppSettings("web.sso.saml.login.url", "");
-        SsoSamlLogoutUrl = GetAppSettings("web.sso.saml.logout.url", "");
+        SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
+        SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
         _hideSettings = GetAppSettings("web.hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -239,61 +227,11 @@ public class SetupInfo
         {
             configSetting = configSetting.Trim();
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter != null && converter.CanConvertFrom(typeof(string)))
+            if (converter.CanConvertFrom(typeof(string)))
             {
                 return (T)converter.ConvertFromString(configSetting);
             }
         }
         return defaultValue;
-    }
-
-    private List<KeyValuePair<string, CultureInfo>> GetPersonalCultures()
-    {
-        var result = new Dictionary<string, CultureInfo>();
-
-        foreach (var culture in EnabledCulturesPersonal)
-        {
-            if (result.ContainsKey(culture.TwoLetterISOLanguageName))
-            {
-                result.Add(culture.Name, culture);
-            }
-            else
-            {
-                result.Add(culture.TwoLetterISOLanguageName, culture);
-            }
-        }
-
-        return result.OrderBy(item => item.Value.DisplayName).ToList();
-    }
-
-    public KeyValuePair<string, CultureInfo> GetPersonalCulture(string lang)
-    {
-        foreach (var item in PersonalCultures)
-        {
-            if (string.Equals(item.Key, lang, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return item;
-            }
-        }
-
-        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase));
-
-        if (cultureInfo == null)
-        {
-            cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        if (cultureInfo != null)
-        {
-            foreach (var item in PersonalCultures)
-            {
-                if (item.Value == cultureInfo)
-                {
-                    return item;
-                }
-            }
-        }
-
-        return new KeyValuePair<string, CultureInfo>(lang, cultureInfo);
     }
 }

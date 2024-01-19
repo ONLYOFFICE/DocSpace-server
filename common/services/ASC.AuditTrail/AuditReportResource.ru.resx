@@ -685,13 +685,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Комната удалена</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Ссылка создана. Роль: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Ссылка удалена</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Ссылка обновлена. Роль: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -717,5 +717,20 @@
   </data>
   <data name="TagsDeleted" xml:space="preserve">
     <value>Теги удалены: {0}</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Страна</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Город</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Внешняя ссылка создана: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Внешняя ссылка удалена: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Внешняя ссылка обновлена: {0}. Роль: {1}</value>
   </data>
 </root>

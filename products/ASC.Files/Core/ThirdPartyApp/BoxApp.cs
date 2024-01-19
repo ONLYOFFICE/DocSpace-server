@@ -1,29 +1,28 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.Web.Files.ThirdPartyApp;
 
@@ -163,7 +162,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         if (boxFile == null)
         {
-            return (null, editable);
+            return (null, true);
         }
 
         var jsonFile = JObject.Parse(boxFile);
@@ -190,16 +189,13 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
 
         var locked = jsonFile.Value<JObject>("lock");
-        if (locked != null)
+        var lockedBy = locked?.Value<JObject>("created_by");
+        if (lockedBy != null)
         {
-            var lockedBy = locked.Value<JObject>("created_by");
-            if (lockedBy != null)
-            {
-                var lockedUserId = lockedBy.Value<string>("id");
-                _logger.DebugBoxAppLockedBy(lockedUserId);
+            var lockedUserId = lockedBy.Value<string>("id");
+            _logger.DebugBoxAppLockedBy(lockedUserId);
 
-                editable = await CurrentUserAsync(lockedUserId);
-            }
+            editable = await CurrentUserAsync(lockedUserId);
         }
 
         return (file, editable);
@@ -315,21 +311,16 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
-
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
             _logger.DebugBoxAppSaveFileResponse(result);
         }
         catch (HttpRequestException e)
         {
             _logger.ErrorBoxAppSaveFile(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
 
             throw;
@@ -349,14 +340,11 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var boxUserId = context.Request.Query["userId"];
 
-        if (_authContext.IsAuthenticated)
+        if (_authContext.IsAuthenticated && !(await CurrentUserAsync(boxUserId)))
         {
-            if (!(await CurrentUserAsync(boxUserId)))
-            {
-                _logger.DebugBoxAppLogout(boxUserId);
-                _cookiesManager.ClearCookies(CookiesType.AuthKey);
-                _authContext.Logout();
-            }
+            _logger.DebugBoxAppLogout(boxUserId);
+            _cookiesManager.ClearCookies(CookiesType.AuthKey);
+            _authContext.Logout();
         }
 
         if (!_authContext.IsAuthenticated)
@@ -372,7 +360,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
                 throw new Exception("Profile is null");
             }
 
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.TenantId, userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
 
             if (isNew)
             {
@@ -410,7 +398,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             var validateResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(fileId + userId, auth, _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                 _logger.ErrorBoxAppValidateError(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
@@ -474,7 +462,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugBoxAppAddLinker(boxUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), boxUserId, ProviderConstants.Box);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, boxUserId, ProviderConstants.Box);
     }
 
     private async Task<UserInfoWrapper> GetUserInfo(Token token)
@@ -500,13 +488,6 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         }
 
         var boxUserInfo = JObject.Parse(resultResponse);
-        if (boxUserInfo == null)
-        {
-            _logger.ErrorInUserInfoRequest();
-
-            return null;
-        }
-
         var email = boxUserInfo.Value<string>("login");
         var userInfo = await _userManager.GetUserByEmailAsync(email);
         if (Equals(userInfo, Constants.LostUser))
@@ -515,7 +496,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 FirstName = boxUserInfo.Value<string>("name"),
                 Email = email,
-                MobilePhone = boxUserInfo.Value<string>("phone"),
+                MobilePhone = boxUserInfo.Value<string>("phone")
             };
 
             var cultureName = boxUserInfo.Value<string>("language");

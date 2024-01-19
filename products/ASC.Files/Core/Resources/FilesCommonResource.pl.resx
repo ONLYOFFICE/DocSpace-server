@@ -127,136 +127,136 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>anulowano</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Nieprawidłowe zapytanie.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Nie można wybrać tego użytkownika</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Konwersja zajmuje zbyt dużo czasu.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>W usłudze dokumentów wystąpił błąd</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Plik jest otwarty do edycji przez {0}. Obecnie funkcja współtworzenia nie jest obsługiwana dla tego formatu pliku.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Plik jest otwarty do edycji w aplikacji mobilnej przez {0}</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Pusty plik</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Żądany plik nie został znaleziony</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>Pliki większe niż {0} nie będą konwerterowane</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Pliki większe niż {0} nie będą skopiowane</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>Pliki większe niż {0} nie będą edytowane</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Pliki większe niż {0} nie zostaną przeniesione</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Nie można skopiować folderu do jego podfolderu</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Żądany folder nie został odnaleziony</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Niepoprawny tytuł</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Plik jest obecnie zablokowany przez innego użytkownika</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Co najmniej {0} wiadomości mail nie mogło zostać wysłane. Proszę odwiedzić moduł mail aby zobaczyć, co jest przyczyną problemu.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Zbyt wiele pobrań.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Niestety, ten format pliku nie jest obsługiwany</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autor zapisu jest nieznany</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Plik został uszkodzony podczas próby jego zapisania</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Nie udało się pobrać pliku do zapisu</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby wykonać to działanie</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nie można zezwolić na {0} dostawcy z podanych poświadczeń.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby utworzyć</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Nie można usunąć pliku gdyż jest on otwarty w trybie edycji</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Nie można usunąć folderu, ponieważ jeden z plików jest otwarty w trybie edycji</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby usunąć plik</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby usunąć folder</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby edytować plik</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Ten dokument jest edytowany przez ciebie w innej karcie</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby przenieść plik</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby przenieść folder</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby przeglądać ten plik</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby przeglądać zawartość folderu</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby zmienić nazwę pliku</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby zmienić nazwę folderu</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Nie można zaktualizować pliku, ponieważ jest on otwarty w trybie edycji</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby przeglądać zawartość folderu</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Zawartość katalogu oprogramowania firm trzecich nie jest dostępna. Spróbuj ponownie połączyć konto.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Błąd startu edycji pliku</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Nie można zaktualizować pliku, ponieważ jest on otwarty w trybie edycji</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Użytkownik nie znaleziony</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nie możesz wyświetlić podglądu elementów znajdujących się w koszu</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -325,13 +325,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Wysłano formularz</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nowa wersja nie może być taka sama jak obecna</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby skopiować plik</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby skopiować katalog</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -401,7 +401,7 @@
     <value>Szukaj w treści dokumentów</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Dokument OFORM jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
+    <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>Kopia OFORM jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
@@ -411,5 +411,21 @@
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>Przeglądaj i pobieraj współdzielone dokumenty. Przesyłaj pliki do współdzielonych katalogów. Najwyższy poziom kompatybilność z docx, xlsx i pptx gwarantowany.</value>
+  </data>
+  <data name="ProductDescriptionEx" xml:space="preserve">
+    <value>Edytuj dokumenty, udostępniaj je i współpracuj nad nimi w czasie rzeczywistym. Twórz współdzielone dokumenty i zarządzaj nimi, aby cały zespół miał do nich dostęp.
+Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Udostępniony link</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link z zaproszeniem</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksymalna liczba linków: {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Przekroczono maksymalną liczbę prób wpisania hasła. Spróbuj ponownie później</value>
   </data>
 </root>

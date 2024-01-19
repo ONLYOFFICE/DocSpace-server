@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -82,21 +82,6 @@ public static class Actions
     public static readonly INotifyAction EnterpriseWhitelabelGuestWelcomeV1 = new NotifyAction("enterprise_whitelabel_guest_welcome_v1");
     public static readonly INotifyAction OpensourceGuestWelcomeV1 = new NotifyAction("opensource_guest_welcome_v1");
 
-    public static readonly INotifyAction PersonalActivate = new NotifyAction("personal_activate");
-    public static readonly INotifyAction PersonalAfterRegistration1 = new NotifyAction("personal_after_registration1");
-    public static readonly INotifyAction PersonalConfirmation = new NotifyAction("personal_confirmation");
-    public static readonly INotifyAction PersonalEmailChangeV115 = new NotifyAction("personal_change_email_v115");
-    public static readonly INotifyAction PersonalPasswordChangeV115 = new NotifyAction("personal_change_password_v115");
-    public static readonly INotifyAction PersonalProfileDelete = new NotifyAction("personal_profile_delete");
-    public static readonly INotifyAction PersonalAlreadyExist = new NotifyAction("personal_already_exist");
-
-    public static readonly INotifyAction PersonalCustomModeAfterRegistration1 = new NotifyAction("personal_custom_mode_after_registration1");
-    public static readonly INotifyAction PersonalCustomModeConfirmation = new NotifyAction("personal_custom_mode_confirmation");
-    public static readonly INotifyAction PersonalCustomModeEmailChangeV115 = new NotifyAction("personal_custom_mode_change_email_v115");
-    public static readonly INotifyAction PersonalCustomModePasswordChangeV115 = new NotifyAction("personal_custom_mode_change_password_v115");
-    public static readonly INotifyAction PersonalCustomModeProfileDelete = new NotifyAction("personal_custom_mode_profile_delete");
-    public static readonly INotifyAction PersonalCustomModeAlreadyExist = new NotifyAction("personal_custom_mode_already_exist");
-
     public static readonly INotifyAction SaasCustomModeRegData = new NotifyAction("saas_custom_mode_reg_data");
 
     public static readonly INotifyAction StorageEncryptionStart = new NotifyAction("storage_encryption_start");
@@ -139,8 +124,6 @@ public static class Actions
     public static readonly INotifyAction EnterpriseWhitelabelUserActivationV1 = new NotifyAction("enterprise_whitelabel_user_activation_v1");
     public static readonly INotifyAction OpensourceUserActivationV1 = new NotifyAction("opensource_user_activation_v1");
 
-    public static readonly INotifyAction PersonalAfterRegistration14V1 = new NotifyAction("personal_after_registration14_v1");
-
     public static readonly INotifyAction SaasAdminModulesV1 = new NotifyAction("saas_admin_modules_v1");
 
     public static readonly INotifyAction SaasAdminUserAppsTipsV1 = new NotifyAction("saas_admin_user_apps_tips_v1");
@@ -152,4 +135,6 @@ public static class Actions
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodActivation = new NotifyAction("saas_owner_payment_warning_grace_period_activation");
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodLastDay = new NotifyAction("saas_owner_payment_warning_grace_period_last_day");
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodExpired = new NotifyAction("saas_owner_payment_warning_grace_period_expired");
+
+    public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
 } 

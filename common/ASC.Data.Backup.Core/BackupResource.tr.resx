@@ -64,4 +64,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Parola Belirle</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Yedekleme, portalın toplam boyutundan daha büyük</value>
+  </data>
 </root>

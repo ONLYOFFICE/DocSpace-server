@@ -148,136 +148,136 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>無効となりました</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>不正なリクエスト。</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>このユーザーを選択できません</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>変換には時間がかかり過ぎます。</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>文書サービでスエラーが発生してしまいました</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>{0}はファイルを編集しています。そのファイルの形式では、共同編集機能が現在サポートされていません。</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>このファイルは{0}によってモバイルアプリケーションで編集用に開かれています</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>空ファイル</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>必要なファイルが見つかりませんでした</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>{0}より大きくファイルが変換されません</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}より大きくファイルがコピーされません</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>{0}より大きくファイルが編集されません</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}より大きくファイルが移動されません</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>あなたは、そのサブフォルダにフォルダをコピーすることはできません</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>必要なフォルダが見つかりませんでした</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>不適切なタイトル</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>このファイルが別のユーザーによってロックされています</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>少なくとも{0}通のメールメッセージが送信できませんでした。失敗のあり得る原因を確認するためには、「メール」モジュールのページを訪問してください。</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>あまりにも多くのダウンロード。</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>申し訳ありませんが、このファイル形式はサポートされていません</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>保存した人は不明です</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>保存しようとした時に、ファイルが破損してしまいました</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>保存するようにファイルを取得することが失敗してしまいました</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>この操作を実行するための十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>与えられた認証情報で{0}プロバイダで認証できません。</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>作成するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>それが編集用に開かれているため、ファイルを削除することはできません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>のいずれかのファイルが編集用に開かれているため、フォルダを削除することはできません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>ファイルを削除するための十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>フォルダを削除するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>このファイルを編集するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>この文書は、別のタブであなたによって編集されている</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>このファイルを移動するための権限ありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>このフォルダを移動するための権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>ファイルを表示するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>フォルダの内容を表示するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>ファイルの名前を変更するための十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>フォルダの名前を変更するための十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>それが編集のためにオープンされているため、ファイルを更新することはできません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>フォルダの内容を表示するのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>第三者フォルダのコンテンツが利用できません。アカウントを再接続してください。</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>ファイル編集の開始でエラーが発生してしまいました</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>あなたは、編集のために開かれているファイルを更新することはできません</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>ユーザーが見つかりません</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>あなたはごみ箱に要素をプレビューすることはできません</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -299,7 +299,8 @@
     <value>文書を作成したり、編集したり及び共有したりすることができます。同時での共同制作可能もあります。MS Office形式の100%互換性が保証されています。</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>文書を作成したり、編集したり及び共有したりすることができます。チーム全体がアクセスできる共通のドキュメントをご作成およびご管理になれます。docx、xlsx、pptxとの100％の互換性が保証されています。</value>
+    <value>文書を作成したり、編集したり及び共有したりすることができます。チーム全体がアクセスできる共通のドキュメントをご作成およびご管理になれます。
+docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>共有ドキュメントを表示およびダウンロードできます。または、共有フォルダにファイルをアップロードできます。docx、xlsx、pptxとの100％の互換性が保証されています。</value>
@@ -361,13 +362,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>提出されたフォーム</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>新しいバージョンは、現在のと同じにすることはできません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>ファイルをコピーするのに十分な権限がありません</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>フォルダをコピーするのに十分な権限がありません</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -407,12 +408,24 @@
     <value>ルームを固定することはできません</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>記入可能なOFORM文書が出来上がりました。{0}に保存されます</value>
+    <value>記入可能なPDF文書が出来上がりました。{0}に保存されます</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>OFORMのコピーは{0}フォルダーに作成されました。フォームに必要事項を記入し、結果ファイルをPDFまたはDOCXファイルとしてダウンロードしてください。</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>このファイルは、もはや記入用の下書きではありません。</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>共有リンク</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>招待リンク</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>リンクの最大数は {0} を超えることはできません</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>パスワードの入力を何度も試行しすぎました。後で再試行してください</value>
   </data>
 </root>

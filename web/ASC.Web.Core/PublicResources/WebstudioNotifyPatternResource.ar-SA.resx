@@ -1,0 +1,1857 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AcceptDocSpace" xml:space="preserve">
+    <value>قبول</value>
+  </data>
+  <data name="ActionFileCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEdited" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتعديل المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploaded" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام برفع مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewComment" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإضافة تعليق جديد إلى نسخة المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomArchived" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بنقل الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; إلى الأرشيف - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإنشاء غرفة جديدة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بحذف الغرفة: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; أعاد تسمية الغرفة: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم تعيينه كـ &lt;b&gt;{1}&lt;/b&gt; iفي الغرفة: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إضافته للغرفة : &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserCreated" xml:space="preserve">
+    <value>تم إضافة مستخدم DocSpace جديد: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إزالته من الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUsersUpdatedType" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتغير مستوى وصول المستخدمين &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserUpdated" xml:space="preserve">
+    <value>تم تحديث مستخدم DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>قبول</value>
+  </data>
+  <data name="ButtonAccessControlPanel" xml:space="preserve">
+    <value>لوحة التحكم بالوصول</value>
+  </data>
+  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <value>ادخل إلى بوابتك</value>
+  </data>
+  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <value>الوصول إلى مكتب الويب الخاص بك</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>انقر هنا لتنشيط عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>قم بتغيير عنوان البريد الإلكتروني</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>قم بتغيير كلمة المرور</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>غير رقم الهاتف المحمول</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>تهيئة تطبيق المصادقة</value>
+  </data>
+  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+    <value>تعاون في DocSpace</value>
+  </data>
+  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <value>التهيئة الآن</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>تأكيد</value>
+  </data>
+  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+    <value>تأكيد دعوة DocSpace</value>
+  </data>
+  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <value>تأكيد</value>
+  </data>
+  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
+    <value>تأكيد تغيير عنوان البوابة</value>
+  </data>
+  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <value>تأكيد تحديث مالك البوابة</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>تأكيد دعوة الغرفة</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>تأكيد إغلاق الحساب</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>تعطيل البوابة</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>حذف البوابة الإلكترونية</value>
+  </data>
+  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <value>دعوة الآن</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>انقر هنا للانضمام إلى البوابة</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>اترك تعليق</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>إزالة ملف التعريف</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>جدد الآن</value>
+  </data>
+  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <value>طلب مكالمة</value>
+  </data>
+  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <value>حدد خطط التسعير الآن</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>بدء الفترة التجريبية</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>استخدام الخصم</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>زيارة قسم المدفوعات</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}. يرجى تفعيل عنوان بريدك الإلكتروني</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>تأكيد تغيير بريدك الإلكتروني</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText} مساعدة كلمة المرور</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>تأكيد تغيير كلمة المرور الخاصة بك</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}. طلب تغيير الهاتف المحمول</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. إشعار الأمان</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}. تغيير مالك البوابة الإلكترونية</value>
+  </data>
+  <data name="subject_dns_change" xml:space="preserve">
+    <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>احصل على تطبيقات ONLYOFFICE المجانية</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>احصل على تطبيقات ONLYOFFICE المجانية</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 نصائح للعمل الفعّال على مستنداتك</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>5 نصائح للعمل الفعّال على مستنداتك</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>5 نصائح للعمل الفعّال على مستنداتك</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 نصائح للعمل الفعّال على مستنداتك</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>اكتشف اشتراك الأعمال في ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>اكتشف اشتراك الأعمال في ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>اكتشف اشتراك الأعمال في ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>اكتشف اشتراك الأعمال في ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>انضم إلى ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>انضم إلى ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>انضم إلى ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>انضم إلى ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>رسالة مستخدم إلى المسؤولين</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>طلب قسم المبيعات</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>دعوة للانضمام إلى بوابة ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. إنشاء صندوق البريد</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. تغيير كلمة مرور صندوق البريد</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}. خطأ آخر في ترحيل مدخل المنطقة</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}.  بدء ترحيل بوابة منطقة أخرى</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}. اكتمل ترحيل بوابة منطقة أخرى بنجاح</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>إلغاء تنشيط بوابة ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>حذف مدخل ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>تم إلغاء تنشيط Onlyoffice DocSpace</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>حذف ملف التعريف الخاص بك من بوابة ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>قام المستخدم بحذف ملفه الشخصي</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>تم تغيير ملف التعريف الخاص بك في ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}. اكتملت إعادة تعيين بيانات المستخدم</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. فشلت إعادة تعيين بيانات المستخدم</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. اكتملت إزالة بيانات المستخدم</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. فشلت إزالة بيانات المستخدم</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>طلب ترخيص المؤسسة</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>طلب خطة تسعير SaaS</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}. اكتملت الاستعادة</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}. بدأت الاستعادة</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>تكوين مساحة دوك سبيس الخاصة ب ONLYOFFICE</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>سيتم حذف مساحة DocSpace الخاصة بك</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>انضم إلى ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>فترة السماح ل ONLYOFFICE DocSpace الخاص بك تنشيط</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>اشتراك Onlyoffice DocSpace على وشك الانتهاء</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>انتهت صلاحية فترة السماح ل ONLYOFFICE DocSpace الخاص بك</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>فترة السماح ل ONLYOFFICE DocSpace الخاص بك تنتهي غدا</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath} إشعار تغيير ملف تعريف البوابة الإلكترونية</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>ما الجديد في البوابة الإلكترونية $Date</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>رسالة اختبار SMTP</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. فشلت عملية فك التشفير</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. بدأت عملية فك التشفير</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. اكتملت عملية فك التشفير</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. فشلت عملية التشفير</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. بدأت عملية التشفير</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. اكتملت عملية التشفير</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>تمت إضافة مستخدم جديد إلى بوابة ${LetterLogoText}</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>أنت مدعو للانضمام ${__VirtualRootPath}</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+اكتملت عملية تشفير الملفات على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}" بنجاح.
+
+البوابة الإلكترونية متاحة مرة أخرى.</value>
+  </data>
+  <data name="pattern_activate_email" xml:space="preserve">
+    <value>h1. قم بتنشيط بريدك الإلكتروني لبوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink".
+
+مرحباً!
+
+لبدء المشاركة في فترة صلاحية البوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink" تحتاج إلى تنشيط عنوان بريدك الإلكتروني. يتم ذلك لأسباب أمنية.
+
+$OrangeButton
+
+هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال تفعيل بريدك الإلكتروني خلال تلك الفترة.</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>هل تريد تغيير البريد الإلكتروني على حساب ${LetterLogoText} الخاص بك؟
+
+انقر فوق الزر أدناه وقم بتسجيل الدخول * إلى السحابة الخاصة بك.
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام.
+
+*إذا لم تقم بتسجيل الدخول إلى ${LetterLogoText} في هذا المتصفح، فستحتاج إلى استخدام بريدك الإلكتروني القديم للتأكيد. إذا كنت لا تتذكر ذلك، اتصل بمسؤول البوابة الإلكترونية.
+
+لا تريد تغيير بريدك الإلكتروني؟ فقط تجاهل هذه الرسالة.</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+أنت مدعو للانضمام الى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام فقط.
+
+ستحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+     تم تغيير كلمة المرور لعلبة بريد &lt;b&gt;$Address&lt;/b&gt;
+
+      إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1.عنوان رئيسي. تمت إضافة مستخدم جديد إلى بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl"انضم إلى البوابة الإلكترونية في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^إذا كنت لا ترغب في تلقي إشعارات حول المستخدمين الجدد، فيرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>تمت إضافة مستخدم جديد إلى بوابة [${__VirtualRootPath}](${__VirtualRootPath})
+[$__AuthorName]($__AuthorUrl) انضم إلى البوابة الإلكترونية في [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+لقد تمت دعوتك للانضمام إلى مكتب الويب الآمن والآمن لشركتك والذي من شأنه تعزيز تعاونك. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". تعد إضافة هذا الرابط إلى إشاراتك المرجعية فكرة جيدة، فمن المحتمل أن تستخدمه كثيرا.
+
+اقبل الدعوة باتباع الرابط أدناه واستخدم معلومات تسجيل الدخول وكلمة المرور من حساب الشركة لتسجيل الدخول.
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام فقط.</value>
+  </data>
+  <data name="pattern_backup_created" xml:space="preserve">
+    <value>h1."{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية
+
+عزيزي $OwnerName،
+
+تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم "النسخ الاحتياطي للبيانات":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block"
+
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})
+تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية
+
+عزيزي $OwnerName,
+
+تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة [${__VirtualRootPath}](${__VirtualRootPath}).
+
+لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم [النسخ الاحتياطي للبيانات](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+
+إذا كان لديك أي أسئلة أو كنت بحاجة إلى مساعدة ، فلا تتردد في الاتصال بنا على [${__SupportLink}](${__SupportLink})
+
+مع خالص تحياتي
+فريق دعم ONLYOFFICE™
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_change_password_v115" xml:space="preserve">
+    <value>هل تريد تغيير كلمة المرور على حساب ONLYOFFICE الخاص بك؟ انقر فوق الزر أدناه للتأكيد.
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام.
+
+لا تريد تغيير بريدك الإلكتروني؟ فقط تجاهل هذه الرسالة</value>
+  </data>
+  <data name="pattern_change_phone" xml:space="preserve">
+    <value>h1. طلب تغيير الهاتف المحمول
+
+لقد طلبت تغيير هاتفك المحمول المستخدم للدخول إلى بوابة ${LetterLogoText}.
+
+يرجى اتباع الرابط أدناه لتغيير هاتفك المحمول:
+
+$OrangeButton
+
+إذا كنت لا ترغب في تغيير هاتفك الجوال أو تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>h1.إشعار الأمان
+
+تمت إعادة تعيين تكوين تطبيق المصادقة الذي تستخدمه للدخول إلى المدخل${LetterLogoText}.
+
+يرجى النقر فوق الزر أدناه للانتقال إلى صفحة تسجيل الدخول إلى البوابة وتكوين تطبيق المصادقة:
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+عزيزي $OwnerName,
+
+كان هناك طلب لتغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"الى $UserName.
+
+يرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية تغيير مالك البوابة خلال تلك الفترة.</value>
+  </data>
+  <data name="pattern_dns_change" xml:space="preserve">
+    <value>h1.تغيير عنوان البوابة الإلكترونية
+
+عزيزي $OwnerName ،
+
+كان هناك طلب لتغيير عنوان البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الى "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
+
+يرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية تغيير عنوان البوابة خلال تلك الفترة.</value>
+  </data>
+  <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!!
+
+
+مرحبا، $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
+
+$OrangeButton
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>h1. احصل&lt;span style="color:#FF6F3D;"&gt;مجانا على &lt;/span&gt; تطبيقاتONLYOFFICE
+	
+
+مرحبا، $UserName!
+
+احصل على تطبيقات ONLYOFFICE المجانية للعمل على المستندات من أي من أجهزتك.
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; للعمل على مستنداتك دون انترنت، احصل على Desktop Editors ONLYOFFICEمن أجل ذلك &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+		
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; لتعديل المستندات على الهاتف المحمول، احصل على تطبيق ONLYOFFICE Documentsمن أجل ذلك &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 نصائح&lt;/span&gt; للعمل الفعّال على مستنداتك
+ 
+ 
+مرحبا، $UserName!
+
+نأمل أن تستمتع باستخدام ONLYOFFICE DocSpace الخاص بك. فيما يلي بعض النصائح حول كيفية جعل العمل على المستندات أكثر فعالية.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. اختر طريقة عملك.&lt;/b&gt; &lt;br/&gt;قم بتنظيم سير العمل حسب حاجتك من خلال إنشاء غرف تعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة بإعدادات مرنة لأي غرض.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b اعمل مع أي محتوى لديك.&lt;/b&gt;قم بتخزين الملفات ذات التنسيقات المختلفة والعمل عليها داخل غرفك: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. شارك في التأليف بفعالية.&lt;/b&gt; &lt;br/&gt;تعاون في العمل على المستندات باستخدام وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. التعاون بشكل آمن.&lt;/b&gt; &lt;br/&gt; ضبط الوصول إلى المساحة بأكملها أو الغرف المنفصلة باستخدام أذونات ومهام مستخدم مرنة. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. استفد من المكوّن الإضافي لمساعد الذكاء الاصطناعي.&lt;/b&gt;&lt;br/&gt;تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>h1. اكتشف الاشتراك التجاري في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+فيما يلي ثلاثة أسئلة بسيطة لك يمكن أن تساعدنا في جعل تجربة المستخدم الخاصة بك أكثر راحة.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل لديك فريق كبير أو الكثير من العملاء والشركاء للتعاون معهم في ONLYOFFICE DocSpace الخاص بك؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل ترغب في إنشاء أي عدد من الغرف للعمل مع العديد من الوثائق؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل تريد استخدام ONLYOFFICE DocSpace تحت العلامة التجارية الخاصة بك؟&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
+
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+    <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Hello, $UserName!
+
+Here are three simple questions for you which can help us make your user experience even more comfortable.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Do you have a big team or lots of customers and partners to collaborate with in your ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Would you like to create any number of rooms to work with numerous documents? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Do you want to use ONLYOFFICE DocSpace under your own brand?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+If you have at least one ‘yes’ answer, opt for the BUSINESS tariff plan which allows you to add any desired number of managers to your ONLYOFFICE DocSpace as well as apply branding options.
+
+To do so, please consult the "Payments section":"$PricingPage" of your ONLYOFFICE DocSpace. There, you will find an individual link to the Stripe Customer Portal where you can easily handle all the payment details. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Please note: The person who pays the subscription becomes the payer. Only the payer is able to make changes to the subscription (adjust the number of managers). Users don’t have access to the payments details. The owner of the ONLYOFFICE DocSpace account is able to reassign the payer anytime later.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</comment>
+  </data>
+  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
+
+$OrangeButton
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>h1. اكتشف الاشتراك التجاري في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+فيما يلي ثلاثة أسئلة بسيطة لك يمكن أن تساعدنا في جعل تجربة المستخدم الخاصة بك أكثر راحة.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل لديك فريق كبير أو الكثير من العملاء والشركاء للتعاون معهم في ONLYOFFICE DocSpace الخاص بك؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل ترغب في إنشاء أي عدد من الغرف للعمل مع العديد من الوثائق؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل تريد استخدام ONLYOFFICE DocSpace تحت العلامة التجارية الخاصة بك؟&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
+
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+دعاك $__AuthorName كمستخدم ضيف إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام فقط.
+
+سوف تحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <value>h1.رسالة من البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+البريد الإلكتروني: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>رسالة من البوابة [${__VirtualRootPath}](${__VirtualRootPath})
+
+البريد الإلكتروني: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_sales_notify" xml:space="preserve">
+    <value>h1.رسالة من البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+الاسم: $UserName
+
+البريد الالكتروني: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_join" xml:space="preserve">
+    <value>h1.دعوة للانضمام إلى البوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink"
+
+مرحبا،
+
+لقد طلبت الانضمام إلى بوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink" على ${LetterLogoText} - منصة لإدارة المستندات والمشاريع. انضم إلى البوابة وابدأ التعاون مع زملائك أو أصدقائك على الفور.
+
+لقبول الدعوة يرجى إدخال اسمك وكلمة المرور باتباع هذا الرابط:
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 48 ساعة فقط. يرجى إكمال العملية خلال تلك الفترة.</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+      استخدم الإعدادات التالية لبرامج البريد الإلكتروني الأخرى:
+      تسجيل دخول: &lt;b&gt;$Login&lt;/b&gt;
+      كلمة السر: "&lt;b&gt;تعيين كلمة السر&lt;/b&gt;":"$MyStaffLink"
+
+      البريد الوارد(IMAP):
+      الخادم: &lt;b&gt;$Server&lt;/b&gt;
+      المنفذ: &lt;b&gt;$ImapPort&lt;/b&gt;
+SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+      البريد الصادر (SMTP): 
+      الخادم: &lt;b&gt;$Server&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      يتطلب المصادقة: &lt;b&gt;نعم&lt;/b&gt;
+
+      إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+      إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_migration_error" xml:space="preserve">
+    <value>h1.خطأ آخر في ترحيل بوابة المنطقة
+
+حدث خطأ أثناء الترحيل إلى منطقة $RegionName. من فضلك، حاول مرة أخرى لاحقا.
+البوابة الإلكترونية متاحة الآن على العنوان القديم "$PortalUrl":"$PortalUrl"
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <value>h1.خطأ آخر في ترحيل بوابة المنطقة
+
+حدث خطأ أثناء الترحيل إلى منطقة أخرى. من فضلك، حاول مرة أخرى لاحقا.
+البوابة الإلكترونية متاحة الآن على العنوان القديم "$PortalUrl":"$PortalUrl"
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_start" xml:space="preserve">
+    <value>h1.بدء ترحيل بوابة منطقة أخرى
+
+بدأ ترحيل البوابة الإلكترونية إلى منطقة $RegionName. قد يستغرق الأمر بعض الوقت بناء على مقدار بياناتك.
+
+*ملاحظة*: لن تكون البوابة متاحة أثناء عملية الترحيل. بعد اكتمال الترحيل، سيتم تغيير عنوان URL للبوابة الإلكترونية ولن يمكن الوصول إلى جميع روابط المستندات المشتركة.
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.ترحيل البوابة
+اh1."$PortalUrl":"$PortalUrl"
+
+تم ترحيل البوابة الإلكترونية إلى مجال جديد. يرجى استعادة وصولك إلى البوابة عن طريق تحديد كلمة المرور التي سيتم استخدامها لتسجيل الدخول.
+
+يرجى اتباع الرابط أدناه لتعيين كلمة المرور الخاصة بك للحساب:
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. أكمل عملية استعادة الوصول خلال تلك الفترة.
+
+إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية "$PortalUrl":"$PortalUrl" لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace ، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
+
+$OrangeButton
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 نصائح&lt;/span&gt; للعمل الفعّال على مستنداتك
+ 
+ 
+مرحبا، $UserName!
+
+نأمل أن تستمتع باستخدام ONLYOFFICE DocSpace الخاص بك. فيما يلي بعض النصائح حول كيفية جعل العمل على المستندات أكثر فعالية.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. اختر طريقة عملك.&lt;/b&gt; &lt;br/&gt;قم بتنظيم سير العمل حسب حاجتك من خلال إنشاء غرف تعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة بإعدادات مرنة لأي غرض.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b اعمل مع أي محتوى لديك.&lt;/b&gt;قم بتخزين الملفات ذات التنسيقات المختلفة والعمل عليها داخل غرفك: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. شارك في التأليف بفعالية.&lt;/b&gt; &lt;br/&gt;تعاون في العمل على المستندات باستخدام وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. التعاون بشكل آمن.&lt;/b&gt; &lt;br/&gt; ضبط الوصول إلى المساحة بأكملها أو الغرف المنفصلة باستخدام أذونات ومهام مستخدم مرنة. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. استفد من المكوّن الإضافي لمساعد الذكاء الاصطناعي.&lt;/b&gt;&lt;br/&gt;تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>h1. اكتشف الاشتراك التجاري في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+فيما يلي ثلاثة أسئلة بسيطة لك يمكن أن تساعدنا في جعل تجربة المستخدم الخاصة بك أكثر راحة.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل لديك فريق كبير أو الكثير من العملاء والشركاء للتعاون معهم في ONLYOFFICE DocSpace الخاص بك؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل ترغب في إنشاء أي عدد من الغرف للعمل مع العديد من الوثائق؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل تريد استخدام ONLYOFFICE DocSpace تحت العلامة التجارية الخاصة بك؟&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
+
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+    <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Hello, $UserName!
+
+Here are three simple questions for you which can help us make your user experience even more comfortable.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Do you have a big team or lots of customers and partners to collaborate with in your ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Would you like to create any number of rooms to work with numerous documents? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Do you want to use ONLYOFFICE DocSpace under your own brand?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+If you have at least one ‘yes’ answer, opt for the BUSINESS tariff plan which allows you to add any desired number of managers to your ONLYOFFICE DocSpace as well as apply branding options.
+
+To do so, please consult the "Payments section":"$PricingPage" of your ONLYOFFICE DocSpace. There, you will find an individual link to the Stripe Customer Portal where you can easily handle all the payment details. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Please note: The person who pays the subscription becomes the payer. Only the payer is able to make changes to the subscription (adjust the number of managers). Users don’t have access to the payments details. The owner of the ONLYOFFICE DocSpace account is able to reassign the payer anytime later.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</comment>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحباً!
+
+أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+
+"$ActivateUrl":"$ActivateUrl"
+
+هذا الرابط صالح لمدة 7 أيام فقط.
+
+سوف تحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
+  </data>
+  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+    <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Hello, $UserName!
+
+Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;Work with other users in the room you are invited to: &lt;b&gt;collaboration rooms for real-time co-authoring or custom rooms with flexible settings for any purpose&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Collaborate on documents&lt;/b&gt; with two co-editing modes: real-time or paragraph-locking. Track changes, communicate in real-time using the built-in chat or making audio and video calls.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Make use of the AI helper plugin:&lt;/b&gt; summarize and translate texts, generate images and keywords, analyze words, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
+
+$TrulyYours
+	  </comment>
+  </data>
+  <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 نصائح&lt;/span&gt; للعمل الفعّال على مستنداتك
+ 
+ 
+مرحبا، $UserName!
+
+نأمل أن تستمتع باستخدام ONLYOFFICE DocSpace الخاص بك. فيما يلي بعض النصائح حول كيفية جعل العمل على المستندات أكثر فعالية.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. اختر طريقة عملك.&lt;/b&gt; &lt;br/&gt;قم بتنظيم سير العمل حسب حاجتك من خلال إنشاء غرف تعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة بإعدادات مرنة لأي غرض.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b اعمل مع أي محتوى لديك.&lt;/b&gt;قم بتخزين الملفات ذات التنسيقات المختلفة والعمل عليها داخل غرفك: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. شارك في التأليف بفعالية.&lt;/b&gt; &lt;br/&gt;تعاون في العمل على المستندات باستخدام وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. التعاون بشكل آمن.&lt;/b&gt; &lt;br/&gt; ضبط الوصول إلى المساحة بأكملها أو الغرف المنفصلة باستخدام أذونات ومهام مستخدم مرنة. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. استفد من المكوّن الإضافي لمساعد الذكاء الاصطناعي.&lt;/b&gt;&lt;br/&gt;تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+    <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Hello, $UserName!
+
+Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;Work with other users in the room you are invited to: &lt;b&gt;collaboration rooms for real-time co-authoring or custom rooms with flexible settings for any purpose&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Collaborate on documents&lt;/b&gt; with two co-editing modes: real-time or paragraph-locking. Track changes, communicate in real-time using the built-in chat or making audio and video calls.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;Make use of the AI helper plugin:&lt;/b&gt; summarize and translate texts, generate images and keywords, analyze words, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
+
+$TrulyYours
+	  </comment>
+  </data>
+  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <value>h1.إلغاء تنشيط بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+عزيزي $OwnerName،
+
+لقد طلبت إلغاء تنشيط مؤقت لبوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" يرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية إلغاء تنشيط البوابة خلال تلك الفترة.
+
+يمكنك إعادة تنشيط البوابة الإلكترونية في أي وقت بالنقر فوق الرابط التالي: p=."إعادة تفعيل البوابة":"$ActivateUrl" (هذا الرابط ليس له حد زمني)
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>إلغاء تنشيط بوابة [${__VirtualRootPath}](${__VirtualRootPath}
+
+عزيزي $OwnerName،
+
+لقد طلبت إلغاء تنشيط مؤقت لبوابة [${__VirtualRootPath}](${__VirtualRootPath}) يرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+_ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية إلغاء تنشيط البوابة خلال تلك الفترة.
+
+يمكنك إعادة تنشيط البوابة الإلكترونية في أي وقت بالنقر فوق الارتباط التالي:
+[إعادة تفعيل البوابة]($ActivateUrl) (هذا الرابط ليس له حد زمني)
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على [${__SalesEmail}](mailto:${__SalesEmail})
+
+مع أطيب التحيات،
+فريق دعم ONLYOFFICE™
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_delete" xml:space="preserve">
+    <value>عزيزي $OwnerName،
+
+لقد طلبت حذف مساحة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+*مهم! ستفقد جميع البيانات المخزنة في مساحتك، بالإضافة إلى تفاصيل التسجيل الخاصة بك ولا يمكن استردادها.*
+
+#if($AutoRenew == "True")
+قبل حذف المساحة، يرجى التأكد من إيقاف الرسوم التلقائية. يمكنك التحقق من حالة الفوترة التلقائية في ا"لحساب Avangate":"https://secure.avangate.com/myaccount/".
+#end
+
+إذا كنت لا تزال ترغب في حذف مساحة "$ "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"، فيرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية حذف البوابة خلال تلك الفترة.
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على"${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_success_v1" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace تم&lt;span style="color:#FF6F3D;"&gt;تعطيل&lt;/span&gt;
+
+
+تم إلغاء تنشيط DocSpace الخاص بك ONLYOFFICE بنجاح. يرجى ملاحظة أنه سيتم حذف جميع بياناتك وفقا ل "سياسة الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; لماذا قررت المغادرة؟ شارك تجربتك معنا.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*شكرا لك ونتمنى لك التوفيق!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>حذف البوابة [${__VirtualRootPath}](${__VirtualRootPath})
+
+عزيزي $OwnerName،
+
+لقد طلبت حذف بوابة [${__VirtualRootPath}](${__VirtualRootPath}) نهائياً
+
+_مهم! ستفقد جميع البيانات المخزنة على بوابتك ، وكذلك تفاصيل التسجيل الخاصة بك ولا يمكن استردادها.
+
+#if($AutoRenew == "True")
+قبل حذف البوابة، يرجى التأكد من إيقاف تشغيل الرسوم التلقائية. يمكنك التحقق من حالة الرسوم التلفائية في [حساب Avangate](https://secure.avangate.com/myaccount/").
+#end
+
+إذا كنت لا تزال ترغب في حذف بوابة [${__VirtualRootPath}](${__VirtualRootPath})، فيرجى اتباع الرابط أدناه لتأكيد العملية:
+
+$OrangeButton
+
+_ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية حذف البوابة خلال تلك الفترة.
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على [${__SalesEmail}](mailto:${__SalesEmail})
+
+ مع أطيب التحيات،
+فريق دعم ONLYOFFICE™
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_rename" xml:space="preserve">
+    <value>h1.تغيير عنوان البوابة الإلكترونية
+
+عزيزي $UserDisplayName،
+
+تم تغيير عنوان البوابة الإلكترونية $PortalUrl إلى عنوان "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" جديد.
+
+*ملاحظة*: تتوقف إعدادات DNS وخيارات تسجيل الدخول لمرة واحدة عن العمل حتى تقوم بتغييرها.</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1.إزالة ملف التعريف من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+لقد طلبت حذف ملف التعريف الخاص بك نهائيا من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+إذا كنت لا تزال ترغب في حذف ملف التعريف الخاص بك، فيرجى اتباع الرابط أدناه لتأكيد العملية 
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية حذف الملف الشخصي خلال تلك الفترة.</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>قام المستخدم "$FromUserName":"$FromUserLink" بحذف ملفه الشخصي، وتم حظر هذا الملف الشخصي الآن. لا تزال جميع ملفات المستخدم مخصصة له/لها وتشغل مساحة على القرص.
+
+يمكنك إعادة تعيين مستندات المستخدم المشتركة مع الآخرين إلى مستخدم نشط آخر أو إزالتها لتحرير مساحة قرص البوابة الإلكترونية.
+
+يرجى الانتقال إلى ملف تعريف المستخدم باستخدام "هذا الرابط":"$FromUserLink" لإعادة تعيين المستندات لمستخدم آخر أو إزالة البيانات.</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1.تم تغيير ملفك الشخصي في "$__VirtualRootPath":"$__VirtualRootPath"
+
+عزيزي $UserName,
+
+تم تغيير تفاصيل ملف تعريف المستخدم الخاص بك في "$__VirtualRootPath":"$__VirtualRootPath" بواسطة 
+"$__AuthorName":"$__AuthorUrl".
+
+لعرض ملفك الشخصي اتبع الرابط أدناه: "$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>تم تغيير ملفك الشخصي في [${__VirtualRootPath}](${__VirtualRootPath})
+
+عزيزي$UserName،
+
+تم تغيير تفاصيل ملف تعريف المستخدم الخاص بك في [${__VirtualRootPath}](${__VirtualRootPath}) بواسطة [$__AuthorName]($__AuthorUrl).
+
+لعرض ملفك الشخصي اتبع الرابط أدناه:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+اكتملت بنجاح عملية إعادة تعيين البيانات من المستخدم "$FromUserName":"$FromUserLink" إلى المستخدم "$ToUserLink".</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+فشلت عملية إعادة تعيين البيانات من المستخدم "$FromUserName":"$FromUserLink" إلى المستخدم "$ToUserName":"$ToUserLink".
+
+رسالة استثناء: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+اكتملت عملية إزالة البيانات من المستخدم "$FromUserName":"$FromUserLink" بنجاح
+
+حذف البيانات الشخصية مسموح لتفريغ المساحة في $DocsSpace</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>عزيزي $UserName،
+
+فشلت عملية إزالة البيانات للمستخدم "$FromUserName":"$FromUserLink"
+
+رسالة استثناء: $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.طلب ترخيص المؤسسة
+
+h3.الاسم الأول
+$UserName
+
+h3.اسم العائلة
+$UserLastName
+
+h3.الموقع
+$Position
+
+h3.البريد الكتروني
+"$UserEmail":"mailto:$UserEmail"
+
+h3.الهاتف
+$Phone
+
+h3.الموقع الالكتروني للشركة
+$Website
+
+h3.اسم الشركة
+$CompanyTitle
+
+h3.حجم الشركة
+$CompanySize
+
+h3.طلب محتوى
+$Body
+
+h3.عنوان البوابة
+"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.طلب التعريفة الجمركية SAAS لـ "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.الاسم الأول
+$UserName
+
+h3.اسم العائلة
+$UserLastName
+
+h3.الموقع
+$Position
+
+h3.البريد الكتروني
+"$UserEmail":"mailto:$UserEmail"
+
+h3.الهاتف
+$Phone
+
+h3.الموقع الالكتروني للشركة
+$Website
+
+h3.اسم الشركة
+$CompanyTitle
+
+h3.حجم الشركة
+$CompanySize
+
+h3.طلب محتوى
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.استعادة البوابة
+h1."{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+تمت استعادة البوابة الإلكترونية. للوصول إليه، تحتاج إلى تعيين كلمة مرور جديدة:
+
+$OrangeButton
+
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط.
+
+إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" لمعرفة التفاصيل.</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.تم بدء استعادة البوابة
+
+بدأت استعادة المدخل. قد يستغرق الأمر بعض الوقت بناء على مقدار بياناتك.
+
+*ملاحظة*: لن تكون البوابة متاحة أثناء عملية الاستعادة.
+
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحباً، $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
+$OrangeButton
+
+الخطة التعريفة الحالية الخاصة بك هي STARTUP. إنه مجاني تماما ويشمل:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 مشرف ، 2 مستخدمين للطاقة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;ما يصل إلى 12 غرفة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;عدد غير محدود من المستخدمين في كل غرفة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 غيغابايت مساحة القرص&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
+    <value>h1. قم بتهيئة &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+اضبط إعدادات الأمان الخاصة ب ONLYOFFICE DocSpace لجعله أكثر أمانا:
+
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;تعيين قوة كلمة المرور&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;تمكين المصادقة الثنائية وتسجيل الدخول لمرة واحدة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;تحديد مجالات البريد الموثوق بها وعمر الجلسة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;تقييد الوصول من عناوين IP محددة &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;السماح أو تقييد رسائل المسؤول&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;إدارة حقوق وصول المسؤول&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;عمل النسخ الاحتياطي للبيانات&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+$OrangeButton
+
+تفضل بزيارة "مركز المساعدة":"${__HelpLink}" لمعرفة المزيد حول تكوين وإدارة ONLYOFFICE DocSpace. نرحب أيضا بالرجوع إليها عندما تكون لديك أسئلة حول الوظيفة.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>h1. سيتم حذف ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;الخاص بك&lt;/span&gt;
+
+  
+لم تقم بإدخال "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" لأكثر من نصف عام.
+
+نظرا لأنك قررت عدم استخدامه بعد الآن ، حذف ONLYOFFICE DocSpace وجميع البيانات وفقا ل "سياسة الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; سنكون ممتنين لملاحظاتك. لماذا قررت التوقف عن استخدام ONLYOFFICE DocSpace؟&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+إذا كنت تعتقد أن هذا خطأ وترغب في الاستمرار في استخدام ONLYOFFICE DocSpace، فيرجى الاتصال بـ "فريق الدعم":"${__SupportLink}". 
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>h1. احصل&lt;span style="color:#FF6F3D;"&gt;مجانا على &lt;/span&gt; تطبيقاتONLYOFFICE
+ 
+
+مرحبا، $UserName!
+
+احصل على تطبيقات ONLYOFFICE المجانية للعمل على المستندات من أي من أجهزتك.
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; للعمل على مستنداتك دون انترنت، احصل على Desktop Editors ONLYOFFICEمن أجل ذلك &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+  
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; لتعديل المستندات على الهاتف المحمول، احصل على تطبيق ONLYOFFICE Documentsمن أجل ذلك &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 28px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 نصائح&lt;/span&gt; للعمل الفعّال على مستنداتك
+ 
+ 
+مرحبا، $UserName!
+
+نأمل أن تستمتع باستخدام ONLYOFFICE DocSpace الخاص بك. فيما يلي بعض النصائح حول كيفية جعل العمل على المستندات أكثر فعالية.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. اختر طريقة عملك.&lt;/b&gt; &lt;br/&gt;قم بتنظيم سير العمل حسب حاجتك من خلال إنشاء غرف تعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة بإعدادات مرنة لأي غرض.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b اعمل مع أي محتوى لديك.&lt;/b&gt;قم بتخزين الملفات ذات التنسيقات المختلفة والعمل عليها داخل غرفك: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. شارك في التأليف بفعالية.&lt;/b&gt; &lt;br/&gt;تعاون في العمل على المستندات باستخدام وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. التعاون بشكل آمن.&lt;/b&gt; &lt;br/&gt; ضبط الوصول إلى المساحة بأكملها أو الغرف المنفصلة باستخدام أذونات ومهام مستخدم مرنة. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. استفد من المكوّن الإضافي لمساعد الذكاء الاصطناعي.&lt;/b&gt;&lt;br/&gt;تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
+    <value>h1. اكتشف الاشتراك التجاري في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا، $UserName!
+
+فيما يلي ثلاثة أسئلة بسيطة لك يمكن أن تساعدنا في جعل تجربة المستخدم الخاصة بك أكثر راحة.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل لديك فريق كبير أو الكثير من العملاء والشركاء للتعاون معهم في ONLYOFFICE DocSpace الخاص بك؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل ترغب في إنشاء أي عدد من الغرف للعمل مع العديد من الوثائق؟ &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; هل تريد استخدام ONLYOFFICE DocSpace تحت العلامة التجارية الخاصة بك؟&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
+
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_invite" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+بعد النقر على رابط الدعوة ، يرجى تعيين كلمة مرور جديدة لحسابك.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+سوف نرسل لك أيضا نصائح مفيدة وآخر أخبارONLYOFFICE من حين لآخر. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>مرحبا، $UserName!
+
+يرجى الأخذ في الاعتبار أنه تم تنشيط فترة السماح البالغة $PaymentDelay أيام ل ONLYOFFICE DocSpace.
+
+تأكد من دفع اشتراكك في الأعمال قبل استحقاق فترة السماح. وبالتالي، ستتمكن من استخدام جميع مزايا ONLYOFFICE DocSpace الخاصة بك.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>مرحبا، $UserName!
+
+يرجى الأخذ في الاعتبار أن اشتراك ONLYOFFICE DocSpace الخاص بك ينتهي في غضون ثلاثة أيام. بعد ذلك ، سيتم تنشيط فترة السماح البالغة $PaymentDelay يوما.
+
+نوصي بدفع اشتراك الأعمال الخاص بك الآن والاستمرار في استخدام جميع مزايا ONLYOFFICE DocSpace الخاص بك.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+يرجى الأخذ في الاعتبار أن فترة السماح البالغة $PaymentDelay أيام ل ONLYOFFICE DocSpace قد انتهت.
+
+تأكد من دفع اشتراك الأعمال الخاص بك في أقرب وقت ممكن. وبالتالي، ستتمكن من استخدام جميع مزايا ONLYOFFICE DocSpace كما كان من قبل.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>مرحبا، $UserName!
+
+يرجى الأخذ في الاعتبار أن فترة السماح البالغة $PaymentDelay أيام ل ONLYOFFICE DocSpace ستنتهي غدا.
+
+تأكد من دفع اشتراك الأعمال الخاص بك اليوم. وبالتالي، ستتمكن من استخدام جميع مزايا ONLYOFFICE DocSpace الخاصة بك.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite" xml:space="preserve">
+    <value>مرحبا!
+
+أنت مدعو للانضمام إلى $Message الغرفة على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+بعد النقر على رابط الدعوة ، يرجى تعيين كلمة مرور جديدة لحسابك.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_user_activation_v1" xml:space="preserve">
+    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+مرحبا!
+
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
+    <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا، $UserName!
+
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; العمل مع ملفات بتنسيقات مختلفة&lt;/b&gt;: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; التعاون في المستندات&lt;/b&gt; مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt; والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/b&gt; تلخيص النصوص وترجمتها، وإنشاء الصور والكلمات الرئيسية، وتحليل الكلمات، وما إلى ذلك.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+$OrangeButton
+
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1.عنوان رئيسي. إشعار تغيير ملف تعريف البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" قام بتغيير تفاصيل ملفه الشخصي في بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^إذا كنت لا ترغب في تلقي إشعارات حول تحديثات الملف الشخصي، فيرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>إشعار تغيير ملف تعريف البوابة الإلكترونية [${__VirtualRootPath}](${__VirtualRootPath})
+
+[$__AuthorName]($__AuthorUrl) قام بتغيير تفاصيل ملفه الشخصي في بوابة [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_send_whats_new" xml:space="preserve">
+    <value>h1.عنوان رئيسي. إليك الميزات الجديدة في DocSpace على $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>رسالة اختبار SMTP
+
+تم إنشاء هذه الرسالة تلقائيا لاختبار إعدادات SMTP. إذا كنت تقوم بعرضه، فهذا يعني أن الإعدادات صحيحة ويمكنك استخدامها على البوابة الإلكترونية.
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+فشلت عملية فك تشفير الملف على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}"
+
+تعذر فك تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+بدأت عملية فك تشفير الملف على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}".
+
+قد يستغرق فك التشفير بعض الوقت، لذلك لن يكون المدخل متاحا مؤقتا. بمجرد انتهاء فك التشفير ، ستتمكن من العمل مع بياناتك مرة أخرى.</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+اكتملت عملية فك تشفير الملف على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}" بنجاح.
+
+البوابة الإلكترونية متاحة مرة أخرى.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+فشلت عملية تشفير الملفات على المدخل "${PortalUrl}":"${PortalUrl}"
+
+تعذر تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>مرحبا $UserName!
+
+بدأت عملية تشفير الملفات على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}".
+
+قد يستغرق التشفير بعض الوقت، لذلك لن يكون المدخل متاحا مؤقتا. بمجرد انتهاء التشفير، ستتمكن من العمل مع بياناتك مرة أخرى.</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. يمكنك إتقان ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;عبر الفيديو التوضيحي&lt;/span&gt;
+
+
+مرحبا $UserName ame!
+
+من أجل راحتك، قمنا بإعداد دروس فيديو حتى تتمكن بسهولة من إتقان ONLYOFFICE DocSpace. شاهد الفيديو التوضيحي وتأكد من عملك السلس والفعال.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: right;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: right; text-decoration: underline;"&gt;ما هو ONLYOFFICE DocSpace&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: right;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: right; text-decoration: underline;"&gt;DocSpace: جولة عملية&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 32px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;الأنشطة الرئيسية&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;نشاء غرف&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;نشاء ورفع الملفات&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;نسخ، نقل، إعادة تسمية، حذف، تنزيل الملفات&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;فرز وتصفية الملفات&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;ستعادة إصدارات الملف&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;ستخدم مفاتيح الاختصار&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;غرف الأرشيف&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 32px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;إدارة المستخدم والملف الشخصي&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;دعوة المستخدمين&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;إدارة مهام المستخدم&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;دارة ملف التعريف الخاص بك&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Sort and filter files&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;تسجيل الخروج من الجلسات النشطة&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 32px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;إدار&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;دارة إعدادات الأمان&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;النسخ الاحتياطي والاستعادة&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>إتقانONLYOFFICE DocSpace مع الفيديو التوضيحي</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>مع أطيب التحيات، فريق دعم ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>مشاهدة القائمة الكاملة</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>شكرًا لك، فريق ONLYOFFICE</value>
+  </data>
+</root>

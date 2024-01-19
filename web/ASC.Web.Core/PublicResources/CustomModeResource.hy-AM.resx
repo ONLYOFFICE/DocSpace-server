@@ -117,90 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1. Բարի գալուստ ONLYOFFICE Personal
-
-Դուք հենց նոր եք ստեղծել ձեր անձնական գրասենյակը ամպի մեջ.
-
-h3. Դա վիրտուալ աշխատանքային տարածք է, որտեղ դուք կարող եք խմբագրել և պահել փաստաթղթերը, աշխատել դրանց հետ ցանկացած վայրից՝ ապահովելով ձեր ընկերներին կամ գործընկերներին հասանելիություն:
-
-h3. Արագ սկսելու համար ահա թե ինչ կարող եք անել ONLYOFFICE-ում:
-
-- Ստեղծեք, դիտեք և խմբագրեք տեքստային փաստաթղթեր, աղյուսակներ, ներկայացումներ.
-
-- Աշխատեք բոլոր հայտնի ձևաչափերով: Ամենաբարձր համատեղելիությունը MS Office ֆայլերի հետ. 
-
-- Ստեղծեք և համատեղ խմբագրեք "պատրաստի լրացման ձևեր":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Համօգտագործեք և համագործակցեք փաստաթղթերի վրա առցանց.
-
-- Լրացուցիչ հնարավորություններ կիրառելու համար օգտագործեք տարբեր պլագիններ.
-
-- Հեշտ մուտք դեպի ձեր անձնական ամպ միջոցով "Chrome ընդլայնման":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
-
-Դուք կարող եք նաև փաստաթղթեր խմբագրել անցանց մեր անվճար միջոցով միջոցով "սեղանի խմբագրի":"https://www.onlyoffice.com/download-desktop.aspx " կամ ստացեք բջջային խմբագրման փաթեթ ձեզ համար "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-Սիրով՝
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել նամակը ձեր ամպային գրասենյակի հաշվին:
-
-Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
-
-$GreenButton
-
-Հղումը գործում է 7 օր.
-
-* Եթե այս բրաուզերով մուտք չեք գործել ձեր ամպային գրասենյակ, հաստատման համար պետք է օգտագործեք ձեր հին էլ․ հասցեն.
-
-Չե՞ք ուզում փոխել ձեր էլ.հասցեն։ Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել գաղտնաբառը ձեր ամպային գրասենյակի հաշվի վրա: Հաստատելու համար սեղմեք ստորև նշված կոճակը:
-
-$GreenButton
-
-Հղումը գործում է 7 օր.
-
-Չե՞ք ուզում փոխել ձեր գաղտնաբառը: Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>Բարեւ,
-
-դուք հենց նոր հաշիվ եք գրանցել ONLYOFFICE լուծումում՝ անձնական օգտագործման համար: Սեղմել "այստեղ":"$InviteLink" գրանցումը հաստատելու և գաղտնաբառ ստեղծելու համար:
-
-Եթե չեք կարող բացել հղումը, խնդրում ենք պատճենեք հետևյալ "$InviteLink":"$InviteLink" և տեղադրեք այն ձեր դիտարկիչի հասցեագոտում:.
-
-Սիրով՝
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com. Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով)։ 
-
-Հաստատեք հաշվի դադարեցումը
-
-*Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության քաղաքականությունը":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Կարդացեք ավելին հաշվի դադարեցման մասին":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
-
-Անտեսեք այս նամակը, եթե չեք ցանկանում շարունակել. 
-
-Եթե ունեք հարցեր, խնդրում ենք կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com"
-
-Սիրով՝
-ONLYOFFICE թիմ</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Հարգելի $UserName,
 
 Օգտագործողից տվյալների հեռացման գործընթացը "$FromUserName":"$FromUserLink" հաջողությամբ ավարտվել է.
 
-Անձնական տվյալների ջնջումը թույլատրվում է անվճար:
-
-# Փաստաթղթեր - $DocsSpace
-# Էլ․փոստ - $MailSpace
-# Խոսելու համար - $TalkSpace</value>
+Անձնական տվյալների ջնջումը թույլատրվում է անվճար: $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3. Գրանցվել է նոր պորտալ
@@ -217,15 +139,6 @@ ONLYOFFICE թիմ</value>
   </data>
   <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
     <value>Ստեղծեք և խմբագրեք ձեր սեփական փաստաթղթերը, ինչպես նաև համօգտագործվող փաստաթղթերը՝ համապատասխան մուտքի իրավունքով | Տվեք այլ օգտատերերի փաստաթղթերի և թղթապանակների ընթերցման/խմբագրման հնարավորություն|Կցել Dropbox-ը, Box-ը և այլ հաշիվները «Իմ փաստաթղթերը» բաժնում</value>
-  </data>
-  <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>Բարի գալուստ ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Խնդրում ենք ակտիվացնել ձեր էլ.փոստի հասցեն</value>
-  </data>
-  <data name="subject_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Personal հաշվի դադարեցում</value>
   </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Օգտագործողի տվյալների հեռացումն ավարտված է</value>
@@ -246,12 +159,10 @@ ONLYOFFICE թիմ</value>
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու. 
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոնը":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցող թիմ":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոնը":"${__HelpLink}" կամ հարցրեք մեր "աջակցող թիմ":"${__SupportLink}".
 
-Սիրով Ձեր՝
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
 </root>

@@ -691,13 +691,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Sala deletada</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Link criado. Função: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Link deletado</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Link atualizado. Função: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -717,5 +717,20 @@
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0} nomeado: {1}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Cidade</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>País</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Link externo criado: {0}. Função: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Link externo excluído: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Link externo atualizado: {0}. Função: {1}</value>
   </data>
 </root>

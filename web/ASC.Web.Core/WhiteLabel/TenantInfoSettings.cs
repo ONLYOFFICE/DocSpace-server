@@ -1,32 +1,31 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Core.WhiteLabel;
 
-[Serializable]
 public class TenantInfoSettings : ISettings<TenantInfoSettings>
 {
     [JsonPropertyName("LogoSize")]
@@ -40,7 +39,7 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 
     public TenantInfoSettings GetDefault()
     {
-        return new TenantInfoSettings()
+        return new TenantInfoSettings
         {
             IsDefault = true
         };
@@ -54,24 +53,11 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 }
 
 [Scope]
-public class TenantInfoSettingsHelper
+public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
+    StorageFactory storageFactory,
+    TenantManager tenantManager,
+    IConfiguration configuration)
 {
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
-    private readonly IConfiguration _configuration;
-
-    public TenantInfoSettingsHelper(
-        WebImageSupplier webImageSupplier,
-        StorageFactory storageFactory,
-        TenantManager tenantManager,
-        IConfiguration configuration)
-    {
-        _webImageSupplier = webImageSupplier;
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-        _configuration = configuration;
-    }
     public async Task RestoreDefaultAsync(TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
         await RestoreDefaultTenantNameAsync();
@@ -80,16 +66,16 @@ public class TenantInfoSettingsHelper
 
     public async Task RestoreDefaultTenantNameAsync()
     {
-        var currentTenant = await _tenantManager.GetCurrentTenantAsync();
-        currentTenant.Name = _configuration["web:portal-name"] ?? "";
-        await _tenantManager.SaveTenantAsync(currentTenant);
+        var currentTenant = await tenantManager.GetCurrentTenantAsync();
+        currentTenant.Name = configuration["web:portal-name"] ?? "";
+        await tenantManager.SaveTenantAsync(currentTenant);
     }
 
     public async Task RestoreDefaultLogoAsync(TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
         tenantInfoSettings.IsDefault = true;
 
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
         try
         {
             await store.DeleteFilesAsync("", "*", false);
@@ -104,7 +90,7 @@ public class TenantInfoSettingsHelper
 
     public async Task SetCompanyLogoAsync(string companyLogoFileName, byte[] data, TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
 
         if (!tenantInfoSettings.IsDefault)
         {
@@ -117,7 +103,7 @@ public class TenantInfoSettingsHelper
             }
         }
         using (var memory = new MemoryStream(data))
-        using (var image = Image.Load(memory))
+        using (var image = await Image.LoadAsync(memory))
         {
             tenantInfoSettings.CompanyLogoSize = image.Size;
 
@@ -134,10 +120,10 @@ public class TenantInfoSettingsHelper
     {
         if (tenantInfoSettings.IsDefault)
         {
-            return _webImageSupplier.GetAbsoluteWebPath("notifications/logo.png");
+            return webImageSupplier.GetAbsoluteWebPath("notifications/logo.png");
         }
 
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
         return (await store.GetUriAsync(tenantInfoSettings.CompanyLogoFileName ?? "")).ToString();
     }
 
@@ -151,7 +137,7 @@ public class TenantInfoSettingsHelper
             return null;
         }
 
-        var storage = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
 
         if (storage == null)
         {

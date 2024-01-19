@@ -130,21 +130,39 @@ Seja bem-vindo(a) ao DocSpace da ONLYOFFICE! O seu perfil de utilizador foi adic
 
 * *Associe qualquer armazenamento em núvem* e trabalhe sem ter que estar a alternar entre aplicações.
 
-$GreenButton
+$OrangeButton
 
-Se precisar de ajuda, navegue através do nosso "Centro de Ajuda":"https://helpcenter.onlyoffice.com/" ou contacte a nossa "Equipa de suporte":"https://www.onlyoffice.com/support-contact-form.aspx".
+Se precisar de ajuda, navegue através do nosso "Centro de Ajuda":"${__HelpLink}" ou contacte a nossa "Equipa de suporte":"${__SupportLink}".
 
-Com os melhores cumprimentos,
-A Equipa da ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
-  <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
-    <value>Quer alterar a palavra-passe na sua conta cloud office? Clique no botão abaixo para confirmar.
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Faça o mesmo como utilizador|Associe o Dropbox, Box e outras contas na Secção ‘comum’|Configure os direitos de acesso aos documentos e pastas na Secção ‘Comum’</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Crie e edite os seus próprios documentos, bem como os documentos partilhados, com os direitos de acesso adequados|Conceder a outros utilizadores acesso de leitura/edição aos documentos e pastas|Ligar o Dropbox, Box e outras contas na secção 'Os meus documentos'</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. A eliminação dos dados do utilizador foi concluída</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Um novo portal foi registado</value>
+  </data>
+  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>Caro $UserName,
 
-$GreenButton
+O processo de remover os dados de "$FromUserName":"$FromUserLink" foi concluído com êxito.
 
-O link é válido por 7 dias.
+A eliminação dos seus dados pessoais libertou $DocsSpace</value>
+  </data>
+  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>h3.Um novo portal foi registado
 
-Não quer alterar a sua palavra-passe? Simplesmente ignore esta mensagem.</value>
+# Portal url: "${__VirtualRootPath}":"${__VirtualRootPath}"
+# Primeiro nome: $UserName
+# Último nome: $UserLastName
+# E-mail: $UserEmail
+# Telemóvel: $Phone
+# Data da Criação: $Date</value>
   </data>
 </root>

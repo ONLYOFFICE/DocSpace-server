@@ -118,394 +118,421 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
-Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipă, colaborării cu clienții și partenerii dvs și nu numai. Adresa spațiului dvs este "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+    <value>h1. în spaţiul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipă, colaborării cu clienții și partenerii dvs și nu numai. Adresa spațiului dvs este "${__VirtualRootPath}":"${__VirtualRootPath}"
+
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
- 
-$GreenButton
- 
-Descoperiți un nou mod de colaborare asupra documentelor!
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$OrangeButton
+
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipă, colaborării cu clienții și partenerii dvs și nu numai. Adresa spațiului dvs este "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
- 
-$GreenButton
- 
-Descoperiți un nou mod de colaborare asupra documentelor!
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$OrangeButton
+
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipă, colaborării cu clienții și partenerii dvs și nu numai. Adresa spațiului dvs este "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
- 
-$GreenButton
- 
-Descoperiți un nou mod de colaborare asupra documentelor!
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$OrangeButton
+
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipă, colaborării cu clienții și partenerii dvs și nu numai. Adresa spațiului dvs este "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
- 
-$GreenButton
- 
+$OrangeButton
+
 Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
- 
-* 1 administrator, 2 utilizatori avansați
-* Până la 12 săli
-*  Un număr nelimitat de utilizatori în fiecare sală
-* 2 GB de spațiu de stocare
- 
-Descoperiți un nou mod de colaborare asupra documentelor!
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 administrator, 2 utilizatori avansați&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Până la 12 săli&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Un număr nelimitat de utilizatori în fiecare sală&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 GB de spațiu de stocare&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE? Faceți clic pe butonul de mai jos pentru a confirma.
- 
-$GreenButton
- 
+
+$OrangeButton
+
 Linkul este valabil timp de 7 zile.
- 
+
 Nu doriți să modificați parola? Atunci ignorați acest mesaj</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Obțineți aplicații ONLYOFFICE&lt;span style="color:#FF6F3D;"&gt;gratuit&lt;/span&gt;
+
+
+Stimate, $UserName!
+
 Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice dispozitiv.
- 
-# Pentru a lucra cu documente în Windows, Linux și Mac, încărcați aplicația de editare desktop ONLYOFFICE:"https://www.onlyoffice.com/download-desktop.aspx".
- 
-#Pentru a edita documente de pe diapozitive mobile, obțineți aplicația ONLYOFFICE Documents pe iOS:"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" sau pe Android:"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a lucra cu documente, încărcați aplicația de editare desktop ONLYOFFICE pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a edita documente de pe diapozitive mobile, obțineți aplicația ONLYOFFICE Documents pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
-$GreenButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
-$GreenButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
-$GreenButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
- 
+
 Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay‎ zile a fost activată pentru contul dvs ONLYOFFICE DocSpace.
- 
-Aveţi grijă să efectuaţi plata abonamentului dvs Business înainte de expirarea perioadei de graţie Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":https://onlyoffice.com</value>
+
+Aveţi grijă să efectuaţi plata abonamentului dvs Business înainte de expirarea perioadei de graţie Astfel, veți putea folosi în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Descoperiți abonamentul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace business
+
+
+Stimate, $UserName!
+
 Iată trei întrebări simple, care ne pot ajuta să facem experiența dvs de utilizator și mai confortabilă.
- 
-* Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? 
- 
-* Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? 
- 
-* Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 Dacă ați răspuns DA la oricare dintre întrebările de mai sus, optați pentru abonamentul BUSINESS, care vă permite să adăugați la spațiul dvs ONLYOFFICE DocSpace numărul de administratori dorit și să utilizați opțiuni de branding.
- 
-Pentru a proceda astfel, consultaţi secţiunea Plăți:"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
- 
-_Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu. _
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+
+Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
-$GreenButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Descoperiți abonamentul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace business
+
+
+Stimate, $UserName!
+
 Iată trei întrebări simple, care ne pot ajuta să facem experiența dvs de utilizator și mai confortabilă.
- 
-* Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? 
- 
-* Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? 
- 
-* Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 Dacă ați răspuns DA la oricare dintre întrebările de mai sus, optați pentru abonamentul BUSINESS, care vă permite să adăugați la spațiul dvs ONLYOFFICE DocSpace numărul de administratori dorit și să utilizați opțiuni de branding.
- 
-Pentru a proceda astfel, consultaţi secţiunea Plăți:"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
- 
-_Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu. _
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Descoperiți abonamentul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace business
+
+
+Stimate, $UserName!
+
 Iată trei întrebări simple, care ne pot ajuta să facem experiența dvs de utilizator și mai confortabilă.
- 
-* Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? 
- 
-* Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? 
- 
-* Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 Dacă ați răspuns DA la oricare dintre întrebările de mai sus, optați pentru abonamentul BUSINESS, care vă permite să adăugați la spațiul dvs ONLYOFFICE DocSpace numărul de administratori dorit și să utilizați opțiuni de branding.
- 
-Pentru a proceda astfel, consultaţi secţiunea Plăți:"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
- 
-_Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu. _
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Descoperiți abonamentul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace business
+
+
+Stimate, $UserName!
+
 Iată trei întrebări simple, care ne pot ajuta să facem experiența dvs de utilizator și mai confortabilă.
- 
-* Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? 
- 
-* Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? 
- 
-* Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Aveți o echipă mare sau o mulțime de clienți și parteneri cu care colaborați în ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să creați un număr nelimitat de camere pentru a lucra cu multe documente? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Doriți să utilizați ONLYOFFICE DocSpace sub marca dvs. proprie?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 Dacă ați răspuns DA la oricare dintre întrebările de mai sus, optați pentru abonamentul BUSINESS, care vă permite să adăugați la spațiul dvs ONLYOFFICE DocSpace numărul de administratori dorit și să utilizați opțiuni de branding.
- 
-Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
- 
-_Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu. _
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+
+Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spațiului dvs ONLYOFFICE DocSpace. Acolo veți găsi un link personal la portalul pentru clienți Stripe de unde puteți gestiona cu ușurință  toate detaliile de plată. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătitorul. Numai plătitorul poate modifica abonamentul (defini numărul de administratori). Utilizatorii nu pot accesa detalii de plată. Proprietarul contului ONLYOFFICE DocSpace poate reatribui rolul de plătitor oricând mai târziu.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Bună!
- 
-Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+    <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Bună!
- 
-Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+    <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Bună!
- 
-Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>Bună!
- 
-Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
-$GreenButton
- 
-Dacă aveți nevoie de ajutor, navigați la Centru de ajutor:"https://helpcenter.onlyoffice.com/" sau contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
-$GreenButton
- 
-Dacă aveți nevoie de ajutor, navigați la Centru de ajutor:"https://helpcenter.onlyoffice.com/" sau contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-*# Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-*# Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*# Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-*# Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
-$GreenButton
- 
-Dacă aveți nevoie de ajutor, navigați la Centru de ajutor:"https://helpcenter.onlyoffice.com/" sau contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-*# Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-*# Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*# Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-*# Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
-$GreenButton
- 
-Dacă aveți nevoie de ajutor, navigați la Centru de ajutor:"https://helpcenter.onlyoffice.com/" sau contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Mesajul de la "${__VirtualRootPath}": portalul "${__VirtualRootPath}"
@@ -516,169 +543,119 @@ Email: $UserEmail
  
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
-Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice dispozitiv.
- 
-# Pentru a lucra cu documente în Windows, Linux și Mac, încărcați aplicația de editare desktop ONLYOFFICE:"https://www.onlyoffice.com/download-desktop.aspx".
- 
-#Pentru a edita documente de pe diqpozitive mobile, obțineți aplicația ONLYOFFICE Documents pe iOS:"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" sau pe Android:"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Obțineți aplicații ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;gratuit&lt;/span&gt;
+
+
+Stimate, $UserName!
+
 Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice dispozitiv.
- 
-# Pentru a lucra cu documente în Windows, Linux și Mac, încărcați aplicația de editare desktop ONLYOFFICE:"https://www.onlyoffice.com/download-desktop.aspx".
- 
-#Pentru a edita documente de pe diqpozitive mobile, obțineți aplicația ONLYOFFICE Documents pe iOS:"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" sau pe Android:"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Salut!
-S-a încercat înregistrarea unui nou cont ONLYOFFICE Personal:"$PortalUrl" pe baza acestei adrese e-mail. Dacă dumneavoastră ați întreprins înregistrarea, vă informăm că contul există deja, accesaţi pagina ONLYOFFICE Personal și vă conectați.
-Dacă v-ați uitat sau ați pierdut parola, este posibil să o recuperați de pe pagina de recuperare a parolei:"$LinkToRecovery".
-Dacă nu s-a încercat înregistrarea unui nou cont, probabil altcineva a făcut-o din greșeală. În acest caz, ignorați acest e-mail.
- 
-Să aveți o zi bună!
-Echipa ONLYOFFICE</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a lucra cu documente, încărcați aplicația de editare desktop ONLYOFFICE pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a edita documente de pe diqpozitive mobile, obțineți aplicația ONLYOFFICE Documents pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>Spațiul dvs ONLYOFFICE DocSpace a fost dezactivat cu succes. Va rugam sa rețineți că, datele dumneavoastră vor fi șterse în conformitate cu politica noastră de confidențialitate :"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
- 
-De ce v-ați decis să părăsiți? Împărtășiți-ne experiența dumneavoastră.
- 
-$GreenButton
- 
-Vă mulțumim și succese!
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+    <value>h1. Spațiul ONLYOFFICE DocSpace a &lt;span style="color:#FF6F3D;"&gt;fost activat&lt;/span&gt;
+
+
+Spațiul dvs ONLYOFFICE DocSpace a fost dezactivat cu succes. Va rugam sa rețineți că, datele dumneavoastră vor fi șterse în conformitate cu "politica noastră de confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;De ce v-ați decis să părăsiți? Împărtășiți-ne experiența dumneavoastră.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*Vă mulțumim și succese!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. Configurați spațiu dvs &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Stimate, $UserName!
+
 Configurați setările de securitate ale spațiului dvs ONLYOFFICE DocSpace pentru a-l securiza și mai mult:
- 
-* Setați nivelul de complexitate parolă.  
- 
-* Activați autentificarea cu doi factori și autentificarea unică (SSO).
- 
-* Indicați domeniul de e-mail de încredere și durata de expirare a sesiunii.
- 
-* Restricționați accesul la anumite adrese IP. 
- 
-* Permiteți sau restricționați mesaje de administrator.  
- 
-* Gestionați drepturile de acces ale administratorului.
- 
-* Creați copii de rezervă.
- 
-$GreenButton
- 
-Vizitați Centru de ajutor:"https://helpcenter.onlyoffice.com/" pentru a afla mai multe despre configurarea și gestionarea spațiului dvs ONLYOFFICE DocSpace. Sunteți binevenit să consultați Centru de ajutor de fiecare dată când aveți întrebări cu privire la funcționalități.
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Setați nivelul de complexitate parolă&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Activați autentificarea cu doi factori și autentificarea unică (SSO)&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Indicați domeniul de e-mail de încredere și durata de expirare a sesiunii&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Restricționați accesul la anumite adrese IP&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Permiteți sau restricționați mesaje de administrator&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Gestionați drepturile de acces ale administratorului&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Creați copii de rezervă&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Vizitați "Centru de ajutor":"${__HelpLink}" pentru a afla mai multe despre configurarea și gestionarea spațiului dvs ONLYOFFICE DocSpace. Sunteți binevenit să consultați Centru de ajutor de fiecare dată când aveți întrebări cu privire la funcționalități.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Nu s-a înregistrat nicio activitate în contul dvs ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" mai mult de 6 luni. 
- 
-Deoarece ați decis să nu-l mai utilizați, spațiul dvs ONLYOFFICE DocSpace și toate datele vor fi șterse în conformitate cu politica noastră de confidențialitate:"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
- 
-Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ONLYOFFICE DocSpace?
- 
-$GreenButton
- 
-Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ONLYOFFICE DocSpace, contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+    <value>h1. Spațiul dvs ONLYOFFICE DocSpace va &lt;span style="color:#FF6F3D;"&gt;fi șters&lt;/span&gt;
+
+
+Nu s-a înregistrat nicio activitate în contul dvs ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" mai mult de 6 luni. 
+
+Deoarece ați decis să nu-l mai utilizați, spațiul dvs ONLYOFFICE DocSpace și toate datele vor fi șterse în conformitate cu "politica noastră de confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ONLYOFFICE DocSpace, contactați echipa "noastră de asistență":"${__SupportLink}". 
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>Bună!
- 
-Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
- 
+
 Vă rugăm să țineți cont de faptul că abonamentul dumneavoastră ONLYOFFICE DocSpace expiră în trei zile. După aceea, o perioadă de grație de $PaymentDelay zile va fi activată.
- 
+
 Vă recomandăm să plătiți abonamentul dvs Business acum pentru a utiliza în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":https://onlyoffice.com</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Stimate, $UserName!
- 
+
 Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay zile s-a încheiat pentru contul dvs ONLYOFFICE DocSpace.
- 
+
 Asigurați-vă că plătiți abonamentul dvs Business cât mai curând posibil. Astfel, veți putea folosi în continuare toate beneficiile oferite de ONLYOFFICE DocSpace ca înainte.
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":https://onlyoffice.com</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Stimate, $UserName!
- 
+
 Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay zile expiră mâine pentru contul dvs ONLYOFFICE DocSpace.
- 
-Asigurați-vă că plătiți abonamentul dvs Business astăzi. Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":https://onlyoffice.com</value>
+
+Asigurați-vă că plătiți abonamentul dvs Business astăzi. Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bună!
- 
+
 Sunteţi invitat să vă asociaţi la sala $Message la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
- 
-$GreenButton
- 
+
+$OrangeButton
+
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
- 
-Cu deosebită considerație,
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Doriți să modificați parola contului dvs ONLYOFFICE Personal? Faceți clic pe butonul de mai jos pentru a confirma.
- 
-$GreenButton 
- 
-Linkul este valabil timp de 7 zile.
- 
-Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
+
+$TrulyYours</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -721,5 +698,1068 @@ Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath} notificarea privind modificarea profilului de portal</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText} asistență cu parole</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} copia de rezervă a portalului a fost creată</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}. Eroare de migrare a portalului la o altă regiune</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}. Migrarea portalului la o altă regiune a început</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}. Migrarea portalului la o altă regiune terminată cu succes</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare parola pentru cutia poștală</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_dns_change" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare finalizat</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare nu a reușit</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare a început</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare finalizat</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare nu a reușit</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare a început</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. Creare cutie poșt</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}. Solicitare de schimbare a telefonului mobil</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}. Activați adresa dvs de e-mail</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Restaurare finalizată</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}. Restaurarea a î</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. Notificare de securitare</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Reatribuirea datelor de utilizator nu a reușit</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Reatribuirea datelor de utilizator finalizată</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Eliminarea datelor de utilizator finalizată</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Eliminarea datelor de utilizator nu a reușit</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath}) copia de rezervă a portalului a fost creată
+
+Stimată/Stimate $OwnerName,
+
+O copie de rezervă, care conține datele din portalul dvs [${__VirtualRootPath}](${__VirtualRootPath}) a fost creată.
+
+Pentru a afla mai multe despre procedura de creare a copiei de rezervă, consultați ghidul nostru pentru utilizatori [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+Echipă de Asistență ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>Notificarea privind modificarea profilului de portal [${__VirtualRootPath}](${__VirtualRootPath})
+ 
+[$__AuthorName]($__AuthorUrl) și-a schimbat detaliile profilului său pe portalul [${__VirtualRootPath}](${__VirtualRootPath}) portal.</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>Acceptare</value>
+  </data>
+  <data name="AcceptDocSpace" xml:space="preserve">
+    <value>ACCEPTARE</value>
+  </data>
+  <data name="ButtonAccessControlPanel" xml:space="preserve">
+    <value>Accesare Panou de Control</value>
+  </data>
+  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <value>Accesaţi portalul dvs</value>
+  </data>
+  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <value>Accesaţi biroul dvs web</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Cu stimă, Echipă de Asistență ONLYOFFICE</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>Schimbare adresa de e-mail</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>Schimbare număr de telefon mobil</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>Schimbare parolă</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>Faceți clic aici pentru a activa adresa dvs de e-mail</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Faceți clic aici pentru a vă asocia la portalul</value>
+  </data>
+  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+    <value>Colaborare în spațiul DocSpace</value>
+  </data>
+  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <value>Configurează acum</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>Configurare aplicație de autentificare</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Configurați spațiu dvs ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>Confirmare</value>
+  </data>
+  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <value>CONFIRMARE</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>Confirmare închidere cont</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>Confirmare schimbare e-mail</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>Confirmare schimbare parolă</value>
+  </data>
+  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+    <value>Confirmare invitație la DocSpace</value>
+  </data>
+  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
+    <value>Confirmarea schimbării adresei de portal</value>
+  </data>
+  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <value>Confirmarea actualizării proprietarului de portal</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>Confirmare invitație la sală</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>Dezactivare portal</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>Dezactivarea portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>Ștergerea profilului din portalul ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>Solicitare licență Enterprise</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace a fost activată</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace a expirat</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace va expira mâine</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>Ștergere portal</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>Ștergerea portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>Invitația să vă alăturați portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <value>Invitați chiar acum</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>Lasati un feedback</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Stăpânește spațiul ONLYOFFICE DocSpace cu ajutorul ghidurilor video</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>Un utilizator nou a fost adăugat pe portalul ${LetterLogoText} portal</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>Un utilizator nou a fost adăugat la portalul [${__VirtualRootPath}](${__VirtualRootPath})
+[$__AuthorName]($__AuthorUrl) s-a alăturat portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>Spațiul ONLYOFFICE DocSpace a fost activat</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Eliminare profil</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>Reînnoiește acum</value>
+  </data>
+  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <value>Solicitați un apel</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>Solicitare plan tarifar SaaS</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>Solicitarea către departamentul de vânzări</value>
+  </data>
+  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <value>Alegeți planul tarifar chiar acum</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>Mesaj test SMTP</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>Începeți o perioadă de încercare gratuită</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Cu deosebită considerație, Echipă ONLYOFFICE</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>Utilizați reducerea</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>Utilizatorul și-a șters profilul</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>Mesaj al utilizatorului către administratorii</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>Vizitați secțiunea Plăți</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>AFIȘEAZĂ LISTA DE REDARE COMPLETĂ</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>Ce este nou pe portalul dvs. în data de $Date</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>Sunteţi invitat să vă asociaţi ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Abonamentul dvs ONLYOFFICE DocSpace va expira în curînd</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>Spațiul dvs ONLYOFFICE DocSpace va fi șters</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>Profilul dvs pe ${__VirtualRootPath} a fost schimbat</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. Stăpânește spațiul ONLYOFFICE DocSpace cu &lt;span style="color:#FF6F3D;"&gt;ghidurilor video&lt;/span&gt;
+
+
+Stimate, $UserName!
+
+Pentru comoditatea dvs, vă propunem tutoriale video pentru a stăpâni cu ușurință spațiul ONLYOFFICE DocSpace. Urmăriți ghidurile video pentru a asigura o activitate eficientă și fără probleme.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;Ce este spațiu ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: cursă practică&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Activități principale&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Creare săli&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Creare și încărcare fișiere&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Copiere, deplasare, redenumire, ștergere, descărcare a fișierelor&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Sortare și filtrare a fișierelor&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Restaurarea versiunilor de fișiere&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Utilizarea comenzilor rapide&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Arhivarea sălilor&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Gestionarea utilizatorilor și profilelor&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Invitarea utilizatorilor&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Gestionarea rolurilor de utilizator&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Gestionarea profilului dvs&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Deconectați-vă de la toate sesiunile active&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Administrare &lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Gestionarea setărilor de securitate&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Copiere de rezervă și restaurare&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_activate_email" xml:space="preserve">
+    <value>h1.Activați poștă dvs electronică pentru portalul "${__VirtualRootPath}":"$InviteLink".
+
+Bună!
+
+Dacă doriți să participați la activitățile desfășurate pe portalul "${__VirtualRootPath}":"$InviteLink", trebuie să activați adresa de e-mail. Acest lucru este necesar din motive de securitate.
+
+$OrangeButton
+
+Acest link este valabil doar timp de 7 zile. Finalizați procedura de activare a adresei de e-mail în perioada dată.</value>
+  </data>
+  <data name="pattern_backup_created" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" copia de rezervă a portalului a fost creată
+
+Stimată/Stimate $OwnerName,
+
+O copie de rezervă, care conține datele din portalul dvs "${__VirtualRootPath}":"${__VirtualRootPath}" a fost creată.
+
+Pentru a afla mai multe despre procedura de creare a copiei de rezervă, consultați ghidul nostru pentru utilizatori "Copiere de rezervă a datelor":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>Doriți să modificați adresa e-mail pentru contul dvs ${LetterLogoText}?
+
+Apăsați pe butonul de mai jos și vă conectați la contul dvs cloud.
+
+$OrangeButton
+
+Linkul este valabil timp de 7 zile.
+
+*Dacă nu v-ați conectat la ${LetterLogoText} din acest browser, utilizați adresa dvs de e-mail veche pentru confirmare. Dacă nu vă amintiți parolă, trebuie să contactați administratorul dvs de portal.
+ 
+Nu doriți să modificați adresa de e-mail? Atunci ignorați acest mesaj.</value>
+  </data>
+  <data name="pattern_change_phone" xml:space="preserve">
+    <value>h1.Solicitare de schimbare a telefonului mobil
+
+Ați solicitat schimbarea numărului de telefon mobil pentru accesarea portalului ${LetterLogoText}.
+
+Urmăriţi linkul de mai jos pentru a schimba numărul de telefon mobil:
+
+$OrangeButton
+
+Dacă nu doriți să schimbați numărul de telefon mobil sau dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>Notificare de securitate
+
+Configurația aplicației de autentificare pe care o utilizați pentru a accesa portalul ${LetterLogoText} a fost resetată.
+
+Faceți clic pe butonul de mai jos pentru a accesa pagina de conectare la portal și pentru a configura aplicația de autentificare:
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <value>h1.Schimbarea proprietarului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Stimată/Stimate $OwnerName,
+
+Am primit o solicitare de schimbare a proprietarului de portal "${__VirtualRootPath}":"${__VirtualRootPath}" în $UserName.
+
+Urmăriţi linkul de mai jos pentru a confirma acţiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a proprietarului de portal în perioada dată.</value>
+  </data>
+  <data name="pattern_dns_change" xml:space="preserve">
+    <value>h1.Schimbarea adresei de portal
+
+Stimată/Stimate $OwnerName,
+
+Am primit o solicitare de schimbare a adresei de portal "${__VirtualRootPath}":"${__VirtualRootPath}" în "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
+
+Urmăriţi linkul de mai jos pentru a confirma acţiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a adresei de portal în perioada dată.</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Salut, $UserName!
+
+Sunteţi invitat să vă asociaţi la "${__VirtualRootPath}":"${__VirtualRootPath}" ca un utilizator invitat. Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+Linkul este valabil numai timp de 7 zile.
+
+Veți primi și mai multe sfaturi despre cum să vă folosiți biroul dvs web. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Salut, $UserName!
+
+$__AuthorName v-a invitat să vă alăturați "${__VirtualRootPath}":"${__VirtualRootPath}" ca un utilizator invitat. Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+Linkul este valabil numai timp de 7 zile.
+
+Veți primi și mai multe sfaturi despre cum să folosiți biroul dvs web. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.</value>
+  </data>
+  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <value>h1.Mesajul de la portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+ 
+Email: $UserEmail
+ 
+$Body</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>Mesajul de la portal [${__VirtualRootPath}](${__VirtualRootPath})
+ 
+Email: $UserEmail
+ 
+$Body</value>
+  </data>
+  <data name="pattern_join" xml:space="preserve">
+    <value>h1.Invitația să vă alăturați portalului "${__VirtualRootPath}":"$InviteLink"
+
+Bună!
+
+Ați decis să vă alăturați portalului "${__VirtualRootPath}":"$InviteLink" pe ${LetterLogoText} - o platformă de gestionare a documentelor și proiectelor. Alăturați-vă portalului și începeți imediat să colaborați cu colegii sau prietenii dumneavoastră.
+
+Pentru a accepta invitația, introduceți numele și parola dvs urmând acest link:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 48 ore. Vă rugăm să finalizați procedura în perioada dată.</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+      Administratorul a creat o nouă cutie poștală &lt;b&gt;$Address&lt;/b&gt; mailbox pentru dvs pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+      Utilizați setările următoare penru alți clienti de e-mail:
+      Nume de utilizator: &lt;b&gt;$Login&lt;/b&gt;
+      Parola: "&lt;b&gt;set password&lt;/b&gt;":"$MyStaffLink"
+
+      Server de primire e-mail (IMAP): 
+      Server: &lt;b&gt;$Server&lt;/b&gt;
+      Port: &lt;b&gt;$ImapPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+      Server de expediere e-mail (SMTP): 
+      Server: &lt;b&gt;$Server&lt;/b&gt;
+      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      Necesită autentificare: &lt;b&gt;Yes&lt;/b&gt;
+
+      Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+      Parola pentru cutia poștală &lt;b&gt;$Address&lt;/b&gt; a fost schimbată.
+
+      Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+      Administratorul a creat o nouă cutie poștală &lt;b&gt;$Address&lt;/b&gt; pentru dvs pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+      Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_migration_error" xml:space="preserve">
+    <value>h1.Eroare de migrare a portalului la o altă regiune
+
+A intervenit o eroare în timpul migrației de date în regiunea $RegionName. Încercaţi din nou mai târziu.
+Portalul dumneavoastră este acum disponibil la adresă veche "$PortalUrl":"$PortalUrl"
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Pentru a modifica tipul de notificare, gestionați "setările pentru abonament":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <value>h1. Eroare de migrare a portalului la o altă regiune
+
+A intervenit o eroare în timpul migrației de date la o altă regiune. Încercaţi din nou mai târziu.
+Portalul dumneavoastră este acum disponibil la adresă veche "$PortalUrl":"$PortalUrl"
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^ Pentru a modifica tipul de notificare, gestionați "setările pentru abonament":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_start" xml:space="preserve">
+    <value>h1. Migrarea portalului la o altă regiune a început
+
+A fost demarată migrația de date în regiunea $RegionName. Procesul va dura ceva timp în funcție de volumul și tipul de date.
+
+*Mențiune*: în timpul procesului de migrare portalul nu va fi disponibil. Odată ce procesul de migrație este finalizat, adresa URL a portalului va schimba și toate link-urile spre documentele partajate vor deveni inaccesibile.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.Migrare portal
+h1."$PortalUrl":"$PortalUrl"
+
+Portalul dvs. a fost migrat pe un nou domeniu. Restabiliți accesul la portalul prin introducerea parolei care va fi utilizată pentru autentificare.
+
+Urmați linkul de mai jos pentru a seta parola pentru contul dvs:
+$OrangeButton
+
+* Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de restabilire a accesului în perioada dată.
+
+Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal "$PortalUrl":"$PortalUrl" pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Salut!
+
+Sunteţi invitat să vă asociaţi la "${__VirtualRootPath}":"${__VirtualRootPath}" ca un utilizator invitat. Faceți clic pe linkul pentru a accepta invitația:
+
+"$ActivateUrl":"$ActivateUrl"
+
+Linkul este valabil numai timp de 7 zile.
+
+Veți primi și mai multe sfaturi despre cum să vă folosiți biroul dvs web. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.</value>
+  </data>
+  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <value>h1.Dezactivarea portalului "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Stimată/Stimate $OwnerName,
+
+Ați solicitat o dezactivare temporară a portalului "${__VirtualRootPath}":"${__VirtualRootPath}". Urmăriţi linkul de mai jos pentru a confirma acţiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de dezactivare a portalului în perioada dată.
+
+Puteți oricând să reactivați portalul dvs apăsând pe link-ul următor:
+p=. "Reactivare portal":"$ActivateUrl" (link-ul nu este limitat de timp)
+ 
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>Dezactivarea portalului [${__VirtualRootPath}](${__VirtualRootPath}) portal
+
+Stimată/Stimate $OwnerName,
+
+Ați solicitat o dezactivare temporară a portalului [${__VirtualRootPath}](${__VirtualRootPath}) Urmăriţi linkul de mai jos pentru a confirma acţiunea:
+
+$OrangeButton
+
+_Menţiune_: Acest link este valabil doar timp de 7 zile. Finalizați procedura de dezactivare a portalului în perioada dată.
+
+Puteți oricând să reactivați portalul dvs apăsând pe link-ul următor:
+[Reactivate Portal]($ActivateUrl) (link-ul nu este limitat de timp)
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SalesEmail}](mailto:${__SalesEmail})
+
+Best regards,
+ONLYOFFICE™ Support Team
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_delete" xml:space="preserve">
+    <value>h1.Ștergerea spațiului "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Stimată/Stimate $OwnerName,
+
+Ați solicitat ștergerea definitivă a spațiului "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*Important! Toate datele stocate în spațiul dvs, inclusiv detaliile de înregistrare, se vor pierde nerecuperabil.*
+
+#if($AutoRenew == "True")
+Înainte să ştergeţi spaţiul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate pentru "contul dvs Avangate":"https://secure.avangate.com/myaccount/".
+#end
+
+Dacă doriți totuși să ștergeți spațiul dvs "${__VirtualRootPath}":"${__VirtualRootPath}", urmăriți linkul de mai jos pentru a confirma acțiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a portalului în perioada dată.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>Ștergerea portalului [${__VirtualRootPath}](${__VirtualRootPath})
+
+Stimată/Stimate $OwnerName,
+
+Ați solicitat ștergerea definitivă a portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}) portal.
+
+_ Important! Toate datele stocate pe portalul dvs, inclusiv detaliile de înregistrare, se vor pierde nerecuperabil._
+
+#if($AutoRenew == "True")
+Înainte să ştergeţi portalul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate în [Avangate account](https://secure.avangate.com/myaccount/").
+#end
+
+Dacă doriți totuși să ștergeți portalul [${__VirtualRootPath}](${__VirtualRootPath}), urmăriți linkul de mai jos pentru a confirma acțiunea:
+
+$OrangeButton
+
+_Menţiune_: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a portalului în perioada dată.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SalesEmail}](mailto:${__SalesEmail})
+
+Cu stimă,
+Echipă de Asistență ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Ați fost invitat(ă) să vă alăturați la biroul web sigur și securizat al companiei dvs, care va ameliora coloborare în echipă. Adresa biroului "${__VirtualRootPath}":"${__VirtualRootPath}". Adăugarea linku-lui la marcaje ar fi o idee bună, deoarece este foarte probabil să o folosiți foarte des.
+
+Urmăriți linkul de mai jos pentru a accepta invitația și folosiți numele de utilizator și parola contului corporativ pentru a vă conecta. 
+
+$OrangeButton
+
+Linkul este valabil numai timp de 7 zile.</value>
+  </data>
+  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_rename" xml:space="preserve">
+    <value>h1.Schimbarea adresei de portal
+
+Stimată/Stimate $UserDisplayName,
+
+Adresa de portal $PortalUrl a fost schimbată cu una nouă "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*Mențiune*: Setările DNS și opțiuni de autentificare unică nu vor funcționa până nu le schimbați.</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1.Ștergerea profilului pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+licitat ștergerea definitivă profilului dvs din portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Dacă doriți totuși să ștergeți portalul, urmăriți linkul de mai jos pentru a confirma acțiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a profilului în perioada dată.</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>Utilizatorul "$FromUserName":"$FromUserLink" și-a șters profilul, așadar acest profil este acum blocat. Toate fișierele sunt încă atribuite acestui utilizator și ocupă spațiu de stocare.
+
+Puteți reatribui documentele partajate de acest utilizator unui alt utilizator activ sau le puteți elimina pentru a elibera spațiul de stocare pe portalul.
+
+Accesați pagina de profil a utilizatorului utilizând acest link.:"$FromUserLink" pentru a reatribui documentele unui alt utilizator sau pentru a elimina totate datele.</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1.Profilul dvs pe "$__VirtualRootPath":"$__VirtualRootPath" a fost schimbat
+
+Stimată/Stimate $UserName,
+
+Detaliile profilului dvs de utilizator pe "$__VirtualRootPath":"$__VirtualRootPath" au fost schimbate de către "$__AuthorName":"$__AuthorUrl".
+ 
+Pentru a vizualiza profilul dvs, urmăriți link-ul de mai jos:
+"$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>Profilul dvs pe [${__VirtualRootPath}](${__VirtualRootPath}) a fost schimbat
+
+Stimată/Stimate $UserName,
+
+Detaliile profilului dvs de utilizator pe [${__VirtualRootPath}](${__VirtualRootPath}) au fost schimbate de către [$__AuthorName]($__AuthorUrl).
+
+Pentru a vizualiza profilul dvs, urmăriți link-ul de mai jos:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Procesul de reatribuire de date de la utilizatorul "$FromUserName":"$FromUserLink" la utilizatorul "$ToUserName":"$ToUserLink" s-a terminat cu succes.</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Procesul de reatribuire de date de la utilizatorul "$FromUserName":"$FromUserLink" la utilizatorul "$ToUserName":"$ToUserLink" nu a reușit.
+
+Mesaj de excepție: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Datele utilizatorului "$FromUserName":"$FromUserLink" nu au fost eliminate.
+
+Mesaj de excepție: $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.Solicitare licență Enterprise
+
+h3.Prenume
+$UserName
+
+h3.Nume
+$UserLastName
+
+h3.Funcția
+$Position
+
+h3.E-mail
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Telefon
+$Phone
+
+h3.Pagina web a societăției
+$Website
+
+h3.Denumirea societății
+$CompanyTitle
+
+h3.Mărimea socuetății
+$CompanySize
+
+h3.Conținutul solicitării
+$Body
+
+h3.Adresă de portal
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.Solicitarea tarifului SaaS pent "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.Prenume
+$UserName
+
+h3.Nume
+$UserLastName
+
+h3.Funcția
+$Position
+
+h3.E-mail
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Telefon
+$Phone
+
+h3.Pagina web a societăției
+$Website
+
+h3.Denumirea societății
+$CompanyTitle
+
+h3.Mărimea socuetății
+$CompanySize
+
+h3.Conținutul solicitării
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.Restaurare portal
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Portalul dvs a fost restaurat. Pentru a accesa portalul, trebuie să setați o nouă parolă:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile.
+
+Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal "${__VirtualRootPath}":"${__VirtualRootPath}" pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.Demararea operaţiunii de restaurare portal
+
+Restaurarea portalului s-a demarat. Procesul va dura ceva timp în funcție de volumul și tipul de date.
+
+*Mențiune*: în timpul procesului de restaurare portalul nu va fi disponibil.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Pentru a modifica tipul de notificare, gestionați setările pentru abonament:":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Salut!
+
+Sunteţi invitat să vă asociaţi la "${__VirtualRootPath}":"${__VirtualRootPath}" ca un utilizator invitat. Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+De asemenea, vă vom trimite din când în când sfaturi utile și ultimele noutăți ONLYOFFICE. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1.Notificarea privind modificarea profilului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" a schimbat detaliile profilului său pe portalul ["${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^Dacă nu doriți să primiți notificări despre actualizări de profil, gestionați setările de abonament:"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_send_whats_new" xml:space="preserve">
+    <value>h1.Ce este nou în spațiul dvs DocSpace în data de $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>Mesaj test SMTP
+
+Acest mesaj a fost generat automat pentru a testa setările SMTP. Dacă mesajul se afișează înseamnă că toate setările sunt setate corect și le puteți folosi pe portalul dvs.
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
+
+Unele fișiere nu au putut fi decriptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului s-a demarat pe portalul "${PortalUrl}":"${PortalUrl}".
+
+Decriptarea va dura ceva timp, deci portalul va fi temporar indisponibil. De îndată ce decriptarea se încheie, veți putea să lucrați din nou cu datele dvs.</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" s-a terminat cu succes.
+
+Portalul dvs este din nou disponibil.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
+
+Unele fișiere nu au putut fi criptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului s-a demarat pe portalul "${PortalUrl}":"${PortalUrl}".
+
+Criptarea va dura ceva timp, deci portalul va fi temporar indisponibil. De îndată ce criptarea se încheie, veți putea să lucrați din nou cu datele dvs.</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" s-a terminat cu succes.
+
+Portalul dvs este din nou disponibil.</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1.Un utilizator nou a fost adăugat la portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" s-a alăturat portalului dvs "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^Dacă nu doriți să primiți notificări despre utilizatorii noi, gestionați setările de abonament:"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Datele utilizatorului "$FromUserName":"$FromUserLink" au fost eliminate cu succes.
+
+Ștergerea datelor cu caracter personal a permis eliberarea $DocsSpace</value>
   </data>
 </root>

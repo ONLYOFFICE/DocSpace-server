@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,28 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Configuration;
+
 namespace ASC.Files.Service;
 public class Startup : BaseWorkerStartup
 {
-    private readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-        _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
-
+        await base.ConfigureServices(services);
         services.AddHttpClient();
 
-        DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
-
-        if (!bool.TryParse(_configuration["disable_elastic"], out var disableElastic))
+        if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
             disableElastic = false;
         }
@@ -76,6 +75,12 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ThumbnailBuilderService>();
 
         DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+        DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+        DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();
@@ -92,6 +97,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();
@@ -107,7 +114,8 @@ public class Startup : BaseWorkerStartup
 
 
         services.AddBaseDbContextPool<FilesDbContext>();
-
+        services.AddScoped<IWebItem, ProductEntryPoint>();
+        
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);

@@ -1,0 +1,22 @@
+
+name: Trigger action
+
+on:
+  push:
+    branches:
+      - 'hotfix/v*'
+      - 'release/v*'
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch Action
+        run: |
+          curl \
+          -X POST \
+          -u "${{ secrets.USERNAME}}:${{secrets.TOKEN}}" \
+          "https://api.github.com/repos/ONLYOFFICE/DocSpace-buildtools/dispatches" \
+          -H "Accept: application/vnd.github.everest-preview+json" \
+          --data '{"event_type": "server-trigger-action", "client_payload": { "branches": ["'"${GITHUB_REF_NAME}"'"]}}'
+

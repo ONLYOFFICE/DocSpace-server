@@ -1,39 +1,35 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Billing;
 
-[Singletone]
-public class LicenseReaderConfig
+[Singleton]
+public class LicenseReaderConfig(IConfiguration configuration)
 {
-    public readonly string LicensePath;
-    public LicenseReaderConfig(IConfiguration configuration)
-    {
-        LicensePath = configuration["license:file:path"] ?? "";
-    }
+    public readonly string LicensePath = configuration["license:file:path"] ?? "";
 }
 
 [Scope]
@@ -43,7 +39,6 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Users.Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -54,8 +49,7 @@ public class LicenseReader
         ITariffService tariffService,
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
-        ILogger<LicenseReader> logger,
-        Users.Constants constants)
+        ILogger<LicenseReader> logger)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -63,7 +57,6 @@ public class LicenseReader
         LicensePath = licenseReaderConfig.LicensePath;
         _licensePathTemp = LicensePath + ".tmp";
         _logger = logger;
-        _constants = constants;
     }
 
     public async Task SetCustomerIdAsync(string value)
@@ -117,7 +110,7 @@ public class LicenseReader
             await using (var licenseStream = GetLicenseStream(temp))
             using (var reader = new StreamReader(licenseStream))
             {
-                var licenseJsonString = reader.ReadToEnd();
+                var licenseJsonString = await reader.ReadToEndAsync();
                 var license = License.Parse(licenseJsonString);
 
                 await LicenseToDBAsync(license);
@@ -217,11 +210,11 @@ public class LicenseReader
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new Quota(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = license.DueDate
         };
 
-        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     private void LogError(Exception error)

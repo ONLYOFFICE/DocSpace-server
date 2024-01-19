@@ -1320,6 +1320,30 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "tenants_partners",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    partner_id = table.Column<string>(type: "varchar(36)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    affiliate_id = table.Column<string>(type: "varchar(50)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    campaign = table.Column<string>(type: "varchar(50)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.tenant_id);
+                    table.ForeignKey(
+                        name: "FK_tenants_partners_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateTable(
                 name: "webhooks_config",
                 columns: table => new
                 {
@@ -1332,8 +1356,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenantid = table.Column<int>(name: "tenant_id", type: "int", nullable: false),
                     uri = table.Column<string>(type: "text", nullable: true, defaultValueSql: "''", collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'"),
-                    ssl = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
+                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
                 },
                 constraints: table =>
                 {
@@ -1483,7 +1506,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "short_links",
                 columns: table => new
                 {
-                    id = table.Column<long>(type: "bigint(19)", nullable: false)
+                    id = table.Column<long>(type: "int(10)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     @short = table.Column<string>(name: "short", type: "varchar(12)", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
@@ -2053,12 +2076,32 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "product_id" },
+                values: new object[] { -7, null, "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20", "nonprofit", null });
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "product_id" },
+                values: new object[] { -6, null, "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024", "subscription", "1001" });
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "product_id" },
+                values: new object[] { -5, null, "manager:1", "admin1", "1005" });
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "product_id" },
+                values: new object[] { -4, null, "total_size:1073741824", "disk", "1004" });
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "product_id" },
                 values: new object[] { -3, null, "free,total_size:2147483648,manager:3,room:12", "startup", null });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "visible" },
-                values: new object[] { -2, null, "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1", "admin", 30m, "1002", true });
+                values: new object[] { -2, null, "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1", "admin", 15m, "1002", true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
@@ -2240,11 +2283,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "core_usersecurity",
                 columns: new[] { "userid", "LastModified", "pwdhash", "tenant" },
                 values: new object[] { "66faa6e4-f133-11ea-b126-00ffeec8b4ef", new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=", 1 });
-
-            migrationBuilder.InsertData(
-                table: "webstudio_settings",
-                columns: new[] { "ID", "TenantID", "UserID", "Data" },
-                values: new object[] { "9a925891-1f92-4ed7-b277-d6f649739f06", 1, "00000000-0000-0000-0000-000000000000", "{\"Completed\":false}" });
 
             migrationBuilder.CreateIndex(
                 name: "uid",
@@ -2689,6 +2727,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "tenants_version");
+
+            migrationBuilder.DropTable(
+                name: "tenants_partners");
 
             migrationBuilder.DropTable(
                 name: "webhooks");

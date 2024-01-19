@@ -1,32 +1,31 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Core.Users;
 
-[Serializable]
 public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
 {
     [JsonIgnore]
@@ -91,55 +90,55 @@ public class PeopleNamesItem
     public string UserCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _userCaption ?? string.Empty : GetResourceValue(_userCaption); }
-        set { _userCaption = value; }
+        init { _userCaption = value; }
     }
 
     public string UsersCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _usersCaption ?? string.Empty : GetResourceValue(_usersCaption); }
-        set { _usersCaption = value; }
+        init { _usersCaption = value; }
     }
 
     public string GroupCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupCaption ?? string.Empty : GetResourceValue(_groupCaption); }
-        set { _groupCaption = value; }
+        init { _groupCaption = value; }
     }
 
     public string GroupsCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupsCaption ?? string.Empty : GetResourceValue(_groupsCaption); }
-        set { _groupsCaption = value; }
+        init { _groupsCaption = value; }
     }
 
     public string UserPostCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _userPostCaption ?? string.Empty : GetResourceValue(_userPostCaption); }
-        set { _userPostCaption = value; }
+        init { _userPostCaption = value; }
     }
 
     public string GroupHeadCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupHeadCaption ?? string.Empty : GetResourceValue(_groupHeadCaption); }
-        set { _groupHeadCaption = value; }
+        init { _groupHeadCaption = value; }
     }
 
     public string RegDateCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _regDateCaption ?? string.Empty : GetResourceValue(_regDateCaption); }
-        set { _regDateCaption = value; }
+        init { _regDateCaption = value; }
     }
 
     public string GuestCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _guestCaption ?? NamingPeopleResource.CommonGuest : GetResourceValue(_guestCaption); }
-        set { _guestCaption = value; }
+        init { _guestCaption = value; }
     }
 
     public string GuestsCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _guestsCaption ?? NamingPeopleResource.CommonGuests : GetResourceValue(_guestsCaption); }
-        set { _guestsCaption = value; }
+        init { _guestsCaption = value; }
     }
 
     private static string GetResourceValue(string resourceKey)
@@ -153,24 +152,18 @@ public class PeopleNamesItem
 }
 
 [Scope]
-public class CustomNamingPeople
+public class CustomNamingPeople(SettingsManager settingsManager)
 {
-    private static readonly object _locked = new object();
+    private static readonly object _locked = new();
     private static bool _loaded;
 
-    private static readonly List<PeopleNamesItem> _items = new List<PeopleNamesItem>();
-    private readonly SettingsManager _settingsManager;
-
-    public CustomNamingPeople(SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
+    private static readonly List<PeopleNamesItem> _items = new();
 
     public PeopleNamesItem Current
     {
         get
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
+            var settings = settingsManager.Load<PeopleNamesSettings>();
             return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
                 settings.Item :
                 GetPeopleNames(settings.ItemId);
@@ -206,24 +199,20 @@ public class CustomNamingPeople
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
-            var result = settings.Item;
-            if (result == null)
+            var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
+            var result = settings.Item ?? new PeopleNamesItem
             {
-                result = new PeopleNamesItem
-                {
-                    Id = PeopleNamesItem.CustomID,
-                    GroupCaption = string.Empty,
-                    GroupHeadCaption = string.Empty,
-                    GroupsCaption = string.Empty,
-                    RegDateCaption = string.Empty,
-                    UserCaption = string.Empty,
-                    UserPostCaption = string.Empty,
-                    UsersCaption = string.Empty,
-                    GuestCaption = string.Empty,
-                    GuestsCaption = string.Empty
-                };
-            }
+                Id = PeopleNamesItem.CustomID,
+                GroupCaption = string.Empty,
+                GroupHeadCaption = string.Empty,
+                GroupsCaption = string.Empty,
+                RegDateCaption = string.Empty,
+                UserCaption = string.Empty,
+                UserPostCaption = string.Empty,
+                UsersCaption = string.Empty,
+                GuestCaption = string.Empty,
+                GuestsCaption = string.Empty
+            };
 
             result.SchemaName = Resource.CustomNamingPeopleSchema;
 
@@ -235,28 +224,24 @@ public class CustomNamingPeople
         return _items.Find(i => i.Id.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public PeopleNamesItem GetPeopleNames(string schemaId)
+    private PeopleNamesItem GetPeopleNames(string schemaId)
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
-            var result = settings.Item;
-            if (result == null)
+            var settings = settingsManager.Load<PeopleNamesSettings>();
+            var result = settings.Item ?? new PeopleNamesItem
             {
-                result = new PeopleNamesItem
-                {
-                    Id = PeopleNamesItem.CustomID,
-                    GroupCaption = string.Empty,
-                    GroupHeadCaption = string.Empty,
-                    GroupsCaption = string.Empty,
-                    RegDateCaption = string.Empty,
-                    UserCaption = string.Empty,
-                    UserPostCaption = string.Empty,
-                    UsersCaption = string.Empty,
-                    GuestCaption = string.Empty,
-                    GuestsCaption = string.Empty
-                };
-            }
+                Id = PeopleNamesItem.CustomID,
+                GroupCaption = string.Empty,
+                GroupHeadCaption = string.Empty,
+                GroupsCaption = string.Empty,
+                RegDateCaption = string.Empty,
+                UserCaption = string.Empty,
+                UserPostCaption = string.Empty,
+                UsersCaption = string.Empty,
+                GuestCaption = string.Empty,
+                GuestsCaption = string.Empty
+            };
 
             result.SchemaName = Resource.CustomNamingPeopleSchema;
 
@@ -270,18 +255,18 @@ public class CustomNamingPeople
 
     public async Task SetPeopleNamesAsync(string schemaId)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         settings.ItemId = schemaId;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task SetPeopleNamesAsync(PeopleNamesItem custom)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         custom.Id = PeopleNamesItem.CustomID;
         settings.ItemId = PeopleNamesItem.CustomID;
         settings.Item = custom;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
 
@@ -318,7 +303,7 @@ public class CustomNamingPeople
                     UserPostCaption = node.SelectSingleNode("names/userpost").InnerText,
                     RegDateCaption = node.SelectSingleNode("names/regdate").InnerText,
                     GuestCaption = node.SelectSingleNode("names/guest").InnerText,
-                    GuestsCaption = node.SelectSingleNode("names/guests").InnerText,
+                    GuestsCaption = node.SelectSingleNode("names/guests").InnerText
                 };
                 _items.Add(item);
             }

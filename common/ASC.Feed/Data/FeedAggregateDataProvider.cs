@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,11 +27,10 @@
 namespace ASC.Feed.Data;
 
 [Scope]
-public class FeedAggregateDataProvider
+public class FeedAggregateDataProvider(AuthContext authContext,
+    TenantManager tenantManager,
+    IMapper mapper)
 {
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IMapper _mapper;
     private readonly IDbContextFactory<FeedDbContext> _dbContextFactory;
 
     public FeedAggregateDataProvider(
@@ -44,19 +43,9 @@ public class FeedAggregateDataProvider
         _dbContextFactory = dbContextFactory;
     }
 
-    public FeedAggregateDataProvider(
-        AuthContext authContext,
-        TenantManager tenantManager,
-        IMapper mapper)
-    {
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _mapper = mapper;
-    }
-
     public async Task<DateTime> GetLastTimeAggregateAsync(string key)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var value = await Queries.LastTimeAsync(feedDbContext, key);
 
         return value != default ? value.AddSeconds(1) : value;
@@ -70,7 +59,7 @@ public class FeedAggregateDataProvider
             LastDate = value
         };
 
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         await feedDbContext.AddOrUpdateAsync(q => q.FeedLast, feedLast);
         await feedDbContext.SaveChangesAsync();
 
@@ -97,7 +86,7 @@ public class FeedAggregateDataProvider
 
     private async Task SaveFeedsPortionAsync(IEnumerable<FeedRow> feeds, DateTime aggregatedDate)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (var f in feeds)
         {
@@ -106,7 +95,7 @@ public class FeedAggregateDataProvider
                 continue;
             }
 
-            var feedAggregate = _mapper.Map<FeedRow, FeedAggregate>(f);
+            var feedAggregate = mapper.Map<FeedRow, FeedAggregate>(f);
             feedAggregate.AggregateDate = aggregatedDate;
 
             if (f.ClearRightsBeforeInsert)
@@ -137,19 +126,15 @@ public class FeedAggregateDataProvider
 
     public async Task RemoveFeedAggregateAsync(DateTime fromTime)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var aggregates = await Queries.FeedAggregatesByFromTimeAsync(feedDbContext, fromTime).ToListAsync();
-
-        feedDbContext.FeedAggregates.RemoveRange(aggregates);
-
-        await feedDbContext.SaveChangesAsync();
+        await Queries.DeleteFeedAggregatesByFromTimeAsync(feedDbContext, fromTime);
     }
 
     public async Task<List<FeedResultItem>> GetFeedsAsync(FeedApiFilter filter)
     {
         var filterOffset = filter.Offset;
-        var filterLimit = filter.Max > 0 && filter.Max < 1000 ? filter.Max : 1000;
+        var filterLimit = filter.Max is > 0 and < 1000 ? filter.Max : 1000;
 
         var feeds = new Dictionary<string, List<FeedResultItem>>();
 
@@ -166,7 +151,7 @@ public class FeedAggregateDataProvider
                 }
                 else
                 {
-                    feeds[feed.GroupId] = new List<FeedResultItem> { feed };
+                    feeds[feed.GroupId] = [feed];
                 }
             }
             filter.Offset += feedsIteration.Count;
@@ -181,22 +166,22 @@ public class FeedAggregateDataProvider
 
     private async Task<List<FeedResultItem>> GetFeedsInternalAsync(FeedApiFilter filter)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var q = feedDbContext.FeedAggregates.AsNoTracking()
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var q = feedDbContext.FeedAggregates
             .Where(r => r.TenantId == tenant.Id);
 
         var feeds = filter.History ? GetFeedsAsHistoryQuery(q, filter) : GetFeedsDefaultQuery(feedDbContext, q, filter);
 
-        return _mapper.Map<IEnumerable<FeedAggregate>, List<FeedResultItem>>(feeds);
+        return mapper.Map<IEnumerable<FeedAggregate>, List<FeedResultItem>>(feeds);
     }
 
     private static IQueryable<FeedAggregate> GetFeedsAsHistoryQuery(IQueryable<FeedAggregate> query, FeedApiFilter filter)
     {
         Expression<Func<FeedAggregate, bool>> exp = null;
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(filter.Id);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(filter.Module);
+        ArgumentException.ThrowIfNullOrEmpty(filter.Id);
+        ArgumentException.ThrowIfNullOrEmpty(filter.Module);
 
         switch (filter.Module)
         {
@@ -236,8 +221,8 @@ public class FeedAggregateDataProvider
             .Skip(filter.Offset)
             .Take(filter.Max);
 
-        q1 = q1.Where(r => r.aggregates.ModifiedBy != _authContext.CurrentAccount.ID).
-            Where(r => r.users.UserId == _authContext.CurrentAccount.ID);
+        q1 = q1.Where(r => r.aggregates.ModifiedBy != authContext.CurrentAccount.ID).
+            Where(r => r.users.UserId == authContext.CurrentAccount.ID);
 
         if (filter.OnlyNew)
         {
@@ -265,7 +250,7 @@ public class FeedAggregateDataProvider
             q1 = q1.Where(r => r.aggregates.ModifiedBy == filter.Author);
         }
 
-        if (filter.SearchKeys != null && filter.SearchKeys.Length > 0)
+        if (filter.SearchKeys is { Length: > 0 })
         {
             var keys = filter.SearchKeys
                 .Where(s => !string.IsNullOrEmpty(s))
@@ -280,33 +265,30 @@ public class FeedAggregateDataProvider
 
     public async Task<int> GetNewFeedsCountAsync(DateTime lastReadedTime)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        return await Queries.CountFeedAggregatesAsync(feedDbContext, tenant.Id, _authContext.CurrentAccount.ID, lastReadedTime);
+        return await Queries.CountFeedAggregatesAsync(feedDbContext, tenant.Id, authContext.CurrentAccount.ID, lastReadedTime);
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(TimeInterval interval)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.KeysAsync(feedDbContext, interval.From, interval.To).ToListAsync();
     }
 
     public async Task<FeedResultItem> GetFeedItemAsync(string id)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var news = await Queries.FeedAggregateAsync(feedDbContext, id);
 
-        return _mapper.Map<FeedAggregate, FeedResultItem>(news);
+        return mapper.Map<FeedAggregate, FeedResultItem>(news);
     }
 
     public async Task RemoveFeedItemAsync(string id)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
-        var aggregates = await Queries.FeedAggregatesAsync(feedDbContext, id).ToListAsync();
-
-        feedDbContext.FeedAggregates.RemoveRange(aggregates);
-        await feedDbContext.SaveChangesAsync();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await Queries.DeleteFeedAggregatesAsync(feedDbContext, id);
     }
 }
 
@@ -348,17 +330,12 @@ static file class Queries
                 ctx.FeedUsers
                     .FirstOrDefault(r => r.FeedId == id));
 
-    public static readonly Func<FeedDbContext, DateTime, IAsyncEnumerable<FeedAggregate>>
-        FeedAggregatesByFromTimeAsync = EF.CompileAsyncQuery(
+    public static readonly Func<FeedDbContext, DateTime, Task<int>>
+        DeleteFeedAggregatesByFromTimeAsync = EF.CompileAsyncQuery(
             (FeedDbContext ctx, DateTime fromTime) =>
                 ctx.FeedAggregates
-                    .Where(r => r.AggregateDate <= fromTime));
-
-    public static readonly Func<FeedDbContext, DateTime, IAsyncEnumerable<FeedUsers>> FeedsUsersByFromTimeAsync =
-        EF.CompileAsyncQuery(
-            (FeedDbContext ctx, DateTime fromTime) =>
-                ctx.FeedUsers
-                    .Where(r => ctx.FeedAggregates.Where(f => f.AggregateDate <= fromTime).Any(a => a.Id == r.FeedId)));
+                    .Where(r => r.AggregateDate <= fromTime)
+                    .ExecuteDelete());
 
     public static readonly Func<FeedDbContext, int, Guid, DateTime, Task<int>> CountFeedAggregatesAsync =
         EF.CompileAsyncQuery(
@@ -387,15 +364,10 @@ static file class Queries
                 ctx.FeedAggregates
                     .FirstOrDefault(r => r.Id == id));
 
-    public static readonly Func<FeedDbContext, string, IAsyncEnumerable<FeedAggregate>> FeedAggregatesAsync =
+    public static readonly Func<FeedDbContext, string, Task<int>> DeleteFeedAggregatesAsync =
         EF.CompileAsyncQuery(
             (FeedDbContext ctx, string id) =>
                 ctx.FeedAggregates
-                    .Where(r => r.Id == id));
-
-    public static readonly Func<FeedDbContext, string, IAsyncEnumerable<FeedUsers>> FeedsUsersAsync =
-        EF.CompileAsyncQuery(
-            (FeedDbContext ctx, string id) =>
-                ctx.FeedUsers
-                    .Where(r => r.FeedId == id));
+                    .Where(r => r.Id == id)
+                    .ExecuteDelete());
 }

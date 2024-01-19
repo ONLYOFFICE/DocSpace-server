@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20230719143251_MigrationContextMigrate")]
+    [Migration("0MigrationContextMigrate")]
     partial class MigrationContextMigrate
     {
         /// <inheritdoc />
@@ -729,6 +729,41 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -3,
                             Features = "free,total_size:2147483648,manager:3,room:12",
                             Name = "startup",
+                            Price = 0m,
+                            Visible = false
+                        },
+                        new
+                        {
+                            TenantId = -4,
+                            Features = "total_size:1073741824",
+                            Name = "disk",
+                            Price = 0m,
+                            ProductId = "1004",
+                            Visible = false
+                        },
+                        new
+                        {
+                            TenantId = -5,
+                            Features = "manager:1",
+                            Name = "admin1",
+                            Price = 0m,
+                            ProductId = "1005",
+                            Visible = false
+                        },
+                        new
+                        {
+                            TenantId = -6,
+                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024",
+                            Name = "subscription",
+                            Price = 0m,
+                            ProductId = "1001",
+                            Visible = false
+                        },
+                        new
+                        {
+                            TenantId = -7,
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20",
+                            Name = "nonprofit",
                             Price = 0m,
                             Visible = false
                         });
@@ -4583,7 +4618,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             {
                 b.Property<long>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint(19)")
+                    .HasColumnType("int(10)")
                     .HasColumnName("id");
 
                 b.Property<string>("Link")
@@ -6496,12 +6531,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("name");
-
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("'1'");
 
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()

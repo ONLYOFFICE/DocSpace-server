@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,21 +29,21 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Scope]
-internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>, IDaoBase<DriveFile, DriveFile, DriveFile>
+internal class GoogleDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>(serviceProvider, userManager, tenantManager, tenantUtil,
+            dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+        IDaoBase<DriveFile, DriveFile, DriveFile>
 {
     private GoogleDriveProviderInfo _providerInfo;
-    public GoogleDriveDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<DriveFile, DriveFile, DriveFile> providerInfo)
     {
@@ -135,10 +135,10 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveEntry is ErrorDriveEntry)
+        if (driveEntry is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFolder(driveEntry as ErrorDriveEntry);
+            return ToErrorFolder(entry);
         }
 
         if (driveEntry.MimeType != GoogleLoginProvider.GoogleDriveMimeTypeFolder)
@@ -152,10 +152,11 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
 
         folder.Id = MakeId(driveEntry);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(driveEntry));
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.ModifiedTime ?? default);
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         folder.Title = MakeFolderTitle(driveEntry);
@@ -218,19 +219,19 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveFile is ErrorDriveEntry)
+        if (driveFile is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFile(driveFile as ErrorDriveEntry);
+            return ToErrorFile(entry);
         }
 
         var file = GetFile();
 
         file.Id = MakeId(driveFile.Id);
-        file.ContentLength = driveFile.Size.HasValue ? (long)driveFile.Size : 0;
-        file.CreateOn = driveFile.CreatedTime.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTime.Value) : default;
+        file.ContentLength = driveFile.Size ?? 0;
+        file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
-        file.ModifiedOn = driveFile.ModifiedTime.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTime.Value) : default;
+        file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.NativeAccessor = driveFile;
         file.Title = MakeFileTitle(driveFile);
         file.ThumbnailStatus = Thumbnail.Created;
@@ -288,10 +289,8 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         {
             return await _providerInfo.GetItemsAsync(parentDriveId);
         }
-        else
-        {
-            return await _providerInfo.GetItemsAsync(parentDriveId, folder);
-        }
+
+        return await _providerInfo.GetItemsAsync(parentDriveId, folder);
     }
 
     public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)

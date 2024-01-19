@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,33 +33,37 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
-    /// <summary></summary>
+    /// <summary>External data status</summary>
     /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
     public Status Status { get; set; }
 
-    /// <summary></summary>
+    /// <summary>External data ID</summary>
     /// <type>System.String, System</type>
     public string Id { get; set; }
 
-    /// <summary></summary>
+    /// <summary>External data title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
-    /// <summary></summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
+    /// <summary>Type of a room where the external data is located</summary>
+    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
     public RoomType? RoomType { get; set; }
 
-    /// <summary></summary>
+    /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
 
-    /// <summary></summary>
+    /// <summary>Room logo</summary>
     /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
     public Logo Logo { get; set; }
 
-    /// <summary></summary>
+    /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
+    
+    /// <summary>Link ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid LinkId { get; set; }
 
     public void Mapping(Profile profile)
     {

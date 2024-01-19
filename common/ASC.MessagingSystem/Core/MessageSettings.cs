@@ -1,29 +1,28 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.MessagingSystem;
 
@@ -31,46 +30,72 @@ public class MessageSettings
 {
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
+    private const string XRealIPHeader = "X-Real-IP";
+    private const string EditorsUAHeader = "AscDesktopEditor";
+    private const string EditorsName = "Desktop Editors";
 
     static MessageSettings()
     {
         Parser = Parser.GetDefault();
     }
 
-    private static Parser Parser { get; set; }
+    private static Parser Parser { get; }
 
     public static ClientInfo GetClientInfo(string uaHeader)
     {
         return Parser.Parse(uaHeader);
     }
 
+    public static IDictionary<string, StringValues> GetHttpHeaders(HttpRequest request)
+    {
+        if (request == null)
+        {
+            return null;
+        }
+
+        var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
+
+        if (!headers.TryGetValue(XRealIPHeader, out var header))
+        {
+            var remoteIpAddress = GetIP(request);
+
+            if (!string.IsNullOrEmpty(remoteIpAddress))
+            {
+                headers.Add(XRealIPHeader, remoteIpAddress);
+            }
+        }
+
+        return headers;
+    }
+
     public static string GetUAHeader(HttpRequest request)
     {
-        return request != null ? request.Headers[UserAgentHeader].FirstOrDefault() : null;
+        return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
     public static string GetUAHeader(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(UserAgentHeader) ? headers[UserAgentHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(UserAgentHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetReferer(HttpRequest request)
     {
-        return request != null ? request.Headers[RefererHeader].FirstOrDefault() : null;
+        return request?.Headers[RefererHeader].FirstOrDefault();
     }
 
     public static string GetReferer(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(RefererHeader) ? headers[RefererHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(RefererHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetIP(HttpRequest request)
     {
-        if (request != null)
-        {
-            return request.HttpContext.Connection.RemoteIpAddress.ToString();          
-        }
-        return null;
+        return request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+    }
+
+    public static string GetIP(IDictionary<string, StringValues> headers)
+    {
+        return headers.TryGetValue(XRealIPHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static void AddInfoMessage(EventMessage message, Dictionary<string, ClientInfo> dict = null)
@@ -97,20 +122,31 @@ public class MessageSettings
 
     public static string GetBrowser(ClientInfo clientInfo)
     {
-        return clientInfo == null
-                   ? null
-                   : string.Format("{0} {1}", clientInfo.UA.Family, clientInfo.UA.Major).Trim();
+        if (clientInfo == null)
+        {
+            return null;
+        }
+
+        if (clientInfo.String.Contains(EditorsUAHeader))
+        {
+            var data = clientInfo.String.Split(" ").FirstOrDefault(r=> r.StartsWith(EditorsUAHeader));
+            if (data != null)
+            {
+                var parts = data.Split("/");
+                return $"{EditorsName} {parts[1]}";
+            }
+        }
+        
+        return $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
     }
 
     public static string GetPlatformAndDevice(ClientInfo clientInfo)
     {
-        return clientInfo == null
-                   ? null
-                   : string.Format("{0} {1} {2} {3}",
-                   clientInfo.OS.Family,
-                   clientInfo.OS.Major,
-                   clientInfo.Device.Brand,
-                   clientInfo.Device.Model)
-                   .Trim();
+        if (clientInfo == null)
+        {
+            return null;
+        }
+        
+        return $"{clientInfo.OS.Family} {clientInfo.OS.Major} {clientInfo.Device.Brand} {clientInfo.Device.Model}".Trim();
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,21 +29,8 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper
+public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roomLogoManager, SecurityContext securityContext, IDaoFactory daoFactory)
 {
-    private readonly ExternalShare _externalShare;
-    private readonly RoomLogoManager _roomLogoManager;
-    private readonly SecurityContext _securityContext;
-    private readonly IDaoFactory _daoFactory;
-
-    public ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roomLogoManager, SecurityContext securityContext, IDaoFactory daoFactory)
-    {
-        _externalShare = externalShare;
-        _roomLogoManager = roomLogoManager;
-        _securityContext = securityContext;
-        _daoFactory = daoFactory;
-    }
-
     public async Task<ValidationInfo> ValidateAsync(string key, string password = null)
     {
         var result = new ValidationInfo
@@ -52,8 +39,8 @@ public class ExternalLinkHelper
             Access = FileShare.Restrict
         };
 
-        var linkId = await _externalShare.ParseShareKeyAsync(key);
-        var securityDao = _daoFactory.GetSecurityDao<int>();
+        var linkId = await externalShare.ParseShareKeyAsync(key);
+        var securityDao = daoFactory.GetSecurityDao<int>();
 
         var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
 
@@ -62,7 +49,7 @@ public class ExternalLinkHelper
             return result;
         }
 
-        var status = await _externalShare.ValidateRecordAsync(record, password);
+        var status = await externalShare.ValidateRecordAsync(record, password);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)
@@ -89,35 +76,36 @@ public class ExternalLinkHelper
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
+        result.LinkId = linkId;
 
-        if (_securityContext.IsAuthenticated)
+        if (securityContext.IsAuthenticated)
         {
-            if (entry.CreateBy.Equals(_securityContext.CurrentAccount.ID))
+            if (entry.CreateBy.Equals(securityContext.CurrentAccount.ID))
             {
                 result.Shared = true;
             }
             else
             {
-                var existedRecord = await securityDao.GetSharesAsync(new[] { _securityContext.CurrentAccount.ID })
+                var existedRecord = await securityDao.GetSharesAsync(new[] { securityContext.CurrentAccount.ID })
                     .FirstOrDefaultAsync(r => r.EntryId.ToString() == entryId);
 
                 result.Shared = existedRecord != null;
             }
         }
 
-        if (_securityContext.IsAuthenticated || !string.IsNullOrEmpty(_externalShare.GetAnonymousSessionKey()))
+        if (securityContext.IsAuthenticated || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
         {
             return result;
         }
         
-        await _externalShare.SetAnonymousSessionKeyAsync();
+        await externalShare.SetAnonymousSessionKeyAsync();
 
         return result;
     }
 
     private async Task<FileEntry> GetEntryAndProcessAsync<T>(T id, ValidationInfo info)
     {
-        var folder = await _daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
 
         if (folder == null)
         {
@@ -128,7 +116,7 @@ public class ExternalLinkHelper
         info.Title = folder.Title;
         info.FolderType = folder.FolderType;
         
-        var logo = await _roomLogoManager.GetLogoAsync(folder);
+        var logo = await roomLogoManager.GetLogoAsync(folder);
 
         if (!logo.IsDefault())
         {

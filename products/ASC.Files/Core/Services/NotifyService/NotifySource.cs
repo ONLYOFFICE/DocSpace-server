@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,18 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using NotifySourceBase = ASC.Core.Notify.NotifySource;
-using SubscriptionManager = ASC.Core.SubscriptionManager;
 
 namespace ASC.Files.Core.Services.NotifyService;
 
 [Scope]
-public class NotifySource : NotifySourceBase
+public class NotifySource(UserManager userManager, IRecipientProvider recipientsProvider,
+        SubscriptionManager subscriptionManager, TenantManager tenantManager)
+    : NotifySourceBase(new Guid("6FE286A4-479E-4c25-A8D9-0156E332B0C0"), userManager, recipientsProvider, subscriptionManager, tenantManager)
 {
-    public NotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager)
-        : base(new Guid("6FE286A4-479E-4c25-A8D9-0156E332B0C0"), userManager, recipientsProvider, subscriptionManager)
-    {
-    }
-
     protected override IActionProvider CreateActionProvider()
     {
         return new ConstActionProvider(

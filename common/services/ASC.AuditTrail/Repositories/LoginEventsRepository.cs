@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,23 +27,12 @@
 namespace ASC.AuditTrail.Repositories;
 
 [Scope(Additional = typeof(LoginEventsRepositoryExtensions))]
-public class LoginEventsRepository
+public class LoginEventsRepository(TenantManager tenantManager,
+    IDbContextFactory<MessagesContext> dbContextFactory,
+    IMapper mapper,
+    GeolocationHelper geolocationHelper)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-
-    public LoginEventsRepository(
-        TenantManager tenantManager,
-        IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper)
-    {
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-    }
-
-    public async Task<IEnumerable<LoginEventDto>> GetByFilterAsync(
+    public async Task<IEnumerable<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
         MessageAction? action = null,
         DateTime? fromDate = null,
@@ -51,8 +40,8 @@ public class LoginEventsRepository
         int startIndex = 0,
         int limit = 0)
     {
-        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var messagesContext = _dbContextFactory.CreateDbContext();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
 
         var query =
             from q in messagesContext.LoginEvents
@@ -93,22 +82,23 @@ public class LoginEventsRepository
         {
             if (hasFromFilter)
             {
-                if (hasToFilter)
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value);
-                }
-                else
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value);
-                }
+                query = hasToFilter ? 
+                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) : 
+                    query.Where(q => q.Event.Date >= fromDate.Value);
             }
-            else if (hasToFilter)
+            else
             {
                 query = query.Where(q => q.Event.Date <= to.Value);
             }
         }
 
-        return _mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEventDto>>(await query.ToListAsync());
+        var events = mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
+
+        foreach (var e in events)
+        {
+            await geolocationHelper.AddGeolocationAsync(e);
+        }
+        return events;
     }
 }
 

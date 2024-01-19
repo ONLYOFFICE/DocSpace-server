@@ -1554,6 +1554,89 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.ToTable("tenants_version", "onlyoffice");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Author")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("author");
+
+                    b.Property<Guid>("CreateBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("uuid")
+                        .HasColumnName("create_by")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("create_on");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("HomePage")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("home_page");
+
+                    b.Property<string>("Image")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("image");
+
+                    b.Property<string>("License")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("license");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PluginName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("plugin_name");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("text")
+                        .HasColumnName("scopes");
+
+                    b.Property<bool>("System")
+                        .HasColumnType("boolean")
+                        .HasColumnName("system");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Version")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("webplugins_pkey");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("tenant_webplugins");
+
+                    b.ToTable("webplugins", "onlyoffice");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioIndex", b =>
                 {
                     b.Property<string>("IndexName")
@@ -4514,7 +4597,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint(19)")
+                        .HasColumnType("int(10)")
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
@@ -5286,6 +5369,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("cron")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("Dump")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("dump")
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<DateTime>("LastBackupTime")
                         .HasColumnType("datetime")
@@ -6329,12 +6418,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("name");
 
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("true");
-
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
@@ -6505,6 +6588,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbCoreSettings", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

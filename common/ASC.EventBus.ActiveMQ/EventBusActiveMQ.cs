@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -63,7 +63,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _rejectedEvents = new ConcurrentQueue<Guid>();
         _consumerSession = CreateConsumerSession();
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
-        _consumers = new List<IMessageConsumer>();
+        _consumers = [];
     }
 
     private void SubsManager_OnEventRemoved(object sender, string eventName)
@@ -73,7 +73,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             _persistentConnection.TryConnect();
         }
 
-        using (var session = _persistentConnection.CreateSession())
+        using (_persistentConnection.CreateSession())
         {
             var messageSelector = $"eventName='{eventName}'";
 
@@ -101,32 +101,28 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             _persistentConnection.TryConnect();
         }
 
-        var policy = Policy.Handle<SocketException>()
-                            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                            {
-                                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
-                            });
-
-        using (var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge))
-        {
-            var destination = session.GetQueue(_queueName);
-
-            using (var producer = session.CreateProducer(destination))
+        Policy.Handle<SocketException>()
+            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
             {
-                producer.DeliveryMode = MsgDeliveryMode.Persistent;
+                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
+            });
 
-                var body = _serializer.Serialize(@event);
+        using var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge);
+        var destination = session.GetQueue(_queueName);
 
-                var request = session.CreateStreamMessage();
-                var eventName = @event.GetType().Name;
+        using var producer = session.CreateProducer(destination);
+        producer.DeliveryMode = MsgDeliveryMode.Persistent;
+
+        var body = _serializer.Serialize(@event);
+
+        var request = session.CreateStreamMessage();
+        var eventName = @event.GetType().Name;
                         
-                request.Properties["eventName"] = eventName;
+        request.Properties["eventName"] = eventName;
 
-                request.WriteBytes(body);
+        request.WriteBytes(body);
 
-                producer.Send(request);
-            }
-        }
+        producer.Send(request);
     }
 
     public void Subscribe<T, TH>()
@@ -241,7 +237,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
             if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
             {
-                _rejectedEvents.TryDequeue(out var _);
+                _rejectedEvents.TryDequeue(out _);
                 streamMessage.Acknowledge();
             }
             else
@@ -284,7 +280,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _subsManager.RemoveDynamicSubscription<TH>(eventName);
     }
 
-    private void PreProcessEvent(IntegrationEvent @event)
+    private static void PreProcessEvent(IntegrationEvent @event)
     {
         if (_rejectedEvents.Count == 0)
         {
@@ -305,38 +301,35 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
         if (_subsManager.HasSubscriptionsForEvent(eventName))
         {
-            await using (var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME))
+            await using var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME);
+            var subscriptions = _subsManager.GetHandlersForEvent(eventName);
+
+            foreach (var subscription in subscriptions)
             {
-                var subscriptions = _subsManager.GetHandlersForEvent(eventName);
-
-                foreach (var subscription in subscriptions)
+                if (subscription.IsDynamic)
                 {
-                    if (subscription.IsDynamic)
+                    if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                     {
-                        var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                        if (handler == null)
-                        {
-                            continue;
-                        }
-
-                        using dynamic eventData = @event;
-                        await Task.Yield();
-                        await handler.Handle(eventData);
+                        continue;
                     }
-                    else
+
+                    using dynamic eventData = @event;
+                    await Task.Yield();
+                    await handler.Handle(eventData);
+                }
+                else
+                {
+                    var handler = scope.ResolveOptional(subscription.HandlerType);
+                    if (handler == null)
                     {
-                        var handler = scope.ResolveOptional(subscription.HandlerType);
-                        if (handler == null)
-                        {
-                            continue;
-                        }
-
-                        var eventType = _subsManager.GetEventTypeByName(eventName);
-                        var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-
-                        await Task.Yield();
-                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+                        continue;
                     }
+
+                    var eventType = _subsManager.GetEventTypeByName(eventName);
+                    var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
+
+                    await Task.Yield();
+                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
                 }
             }
         }
@@ -353,10 +346,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             consumer.Dispose();
         }
 
-        if (_consumerSession != null)
-        {
-            _consumerSession.Dispose();
-        }
+        _consumerSession?.Dispose();
 
         _subsManager.Clear();
     }

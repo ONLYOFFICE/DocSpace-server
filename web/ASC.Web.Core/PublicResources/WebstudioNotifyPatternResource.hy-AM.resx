@@ -315,23 +315,20 @@
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ONLYOFFICE հավելվածներ</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Մի քանի խորհուրդ ձեր փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
+    <value>5 խորհուրդ փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Մի քանի խորհուրդ ձեր փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
+    <value>5 խորհուրդ փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Մի քանի խորհուրդ ձեր փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
+    <value>5 խորհուրդ փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Մի քանի խորհուրդ ձեր փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
+    <value>5 խորհուրդ փաստաթղթերի վրա արդյունավետ աշխատանքի համար</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Օգտատիրոջ հաղորդագրություն ադմինիստրատորներին</value>
@@ -395,21 +392,6 @@
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Միացեք ${__VirtualRootPath}-ին</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Բարի գալուստ ONLYOFFICE անձնական օգտագործման համար:</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Բարի գալուստ ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Մուտք գործեք ձեր ONLYOFFICE անձնական հաշիվ</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Անձնական. Խնդրում ենք ակտիվացնել ձեր էլփոստի հասցեն</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Անձնական հաշվի դադարեցում</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootPath} պորտալի ապաակտիվացում</value>
@@ -517,7 +499,7 @@
 
 "${__VirtualRootPath}":"$InviteLink" պորտալի կյանքին մասնակցելու համար դուք պետք է ակտիվացնեք ձեր էլ. հասցեն: Սա արվում է անվտանգության նկատառումներով:
 
-$GreenButton
+$OrangeButton
 
 Այս հղումը գործում է միայն 7 օր։ Խնդրում ենք լրացնել ձեր էլփոստի ակտիվացումը այդ ժամանակահատվածում.</value>
   </data>
@@ -528,14 +510,12 @@ $GreenButton
 
 Ստեղծվել է պահուստային ֆայլ, որը պարունակում է տվյալներ ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից:
 
-Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" օգտատիրոջ ուղեցույցը:
+Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" օգտատիրոջ ուղեցույցը:
 
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "support.onlyoffice.com":"http://support.onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" հասցեով
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի կրկնօրինակը ստեղծվել է
@@ -546,18 +526,18 @@ ONLYOFFICE™ աջակցման թիմ
 
 Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) օգտատիրոջ ուղեցույցը:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support.onlyoffice.com](http://support.onlyoffice.com) հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) հասցեով:
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել նամակը ձեր ${LetterLogoText} հաշվի վրա:
 
 Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -572,12 +552,12 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -590,7 +570,7 @@ $GreenButton
 
 Բջջային հեռախոսը փոխելու համար խնդրում ենք հետևել հետևյալ հղմանը.
 
-$GreenButton
+$OrangeButton
 
 Եթե դուք չեք ցանկանում փոխել ձեր բջջային հեռախոսը կամ սխալմամբ ստացել եք այս էլ.</value>
   </data>
@@ -603,7 +583,7 @@ $GreenButton
 
 Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի սեփականատիրոջ փոփոխության գործընթացը այդ ժամանակահատվածում.</value>
   </data>
@@ -616,255 +596,262 @@ $GreenButton
 
 Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի հասցեի փոփոխման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName:
 
 Դուք հենց նոր ստեղծեցիք ONLYOFFICE DocSpace-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Դրա հասցեն է "${__VirtualRootPath}":"${__VirtualRootPath}":
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
-Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
+*Վայելեք փաստաթղթերի համագործակցության նոր եղանակը!*
 
-* 1 ադմին, 2 հզոր օգտագործող
-* Մինչև 12 սենյակ
-* Յուրաքանչյուր սենյակում անսահմանափակ թվով օգտվողներ
-* 2 ԳԲ սկավառակի տարածություն
-
-Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
-
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Ստացեք &lt;span style="color:#FF6F3D;"&gt;անվճար&lt;/span&gt; ONLYOFFICE հավելվածներ
+
+
+Բարև, $UserName!
 
 Ստացեք անվճար ONLYOFFICE հավելվածներ՝ ձեր ցանկացած սարքից փաստաթղթերի վրա աշխատելու համար:
 
-# Windows-ում, Linux-ում և Mac-ում փաստաթղթերի վրա օֆլայն աշխատելու համար ներբեռնեք "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx":
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Փաստաթղթերի վրա առցանց աշխատելու համար ստացեք ONLYOFFICE Desktop Editors&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972"-ի համար կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents":
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 խորհուրդ&lt;/span&gt; փաստաթղթերի վրա արդյունավետ աշխատանքի համար
+
+
+Բարև, $UserName!
 
 Հուսով ենք, որ դուք վայելում եք ձեր ONLYOFFICE DocSpace-ի օգտագործումը: Ահա մի քանի խորհուրդ, թե ինչպես կարելի է ավելի արդյունավետ դարձնել փաստաթղթերի վրա աշխատանքը:
 
-*#1. Ընտրեք ձեր աշխատանքի ձևը։* Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Ընտրեք ձեր աշխատանքի ձևը։&lt;/b&gt; &lt;br/&gt;Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:* Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:&lt;/b&gt;Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Արդյունավետ համահեղինակ:* Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Արդյունավետ համահեղինակ:&lt;/b&gt; &lt;br/&gt;Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր: &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Համագործակցեք ապահով.&lt;/b&gt; &lt;br/&gt;Կարգավորեք մուտքը դեպի ամբողջ տարածք կամ առանձին սենյակներ՝ ճկուն թույլտվություններով և օգտվողի դերերով. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt;&lt;br/&gt;Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն: &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Բացահայտեք&lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ի բիզնես բաժանորդագրությունը
+
+
+Բարև, $UserName!
 
 Ահա երեք պարզ հարցեր ձեզ համար, որոնք կարող են օգնել մեզ ավելի հարմարավետ դարձնել ձեր օգտատերերի փորձը:
 
-* Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Եթե ունեք առնվազն մեկ «այո» պատասխան, ընտրեք ԲԻԶՆԵՍ սակագնային պլանը, որը թույլ է տալիս ձեր ONLYOFFICE DocSpace-ում ավելացնել ցանկացած մենեջեր, ինչպես նաև կիրառել բրենդինգի տարբերակներ:
 
 Դա անելու համար խնդրում ենք խորհրդակցել ձեր ONLYOFFICE DocSpace-ի "Վճարումների բաժին":"$PricingPage": Այնտեղ դուք կգտնեք Stripe Customer Portal-ի անհատական հղում, որտեղ հեշտությամբ կարող եք կարգավորել վճարման բոլոր մանրամասները:
 
-_Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին: _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարև, $UserName!
 
 Դուք հրավիրված եք միանալու "${__VirtualRootPath}":"${__VirtualRootPath}"-ին որպես հյուր օգտատեր: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է ընդամենը 7 օր։
 
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:`Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Դուք հենց նոր ստեղծեցիք ONLYOFFICE DocSpace-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Դրա հասցեն է "${__VirtualRootPath}":"${__VirtualRootPath}":
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
-Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
+*Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:*
 
-* 1 ադմին, 2 հզոր օգտագործող
-* Մինչև 12 սենյակ
-* Յուրաքանչյուր սենյակում անսահմանափակ թվով օգտվողներ
-* 2 ԳԲ սկավառակի տարածություն
-
-Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
-
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Բացահայտեք&lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ի բիզնես բաժանորդագրությունը
+
+
+Բարև, $UserName!
 
 Ահա երեք պարզ հարցեր ձեզ համար, որոնք կարող են օգնել մեզ ավելի հարմարավետ դարձնել ձեր օգտատերերի փորձը:
 
-* Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Եթե ունեք առնվազն մեկ «այո» պատասխան, ընտրեք ԲԻԶՆԵՍ սակագնային պլանը, որը թույլ է տալիս ձեր ONLYOFFICE DocSpace-ում ավելացնել ցանկացած մենեջեր, ինչպես նաև կիրառել բրենդինգի տարբերակներ:
 
 Դա անելու համար խնդրում ենք խորհրդակցել ձեր ONLYOFFICE DocSpace-ի "Վճարումների բաժին":"$PricingPage": Այնտեղ դուք կգտնեք Stripe Customer Portal-ի անհատական հղում, որտեղ հեշտությամբ կարող եք կարգավորել վճարման բոլոր մանրամասները:
 
-_Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին: _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարև, $UserName!
 
 $__AuthorName-ը ձեզ հրավիրել է որպես հյուր օգտատեր "${__VirtualRootPath}":"${__VirtualRootPath}": Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է ընդամենը 7 օր։
 
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}" o: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1. Հաղորդագրություն "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
@@ -890,7 +877,7 @@ $Body</value>
 $Body</value>
   </data>
   <data name="pattern_join" xml:space="preserve">
-    <value>h1. "${__VirtualRootPath}":"$InviteLink"-ին միանալու հրավեր պորտալին
+    <value>h1."${__VirtualRootPath}":"$InviteLink"-ին միանալու հրավեր պորտալին
 
 Բարեւ Ձեզ,
 
@@ -898,7 +885,7 @@ $Body</value>
 
 Հրավերն ընդունելու համար խնդրում ենք մուտքագրել ձեր անունը և գաղտնաբառը հետևյալ հղումով.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 48 ժամ: Խնդրում ենք ավարտել գործողությունը այդ ժամկետում.</value>
   </data>
@@ -939,16 +926,14 @@ $GreenButton
       Եթե սխալմամբ եք ստացել այս նամակը, խնդրում ենք անտեսել այն կամ կապվել ձեր պորտալի ադմինիստրատորի հետ՝ մանրամասները պարզելու համար.</value>
   </data>
   <data name="pattern_migration_error" xml:space="preserve">
-    <value>h1. Տարածաշրջանի պորտալի միգրացիայի մեկ այլ սխալ
+    <value>h1.Տարածաշրջանի պորտալի միգրացիայի մեկ այլ սխալ
 
 $RegionName տարածաշրջան տեղափոխելիս սխալ է տեղի ունեցել: Խնդրում եմ, մի անգամ էլ ավելի ուշ փորձեք:
-Ձեր պորտալն այժմ հասանելի է "$PortalUrl":"$PortalUrl" հին հասցեով 
+Ձեր պորտալն այժմ հասանելի է "$PortalUrl":"$PortalUrl" հին հասցեով
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -958,11 +943,9 @@ ONLYOFFICE™ աջակցման թիմ
 Մեկ այլ տարածաշրջան տեղափոխելիս սխալ է տեղի ունեցել: Խնդրում եմ, մի անգամ էլ ավելի ուշ փորձեք:
 Ձեր պորտալն այժմ հասանելի է "$PortalUrl":"$PortalUrl" հին հասցեով
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+$TrulyYours
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -973,11 +956,9 @@ ONLYOFFICE™ աջակցման թիմ
 
 *Նշում*. պորտալը հասանելի չի լինի միգրացիայի գործընթացում: Միգրացիայի ավարտից հետո պորտալի URL-ը կփոխվի, և բոլոր ընդհանուր փաստաթղթերի հղումներն անհասանելի կլինեն:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Պորտալի միգրացիա
@@ -986,76 +967,78 @@ h1."$PortalUrl":"$PortalUrl"
 Ձեր պորտալը տեղափոխվել է նոր տիրույթ: Խնդրում ենք վերականգնել ձեր մուտքը դեպի պորտալ՝ նշելով գաղտնաբառը, որը կօգտագործվի մուտք գործելու համար:
 
 Խնդրում ենք հետևել ստորև բերված հղմանը` ձեր հաշվի գաղտնաբառը սահմանելու համար.
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել մուտքի վերականգնման գործընթացը այդ ժամանակահատվածում:
 
 Եթե սխալմամբ եք ստացել այս նամակը, խնդրում ենք անտեսել այն կամ կապվել ձեր "$PortalUrl":"$PortalUrl" պորտալի ադմինիստրատորի հետ՝ մանրամասները պարզելու համար.</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Դուք հենց նոր ստեղծեցիք ONLYOFFICE DocSpace-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Դրա հասցեն է "${__VirtualRootPath}":"${__VirtualRootPath}":
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
-Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
+*Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:*
 
-* 1 ադմին, 2 հզոր օգտագործող
-* Մինչև 12 սենյակ
-* Յուրաքանչյուր սենյակում անսահմանափակ թվով օգտվողներ
-* 2 ԳԲ սկավառակի տարածություն
-
-Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
-
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 խորհուրդ&lt;/span&gt; փաստաթղթերի վրա արդյունավետ աշխատանքի համար
+
+
+Բարև, $UserName!
 
 Հուսով ենք, որ դուք վայելում եք ձեր ONLYOFFICE DocSpace-ի օգտագործումը: Ահա մի քանի խորհուրդ, թե ինչպես կարելի է ավելի արդյունավետ դարձնել փաստաթղթերի վրա աշխատանքը:
 
-*#1. Ընտրեք ձեր աշխատանքի ձևը։* Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Ընտրեք ձեր աշխատանքի ձևը։&lt;/b&gt; &lt;br/&gt;Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:* Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:&lt;/b&gt;Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Արդյունավետ համահեղինակ:* Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Արդյունավետ համահեղինակ:&lt;/b&gt; &lt;br/&gt;Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր: &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Համագործակցեք ապահով.&lt;/b&gt; &lt;br/&gt;Կարգավորեք մուտքը դեպի ամբողջ տարածք կամ առանձին սենյակներ՝ ճկուն թույլտվություններով և օգտվողի դերերով. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt;&lt;br/&gt;Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն: &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Բացահայտեք&lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ի բիզնես բաժանորդագրությունը
+
+
+Բարև, $UserName!
 
 Ահա երեք պարզ հարցեր ձեզ համար, որոնք կարող են օգնել մեզ ավելի հարմարավետ դարձնել ձեր օգտատերերի փորձը:
 
-* Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Եթե ունեք առնվազն մեկ «այո» պատասխան, ընտրեք ԲԻԶՆԵՍ սակագնային պլանը, որը թույլ է տալիս ձեր ONLYOFFICE DocSpace-ում ավելացնել ցանկացած մենեջեր, ինչպես նաև կիրառել բրենդինգի տարբերակներ:
 
 Դա անելու համար խնդրում ենք խորհրդակցել ձեր ONLYOFFICE DocSpace-ի "Վճարումների բաժին":"$PricingPage": Այնտեղ դուք կգտնեք Stripe Customer Portal-ի անհատական հղում, որտեղ հեշտությամբ կարող եք կարգավորել վճարման բոլոր մանրամասները:
 
-_Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին: _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու "${__VirtualRootPath}":"${__VirtualRootPath}"-ին որպես հյուր օգտատեր: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
@@ -1066,185 +1049,82 @@ ONLYOFFICE թիմ
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 խորհուրդ&lt;/span&gt; փաստաթղթերի վրա արդյունավետ աշխատանքի համար
+
+
+Բարև, $UserName!
 
 Հուսով ենք, որ դուք վայելում եք ձեր ONLYOFFICE DocSpace-ի օգտագործումը: Ահա մի քանի խորհուրդ, թե ինչպես կարելի է ավելի արդյունավետ դարձնել փաստաթղթերի վրա աշխատանքը:
 
-*#1. Ընտրեք ձեր աշխատանքի ձևը։* Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Ընտրեք ձեր աշխատանքի ձևը։&lt;/b&gt; &lt;br/&gt;Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:* Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:&lt;/b&gt;Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Արդյունավետ համահեղինակ:* Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Արդյունավետ համահեղինակ:&lt;/b&gt; &lt;br/&gt;Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր: &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Համագործակցեք ապահով.&lt;/b&gt; &lt;br/&gt;Կարգավորեք մուտքը դեպի ամբողջ տարածք կամ առանձին սենյակներ՝ ճկուն թույլտվություններով և օգտվողի դերերով. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt;&lt;br/&gt;Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն: &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Բարև, $UserName
-Դուք հաջողությամբ գրանցվել եք ONLYOFFICE Personal-ում "${__VirtualRootPath}":"${__VirtualRootPath}":
-
-Միացրեք ձեր սիրած ամպային պահեստը՝ Dropbox, Google Drive, OneDrive կամ Box՝ ձեր փաստաթղթերի համար մեկ աշխատանքային տարածք ստեղծելու համար, որը հասանելի է ցանկացած վայրից:
-
-Իմացեք ավելին ONLYOFFICE Personal-ի մասին "մեր բլոգում":"$TagBlogLink":
-
-Մենք ուրախ ենք, որ դուք այստեղ եք: Մնացեք մեզ հետ!
-
-Հարգանքներով՝
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Բարի գալուստ ONLYOFFICE Personal
-
-Դուք հենց նոր եք ստեղծել ձեր անձնական գրասենյակը ամպի մեջ:
-
-h3.Դա վիրտուալ աշխատանքային տարածք է, որտեղ դուք կարող եք խմբագրել և պահել փաստաթղթերը, աշխատել դրանց հետ ցանկացած վայրից՝ ապահովելով ձեր ընկերներին կամ գործընկերներին հասանելիություն:
-
-h3.Արագ սկսելու համար ահա թե ինչ կարող եք անել ONLYOFFICE-ում.
-
-- Ստեղծեք, դիտեք և խմբագրեք տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ:
-
-- Աշխատեք բոլոր հայտնի ձևաչափերով: Ամենաբարձր համատեղելիությունը MS Office ֆայլերի հետ:
-
-- Ստեղծեք և համատեղ խմբագրեք "լրացնելու պատրաստ ձևեր":"https://www.onlyoffice.com/form-creator.aspx":
-
-- Համօգտագործեք և համագործակցեք փաստաթղթերի վրա առցանց:
-
-- Օգտագործեք տարբեր պլագիններ՝ լրացուցիչ հնարավորություններ կիրառելու համար:
-
-- Հեշտությամբ մուտք գործեք ձեր անձնական ամպը "Chrome ընդլայնման":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US միջոցով":
-
-Դուք կարող եք նաև փաստաթղթերը օֆլայն խմբագրել մեր անվճար "աշխատասեղանի խմբագրիչների":"https://www.onlyoffice.com/download-desktop.aspx" միջոցով կամ ձեռք բերել բջջային խմբագրման փաթեթ ձեր "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" -ի համար կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" սարք:
-
-Հարգանքներով՝
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
-
-Ստացեք անվճար ONLYOFFICE հավելվածներ՝ ձեր ցանկացած սարքից փաստաթղթերի վրա աշխատելու համար:
-
-# Windows-ում, Linux-ում և Mac-ում փաստաթղթերի վրա օֆլայն աշխատելու համար ներբեռնեք "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx":
-
-#Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972"-ի համար կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents":
-
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Ողջույն!
-Այս էլ.փոստի միջոցով փորձ է արվել գրանցել նոր "ONLYOFFICE Personal":"$PortalUrl" հաշիվ: Եթե դուք էիք, մենք ուզում ենք ձեզ տեղեկացնել, որ հաշիվն արդեն գոյություն ունի — անցեք ONLYOFFICE Personal և մուտք գործեք:
-Եթե կորցրել եք ձեր գաղտնաբառը, կարող եք վերականգնել այն "գաղտնաբառի վերականգնման էջում":"$LinkToRecovery":
-Եթե դուք չեք փորձել գրանցել նոր հաշիվ, հավանաբար ինչ-որ մեկը դա սխալմամբ է արել: Այս դեպքում խնդրում ենք անտեսել այս էլ.
-
-Հաճելի օր!
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE հաշվի էլ.
-
-Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
-
-$GreenButton
-
-Հղումը գործում է 7 օր։
-
-*Եթե այս դիտարկիչով մուտք չեք գործել ONLYOFFICE, հաստատման համար պետք է օգտագործեք ձեր հին էլ.
-
-Չե՞ք ուզում փոխել ձեր էլ. Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE անձնական հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
-
-$GreenButton
-
-Հղումը գործում է 7 օր։
-
-Չե՞ք ուզում փոխել ձեր գաղտնաբառը: Պարզապես անտեսեք այս հաղորդագրությունը.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Բարեւ Ձեզ,
-
-Դուք հենց նոր հաշիվ եք գրանցել ONLYOFFICE լուծումում՝ անձնական օգտագործման համար: Սեղմեք "այստեղ":"$InviteLink" գրանցումը հաստատելու և գաղտնաբառ ստեղծելու համար:
-
-Եթե չեք կարող բացել հղումը, խնդրում ենք պատճենեք հետևյալ "$InviteLink":"$InviteLink" և տեղադրեք այն ձեր դիտարկիչի հասցեագոտում:
-
-Հարգանքներով՝
-ONLYOFFICE թիմ</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com կայքում: Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով).
-
-$GreenButton
-
-*Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության հայտարարության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0":
-
-"Կարդացեք ավելին հաշվի դադարեցման մասին":"https://helpcenter.onlyoffice.com/administration/configuration.aspx":
-
-Անտեսեք այս նամակը, եթե չեք ցանկանում շարունակել:
-
-Եթե ունեք հարցեր, դիմեք մեզ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով
-
-Հարգանքներով՝
-ONLYOFFICE թիմ</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ապաակտիվացում
@@ -1253,18 +1133,16 @@ ONLYOFFICE թիմ</value>
 
 Դուք խնդրել եք ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ժամանակավոր ապաակտիվացում: Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ապաակտիվացման գործընթացը այդ ժամանակահատվածում:
 
 Ցանկացած ժամանակ կարող եք վերակտիվացնել ձեր պորտալը՝ սեղմելով հետևյալ հղումը.
 p=. "Reactivate Portal":"$ActivateUrl" (այս հղումը չունի ժամանակի սահմանափակում)
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով:
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ապաակտիվացում
@@ -1273,7 +1151,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Դուք խնդրել եք ձեր [${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ժամանակավոր ապաակտիվացում: Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ապաակտիվացման գործընթացը այդ ժամանակահատվածում:
 
@@ -1281,11 +1159,11 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 սեղմելով հետևյալ հղումը.
 [Reactivate Portal]($ActivateUrl) (այս հղումը չունի ժամանակի սահմանափակում)
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support@onlyoffice.com](mailto:support@onlyoffice.com) հասցեով
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SalesEmail}](mailto:${__SalesEmail}) հասցեով
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ջնջում
@@ -1302,28 +1180,25 @@ ONLYOFFICE™ աջակցման թիմ
 
 Եթե դեռ ցանկանում եք ջնջել ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալը, խնդրում ենք հետևել ստորև բերված հղմանը` հաստատելու գործողությունը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ջնջման գործընթացը այդ ժամանակահատվածում:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով:
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>Ձեր ONLYOFFICE DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" համաձայն:
+    <value>h1. ONLYOFFICE DocSpace-ն &lt;span style="color:#FF6F3D;"&gt;ապաակտիվացված է&lt;/span&gt;
 
-Ինչո՞ւ եք որոշել հեռանալ: Կիսվեք ձեր փորձով մեզ հետ:
 
-$GreenButton
+Ձեր ONLYOFFICE DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
 
-Շնորհակալություն և հաջողություն:
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Ինչո՞ւ եք որոշել հեռանալ: Կիսվեք ձեր փորձով մեզ հետ:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+*Շնորհակալություն և հաջողություն:*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի պրոֆիլի փոփոխության ծանուցում
@@ -1359,8 +1234,7 @@ $activity
 Այս հաղորդագրությունը ստեղծվել է ավտոմատ կերպով՝ ձեր SMTP կարգավորումները ստուգելու համար: Եթե դուք դիտում եք այն, դա նշանակում է, որ կարգավորումները ճիշտ են, և դուք կարող եք դրանք օգտագործել ձեր պորտալում:
 
 
-Հարգանքներով՝
-ONLYOFFICE թիմ</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1416,86 +1290,72 @@ ONLYOFFICE թիմ</value>
 
 Ընդունեք հրավերը՝ հետևելով ստորև նշված հղմանը և մուտք գործելու համար օգտագործեք ձեր մուտքն ու գաղտնաբառը կորպորատիվ հաշվից:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է միայն 7 օր.</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Ստացեք &lt;span style="color:#FF6F3D;"&gt;անվճար&lt;/span&gt; ONLYOFFICE հավելվածներ
+
+
+Բարև, $UserName!
 
 Ստացեք անվճար ONLYOFFICE հավելվածներ՝ ձեր ցանկացած սարքից փաստաթղթերի վրա աշխատելու համար:
 
-# Windows-ում, Linux-ում և Mac-ում փաստաթղթերի վրա օֆլայն աշխատելու համար ներբեռնեք "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx":
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Փաստաթղթերի վրա առցանց աշխատելու համար ստացեք ONLYOFFICE Desktop Editors&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972"-ի համար՝ կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents":
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ONLYOFFICE Documents հավելվածը&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Դուք հենց նոր ստեղծեցիք ONLYOFFICE DocSpace-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Դրա հասցեն է "${__VirtualRootPath}":"${__VirtualRootPath}":
 
-Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
-
-$GreenButton
+Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր)
+$OrangeButton
 
 Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
 
-* 1 ադմին, 2 հզոր օգտագործող
-* Մինչև 12 սենյակ
-* Յուրաքանչյուր սենյակում անսահմանափակ թվով օգտվողներ
-* 2 ԳԲ սկավառակի տարածություն
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 ադմին, 2 հզոր օգտագործող&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Մինչև 12 սենյակ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Յուրաքանչյուր սենյակում անսահմանափակ թվով օգտվողներ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 ԳԲ սկավառակի տարածություն&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
+*Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:*
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Կարգավորեք ձեր &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Բարև, $UserName!
 
 Կարգավորեք ձեր ONLYOFFICE DocSpace-ի անվտանգության կարգավորումները՝ այն ավելի անվտանգ դարձնելու համար.
 
-* Սահմանեք գաղտնաբառի ուժը:
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Սահմանեք գաղտնաբառի ուժը:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Միացնել երկգործոն նույնականացումը և միայնակ մուտքը:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Որոշեք վստահելի փոստային տիրույթները և նստաշրջանի տևողությունը:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Սահմանափակել մուտքը հատուկ IP հասցեներից:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Թույլատրել կամ սահմանափակել ադմինիստրատորի հաղորդագրությունները:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Կառավարեք ադմինիստրատորի մուտքի իրավունքները:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Կատարեք տվյալների կրկնօրինակում:&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-* Միացնել երկգործոն նույնականացումը և միայնակ մուտքը:
+$OrangeButton
 
-* Որոշեք վստահելի փոստային տիրույթները և նստաշրջանի տևողությունը:
+Այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" ձեր ONLYOFFICE DocSpace-ի կազմաձևման և կառավարման մասին ավելին իմանալու համար: Դուք կարող եք նաև խորհրդակցել այն, երբ ֆունկցիոնալության վերաբերյալ հարցեր ունեք:
 
-* Սահմանափակել մուտքը հատուկ IP հասցեներից:
-
-* Թույլատրել կամ սահմանափակել ադմինիստրատորի հաղորդագրությունները:
-
-* Կառավարեք ադմինիստրատորի մուտքի իրավունքները:
-
-* Կատարեք տվյալների կրկնօրինակում:
-
-$GreenButton
-
-Այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" ձեր ONLYOFFICE DocSpace-ի կազմաձևման և կառավարման մասին ավելին իմանալու համար: Դուք կարող եք նաև խորհրդակցել այն, երբ ֆունկցիոնալության վերաբերյալ հարցեր ունեք:
-
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Դուք չեք մտել ձեր ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" կես տարուց ավելի:
+    <value>h1. Ձեր ONLYOFFICE DocSpace-ը &lt;span style="color:#FF6F3D;"&gt;կջնջվի&lt;/span&gt;
 
-Քանի որ որոշել եք այլևս չօգտագործել այն, ձեր ONLYOFFICE DocSpace-ը և բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" համաձայն:
 
-Մենք կգնահատենք ձեր կարծիքը: Ինչո՞ւ որոշեցիք դադարեցնել ONLYOFFICE DocSpace-ի օգտագործումը:
+Դուք չեք մտել ձեր ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" կես տարուց ավելի:
 
-$GreenButton
+Քանի որ որոշել եք այլևս չօգտագործել այն, ձեր ONLYOFFICE DocSpace-ը և բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
 
-Եթե կարծում եք, որ սա սխալ է և ցանկանում եք շարունակել օգտագործել ONLYOFFICE DocSpace-ը, դիմեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx":
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Մենք կգնահատենք ձեր կարծիքը: Ինչո՞ւ որոշեցիք դադարեցնել ONLYOFFICE DocSpace-ի օգտագործումը:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+Եթե կարծում եք, որ սա սխալ է և ցանկանում եք շարունակել օգտագործել ONLYOFFICE DocSpace-ը, դիմեք մեր "աջակցության թիմին":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ջնջում
@@ -1512,15 +1372,15 @@ _Կարևոր! Ձեր պորտալում պահվող բոլոր տվյալնե�
 
 Եթե դուք դեռ ցանկանում եք ջնջել ձեր [${__VirtualRootPath}](${__VirtualRootPath}) պորտալը, խնդրում ենք հետևել ստորև նշված հղմանը` գործողությունը հաստատելու համար.
 
-$GreenButton
+$OrangeButton
 
 _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ջնջման գործընթացը այդ ժամանակահատվածում:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support@onlyoffice.com](mailto:support@onlyoffice.com) հասցեով
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SalesEmail}](mailto:${__SalesEmail}) հասցեով
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Պորտալի հասցեի փոփոխություն
@@ -1538,7 +1398,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Եթե դուք դեռ ցանկանում եք ջնջել ձեր պրոֆիլը, ապա հետևեք ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պրոֆիլի ջնջման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
@@ -1579,12 +1439,7 @@ $GreenButton
 
 "$FromUserName":"$FromUserLink" օգտվողից տվյալների հեռացման գործընթացը հաջողությամբ ավարտվել է:
 
-Անձնական տվյալների ջնջումը թույլատրվում է անվճար.
-
-# Փաստաթղթեր - $DocsSpace
-# CRM - $CrmSpace
-# Փոստ - $MailSpace
-# Talk - $TalkSpace</value>
+Անձնական տվյալների ջնջումը թույլատրվում է անվճար $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Հարգելի $UserName,
@@ -1662,113 +1517,119 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Ձեր պորտալը վերականգնվել է: Այն մուտք գործելու համար դուք պետք է սահմանեք նոր գաղտնաբառ.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր:
 
 Եթե սխալմամբ եք ստացել այս նամակը, խնդրում ենք անտեսել այն կամ կապվեք ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ադմինիստրատորին` մանրամասները պարզելու համար.</value>
   </data>
   <data name="pattern_restore_started" xml:space="preserve">
-    <value>h1. Սկսվել է պորտալի վերականգնումը
+    <value>h1.Սկսվել է պորտալի վերականգնումը
 
 Պորտալի վերականգնումը սկսված է։ Դա կարող է որոշ ժամանակ տևել՝ կախված ձեր տվյալների քանակից:
 
 *Նշում*. պորտալը հասանելի չի լինի վերականգնման գործընթացում:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք ազատ զգալ կապվել մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով:
 
-Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+$TrulyYours
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 խորհուրդ&lt;/span&gt; փաստաթղթերի վրա արդյունավետ աշխատանքի համար
+
+
+Բարև, $UserName!
 
 Հուսով ենք, որ դուք վայելում եք ձեր ONLYOFFICE DocSpace-ի օգտագործումը: Ահա մի քանի խորհուրդ, թե ինչպես կարելի է ավելի արդյունավետ դարձնել փաստաթղթերի վրա աշխատանքը:
 
-*#1. Ընտրեք ձեր աշխատանքի ձևը։* Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Ընտրեք ձեր աշխատանքի ձևը։&lt;/b&gt; &lt;br/&gt;Կազմակերպեք ձեր աշխատանքային հոսքը ըստ ձեզ՝ ստեղծելով համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով։&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:* Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Աշխատեք ձեր ցանկացած բովանդակության հետ:&lt;/b&gt;Պահպանեք և աշխատեք տարբեր ձևաչափերի ֆայլերի հետ ձեր սենյակներում՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևաթղթեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Արդյունավետ համահեղինակ:* Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Արդյունավետ համահեղինակ:&lt;/b&gt; &lt;br/&gt;Համագործակցեք փաստաթղթերի վրա երկու համատեղ խմբագրման եղանակներով՝ իրական ժամանակում կամ պարբերության կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր: &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Համագործակցեք ապահով.&lt;/b&gt; &lt;br/&gt;Կարգավորեք մուտքը դեպի ամբողջ տարածք կամ առանձին սենյակներ՝ ճկուն թույլտվություններով և օգտվողի դերերով. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt;&lt;br/&gt;Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն: &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Բացահայտեք&lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ի բիզնես բաժանորդագրությունը
+
+
+Բարև, $UserName!
 
 Ահա երեք պարզ հարցեր ձեզ համար, որոնք կարող են օգնել մեզ ավելի հարմարավետ դարձնել ձեր օգտատերերի փորձը:
 
-* Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ունե՞ք մեծ թիմ կամ շատ հաճախորդներ և գործընկերներ, որոնց հետ կարող եք համագործակցել ձեր ONLYOFFICE DocSpace-ում:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք ստեղծել մի շարք սենյակներ բազմաթիվ փաստաթղթերի հետ աշխատելու համար:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ցանկանու՞մ եք օգտագործել ONLYOFFICE DocSpace-ը ձեր սեփական ապրանքանիշի ներքո:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Եթե ունեք առնվազն մեկ «այո» պատասխան, ընտրեք ԲԻԶՆԵՍ սակագնային պլանը, որը թույլ է տալիս ձեր ONLYOFFICE DocSpace-ում ավելացնել ցանկացած մենեջեր, ինչպես նաև կիրառել բրենդինգի տարբերակներ:
 
 Դա անելու համար խնդրում ենք խորհրդակցել ձեր ONLYOFFICE DocSpace-ի "Վճարումների բաժին":"$PricingPage": Այնտեղ դուք կգտնեք Stripe Customer Portal-ի անհատական հղում, որտեղ հեշտությամբ կարող եք կարգավորել վճարման բոլոր մանրամասները:
 
-_Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին: _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում է այն անձը, ով վճարում է բաժանորդագրությունը: Միայն վճարողը կարող է փոփոխություններ կատարել բաժանորդագրության մեջ (կարգավորել կառավարիչների թիվը): Օգտատերերը մուտք չունեն վճարումների մանրամասներին: ONLYOFFICE DocSpace հաշվի սեփականատերը ցանկացած ժամանակ կարող է վերահանձնարարել վճարողին:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հրավերի հղումը սեղմելուց հետո խնդրում ենք նոր գաղտնաբառ սահմանել ձեր հաշվի համար:
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
+
+
+Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու "${__VirtualRootPath}":"${__VirtualRootPath}"-ին որպես հյուր օգտատեր: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Մենք նաև ձեզ ժամանակ առ ժամանակ կուղարկենք օգտակար խորհուրդներ և ONLYOFFICE-ի վերջին նորությունները: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք:
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ դուք հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1777,11 +1638,9 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1790,11 +1649,9 @@ ONLYOFFICE թիմ
 
 Մենք խորհուրդ ենք տալիս վճարել ձեր Business բաժանորդագրությունը հիմա և շարունակել օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1803,11 +1660,9 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ որքան հնարավոր է շուտ վճարեք ձեր Բիզնեսի բաժանորդագրությունը: Այսպիսով, դուք նախկինի պես կկարողանաք օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1816,56 +1671,54 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ այսօր վճարեք ձեր Business բաժանորդագրությունը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու $Message սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հրավերի հղումը սեղմելուց հետո խնդրում ենք նոր գաղտնաբառ սահմանել ձեր հաշվի համար:
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>Բարեւ Ձեզ!
+    <value>h1. Միացեք &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ին
 
-Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+Բարեւ Ձեզ!
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Բարև, $UserName:
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
+
+
+Բարև, $UserName!
 
 Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտատիրոջ պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}": Այժմ դուք կարող եք.
 
-* Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք*. համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք: &lt;b&gt;համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Աշխատեք տարբեր ձևաչափի ֆայլերի հետ*՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Աշխատեք տարբեր ձևաչափի ֆայլերի հետ&lt;/b&gt;: *՝ տեքստային փաստաթղթեր, աղյուսակներ, շնորհանդեսներ, թվային ձևեր, PDF-ներ, էլեկտրոնային գրքեր, մուլտիմեդիա:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Համագործակցեք փաստաթղթերի վրա* երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Համագործակցեք փաստաթղթերի վրա&lt;/b&gt; երկու համատեղ խմբագրման ռեժիմներով՝ իրական ժամանակում կամ պարբերությունների կողպում: Հետևեք փոփոխություններին, շփվեք իրական ժամանակում՝ օգտագործելով ներկառուցված զրույցը կամ կատարելով աուդիո և տեսազանգեր:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Օգտագործեք AI օգնական հավելվածը.&lt;/b&gt; Ամփոփել և թարգմանել տեքստերը, ստեղծել պատկերներ և հիմնաբառեր, վերլուծել բառերը և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ հարցրեք մեր "աջակցության թիմին":"${__SupportLink}".
 
-Իսկապես քոնը,
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը "$FromUserName":"$FromUserLink" ջնջել է իր պրոֆիլը, և այս պրոֆիլն այժմ արգելափակված է: Օգտատիրոջ բոլոր ֆայլերը դեռ վերագրված են նրան և զբաղեցնում են սկավառակի տարածք:
@@ -1876,5 +1729,37 @@ ONLYOFFICE թիմ
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} գաղտնաբառի օգնություն</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Հարգանքներով, ONLYOFFICE Աջակցման Թիմ</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ԴԻՏԵԼ ԱՄԲՈՂՋ երգացանկը</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Վերապատրաստեք ONLYOFFICE DocSpace-ը վիդեո ուղեցույցներով</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Սիրով Ձեր, ONLYOFFICE թիմ</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. Վերապատրաստեք ONLYOFFICE DocSpace-ը &lt;span style="color:#FF6F3D;"&gt;վիդեո ուղեցույցներով&lt;/span&gt;
+
+
+Բարև Ձեղ, $UserName!
+
+Ձեր հարմարության համար մենք պատրաստել ենք վիդեո ձեռնարկներ, որպեսզի կարողանաք հեշտությամբ տիրապետել ONLYOFFICE DocSpace-ին: Դիտեք տեսանյութերի ուղեցույցները և ապահովեք ձեր անխափան և արդյունավետ աշխատանքը:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;Ինչ է ONLYOFFICE DocSpace-ը&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: Գործնական շրջագայություն &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Հիմնական գործունեությունը&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Ստեղծել սենյակներ&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Ստեղծել և վերբեռնել ֆայլեր&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Պատճենել, տեղափոխել, վերանվանել, ջնջել, ներբեռնել ֆայլերը&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Տեսակավորել և զտել ֆայլերը&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Վերականգնել ֆայլերի տարբերակները&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Օգտագործել թեժ ստեղներ&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Արխիվացնել սենյակները&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Օգտատիրոջ և պրոֆիլի կառավարում&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Հրավիրել օգտվողներին&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Կառավարել ձեր պրոֆիլը&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Manage your profile&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Դուրս գալ ակտիվ նիստերից&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Ադմինիստրացիա&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Կառավարել անվտանգության կարգավորումները&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Կրկնօրինակել և վերականգնել&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

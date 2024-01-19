@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,38 +26,30 @@
 
 namespace ASC.Web.Core.RemovePortal;
 
-[Singletone(Additional = typeof(RemovePortalWorkerExtension))]
-public class RemovePortalWorker
+[Singleton(Additional = typeof(RemovePortalWorkerExtension))]
+public class RemovePortalWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
 
-    public RemovePortalWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
+    public async Task StartAsync(int tenantId)
     {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-    public void Start(int tenantId)
-    {
-        lock (_locker)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
             var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _queue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null)
             {
-
-                item = _serviceProvider.GetService<RemovePortalOperation>();
+                item = serviceProvider.GetService<RemovePortalOperation>();
 
                 item.Init(tenantId);
 

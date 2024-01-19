@@ -1,48 +1,42 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.AuditTrail.Mappers;
 
 internal class DocumentsActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; }
-    public ProductType Product { get; }
-    public DocumentsActionMapper()
-    {
-        Product = ProductType.Documents;
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
+        new FilesActionMapper(),
+        new FoldersActionMapper(),
+        new RoomsActionMapper(),
+        new SettingsActionMapper()
+    ];
 
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new FilesActionMapper(),
-            new FoldersActionMapper(),
-            new RoomsActionMapper(),
-            new SettingsActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.Documents;
 }
 internal class FilesActionMapper : IModuleActionMapper
 {
@@ -55,23 +49,30 @@ internal class FilesActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.File, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.File, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, new[] { MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted } },
+                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted
+                        ]
+                    },
                     {
-                        ActionType.Update, new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded
-                        }
+                        ]
                     },
-                    { ActionType.Delete, new[] { MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied } },
-                    { ActionType.UpdateAccess, new[] { MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated } },
-                    { ActionType.Download, new[] {  MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded } },
-                    { ActionType.Send, new[] { MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner } },
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
+                        ]
+                    },
+                    { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated
+                        ]
+                    },
+                    { ActionType.Download, [MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded
+                        ]
+                    },
+                    { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] }
                 },
-                new Dictionary<ActionType, MessageAction>()
+                new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Upload, MessageAction.FileUploaded },
                     { ActionType.Import, MessageAction.FileImported },
@@ -79,12 +80,12 @@ internal class FilesActionMapper : IModuleActionMapper
                 }
             },
             {
-                EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Copy, new[] { MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting } },
+                    { ActionType.Copy, [MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting] },
+                    { ActionType.Move, [MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting] }
                 }
-            },
+            }
         };
 
         Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Module, EntryType.File));
@@ -103,26 +104,28 @@ internal class FoldersActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, new[] { MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead } },
-                    { ActionType.UpdateAccess, new[] { MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList } }
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead] },
+                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
+                        ]
+                    }
                 },
-                new Dictionary<ActionType, MessageAction>()
+                new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Create, MessageAction.FolderCreated },
                     { ActionType.Move, MessageAction.FolderMovedToTrash },
                     { ActionType.Delete, MessageAction.FolderDeleted },
-                    { ActionType.Download, MessageAction.FolderDownloaded },
+                    { ActionType.Download, MessageAction.FolderDownloaded }
                 }
             },
             {
-                EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Copy, new[] { MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting } },
+                    { ActionType.Copy, [MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting] },
+                    { ActionType.Move, [MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting] }
                 }
-            },
+            }
         };
     }
 }
@@ -140,10 +143,9 @@ internal class RoomsActionMapper : IModuleActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, new[] { MessageAction.RoomCreated } },
+                    { ActionType.Create, [MessageAction.RoomCreated] },
                     {
-                        ActionType.Update, new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.RoomArchived,
                             MessageAction.RoomUnarchived,
                             MessageAction.RoomRenamed,
@@ -156,11 +158,14 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomRemoveUser,
                             MessageAction.RoomInvitationLinkCreated,
                             MessageAction.RoomInvitationLinkUpdated,
-                            MessageAction.RoomInvitationLinkDeleted
-                        }
+                            MessageAction.RoomInvitationLinkDeleted,
+                            MessageAction.RoomExternalLinkCreated,
+                            MessageAction.RoomExternalLinkUpdated,
+                            MessageAction.RoomExternalLinkDeleted
+                        ]
                     },
                     {
-                        ActionType.Delete, new [] { MessageAction.RoomDeleted }
+                        ActionType.Delete, [MessageAction.RoomDeleted]
                     }
                 }
             },
@@ -186,11 +191,11 @@ internal class SettingsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.Folder, new Dictionary<ActionType, MessageAction>()
+                EntryType.Folder, new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Create,  MessageAction.ThirdPartyCreated  },
                     { ActionType.Update, MessageAction.ThirdPartyUpdated },
-                    { ActionType.Delete, MessageAction.ThirdPartyDeleted },
+                    { ActionType.Delete, MessageAction.ThirdPartyDeleted }
                 }
             },
             {
@@ -200,7 +205,7 @@ internal class SettingsActionMapper : IModuleActionMapper
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
                     MessageAction.DocumentsExternalShareSettingsUpdated
                 }
-            },
+            }
         };
     }
 }

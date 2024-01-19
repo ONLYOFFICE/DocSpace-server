@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class UploadControllerHelper : FilesHelperBase
-{
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
-    private readonly TenantManager _tenantManager;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly SecurityContext _securityContext;
-
-    public UploadControllerHelper(
-        FilesSettingsHelper filesSettingsHelper,
+public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
@@ -48,9 +39,10 @@ public class UploadControllerHelper : FilesHelperBase
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
         TenantManager tenantManager,
         IHttpClientFactory httpClientFactory,
-        SecurityContext securityContext)
-        : base(
-            filesSettingsHelper,
+        SecurityContext securityContext,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity)
+    : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
@@ -60,33 +52,54 @@ public class UploadControllerHelper : FilesHelperBase
             httpContextAccessor,
             folderDtoHelper)
     {
-        _filesLinkUtility = filesLinkUtility;
-        _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
-        _tenantManager = tenantManager;
-        _httpClientFactory = httpClientFactory;
-        _securityContext = securityContext;
-    }
-
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default(ApiDateTime), true);
+        return await CreateUploadSessionAsync(file, false, default, true);
     }
 
-    public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
     {
-        var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, _filesSettingsHelper.UpdateIfExist, relativePath);
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var toFolder = await folderDao.GetFolderAsync(folderId);
+        if (toFolder == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+        if (!await fileSecurity.CanCreateAsync(toFolder))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        var result = new List<string>();
+
+        foreach (var title in filesTitle)
+        {
+            var file = await fileDao.GetFileAsync(folderId, title);
+            if (file is { Encrypted: false })
+            {
+                result.Add(title);
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
+    {
+        var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
     public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
-        if (_filesLinkUtility.IsLocalFileUploader)
+        if (filesLinkUtility.IsLocalFileUploader)
         {
             var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
-            var responseObject = await _chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
+            var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
 
             return new
             {
@@ -95,9 +108,9 @@ public class UploadControllerHelper : FilesHelperBase
             };
         }
 
-        var createSessionUrl = _filesLinkUtility.GetInitiateUploadSessionUrl(await _tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, _securityContext);
+        var createSessionUrl = filesLinkUtility.GetInitiateUploadSessionUrl(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
 
         var request = new HttpRequestMessage
         {
@@ -145,7 +158,7 @@ public class UploadControllerHelper : FilesHelperBase
         }
 
         IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext.Request.Form.Files;
-        if (files == null || !files.Any())
+        if (!files.Any())
         {
             files = uploadModel.Files;
         }

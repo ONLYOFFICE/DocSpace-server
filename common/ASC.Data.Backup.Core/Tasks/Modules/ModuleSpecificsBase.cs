@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public abstract class ModuleSpecificsBase : IModuleSpecifics
+public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
 {
     public abstract ModuleName ModuleName { get; }
     public abstract IEnumerable<TableInfo> Tables { get; }
@@ -35,13 +35,8 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         => _connectionStringName ??= ModuleName.ToString().ToLower();
 
     private string _connectionStringName;
-    private readonly Helpers _helpers;
-
-    protected ModuleSpecificsBase(Helpers helpers)
-    {
-        _helpers = helpers;
-    }
-
+    protected Helpers Helpers => helpers;
+    
     public IEnumerable<TableInfo> GetTablesOrdered()
     {
         var notOrderedTables = new List<TableInfo>(Tables);
@@ -120,10 +115,8 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         {
             return "and t." + table.UserIDColumns[0] + " = '" + id + "' ";
         }
-        else
-        {
-            return "";
-        }
+
+        return "";
     }
 
     public DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table)
@@ -134,14 +127,15 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         return command;
     }
 
-    public DbCommand CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
+    public async Task<DbCommand> CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
     {
         if (table.InsertMethod == InsertMethod.None)
         {
             return null;
         }
 
-        if (!TryPrepareRow(dump, connection, columnMapper, table, row, out var valuesForInsert))
+        var (prepared, valuesForInsert) = await TryPrepareRow(dump, connection, columnMapper, table, row);
+        if (!prepared)
         {
             return null;
         }
@@ -223,14 +217,14 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         return string.Format("where t.{0} = {1}", table.TenantColumn, tenantId);
     }
 
-    protected virtual string GetDeleteCommandConditionText(int tenantId, TableInfo table)
+    protected string GetDeleteCommandConditionText(int tenantId, TableInfo table)
     {
         return GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected virtual bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected virtual Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
     {
-        preparedRow = new Dictionary<string, object>();
+        var preparedRow = new Dictionary<string, object>();
 
         var parentRelations = TableRelations
             .Where(x => x.FitsForRow(row) && x.Importance != RelationImportance.Low)
@@ -249,26 +243,26 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
             {
                 if (!TryPrepareValue(connection, columnMapper, table, columnName, ref val))
                 {
-                    return false;
+                    return Task.FromResult((false, (Dictionary<string, object>)null));
                 }
             }
             else
             {
                 if (!TryPrepareValue(dump, connection, columnMapper, table, columnName, parentRelations[columnName], ref val))
                 {
-                    return false;
+                    return Task.FromResult((false, (Dictionary<string, object>)null));
                 }
 
                 if (!table.HasIdColumn() && !table.HasTenantColumn() && val == row[columnName])
                 {
-                    return false;
+                    return Task.FromResult((false, (Dictionary<string, object>)null));
                 }
             }
 
             preparedRow.Add(columnName, val);
         }
 
-        return true;
+        return Task.FromResult((true, preparedRow));
     }
 
     protected virtual bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
@@ -292,7 +286,7 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
             var userMapping = columnMapper.GetUserMapping(strVal);
             if (userMapping == null)
             {
-                return _helpers.IsEmptyOrSystemUser(strVal);
+                return helpers.IsEmptyOrSystemUser(strVal);
             }
 
             value = userMapping;

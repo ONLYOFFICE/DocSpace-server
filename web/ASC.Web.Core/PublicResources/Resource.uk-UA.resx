@@ -422,7 +422,7 @@
     <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter та пошуку контактів.</value>
+    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Увімкніть додаток для імпорту контактів Yahoo.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
     <value>StartTLS не підтримується для поточного сервера LDAP.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Секретний ключ клієнта Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до ONLYOFFICE за допомогою облікових записів Zoom. {0}Перейдіть на сайт Zoom для розробників і створіть новий застосунок для інтеграції ONLYOFFICE. Вставте отримані дані нижче:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Забагато спроб входу. Повторіть пізніше</value>
   </data>
 </root>

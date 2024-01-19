@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,8 +47,8 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? CreateNewIfExist { get; set; }
+    /// <type>System.Boolean, System</type>
+    public bool CreateNewIfExist { get; set; }
 
     /// <summary>Specifies whether to upload documents in the original formats as well or not</summary>
     /// <type>System.Nullable{System.Boolean}, System</type>
@@ -69,7 +69,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
         set => _stream = value;
     }
 
-    protected virtual void Dispose(bool disposing)
+    public void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

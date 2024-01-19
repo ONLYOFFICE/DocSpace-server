@@ -58,66 +58,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1.Benvenuti su ONLYOFFICE Personal
-
-Hai appena creato il tuo office in cloud personale.
-
-h3.È uno spazio di lavoro virtuale in cui è possibile modificare e archiviare documenti, lavorare con loro da qualsiasi luogo fornendo accesso ai tuoi amici o colleghi.
-
-ONLYOFFICE è compatibile con i formati di documenti Microsoft Office ™ e non garantisce alcuna perdita di formattazione o qualità degli oggetti creati. Ci impegniamo ad alleviarti dalla formattazione del mal di testa fedele e ti forniremo un set completo di strumenti di editing professionale.
-
-h3.Per iniziare, ecco cosa puoi fare in ONLYOFFICE:
-
-- Carica file dal tuo computer o creane di nuovi;
-
-- Lavora con tutti i formati di file più diffusi;
-
-- Modifica forme, grafici, tabelle, equazioni e altri oggetti;
-
-- Utilizzare vari componenti aggiuntivi per funzionalità di modifica estese;
-
-- Accedi facilmente al tuo personal cloud tramite "Estensione di Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
-
-Puoi anche modificare i documenti offline con i nostri "editor desktop" gratuiti: "https://www.onlyoffice.com/download-desktop.aspx" o ottenere una "suite di editing mobile": "https://www.onlyoffice.com /mobile.aspx "per il tuo dispositivo iOS o Android.
-
-Cordiali saluti,
-il team ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>Salve,
-
-Hai appena registrato un account presso la soluzione ONLYOFFICE per uso personale. Fai clic su "qui":"$InviteLink" per confermare la registrazione e creare una password.
-
-Se non riesci ad aprire il link, copia il seguente "$InviteLink":"$InviteLink" e incollalo nella barra degli indirizzi del browser.
-
-Cordiali saluti,
-il team ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Hai richiesto la chiusura del tuo account su personal.onlyoffice.com. Segui il collegamento per completare la richiesta (il collegamento è attivo per un periodo di 7 giorni):
-
-$GreenButton
-
-* Nota *: dopo la cancellazione, il tuo account e tutti i dati ad esso associati verranno cancellati in modo permanente in conformità con la nostra "Dichiarazione sulla privacy":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-Ignora questa e-mail se non vuoi procedere.
-
-In caso di domande, contattaci all'indirizzo "support@onlyoffice.com":"mailto: support@onlyoffice.com"
-
-Cordiali saluti,
-il team ONLYOFFICE</value>
-  </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Gentile $UserName,
 
 La procedura di rimozione dei dati dall'utente "$FromUserName":"$FromUserLink" è stata completata con successo.
 
-L'eliminazione dei dati personali ha permesso di liberare:
-
-# Documenti - $DocsSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+L'eliminazione dei dati personali ha permesso di liberare $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Il nuovo portale è stato registrato
@@ -135,29 +81,11 @@ L'eliminazione dei dati personali ha permesso di liberare:
   <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
     <value>Creare e modificare i propri documenti e anche i documenti condivisi con i diritti di accesso adatti|Concedere l'accesso agli altri utenti per leggere/modificare i documenti e le cartelle|Collegare Dropbox, Box e altri account nella sezione 'I miei documenti'</value>
   </data>
-  <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>Benvenuto su ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Si prega di attivare il tuo indirizzo email</value>
-  </data>
-  <data name="subject_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Chiusura account personale ONLYOFFICE</value>
-  </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Procedura di rimozione dati dell'utente completata</value>
   </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>Il nuovo portale è stato registrato</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
-    <value>‎Vuoi cambiare la password del tuo account cloud office? Fai clic sul pulsante qui sotto per confermare.
-
-$GreenButton
-
-‎Il link è valido per 7 giorni.
-
-Non vuoi cambiare la tua password? Basta ignorare questo messaggio.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Ciao, $UserName!
@@ -172,25 +100,10 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
-Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx ".
+Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"${__HelpLink}" o chiedi al nostro "team di supporto":"${__SupportLink}".
 
-Distinti saluti,
-Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
-    <value>Vuoi cambiare l'e-mail del tuo account dell'ufficio nel cloud?
-
-Fai clic sul pulsante in basso e accedi* al tuo cloud.
-
-$GreenButton
-
-Il collegamento è valido per 7 giorni.
-
-*Se non hai effettuato l'accesso al tuo ufficio cloud in questo browser, dovrai utilizzare la tua vecchia e-mail per la conferma.
-
-Non vuoi cambiare la tua email? Ignora questo messaggio.</value>
+$TrulyYours</value>
   </data>
 </root>

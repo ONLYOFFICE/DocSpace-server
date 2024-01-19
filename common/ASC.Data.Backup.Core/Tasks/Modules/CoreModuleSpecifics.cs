@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,35 +34,35 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
     private readonly RelationInfo[] _tableRelations;
     private readonly Helpers _helpers;
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
-            new TableInfo("core_subscription", "tenant"),
-            new TableInfo("core_subscriptionmethod", "tenant"),
-            new TableInfo("core_userphoto", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usersecurity", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usergroup", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("feed_aggregate", "tenant")
+    private readonly TableInfo[] _tables =
+    [
+        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
+            new("core_subscription", "tenant"),
+            new("core_subscriptionmethod", "tenant"),
+            new("core_userphoto", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usergroup", "tenant") {UserIDColumns = ["userid"] },
+            new("feed_aggregate", "tenant")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"created_date", false}, {"aggregated_date", false}}
             },
-            new TableInfo("feed_readed", "tenant_id")
+            new("feed_readed", "tenant_id")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"timestamp", false}}
             },
-            new TableInfo("feed_users") {InsertMethod = InsertMethod.None},
-            new TableInfo("backup_schedule", "tenant_id"),
-            new TableInfo("core_settings", "tenant")
-        };
+            new("feed_users") {InsertMethod = InsertMethod.None},
+            new("backup_schedule", "tenant_id"),
+            new("core_settings", "tenant")
+    ];
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)
     {
         _helpers = helpers;
-        _tableRelations = new[]
-        {
-                new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
+        _tableRelations =
+        [
+            new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_user", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
@@ -74,8 +74,8 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
                 new RelationInfo("core_user", "id", "feed_users", "user_id", typeof(CoreModuleSpecifics)),
 
                 new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
-                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"]))),
-            };
+                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
+        ];
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
@@ -93,6 +93,17 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
+    {
+        if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
+        {
+            return (false, null);
+        }
+
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+    }
+
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
         if (table.Name == "core_usergroup" && columnName == "last_modified")
@@ -104,22 +115,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
         return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
     }
-
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
-    {
-        if (table.Name == "core_acl")
-        {
-            if (int.Parse((string)row["tenant"]) == -1)
-            {
-                preparedRow = null;
-
-                return false;
-            }
-        }
-
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
-    }
-
+    
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
         if (relation.ChildTable == "core_acl" && relation.ChildColumn == "object")
@@ -144,7 +140,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     {
         var relationList = relations.ToList();
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
         {
             var valParts = Convert.ToString(value).Split('_');
 
@@ -166,9 +162,9 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
             return true;
         }
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
         {
             var strVal = Convert.ToString(value);
             if (_helpers.IsEmptyOrSystemUser(strVal) || _helpers.IsEmptyOrSystemGroup(strVal))
@@ -193,23 +189,10 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relationList, ref value);
     }
 
-    private static bool ValidateSource(Guid expectedValue, DataRowInfo row)
-    {
-        var source = Convert.ToString(row["source"]);
-        try
-        {
-            return expectedValue == new Guid(source);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private static bool IsDocumentsStorageType(string strStorageType)
     {
         var storageType = int.Parse(strStorageType);
 
-        return storageType == 0 || storageType == 1;
+        return storageType is 0 or 1;
     }
 }

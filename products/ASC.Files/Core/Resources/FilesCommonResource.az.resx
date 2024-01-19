@@ -151,136 +151,136 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Ləğv edildi</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Pis sorğu.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Bu istifadəçini seçə bilməzsiniz</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Çevirmə prosesi çox vaxt ala bilər.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Sənədlər Xidmətində xəta baş verdi</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Fayl {0} istifadəçisi tərəfindən redaktə üçün açıqdır. Birgə redaktə, hazırda bu format üçün dəstəklənmir.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Fayl {0} tərəfindən mobil tətbiqdə redaktə etmək üçün açıqdır</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Boş qovluq</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Tələb olunan fayl tapılmadı</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl çevrilməyəcək</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl kopyalanmayacaq</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl redaktə edilməyəcək</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl köçürülməyəcək</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Qovluğu öz alt qovluğuna köçürə bilməzsiniz</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Tələb olunan qovluq tapılmadı</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Yanlış başlıq</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Hazırda fayl başqa istifadəçi tərəfindən kilidlənib</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Ən azı {0} poçt mesajı göndərmək alınmadı. Bunun səbəbini öyrənmək üçün Poçt moduluna daxil olun.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Həddən çox endirmə var.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Üzr istəyirik, amma bu format dəstəklənmir</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Yadda saxlamanı icra edən şəxs bilinmir</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Yadda saxlamağa çalışarkən fayl pozuldu</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Yadda saxlanılacaq faylı əldə etmək alınmadı</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Əməliyyatı gerçəkləşdirməyə yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Verilən kredensiallar ilə {0} provayerinə qoşulmaq mümkün deyil.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Yaratmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Fayl silinə bilməz, çünki fayl redaktə olunmaq üçün açıqdır</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Qovluq silinə bilməz, çünki qovluqdakı fayllardan biri redaktə olunmaq üçün açıqdır</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Faylı silməyə yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Qovluğu silməyə yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Faylı redaktə etməyə yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Bu sənəd Sizin tərəfinizdən başqa bir nişanda redaktə olunur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Bu faylı köçürmək üçün kifayət qədər icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Bu qovluğu köçürmək üçün kifayət qədər icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Fayla baxmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Qovluğun içinə baxmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Faylı yenidən adlandırmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Qovluğu yenidən adlandırmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Fayl yenilənə bilməz, çünki redaktə olunmaq üçün açıqdır</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Qovluğun içinə baxmağa yetərincə icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Üçüncü tərəf resurs qovluğunun məzmunu mövcud deyil. Hesabınızı yenidən əlaqələndirməyə çalışın.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Faylın redaktəsinə başlarkən xəta baş verdi</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Redaktə üçün açıq olan faylı güncəlləyə bilməzsiniz</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>İStifadəçi tapılmadı</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Səbətdə elementlərə baxmağa icazəniz yoxdur</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -296,7 +296,7 @@
     <value>"{0}" qovluğunda fayl yaradıldı</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Doldurula bilən OFORM sənədi hazırdır. {0} qovluğunda yadda saxlanıldı</value>
+    <value>Doldurula bilən PDF sənədi hazırdır. {0} qovluğunda yadda saxlanıldı</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>OFORM-un kopyası {0} qovluğunda yaradıldı. Formanı doldurun və nəticəni PDF və ya DOCX formatında yükləyin.</value>
@@ -311,7 +311,8 @@
     <value>Portaldakı sənədlərinizi yaradın, redaktə edin, yaddaşda saxlayın və paylaşın. Google Drive, Zoho, Box'dən sənədlərinizi import edin.</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Portaldakı sənədlərinizi yaradın, redaktə edin, yaddaşda saxlayın və paylaşın. Google Drive, Zoho, Box'dən sənədlərinizi import edin.</value>
+    <value>Ofis sənədlərini real vaxt rejimində redaktə edin, paylaşın və əməkdaşlıq edin. Bütün komandanın daxil ola biləcəyi ümumi sənədlər yaradın və idarə edin.
+docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>Paylaşılan sənədlərə baxıb endirin. Faylları paylaşılan qovluqlara yükləyin. docx, xlsx, pptx formatları ilə 100% uyğunluğa zəmanət verilir.</value>
@@ -370,13 +371,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Təqdim edilmiş forma</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Yeni versiya cari versiya ilə eyni ola bilməz</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Faylı kopyalamaq üçün lazımi icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Qovluğu kopyalamaq üçün lazımi icazəniz yoxdur</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -414,5 +415,17 @@
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Otağı sabitləyə bilməzsiniz</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Paylaşılan keçid</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Dəvət keçidi</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Bağlantıların maksimum sayı {0}-dan çox ola bilməz</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
   </data>
 </root>
