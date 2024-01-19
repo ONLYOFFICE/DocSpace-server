@@ -24,12 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.VirtualRooms;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public enum SearchArea
+/// <summary>
+/// </summary>
+public class RoomLinkRequestDto : LinkRequestDtoBase
 {
-    Active,
-    Archive,
-    Any,
-    RecentByLinks
+    /// <summary>Link name</summary>
+    /// <type>System.String, System</type>
+    public string Title { get; set; }
+
+    /// <summary>Link type</summary>
+    /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
+    public LinkType LinkType { get; set; }
+
+    /// <summary>Link password</summary>
+    /// <type>System.String, System</type>
+    public string Password { get; set; }
+    
+    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DenyDownload { get; set; }
 }

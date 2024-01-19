@@ -265,6 +265,7 @@ public class EntryManager(IDaoFactory daoFactory,
         bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All)
     {
         int total;
+        var withShared = false;
 
         if (parent == null)
         {
@@ -288,6 +289,11 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.FolderType == FolderType.TRASH)
         {
             withSubfolders = false;
+        }
+
+        if (parent.RootFolderType == FolderType.USER)
+        {
+            withShared = true;
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
@@ -319,10 +325,27 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType == FolderType.Recent)
         {
-            var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
-            entries.AddRange(files);
+            if (searchArea == SearchArea.RecentByLinks)
+            {
+                var fileDao = daoFactory.GetFileDao<T>();
+                var userId = authContext.CurrentAccount.ID;
 
-            CalculateTotal();
+                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+                
+                entries.AddRange(files);
+
+                total = await filesTotalCountTask;
+
+                return (entries, total);
+            }
+            else
+            {
+                var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
+                entries.AddRange(files);
+
+                CalculateTotal();
+            }
         }
         else if (parent.FolderType == FolderType.Favorites)
         {
@@ -382,7 +405,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId)
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
                 .ToListAsync();
 
             entries = new List<FileEntry>(folders.Count + files.Count);
@@ -402,7 +425,7 @@ public class EntryManager(IDaoFactory daoFactory,
         else
         {
             var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
-            var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject);
+            var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, withShared: withShared);
 
             var task1 = fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = fileSecurity.FilterReadAsync(files).ToListAsync();
@@ -1695,6 +1718,30 @@ public class EntryManager(IDaoFactory daoFactory,
             File = file,
             Renamed = renamed
         };
+    }
+
+    public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
+    {
+        var tagDao = daoFactory.GetTagDao<T>();
+        var userId = authContext.CurrentAccount.ID;
+        var linkIdString = linkId.ToString();
+
+        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, new[] { file })
+            .ToDictionaryAsync(k => k.Name);
+
+        if (tags.Count > 0)
+        {
+            var toRemove = tags.Values.Where(t => t.Name != linkIdString);
+
+            await tagDao.RemoveTagsAsync(toRemove);
+        }
+
+        if (!tags.ContainsKey(linkIdString))
+        {
+            var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, file);
+
+            await tagDao.SaveTagsAsync(tag);
+        }
     }
 
     public async Task MarkAsRecent<T>(File<T> file)

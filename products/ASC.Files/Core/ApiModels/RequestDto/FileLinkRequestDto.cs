@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.VirtualRooms;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public enum SearchArea
+public class FileLinkRequestDto : LinkRequestDtoBase
 {
-    Active,
-    Archive,
-    Any,
-    RecentByLinks
+    /// <summary>Scope of the link</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Internal { get; set; }
+    
+    /// <summary>Primary link flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Primary { get; set; }
 }

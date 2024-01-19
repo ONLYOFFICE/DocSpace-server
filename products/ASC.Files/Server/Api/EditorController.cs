@@ -38,8 +38,11 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+    ExternalShare externalShare,
+        AuthContext authContext)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
+            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -53,8 +56,11 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+    ExternalShare externalShare,
+        AuthContext authContext)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
+            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext)
 {
     /// <summary>
     /// Opens a third-party file with the ID specified in the request for editing.
@@ -117,13 +123,17 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
     protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
     protected readonly SettingsManager _settingsManager = settingsManager;
     protected readonly EntryManager _entryManager = entryManager;
+    protected readonly AuthContext _authContext = authContext;
+    protected readonly ExternalShare _externalShare = externalShare;
 
     /// <summary>
     /// Saves edits to a file with the ID specified in the request.
@@ -214,16 +224,27 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        if (!file.Encrypted && !file.ProviderEntry)
-        {
-            await _entryManager.MarkAsRecent(file);
-        }
-
         configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
         var result = mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
         result.EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
         result.File = await _fileDtoHelper.GetAsync(file);
+        
+        if (_authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
+            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
+        {
+            var linkId = await _externalShare.GetLinkIdAsync();
+
+            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != _authContext.CurrentAccount.ID)
+            {
+                await _entryManager.MarkAsRecentByLink(file, linkId);
+            }
+            else
+            {
+                await _entryManager.MarkAsRecent(file);
+            }
+        }
+        
         return result;
     }
 

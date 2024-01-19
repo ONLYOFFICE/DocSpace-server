@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -39,17 +39,18 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         SocketManager socketManager,
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
-            fileOperationDtoHelper,
-            customTagsService,
-            roomLogoManager,
-            fileStorageService,
-            folderDtoHelper,
-            fileDtoHelper,
-            fileShareDtoHelper,
-            mapper,
-            socketManager,
-            apiContext)
-    {
+    fileOperationDtoHelper,
+    
+    customTagsService,
+    roomLogoManager,
+    fileStorageService,
+    folderDtoHelper,
+    fileDtoHelper,
+    fileShareDtoHelper,
+    mapper,
+    socketManager,
+    apiContext)
+{
     /// <summary>
     /// Creates a room in the "Rooms" section.
     /// </summary>
@@ -80,17 +81,18 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         SocketManager socketManager,
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
-            fileOperationDtoHelper,
-            customTagsService,
-            roomLogoManager,
-            fileStorageService,
-            folderDtoHelper,
-            fileDtoHelper,
-            fileShareDtoHelper,
-            mapper,
-            socketManager,
-            apiContext)
-    {
+    fileOperationDtoHelper,
+    
+    customTagsService,
+    roomLogoManager,
+    fileStorageService,
+    folderDtoHelper,
+    fileDtoHelper,
+    fileShareDtoHelper,
+    mapper,
+    socketManager,
+    apiContext)
+{
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
     /// </summary>
@@ -123,7 +125,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         SocketManager socketManager,
         ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     protected readonly FileStorageService _fileStorageService = fileStorageService;
 
     /// <summary>
@@ -277,10 +279,10 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCountTask = await _fileStorageService.GetRoomSharesCountAsync(id, filterType);
+        var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(id, FileEntryType.Folder, filterType);
         apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
 
-        await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, offset, count))
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -297,7 +299,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/links")]
-    public async Task<FileShareDto> SetLinkAsync(T id, LinkRequestDto inDto)
+    public async Task<FileShareDto> SetLinkAsync(T id, RoomLinkRequestDto inDto)
     {
         var linkAce = inDto.LinkType switch
         {
@@ -334,7 +336,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
 
         var counter = 0;
 
-        await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, 0, 100))
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, 0, 100))
         {
             counter++;
 
@@ -520,7 +522,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         IEventBus eventBus,
         IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Returns the contents of the "Rooms" section by the parameters specified in the request.
     /// </summary>
