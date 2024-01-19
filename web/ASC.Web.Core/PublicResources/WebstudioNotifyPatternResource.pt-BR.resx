@@ -487,20 +487,6 @@ O link só é válido por 7 dias.
 
 Você receberá mais dicas sobre como usar seu web-office. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.</value>
   </data>
-  <data name="pattern_personal_change_password" xml:space="preserve">
-    <value>Houve um pedido para alterar sua senha utilizada para entrar no portal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Por favor, siga o link abaixo para alterar sua senha:
-
-$OrangeButton
-
-*Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
-
-Se você não deseja alterar sua senha ou recebeu este e-mail por engano, por favor, ignore-a.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
-  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Desativação do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 

@@ -1602,21 +1602,6 @@ $OrangeButton
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpaceに参加しましょう</value>
   </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>個人用ONLYOFFICEへようこそ！</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>ONLYOFFICE Personalへようこそ</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>ONLYOFFICE Personalアカウントにログインしてください</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. メールアドレスを有効にしてください</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Personalアカウント解約</value>
-  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootPath}ポータルの停止</value>
   </data>
