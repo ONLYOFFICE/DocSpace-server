@@ -3601,8 +3601,14 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
 
-        ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
-        ErrorIf(!await fileSecurity.CanReadAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
 
         var share = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
         var keys = await encryptionLoginProvider.GetKeysAsync();
@@ -3618,9 +3624,16 @@ public class FileStorageService //: IFileStorageService
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
-
-        ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
-        ErrorIf(!await fileSecurity.CanReadAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
+        
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
         FileShare access;
 
         if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
