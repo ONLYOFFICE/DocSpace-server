@@ -27,30 +27,21 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class TenantExtraConfig
+public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReaderConfig _licenseReaderConfig;
-
-    public TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReaderConfig = licenseReaderConfig;
-    }
-
     public bool Saas
     {
-        get { return !_coreBaseSettings.Standalone; }
+        get { return !coreBaseSettings.Standalone; }
     }
 
     public bool Enterprise
     {
-        get { return _coreBaseSettings.Standalone && !string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
     public bool Opensource
     {
-        get { return _coreBaseSettings.Standalone && string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 }
 
@@ -61,7 +52,6 @@ public class TariffServiceStorage
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     internal readonly ICache Cache;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceProvider _serviceProvider;
     internal readonly ICacheNotify<TariffCacheItem> Notify;
     private TimeSpan _cacheExpiration;
 
@@ -71,9 +61,8 @@ public class TariffServiceStorage
 
         Cache = cache;
         _coreBaseSettings = coreBaseSettings;
-        _serviceProvider = serviceProvider;
         Notify = notify;
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             Cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
 
@@ -82,9 +71,9 @@ public class TariffServiceStorage
             Cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
         }, CacheNotifyAction.Remove);
 
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();
             var tariff = tariffService.GetBillingInfoAsync(i.TenantId, i.TariffId).Result;
             if (tariff != null)
@@ -303,11 +292,11 @@ public class TariffService : ITariffService
 
                 tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new(quota.TenantId, 1) },
+                    Quotas = [new(quota.TenantId, 1)],
                     DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
                 };
 
-                await SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+                await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
                 UpdateCache(tariff.Id);
             }
         }
@@ -451,7 +440,7 @@ public class TariffService : ITariffService
         var payments = _cache.Get<List<PaymentInfo>>(key);
         if (payments == null)
         {
-            payments = new List<PaymentInfo>();
+            payments = [];
             if (_billingClient.Configured)
             {
                 try
@@ -481,7 +470,7 @@ public class TariffService : ITariffService
 
     public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
     {
-        List<TenantQuota> newQuotas = new();
+        List<TenantQuota> newQuotas = [];
 
         if (_billingClient.Configured)
         {
@@ -669,16 +658,12 @@ public class TariffService : ITariffService
                     tariffInfo.Id = efTariff.Id;
                 }
 
-                if (efTariff.CustomerId == default)
-                {
-                    efTariff.CustomerId = "";
-                }
-
+                efTariff.CustomerId ??= "";
                 efTariff = await dbContext.AddOrUpdateAsync(q => q.Tariffs, efTariff);
 
                 foreach (var q in tariffInfo.Quotas)
                 {
-                    await dbContext.AddOrUpdateAsync(q => q.TariffRows, new DbTariffRow
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = efTariff.Id,
                         Quota = q.Id,
@@ -738,7 +723,7 @@ public class TariffService : ITariffService
         }
 
         var delay = 0;
-        var setDelay = true;
+        var setDelay = !_coreBaseSettings.Standalone;
 
         if (_trialEnabled)
         {
@@ -811,10 +796,7 @@ public class TariffService : ITariffService
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>()
-                {
-                    new(defaultQuota.TenantId, 1)
-                };
+                unlimTariff.Quotas = [new(defaultQuota.TenantId, 1)];
 
                 tariff = unlimTariff;
             }
@@ -839,7 +821,7 @@ public class TariffService : ITariffService
             DelayDueDate = DateTime.MaxValue,
             LicenseDate = DateTime.MaxValue,
             CustomerId = "",
-            Quotas = new List<Quota>()
+            Quotas = []
         };
 
         if (!empty)

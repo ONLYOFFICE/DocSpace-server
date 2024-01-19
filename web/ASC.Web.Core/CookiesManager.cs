@@ -100,7 +100,7 @@ public class CookiesManager
             Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
+        if (type is CookiesType.AuthKey or CookiesType.ConfirmKey or CookiesType.AnonymousSessionKey or CookiesType.ShareLink)
         {
             options.HttpOnly = true;
 
@@ -186,7 +186,7 @@ public class CookiesManager
 
         if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
         {
-            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions() { Expires = DateTime.Now.AddDays(-3) });
+            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions { Expires = DateTime.Now.AddDays(-3) });
         }
     }
 
@@ -329,7 +329,7 @@ public class CookiesManager
             CookiesType.ShareLink => ShareLinkCookiesName,
             CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
             CookiesType.ConfirmKey => ConfirmCookiesName,
-            _ => string.Empty,
+            _ => string.Empty
         };
 
         var request = _httpContextAccessor.HttpContext?.Request;
@@ -340,7 +340,7 @@ public class CookiesManager
 
         var originUri = new Uri(origin);
         var host = originUri.Host;
-        var alias = host.Substring(0, host.Length - _coreBaseSettings.Basedomain.Length - 1);
+        var alias = host[..(host.Length - _coreBaseSettings.Basedomain.Length - 1)];
         result = $"{result}_{alias}";
 
         return result;

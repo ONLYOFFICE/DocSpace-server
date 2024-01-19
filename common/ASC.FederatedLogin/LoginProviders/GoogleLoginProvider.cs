@@ -45,7 +45,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public override string ClientSecret => this["googleClientSecret"];
     public override string Scopes => "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 
-    public static readonly string[] GoogleDriveExt = new[] { ".gdoc", ".gsheet", ".gslides", ".gdraw" };
+    public static readonly string[] GoogleDriveExt = [".gdoc", ".gsheet", ".gslides", ".gdraw"];
     public static readonly string GoogleDriveMimeTypeFolder = "application/vnd.google-apps.folder";
     public static readonly string FilesFields = "id,name,mimeType,parents,createdTime,modifiedTime,owners/displayName,lastModifyingUser/displayName,capabilities/canEdit,size";
     public static readonly string ProfileFields = "emailAddresses,genders,names";
@@ -61,11 +61,9 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-            RequestHelper requestHelper,
+        RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -107,10 +105,10 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = jProfile.Value<string>("resourceName").Replace("people/", ""),
-            Provider = ProviderConstants.Google,
+            Provider = ProviderConstants.Google
         };
 
         var emailsArr = jProfile.Value<JArray>("emailAddresses");

@@ -38,4 +38,5 @@ public enum FileType
     Document = 7,
     OFormTemplate = 8,
     OForm = 9,
+    Pdf = 10
 }

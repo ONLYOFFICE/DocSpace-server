@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Data;
 global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Immutable;
@@ -36,7 +37,6 @@ global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Net.Mime;
 global using System.Net.Sockets;
-global using System.Reflection;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Cryptography;
@@ -69,6 +69,7 @@ global using ASC.Common.Mapping;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -127,6 +128,7 @@ global using ASC.Files.Thirdparty.ProviderDao;
 global using ASC.Files.Thirdparty.SharePoint;
 global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
+global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Model;
@@ -141,6 +143,7 @@ global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
+global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Core.Utility.Skins;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Files;

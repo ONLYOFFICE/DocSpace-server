@@ -27,14 +27,10 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource : NotifySource
+public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider,
+        SubscriptionManager subscriptionManager, TenantManager tenantManager)
+    : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager, tenantManager)
 {
-    public StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager, TenantManager tenantManager)
-        : base("asc.web.studio", userManager, recipientsProvider, subscriptionManager, tenantManager)
-    {
-    }
-
-
     protected override IActionProvider CreateActionProvider()
     {
         return new ConstActionProvider(
@@ -84,27 +80,8 @@ public class StudioNotifySource : NotifySource
 
                 Actions.SaasAdminModulesV1,
 
-                Actions.PersonalActivate,
-                Actions.PersonalAfterRegistration1,
-                Actions.PersonalAfterRegistration14V1,
-                Actions.PersonalConfirmation,
-                Actions.PersonalPasswordChangeV115,
-                Actions.PersonalEmailChangeV115,
-                Actions.PersonalProfileDelete,
-                Actions.PersonalAlreadyExist,
-
                 Actions.MailboxCreated,
                 Actions.MailboxWithoutSettingsCreated,
-
-                Actions.MailboxCreated,
-                Actions.MailboxWithoutSettingsCreated,
-
-                Actions.PersonalCustomModeAfterRegistration1,
-                Actions.PersonalCustomModeConfirmation,
-                Actions.PersonalCustomModePasswordChangeV115,
-                Actions.PersonalCustomModeEmailChangeV115,
-                Actions.PersonalCustomModeProfileDelete,
-                Actions.PersonalCustomModeAlreadyExist,
 
                 Actions.SaasCustomModeRegData,
 
@@ -165,69 +142,61 @@ public class StudioNotifySource : NotifySource
     }
 
 
-    private sealed class AdminNotifySubscriptionProvider : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
     {
-        private readonly ISubscriptionProvider _provider;
-
-
-        public AdminNotifySubscriptionProvider(ISubscriptionProvider provider)
-        {
-            this._provider = provider;
-        }
-
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
-            return await _provider.GetSubscriptionRecordAsync(GetAdminAction(action), recipient, objectID);
+            return await provider.GetSubscriptionRecordAsync(GetAdminAction(action), recipient, objectID);
         }
 
         public async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscribe = true)
         {
-            return await _provider.GetSubscriptionsAsync(GetAdminAction(action), recipient, checkSubscribe);
+            return await provider.GetSubscriptionsAsync(GetAdminAction(action), recipient, checkSubscribe);
         }
 
         public async Task SubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
         {
-            await _provider.SubscribeAsync(GetAdminAction(action), objectID, recipient);
+            await provider.SubscribeAsync(GetAdminAction(action), objectID, recipient);
         }
 
         public async Task UnSubscribeAsync(INotifyAction action, IRecipient recipient)
         {
-            await _provider.UnSubscribeAsync(GetAdminAction(action), recipient);
+            await provider.UnSubscribeAsync(GetAdminAction(action), recipient);
         }
 
         public async Task UnSubscribeAsync(INotifyAction action)
         {
-            await _provider.UnSubscribeAsync(GetAdminAction(action));
+            await provider.UnSubscribeAsync(GetAdminAction(action));
         }
 
         public async Task UnSubscribeAsync(INotifyAction action, string objectID)
         {
-            await _provider.UnSubscribeAsync(GetAdminAction(action), objectID);
+            await provider.UnSubscribeAsync(GetAdminAction(action), objectID);
         }
 
         public async Task UnSubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
         {
-            await _provider.UnSubscribeAsync(GetAdminAction(action), objectID, recipient);
+            await provider.UnSubscribeAsync(GetAdminAction(action), objectID, recipient);
         }
 
         public async Task UpdateSubscriptionMethodAsync(INotifyAction action, IRecipient recipient, params string[] senderNames)
         {
-            await _provider.UpdateSubscriptionMethodAsync(GetAdminAction(action), recipient, senderNames);
+            await provider.UpdateSubscriptionMethodAsync(GetAdminAction(action), recipient, senderNames);
         }
 
         public async Task<IRecipient[]> GetRecipientsAsync(INotifyAction action, string objectID)
         {
-            return await _provider.GetRecipientsAsync(GetAdminAction(action), objectID);
+            return await provider.GetRecipientsAsync(GetAdminAction(action), objectID);
         }
 
         public async Task<string[]> GetSubscriptionMethodAsync(INotifyAction action, IRecipient recipient)
         {
-            return await _provider.GetSubscriptionMethodAsync(GetAdminAction(action), recipient);
+            return await provider.GetSubscriptionMethodAsync(GetAdminAction(action), recipient);
         }
 
         public async Task<bool> IsUnsubscribeAsync(IDirectRecipient recipient, INotifyAction action, string objectID)
         {
-            return await _provider.IsUnsubscribeAsync(recipient, action, objectID);
+            return await provider.IsUnsubscribeAsync(recipient, action, objectID);
         }
 
         private INotifyAction GetAdminAction(INotifyAction action)
@@ -235,14 +204,12 @@ public class StudioNotifySource : NotifySource
             if (Actions.SelfProfileUpdated.ID == action.ID ||
                 Actions.UserHasJoin.ID == action.ID ||
                 Actions.UserMessageToAdmin.ID == action.ID
-                )
+               )
             {
                 return Actions.AdminNotify;
             }
-            else
-            {
-                return action;
-            }
+
+            return action;
         }
     }
 }

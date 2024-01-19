@@ -50,55 +50,41 @@ class QuotaServiceCache
         CacheNotify = cacheNotify;
         Cache = cache;
 
-        cacheNotify.Subscribe((i) =>
-        {
-            if (i.Key == KeyQuota)
-            {
-                Cache.Remove(KeyQuota);
-            }
-            else
-            {
-                Cache.Remove(i.Key);
-            }
-        }, CacheNotifyAction.Any);
+        cacheNotify.Subscribe(i => Cache.Remove(i.Key == KeyQuota ? KeyQuota : i.Key), CacheNotifyAction.Any);
     }
 }
 
 [Scope]
-class CachedQuotaService : IQuotaService
+class CachedQuotaService() : IQuotaService
 {
-    private readonly IQuotaService Service;
-    private readonly ICache Cache;
-    private readonly ICacheNotify<QuotaCacheItem> CacheNotify;
-    private readonly QuotaServiceCache QuotaServiceCache;
+    private readonly IQuotaService _service;
+    private readonly ICache _cache;
+    private readonly ICacheNotify<QuotaCacheItem> _cacheNotify;
+    private readonly QuotaServiceCache _quotaServiceCache;
 
     private readonly GeolocationHelper _geolocationHelper;
 
-    private readonly TimeSpan _cacheExpiration;
-
-    public CachedQuotaService()
-    {
-        _cacheExpiration = TimeSpan.FromMinutes(10);
-    }
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
     public CachedQuotaService(DbQuotaService service, QuotaServiceCache quotaServiceCache, GeolocationHelper geolocationHelper) : this()
     {
-        Service = service ?? throw new ArgumentNullException(nameof(service));
-        QuotaServiceCache = quotaServiceCache;
-        Cache = quotaServiceCache.Cache;
-        CacheNotify = quotaServiceCache.CacheNotify;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _quotaServiceCache = quotaServiceCache;
+        _cache = quotaServiceCache.Cache;
+        _cacheNotify = quotaServiceCache.CacheNotify;
         _geolocationHelper = geolocationHelper;
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        var quotas = Cache.Get<IEnumerable<TenantQuota>>(QuotaServiceCache.KeyQuota + (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key);
+        var cacheKey = QuotaServiceCache.KeyQuota + (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+        var quotas = _cache.Get<IEnumerable<TenantQuota>>(cacheKey);
         if (quotas == null)
         {
-            quotas = await Service.GetTenantQuotasAsync();
-            if (QuotaServiceCache.QuotaCacheEnabled)
+            quotas = await _service.GetTenantQuotasAsync();
+            if (_quotaServiceCache.QuotaCacheEnabled)
             {
-                Cache.Insert(QuotaServiceCache.KeyQuota, quotas, DateTime.UtcNow.Add(_cacheExpiration));
+                _cache.Insert(cacheKey, quotas, DateTime.UtcNow.Add(_cacheExpiration));
             }
         }
 
@@ -112,8 +98,8 @@ class CachedQuotaService : IQuotaService
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
-        var q = await Service.SaveTenantQuotaAsync(quota);
-        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
+        var q = await _service.SaveTenantQuotaAsync(quota);
+        await _cacheNotify.PublishAsync(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
 
         return q;
     }
@@ -125,24 +111,24 @@ class CachedQuotaService : IQuotaService
 
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
-        await Service.SetTenantQuotaRowAsync(row, exchange);
-        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
+        await _service.SetTenantQuotaRowAsync(row, exchange);
+        await _cacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
 
         if (row.UserId != Guid.Empty)
         {
-            await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
+            await _cacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
         }
     }
 
     public async Task<IEnumerable<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenantId)
     {
         var key = GetKey(tenantId);
-        var result = Cache.Get<IEnumerable<TenantQuotaRow>>(key);
+        var result = _cache.Get<IEnumerable<TenantQuotaRow>>(key);
 
         if (result == null)
         {
-            result = await Service.FindTenantQuotaRowsAsync(tenantId);
-            Cache.Insert(key, result, DateTime.UtcNow.Add(_cacheExpiration));
+            result = await _service.FindTenantQuotaRowsAsync(tenantId);
+            _cache.Insert(key, result, DateTime.UtcNow.Add(_cacheExpiration));
         }
 
         return result;
@@ -151,12 +137,12 @@ class CachedQuotaService : IQuotaService
     public async Task<IEnumerable<TenantQuotaRow>> FindUserQuotaRowsAsync(int tenantId, Guid userId)
     {
         var key = GetKey(tenantId, userId);
-        var result = Cache.Get<IEnumerable<TenantQuotaRow>>(key);
+        var result = _cache.Get<IEnumerable<TenantQuotaRow>>(key);
 
         if (result == null)
         {
-            result = await Service.FindUserQuotaRowsAsync(tenantId, userId);
-            Cache.Insert(key, result, DateTime.UtcNow.Add(_cacheExpiration));
+            result = await _service.FindUserQuotaRowsAsync(tenantId, userId);
+            _cache.Insert(key, result, DateTime.UtcNow.Add(_cacheExpiration));
         }
 
         return result;

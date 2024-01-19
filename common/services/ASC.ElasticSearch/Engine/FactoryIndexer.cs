@@ -34,7 +34,7 @@ public class FactoryIndexerHelper
 
     public FactoryIndexerHelper(ICacheNotify<IndexAction> cacheNotify)
     {
-        cacheNotify.Subscribe((a) =>
+        cacheNotify.Subscribe(a =>
         {
             if (a.LastIndexed != 0)
             {
@@ -54,44 +54,30 @@ public interface IFactoryIndexer
 }
 
 [Scope]
-public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
-{
-    public ILogger Logger { get; }
-    public string IndexName { get => _indexer.IndexName; }
-    public virtual string SettingsTitle => string.Empty;
-
-    protected readonly TenantManager _tenantManager;
-    protected readonly BaseIndexer<T> _indexer;
-
-    private readonly SearchSettingsHelper _searchSettingsHelper;
-    private readonly FactoryIndexer _factoryIndexerCommon;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICache _cache;
-    private static readonly TaskScheduler _scheduler
-        = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, 10).ConcurrentScheduler;
-
-    public FactoryIndexer(
-        ILoggerProvider options,
+public class FactoryIndexer<T>(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
         BaseIndexer<T> baseIndexer,
         IServiceProvider serviceProvider,
         ICache cache)
-    {
-        _cache = cache;
-        Logger = options.CreateLogger("ASC.Indexer");
-        _tenantManager = tenantManager;
-        _searchSettingsHelper = searchSettingsHelper;
-        _factoryIndexerCommon = factoryIndexer;
-        _indexer = baseIndexer;
-        _serviceProvider = serviceProvider;
-    }
+    : IFactoryIndexer
+    where T : class, ISearchItem
+{
+    public ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
+    public string IndexName { get => _indexer.IndexName; }
+    public virtual string SettingsTitle => string.Empty;
+
+    protected readonly TenantManager _tenantManager = tenantManager;
+    protected readonly BaseIndexer<T> _indexer = baseIndexer;
+
+    private static readonly TaskScheduler _scheduler
+        = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, 10).ConcurrentScheduler;
 
     public async Task<(bool, IReadOnlyCollection<T>)> TrySelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
         IReadOnlyCollection<T> result;
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<T>();
@@ -117,10 +103,10 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task<(bool, List<int>)> TrySelectIdsAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
         List<int> result;
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
-            result = new List<int>();
+            result = [];
 
             return (false, result);
         }
@@ -132,7 +118,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         catch (Exception e)
         {
             Logger.ErrorSelect(e);
-            result = new List<int>();
+            result = [];
 
             return (false, result);
         }
@@ -144,10 +130,10 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     {
         List<int> result;
         long total;
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
-            result = new List<int>();
+            result = [];
             total = 0;
 
             return (false, result, total);
@@ -156,13 +142,13 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         try
         {
             (var r, total) = await _indexer.SelectWithTotalAsync(expression, true);
-            result = r.Select(r => r.Id).ToList();
+            result = r.Select(entry => entry.Id).ToList();
         }
         catch (Exception e)
         {
             Logger.ErrorSelect(e);
             total = 0;
-            result = new List<int>();
+            result = [];
 
             return (false, result, total);
         }
@@ -170,14 +156,14 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         return (true, result, total);
     }
 
-    public async Task<bool> CanIndexByContentAsync(T t)
+    public virtual async Task<bool> CanIndexByContentAsync(T t)
     {
-        return await SupportAsync(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>();
+        return await SupportAsync(t) && await searchSettingsHelper.CanIndexByContentAsync<T>();
     }
 
     public async Task<bool> Index(T data, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t))
         {
             return false;
@@ -199,7 +185,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task Index(List<T> data, bool immediately = true, int retry = 0)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
@@ -280,7 +266,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     protected async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
@@ -361,7 +347,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public void Update(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!Support(t))
         {
             return;
@@ -379,7 +365,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public void Update(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!Support(t))
         {
             return;
@@ -397,7 +383,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public Task<bool> UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
 
         return !Support(t)
             ? Task.FromResult(false)
@@ -407,7 +393,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t))
         {
             return;
@@ -426,7 +412,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t))
         {
             return;
@@ -445,7 +431,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public void Delete(T data, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!Support(t))
         {
             return;
@@ -463,7 +449,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public Task IndexAsync(T data, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
 
         if (Support(t))
         {
@@ -475,7 +461,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
 
         return !Support(t)
             ? Task.FromResult(false)
@@ -484,7 +470,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public Task<bool> DeleteAsync(T data, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
 
         return !Support(t)
             ? Task.FromResult(false)
@@ -493,7 +479,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<bool> DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true)
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t))
         {
             return false;
@@ -506,7 +492,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public void Flush()
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!Support(t))
         {
             return;
@@ -517,7 +503,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public void Refresh()
     {
-        var t = _serviceProvider.GetService<T>();
+        var t = serviceProvider.GetService<T>();
         if (!Support(t))
         {
             return;
@@ -538,7 +524,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public bool Support(T t)
     {
-        if (!_factoryIndexerCommon.CheckState())
+        if (!factoryIndexer.CheckState())
         {
             return false;
         }
@@ -547,7 +533,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         var key = "elasticsearch " + t.IndexName;
         try
         {
-            var cacheValue = _cache.Get<string>(key);
+            var cacheValue = cache.Get<string>(key);
             if (!string.IsNullOrEmpty(cacheValue))
             {
                 return Convert.ToBoolean(cacheValue);
@@ -564,7 +550,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         }
         catch (Exception e)
         {
-            _cache.Insert(key, "false", cacheTime);
+            cache.Insert(key, "false", cacheTime);
             Logger.ErrorFactoryIndexerCheckState(e);
 
             return false;
@@ -573,7 +559,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<bool> SupportAsync(T t)
     {
-        return await _factoryIndexerCommon.CheckStateAsync();
+        return await factoryIndexer.CheckStateAsync();
     }
 
     private Task<bool> QueueAsync(Action actionData)
@@ -780,18 +766,15 @@ public class FactoryIndexer
             state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
         }
 
-        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = new[] { "index" } }).Records
+        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
             .Select(r => new
             {
                 r.Index,
-                Count = count.ContainsKey(r.Index) ? count[r.Index] : 0,
+                Count = count.GetValueOrDefault(r.Index, 0),
                 DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
-            .Where(r =>
-            {
-                return r.Count > 0;
-            });
+            .Where(r => r.Count > 0);
 
         return new
         {

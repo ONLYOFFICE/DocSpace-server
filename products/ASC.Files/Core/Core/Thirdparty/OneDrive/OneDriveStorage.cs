@@ -29,7 +29,9 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Transient]
-internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
+internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFactory clientFactory,
+        OAuth20TokenHelper oAuth20TokenHelper)
+    : IThirdPartyStorage<Item, Item, Item>
 {
     private OAuth20Token _token;
 
@@ -44,7 +46,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
 
             if (_token.IsExpired)
             {
-                _token = _oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(_consumerFactory, _token);
+                _token = oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(consumerFactory, _token);
                 _onedriveClientCache = null;
             }
 
@@ -57,18 +59,8 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     private OneDriveClient OnedriveClient => _onedriveClientCache ??= new OneDriveClient(new OneDriveAuthProvider(AccessToken));
 
     public bool IsOpened { get; private set; }
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
 
     public readonly long MaxChunkedUploadFileSize = 10L * 1024L * 1024L * 1024L;
-
-    public OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _consumerFactory = consumerFactory;
-        _clientFactory = clientFactory;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -107,11 +99,6 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     public static readonly string RootPath = "/drive/root:";
     public static readonly string ApiVersion = "v1.0";
 
-    public static string MakeOneDrivePath(string parentPath, string name)
-    {
-        return (parentPath ?? "") + "/" + (name ?? "");
-    }
-
     public async Task<Item> GetItemAsync(string itemId)
     {
         try
@@ -131,7 +118,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
 
     public async Task<List<Item>> GetItemsAsync(string folderId)
     {
-        return new List<Item>(await GetItemRequest(folderId).Children.Request().GetAsync());
+        return [..await GetItemRequest(folderId).Children.Request().GetAsync()];
     }
 
     public async Task<Stream> DownloadStreamAsync(Item file, int offset = 0)
@@ -169,12 +156,21 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     }
 
 
-    public async Task<Item> CreateFileAsync(Stream fileStream, string title, string parentPath)
+    public async Task<Item> CreateFileAsync(Stream fileStream, string title, string parentId)
     {
+        var parent = await GetFolderAsync(parentId);
+
+        if (parent == null)
+        {
+            return null;
+        }
+
+        var path = $"{parent.ParentReference.Path.Replace(RootPath, string.Empty)}/{parent.Name}/{title}";
+
         return await OnedriveClient
             .Drive
             .Root
-            .ItemWithPath(MakeOneDrivePath(parentPath, title))
+            .ItemWithPath(path)
             .Content
             .Request()
             .PutAsync<Item>(fileStream);
@@ -265,17 +261,14 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
 
         var uploadSession = new ResumableUploadSession(onedriveFile.Id, folderId, contentLength);
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                var responseString = await readStream.ReadToEndAsync();
-                var responseJson = JObject.Parse(responseString);
-                uploadSession.Location = responseJson.Value<string>("uploadUrl");
-            }
+            using var readStream = new StreamReader(responseStream);
+            var responseString = await readStream.ReadToEndAsync();
+            var responseJson = JObject.Parse(responseString);
+            uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
 
         uploadSession.Status = ResumableUploadSessionStatus.Started;
@@ -304,7 +297,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
                                                                oneDriveSession.BytesTransfered + chunkLength - 1,
                                                                oneDriveSession.BytesToTransfer);
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
 
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
@@ -337,7 +330,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
             Method = HttpMethod.Delete
         };
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
     }
 
@@ -347,22 +340,20 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
         if (thumbnails.Count > 0)
         {
             var url = thumbnails[0].Medium.Url;
-            url = url.Substring(0, url.IndexOf("?width"));
-            url = url + $"?width={width}&height={height}&cropmode=none";
+            url = url[..url.IndexOf("?width")];
+            url += $"?width={width}&height={height}&cropmode=none";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url),
                 Method = HttpMethod.Get
             };
-            var httpClient = _clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request);
             var bytes = await response.Content.ReadAsByteArrayAsync();
             return new MemoryStream(bytes);
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     public Task<Item> GetFolderAsync(string folderId)
@@ -413,18 +404,11 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
 
 
 
-public class OneDriveAuthProvider : IAuthenticationProvider
+public class OneDriveAuthProvider(string accessToken) : IAuthenticationProvider
 {
-    private readonly string _accessToken;
-
-    public OneDriveAuthProvider(string accessToken)
-    {
-        _accessToken = accessToken;
-    }
-
     public async Task AuthenticateRequestAsync(HttpRequestMessage request)
     {
-        request.Headers.Authorization = new AuthenticationHeaderValue("bearer", _accessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("bearer", accessToken);
 
         await Task.WhenAll();
     }
@@ -438,20 +422,12 @@ public enum ResumableUploadSessionStatus
     Aborted
 }
 
-internal class ResumableUploadSession
+internal class ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
 {
-    public long BytesToTransfer { get; set; }
+    public long BytesToTransfer { get; set; } = bytesToTransfer;
     public long BytesTransfered { get; set; }
-    public string FileId { get; set; }
-    public string FolderId { get; set; }
-    public ResumableUploadSessionStatus Status { get; set; }
+    public string FileId { get; set; } = fileId;
+    public string FolderId { get; set; } = folderId;
+    public ResumableUploadSessionStatus Status { get; set; } = ResumableUploadSessionStatus.None;
     public string Location { get; set; }
-
-    public ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
-    {
-        FileId = fileId;
-        FolderId = folderId;
-        BytesToTransfer = bytesToTransfer;
-        Status = ResumableUploadSessionStatus.None;
-    }
 }

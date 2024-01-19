@@ -27,45 +27,24 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class TagsControllerInternal : TagsController<int>
-{
-    public TagsControllerInternal(
-        FileStorageService fileStorageService,
+public class TagsControllerInternal(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper)
-    {
-    }
-}
+    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper);
 
-public class TagsControllerThirdparty : TagsController<string>
-{
-    public TagsControllerThirdparty(
-        FileStorageService fileStorageService,
+public class TagsControllerThirdparty(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper)
-    {
-    }
-}
+    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper);
 
-public abstract class TagsController<T> : ApiControllerBase
-{
-    private readonly FileStorageService _fileStorageService;
-    private readonly EntryManager _entryManager;
-
-    protected TagsController(
-        FileStorageService fileStorageService,
+public abstract class TagsController<T>(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
-    {
-        _fileStorageService = fileStorageService;
-        _entryManager = entryManager;
-    }
-
+        FileDtoHelper fileDtoHelper)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+{
     /// <summary>
     /// Adds a file with the ID specified in the request to the "Recent" section.
     /// </summary>
@@ -75,12 +54,13 @@ public abstract class TagsController<T> : ApiControllerBase
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(T fileId)
     {
-        var file = await _fileStorageService.GetFileAsync(fileId, -1).NotFoundIfNull("File not found");
+        var file = await fileStorageService.GetFileAsync(fileId, -1).NotFoundIfNull("File not found");
 
-        await _entryManager.MarkAsRecent(file);
+        await entryManager.MarkAsRecent(file);
 
         return await _fileDtoHelper.GetAsync(file);
     }
@@ -99,22 +79,15 @@ public abstract class TagsController<T> : ApiControllerBase
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(T fileId, bool favorite)
     {
-        return await _fileStorageService.ToggleFileFavoriteAsync(fileId, favorite);
+        return await fileStorageService.ToggleFileFavoriteAsync(fileId, favorite);
     }
 }
 
-public class TagsControllerCommon : ApiControllerBase
-{
-    private readonly FileStorageService _fileStorageService;
-
-    public TagsControllerCommon(
-        FileStorageService fileStorageService,
+public class TagsControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
-    {
-        _fileStorageService = fileStorageService;
-    }
-
+        FileDtoHelper fileDtoHelper)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+{
     /// <summary>
     /// Adds files and folders with the IDs specified in the request to the favorite list.
     /// </summary>
@@ -131,8 +104,8 @@ public class TagsControllerCommon : ApiControllerBase
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        await _fileStorageService.AddToFavoritesAsync(folderIntIds, fileIntIds);
-        await _fileStorageService.AddToFavoritesAsync(folderStringIds, fileStringIds);
+        await fileStorageService.AddToFavoritesAsync(folderIntIds, fileIntIds);
+        await fileStorageService.AddToFavoritesAsync(folderStringIds, fileStringIds);
 
         return true;
     }
@@ -149,7 +122,7 @@ public class TagsControllerCommon : ApiControllerBase
     [HttpPost("templates")]
     public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
     {
-        await _fileStorageService.AddToTemplatesAsync(inDto.FileIds);
+        await fileStorageService.AddToTemplatesAsync(inDto.FileIds);
 
         return true;
     }
@@ -199,7 +172,7 @@ public class TagsControllerCommon : ApiControllerBase
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplatesAsync(IEnumerable<int> fileIds)
     {
-        await _fileStorageService.DeleteTemplatesAsync(fileIds);
+        await fileStorageService.DeleteTemplatesAsync(fileIds);
 
         return true;
     }
@@ -209,8 +182,8 @@ public class TagsControllerCommon : ApiControllerBase
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        await _fileStorageService.DeleteFavoritesAsync(folderIntIds, fileIntIds);
-        await _fileStorageService.DeleteFavoritesAsync(folderStringIds, fileStringIds);
+        await fileStorageService.DeleteFavoritesAsync(folderIntIds, fileIntIds);
+        await fileStorageService.DeleteFavoritesAsync(folderStringIds, fileStringIds);
 
         return true;
     }

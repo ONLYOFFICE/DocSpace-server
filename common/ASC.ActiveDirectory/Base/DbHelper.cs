@@ -27,25 +27,15 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Scope]
-public class DbHelper
+public class DbHelper(IDbContextFactory<WebstudioDbContext> activeDirectoryDbContextFactory,
+    LdapSettings ldapSettings)
 {
-    private readonly IDbContextFactory<WebstudioDbContext> _activeDirectoryDbContextFactory;
-    private readonly LdapSettings _ldapSettings;
-
-    public DbHelper(
-        IDbContextFactory<WebstudioDbContext> activeDirectoryDbContextFactory,
-        LdapSettings ldapSettings)
-    {
-        _activeDirectoryDbContextFactory = activeDirectoryDbContextFactory;
-        _ldapSettings = ldapSettings;
-    }
-
     public async Task<List<int>> TenantsAsync()
     {
-        var id = _ldapSettings.ID;
-        var enableLdapAuthentication = _ldapSettings.EnableLdapAuthentication;
+        var id = ldapSettings.ID;
+        var enableLdapAuthentication = ldapSettings.EnableLdapAuthentication;
 
-        await using var activeDirectoryDbContext = await _activeDirectoryDbContextFactory.CreateDbContextAsync();
+        await using var activeDirectoryDbContext = await activeDirectoryDbContextFactory.CreateDbContextAsync();
         var data = await activeDirectoryDbContext.WebstudioSettings
             .Where(r => r.Id == id)
             .Join(activeDirectoryDbContext.Tenants, r => r.TenantId, r => r.Id, (settings, tenant) => new { settings, tenant })

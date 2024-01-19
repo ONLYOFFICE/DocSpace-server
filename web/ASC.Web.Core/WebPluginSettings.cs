@@ -36,10 +36,11 @@ public class WebPluginConfigSettings
 
     private long _maxSize;
     private string _extension;
-    private string[] _allow;
     private string[] _assetExtensions;
 
     public bool Enabled { get; set; }
+    public bool Upload { get; set; }
+    public bool Delete { get; set; }
 
     public long MaxSize
     {
@@ -51,12 +52,6 @@ public class WebPluginConfigSettings
     {
         get => _extension ?? ".zip";
         set => _extension = value;
-    }
-
-    public string[] Allow
-    {
-        get => _allow ?? Array.Empty<string>();
-        set => _allow = value;
     }
 
     public string[] AssetExtensions
@@ -82,14 +77,8 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     }
 }
 
-public class WebPluginState
+public class WebPluginState(bool enabled, string settings)
 {
-    public bool Enabled { get; set; }
-    public string Settings { get; set; }
-
-    public WebPluginState(bool enabled, string settings)
-    {
-        Enabled = enabled;
-        Settings = settings;
-    }
+    public bool Enabled { get; set; } = enabled;
+    public string Settings { get; set; } = settings;
 }

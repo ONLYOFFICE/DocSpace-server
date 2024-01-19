@@ -85,7 +85,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
             }
             else
             {
-                safe.Add(d.Substring(0, maxLength - currentLength - 3) + "...");
+                safe.Add(d[..(maxLength - currentLength - 3)] + "...");
                 break;
             }
         }

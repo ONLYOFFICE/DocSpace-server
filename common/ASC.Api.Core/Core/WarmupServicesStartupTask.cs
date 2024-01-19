@@ -29,23 +29,15 @@ namespace ASC.Api.Core.Core;
 /// <summary>
 ///     https://andrewlock.net/reducing-latency-by-pre-building-singletons-in-asp-net-core/
 /// </summary>
-public class WarmupServicesStartupTask : IStartupTask
+public class WarmupServicesStartupTask(IServiceCollection services, IServiceProvider provider) : IStartupTask
 {
-    private readonly IServiceCollection _services;
-    private readonly IServiceProvider _provider;
-    public WarmupServicesStartupTask(IServiceCollection services, IServiceProvider provider)
-    {
-        _services = services;
-        _provider = provider;
-    }
-
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {      
         var processedFailed = 0;
         var processedSuccessed = 0;
         var startTime = DateTime.UtcNow;
 
-        using var scope = _provider.CreateScope();
+        using var scope = provider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
 
@@ -53,7 +45,7 @@ public class WarmupServicesStartupTask : IStartupTask
 
         await tenantManager.SetCurrentTenantAsync("localhost");
             
-        foreach (var service in GetServices(_services))
+        foreach (var service in GetServices(services))
         {
             try
             {

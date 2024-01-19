@@ -26,23 +26,14 @@
 
 namespace ASC.Api.Core.Routing;
 
-public class ConstraintRouteAttribute : Attribute
+public class ConstraintRouteAttribute(string constraint) : Attribute
 {
-    private readonly string _constraint;
-
-    public ConstraintRouteAttribute(string constraint)
-    {
-        _constraint = constraint;
-    }
-
     public IRouteConstraint GetRouteConstraint()
     {
-        switch (_constraint)
+        return constraint switch
         {
-            case "int":
-                return new IntRouteConstraint();
-        }
-
-        return null;
+            "int" => new IntRouteConstraint(),
+            _ => null
+        };
     }
 }

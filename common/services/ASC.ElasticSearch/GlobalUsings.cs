@@ -46,7 +46,6 @@ global using ASC.ElasticSearch.Service;
 
 global using Elasticsearch.Net;
 
-global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;

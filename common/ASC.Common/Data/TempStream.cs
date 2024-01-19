@@ -27,15 +27,8 @@
 namespace ASC.Common;
 
 [Singleton]
-public class TempStream
+public class TempStream(TempPath tempPath)
 {
-    private readonly TempPath _tempPath;
-
-    public TempStream(TempPath tempPath)
-    {
-        _tempPath = tempPath;
-    }
-
     public Stream GetBuffered(Stream srcStream)
     {
         ArgumentNullException.ThrowIfNull(srcStream);
@@ -54,12 +47,7 @@ public class TempStream
 
     public Stream Create()
     {
-        return Create(out _);
-    }
-
-    public Stream Create(out string path, string ext = "")
-    {
-        path = _tempPath.GetTempFileName(ext);
+        var path = tempPath.GetTempFileName("");
         return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose);
     }
 }

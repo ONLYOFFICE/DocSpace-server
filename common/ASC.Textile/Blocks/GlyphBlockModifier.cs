@@ -34,9 +34,9 @@ public class GlyphBlockModifier : BlockModifier
 
         // fix: hackish
         string[,] glyphs = {
-                            { @"([^\s[{(>_*])?\'(?(1)|(\s|s\b|" + Globals.PunctuationPattern + @"))", "$1&#8217;$2" },    //  single closing
+                            { @"([^\s[{(>_*])?\'(?(1)|(\s|s\b|" + Globals.PunctuationPattern + "))", "$1&#8217;$2" },    //  single closing
                             { @"\'", "&#8216;" },                                                   //  single opening
-                            { @"([^\s[{(>_*])?""(?(1)|(\s|" + Globals.PunctuationPattern + @"))", "$1&#8221;$2" },        //  double closing
+                            { @"([^\s[{(>_*])?""(?(1)|(\s|" + Globals.PunctuationPattern + "))", "$1&#8221;$2" },        //  double closing
                             { @"""", "&#8220;" },                                                   //  double opening
                             { @"\b( )?\.{3}", "$1&#8230;" },                                        //  ellipsis
                             { @"\b([A-Z][A-Z0-9]{2,})\b(?:[(]([^)]*)[)])", "<acronym title=\"$2\">$1</acronym>" },        //  3+ uppercase acronym
@@ -73,7 +73,7 @@ public class GlyphBlockModifier : BlockModifier
                     continue;
                 }
 
-                if (Regex.IsMatch(modifiedSplit, @"<(" + offtags + ")>"))
+                if (Regex.IsMatch(modifiedSplit, "<(" + offtags + ")>"))
                 {
                     codepre = true;
                 }

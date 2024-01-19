@@ -56,7 +56,7 @@ public class FileShareDto
         {
             Access = FileShare.ReadWrite,
             IsLocked = false,
-            IsOwner = true,
+            IsOwner = true
             //SharedTo = EmployeeWraper.GetSample()
         };
     }
@@ -85,29 +85,17 @@ public enum LinkType
 }
 
 [Scope]
-public class FileShareDtoHelper
+public class FileShareDtoHelper(UserManager userManager,
+    EmployeeFullDtoHelper employeeWraperFullHelper,
+    ApiDateTimeHelper apiDateTimeHelper)
 {
-    private readonly UserManager _userManager;
-    private readonly EmployeeFullDtoHelper _employeeWraperFullHelper;
-    private readonly ApiDateTimeHelper _apiDateTimeHelper;
-
-    public FileShareDtoHelper(
-        UserManager userManager,
-        EmployeeFullDtoHelper employeeWraperFullHelper,
-        ApiDateTimeHelper apiDateTimeHelper)
-    {
-        _userManager = userManager;
-        _employeeWraperFullHelper = employeeWraperFullHelper;
-        _apiDateTimeHelper = apiDateTimeHelper;
-    }
-
     public async Task<FileShareDto> Get(AceWrapper aceWrapper)
     {
         var result = new FileShareDto
         {
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
-            CanEditAccess = aceWrapper.CanEditAccess,
+            CanEditAccess = aceWrapper.CanEditAccess
         };
 
         if (aceWrapper.SubjectGroup)
@@ -122,7 +110,7 @@ public class FileShareDtoHelper
                     Id = aceWrapper.Id,
                     Title = aceWrapper.FileShareOptions?.Title,
                     ShareLink = aceWrapper.Link,
-                    ExpirationDate = date.HasValue && date.Value != default ? _apiDateTimeHelper.Get(date) : null,
+                    ExpirationDate = date.HasValue && date.Value != default ? apiDateTimeHelper.Get(date) : null,
                     Password = aceWrapper.FileShareOptions?.Password,
                     DenyDownload = aceWrapper.FileShareOptions?.DenyDownload,
                     LinkType = aceWrapper.SubjectType switch
@@ -140,12 +128,12 @@ public class FileShareDtoHelper
             else
             {
                 //Shared to group
-                result.SharedTo = new GroupSummaryDto(await _userManager.GetGroupInfoAsync(aceWrapper.Id), _userManager);
+                result.SharedTo = new GroupSummaryDto(await userManager.GetGroupInfoAsync(aceWrapper.Id), userManager);
             }
         }
         else
         {
-            result.SharedTo = await _employeeWraperFullHelper.GetFullAsync(await _userManager.GetUsersAsync(aceWrapper.Id));
+            result.SharedTo = await employeeWraperFullHelper.GetFullAsync(await userManager.GetUsersAsync(aceWrapper.Id));
         }
 
         result.Access = aceWrapper.Access;

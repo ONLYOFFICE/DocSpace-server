@@ -26,15 +26,12 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T> : FileOperationData<T>
+class FileMarkAsReadOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant,
+        IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
+        bool holdResult = true)
+    : FileOperationData<T>(folders, files, tenant, externalShareData, holdResult)
 {
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileMarkAsReadOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
-        bool holdResult = true) : base(folders, files, tenant, externalShareData, holdResult)
-    {
-        Headers = headers;
-    }
+    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
@@ -67,15 +64,16 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
     {
         var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
+        var fileSecurity = serviceScope.ServiceProvider.GetRequiredService<FileSecurity>();
         var (fileMarker, globalFolder, daoFactory, settingsManager) = scopeClass;
         var entries = Enumerable.Empty<FileEntry<T>>();
         if (Folders.Count > 0)
         {
-            entries = entries.Concat(await FolderDao.GetFoldersAsync(Folders).ToListAsync());
+            entries = entries.Concat(await fileSecurity.CanReadAsync(FolderDao.GetFoldersAsync(Folders)).Where(r => r.Item2).Select(r => r.Item1).ToListAsync());
         }
         if (Files.Count > 0)
         {
-            entries = entries.Concat(await FileDao.GetFilesAsync(Files).ToListAsync());
+            entries = entries.Concat(await fileSecurity.CanReadAsync(FileDao.GetFilesAsync(Files)).Where(r => r.Item2).Select(r => r.Item1).ToListAsync());
         }
 
         foreach (var entry in entries)
@@ -105,7 +103,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),
+                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
@@ -126,34 +124,8 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 }
 
 [Scope]
-public class FileMarkAsReadOperationScope
-{
-    private readonly FileMarker _fileMarker;
-    private readonly GlobalFolder _globalFolder;
-    private readonly IDaoFactory _daoFactory;
-    private readonly SettingsManager _settingsManager;
-
-    public FileMarkAsReadOperationScope(
-        FileMarker fileMarker,
-        GlobalFolder globalFolder,
-        IDaoFactory daoFactory,
-        SettingsManager settingsManager)
-    {
-        _fileMarker = fileMarker;
-        _globalFolder = globalFolder;
-        _daoFactory = daoFactory;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(
-        out FileMarker fileMarker,
-        out GlobalFolder globalFolder,
-        out IDaoFactory daoFactory,
-        out SettingsManager settingsManager)
-    {
-        fileMarker = _fileMarker;
-        globalFolder = _globalFolder;
-        daoFactory = _daoFactory;
-        settingsManager = _settingsManager;
-    }
-}
+public record FileMarkAsReadOperationScope(
+    FileMarker FileMarker,
+    GlobalFolder GlobalFolder,
+    IDaoFactory DaoFactory,
+    SettingsManager SettingsManager);

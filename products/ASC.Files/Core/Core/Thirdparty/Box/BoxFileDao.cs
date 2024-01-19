@@ -24,15 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
+
 namespace ASC.Files.Core.Core.Thirdparty.Box;
 
 [Scope]
-internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
-{
-    private readonly TempPath _tempPath;
-    private readonly SetupInfo _setupInfo;
-
-    public BoxFileDao(UserManager userManager,
+internal class BoxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<BoxFile, BoxFolder, BoxItem> daoSelector,
         CrossDao crossDao,
@@ -40,22 +37,19 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
         IDaoBase<BoxFile, BoxFolder, BoxItem> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _tempPath = tempPath;
-        _setupInfo = setupInfo;
-    }
-
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
     public override Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return Task.FromResult(new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false });
         }
 
         var uploadSession = new ChunkedUploadSession<string>(file, contentLength);
 
-        uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+        uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
 
         uploadSession.File = RestoreIds(uploadSession.File);
 
@@ -104,7 +98,7 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
     {
         if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
         }
 
         return Task.CompletedTask;

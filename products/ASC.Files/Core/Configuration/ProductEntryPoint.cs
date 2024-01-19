@@ -29,7 +29,7 @@ namespace ASC.Web.Files.Configuration;
 [Scope]
 public class ProductEntryPoint : Product
 {
-    internal const string ProductPath = "/";
+    private const string ProductPath = "/";
 
     private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -94,14 +94,6 @@ public class ProductEntryPoint : Product
 
     public override void Init()
     {
-        List<string> adminOpportunities() => (_coreBaseSettings.CustomMode
-                                                           ? CustomModeResource.ProductAdminOpportunitiesCustomMode
-                                                           : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
-
-        List<string> userOpportunities() => (_coreBaseSettings.CustomMode
-                                     ? CustomModeResource.ProductUserOpportunitiesCustomMode
-                                     : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
-
         _productContext =
             new ProductContext
             {
@@ -111,33 +103,22 @@ public class ProductEntryPoint : Product
                 DefaultSortOrder = 10,
                 //SubscriptionManager = SubscriptionManager,
                 SpaceUsageStatManager = _filesSpaceUsageStatManager,
-                AdminOpportunities = adminOpportunities,
-                UserOpportunities = userOpportunities,
-                CanNotBeDisabled = true,
+                AdminOpportunities = AdminOpportunities,
+                UserOpportunities = UserOpportunities,
+                CanNotBeDisabled = true
             };
 
-        if (_notifyConfiguration != null)
-        {
-            _notifyConfiguration.Configure();
-        }
+        _notifyConfiguration?.Configure();
+        return;
+
+        List<string> UserOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductUserOpportunitiesCustomMode
+            : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
+
         //SearchHandlerManager.Registry(new SearchHandler());
-    }
-
-    public string GetModuleResource(string ResourceClassTypeName, string ResourseKey)
-    {
-        if (string.IsNullOrEmpty(ResourseKey))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            return (string)Type.GetType(ResourceClassTypeName).GetProperty(ResourseKey, BindingFlags.Static | BindingFlags.Public).GetValue(null, null);
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
+        List<string> AdminOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductAdminOpportunitiesCustomMode
+            : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
     }
 
     public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
@@ -164,14 +145,14 @@ public class ProductEntryPoint : Product
                 limit: 100);
         }
 
+        var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
+
         var disabledRooms = _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
 
-        var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId);
+        var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 
-        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key));
-        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key);
-
-        var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
+        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key)).ToList();
+        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key).ToList();
 
         var result = new List<ActivityInfo>();
 
@@ -181,26 +162,17 @@ public class ProductEntryPoint : Product
             {
                 UserId = e.UserId,
                 Action = (MessageAction)e.Action,
-                Data = e.Date
+                Data = e.Date,
+                FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1]
             };
 
-            if (e.Action != (int)MessageAction.UserFileUpdated)
+            switch (e.Action)
             {
-                activityInfo.FileTitle = e.Description[0];
-            }
-            else
-            {
-                activityInfo.FileTitle = e.Description[1];
-            }
-
-            if (e.Action == (int)MessageAction.RoomCreated && !docSpaceAdmin)
-            {
-                continue;
-            }
-
-            if (e.Action is (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated)
-            {
-                activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                case (int)MessageAction.RoomCreated when !docSpaceAdmin:
+                    continue;
+                case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                    break;
             }
 
             var obj = e.Description.LastOrDefault();
@@ -208,24 +180,26 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
-            if (e.Action is (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated)
+            switch (e.Action)
             {
-                if (docSpaceAdmin)
-                {
-                    result.Add(activityInfo);
-                }
+                case (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            result.Add(activityInfo);
+                        }
 
-                continue;
-            }
-
-            if (e.Action == (int)MessageAction.UsersUpdatedType)
-            {
-                if (docSpaceAdmin)
-                {
-                    activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
-                    result.Add(activityInfo);
-                }
-                continue;
+                        continue;
+                    }
+                case (int)MessageAction.UsersUpdatedType:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
+                            result.Add(activityInfo);
+                        }
+                        continue;
+                    }
             }
 
             var roomId = additionalInfo.RoomId;
@@ -239,7 +213,8 @@ public class ProductEntryPoint : Product
 
                 var isRoomAdmin = userRoomsWithRoleForSend
                     .Where(r => r.Key == roomId.ToString())
-                    .Select(r => r.Value).FirstOrDefault();
+                    .Select(r => r.Value)
+                    .FirstOrDefault();
 
                 if (!CheckRightsToReceive(userId, (MessageAction)e.Action, isRoomAdmin, activityInfo.TargetUsers))
                 {
@@ -290,7 +265,7 @@ public class ProductEntryPoint : Product
     public override ProductContext Context => _productContext;
     public override string ApiURL => string.Empty;
 
-    private async Task<Dictionary<string, bool>> GetUserRoomsWithRoleAsync(Guid userId)
+    private async Task<Dictionary<string, bool>> GetUserRoomsWithRoleAsync(Guid userId, bool isDocSpaceAdmin)
     {
         var result = new Dictionary<string, bool>();
 
@@ -310,6 +285,11 @@ public class ProductEntryPoint : Product
             {
                 result.TryAdd(record.EntryId.ToString(), false);
             }
+        }
+
+        if (!isDocSpaceAdmin)
+        {
+            return result;
         }
 
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
@@ -336,11 +316,13 @@ public class ProductEntryPoint : Product
         {
             return true;
         }
-        else if (IsRoomAdminAction())
+
+        if (IsRoomAdminAction())
         {
             return false;
         }
-        else if (targetUsers != null
+
+        if (targetUsers != null
             && !targetUsers.Contains(userId)
             && IsRoomAdminOrTargetUserAction())
         {

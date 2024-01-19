@@ -26,24 +26,15 @@
 
 namespace ASC.Files.Core.Core;
 
-public class UsersInRoomChecker : TenantQuotaFeatureCheckerCount<UsersInRoomFeature>
+public class UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager)
+    : TenantQuotaFeatureCheckerCount<UsersInRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
     public override string Exception => Resource.TariffsFeature_usersInRoom_exception;
-
-    public UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
-    {
-    }
 }
 
-public class UsersInRoomStatistic : ITenantQuotaFeatureStat<UsersInRoomFeature, int>
+public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<UsersInRoomFeature, int>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public UsersInRoomStatistic(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public Task<int> GetValueAsync()
     {
         return Task.FromResult(0);
@@ -51,8 +42,8 @@ public class UsersInRoomStatistic : ITenantQuotaFeatureStat<UsersInRoomFeature, 
 
     public async Task<int> GetValue<T>(T roomId)
     {
-        var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
-        var securityDao = _serviceProvider.GetService<ISecurityDao<T>>();
+        var folderDao = serviceProvider.GetService<IFolderDao<T>>();
+        var securityDao = serviceProvider.GetService<ISecurityDao<T>>();
         var folder = await folderDao.GetFolderAsync(roomId);
 
         if (folder == null)

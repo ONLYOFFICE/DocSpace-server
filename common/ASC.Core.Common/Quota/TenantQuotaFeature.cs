@@ -29,7 +29,7 @@ namespace ASC.Core.Common.Quota;
 public class TenantQuotaFeature
 {
     public int Order { get; init; }
-    public virtual bool Visible { get; init; } = true;
+    public bool Visible { get; init; } = true;
     public virtual string Name { get; init; }
     public virtual bool Paid { get; init; }
     public bool Standalone { get; init; }
@@ -40,15 +40,13 @@ public class TenantQuotaFeature
     }
 }
 
-public class TenantQuotaFeature<T> : TenantQuotaFeature
+public class TenantQuotaFeature<T>(TenantQuota tenantQuota) : TenantQuotaFeature
 {
-    private readonly TenantQuota _tenantQuota;
-
     public virtual T Value
     {
         get
         {
-            var parsed = _tenantQuota.GetFeature(Name);
+            var parsed = tenantQuota.GetFeature(Name);
 
             if (parsed == null)
             {
@@ -64,16 +62,11 @@ public class TenantQuotaFeature<T> : TenantQuotaFeature
         }
         set
         {
-            _tenantQuota.ReplaceFeature(Name, value, Default);
+            tenantQuota.ReplaceFeature(Name, value, Default);
         }
     }
 
     public virtual T Default { get; }
-
-    public TenantQuotaFeature(TenantQuota tenantQuota)
-    {
-        _tenantQuota = tenantQuota;
-    }
 
     protected virtual bool TryParse(string s, out T result)
     {
@@ -82,17 +75,13 @@ public class TenantQuotaFeature<T> : TenantQuotaFeature
     }
 }
 
-public class TenantQuotaFeatureCount : TenantQuotaFeature<int>
+public class TenantQuotaFeatureCount(TenantQuota tenantQuota) : TenantQuotaFeature<int>(tenantQuota)
 {
     public override int Default => int.MaxValue;
 
-    public TenantQuotaFeatureCount(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
-
     protected override bool TryParse(string s, out int result)
     {
-        return int.TryParse(s.Substring(s.IndexOf(':') + 1), out result);
+        return int.TryParse(s[(s.IndexOf(':') + 1)..], out result);
     }
 
     protected internal override void Multiply(int quantity)
@@ -111,17 +100,13 @@ public class TenantQuotaFeatureCount : TenantQuotaFeature<int>
     }
 }
 
-public class TenantQuotaFeatureSize : TenantQuotaFeature<long>
+public class TenantQuotaFeatureSize(TenantQuota tenantQuota) : TenantQuotaFeature<long>(tenantQuota)
 {
     public override long Default => long.MaxValue;
 
-    public TenantQuotaFeatureSize(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
-
     protected override bool TryParse(string s, out long result)
     {
-        return long.TryParse(s.Substring(s.IndexOf(':') + 1), out result);
+        return long.TryParse(s[(s.IndexOf(':') + 1)..], out result);
     }
 
     protected internal override void Multiply(int quantity)
@@ -146,12 +131,8 @@ public class TenantQuotaFeatureSize : TenantQuotaFeature<long>
     }
 }
 
-public class TenantQuotaFeatureFlag : TenantQuotaFeature<bool>
+public class TenantQuotaFeatureFlag(TenantQuota tenantQuota) : TenantQuotaFeature<bool>(tenantQuota)
 {
-    public TenantQuotaFeatureFlag(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
-
     protected override bool TryParse(string s, out bool result)
     {
         result = true;

@@ -166,9 +166,9 @@ public class MigrationCreator
             }
             return user.Id;
         }
-        catch (ArgumentException e)
+        catch (ArgumentException)
         {
-            throw e;
+            throw;
         }
         catch (Exception)
         {
@@ -236,45 +236,46 @@ public class MigrationCreator
         Console.WriteLine($"backup table {table.Name}");
         using (var data = new DataTable(table.Name))
         {
-            ActionInvoker.Try(
-                state =>
+            try
+            {
+                data.Clear();
+                int counts;
+                var offset = 0;
+                do
                 {
-                    data.Clear();
-                    int counts;
-                    var offset = 0;
-                    do
-                    {
-                        var t = (TableInfo)state;
-                        var dataAdapter = _dbFactory.CreateDataAdapter();
-                        dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), _fromTenantId, t, _limit, offset, id).WithTimeout(600);
-                        counts = ((DbDataAdapter)dataAdapter).Fill(data);
-                        offset += _limit;
-                    } while (counts == _limit);
+                    var dataAdapter = _dbFactory.CreateDataAdapter();
+                    dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), _fromTenantId, table, _limit, offset, id).WithTimeout(600);
+                    counts = ((DbDataAdapter)dataAdapter).Fill(data);
+                    offset += _limit;
+                } while (counts == _limit);
 
-                },
-                table,
-                maxAttempts: 5,
-                onFailure: error => { throw ThrowHelper.CantBackupTable(table.Name, error); });
+                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                {
+                    col.DateTimeMode = DataSetDateTime.Unspecified;
+                }
 
-            foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
-            {
-                col.DateTimeMode = DataSetDateTime.Unspecified;
+                module.PrepareData(data);
+
+                if (data.TableName == "tenants_tenants")
+                {
+                    ChangeAlias(data);
+                    ChangeName(data);
+                }
+
+                if (data.TableName == "files_bunch_objects")
+                {
+                    ClearCommonBunch(data);
+                }
+
+                await WriteEnrty(data, writer, module);
             }
-
-            module.PrepareData(data);
-
-            if (data.TableName == "tenants_tenants")
+            catch(MySqlException e)
             {
-                ChangeAlias(data);
-                ChangeName(data);
+                if (table.Name != "tenants_tariffrow")
+                {
+                    throw;
+                }
             }
-
-            if (data.TableName == "files_bunch_objects")
-            {
-                ClearCommonBunch(data);
-            }
-
-            await WriteEnrty(data, writer, module);
         }
     }
 
@@ -285,7 +286,7 @@ public class MigrationCreator
             data.WriteXml(file, XmlWriteMode.WriteSchema);
             data.Clear();
 
-            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file);
+            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, t => { });
         }
     }
 
@@ -382,7 +383,7 @@ public class MigrationCreator
                 {
                     var f = (BackupFileInfo)state;
                     using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
-                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream);
+                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, t => { });
                 }, file, 5);
             }
             Console.WriteLine($"end backup fileGroup: {group.Key}");
@@ -397,7 +398,7 @@ public class MigrationCreator
         using (var tmpFile = _tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => { });
         }
         Console.WriteLine($"end backup storage");
     }

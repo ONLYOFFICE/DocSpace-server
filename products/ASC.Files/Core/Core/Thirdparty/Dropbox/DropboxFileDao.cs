@@ -24,15 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
+
 namespace ASC.Files.Core.Core.Thirdparty.Dropbox;
 
 [Scope]
-internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>
-{
-    private readonly TempPath _tempPath;
-    private readonly SetupInfo _setupInfo;
-
-    public DropboxFileDao(UserManager userManager,
+internal class DropboxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<FileMetadata, FolderMetadata, Metadata> daoSelector,
         CrossDao crossDao,
@@ -40,15 +37,12 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         IDaoBase<FileMetadata, FolderMetadata, Metadata> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _tempPath = tempPath;
-        _setupInfo = setupInfo;
-    }
-
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false };
         }
@@ -63,7 +57,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         }
         else
         {
-            uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+            uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);
@@ -151,7 +145,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
     {
         if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
         }
 
         return Task.CompletedTask;

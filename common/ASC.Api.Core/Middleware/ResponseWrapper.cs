@@ -26,15 +26,8 @@
 
 namespace ASC.Api.Core.Middleware;
 
-public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
+public class CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger) : ExceptionFilterAttribute
 {
-    private readonly ILogger<CustomExceptionFilterAttribute> _logger;
-
-    public CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger)
-    {
-        _logger = logger;
-    }
-
     public override void OnException(ExceptionContext context)
     {
         var status = (HttpStatusCode)context.HttpContext.Response.StatusCode;
@@ -79,14 +72,13 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
-            case CustomHttpException:
-                status = (HttpStatusCode)((CustomHttpException)exception).StatusCode;
+            case CustomHttpException httpException:
+                status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;
                 break;
         }
 
-        _logger.LogCritical(exception,
-    $"error during executing {context.HttpContext.Request.Method}: {context.HttpContext.Request.Path.Value}");
+        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.HttpContext.Request.Method, context.HttpContext.Request.Path.Value);
 
         var result = new ObjectResult(new ErrorApiResponse(status, exception, message, withStackTrace))
         {

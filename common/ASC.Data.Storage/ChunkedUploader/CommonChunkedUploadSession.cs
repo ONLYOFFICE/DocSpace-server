@@ -24,20 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Newtonsoft.Json.Linq;
+
 namespace ASC.Core.ChunkedUploader;
 
-public class CommonChunkedUploadSession : ICloneable
+public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
 {
-    public string Id { get; init; }
-    public DateTime Created { get; set; }
+    public string Id { get; init; } = Guid.NewGuid().ToString("N");
+    public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Expired { get; set; }
     public string Location { get; set; }
     public long BytesUploaded { get; set; }
-    public long BytesTotal { get; set; }
+    public long BytesTotal { get; set; } = bytesTotal;
     public bool LastChunk { get; set; }
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
-    public bool UseChunks { get; set; }
+    public bool UseChunks { get; set; } = true;
     public string CultureName { get; set; }
     public Dictionary<string, object> Items { get; set; } = new();
 
@@ -66,16 +68,6 @@ public class CommonChunkedUploadSession : ICloneable
     private const string UploadIdKey = "UploadId";
     private const string ChunksBufferKey = "ChunksBuffer";
 
-    public CommonChunkedUploadSession(long bytesTotal)
-    {
-        Id = Guid.NewGuid().ToString("N");
-        Created = DateTime.UtcNow;
-        BytesUploaded = 0;
-        BytesTotal = bytesTotal;
-        UseChunks = true;
-        LastChunk = false;
-    }
-
     public T GetItemOrDefault<T>(string key)
     {
         if (Items.ContainsKey(key) && Items[key] != null)
@@ -85,15 +77,14 @@ public class CommonChunkedUploadSession : ICloneable
                 return (T)Items[key];
             }
 
-            var jToken = Items[key] as Newtonsoft.Json.Linq.JToken;
-            if (jToken != null)
+            if (Items[key] is JToken jToken)
             {
                 var item = jToken.ToObject<T>();
                 Items[key] = item;
                 return item;
             }
         }
-        return default(T);
+        return default;
     }
 
     public virtual Stream Serialize()
@@ -109,26 +100,24 @@ public class CommonChunkedUploadSession : ICloneable
         {
             if (item.Value != null)
             {
-                if (item.Value is JsonElement)
+                if (item.Value is JsonElement value)
                 {
-                    var value = (JsonElement)item.Value;
-
                     switch (value.ValueKind)
                     {
                         case JsonValueKind.String:
-                            newItems.Add(item.Key, item.Value.ToString());
+                            newItems.Add(item.Key, value.ToString());
                             break;
                         case JsonValueKind.Number:
-                            newItems.Add(item.Key, Int32.Parse(item.Value.ToString()));
+                            newItems.Add(item.Key, Int32.Parse(value.ToString()));
                             break;
                         case JsonValueKind.Array:
                             newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
                             break;
                         case JsonValueKind.Object:
-                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(item.Value.ToString()));
+                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(value.ToString()));
                             break;
                         default:
-                            newItems.Add(item.Key, item.Value);
+                            newItems.Add(item.Key, value);
                             break;
                     }
                 }

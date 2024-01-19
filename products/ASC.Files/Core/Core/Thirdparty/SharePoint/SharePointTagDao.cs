@@ -24,12 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = Microsoft.SharePoint.Client.File;
+using Folder = Microsoft.SharePoint.Client.Folder;
+
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
-{
-    public SharePointTagDao(IServiceProvider serviceProvider,
+internal class SharePointTagDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -37,12 +38,10 @@ internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
         SetupInfo setupInfo,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<Microsoft.SharePoint.Client.File, Microsoft.SharePoint.Client.Folder, ClientObject> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-    }
-
+        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
+        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
+{
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
@@ -55,7 +54,7 @@ internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, _tenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

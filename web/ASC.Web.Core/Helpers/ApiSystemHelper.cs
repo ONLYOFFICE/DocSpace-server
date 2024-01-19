@@ -30,6 +30,8 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Core.Helpers;
 
 [Scope]
@@ -68,7 +70,7 @@ public class ApiSystemHelper
         _coreBaseSettings = coreBaseSettings;
         _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
         _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
-    }
+        }
 
     public string CreateAuthToken(string pkey)
     {
@@ -87,7 +89,7 @@ public class ApiSystemHelper
             PortalName = HttpUtility.UrlEncode(domain)
         };
 
-        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var dataJson = JsonSerializer.Serialize(data);
         var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
         var resObj = JsonNode.Parse(result)?.AsObject();
         if (resObj?["error"] != null)
@@ -168,7 +170,7 @@ public class ApiSystemHelper
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
-            },
+            }
         };
 
         await awsDynamoDbClient.DeleteItemAsync(request);
@@ -177,6 +179,8 @@ public class ApiSystemHelper
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
     {
         using var awsDynamoDbClient = GetDynamoDBClient();
+
+        portalName = portalName.Trim().ToLowerInvariant();
 
         var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
 
@@ -193,34 +197,38 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0) return null;
-
-        // cut number suffix
-        while (true)
+        if (getItemResponse.Item.Count == 0)
         {
-            if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
-            {
-                portalName = portalName[0..^1];
-            }
-            else
-            {
-                break;
-            }
+            return null;
         }
 
-        var scanRequest = new ScanRequest
-        {
-            TableName = _regionTableName,
-            FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
-            ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
-                                                {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = TenantDomainKey,
-            ConsistentRead = true
-        };
+        //// cut number suffix
+        //while (true)
+        //{
+        //    if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
+        //    {
+        //        portalName = portalName[0..^1];
+        //    }
+        //    else
+        //    {
+        //        break;
+        //    }
+        //}
 
-        var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
-        var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
-        return result;
+        //var scanRequest = new ScanRequest
+        //{
+        //    TableName = _regionTableName,
+        //    FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
+        //    ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+        //                                        {":v_tenant_domain", new AttributeValue { S =  portalName }} },
+        //    ProjectionExpression = TenantDomainKey,
+        //    ConsistentRead = true
+        //};
+
+        //var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
+        //var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
+
+        return new List<string> { portalName };
     }
 
     #endregion

@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapUserManagerLogger
+internal static partial class LdapUserManagerLogger
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "TryAddLDAPUser(SID: {sid}): Email '{email}' UserName: {userName}")]
     public static partial void DebugTryAddLdapUser(this ILogger<LdapUserManager> logger, string sid, string email, string userName);

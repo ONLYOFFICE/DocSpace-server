@@ -1004,20 +1004,6 @@ Email: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Nhận ứng dụng ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;miễn phí&lt;/span&gt;
-
-
-Xin chào $UserName!
-
-Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để làm việc trên các tài liệu ngoại tuyến, hãy tải ONLYOFFICE Desktop Editors cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Nhận ứng dụng ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;miễn phí&lt;/span&gt;
 
@@ -1031,24 +1017,6 @@ Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên cá
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Xin chào!
-Đã có người cố đăng ký tài khoản "ONLYOFFICE Personal":"$PortalUrl" mới bằng email này. Nếu đó là bạn, chúng tôi muốn thông báo cho bạn rằng tài khoản đã tồn tại — hãy chuyển sang ONLYOFFICE Personal và đăng nhập.
-Nếu bạn bị mất mật khẩu, bạn có thể khôi phục nó trên "trang khôi phục mật khẩu":"$LinkToRecovery".
-Nếu bạn không đăng ký một tài khoản mới, có lẽ người khác đã làm điều đó do nhầm lẫn. Trong trường hợp này, vui lòng bỏ qua email này.
-
-Chúc bạn một ngày tốt lành!
-Nhóm ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Bạn muốn thay đổi mật khẩu cho tài khoản ONLYOFFICE Personal của mình? Hãy nhấp vào nút bên dưới để xác nhận.
-
-$OrangeButton
-
-Liên kết có hiệu lực trong 7 ngày.
-
-Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;đã bị hủy kích hoạt&lt;/span&gt;
@@ -1218,9 +1186,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
   </data>
@@ -1332,9 +1297,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Tham gia ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Đăng nhập vào tài khoản ONLYOFFICE Cá nhân của bạn</value>
-  </data>
   <data name="subject_remove_user_data_failed" xml:space="preserve">
     <value>${LetterLogoText}. Xóa dữ liệu người dùng không thành công</value>
   </data>
@@ -1349,18 +1311,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_mailbox_password_changed" xml:space="preserve">
     <value>${LetterLogoText}. Thay đổi mật khẩu hộp thư</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Chấm dứt tài khoản ONLYOFFICE Cá nhân</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Cá nhân. Vui lòng kích hoạt địa chỉ email của bạn</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Chào mừng bạn đến với ONLYOFFICE Cá nhân</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Chào mừng bạn đến với ONLYOFFICE dành cho cá nhân!</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Tham gia ${__VirtualRootPath}</value>
@@ -1445,68 +1395,6 @@ Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}" vớ
 Liên kết chỉ có hiệu lực trong 7 ngày.
 
 Bạn sẽ nhận được thêm nhiều mẹo về cách sử dụng văn phòng web của bạn. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Chào mừng bạn đến với ONLYOFFICE Cá nhân
-
-Bạn vừa tạo văn phòng cá nhân của mình trên đám mây.
-
-h3.Đó là một không gian làm việc ảo, nơi bạn có thể chỉnh sửa và lưu trữ tài liệu, làm việc với chúng từ bất cứ nơi nào cung cấp quyền truy cập cho bạn bè hoặc đồng nghiệp của bạn.
-
-h3.Để bắt đầu nhanh, đây là những gì bạn có thể làm trong ONLYOFFICE:
-
-- Tạo, xem và chỉnh sửa tài liệu văn bản, bảng tính, bản trình chiếu.
-
-- Làm việc với tất cả các định dạng phổ biến. Khả năng tương thích cao nhất với các tập tin MS Office.
-
-- Tạo và đồng chỉnh sửa "biểu mẫu sẵn sàng để điền":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Chia sẻ và cộng tác trên các tài liệu trực tuyến.
-
-- Sử dụng các plugin khác nhau để áp dụng các tính năng bổ sung.
-
-- Dễ dàng truy cập đám mây Cá nhân của bạn thông qua "Tiện ích mở rộng của Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=vi".
-
-Bạn cũng có thể chỉnh sửa tài liệu ngoại tuyến với "trình chỉnh sửa cho máy tính để bàn":"https://www.onlyoffice.com/download-desktop.aspx" miễn phí của chúng tôi hoặc nhận bộ chỉnh sửa cho thiết bị "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" hoặc "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" của bạn.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Bạn muốn thay đổi email trên tài khoản ONLYOFFICE của mình?
-
-Hãy nhấp vào nút bên dưới và đăng nhập* vào đám mây của bạn.
-
-$OrangeButton
-
-Liên kết có hiệu lực trong 7 ngày.
-
-*Nếu bạn không đăng nhập ONLYOFFICE trên trình duyệt này, bạn sẽ cần phải sử dụng email cũ của bạn để xác nhận.
-
-Bạn không muốn thay đổi email của mình? Xin hãy bỏ qua tin nhắn này.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Xin chào,
-
-Bạn vừa đăng ký một tài khoản tại giải pháp ONLYOFFICE để sử dụng cá nhân. Hãy nhấp vào "đây":"$InviteLink" để xác nhận đăng ký và tạo mật khẩu.
-
-Nếu bạn không thể mở liên kết, vui lòng sao chép "$InviteLink":"$InviteLink" sau và dán nó vào thanh địa chỉ trình duyệt của bạn.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Bạn đã yêu cầu chấm dứt tài khoản của mình tại personal.onlyoffice.com. Hãy làm theo liên kết để hoàn thành yêu cầu (liên kết hiệu lực trong 7 ngày): 
-
-$OrangeButton
-
-*Lưu ý*: Sau khi xóa, tài khoản của bạn và tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn theo "Chính sách quyền riêng tư":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
-
-"Đọc thêm về việc chấm dứt tài khoản":"${__HelpLink}/administration/configuration.aspx"
-
-Bỏ qua email này nếu bạn không muốn tiếp tục. 
-
-Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Vô hiệu hóa cổng [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1729,18 +1617,6 @@ $OrangeButton
 Liên kết chỉ có hiệu lực trong 7 ngày.
 
 Bạn sẽ nhận được thêm nhiều mẹo về cách sử dụng văn phòng web của bạn. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Xin chào $UserName!
-Bạn đã đăng ký thành công tại ONLYOFFICE Cá nhân "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Kết nối bộ nhớ đám mây yêu thích của bạn: Dropbox, Google Drive, OneDrive hoặc Box để tạo một không gian làm việc duy nhất giúp các tài liệu của bạn có thể truy cập từ mọi nơi.
-
-Tìm hiểu thêm về ONLYOFFICE Cá nhân trên "blog của chúng tôi":"$TagBlogLink".
-
-Chúng tôi rất vui được phục vụ bạn. Hãy theo dõi!
-
-$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace

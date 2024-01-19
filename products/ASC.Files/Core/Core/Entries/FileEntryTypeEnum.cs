@@ -30,5 +30,5 @@ namespace ASC.Files.Core;
 public enum FileEntryType
 {
     Folder = 1,
-    File = 2,
+    File = 2
 }

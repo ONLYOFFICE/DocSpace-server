@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapUserImporterLogger
+internal static partial class LdapUserImporterLogger
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.GetGroupUsers(Group name: {groupName})")]
     public static partial void DebugGetGroupUsers(this ILogger<LdapUserImporter> logger, string groupName);

@@ -27,28 +27,20 @@
 namespace ASC.Files.Thirdparty;
 
 [Scope]
-internal class RegexDaoSelectorBase<TFile, TFolder, TItem> : IDaoSelector<TFile, TFolder, TItem>
+internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serviceProvider,
+        IDaoFactory daoFactory)
+    : IDaoSelector<TFile, TFolder, TItem>
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
 {
-    protected readonly IServiceProvider _serviceProvider;
-    private readonly IDaoFactory _daoFactory;
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected internal string Name { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Name; }
     protected internal string Id { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id; }
     public Regex Selector => _selector ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
     private Regex _selector;
 
-    private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; }
-
-    public RegexDaoSelectorBase(
-        IServiceProvider serviceProvider,
-        IDaoFactory daoFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _daoFactory = daoFactory;
-        Providers = new Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>>();
-    }
+    private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; } = new();
 
     public virtual string ConvertId(string id)
     {
@@ -128,8 +120,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem> : IDaoSelector<TFile,
             return info;
         }
 
-        var id = objectId;
-        var match = Selector.Match(id);
+        var match = Selector.Match(objectId);
         if (match.Success)
         {
             var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
@@ -154,16 +145,17 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem> : IDaoSelector<TFile,
         provider.UpdateTitle(newTitle); //This will update cached version too
     }
 
-    public async Task UpdateProviderFolderId(IProviderInfo<TFile, TFolder, TItem> provider, string id)
+    public async Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId)
     {
         var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
-        await dbDao.UpdateProviderInfoAsync(provider.ProviderId, provider.CustomerTitle, id, provider.FolderType, provider.Private);
-        provider.FolderId = id;
+        await dbDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = provider.ProviderId, Title = newTitle, FolderId = folderId });
+        provider.FolderId = folderId;
+        provider.CustomerTitle = newTitle;
     }
 
-    protected virtual IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
+    protected IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
     {
-        var dbDao = _daoFactory.ProviderDao;
+        var dbDao = daoFactory.ProviderDao;
         try
         {
             return dbDao.GetProviderInfoAsync(linkId).Result as IProviderInfo<TFile, TFolder, TItem>;

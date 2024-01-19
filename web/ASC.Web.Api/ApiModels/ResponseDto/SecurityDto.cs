@@ -61,10 +61,7 @@ public class SecurityDto
                     {
                         GroupSummaryDto.GetSample()
                     },
-            Users = new List<EmployeeDto>
-                    {
-                        EmployeeDto.GetSample()
-                    }
+            Users = [EmployeeDto.GetSample()]
         };
     }
 }

@@ -24,10 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Object = Google.Apis.Storage.v1.Data.Object;
+
 namespace ASC.Data.Storage.GoogleCloud;
 
 [Scope]
-public class GoogleCloudStorage : BaseStorage
+public class GoogleCloudStorage(TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider factory,
+        ILogger<GoogleCloudStorage> options,
+        IHttpClientFactory clientFactory,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportChunking => true;
 
@@ -39,21 +51,6 @@ public class GoogleCloudStorage : BaseStorage
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
-
-    public GoogleCloudStorage(
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
-        ILogger<GoogleCloudStorage> options,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-    }
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -218,10 +215,7 @@ public class GoogleCloudStorage : BaseStorage
         uploaded.ContentEncoding = contentEncoding;
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
 
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
+        uploaded.Metadata ??= new Dictionary<string, string>();
 
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
 
@@ -259,7 +253,7 @@ public class GoogleCloudStorage : BaseStorage
     {
         using var storage = await GetStorageAsync();
 
-        IAsyncEnumerable<Google.Apis.Storage.v1.Data.Object> objToDel;
+        IAsyncEnumerable<Object> objToDel;
 
         if (recursive)
         {
@@ -269,7 +263,7 @@ public class GoogleCloudStorage : BaseStorage
         }
         else
         {
-            objToDel = AsyncEnumerable.Empty<Google.Apis.Storage.v1.Data.Object>();
+            objToDel = AsyncEnumerable.Empty<Object>();
         }
 
         await foreach (var obj in objToDel)
@@ -279,7 +273,7 @@ public class GoogleCloudStorage : BaseStorage
         }
     }
 
-    public async override Task DeleteFilesAsync(string domain, List<string> paths)
+    public override async Task DeleteFilesAsync(string domain, List<string> paths)
     {
         if (paths.Count == 0)
         {
@@ -393,10 +387,10 @@ public class GoogleCloudStorage : BaseStorage
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive)
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
 
-    private IEnumerable<Google.Apis.Storage.v1.Data.Object> GetObjects(string domain, string path, bool recursive)
+    private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
     {
         using var storage = GetStorage();
 
@@ -410,7 +404,7 @@ public class GoogleCloudStorage : BaseStorage
         return items.Where(x => x.Name.IndexOf('/', MakePath(domain, path + "/").Length) == -1);
     }
 
-    private IAsyncEnumerable<Google.Apis.Storage.v1.Data.Object> GetObjectsAsync(string domain, string path, bool recursive)
+    private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
         using var storage = GetStorage();
 
@@ -427,7 +421,7 @@ public class GoogleCloudStorage : BaseStorage
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive).Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Name)))
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length).TrimStart('/'));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..].TrimStart('/'));
     }
 
     public override async Task<bool> IsFileAsync(string domain, string path)
@@ -599,12 +593,7 @@ public class GoogleCloudStorage : BaseStorage
 
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
         uploaded.ContentDisposition = "attachment";
-
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
-
+        uploaded.Metadata ??= new Dictionary<string, string>();
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
         uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
@@ -696,11 +685,10 @@ public class GoogleCloudStorage : BaseStorage
                                                                Convert.ToInt64(totalBytes));
 
         const int MAX_RETRIES = 100;
-        int millisecondsTimeout;
 
         for (var i = 0; i < MAX_RETRIES; i++)
         {
-            millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
+            var millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
 
             try
             {
@@ -854,11 +842,7 @@ public class GoogleCloudStorage : BaseStorage
             return PredefinedObjectAcl.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override async Task<string> GetFileEtagAsync(string domain, string path)

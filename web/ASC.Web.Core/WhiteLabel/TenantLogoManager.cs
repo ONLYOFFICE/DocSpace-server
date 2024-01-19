@@ -138,13 +138,10 @@ public class TenantLogoManager
 
     public bool IsRetina(HttpRequest request)
     {
-        if (request != null)
+        var cookie = request?.Cookies["is_retina"];
+        if (cookie != null && !string.IsNullOrEmpty(cookie) && bool.TryParse(cookie, out var result))
         {
-            var cookie = request.Cookies["is_retina"];
-            if (cookie != null && !string.IsNullOrEmpty(cookie) && bool.TryParse(cookie, out var result))
-            {
-                return result;
-            }
+            return result;
         }
         return !_authContext.IsAuthenticated;
     }

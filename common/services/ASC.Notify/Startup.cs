@@ -29,14 +29,15 @@ public class Startup : BaseWorkerStartup
 {
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
-
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
+        await base.ConfigureServices(services);
 
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 

@@ -31,12 +31,15 @@ public class Startup : BaseStartup
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         var maxRequestLimit = 1024L * 1024L * 1024L;
         services.Configure<KestrelServerOptions>(options =>

@@ -40,7 +40,7 @@ public class DbFilesTagLink : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, TagId, EntryId, EntryType };
+        return [TenantId, TagId, EntryId, EntryType];
     }
 }
 

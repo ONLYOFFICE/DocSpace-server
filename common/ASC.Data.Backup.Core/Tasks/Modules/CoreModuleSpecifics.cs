@@ -34,35 +34,35 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
     private readonly RelationInfo[] _tableRelations;
     private readonly Helpers _helpers;
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
-            new TableInfo("core_subscription", "tenant"),
-            new TableInfo("core_subscriptionmethod", "tenant"),
-            new TableInfo("core_userphoto", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usersecurity", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usergroup", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("feed_aggregate", "tenant")
+    private readonly TableInfo[] _tables =
+    [
+        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
+            new("core_subscription", "tenant"),
+            new("core_subscriptionmethod", "tenant"),
+            new("core_userphoto", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usergroup", "tenant") {UserIDColumns = ["userid"] },
+            new("feed_aggregate", "tenant")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"created_date", false}, {"aggregated_date", false}}
             },
-            new TableInfo("feed_readed", "tenant_id")
+            new("feed_readed", "tenant_id")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"timestamp", false}}
             },
-            new TableInfo("feed_users") {InsertMethod = InsertMethod.None},
-            new TableInfo("backup_schedule", "tenant_id"),
-            new TableInfo("core_settings", "tenant")
-        };
+            new("feed_users") {InsertMethod = InsertMethod.None},
+            new("backup_schedule", "tenant_id"),
+            new("core_settings", "tenant")
+    ];
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)
     {
         _helpers = helpers;
-        _tableRelations = new[]
-        {
-                new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
+        _tableRelations =
+        [
+            new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_user", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
@@ -74,8 +74,8 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
                 new RelationInfo("core_user", "id", "feed_users", "user_id", typeof(CoreModuleSpecifics)),
 
                 new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
-                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"]))),
-            };
+                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
+        ];
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
@@ -93,16 +93,15 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     {
         if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
         {
-            preparedRow = null;
-
-            return false;
+            return (false, null);
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)

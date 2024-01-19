@@ -26,13 +26,13 @@
 
 namespace ASC.Feed.Core;
 
-public class FeedRow
+public class FeedRow(Aggregator.Feed feed)
 {
     public DateTime AggregatedDate { get; set; }
-    public IList<Guid> Users { get; set; }
+    public IList<Guid> Users { get; set; } = new List<Guid>();
     public int TenantId { get; init; }
     public string Product { get; set; }
-    public Aggregator.Feed Feed { get; private set; }
+    public Aggregator.Feed Feed { get; private set; } = feed;
     public string Id => Feed.Id;
     public bool ClearRightsBeforeInsert => Feed.Variate;
     public string Module => Feed.Module;
@@ -52,11 +52,5 @@ public class FeedRow
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc
             });
         }
-    }
-
-    public FeedRow(Aggregator.Feed feed)
-    {
-        Users = new List<Guid>();
-        Feed = feed;
     }
 }

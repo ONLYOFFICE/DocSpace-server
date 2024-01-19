@@ -27,22 +27,13 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper
+public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings,
+        UserManager userManager,
+        AuthContext authContext)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings)
-    {
-        _tenantManager = tenantManager;
-        _serviceProvider = serviceProvider;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
-        var quotaList = await _tenantManager.GetTenantQuotasAsync(false);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false);
 
         foreach (var quota in quotaList)
         {
@@ -52,7 +43,7 @@ public class QuotaHelper
 
     public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false)
     {
-        var quota = await _tenantManager.GetCurrentTenantQuotaAsync(refresh);
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
 
         return await ToQuotaDto(quota, true);
     }
@@ -89,7 +80,7 @@ public class QuotaHelper
                      {
                          if (r.Standalone)
                          {
-                             return _coreBaseSettings.Standalone;
+                             return coreBaseSettings.Standalone;
                          }
 
                          return r.Visible;
@@ -98,7 +89,7 @@ public class QuotaHelper
         {
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}"),
+                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}")
             };
 
             if (feature.Paid)
@@ -109,6 +100,8 @@ public class QuotaHelper
             result.Id = feature.Name;
 
             object used = null;
+            var currentUserId = authContext.CurrentAccount.ID;
+            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && !await userManager.IsCollaboratorAsync(currentUserId);
 
             if (feature is TenantQuotaFeatureSize size)
             {
@@ -137,7 +130,7 @@ public class QuotaHelper
                 {
                     result.Used = new FeatureUsedDto
                     {
-                        Value = used,
+                        Value = isUsedAvailable ? used : null,
                         Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{feature.Name}")
                     };
                 }
@@ -165,7 +158,7 @@ public class QuotaHelper
 
             async Task GetStat<T>()
             {
-                var statisticProvider = (ITenantQuotaFeatureStat<T>)_serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
+                var statisticProvider = (ITenantQuotaFeatureStat<T>)serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
 
                 if (statisticProvider != null)
                 {

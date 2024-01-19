@@ -36,6 +36,7 @@ public class BaseCommonLinkUtility
     private string _vpath;
 
     protected readonly IHttpContextAccessor _httpContextAccessor;
+    private bool serverUriForce;
     public string ServerUri
     {
         set
@@ -43,16 +44,8 @@ public class BaseCommonLinkUtility
             var uri = new Uri(value.Replace('*', 'x').Replace('+', 'x'));
             _serverRoot = new UriBuilder(uri.Scheme, uri.Host != "x" ? uri.Host : LocalHost, uri.Port);
             _vpath = "/" + uri.AbsolutePath.Trim('/');
+            serverUriForce = true;
         }
-    }
-
-    public BaseCommonLinkUtility(
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        TenantManager tenantManager,
-        ILoggerProvider options)
-        : this(null, coreBaseSettings, coreSettings, tenantManager, options)
-    {
     }
 
     public BaseCommonLinkUtility(
@@ -75,7 +68,7 @@ public class BaseCommonLinkUtility
 
                 _serverRoot = new UriBuilder(u.Scheme, LocalHost, u.Port);
             }
-            else if (_serverRoot == null)
+            else
             {
                 var serverRoot = coreBaseSettings.ServerRoot;
 
@@ -111,7 +104,7 @@ public class BaseCommonLinkUtility
         {
             UriBuilder result;
             // first, take from current request
-            if (_httpContextAccessor?.HttpContext?.Request != null)
+            if (_httpContextAccessor?.HttpContext?.Request != null && !serverUriForce)
             {
                 var u = _httpContextAccessor?.HttpContext?.Request.Url();
 

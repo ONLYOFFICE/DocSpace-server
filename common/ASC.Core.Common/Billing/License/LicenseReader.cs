@@ -27,13 +27,9 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class LicenseReaderConfig
+public class LicenseReaderConfig(IConfiguration configuration)
 {
-    public readonly string LicensePath;
-    public LicenseReaderConfig(IConfiguration configuration)
-    {
-        LicensePath = configuration["license:file:path"] ?? "";
-    }
+    public readonly string LicensePath = configuration["license:file:path"] ?? "";
 }
 
 [Scope]
@@ -43,7 +39,6 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Users.Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -54,8 +49,7 @@ public class LicenseReader
         ITariffService tariffService,
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
-        ILogger<LicenseReader> logger,
-        Users.Constants constants)
+        ILogger<LicenseReader> logger)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -63,7 +57,6 @@ public class LicenseReader
         LicensePath = licenseReaderConfig.LicensePath;
         _licensePathTemp = LicensePath + ".tmp";
         _logger = logger;
-        _constants = constants;
     }
 
     public async Task SetCustomerIdAsync(string value)
@@ -217,11 +210,11 @@ public class LicenseReader
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = license.DueDate
         };
 
-        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     private void LogError(Exception error)

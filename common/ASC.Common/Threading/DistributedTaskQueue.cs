@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,16 +27,15 @@
 namespace ASC.Common.Threading;
 
 [Transient]
-public class DistributedTaskQueue
+public class DistributedTaskQueue(IServiceProvider serviceProvider,
+    ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
+    IDistributedCache distributedCache,
+    ILogger<DistributedTaskQueue> logger)
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
     public static readonly int INSTANCE_ID = Process.GetCurrentProcess().Id;
 
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICacheNotify<DistributedTaskCancelation> _cancellationCacheNotify;
-    private readonly IDistributedCache _distributedCache;
-    private readonly ILogger<DistributedTaskQueue> _logger;
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
     private bool _subscribed;
 
     /// <summary>
@@ -46,21 +45,6 @@ public class DistributedTaskQueue
     private string _name;
     private int _timeUntilUnregisterInSeconds;
     private TaskScheduler Scheduler { get; set; } = TaskScheduler.Default;
-
-    public DistributedTaskQueue(
-        IServiceProvider serviceProvider,
-        ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
-        IDistributedCache distributedCache,
-        ILogger<DistributedTaskQueue> logger)
-
-    {
-        _distributedCache = distributedCache;
-        _serviceProvider = serviceProvider;
-        _cancellationCacheNotify = cancelTaskNotify;
-        _cancelations = new ConcurrentDictionary<string, CancellationTokenSource>();
-        _logger = logger;
-        _subscribed = false;
-    }
 
     public int TimeUntilUnregisterInSeconds
     {
@@ -101,10 +85,7 @@ public class DistributedTaskQueue
 
     public void EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
     {
-        if (distributedTask == null)
-        {
-            distributedTask = new DistributedTask();
-        }
+        distributedTask ??= new DistributedTask();
 
         distributedTask.InstanceId = INSTANCE_ID;
 
@@ -119,7 +100,7 @@ public class DistributedTaskQueue
 
         if (!_subscribed)
         {
-            _cancellationCacheNotify.Subscribe((c) =>
+            cancelTaskNotify.Subscribe(c =>
             {
                 if (_cancelations.TryGetValue(c.Id, out var s))
                 {
@@ -142,15 +123,11 @@ public class DistributedTaskQueue
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
-        if (distributedTask.Publication == null)
-        {
-            distributedTask.Publication = GetPublication();
-        }
-        distributedTask.PublishChanges();
+        _ = PublishTask(distributedTask);
 
         task.Start(Scheduler);
 
-        _logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
+        logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
     }
 
@@ -167,10 +144,7 @@ public class DistributedTaskQueue
 
         foreach (var task in queueTasks)
         {
-            if (task.Publication == null)
-            {
-                task.Publication = GetPublication();
-            }
+            task.Publication ??= GetPublication();
         }
 
         return queueTasks;
@@ -178,7 +152,7 @@ public class DistributedTaskQueue
 
     public IEnumerable<T> GetAllTasks<T>() where T : DistributedTask
     {
-        return GetAllTasks().Select(x => Map(x, _serviceProvider.GetService<T>()));
+        return GetAllTasks().Select(x => Map(x, serviceProvider.GetService<T>()));
     }
 
     public T PeekTask<T>(string id) where T : DistributedTask
@@ -190,7 +164,7 @@ public class DistributedTaskQueue
             return null;
         }
 
-        return Map(taskById, _serviceProvider.GetService<T>());
+        return Map(taskById, serviceProvider.GetService<T>());
     }
 
     public void DequeueTask(string id)
@@ -202,21 +176,29 @@ public class DistributedTaskQueue
             return;
         }
 
-        _cancellationCacheNotify.Publish(new DistributedTaskCancelation() { Id = id }, CacheNotifyAction.Remove);
+        cancelTaskNotify.Publish(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
 
         queueTasks = queueTasks.FindAll(x => x.Id != id);
 
         if (queueTasks.Count == 0)
         {
-            _distributedCache.Remove(_name);
+            distributedCache.Remove(_name);
         }
         else
         {
             SaveToCache(queueTasks);
         }
 
-        _logger.TraceEnqueueTask(id, INSTANCE_ID);
+        logger.TraceEnqueueTask(id, INSTANCE_ID);
 
+    }
+
+    public string PublishTask(DistributedTask distributedTask)
+    {
+        distributedTask.Publication ??= GetPublication();
+        distributedTask.PublishChanges();
+
+        return distributedTask.Id;
     }
 
     private void OnCompleted(Task task, string id)
@@ -247,7 +229,7 @@ public class DistributedTaskQueue
 
     private Action<DistributedTask> GetPublication()
     {
-        return (task) =>
+        return task =>
         {
             var queueTasks = GetAllTasks().ToList().FindAll(x => x.Id != task.Id);
 
@@ -257,7 +239,7 @@ public class DistributedTaskQueue
 
             SaveToCache(queueTasks);
 
-            _logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
+            logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
         };
     }
 
@@ -266,7 +248,7 @@ public class DistributedTaskQueue
     {
         if (!queueTasks.Any())
         {
-            _distributedCache.Remove(_name);
+            distributedCache.Remove(_name);
 
             return;
         }
@@ -275,7 +257,7 @@ public class DistributedTaskQueue
 
         Serializer.Serialize(ms, queueTasks);
 
-        _distributedCache.Set(_name, ms.ToArray(), new DistributedCacheEntryOptions
+        distributedCache.Set(_name, ms.ToArray(), new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = DateTime.UtcNow.AddDays(1)
         });
@@ -284,7 +266,7 @@ public class DistributedTaskQueue
 
     private IEnumerable<DistributedTask> LoadFromCache()
     {
-        var serializedObject = _distributedCache.Get(_name);
+        var serializedObject = distributedCache.Get(_name);
 
         if (serializedObject == null)
         {
@@ -337,7 +319,7 @@ public class DistributedTaskQueue
                         }
                     });
 
-        destination.GetType().GetProperties().Where(p => p.CanWrite == true && !p.GetIndexParameters().Any())
+        destination.GetType().GetProperties().Where(p => p.CanWrite && !p.GetIndexParameters().Any())
                     .ToList()
                     .ForEach(prop =>
                     {

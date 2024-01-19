@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core;
+using ASC.Web.Files.Configuration;
 using ASC.Web.Studio.IntegrationEvents;
 
 namespace ASC.Studio.Notify;
@@ -33,21 +35,24 @@ public class Startup : BaseWorkerStartup
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }        
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddHttpClient();
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         DIHelper.TryAdd<ServiceLauncher>();
         NotifyConfigurationExtension.Register(DIHelper);
         DIHelper.TryAdd<EmailSenderSink>();
         DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
+        DIHelper.TryAdd<ProductEntryPoint>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
     }
 }

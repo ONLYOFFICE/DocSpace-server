@@ -182,7 +182,7 @@ public class MultiRegionHostedSolution
             {
                 if (cs.Name.StartsWith(_dbid + "."))
                 {
-                    var name = cs.Name.Substring(_dbid.Length + 1);
+                    var name = cs.Name[(_dbid.Length + 1)..];
                     _regions[name] = _hostedSolutionOptions.Get(cs.Name);
                 }
             }
@@ -210,7 +210,7 @@ public class MultiRegionHostedSolution
 
                 if (cs.Name.StartsWith(_dbid + "."))
                 {
-                    var name = cs.Name.Substring(_dbid.Length + 1);
+                    var name = cs.Name[(_dbid.Length + 1)..];
                     _regions[name] = _hostedSolutionOptions.Get(name);
                     find = true;
                 }

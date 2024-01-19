@@ -26,17 +26,12 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class WebstudioDbContext : DbContext
+public class WebstudioDbContext(DbContextOptions<WebstudioDbContext> options) : DbContext(options)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbWebstudioUserVisit> WebstudioUserVisit { get; set; }
     public DbSet<DbWebstudioIndex> WebstudioIndex { get; set; }
-
-    public WebstudioDbContext(DbContextOptions<WebstudioDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

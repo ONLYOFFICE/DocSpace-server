@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage;
+using ASC.Web.Core;
 
 namespace ASC.Files;
 
@@ -34,15 +35,20 @@ public class Startup : BaseStartup
         : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {
@@ -53,6 +59,8 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();
         DIHelper.TryAdd<DocuSignHandlerService>();
         DIHelper.TryAdd<ThirdPartyAppHandlerService>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         NotifyConfigurationExtension.Register(DIHelper);
 
@@ -68,6 +76,7 @@ public class Startup : BaseStartup
 
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

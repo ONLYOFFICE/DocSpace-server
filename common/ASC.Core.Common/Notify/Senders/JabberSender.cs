@@ -27,16 +27,10 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton(Additional = typeof(JabberSenderExtension))]
-public class JabberSender : INotifySender
+public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger)
+    : INotifySender
 {
-    private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
-
-    public JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public void Init(IDictionary<string, string> properties) { }
 
@@ -50,7 +44,7 @@ public class JabberSender : INotifySender
         }
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetService<JabberServiceClient>();
             service.SendMessage(m.TenantId, null, m.Reciever, text, m.Subject);
         }

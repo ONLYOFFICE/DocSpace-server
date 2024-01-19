@@ -26,27 +26,18 @@
 
 namespace ASC.Web.Core.Quota;
 
-public class MaxTotalSizeChecker : TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>
+public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager)
+    : TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
     public override string Exception => Resource.TariffsFeature_total_size_exception;
-
-    public MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
-    {
-    }
 }
 
-public class MaxTotalSizeStatistic : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>
+public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public MaxTotalSizeStatistic(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task<long> GetValueAsync()
     {
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
+        var tenantManager = serviceProvider.GetService<TenantManager>();
         var tenant = (await tenantManager.GetCurrentTenantAsync()).Id;
 
         return (await tenantManager.FindTenantQuotaRowsAsync(tenant))

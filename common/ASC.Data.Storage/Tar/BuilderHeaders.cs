@@ -31,7 +31,7 @@ public static class BuilderHeaders
     {
         var blockBuffer = new byte[512];
 
-        var tarHeader = new TarHeader()
+        var tarHeader = new TarHeader
         {
             Name = name,
             Size = size

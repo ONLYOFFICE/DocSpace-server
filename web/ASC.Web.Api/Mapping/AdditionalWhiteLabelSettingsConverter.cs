@@ -28,24 +28,19 @@ namespace ASC.Web.Api.Mapping;
 
 
 [Scope(Additional = typeof(AdditionalWhiteLabelSettingsConverterExtension))]
-public class AdditionalWhiteLabelSettingsConverter : ITypeConverter<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>
+public class AdditionalWhiteLabelSettingsConverter(
+        AdditionalWhiteLabelSettingsHelper additionalWhiteLabelSettingsHelper)
+    : ITypeConverter<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>
 {
-    private readonly AdditionalWhiteLabelSettingsHelper _additionalWhiteLabelSettingsHelper;
-
-    public AdditionalWhiteLabelSettingsConverter(AdditionalWhiteLabelSettingsHelper additionalWhiteLabelSettingsHelper)
-    {
-        _additionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
-    }
-
     public AdditionalWhiteLabelSettingsDto Convert(AdditionalWhiteLabelSettings source, AdditionalWhiteLabelSettingsDto destination, ResolutionContext context)
     {
-        var result = new AdditionalWhiteLabelSettingsDto()
+        var result = new AdditionalWhiteLabelSettingsDto
         {
             BuyUrl = source.BuyUrl,
             FeedbackAndSupportEnabled = source.FeedbackAndSupportEnabled,
             FeedbackAndSupportUrl = source.FeedbackAndSupportUrl,
             HelpCenterEnabled = source.HelpCenterEnabled,
-            IsDefault = _additionalWhiteLabelSettingsHelper.IsDefault(source),
+            IsDefault = additionalWhiteLabelSettingsHelper.IsDefault(source),
             LicenseAgreementsEnabled = source.LicenseAgreementsEnabled,
             LicenseAgreementsUrl = source.LicenseAgreementsUrl,
             SalesEmail = source.SalesEmail,

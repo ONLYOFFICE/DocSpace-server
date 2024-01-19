@@ -32,4 +32,6 @@ public class TagInfo : IMapFrom<DbFilesTag>
     public string Name { get; init; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
+    public object EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
 }
