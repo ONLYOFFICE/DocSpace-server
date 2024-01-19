@@ -100,7 +100,7 @@ public class CookiesManager
             Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
+        if (type is CookiesType.AuthKey or CookiesType.ConfirmKey or CookiesType.AnonymousSessionKey or CookiesType.ShareLink)
         {
             options.HttpOnly = true;
 

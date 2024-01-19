@@ -213,12 +213,12 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
             throw new ArgumentException();
         }
 
-        return new[]
-        {
+        return
+        [
             ApplyOpacity(255, Convert.ToInt32(color.Substring(1, 2), 16), opacity),
             ApplyOpacity(255, Convert.ToInt32(color.Substring(3, 2), 16), opacity),
             ApplyOpacity(255, Convert.ToInt32(color.Substring(5, 2), 16), opacity)
-        };
+        ];
 
         static int ApplyOpacity(int background, int overlay, double opacity)
         {

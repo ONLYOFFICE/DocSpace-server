@@ -25,14 +25,19 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Notify;
-public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    : BaseWorkerStartup(configuration, hostEnvironment)
+public class Startup : BaseWorkerStartup
 {
+    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
+    {
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
+    }
+
     public override async Task ConfigureServices(IServiceCollection services)
     {
         await base.ConfigureServices(services);
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
 
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 

@@ -106,7 +106,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
-            result = new List<int>();
+            result = [];
 
             return (false, result);
         }
@@ -118,7 +118,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         catch (Exception e)
         {
             Logger.ErrorSelect(e);
-            result = new List<int>();
+            result = [];
 
             return (false, result);
         }
@@ -133,7 +133,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
-            result = new List<int>();
+            result = [];
             total = 0;
 
             return (false, result, total);
@@ -148,7 +148,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         {
             Logger.ErrorSelect(e);
             total = 0;
-            result = new List<int>();
+            result = [];
 
             return (false, result, total);
         }
@@ -156,7 +156,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         return (true, result, total);
     }
 
-    public async Task<bool> CanIndexByContentAsync(T t)
+    public virtual async Task<bool> CanIndexByContentAsync(T t)
     {
         return await SupportAsync(t) && await searchSettingsHelper.CanIndexByContentAsync<T>();
     }
@@ -766,7 +766,7 @@ public class FactoryIndexer
             state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
         }
 
-        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = new[] { "index" } }).Records
+        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
             .Select(r => new
             {
                 r.Index,

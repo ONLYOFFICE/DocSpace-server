@@ -90,12 +90,12 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
 
     public string GetMyStaff()
     {
-        return _coreBaseSettings.Personal ? ToAbsolute("~/my") : ToAbsolute("~/profile");
+        return ToAbsolute("~/profile");
     }
 
     public string GetUnsubscribe()
     {
-        return _coreBaseSettings.Personal ? ToAbsolute("~/my?unsubscribe=tips") : ToAbsolute("~/profile/notifications");
+        return ToAbsolute("~/profile/notifications");
     }
 
     public string GetEmployees()

@@ -58,6 +58,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <returns type="System.Object, System">Shared file link</returns>
     /// <path>api/2.0/files/{fileId}/sharedlinkAsync</path>
     /// <httpMethod>PUT</httpMethod>
+    /// <visible>false</visible>
     [HttpPut("{fileId}/sharedlinkAsync")]
     public async Task<object> GenerateSharedLinkAsync(T fileId, GenerateSharedLinkRequestDto inDto)
     {
@@ -114,6 +115,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <returns type="System.Boolean, System">Boolean value: true if the file is successfully shared</returns>
     /// <path>api/2.0/files/{fileId}/setacelink</path>
     /// <httpMethod>PUT</httpMethod>
+    /// <visible>false</visible>
     [HttpPut("{fileId}/setacelink")]
     public async Task<bool> SetAceLinkAsync(T fileId, [FromBody] GenerateSharedLinkRequestDto inDto)
     {
@@ -172,6 +174,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyDto>> GetEncryptionAccess(T fileId)
     {
@@ -189,6 +192,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
     {
@@ -216,6 +220,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/owner</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryDto> ChangeOwnerAsync(ChangeOwnerRequestDto inDto)
     {
@@ -316,6 +321,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
@@ -335,6 +341,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

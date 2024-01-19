@@ -137,12 +137,12 @@ public class EncryptionKeyPairDtoHelper(
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var locatedInPrivateRoom = file.RootFolderType == FolderType.VirtualRooms

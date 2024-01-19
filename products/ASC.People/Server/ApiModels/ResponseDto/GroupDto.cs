@@ -67,7 +67,7 @@ public class GroupDto
             Category = Guid.NewGuid(),
             Name = "Sample group",
             Parent = Guid.NewGuid(),
-            Members = new List<EmployeeDto> { EmployeeDto.GetSample() }
+            Members = [EmployeeDto.GetSample()]
         };
     }
 }
@@ -88,7 +88,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper emplo
 
         if (includeMembers)
         {
-            result.Members = new List<EmployeeDto>();
+            result.Members = [];
 
             foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
             {

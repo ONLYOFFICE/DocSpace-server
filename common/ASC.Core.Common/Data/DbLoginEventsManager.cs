@@ -32,8 +32,8 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
     ICache cache)
 {
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
-    private static readonly List<int> _loginActions = new()
-    {
+    private static readonly List<int> _loginActions =
+    [
         (int)MessageAction.LoginSuccess,
         (int)MessageAction.LoginSuccessViaSocialAccount,
         (int)MessageAction.LoginSuccessViaSms,
@@ -44,7 +44,7 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         (int)MessageAction.LoginSuccessViaApiSocialAccount,
         (int)MessageAction.LoginSuccesViaTfaApp,
         (int)MessageAction.LoginSuccessViaApiTfa
-    };
+    ];
 
     public async Task<DbLoginEvent> GetByIdAsync(int id)
     {

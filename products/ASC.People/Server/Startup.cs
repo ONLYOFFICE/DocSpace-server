@@ -28,11 +28,14 @@ namespace ASC.People;
 
 public class Startup : BaseStartup
 {
-    protected override bool ConfirmAddScheme => true;
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override async Task ConfigureServices(IServiceCollection services)

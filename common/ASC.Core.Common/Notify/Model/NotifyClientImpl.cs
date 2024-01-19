@@ -46,7 +46,7 @@ class NotifyClientImpl(
     
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, null, recipient, new []{  senderNames}, false, args);
+        await SendNoticeToAsync(action, null, recipient, [senderNames], false, args);
     }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
@@ -56,17 +56,17 @@ class NotifyClientImpl(
 
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, null, false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, false, args);
     }
 
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string sendername, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, new[] { sendername }, false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], [sendername], false, args);
     }
 
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, null, checkSubscription, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription, args);
     }
 
     public void BeginSingleRecipientEvent(string name)

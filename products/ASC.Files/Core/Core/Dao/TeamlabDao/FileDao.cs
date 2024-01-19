@@ -45,7 +45,6 @@ internal class FileDao(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     GlobalStore globalStore,
-    GlobalSpace globalSpace,
     GlobalFolder globalFolder,
     Global global,
     IDaoFactory daoFactory,
@@ -170,7 +169,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -340,15 +339,6 @@ internal class FileDao(
         if (checkQuota && maxChunkedUploadSize < file.ContentLength)
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
-        if (checkQuota && _coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -528,15 +518,6 @@ internal class FileDao(
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
 
-        if (_coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
-            if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy) < file.ContentLength)
-            {
-                throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
-            }
-        }
-
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         DbFile toUpdate = null;
 
@@ -654,7 +635,10 @@ internal class FileDao(
 
     private async Task DeleteVersionStreamAsync(File<int> file)
     {
-        await (await globalStore.GetStoreAsync()).DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        tenantQuotaController.Init(tenantId, ThumbnailTitle);
+        var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+        await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream)
@@ -883,9 +867,12 @@ internal class FileDao(
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var dataStore = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, (IQuotaController)null);
+
                 foreach (var size in thumbnailSettings.Sizes)
                 {
-                    await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                    await dataStore.CopyAsync(String.Empty,
                                          GetUniqThumbnailPath(file, size.Width, size.Height),
                                          String.Empty,
                                          GetUniqThumbnailPath(copy, size.Width, size.Height));
@@ -1133,7 +1120,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)
@@ -1458,7 +1445,7 @@ internal class FileDao(
             {
                 if (withSubfolders)
                 {
-                    result.In(a => a.Folders.Select(r => r.ParentId), new[] { parentId });
+                    result.In(a => a.Folders.Select(r => r.ParentId), [parentId]);
                 }
                 else
                 {
@@ -1574,13 +1561,14 @@ internal class FileDao(
         file.Version = dbFile.Version;
         file.ContentLength = dbFile.ContentLength;
 
-        if (!await IsExistOnStorageAsync(file) || file.ContentLength > settings.MaxContentLength)
+        if (!await IsExistOnStorageAsync(file) || file.ContentLength > settings.MaxFileSize)
         {
             return dbFile;
         }
 
-        await using var stream = await GetFileStreamAsync(file);
-
+        byte[] buffer;
+        await using(var stream = await GetFileStreamAsync(file))
+        {
         if (stream == null)
         {
             return dbFile;
@@ -1588,9 +1576,12 @@ internal class FileDao(
 
         using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
+            buffer = ms.GetBuffer();
+        }
+        
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(ms.GetBuffer())
+            Data = Convert.ToBase64String(buffer)
             };
 
         return dbFile;
@@ -1615,7 +1606,7 @@ internal class FileDao(
 
         if (extension.IsNullOrEmpty())
         {
-            extension = new string[] { "" };
+            extension = [""];
         }
 
         if (searchByText || searchByExtension)

@@ -122,6 +122,7 @@ public static class ActionInvoker
             try
             {
                 await action(state);
+                return;
             }
             catch (Exception error)
             {

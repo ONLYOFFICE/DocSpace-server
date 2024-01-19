@@ -46,8 +46,8 @@ public class EncryptionLoginProvider(
             Name = instanceCrypto.Encrypt(keys)
         };
 
-        await accountLinker.RemoveProviderAsync(userId.ToString());
-        await accountLinker.AddLinkAsync(userId.ToString(), loginProfile);
+        await accountLinker.RemoveProviderAsync(userId);
+        await accountLinker.AddLinkAsync(userId, loginProfile);
     }
 
     public async Task<string> GetKeysAsync()

@@ -27,12 +27,12 @@
 namespace ASC.Core.Common.Quota;
 public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
         IHttpClientFactory clientFactory,
-        MachinePseudoKeys mashinePseudoKeys,
+        MachinePseudoKeys machinePseudoKeys,
         TenantManager tenantManager,
         IConfiguration configuration)
-    : SocketServiceClient(logger, clientFactory, mashinePseudoKeys, configuration)
+    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
 {
-    public override string Hub => "files";
+    protected override string Hub => "files";
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {

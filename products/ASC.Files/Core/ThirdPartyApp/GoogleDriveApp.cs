@@ -316,7 +316,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             _logger.ErrorGoogleDriveAppSaveFileStream(e);
             if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
 
             throw;
@@ -458,7 +458,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             var validateResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(fileId + userId, auth, _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                 _logger.ErrorGoogleDriveAppValidate(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
@@ -615,7 +615,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugGoogleDriveApAddLinker(googleUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), googleUserId, ProviderConstants.Google);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, googleUserId, ProviderConstants.Google);
     }
 
     private async Task<UserInfoWrapper> GetUserInfoAsync(Token token)
@@ -780,7 +780,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
         }
 
@@ -854,7 +854,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
                 if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
                 }
             }
         }
@@ -866,7 +866,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 _logger.ErrorGoogleDriveAppConvertUrl(FileSizeComment.FilesSizeToString(jsonFile.Value<int>("size")));
 
-                throw new Exception(FilesCommonResource.ErrorMassage_DocServiceException + " (convert)");
+                throw new Exception(FilesCommonResource.ErrorMessage_DocServiceException + " (convert)");
             }
 
             var toExt = _fileUtility.GetInternalExtension(fileName);

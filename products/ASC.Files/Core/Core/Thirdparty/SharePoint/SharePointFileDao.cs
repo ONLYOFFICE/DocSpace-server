@@ -271,7 +271,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         var fileToDownload = await SharePointProviderInfo.GetFileByIdAsync(file.Id);
         if (fileToDownload == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var fileStream = await SharePointProviderInfo.GetFileStreamAsync(fileToDownload.ServerRelativeUrl, (int)offset);
