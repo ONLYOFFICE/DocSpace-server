@@ -453,7 +453,7 @@ public class BackupPortalTask : PortalTaskBase
     {
         _logger.DebugSaveTable(t);
         List<object[]> portion;
-        while ((portion = data.Take(BatchLimit).ToList()).Count > 0)
+        while ((portion = data.Take(BatchLimit).ToList()).Any())
         {
             using (var sw = new StreamWriter(path, true))
             using (var writer = new JsonTextWriter(sw))
@@ -470,26 +470,24 @@ public class BackupPortalTask : PortalTaskBase
 
                     for (var i = 0; i < obj.Length; i++)
                     {
-                        var value = obj[i];
-                        if (value is byte[] byteArray && byteArray.Length != 0)
+                        var byteArray = obj[i] as byte[];
+                        if (byteArray != null && byteArray.Length != 0)
                         {
                             sw.Write("0x");
                             foreach (var b in byteArray)
-                            {
                                 sw.Write("{0:x2}", b);
-                            }
                         }
                         else
                         {
                             var s = obj[i] as string;
                             if (s != null)
                             {
-                                sw.Write("'" + s.Replace("\r", "\\r").Replace("\n", "\\n") + "'");
+                                sw.Write("'" + s.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("'", "\\'").Replace("\n", "\\n") + "'");
                             }
                             else
                             {
                                 var ser = new JsonSerializer();
-                                ser.Serialize(writer, value);
+                                ser.Serialize(writer, obj[i]);
                             }
                         }
                         if (i != obj.Length - 1)
