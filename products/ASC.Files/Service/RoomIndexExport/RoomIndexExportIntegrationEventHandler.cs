@@ -30,6 +30,7 @@ namespace ASC.Files.Service.RoomIndexExport;
 public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
 {
     private readonly ILogger _logger;
+    private readonly CommonLinkUtility _commonLinkUtility;
     private readonly TenantManager _tenantManager;
     private readonly AuthManager _authManager;
     private readonly SecurityContext _securityContext;
@@ -39,6 +40,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
     public RoomIndexExportIntegrationEventHandler(
         ILogger<RoomIndexExportIntegrationEventHandler> logger,
+        CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager,
         AuthManager authManager,
         SecurityContext securityContext,
@@ -47,6 +49,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
         IServiceProvider serviceProvider)
     {
         _logger = logger;
+        _commonLinkUtility = commonLinkUtility;
         _tenantManager = tenantManager;
         _authManager = authManager;
         _securityContext = securityContext;
@@ -71,6 +74,11 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
                     return;
                 }
 
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    _commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
                 await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
                 var account = await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy);
@@ -81,7 +89,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
                 var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
 
-                task.Init(@event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
 
                 _documentBuilderTaskManager.StartTask(task, true);
             }

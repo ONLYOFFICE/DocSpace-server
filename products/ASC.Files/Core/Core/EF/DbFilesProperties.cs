@@ -35,7 +35,7 @@ public class DbFilesProperties : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, EntryId };
+        return [TenantId, EntryId];
     }
 }
 

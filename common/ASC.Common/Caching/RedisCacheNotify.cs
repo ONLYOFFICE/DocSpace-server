@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis;
-
 namespace ASC.Common.Caching;
 
 [Singleton]
@@ -118,7 +116,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         if (onChange != null)
         {
             _invoctionList.AddOrUpdate(action,
-                new ConcurrentBag<Action<T>> { onChange },
+                [onChange],
                 (_, bag) =>
                 {
                     bag.Add(onChange);

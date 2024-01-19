@@ -38,4 +38,7 @@ public record EmptyTrashIntegrationEvent : IntegrationEvent
 
     [ProtoMember(1)]
     public string TaskId { get; set; }
+
+    [ProtoMember(2)]
+    public IDictionary<string, string> Headers { get; set; }
 }

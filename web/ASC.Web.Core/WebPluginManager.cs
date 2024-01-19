@@ -105,14 +105,14 @@ public class WebPluginManager(
     private const string PluginFileName = "plugin.js";
     private const string AssetsFolderName = "assets";
 
-    private void DemandWebPlugins(string action = null)
+    private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
         if (!webPluginConfigSettings.Enabled)
         {
             throw new SecurityException("Plugins disabled");
         }
 
-        if (!string.IsNullOrWhiteSpace(action) && webPluginConfigSettings.Allow.Any() && !webPluginConfigSettings.Allow.Contains(action))
+        if ((upload && !webPluginConfigSettings.Upload) || (delete && !webPluginConfigSettings.Delete))
         {
             throw new SecurityException("Forbidden action");
         }
@@ -141,7 +141,7 @@ public class WebPluginManager(
 
     public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system)
     {
-        DemandWebPlugins("upload");
+        DemandWebPlugins(upload: true);
 
         if (system && !coreBaseSettings.Standalone)
         {
@@ -435,7 +435,7 @@ public class WebPluginManager(
 
     public async Task<WebPlugin> DeleteWebPluginAsync(int tenantId, string name)
     {
-        DemandWebPlugins("delete");
+        DemandWebPlugins(delete: true);
 
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 

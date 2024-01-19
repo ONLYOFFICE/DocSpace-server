@@ -33,17 +33,6 @@ public static class TagValues
         return new TagValue(CommonTags.WithoutUnsubscribe, true);
     }
 
-    public static ITagValue PersonalHeaderStart()
-    {
-        return new TagValue("PersonalHeaderStart",
-                            "<table style=\"margin: 0; border-spacing: 0; empty-cells: show; width: 540px; width: 100%;\" cellspacing=\"0\" cellpadding=\"0\"><tbody><tr><td style=\"width: 100%;color: #333333;font-size: 18px;font-weight: bold;margin: 0;height: 71px;padding-right:165px;background: url('https://d2nlctn12v279m.cloudfront.net/media/newsletters/images/personal-header-bg.png') top right no-repeat;\">");
-    }
-
-    public static ITagValue PersonalHeaderEnd()
-    {
-        return new TagValue("PersonalHeaderEnd", "</td></tr></tbody></table>");
-    }
-
     public static ITagValue OrangeButton(string btnText, string btnUrl)
     {
         const string td = "<td style=\"height: 48px; width: 80px; margin:0; padding-bottom:56px;\">&nbsp;</td>";

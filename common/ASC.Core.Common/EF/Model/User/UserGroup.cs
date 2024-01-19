@@ -41,7 +41,7 @@ public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Userid, UserGroupId, RefType };
+        return [TenantId, Userid, UserGroupId, RefType];
     }
     public void Mapping(Profile profile)
     {

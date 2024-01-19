@@ -37,7 +37,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     public override string Scopes => "";
 
     // used in ZoomService
-    public const string ApiUrl = "https://api.zoom.us/v2";
+    private const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
     
     private readonly RequestHelper _requestHelper;
@@ -51,11 +51,9 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -91,12 +89,12 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return LoginProfile.FromError(ex);
         }
     }
 
     // used in ZoomService
-    public OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
+    private OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
     {
         var clientPair = $"{ClientID}:{ClientSecret}";
         var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
@@ -147,7 +145,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
     public LoginProfile GetMinimalProfile(string uid)
     {
-        return new LoginProfile(Signature, InstanceCrypto)
+        return new LoginProfile
         {
             Id = uid,
             Provider = ProviderConstants.Zoom
@@ -158,7 +156,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     {
         var jsonProfile = JsonConvert.DeserializeObject<ZoomProfile>(zoomProfile);
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = jsonProfile.Id,
             Avatar = jsonProfile.PicUrl?.ToString(),

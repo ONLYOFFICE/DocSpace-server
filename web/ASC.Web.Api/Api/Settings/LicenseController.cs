@@ -170,11 +170,11 @@ public class LicenseController(ILoggerProvider option,
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
+            Quotas = [new(quota.TenantId, 1)],
             DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
         };
 
-        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
 
         await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 

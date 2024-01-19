@@ -266,9 +266,11 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Take(count);
         }
 
-        await foreach (var r in q.ToAsyncEnumerable())
+        var records = q.ToAsyncEnumerable().SelectAwait(async r => await ToFileShareRecordAsync(r));
+
+        await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
         {
-            yield return await ToFileShareRecordAsync(r);
+            yield return r;
         }
     }
 
@@ -368,7 +370,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(List<string> files, List<string> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(IEnumerable<string> files, IEnumerable<string> folders)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -502,6 +504,33 @@ internal abstract class SecurityBaseDao<T>(
 
         return q;
     }
+
+    protected async IAsyncEnumerable<FileShareRecord> DeleteExpiredAsync(IAsyncEnumerable<FileShareRecord> records, FilesDbContext filesDbContext)
+    {
+        var expired = new List<Guid>();
+        
+        await foreach (var r in records)
+        {
+            if (r.SubjectType == SubjectType.InvitationLink && r.Options is { IsExpired: true })
+            {
+                expired.Add(r.Subject);
+                continue;
+            }
+            
+            yield return r;
+        }
+
+        if (expired.Count <= 0)
+        {
+            yield break;
+        }
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await filesDbContext.Security
+            .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
+            .ExecuteDeleteAsync();
+    }
 }
 
 [Scope]
@@ -580,41 +609,12 @@ internal class SecurityDao(UserManager userManager,
             q = q.Where(r => subjects.Contains(r.Subject));
         }
 
-        var records = await q.ToAsyncEnumerable()
+        var records = q.ToAsyncEnumerable()
             .Select(ToFileShareRecord)
             .OrderBy(r => r.Level)
-            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-            .ToListAsync();
+            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer());
 
-        await DeleteExpiredAsync(records, filesDbContext);
-
-        return records;
-    }
-
-    private async Task DeleteExpiredAsync(List<FileShareRecord> records, FilesDbContext filesDbContext)
-    {
-        var expired = new List<Guid>();
-
-        for (var i = 0; i < records.Count; i++)
-        {
-            var r = records[i];
-            if (r.SubjectType != SubjectType.InvitationLink || r.Options is not { IsExpired: true })
-            {
-                continue;
-            }
-
-            expired.Add(r.Subject);
-            records.RemoveAt(i);
-        }
-
-        if (expired.Count > 0)
-        {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-            await filesDbContext.Security
-                .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
-                .ExecuteDeleteAsync();
-        }
+        return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
     }
 }
 
@@ -689,7 +689,7 @@ internal class ThirdPartySecurityDao(UserManager userManager,
         }
     }
 
-    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IReadOnlyCollection<FileEntry<string>> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetShareForFoldersAsync(IEnumerable<FileEntry<string>> folders)
     {
         foreach (var folder in folders)
         {

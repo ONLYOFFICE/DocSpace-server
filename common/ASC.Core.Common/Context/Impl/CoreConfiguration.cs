@@ -31,9 +31,7 @@ public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
     private string _basedomain;
-    private bool? _personal;
     private bool? _customMode;
-    private bool? _disableDocSpace;
     private string _serverRoot;
 
     private IConfiguration Configuration { get; } = configuration;
@@ -56,16 +54,8 @@ public class CoreBaseSettings(IConfiguration configuration)
 
     public bool Standalone => _standalone ?? (bool)(_standalone = Configuration["core:base-domain"] == "localhost");
 
-    public bool Personal =>
-        //TODO:if (CustomMode && HttpContext.Current != null && HttpContext.Current.Request.SailfishApp()) return true;
-        _personal ?? (bool)(_personal =
-            string.Equals(Configuration["core:personal"], "true", StringComparison.OrdinalIgnoreCase));
-
     public bool CustomMode => _customMode ?? (bool)(_customMode =
         string.Equals(Configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase));
-
-    public bool DisableDocSpace => _disableDocSpace ?? (bool)(_disableDocSpace =
-        string.Equals(Configuration["core:disableDocspace"], "true", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>
@@ -219,34 +209,8 @@ public class CoreSettings
 }
 
 [Scope]
-public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
+public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager)
 {
-    private long? _personalMaxSpace;
-
-    public async Task<long> PersonalMaxSpaceAsync(SettingsManager settingsManager)
-    {
-        var quotaSettings = await settingsManager.LoadForCurrentUserAsync<PersonalQuotaSettings>();
-
-        if (quotaSettings.MaxSpace != long.MaxValue)
-        {
-            return quotaSettings.MaxSpace;
-        }
-
-        if (_personalMaxSpace.HasValue)
-        {
-            return _personalMaxSpace.Value;
-        }
-
-        if (!long.TryParse(configuration["core:personal.maxspace"], out var value))
-        {
-            value = long.MaxValue;
-        }
-
-        _personalMaxSpace = value;
-
-        return _personalMaxSpace.Value;
-    }
-
     public async Task<SmtpSettings> GetDefaultSmtpSettingsAsync()
     {
         var isDefaultSettings = false;

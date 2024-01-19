@@ -48,7 +48,7 @@ public class IntegrationEventLogEntry
     public string EventTypeName { get; private set; }
 
     [NotMapped]
-    public string EventTypeShortName => EventTypeName.Split('.')?.Last();
+    public string EventTypeShortName => EventTypeName.Split('.').Last();
 
     [NotMapped]
     public IntegrationEvent IntegrationEvent { get; private set; }

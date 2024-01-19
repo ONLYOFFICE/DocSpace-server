@@ -26,8 +26,8 @@
 
 namespace ASC.Files.Api;
 
-public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
-        EntryManager entryManager,
+public class ThirdpartyController(
+    EntryManager entryManager,
         FilesSettingsHelper filesSettingsHelper,
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
@@ -57,9 +57,7 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
     {
         var result = new List<List<string>>();
 
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID)
-                || (!filesSettingsHelper.EnableThirdParty
-                && !coreBaseSettings.Personal))
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID) || !filesSettingsHelper.EnableThirdParty)
         {
             return result;
         }
@@ -283,7 +281,7 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(securityContext.CurrentAccount.ID))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         var thirdPartyParams = new ThirdPartyParams

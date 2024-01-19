@@ -32,13 +32,14 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _relations;
 
-    private readonly TableInfo[] _tables = {
-            new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
-            new("webstudio_settings", "TenantID") {UserIDColumns = new[] {"UserID"}},
+    private readonly TableInfo[] _tables =
+    [
+        new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
+            new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
             new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
-        };
+    ];
 
-    private readonly RelationInfo[] _relations = new RelationInfo[0];
+    private readonly RelationInfo[] _relations = Array.Empty<RelationInfo>();
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

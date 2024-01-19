@@ -47,6 +47,12 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
             return await CheckRoomAccess(internalId);
         }
 
+        var provider = await daoFactory.ProviderDao.GetProviderInfoByEntryIdAsync(id);
+        if (provider is { MutableEntityId: true })
+        {
+            id = provider.FolderId;
+        }
+
         return await CheckRoomAccess(id);
     }
     

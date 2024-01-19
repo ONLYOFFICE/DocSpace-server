@@ -38,7 +38,7 @@ public class NotifyEngine(Context context,
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
-    internal readonly List<SendMethodWrapper> SendMethods = new();
+    internal readonly List<SendMethodWrapper> SendMethods = [];
     private readonly Dictionary<string, IPatternStyler> _stylers = new();
     private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions = new List<Type>();
@@ -142,7 +142,7 @@ public class NotifyEngine(Context context,
 
                     try
                     {
-                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? new IRecipient[0];
+                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? Array.Empty<IRecipient>();
                         foreach (var recipient in recipients)
                         {
                             try
@@ -302,14 +302,13 @@ public class NotifyEngine(Context context,
         {
             formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
-                noticeMessage, 
-                new ITagValue[]
-               {
-                       new TagValue(Context.SysRecipientId, request.Recipient.ID),
+                noticeMessage,
+                [
+                    new TagValue(Context.SysRecipientId, request.Recipient.ID),
                        new TagValue(Context.SysRecipientName, request.Recipient.Name),
                        new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
-               }
-                );
+                ]
+            );
             //Do styling here
             if (!string.IsNullOrEmpty(pattern.Styler))
             {

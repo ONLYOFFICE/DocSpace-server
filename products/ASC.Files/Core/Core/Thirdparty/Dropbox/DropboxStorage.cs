@@ -127,7 +127,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
         var data = await _dropboxClient.Files.ListFolderAsync(folderId);
-        return new List<Metadata>(data.Entries);
+        return [..data.Entries];
     }
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)

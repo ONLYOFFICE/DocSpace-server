@@ -45,7 +45,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("remove/progress/{userid}")]
+    [HttpGet("remove/progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(Guid userId)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);

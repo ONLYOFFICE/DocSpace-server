@@ -36,12 +36,14 @@ public class RabbitMQSettings
     public bool EnableSsl { get; set; }
     public string SslServerName { get; set; }
     public string SslCertPath { get; set; }
+    public string ClientProvidedName { get; set; }
 
     public ConnectionFactory GetConnectionFactory()
     {
         var factory = new ConnectionFactory
         {
-            DispatchConsumersAsync = true
+            DispatchConsumersAsync = true,
+            ClientProvidedName = ClientProvidedName
         };
 
         if (!string.IsNullOrEmpty(Uri))

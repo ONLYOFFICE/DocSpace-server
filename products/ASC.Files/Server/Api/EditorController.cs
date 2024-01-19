@@ -41,6 +41,7 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper)
     : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper);
 
+[DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
@@ -251,6 +252,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {
@@ -294,7 +296,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         DocumentServiceConnector documentServiceConnector,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -308,8 +311,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("docservice")]
-    public async Task<IEnumerable<string>> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
+    public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
@@ -325,12 +330,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
         await documentServiceConnector.CheckDocServiceUrlAsync();
 
-        return new[]
-        {
-            filesLinkUtility.DocServiceUrl,
-            filesLinkUtility.DocServiceUrlInternal,
-            filesLinkUtility.DocServicePortalUrl
-        };
+        return await GetDocServiceUrlAsync(false);
     }
 
     /// <summary>
@@ -346,7 +346,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <visible>false</visible>
     [AllowAnonymous]
     [HttpGet("docservice")]
-    public async Task<object> GetDocServiceUrlAsync(bool version)
+    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(bool version)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
 
@@ -357,14 +357,14 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             dsVersion = await documentServiceConnector.GetVersionAsync();
         }
 
-        return new
+        return new DocServiceUrlDto
         {
-            version = dsVersion,
-            docServiceUrlApi = url,
-            filesLinkUtility.DocServiceUrl,
-            filesLinkUtility.DocServiceUrlInternal,
-            filesLinkUtility.DocServicePortalUrl,
-            filesLinkUtility.IsDefault
+            Version = dsVersion,
+            DocServiceUrlApi = url,
+            DocServiceUrl = filesLinkUtility.DocServiceUrl,
+            DocServiceUrlInternal =filesLinkUtility.DocServiceUrlInternal,
+            DocServicePortalUrl = filesLinkUtility.DocServicePortalUrl,
+            IsDefault = filesLinkUtility.IsDefault
         };
     }
 }

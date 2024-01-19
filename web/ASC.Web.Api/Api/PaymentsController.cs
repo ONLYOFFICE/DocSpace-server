@@ -30,6 +30,7 @@ namespace ASC.Web.Api.Controllers;
 /// Portal information access.
 ///</summary>
 ///<name>portal</name>
+///<visible>false</visible>
 [Scope]
 [DefaultRoute("payment")]
 [ApiController]
@@ -160,7 +161,7 @@ public class PaymentController(UserManager userManager,
     {
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
-            .ToDictionary(pr => pr.Key, pr => pr.Value.TryGetValue(currency, out var value) ? value : 0);
+            .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
         return result;
     }
 

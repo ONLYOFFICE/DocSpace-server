@@ -89,7 +89,7 @@ public class NotifyClient(WorkContext notifyContext,
             recipient,
             true,
             new TagValue(NotifyConstants.TagMailsCount, countMails),
-            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMassage_MailMergeCount, countError) : string.Empty)
+            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMessage_MailMergeCount, countError) : string.Empty)
             );
     }
 
@@ -196,12 +196,18 @@ public class NotifyClient(WorkContext notifyContext,
 
         var recipientsProvider = notifySource.GetRecipientsProvider();
 
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
-        var (roomId, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+        var (id, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+
+        if (!int.TryParse(id.ToString(), out var roomId))
+        {
+            return;
+        }
+        
         var roomUrl = pathProvider.GetRoomsUrl(roomId);
 
-        var room = await folderDao.GetFolderAsync(roomId);
+        var room = await folderDao.GetFolderAsync(id);
 
         foreach (var recipientId in recipientIds)
         {

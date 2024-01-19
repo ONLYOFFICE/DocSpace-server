@@ -53,7 +53,7 @@ public class BillingClient
 
     public string GetAccountLink(string portalId, string backUrl)
     {
-        var result = Request("GetAccountLink", portalId, new[] { Tuple.Create("BackRef", backUrl) });
+        var result = Request("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
         var link = JsonConvert.DeserializeObject<string>(result);
         return link;
     }
@@ -140,7 +140,7 @@ public class BillingClient
         return urls;
     }
 
-    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
+    public string GetPaymentUrl(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
         var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
@@ -189,7 +189,7 @@ public class BillingClient
         return paymentUrl;
     }
 
-    public bool ChangePayment(string portalId, string[] products, int[] quantity)
+    public bool ChangePayment(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
@@ -264,7 +264,7 @@ public class BillingClient
 
         if (!string.IsNullOrEmpty(portalId))
         {
-            data.Add("PortalId", new List<string> { portalId });
+            data.Add("PortalId", [portalId]);
         }
 
         if (parameters != null)
@@ -273,7 +273,7 @@ public class BillingClient
             {
                 if (!data.ContainsKey(parameter.Item1))
                 {
-                    data.Add(parameter.Item1, new List<string> { parameter.Item2 });
+                    data.Add(parameter.Item1, [parameter.Item2]);
                 }
                 else
                 {

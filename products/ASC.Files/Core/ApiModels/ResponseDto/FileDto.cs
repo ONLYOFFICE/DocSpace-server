@@ -102,6 +102,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool DenyDownload { get; set; }
 
+    /// <summary>Is there a draft or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? HasDraft { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -148,7 +152,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FileSharingHelper fileSharingHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime, 
+        ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
@@ -189,9 +194,19 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
+        var fileExst = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+
+        if (fileType == FileType.Pdf)
+        {
+            var linkDao = daoFactory.GetLinkDao();
+            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            result.HasDraft = linkedId != null;
+        }
         
-        result.FileExst = FileUtility.GetFileExtension(file.Title);
-        result.FileType = FileUtility.GetFileTypeByExtention(result.FileExst);
+        result.FileExst = fileExst;
+        result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
@@ -214,9 +229,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            result.ViewUrl = commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
+            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
 
-            result.WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version));
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)));
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -224,7 +239,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}";
+                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"); 
             }
         }
         catch (Exception)

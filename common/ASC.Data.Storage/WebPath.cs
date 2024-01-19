@@ -90,7 +90,7 @@ public class WebPathSettings
             {
                 var query = string.Empty;
                 //Rel path
-                if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
+                if (relativePath.IndexOfAny(['?', '=', '&']) != -1)
                 {
                     //Cut it
                     query = relativePath[relativePath.IndexOf('?')..];
@@ -124,7 +124,7 @@ public class WebPathSettings
     }
 }
 
-[Scope]
+[Scope(Additional = typeof(StaticUploaderExtension))]
 public class WebPath(WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
     SettingsManager settingsManager,
@@ -217,5 +217,13 @@ public class WebPath(WebPathSettings webPathSettings,
         {
             return false;
         }
+    }
+}
+
+public class StaticUploaderExtension
+{
+    public static void Register(DIHelper services)
+    {
+        services.TryAdd<StaticUploader>();
     }
 }

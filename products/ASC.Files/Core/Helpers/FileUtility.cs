@@ -240,9 +240,7 @@ public class FileUtility
     public string GetInternalExtension(string fileName)
     {
         var extension = GetFileExtension(fileName);
-        return InternalExtension.TryGetValue(GetFileTypeByExtention(extension), out var internalExtension)
-                   ? internalExtension
-                   : extension;
+        return InternalExtension.GetValueOrDefault(GetFileTypeByExtention(extension), extension);
     }
 
     public string GetGoogleDownloadableExtension(string googleExtension)
@@ -276,6 +274,11 @@ public class FileUtility
     public static FileType GetFileTypeByExtention(string extension)
     {
         extension = extension.ToLower();
+
+        if (ExtsPdf.Contains(extension))
+        {
+            return FileType.Pdf;
+        }
 
         if (ExtsDocument.Contains(extension))
         {
@@ -683,6 +686,11 @@ public class FileUtility
     public static readonly ImmutableList<string> ExtsOForm = new List<string>
     {
                 ".oform"
+            }.ToImmutableList();
+
+    public static readonly ImmutableList<string> ExtsPdf = new List<string>
+    {
+                ".pdf"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsTemplate = new List<string>

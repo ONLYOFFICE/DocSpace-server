@@ -38,14 +38,16 @@ internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dicti
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
+    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
         : base(serviceProvider, f1, f2)
     {
         _tempStream = tempStream;
+        _baseUri = baseUri;
         this[OpType] = (int)FileOperationType.Download;
     }
 
     private readonly TempStream _tempStream;
+    private readonly string _baseUri;
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -59,6 +61,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            commonLinkUtility.ServerUri = _baseUri;
+        }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
@@ -84,9 +92,9 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
                     (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
+            }
+            else
+            {
                 fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
@@ -107,7 +115,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
                 if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
                 path = $@"{linkId}\{sessionId}\{fileName}";
@@ -193,10 +201,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             if (Files.Count > 0)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         Total = _entriesPathId.Count + 1;
@@ -237,7 +245,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
                 title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+        }
 
         var entriesPathId = new ItemNameValueCollection<T>();
         entriesPathId.Add(path + title, file.Id);
@@ -369,15 +377,15 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (file == null)
                     {
-                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                         continue;
                     }
 
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
                         newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                        }
                     }
+                }
 
                 if (0 < counter)
                 {
