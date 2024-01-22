@@ -125,7 +125,7 @@ public class FileSharingAceHelper(
                         _ => (ShareFilterType.Link, 0)
                     };
 
-                    var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+                    var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null, null);
 
                     if (linksCount >= maxCount)
                     {
@@ -471,7 +471,7 @@ public class FileSharing(
         }
     }
 
-    public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, int offset, int count)
+    public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset, int count)
     {
         if (entry == null)
         {
@@ -485,13 +485,13 @@ public class FileSharing(
             yield break;
         }
 
-        var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status).ToListAsync();
+        var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status, text).ToListAsync();
         var defaultAces = allDefaultAces.Skip(offset).Take(count).ToList();
 
         offset = Math.Max(defaultAces.Count > 0 ? 0 : offset - allDefaultAces.Count, 0);
         count -= defaultAces.Count;
 
-        var records = fileSecurity.GetPureSharesAsync(entry, filterType, status, offset, count);
+        var records = fileSecurity.GetPureSharesAsync(entry, filterType, status, text, offset, count);
 
         foreach (var record in defaultAces)
         {
@@ -506,7 +506,7 @@ public class FileSharing(
         }
     }
 
-    public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
+    public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, string text)
     {
         if (entry == null)
         {
@@ -520,8 +520,8 @@ public class FileSharing(
             return 0;
         }
 
-        var defaultAces = await GetDefaultAcesAsync(entry, filterType, null).CountAsync();
-        var sharesCount = await fileSecurity.GetPureSharesCountAsync(entry, filterType, null);
+        var defaultAces = await GetDefaultAcesAsync(entry, filterType, null, text).CountAsync();
+        var sharesCount = await fileSecurity.GetPureSharesCountAsync(entry, filterType, null, text);
 
         return defaultAces + sharesCount;
     }
@@ -894,18 +894,28 @@ public class FileSharing(
         return await fileSecurity.CanReadLinksAsync(entry);
     }
 
-    private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
+    private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
     {
-        if (filterType != ShareFilterType.UserOrGroup)
+        if (filterType is not (ShareFilterType.User or ShareFilterType.UserOrGroup))
         {
             yield break;
         }
 
-        if (status.HasValue)
+        if (status.HasValue && filterType == ShareFilterType.User)
         {
             var user = await userManager.GetUsersAsync(entry.CreateBy);
 
             if (user.ActivationStatus != status.Value)
+            {
+                yield break;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            var user = await userManager.GetUsersAsync(entry.CreateBy);
+
+            if (!(user.FirstName.Contains(text) || user.LastName.Contains(text) || user.Email.Contains(text)))
             {
                 yield break;
             }

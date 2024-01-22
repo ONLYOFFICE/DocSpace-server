@@ -2515,21 +2515,21 @@ public class FileStorageService //: IFileStorageService
         return await fileSharing.GetSharedInfoAsync(fileIds, folderIds, subjectTypes);
     }
 
-    public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, ShareFilterType filterType, int offset, int count)
+    public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, ShareFilterType filterType, string text, int offset, int count)
     {
         var room = await GetFolderDao<T>().GetFolderAsync(roomId).NotFoundIfNull();
 
-        await foreach (var ace in fileSharing.GetPureSharesAsync(room, filterType, null, offset, count))
+        await foreach (var ace in fileSharing.GetPureSharesAsync(room, filterType, null, text, offset, count))
         {
             yield return ace;
-    }
+        }
     }
 
-    public async Task<int> GetRoomSharesCountAsync<T>(T roomId, ShareFilterType filterType)
+    public async Task<int> GetRoomSharesCountAsync<T>(T roomId, ShareFilterType filterType, string text)
     {
         var room = (await GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
-        return await fileSharing.GetPureSharesCountAsync(room, filterType);
+        return await fileSharing.GetPureSharesCountAsync(room, filterType, text);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)
@@ -2555,7 +2555,7 @@ public class FileStorageService //: IFileStorageService
             var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).
                 FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
             
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
                 .FirstOrDefaultAsync();
             if (parentLink == null)
             {
@@ -2568,7 +2568,7 @@ public class FileStorageService //: IFileStorageService
             return parentLink;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
             .FirstOrDefaultAsync();
 
         if (link == null)
@@ -3359,7 +3359,7 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(!await fileSecurity.CanEditRoomAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
 
         if (!resendAll)
-    {
+        {
             await foreach (var ace in fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
@@ -3380,7 +3380,7 @@ public class FileStorageService //: IFileStorageService
         {
             var counter = 0;
 
-            await foreach (var ace in fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, offset, packSize + margin))
+            await foreach (var ace in fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, null, offset, packSize + margin))
             {
                 counter++;
                 
@@ -3388,7 +3388,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     offset += packSize;
                     break;
-            }
+                }
 
                 var user = await userManager.GetUsersAsync(ace.Id);
 

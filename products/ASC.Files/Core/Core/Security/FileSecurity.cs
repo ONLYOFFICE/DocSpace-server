@@ -1264,14 +1264,14 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, subjects);
     }
 
-    public IAsyncEnumerable<FileShareRecord> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, int offset = 0, int count = -1)
+    public IAsyncEnumerable<FileShareRecord> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1)
     {
-        return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, offset, count);
+        return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, text, offset, count);
     }
 
-    public Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
+    public Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
     {
-        return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status);
+        return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);
     }
 
     public IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync<T>(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
