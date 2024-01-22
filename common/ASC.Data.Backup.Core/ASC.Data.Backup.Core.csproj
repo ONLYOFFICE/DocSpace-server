@@ -12,8 +12,8 @@
     <PackageReference Include="Grpc" Version="2.46.6">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
-    <PackageReference Include="MySql.Data" Version="8.1.0" />
-    <PackageReference Include="protobuf-net" Version="3.2.26" />
+    <PackageReference Include="MySql.Data" Version="8.2.0" />
+    <PackageReference Include="protobuf-net" Version="3.2.30" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />

@@ -58,15 +58,15 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
             var location = await GetIPGeolocationAsync(IPAddress.Parse(ip));
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
-                return new[] { string.Empty, string.Empty };
+                return [string.Empty, string.Empty];
             }
             var regionInfo = new RegionInfo(location.Key).EnglishName;
-            return new[] { regionInfo, location.City };
+            return [regionInfo, location.City];
         }
         catch (Exception ex)
         {
             logger.ErrorWithException(ex);
-            return new[] { string.Empty, string.Empty };
+            return [string.Empty, string.Empty];
         }
     }
 

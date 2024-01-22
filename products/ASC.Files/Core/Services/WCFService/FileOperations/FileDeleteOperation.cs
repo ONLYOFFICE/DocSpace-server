@@ -26,15 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDeleteOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant,
-        ExternalShareData externalShareData, bool holdResult = true,
+internal class FileDeleteOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, bool holdResult = true,
         bool ignoreException = false, bool immediately = false, IDictionary<string, StringValues> headers = null,
         bool isEmptyTrash = false)
-    : FileOperationData<T>(folders, files, tenant, externalShareData, holdResult)
+    : FileOperationData<T>(folders, files, tenant, headers, holdResult)
 {
     public bool IgnoreException { get; } = ignoreException;
     public bool Immediately { get; } = immediately;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
     public bool IsEmptyTrash { get; } = isEmptyTrash;
 }
 
@@ -75,7 +73,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         tenantManager.SetCurrentTenant(CurrentTenant);
 
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
+        externalShare.Init(Headers);
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 
@@ -131,18 +129,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             T canCalculate = default;
             if (folder == null)
             {
-                this[Err] = FilesCommonResource.ErrorMassage_FolderNotFound;
+                this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
                 && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
-                this[Err] = FilesCommonResource.ErrorMassage_SecurityException_DeleteFolder;
+                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
 
-                this[Err] = FilesCommonResource.ErrorMassage_SecurityException_DeleteFolder;
+                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else
             {
@@ -294,7 +292,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var (isError, message) = await WithErrorAsync(scope, new[] { file }, false, checkPermissions);
             if (file == null)
             {
-                this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
             }
             else if (!_ignoreException && isError)
             {
@@ -305,7 +303,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId));
+                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
                     
                     if (isNeedSendActions)
                     {
@@ -345,6 +343,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
 
                     await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                    await FileDao.SaveProperties(file.Id, null);
                 }
 
                 ProcessedFile(fileId);
@@ -364,19 +363,19 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             string error;
             if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
             {
-                error = FilesCommonResource.ErrorMassage_SecurityException_DeleteFile;
+                error = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
 
                 return (true, error);
             }
             if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
             {
-                error = FilesCommonResource.ErrorMassage_LockedFile;
+                error = FilesCommonResource.ErrorMessage_LockedFile;
 
                 return (true, error);
             }
             if (fileTracker.IsEditing(file.Id))
             {
-                error = folder ? FilesCommonResource.ErrorMassage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMassage_SecurityException_DeleteEditingFile;
+                error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
 
                 return (true, error);
             }

@@ -45,10 +45,20 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
-{
+    {
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
-        return SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        
+        if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+        {
+            return folder;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+
+        return folder;
     }
 
     public async Task<Folder<string>> GetFolderAsync(string title, string parentId)
@@ -93,8 +103,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         {
             yield return room;
         }
+        }
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        return GetFoldersAsync(parentId);
     }
-
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
@@ -105,7 +118,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (CheckInvalidFilter(filterType))
@@ -355,12 +368,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
 
             if (DocSpaceHelper.IsRoom(SharePointProviderInfo.FolderType) && SharePointProviderInfo.FolderId != null)
             {
-                await DaoSelector.RenameProviderAsync(SharePointProviderInfo, newTitle);
-
-                if (SharePointProviderInfo.FolderId == oldId)
-                {
-                    await DaoSelector.UpdateProviderFolderId(SharePointProviderInfo, newFolderId);
-                }
+                await DaoSelector.RenameRoomProviderAsync(SharePointProviderInfo, newTitle, newFolderId);
             }
         }
 
@@ -425,6 +433,13 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult("tar.gz");
     }
 
+    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    {
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
+            ? (string.Empty, string.Empty) 
+            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+    }
+
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;
@@ -477,4 +492,14 @@ static file class Queries
                     ctx.ThirdpartyIdMapping
                         .Where(r => r.TenantId == tenantId)
                         .Where(m => m.Id.StartsWith(idStart)));
+    
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, SubjectType, Task<bool>>
+        SharedAsync =
+            EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, SubjectType subjectType) =>
+                    ctx.Security
+                        .Where(t => t.TenantId == tenantId && t.EntryType == entryType && t.SubjectType == subjectType)
+                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId, 
+                            (s, m) => new { s, m.Id })
+                        .Any(r => r.Id == entryId));
 }

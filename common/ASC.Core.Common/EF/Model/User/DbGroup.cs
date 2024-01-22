@@ -41,7 +41,7 @@ public class DbGroup : BaseEntity, IMapFrom<Group>
 
     public override object[] GetKeys()
     {
-        return new object[] { Id };
+        return [Id];
     }
 }
 

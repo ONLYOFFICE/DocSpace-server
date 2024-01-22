@@ -60,15 +60,15 @@ public enum LdapChangeAction
 
 public static class LdapUserMapping
 {
-    public static readonly List<string> Fields = new()
-    {
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.FirstName),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.LastName),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Mail),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Phone),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Title),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Location),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Sid),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Member)
-        };
+    public static readonly List<string> Fields =
+    [
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.FirstName),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.LastName),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Mail),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Phone),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Title),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Location),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Sid),
+        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Member)
+    ];
 }

@@ -322,7 +322,8 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
 public class AuthContext
 {
     private IHttpContextAccessor HttpContextAccessor { get; }
-    private static readonly List<string> _typesCheck = new() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
+    private static readonly List<string> _typesCheck =
+        [ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString()];
 
     public AuthContext()
     {

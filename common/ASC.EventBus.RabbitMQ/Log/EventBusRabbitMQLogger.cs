@@ -63,6 +63,12 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(Level = LogLevel.Trace, Message = "Creating RabbitMQ consumer channel")]
     public static partial void TraceCreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Channel was recreated successfully")]
+    public static partial void InfoCreatedConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to recreate channel, trying again")]
+    public static partial void ErrorCreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger, Exception exception);
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "Recreating RabbitMQ consumer channel")]
     public static partial void WarningRecreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger, Exception exception);
 

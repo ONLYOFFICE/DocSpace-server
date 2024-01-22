@@ -164,6 +164,65 @@ public class AbstractDao
             _ => query
         };
     }
+    
+    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, string text, SearchType searchType) 
+        where TQuery : IQueryResult<TEntry> 
+        where TEntry: IDbSearch
+    {
+        var lowerText = GetSearchText(text);
+
+        return searchType switch
+        {
+            SearchType.Start => query.Where(r => r.Entry.Title.ToLower().StartsWith(lowerText)),
+            SearchType.End => query.Where(r => r.Entry.Title.ToLower().EndsWith(lowerText)),
+            SearchType.Any => query.Where(r => r.Entry.Title.ToLower().Contains(lowerText)),
+            _ => query,
+        };
+    }
+    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, IEnumerable<string> text, SearchType searchType) 
+        where TQuery : IQueryResult<TEntry> 
+        where TEntry: IDbSearch
+    {
+        var lowerText = text.Select(GetSearchText);
+
+        switch (searchType)
+        {
+            case SearchType.Start:
+                {
+                    Expression<Func<TQuery, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Entry.Title.ToLower().StartsWith(t));
+                    }
+                    return query.Where(exp);
+                }
+            case SearchType.End:
+                {
+                    Expression<Func<TQuery, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Entry.Title.ToLower().EndsWith(t));
+                    }
+                    return query.Where(exp);
+                }
+            case SearchType.Any:
+                {
+                    Expression<Func<TQuery, bool>> exp = p1 => false;
+
+                    foreach (var t in lowerText)
+                    {
+                        exp = exp.Or(p => p.Entry.Title.ToLower().Contains(t));
+                    }
+                    return query.Where(exp);
+                }
+            default:
+                {
+                    return query;
+                }
+        }
+    }
 
     internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, IEnumerable<string> text, SearchType searchType) where T : IDbSearch
     {

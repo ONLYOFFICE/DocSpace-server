@@ -165,6 +165,18 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         };
     }
 
+    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
+        var userIds = whoCanRead
+            .Concat(await GetAdmins())
+            .Concat(new []{ entry.CreateBy })
+            .Distinct()
+            .ToList();
+
+        return userIds;
+    }
+    
     private List<Guid> _admins;
     private async Task<IEnumerable<Guid>> GetAdmins()
     {
@@ -182,15 +194,4 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
         return _admins;
     }
-    
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
-    {
-        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
-        var userIds = whoCanRead
-            .Concat(await GetAdmins())
-            .Distinct()
-            .ToList();
-
-        return userIds;
     }
-}

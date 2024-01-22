@@ -64,7 +64,7 @@ public class DefaultMappingProfile : Profile
 
             if (methodInfo != null)
             {
-                methodInfo.Invoke(instance, new object[] { this });
+                methodInfo.Invoke(instance, [this]);
             }
             else
             {
@@ -76,7 +76,7 @@ public class DefaultMappingProfile : Profile
                     {
                         var interfaceMethodInfo = @interface.GetMethod(mappingMethodName, argumentTypes);
 
-                        interfaceMethodInfo?.Invoke(instance, new object[] { this });
+                        interfaceMethodInfo?.Invoke(instance, [this]);
                     }
                 }
             }

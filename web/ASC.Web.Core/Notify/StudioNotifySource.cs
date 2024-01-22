@@ -80,24 +80,8 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
                 Actions.SaasAdminModulesV1,
 
-                Actions.PersonalActivate,
-                Actions.PersonalAfterRegistration1,
-                Actions.PersonalAfterRegistration14V1,
-                Actions.PersonalConfirmation,
-                Actions.PersonalPasswordChangeV115,
-                Actions.PersonalEmailChangeV115,
-                Actions.PersonalProfileDelete,
-                Actions.PersonalAlreadyExist,
-
                 Actions.MailboxCreated,
                 Actions.MailboxWithoutSettingsCreated,
-
-                Actions.PersonalCustomModeAfterRegistration1,
-                Actions.PersonalCustomModeConfirmation,
-                Actions.PersonalCustomModePasswordChangeV115,
-                Actions.PersonalCustomModeEmailChangeV115,
-                Actions.PersonalCustomModeProfileDelete,
-                Actions.PersonalCustomModeAlreadyExist,
 
                 Actions.SaasCustomModeRegData,
 

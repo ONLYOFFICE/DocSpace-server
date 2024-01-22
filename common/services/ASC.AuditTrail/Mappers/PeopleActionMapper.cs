@@ -28,11 +28,11 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class PeopleActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } = new()
-    {
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
         new UsersActionMapper(),
         new GroupsActionMapper()
-    };
+    ];
 
     public ProductType Product { get; } = ProductType.People;
 }
@@ -52,19 +52,24 @@ internal class UsersActionMapper : IModuleActionMapper
                 EntryType.User,
                 new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create,  new[] { MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite }  },
+                    { ActionType.Create, [MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite
+                        ]
+                    },
                     {
-                        ActionType.Update,  new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.UserActivated, MessageAction.GuestActivated, MessageAction.UserUpdated,
                             MessageAction.UserUpdatedMobileNumber, MessageAction.UserUpdatedLanguage, MessageAction.UserAddedAvatar,
                             MessageAction.UserUpdatedAvatarThumbnails, MessageAction.UserUpdatedEmail, MessageAction.UsersUpdatedType,
                             MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
-                        }
+                        ]
                     },
-                    { ActionType.Delete, new[] { MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving } },
-                    { ActionType.Import, new[] { MessageAction.UserImported, MessageAction.GuestImported } },
-                    { ActionType.Logout, new[] { MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser } }
+                    { ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving
+                        ]
+                    },
+                    { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },
+                    { ActionType.Logout, [MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser
+                        ]
+                    }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {

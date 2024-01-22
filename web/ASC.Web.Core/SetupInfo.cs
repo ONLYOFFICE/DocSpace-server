@@ -44,8 +44,6 @@ public class SetupInfo
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
     public List<CultureInfo> EnabledCultures { get; private set; }
-    private List<CultureInfo> EnabledCulturesPersonal { get; set; }
-    public List<KeyValuePair<string, CultureInfo>> PersonalCultures { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -138,13 +136,6 @@ public class SetupInfo
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
             .ToList();
 
-        EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
-            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .ToList();
-
-        PersonalCultures = GetPersonalCultures();
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
         AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
@@ -242,46 +233,5 @@ public class SetupInfo
             }
         }
         return defaultValue;
-    }
-
-    private List<KeyValuePair<string, CultureInfo>> GetPersonalCultures()
-    {
-        var result = new Dictionary<string, CultureInfo>();
-
-        foreach (var culture in EnabledCulturesPersonal)
-        {
-            result.Add(
-                result.ContainsKey(culture.TwoLetterISOLanguageName) ? culture.Name : culture.TwoLetterISOLanguageName,
-                culture);
-        }
-
-        return result.OrderBy(item => item.Value.DisplayName).ToList();
-    }
-
-    public KeyValuePair<string, CultureInfo> GetPersonalCulture(string lang)
-    {
-        foreach (var item in PersonalCultures)
-        {
-            if (string.Equals(item.Key, lang, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return item;
-            }
-        }
-
-        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase)) ??
-                          EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
-
-        if (cultureInfo != null)
-        {
-            foreach (var item in PersonalCultures)
-            {
-                if (Equals(item.Value, cultureInfo))
-                {
-                    return item;
-                }
-            }
-        }
-
-        return new KeyValuePair<string, CultureInfo>(lang, cultureInfo);
     }
 }

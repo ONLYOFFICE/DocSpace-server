@@ -60,7 +60,7 @@ try
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        containerBuilder.Register(context.Configuration, false, false);
+        containerBuilder.Register(context.Configuration, false);
 
         if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
         {

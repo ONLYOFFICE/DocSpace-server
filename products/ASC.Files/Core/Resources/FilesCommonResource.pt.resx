@@ -70,73 +70,73 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Eu</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Pedido incorreto.</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Ficheiro vazio</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>O ficheiro necessário não foi encontrado</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Você não pode copiar a pasta para a sua subpasta</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>A pasta necessária não foi encontrada</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Demasiado carregamentos.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Desculpe, este formato de ficheiro não é suportado</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Você não tem permissão suficiente para executar a operação</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Você não tem permissão suficiente para criar</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Não é possível eliminar o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Não é possível eliminar a pasta</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Você não tem permissão suficiente para eliminar o arquivo</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Você não tem permissões suficientes para eliminar a pasta</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Você não tem permissões suficientes para editar o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Este documento já está a ser editado por você num outro separador</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Você não tem permissão suficiente para ver o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para exibir o conteúdo da pasta</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Você não tem permissão suficiente para renomear o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para renomear a pasta</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Não é possível atualizar o ficheiro porque ele está aberto para edição</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para exibir o conteúdo da pasta</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Você não pode atualizar um ficheiro que está aberto para edição</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Você não tem permissão para visualizar os elementos no Lixo</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -200,13 +200,13 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Formulário submetido</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>A nova versão não pode ser igual à versão atual</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Não tem permissão para copiar o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Não tem permissão para copiar a pasta</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -332,67 +332,67 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Anulado</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Não pode selecionar este utilizador</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>A conversão demora demasiado tempo.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Um erro ocorreu no Serviço de Documentos</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>O ficheiro foi aberto para edição numa aplicação móvel por {0}</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>O ficheiro foi aberto para edição por {0}. Atualmente, a função de coedição não é suportada para este formato de ficheiro.</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>Ficheiro maior que {0}, não será convertido</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será copiado</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será editado</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será movido</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Título incorreto</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>O ficheiro está atualmente bloqueado por outro utilizador</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Pelo menos {0} mensagens de email não puderam ser enviadas. Por favor, visite o módulo E-mail para ver qual pode ser a razão da falha.</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>O autor da última gravação é desconhecido</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>O ficheiro foi corrompido quando tentou guardá-lo</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Falha ao tentar obter o ficheiro a ser guardado</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Não é possível autorizar fornecedor {0} com as credenciais fornecidas.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Não tem permissão suficiente para mover o ficheiro</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Não tem permissão suficiente para mover a pasta</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>O conteúdo da pasta de terceiros não está disponível. Tente voltar a ligar a conta.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Erro no início da edição de ficheiros</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>O utilizador não foi encontrado</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
@@ -402,7 +402,7 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
     <value>Ficheiro criado na pasta "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>O documento preenchível OFORM está pronto. Está guardado no ficheiro {0}</value>
+    <value>O documento preenchível PDF está pronto. Está guardado no ficheiro {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
     <value>A cópia OFORM foi criada na pasta {0}. Preencha o formulário e descarregue o resultado como ficheiro PDF ou DOCX.</value>

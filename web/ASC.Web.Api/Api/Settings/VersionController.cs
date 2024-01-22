@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+/// <visible>false</visible>
 [DefaultRoute("version")]
 public class VersionController(PermissionContext permissionContext,
         ApiContext apiContext,
@@ -45,6 +46,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <returns type="ASC.Api.Settings.BuildVersion, ASC.Web.Api">Current product versions</returns>
+    /// <visible>false</visible>
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("build")]
@@ -63,6 +65,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <path>api/2.0/settings/version</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
+    /// <visible>false</visible>
     [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
@@ -81,6 +84,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <path>api/2.0/settings/version</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
+    /// <visible>false</visible>
     [HttpPut("")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {
