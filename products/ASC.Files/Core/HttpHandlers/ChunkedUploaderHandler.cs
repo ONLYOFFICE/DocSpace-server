@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.Web.Files.HttpHandlers;
 
 public class ChunkedUploaderHandler
@@ -130,7 +132,20 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                 case ChunkedRequestType.UploadAsync:
                     {
-                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize(), request.ChunkNumber);
+                        var boundary = MultipartRequestHelper.GetBoundary(
+                            Microsoft.Net.Http.Headers.MediaTypeHeaderValue.Parse(context.Request.ContentType),
+                            100);
+                        var reader = new MultipartReader(boundary, context.Request.Body);
+                        var section = await reader.ReadNextSectionAsync();
+                        var headersLength = 0;
+                        boundary = HeaderUtilities.RemoveQuotes(new StringSegment(boundary)).ToString();
+                        var boundaryLength = Encoding.UTF8.GetBytes("\r\n--" + boundary).Length + 2;
+                        foreach (var h in section.Headers)
+                        {
+                            headersLength += h.Value.Sum(r => r.Length) + h.Key.Length + "\n\n".Length;
+                        }
+                       
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
                         if (resumedSession.UseChunks)
                         {
                             await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
@@ -388,6 +403,26 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
     private bool IsFileDataSet()
     {
         return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default);
+    }
+}
+
+public static class MultipartRequestHelper
+{
+    public static string GetBoundary(Microsoft.Net.Http.Headers.MediaTypeHeaderValue contentType, int lengthLimit)
+    {
+        var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
+
+        if (string.IsNullOrWhiteSpace(boundary))
+        {
+            throw new InvalidDataException("Missing content-type boundary.");
+        }
+
+        if (boundary.Length > lengthLimit)
+        {
+            throw new InvalidDataException($"Multipart boundary length limit {lengthLimit} exceeded.");
+        }
+
+        return boundary;
     }
 }
 
