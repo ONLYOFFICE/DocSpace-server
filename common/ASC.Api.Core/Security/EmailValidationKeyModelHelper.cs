@@ -80,7 +80,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, first, _) = inDto;
+        var (key, emplType, email, uiD, type, first) = inDto;
 
         ValidationResult checkKeyResult;
 
