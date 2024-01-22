@@ -256,7 +256,8 @@ public class EntryManager(IDaoFactory daoFactory,
     SocketManager socketManager,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    TenantUtil tenantUtil)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1047,16 +1048,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 if (properties == null)
                 {
-                    try
-                    {
-                        var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolder.Id, readyFormFolder.Id, folderIfNew.CreateBy, fileDao, folderDao);
-                        linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
-                    }
-                    catch (Exception e)
-                    {
-                        logger.ErrorUpdateFile(sourceFile.Id.ToString(), sourceFile.Version, e);
-                    }
-
+                    var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolder.Id, readyFormFolder.Id, folderIfNew.CreateBy, fileDao, folderDao);
+                    linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
                 }
                 else
                 {
@@ -1066,7 +1059,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
-                title = $"{sourceTitle}-{DateTime.UtcNow:s}";
+                title = $"{sourceTitle}-{tenantUtil.DateTimeNow():s}";
 
                 if (sourceFile.ProviderEntry)
                 {
