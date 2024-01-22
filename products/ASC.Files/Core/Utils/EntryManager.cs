@@ -1039,8 +1039,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
             {
-                var inProcessFormFolder = (await folderDao.GetFoldersAsync(FolderType.InProcessFormFolder, folderId).ToListAsync()).FirstOrDefault();
-                var readyFormFolder = (await folderDao.GetFoldersAsync(FolderType.ReadyFormFolder, folderId).ToListAsync()).FirstOrDefault();
+                var inProcessFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).ToListAsync()).FirstOrDefault();
+                var readyFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).ToListAsync()).FirstOrDefault();
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
                 title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";

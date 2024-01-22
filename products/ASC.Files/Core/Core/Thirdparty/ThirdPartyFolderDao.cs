@@ -105,7 +105,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
             yield return room;
         }
     }
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
     }
