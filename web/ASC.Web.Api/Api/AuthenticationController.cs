@@ -409,7 +409,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 var email = inDto.ConfirmData.Email;
 
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First + inDto.ConfirmData.Module + inDto.ConfirmData.Sms, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
