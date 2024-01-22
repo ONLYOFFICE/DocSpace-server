@@ -288,7 +288,7 @@ IConfiguration configuration)
                     {
                         linkLockHandle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
 
-                        var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+                        var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null, null);
                         if (linksCount >= maxCount)
                         {
                             warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);

@@ -352,10 +352,10 @@ internal abstract class SecurityBaseDao<T>(
 
         switch (filterType)
         {
-            case ShareFilterType.User when entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType):
+            case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
                 {
                     var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
-            
+
                     var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                         (security, user) => new SecurityUserRecord { Security = security, User = user });
 
@@ -377,20 +377,20 @@ internal abstract class SecurityBaseDao<T>(
                 {
                     if (searchByText)
                     {
-                        q = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, 
+                        q = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                                 (security, group) => new { security, group })
                             .Where(r => r.group.Name.Contains(text))
                             .Select(r => r.security);
                     }
-            
-                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share);
+
+                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
                     q = q.OrderBy(predicate);
                     break;
                 }
             case ShareFilterType.UserOrGroup:
                 {
-                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share);
-            
+                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share, entry.RootFolderType);
+
                     if (searchByText)
                     {
                         var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
@@ -398,11 +398,10 @@ internal abstract class SecurityBaseDao<T>(
                             .Where(r => r.user.FirstName.Contains(text) || r.user.LastName.Contains(text) || r.user.Email.Contains(text))
                             .Select(r => new SecurityOrderRecord
                             {
-                                Security = r.security, 
-                                Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2
+                                Security = r.security, Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2
                             });
 
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, 
+                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                                 (security, group) => new { security, group })
                             .Where(r => r.group.Name.Contains(text))
                             .Select(r => new SecurityOrderRecord { Security = r.security, Order = 1 });
@@ -426,9 +425,11 @@ internal abstract class SecurityBaseDao<T>(
                     break;
                 }
             case ShareFilterType.ExternalLink:
-                var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                q = q.OrderBy(predicate).ThenByDescending(s => s.SubjectType);
-                break;
+                {
+                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+                    q = q.OrderBy(predicate).ThenByDescending(s => s.SubjectType);
+                    break;
+                }
             default:
                 {
                     var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
@@ -436,7 +437,7 @@ internal abstract class SecurityBaseDao<T>(
                     break;
                 }
         }
-        
+
         if (offset > 0)
         {
             q = q.Skip(offset);

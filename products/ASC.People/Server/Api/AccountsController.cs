@@ -32,7 +32,6 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 public class AccountsController(
-    CoreBaseSettings coreBaseSettings,
     ApiContext apiContext,
     SecurityContext securityContext,
     UserManager userManager,
@@ -74,11 +73,6 @@ public class AccountsController(
         bool? withoutGroup,
         SearchArea searchArea = SearchArea.Any)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method not available");
-        }
-        
         var isDocSpaceAdmin = (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
         var filter = GroupBasedFilter.Create(groupsIds, employeeType, employeeTypes, isAdministrator, payments, withoutGroup, webItemManager);
