@@ -87,7 +87,13 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        return JsonConvert.DeserializeObject<SubmitFormsData>(data);
+        var options = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = true,
+            PropertyNameCaseInsensitive = true
+        };
+
+        return JsonSerializer.Deserialize<SubmitFormsData>(data, options);
     }
 
 }
