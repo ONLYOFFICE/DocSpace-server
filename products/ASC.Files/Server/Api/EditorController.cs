@@ -132,7 +132,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
     protected readonly SettingsManager _settingsManager = settingsManager;
     protected readonly EntryManager _entryManager = entryManager;
-    protected readonly AuthContext _authContext = authContext;
     protected readonly ExternalShare _externalShare = externalShare;
 
     /// <summary>
@@ -230,12 +229,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         result.EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
         result.File = await _fileDtoHelper.GetAsync(file);
         
-        if (_authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
+        if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
 
-            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != _authContext.CurrentAccount.ID)
+            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
                 await _entryManager.MarkAsRecentByLink(file, linkId);
             }
@@ -336,11 +335,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
+        var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
+        var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
+        var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        
         filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
-
-        await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -349,7 +350,19 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
-        await documentServiceConnector.CheckDocServiceUrlAsync();
+        try
+        {        
+            await documentServiceConnector.CheckDocServiceUrlAsync();
+
+            await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+        }
+        catch (Exception)
+        {        
+            filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
+            filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
+            filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+            throw;
+        }
 
         return await GetDocServiceUrlAsync(false);
     }

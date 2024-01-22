@@ -250,17 +250,9 @@ public class ExternalShare(Global global,
 
         key ??= GetKey();
 
-        if (string.IsNullOrEmpty(key))
-        {
-            return url;
-        }
-
-        var uriBuilder = new UriBuilder(url);
-        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-        query[FilesLinkUtility.ShareKey] = key;
-        uriBuilder.Query = query.ToString() ?? string.Empty;
-
-        return uriBuilder.ToString();
+        return !string.IsNullOrEmpty(key)
+            ? QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key)
+            : url;
     }
     
     public async Task<string> CreateShareKeyAsync(Guid linkId)

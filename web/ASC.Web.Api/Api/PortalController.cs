@@ -522,7 +522,6 @@ public class PortalController(ILogger<PortalController> logger,
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
@@ -582,8 +581,6 @@ public class PortalController(ILogger<PortalController> logger,
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
-
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -666,9 +663,6 @@ public class PortalController(ILogger<PortalController> logger,
                 await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
-
-            await messageService.SendAsync(MessageAction.PortalDeleted);
-
         }
         finally
         {

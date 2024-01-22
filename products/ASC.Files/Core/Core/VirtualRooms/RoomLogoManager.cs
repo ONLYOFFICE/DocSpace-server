@@ -38,7 +38,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
     FilesMessageService filesMessageService,
     EmailValidationKeyProvider emailValidationKeyProvider,
     SecurityContext securityContext,
-    FileUtilityConfiguration fileUtilityConfiguration)
+    FileUtilityConfiguration fileUtilityConfiguration, 
+    ExternalShare externalShare)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -278,7 +279,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 
-        return uri + (secure ? "&" : "?") + $"hash={hash}";
+        return externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
     }
 
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
