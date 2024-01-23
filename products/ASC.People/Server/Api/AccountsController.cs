@@ -37,8 +37,7 @@ public class AccountsController(
     UserManager userManager,
     WebItemSecurity webItemSecurity,
     GroupFullDtoHelper groupFullDtoHelper,
-    EmployeeFullDtoHelper employeeFullDtoHelper,
-    WebItemManager webItemManager) : ControllerBase
+    EmployeeFullDtoHelper employeeFullDtoHelper) : ControllerBase
 {
     /// <summary>
     /// Returns a list of users or groups with full information about them matching the parameters specified in the request.
@@ -46,77 +45,45 @@ public class AccountsController(
     /// <short>
     /// Search users and groups by extended filter
     /// </short>
-    /// <category>Search</category>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
-    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
-    /// <param type="Sustem.Guid[], System" name="groupsIds">List of groups ids</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
-    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
-    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
-    /// <param type="ASC.People.Utils.SearchArea, ASC.People.Utils" name="searchArea">Specifies which area to search. Users (0), Groups (1), Any (2)</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <category>accounts</category>
     /// <path>api/2.0/accounts</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet]
-    public async IAsyncEnumerable<object> GetEntriesAsync(EmployeeStatus? employeeStatus,
-        EmployeeActivationStatus? activationStatus,
-        EmployeeType? employeeType,
-        Payments? payments,
-        AccountLoginType? accountLoginType,
-        [FromQuery] EmployeeType[] employeeTypes,
-        [FromQuery] Guid[] groupsIds,
-        bool? isAdministrator,
-        bool? withoutGroup,
-        SearchArea searchArea = SearchArea.Any)
+    [HttpGet("search")]
+    public async IAsyncEnumerable<object> GetAccountsEntriesAsync(EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus)
     {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+        var text = apiContext.FilterValue;
+
+        if (string.IsNullOrEmpty(text))
+        {
+            apiContext.SetCount(0).SetTotalCount(0);
+            yield break;
+        }
+        
         var isDocSpaceAdmin = (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
-        var filter = GroupBasedFilter.Create(groupsIds, employeeType, employeeTypes, isAdministrator, payments, withoutGroup, webItemManager);
 
-        var onlyUsers = searchArea == SearchArea.Users || employeeStatus.HasValue || (groupsIds != null && groupsIds.Length != 0) || activationStatus.HasValue || employeeType.HasValue || 
-                        (employeeTypes != null && employeeTypes.Length != 0) || isAdministrator.HasValue || payments.HasValue || accountLoginType.HasValue;
+        var totalGroups = await userManager.GetGroupsCountAsync(text);
+        var totalUsers = await userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, [], [], [], activationStatus, null, text, false);
+        var total = totalGroups + totalUsers;
 
-        var groups = onlyUsers 
-            ? Enumerable.Empty<GroupInfo>()
-            : (await userManager.GetDepartmentsAsync()).Select(r => r);
-        
-        if (!string.IsNullOrEmpty(apiContext.FilterValue))
+        apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
+
+        var groupsCount = 0;
+
+        await foreach (var group in userManager.GetGroupsAsync(text, offset, count))
         {
-            groups = groups.Where(r => r.Name!.Contains(apiContext.FilterValue, StringComparison.InvariantCultureIgnoreCase));
+            groupsCount++;
+            yield return await groupFullDtoHelper.Get(group, false);
         }
 
-        var totalGroupsCount = groups.Count();
+        var usersCount = count - groupsCount;
+        var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
-        groups = groups.Skip((int)apiContext.StartIndex).Take((int)apiContext.Count);
-        
-        var groupsCount = groups.Count();
-
-        var usersLimit = apiContext.Count - groupsCount;
-        var usersOffset =  Math.Max(groupsCount > 0 ? 0 : apiContext.StartIndex - totalGroupsCount, 0);
-
-        var users = searchArea != SearchArea.Groups
-            ? userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
-                apiContext.FilterValue, withoutGroup ?? false, apiContext.SortBy, !apiContext.SortDescending, usersLimit, usersOffset)
-            : AsyncEnumerable.Empty<UserInfo>();
-        
-        var totalUsersCount = searchArea != SearchArea.Groups 
-            ? await userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, 
-                activationStatus, accountLoginType, apiContext.FilterValue, withoutGroup ?? false) 
-            : 0;
-
-        var totalCount = totalGroupsCount + totalUsersCount;
-        var count = Math.Max(totalCount - (int)apiContext.StartIndex, 0);
-
-        apiContext.SetCount(Math.Min(count, (int)apiContext.Count)).SetTotalCount(totalCount);
-        
-        foreach (var g in groups)
-        {
-            yield return await groupFullDtoHelper.Get(g, false);
-        }
+        var users = userManager.GetUsers(isDocSpaceAdmin, employeeStatus, [], [], [], activationStatus, null, text, false,
+            "firstname", true, usersCount, usersOffset);
 
         await foreach (var user in users)
         {
