@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Core;
+
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope]
@@ -76,7 +78,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult(ToFolder(RootFolder()));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
         ArgumentNullException.ThrowIfNull(folderFilter);
         if (CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != ProviderFilter.kDrive && folderFilter.Provider != ProviderFilter.WebDav && folderFilter.Provider != ProviderFilter.Yandex))
@@ -95,7 +97,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.Tags, filesDbContext);
+        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.TagNames, filesDbContext);
 
         await foreach (var room in rooms)
         {
@@ -113,10 +115,9 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return parentFolder.OfType<ICloudDirectoryEntry>().Select(ToFolder).ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderFilter folderFilter, string roomId = default)
     {
-        if (CheckInvalidFilter(filterType))
+        if (CheckInvalidFilter(folderFilter.FilterType))
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
@@ -124,18 +125,19 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         var folders = GetFoldersAsync(parentId); //TODO:!!!
 
         //Filter
-        if (subjectID != Guid.Empty)
+        if (folderFilter.SubjectId != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
-                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
-                                             : x.CreateBy == subjectID);
+            folders = folders.WhereAwait(async x => folderFilter.SubjectGroup
+                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, folderFilter.SubjectId)
+                                             : x.CreateBy == folderFilter.SubjectId);
         }
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.IndexOf(folderFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+        var orderBy = folderFilter.OrderBy;
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         folders = orderBy.SortedBy switch

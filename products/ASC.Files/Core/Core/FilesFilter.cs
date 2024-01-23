@@ -26,25 +26,41 @@
 
 namespace ASC.Web.Files.Core;
 
-public class FolderFilter
+public record FileFilter { }
+
+public record BaseFilter : FileFilter
 {
-    public FilterType FilterType { get; set; }
-    public IEnumerable<string> Tags { get; set; }
+    public int From { get; set; }
+    public int Count { get; set; } 
+    public OrderBy OrderBy { get; set; }
     public Guid SubjectId { get; set; }
+    public FilterType FilterType { get; set; }
+    public bool SubjectGroup { get; set; }
     public string SearchText { get; set; }
+    public string[] Extension { get; set; }
+    public bool SearchInContent { get; set; }
+    public bool WithSubfolders { get; set; }
+    public SearchArea SearchArea { get; set; }
     public bool WithoutTags { get; set; }
+    public IEnumerable<string> TagNames { get; set; }
     public bool ExcludeSubject { get; set; }
-    public ProviderFilter Provider {  get; set; }
+    public ProviderFilter Provider { get; set; }
     public SubjectFilter SubjectFilter { get; set; }
+    public ApplyFilterOption ApplyFilterOption { get; set; }
+
+    public void Deconstruct(
+        out int from, out int count, out OrderBy orderBy, out Guid subjectId, out FilterType filterType, 
+        out bool subjectGroup, out string searchText, out string[] extension, out bool searchInContent, out bool withSubfolders,
+        out SearchArea searchArea, out bool withoutTags, out IEnumerable<string> tagNames, out bool excludeSubject,
+        out ProviderFilter provider, out SubjectFilter subjectFilter, out ApplyFilterOption applyFilterOption
+    ) => (from, count, orderBy, subjectId, filterType, subjectGroup, searchText, extension, searchInContent, withSubfolders,
+            searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = 
+        (From, Count, OrderBy, SubjectId, FilterType, SubjectGroup, SearchText, Extension, SearchInContent, WithSubfolders, 
+            SearchArea, WithoutTags, TagNames, ExcludeSubject, Provider, SubjectFilter, ApplyFilterOption);
+}
+
+public record FolderFilter : BaseFilter
+{
     public IEnumerable<string> SubjectEntriesIds { get; set; }
 }
 
-public class FileFilter
-{
-    public FilterType FilterType { get; set; }
-    public bool SubjectGroup {  get; set; }
-    public Guid SubjectID { get; set; }
-    public string SearchText { get; set; }
-    public string[] Extension {  get; set; }
-    public bool SearchInContent { get; set; }
-}

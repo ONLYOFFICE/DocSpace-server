@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core;
+using ASC.Web.Files.Core;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -125,9 +128,14 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
+            var baseFilter = new BaseFilter()
+            {
+                Count = -1,
+                FilterType = FilterType.FoldersOnly,
+                OrderBy = new OrderBy(SortedByType.AZ, true)
+            };
             (entries, _) = await entryManager.GetEntriesAsync(
-                await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+                await folderDao.GetFolderAsync(parentId), baseFilter);
         }
         catch (Exception e)
         {
@@ -139,26 +147,10 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
         T parentId,
-        int from,
-        int count,
-        FilterType filterType,
-        bool subjectGroup,
-        string subject,
-        string searchText,
-        string[] extension,
-        bool searchInContent,
-        bool withSubfolders,
-        OrderBy orderBy,
-        SearchArea searchArea = SearchArea.Active,
-        T roomId = default,
-        bool withoutTags = false,
-        IEnumerable<string> tagNames = null,
-        bool excludeSubject = false,
-        ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter subjectFilter = SubjectFilter.Owner,
-        ApplyFilterOption applyFilterOption = ApplyFilterOption.All)
+        BaseFilter baseFilter,
+        T roomId = default)
     {
-        var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
+        var (from, count, orderBy, subjectId, filterType, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = baseFilter;
 
         var folderDao = GetFolderDao<T>();
 
@@ -226,8 +218,27 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FileEntry> entries;
         try
         {
-            (entries, total) = await entryManager.GetEntriesAsync(parent, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea,
-                withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption);
+            var filter = new BaseFilter
+            {
+                From = from,
+                Count = count,
+                FilterType = filterType,
+                SubjectGroup = subjectGroup,
+                SubjectId = subjectId,
+                SearchText = searchText,
+                Extension = extension,
+                SearchInContent = searchInContent,
+                WithSubfolders = withSubfolders,
+                OrderBy = orderBy,
+                SearchArea = searchArea,
+                WithoutTags = withoutTags,
+                TagNames = tagNames,
+                ExcludeSubject = excludeSubject,
+                Provider = provider,
+                SubjectFilter = subjectFilter,
+                ApplyFilterOption = applyFilterOption
+            };
+            (entries, total) = await entryManager.GetEntriesAsync(parent, filter, roomId);
         }
         catch (Exception e)
         {
@@ -256,7 +267,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
                 }
-            }
+        }
 
         parent.Shareable =
             parent.FolderType == FolderType.SHARE ||
@@ -688,10 +699,10 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders, OrderBy orderBy)
+    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, BaseFilter baseFilter)
     {
-        var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
+
+        var (from, count, orderBy, subjectId, filter, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = baseFilter;
 
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
@@ -743,7 +754,18 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                (entries, _) = await entryManager.GetEntriesAsync(parent, 0, 0, filter, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy);
+                var filterBase = new BaseFilter
+                {
+                    FilterType = filter,
+                    SubjectGroup = subjectGroup,
+                    SubjectId = subjectId,
+                    SearchText = searchText,
+                    Extension = extension,
+                    SearchInContent = searchInContent,
+                    WithSubfolders = withSubfolders,
+                    OrderBy = orderBy
+                };
+                (entries, _) = await entryManager.GetEntriesAsync(parent, filterBase);
             }
             catch (Exception e)
             {
@@ -2602,7 +2624,16 @@ public class FileStorageService //: IFileStorageService
         var folderDao = GetFolderDao<T>();
         var fileDao = GetFileDao<T>();
 
-        var result = entryManager.GetTemplatesAsync(folderDao, fileDao, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
+        var baseFilter = new BaseFilter()
+        {
+            FilterType = filter,
+            SubjectGroup = subjectGroup,
+            SubjectId = subjectId,
+            SearchText = searchText,
+            Extension = extension,
+            SearchInContent = searchInContent
+        };
+        var result = entryManager.GetTemplatesAsync(folderDao, fileDao, baseFilter);
 
         await foreach (var r in result.Skip(from).Take(count))
         {
@@ -2917,12 +2948,14 @@ public class FileStorageService //: IFileStorageService
                     Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
                 };
             }
-            var fileFilter = new FileFilter
+            var baseFilter = new BaseFilter()
             {
                 FilterType = FilterType.FilesOnly,
-                SearchText = path
+                SearchText = path,
+                OrderBy = new OrderBy(SortedByType.AZ, true),
+                Count = -1
             };
-            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter);
+            var list = fileDao.GetFilesAsync(folder.Id, baseFilter);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
         }
 
@@ -3069,11 +3102,13 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
-        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
+
+        var folderFilter = new FolderFilter { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
+        var folders = await folderDao.GetFoldersAsync(folderId, folderFilter).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
-        
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), new FileFilter{}).Select(r=> r.Id).ToListAsync();
+
+        var baseFilter = new BaseFilter() { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
+        var files = await fileDao.GetFilesAsync(folderId, baseFilter).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 
         if (subfolders)

@@ -237,12 +237,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
 
-        var fileFilter = new FileFilter
+        var baseFilter = new BaseFilter()
         {
-            FilterType = FilterType.FilesOnly
+            FilterType = FilterType.FilesOnly,
+            OrderBy = new OrderBy(SortedByType.AZ, true),
+            WithSubfolders = true,
+            Count = -1
         };
 
-        var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
+        var files = await fileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
 
         return files;
     }
@@ -326,11 +329,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {
-                var fileFilter = new FileFilter
+                var baseFilter = new BaseFilter()
                 {
-                    FilterType = FilterType.FilesOnly
+                    FilterType = FilterType.FilesOnly,
+                    OrderBy = new OrderBy(SortedByType.AZ, true),
+                    WithSubfolders = true,
+                    Count = -1
                 };
-                var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
+                var files = await FileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
                 var (isError, message) = await WithErrorAsync(scope, files, checkPermissions);
 
                 try

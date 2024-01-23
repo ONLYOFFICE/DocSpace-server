@@ -57,13 +57,13 @@ public interface IFolderDao<T>
     /// <returns>root folder</returns>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, bool withSubfolders, FolderFilter folderFilter);
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, FolderFilter folderFilter);
         
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null);
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FolderFilter folderFilter, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter);
+    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(FolderFilter folderFilter);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FolderFilter folderFilter);
+    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(IEnumerable<T> roomsIds, FolderFilter folderFilter);
 
     /// <summary>
     ///     Get a list of folders in current folder.
@@ -82,19 +82,10 @@ public interface IFolderDao<T>
     /// Get a list of folders.
     /// </summary>
     /// <param name="parentId"></param>
-    /// <param name="orderBy"></param>
-    /// <param name="filterType"></param>
-    /// <param name="subjectGroup"></param>
-    /// <param name="subjectID"></param>
-    /// <param name="searchText"></param>
-    /// <param name="withSubfolders"></param>
-    /// <param name="excludeSubject"></param>
-    /// <param name="offset"></param>
-    /// <param name="count"></param>
+    /// <param name="folderFilter"></param>
     /// <param name="roomId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, FolderFilter folderFilter, T roomId = default);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -377,8 +368,7 @@ public interface IFolderDao<T>
     /// <param name="entry"></param>
     /// <returns></returns>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
-    Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
-        T roomId = default);
+    Task<int> GetFoldersCountAsync(T parentId, FolderFilter folderFilter, T roomId = default);
 
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 

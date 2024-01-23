@@ -79,7 +79,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult(SharePointProviderInfo.ToFolder(SharePointProviderInfo.RootFolder));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
         ArgumentNullException.ThrowIfNull(folderFilter);
         if (CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != SharePointProviderInfo.ProviderFilter))
@@ -98,13 +98,13 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.Tags, filesDbContext);
+        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.TagNames, filesDbContext);
 
         await foreach (var room in rooms)
         {
             yield return room;
         }
-        }
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
     {
         return GetFoldersAsync(parentId);
@@ -119,10 +119,9 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderFilter folderFilter, string roomId = default)
     {
-        if (CheckInvalidFilter(filterType))
+        if (CheckInvalidFilter(folderFilter.FilterType))
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
@@ -130,18 +129,19 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         var folders = GetFoldersAsync(parentId);
 
         //Filter
-        if (subjectID != Guid.Empty)
+        if (folderFilter.SubjectId != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
-                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
-                                             : x.CreateBy == subjectID);
+            folders = folders.WhereAwait(async x => folderFilter.SubjectGroup
+                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, folderFilter.SubjectId)
+                                             : x.CreateBy == folderFilter.SubjectId);
         }
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.IndexOf(folderFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+        var orderBy = folderFilter.OrderBy;
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         folders = orderBy.SortedBy switch

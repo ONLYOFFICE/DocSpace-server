@@ -347,7 +347,11 @@ public class EditorConfiguration<T>
             };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
-            var files = _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false).Result.Cast<File<int>>();
+            var baseFilter = new BaseFilter()
+            {
+                FilterType = filter
+            };
+            var files = _entryManager.GetRecentAsync(baseFilter).Result.Cast<File<int>>();
 
             var listRecent = from file in files
                              where !Equals(_configuration.Document.Info.GetFile().Id, file.Id)
@@ -395,7 +399,8 @@ public class EditorConfiguration<T>
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var fileDao = _daoFactory.GetFileDao<int>();
-            var files = _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync().Result;
+            var baseFilter = new BaseFilter() { FilterType = filter };
+            var files = _entryManager.GetTemplatesAsync(folderDao, fileDao, baseFilter).ToListAsync().Result;
             var listTemplates = from file in files
                                 select
                                     new TemplatesConfig

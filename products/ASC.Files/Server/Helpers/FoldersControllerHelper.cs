@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Core;
+
 namespace ASC.Files.Helpers;
 
 public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
@@ -55,9 +57,9 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, string[] extension = null)
+    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, T roomId, BaseFilter baseFilter)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, roomId, baseFilter);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -101,7 +103,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, T roomId, BaseFilter baseFilter)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(_apiContext.SortBy, true, out var sortBy))
@@ -110,8 +112,14 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         }
 
         var startIndex = Convert.ToInt32(_apiContext.StartIndex);
-        var items = await _fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(_apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), _apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
-            roomId: roomId, applyFilterOption: applyFilterOption);
+
+        baseFilter.From = startIndex;
+        baseFilter.Count = Convert.ToInt32(_apiContext.Count);
+        baseFilter.SubjectGroup = baseFilter.FilterType == FilterType.ByUser;
+        baseFilter.SearchText = _apiContext.FilterValue;
+        baseFilter.OrderBy = orderBy;
+
+        var items = await _fileStorageService.GetFolderItemsAsync(folderId, baseFilter, roomId);
 
         return await _folderContentDtoHelper.GetAsync(folderId, items, startIndex);
     }

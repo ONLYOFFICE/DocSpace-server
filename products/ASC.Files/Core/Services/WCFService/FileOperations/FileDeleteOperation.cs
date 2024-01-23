@@ -219,11 +219,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     else
                     {
-                        var fileFilter = new FileFilter
+                        var baseFilter = new BaseFilter()
                         {
-                            FilterType = FilterType.FilesOnly
+                            FilterType = FilterType.FilesOnly,
+                            OrderBy = new ASC.Files.Core.OrderBy(SortedByType.AZ, true),
+                            WithSubfolders = true,
+                            Count = -1
                         };
-                        var files = await FileDao.GetFilesAsync(folder.Id, new ASC.Files.Core.OrderBy(SortedByType.AZ, true), fileFilter, withSubfolders: true).ToListAsync();
+                        var files = await FileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
                         if (!_ignoreException && isError)
                         {

@@ -79,7 +79,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         return dao.GetRootFolderAsync();
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, bool withSubfolders, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FolderFilter folderFilter, IEnumerable<int> parentsIds = null)
     {
         ArgumentNullException.ThrowIfNull(folderFilter);
         if (dao.CheckInvalidFilter(folderFilter.FilterType) || (folderFilter.Provider != ProviderFilter.None && folderFilter.Provider != _providerInfo.ProviderFilter))
@@ -98,7 +98,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
 
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.Tags, filesDbContext);
+        rooms = FilterByTags(rooms, folderFilter.WithoutTags, folderFilter.TagNames, filesDbContext);
 
         await foreach (var room in rooms)
         {
@@ -118,27 +118,28 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderFilter folderFilter, string roomId = default)
     {
-        if (dao.CheckInvalidFilter(filterType))
+        if (dao.CheckInvalidFilter(folderFilter.FilterType))
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
 
         var folders = GetFoldersAsync(parentId); //TODO:!!!
 
-        if (subjectID != Guid.Empty)
+        if (folderFilter.SubjectId != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID)
-                                             : x.CreateBy == subjectID);
+            folders = folders.Where(x => folderFilter.SubjectGroup
+                                             ? userManager.IsUserInGroup(x.CreateBy, folderFilter.SubjectId)
+                                             : x.CreateBy == folderFilter.SubjectId);
         }
 
-        if (!string.IsNullOrEmpty(searchText))
+        if (!string.IsNullOrEmpty(folderFilter.SearchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.IndexOf(folderFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+        var orderBy = folderFilter.OrderBy;
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         folders = orderBy.SortedBy switch
@@ -619,17 +620,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, bool withSubfolders, FolderFilter folderFilter)
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FolderFilter folderFilter)
+    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FolderFilter folderFilter)
+    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(IEnumerable<string> roomsIds, FolderFilter folderFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
@@ -651,7 +652,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
             : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
     }
 
-    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
+    public Task<int> GetFoldersCountAsync(string parentId, FolderFilter folderFilter, string roomId = default)
     {
         throw new NotImplementedException();
     }

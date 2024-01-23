@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Core;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -570,10 +572,25 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
-            [],
-            searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
-            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
+        var baseFilter = new BaseFilter
+        {
+            From = startIndex,
+            Count = count,
+            FilterType = filter,
+            SubjectId = string.IsNullOrEmpty(subjectId) ? Guid.Empty : new Guid(subjectId),
+            SearchText = filterValue,
+            Extension = [],
+            SearchInContent = searchInContent ?? false,
+            WithSubfolders = withSubfolders ?? false,
+            OrderBy = orderBy,
+            SearchArea = searchArea ?? SearchArea.Active,
+            WithoutTags = withoutTags ?? false,
+            TagNames = tagNames,
+            ExcludeSubject = excludeSubject ?? false,
+            Provider = provider ?? ProviderFilter.None,
+            SubjectFilter = subjectFilter ?? SubjectFilter.Owner
+        };
+        var content = await fileStorageService.GetFolderItemsAsync(parentId, baseFilter);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

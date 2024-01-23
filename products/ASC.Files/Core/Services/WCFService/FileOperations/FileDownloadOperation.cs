@@ -318,12 +318,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var fileFilter = new FileFilter
+            var baseFilter = new BaseFilter()
             {
-                SearchInContent = true
+                SearchInContent = true,
+                Count = -1
             };
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, fileFilter));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, baseFilter));
 
             await foreach (var file in files)
             {
