@@ -275,13 +275,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             }
 
             await ProcessEvent(eventName, @event);
-
-            _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
-        }
-        catch (AlreadyClosedException ex)
-        {
-            _logger.ErrorProcessingMessage(message, ex);
-        }
+        }        
         catch (IntegrationEventRejectExeption ex)
         {
             _logger.ErrorProcessingMessage(message, ex);
@@ -300,11 +294,15 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
                 _logger.DebugNackEvent(eventName);
             }
+
+            return;
         }
         catch (Exception ex)
         {
             _logger.ErrorProcessingMessage(message, ex);
         }
+
+        _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
     }
 
     private IModel CreateConsumerChannel()
