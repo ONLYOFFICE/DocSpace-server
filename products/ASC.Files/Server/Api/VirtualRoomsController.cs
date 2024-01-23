@@ -179,8 +179,6 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<T>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        ErrorIfNotDocSpace();
-
         foreach (var roomId in inDto.RoomIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
@@ -203,8 +201,6 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<T>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        ErrorIfNotDocSpace();
-
         foreach (var roomId in inDto.RoomIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);

@@ -185,7 +185,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             return _admins;
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         
