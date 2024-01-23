@@ -58,22 +58,15 @@ public class AccountLinkerStorage
 }
 
 [Scope]
-public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager, TenantManager tenantManager)
+public class AccountLinker(
+    AccountLinkerStorage accountLinkerStorage,
+    IDbContextFactory<AccountLinkContext> accountLinkContextManager,
+    TenantManager tenantManager)
 {
-    public async Task<IEnumerable<string>> GetLinkedObjectsAsync(string id, string provider)
-    {
-        return await GetLinkedObjectsAsync(new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
-    }
-
-    public async Task<IEnumerable<string>> GetLinkedObjectsAsync(LoginProfile profile)
-    {
-        return await GetLinkedObjectsByHashIdAsync(profile.HashId);
-    }
-
-    public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashid)
+    public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashId)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
-        return await Queries.LinkedObjectsByHashIdAsync(accountLinkContext, hashid).ToListAsync();
+        return await Queries.LinkedObjectsByHashIdAsync(accountLinkContext, hashId).ToListAsync();
     }
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync(string obj, string provider)
@@ -91,11 +84,11 @@ public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, A
         return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
-    public async Task AddLinkAsync(string obj, LoginProfile profile)
+    public async Task AddLinkAsync(Guid obj, LoginProfile profile)
     {
         var accountLink = new AccountLinks
         {
-            Id = obj,
+            Id = obj.ToString(),
             UId = profile.HashId,
             Provider = profile.Provider,
             Profile = profile.ToSerializedString(),
@@ -112,22 +105,12 @@ public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, A
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        accountLinkerStorage.RemoveFromCache(obj);
+        accountLinkerStorage.RemoveFromCache(obj.ToString());
     }
 
-    public async Task AddLinkAsync(string obj, string id, string provider)
+    public async Task AddLinkAsync(Guid obj, string id, string provider)
     {
-        await AddLinkAsync(obj, new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
-    }
-
-    public async Task RemoveLinkAsync(string obj, string id, string provider)
-    {
-        await RemoveLinkAsync(obj, new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
-    }
-
-    public async Task RemoveLinkAsync(string obj, LoginProfile profile)
-    {
-        await RemoveProviderAsync(obj, hashId: profile.HashId);
+        await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
     }
 
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
@@ -145,9 +128,9 @@ public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, A
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
-        //Retrieve by uinque id
+        //Retrieve by unique id
         return (await Queries.LinkedProfilesFromDbAsync(accountLinkContext, obj).ToListAsync())
-                .ConvertAll(x => LoginProfile.CreateFromSerializedString(signature, instanceCrypto, x));
+                .ConvertAll(LoginProfile.CreateFromSerializedString);
     }
 
     private async Task<IDictionary<string, LoginProfile>> GetLinkedProfilesAsync(IEnumerable<string> objects)
@@ -156,7 +139,7 @@ public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, A
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
-            .ToDictionaryAsync(k => k.Id, v => LoginProfile.CreateFromSerializedString(signature, instanceCrypto, v.Profile));
+            .ToDictionaryAsync(k => k.Id, v => LoginProfile.CreateFromSerializedString(v.Profile));
     }
 }
 

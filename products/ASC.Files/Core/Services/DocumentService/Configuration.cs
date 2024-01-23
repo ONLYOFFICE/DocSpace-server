@@ -80,7 +80,8 @@ public class Configuration<T>
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
-        { FileType.Presentation, "slide" }
+        { FileType.Presentation, "slide" },
+        { FileType.Pdf, "pdf" }
     };
 
     private FileType _fileTypeCache = FileType.Unknown;
@@ -232,6 +233,7 @@ public class EditorConfiguration<T>
     private readonly FileUtility _fileUtility;
     private readonly UserInfo _userInfo;
     private readonly UserManager _userManager;
+    private readonly ExternalShare _externalShare;
     private Configuration<T> _configuration;
 
     private EmbeddedConfig _embeddedConfig;
@@ -264,7 +266,14 @@ public class EditorConfiguration<T>
     {
         get
         {
-            return ModeWrite ? _documentServiceTrackerHelper.GetCallbackUrl(_configuration.Document.Info.GetFile().Id.ToString()) : null;
+            if (!ModeWrite)
+            {
+                return null;
+            }
+
+            var callbackUrl = _documentServiceTrackerHelper.GetCallbackUrl(_configuration.Document.Info.GetFile().Id.ToString());
+
+            return _externalShare.GetUrlWithShare(callbackUrl);
         }
     }
 
@@ -422,7 +431,8 @@ public class EditorConfiguration<T>
         FilesSettingsHelper filesSettingsHelper,
         IDaoFactory daoFactory,
         EntryManager entryManager,
-        DocumentServiceTrackerHelper documentServiceTrackerHelper)
+        DocumentServiceTrackerHelper documentServiceTrackerHelper, 
+        ExternalShare externalShare)
     {
         _userManager = userManager;
         _authContext = authContext;
@@ -434,6 +444,7 @@ public class EditorConfiguration<T>
         _daoFactory = daoFactory;
         _entryManager = entryManager;
         _documentServiceTrackerHelper = documentServiceTrackerHelper;
+        _externalShare = externalShare;
         Plugins = pluginsConfig;
         Embedded = embeddedConfig;
         _userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
@@ -592,6 +603,7 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
+    public bool Copy { get; set; } = true;
 }
 
 /// <summary>
@@ -806,8 +818,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
     {
         get
         {
-            if (_configuration.EditorConfig.ModeWrite
-              && _configuration.Document.Info.GetFile().Access == FileShare.FillForms)
+            if (_configuration.EditorConfig.ModeWrite)
             {
                 var linkDao = daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;

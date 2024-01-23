@@ -37,7 +37,7 @@ public class FeedReaded : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, UserId, Module };
+        return [TenantId, UserId, Module];
     }
 }
 

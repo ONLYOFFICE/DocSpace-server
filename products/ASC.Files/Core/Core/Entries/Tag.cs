@@ -40,7 +40,8 @@ public enum TagType
     Custom = 64,
     Pin = 128,
     Origin = 256,
-    FromRoom = 512
+    RecentByLink = 512,
+    FromRoom = 1024
 }
 
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
@@ -131,6 +132,11 @@ public sealed class Tag : IMapFrom<DbFilesTag>
             EntryId = entryId,
             EntryType = type
         };
+    }
+
+    public static Tag RecentByLink<T>(Guid owner, Guid linkId, File<T> file)
+    {
+        return new Tag(linkId.ToString(), TagType.RecentByLink, owner, 0).AddEntry(file);
     }
 
     public override bool Equals(object obj)

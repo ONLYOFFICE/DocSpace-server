@@ -250,7 +250,7 @@ public class PortalController(
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
+                    Quotas = [new(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
                 await hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -495,15 +495,17 @@ public class PortalController(
             return (false, error);
         }
 
+        portalName = portalName.Trim().ToLowerInvariant();
+
         try
         {
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
-                await ValidateTenantAliasAsync(portalName.Trim());
+                await ValidateTenantAliasAsync(portalName);
             }
             else
             {
-                await hostedSolution.CheckTenantAddressAsync(portalName.Trim());
+                await hostedSolution.CheckTenantAddressAsync(portalName);
             }
         }
         catch (TenantAlreadyExistsException ex)

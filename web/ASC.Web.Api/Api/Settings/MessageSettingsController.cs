@@ -36,7 +36,6 @@ public class MessageSettingsController(MessageService messageService,
         PermissionContext permissionContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
-        CoreBaseSettings coreBaseSettings,
         CustomNamingPeople customNamingPeople,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
@@ -129,7 +128,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
+    [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
     {
@@ -204,22 +203,19 @@ public class MessageSettingsController(MessageService messageService,
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
             var emplType = trustedDomainSettings.InviteAsUsers ? EmployeeType.User : EmployeeType.RoomAdmin;
-            if (!coreBaseSettings.Personal)
+            var enableInviteUsers = true;
+            try
             {
-                var enableInviteUsers = true;
-                try
-                {
-                    await countPaidUserChecker.CheckAppend();
-                }
-                catch (Exception)
-                {
-                    enableInviteUsers = false;
-                }
+                await countPaidUserChecker.CheckAppend();
+            }
+            catch (Exception)
+            {
+                enableInviteUsers = false;
+            }
 
-                if (!enableInviteUsers)
-                {
-                    emplType = EmployeeType.User;
-                }
+            if (!enableInviteUsers)
+            {
+                emplType = EmployeeType.User;
             }
 
             switch (tenant.TrustedDomainsType)

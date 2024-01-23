@@ -50,10 +50,8 @@ public class Builder<T>(ThumbnailSettings settings,
     private readonly ILogger _logger = log.CreateLogger("ASC.Files.ThumbnailBuilder");
     private IDataStore _dataStore;
 
-    private readonly List<string> _imageFormatsCanBeCrop = new()
-    {
-                ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"
-    };
+    private readonly List<string> _imageFormatsCanBeCrop =
+        [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"];
 
     internal async Task BuildThumbnail(FileData<T> fileData)
     {

@@ -145,14 +145,14 @@ public class ProductEntryPoint : Product
                 limit: 100);
         }
 
+        var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
+
         var disabledRooms = _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
 
-        var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId);
+        var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 
-        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key));
-        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key);
-
-        var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
+        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key)).ToList();
+        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key).ToList();
 
         var result = new List<ActivityInfo>();
 
@@ -162,10 +162,9 @@ public class ProductEntryPoint : Product
             {
                 UserId = e.UserId,
                 Action = (MessageAction)e.Action,
-                Data = e.Date
+                Data = e.Date,
+                FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1]
             };
-
-            activityInfo.FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1];
 
             switch (e.Action)
             {
@@ -214,7 +213,8 @@ public class ProductEntryPoint : Product
 
                 var isRoomAdmin = userRoomsWithRoleForSend
                     .Where(r => r.Key == roomId.ToString())
-                    .Select(r => r.Value).FirstOrDefault();
+                    .Select(r => r.Value)
+                    .FirstOrDefault();
 
                 if (!CheckRightsToReceive(userId, (MessageAction)e.Action, isRoomAdmin, activityInfo.TargetUsers))
                 {
@@ -265,7 +265,7 @@ public class ProductEntryPoint : Product
     public override ProductContext Context => _productContext;
     public override string ApiURL => string.Empty;
 
-    private async Task<Dictionary<string, bool>> GetUserRoomsWithRoleAsync(Guid userId)
+    private async Task<Dictionary<string, bool>> GetUserRoomsWithRoleAsync(Guid userId, bool isDocSpaceAdmin)
     {
         var result = new Dictionary<string, bool>();
 
@@ -285,6 +285,11 @@ public class ProductEntryPoint : Product
             {
                 result.TryAdd(record.EntryId.ToString(), false);
             }
+        }
+
+        if (!isDocSpaceAdmin)
+        {
+            return result;
         }
 
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);

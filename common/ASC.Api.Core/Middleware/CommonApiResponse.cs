@@ -115,14 +115,10 @@ public class SuccessApiResponse : CommonApiResponse
         _httpContext = httpContext;
         Response = response;
 
-        Links = new List<Link>(1)
-        {
-            new()
-            {
-                Href = httpContext.Request.GetDisplayUrl(),
-                Action = httpContext.Request.Method
-            }
-        };
+        Links =
+        [
+            new() { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
+        ];
     }
 }
 

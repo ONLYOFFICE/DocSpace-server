@@ -275,7 +275,7 @@ public class GlobalSpace(FilesSpaceUsageStatManager filesSpaceUsageStatManager, 
 }
 
 [Scope]
-public class GlobalFolder(CoreBaseSettings coreBaseSettings,
+public class GlobalFolder(
     WebItemManager webItemManager,
     WebItemSecurity webItemSecurity,
     AuthContext authContext,
@@ -292,11 +292,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderProjectsAsync(IDaoFactory daoFactory)
     {
-        if (coreBaseSettings.Personal)
-        {
-            return default;
-        }
-
         if (await webItemManager[WebItemManager.ProjectsProductID].IsDisabledAsync(webItemSecurity, authContext))
         {
             return default;
@@ -323,11 +318,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderVirtualRoomsAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
     {
-        if (coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
         var key = $"vrooms/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (DocSpaceFolderCache.TryGetValue(key, out var result))
@@ -347,11 +337,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderArchiveAsync(IDaoFactory daoFactory)
     {
-        if (coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
         var key = $"archive/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (!DocSpaceFolderCache.TryGetValue(key, out var result))
@@ -395,11 +380,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderCommonAsync(IDaoFactory daoFactory)
     {
-        if (coreBaseSettings.Personal)
-        {
-            return default;
-        }
-
         var tenant = await tenantManager.GetCurrentTenantAsync();
         if (CommonFolderCache.TryGetValue(tenant.Id, out var commonFolderId))
         {
@@ -421,11 +401,6 @@ public class GlobalFolder(CoreBaseSettings coreBaseSettings,
 
     public async ValueTask<int> GetFolderShareAsync(IDaoFactory daoFactory)
     {
-        if (coreBaseSettings.Personal)
-        {
-            return default;
-        }
-
         if (await IsOutsiderAsync)
         {
             return default;

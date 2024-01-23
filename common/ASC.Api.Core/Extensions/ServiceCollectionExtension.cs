@@ -25,28 +25,23 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Apache.NMS;
-
 using ASC.EventBus.Serializers;
 
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
 {
-    public static void AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        var redisConfiguration = configuration.GetSection("Redis");
         var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
         var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
         if (redisConfiguration != null)
         {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(redisConfiguration);
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => {
+                return new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() };
+            });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
@@ -62,29 +57,25 @@ public static class ServiceCollectionExtension
         {
             services.AddSingleton(typeof(ICacheNotify<>), typeof(MemoryCacheNotify<>));
         }
+
+        return services;
     }
 
-    public static void AddDistributedCache(this IServiceCollection services, IConfiguration configuration)
-    {
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
-
-        if (redisConfiguration != null)
+    public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    {        
+        if (connection != null)
         {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
             services.AddStackExchangeRedisCache(config =>
             {
-                config.ConfigurationOptions = redisConfiguration.ConfigurationOptions;
+                config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
             });
         }
         else
         {
             services.AddDistributedMemoryCache();
         }
+
+        return services;
     }
 
     public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
@@ -122,16 +113,10 @@ public static class ServiceCollectionExtension
             });
         }
         
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        var redisConfiguration = configuration.GetSection("Redis");
 
         if (redisConfiguration != null)
-        {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
+        {            
             services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(sp =>
             {
                 var database = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase().Database;
@@ -192,7 +177,7 @@ public static class ServiceCollectionExtension
         throw new NotImplementedException("DistributedLock: Provider not found.");
     }
 
-    public static void AddEventBus(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddEventBus(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
@@ -299,6 +284,8 @@ public static class ServiceCollectionExtension
         {
             throw new NotImplementedException("EventBus: Provider not found.");
         }
+
+        return services;
     }
 
     /// <remarks>
@@ -317,11 +304,13 @@ public static class ServiceCollectionExtension
 
     }
 
-    public static void AddDistributedTaskQueue(this IServiceCollection services)
+    public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
     {
         services.AddTransient<DistributedTaskQueue>();
 
         services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
+
+        return services;
     }
 
     public static IServiceCollection AddStartupTask<T>(this IServiceCollection services)

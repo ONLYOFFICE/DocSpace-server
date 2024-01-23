@@ -40,9 +40,6 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("KeepNewFileName")]
     public bool KeepNewFileName { get; set; }
 
-    [JsonPropertyName("UpdateIfExist")]
-    public bool UpdateIfExistSetting { get; set; }
-
     [JsonPropertyName("ConvertNotify")]
     public bool ConvertNotifySetting { get; set; }
 
@@ -95,7 +92,6 @@ public class FilesSettings : ISettings<FilesSettings>
             FastDeleteSetting = false,
             EnableThirdpartySetting = true,
             StoreOriginalFilesSetting = true,
-            UpdateIfExistSetting = false,
             ConvertNotifySetting = true,
             DefaultSortedBySetting = SortedByType.DateAndTime,
             DefaultSortedAscSetting = false,
@@ -224,17 +220,6 @@ public class FilesSettingsHelper(SettingsManager settingsManager,
         get => LoadForCurrentUser().KeepNewFileName;
     }
 
-    public bool UpdateIfExist
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.UpdateIfExistSetting = value;
-            SaveForCurrentUser(setting);
-        }
-        get => LoadForCurrentUser().UpdateIfExistSetting;
-    }
-
     public bool ConvertNotify
     {
         set
@@ -303,16 +288,11 @@ public class FilesSettingsHelper(SettingsManager settingsManager,
     {
         set
         {
-            //if (_coreBaseSettings.Personal)
-            //{
-            //    throw new NotSupportedException();
-            //}
-
             //var setting = _settingsManager.Load<FilesSettings>();
             //setting.StoreForcesaveSetting = value;
             //_settingsManager.Save(setting);
         }
-        get => false;//!_coreBaseSettings.Personal && _settingsManager.Load<FilesSettings>().StoreForcesaveSetting;
+        get => false;//_settingsManager.Load<FilesSettings>().StoreForcesaveSetting;
     }
 
     public bool RecentSection
@@ -441,7 +421,7 @@ public class FilesSettingsHelper(SettingsManager settingsManager,
         get
         {
             var setting = LoadForCurrentUser().DefaultSharingAccessRightsSetting;
-            return setting ?? new List<FileShare> { FileShare.Read };
+            return setting ?? [FileShare.Read];
         }
     }
 

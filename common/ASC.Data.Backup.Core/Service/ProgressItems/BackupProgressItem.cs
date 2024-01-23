@@ -41,6 +41,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     private BackupStorageType _storageType;
     private string _storageBasePath;
     private int _limit;
+    private string _serverBaseUri;
     private bool _dump;
 
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
@@ -67,6 +68,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         _tempFolder = tempFolder;
         _limit = limit;
         _dump = request.Dump;
+        _serverBaseUri = request.ServerBaseUri;
     }
 
     protected override async Task DoJob()
@@ -140,6 +142,8 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
             if (_userId != Guid.Empty && !_isScheduled)
             {
+                notifyHelper.SetServerBaseUri(_serverBaseUri);
+
                 await notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 

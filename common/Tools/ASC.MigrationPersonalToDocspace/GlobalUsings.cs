@@ -40,7 +40,6 @@ global using ASC.Core.Common.Hosting;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Backup.EF.Context;
-global using ASC.Data.Backup.Exceptions;
 global using ASC.Data.Backup.Extensions;
 global using ASC.Data.Backup.Tasks;
 global using ASC.Data.Backup.Tasks.Data;
@@ -63,5 +62,11 @@ global using Autofac.Extensions.DependencyInjection;
 global using AutoMapper;
 global using AutoMapper.QueryableExtensions;
 
+global using CommandLine;
+
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using MySql.Data.MySqlClient;
+
+global using StackExchange.Redis.Extensions.Core.Configuration;

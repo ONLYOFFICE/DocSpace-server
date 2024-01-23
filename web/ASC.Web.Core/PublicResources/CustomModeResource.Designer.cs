@@ -8,12 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace ASC.Web.Core.PublicResources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -21,27 +19,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class CustomModeResource {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal CustomModeResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.CustomModeResource", typeof(CustomModeResource).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.CustomModeResource", typeof(CustomModeResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -52,8 +50,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -76,91 +74,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_enterprise_whitelabel_user_welcome_custom_mode_v1 {
             get {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_user_welcome_custom_mode_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.Welcome to ONLYOFFICE Personal
-        ///
-        ///You have just created your personal office in the cloud.
-        ///
-        ///h3.It&apos;s a virtual workspace where you can edit and store documents, work with them from anywhere providing access to your friends or colleagues.
-        ///
-        ///h3.For a quick start, here&apos;s what you can do in ONLYOFFICE:
-        ///
-        ///- Create, view and edit text documents, spreadsheets, presentations.
-        ///
-        ///- Work with all popular formats. Highest compatibility with MS Office files.
-        ///
-        ///- Create and co-edit &quot;ready-to-fill-out forms&quot;:&quot;http [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_custom_mode_after_registration1 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the email on your cloud office account?
-        ///
-        ///Click the button below and log in* to your cloud.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///*If you are not signed in to your cloud office in this browser, you’ll need to use your old email for confirmation.
-        ///
-        ///Don’t want to change your email? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_custom_mode_change_email_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_email_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the password on your cloud office account? Click the button below to confirm.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///Don’t want to change your password? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_custom_mode_change_password_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_password_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hello,
-        ///
-        ///you&apos;ve just registered an account at the ONLYOFFICE solution for personal use. Click &quot;here&quot;:&quot;$InviteLink&quot; to confirm the registration and create a password.
-        ///
-        ///If you can&apos;t open the link, please copy the following &quot;$InviteLink&quot;:&quot;$InviteLink&quot; and paste it into your browser address bar.
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_personal_custom_mode_confirmation {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have requested a termination of your account at personal.onlyoffice.com. Follow the link to complete the request (the link is active for a 7-day period): 
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: After the deletion, your account and all data associated with it will be erased permanently in accordance with our &quot;Privacy statement&quot;:&quot;https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0&quot;.
-        ///
-        ///&quot;Read more about account terminati [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_custom_mode_profile_delete {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_profile_delete", resourceCulture);
             }
         }
         
@@ -208,33 +121,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string ProductUserOpportunitiesCustomMode {
             get {
                 return ResourceManager.GetString("ProductUserOpportunitiesCustomMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE Personal.
-        /// </summary>
-        public static string subject_personal_custom_mode_after_registration1 {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal. Please activate your email address.
-        /// </summary>
-        public static string subject_personal_custom_mode_confirmation {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal account termination.
-        /// </summary>
-        public static string subject_personal_custom_mode_profile_delete {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_profile_delete", resourceCulture);
             }
         }
         

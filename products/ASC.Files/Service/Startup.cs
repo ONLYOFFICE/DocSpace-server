@@ -24,17 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Files.Configuration;
+
 namespace ASC.Files.Service;
-public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    : BaseWorkerStartup(configuration, hostEnvironment)
+
+public class Startup : BaseWorkerStartup
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+        : base(configuration, hostEnvironment)
     {
-        base.ConfigureServices(services);
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
+    }
 
+    public override async Task ConfigureServices(IServiceCollection services)
+    {
+        await base.ConfigureServices(services);
         services.AddHttpClient();
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
 
         if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
@@ -91,6 +100,7 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
         DIHelper.TryAdd<Builder<int>>();
         DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
+        DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();
@@ -104,12 +114,11 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
 
         services.AddScoped<UsersInRoomStatistic>();
 
-
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
 
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
-        }
-
     }
+}

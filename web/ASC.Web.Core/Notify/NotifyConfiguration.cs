@@ -144,44 +144,31 @@ public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workCont
 public class ProductSecurityInterceptor(TenantManager tenantManager,
     WebItemSecurity webItemSecurity,
     UserManager userManager,
-    CoreBaseSettings coreBaseSettings,
     ILogger<ProductSecurityInterceptor> logger)
 {
     public async Task<bool> InterceptAsync(NotifyRequest r, InterceptorPlace p)
     {
         try
         {
-            // culture
-            if (coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID)
-            {
-                return false;
-            }
-
             await tenantManager.GetCurrentTenantAsync();
 
             var u = await userManager.SearchUserAsync(r.Recipient.ID);
 
             if (Constants.LostUser.Equals(u))
-            {                
+            {
                 return false;
             }
 
             // security
-            var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
+            var tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
             var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-            if (productId == Guid.Empty)
-            {
-                tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
-                productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-            }
 
             if (productId == Guid.Empty)
             {
                 productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
             }
 
-            if (productId != Guid.Empty &&
-                productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
+            if (productId != Guid.Empty && productId != WebItemManager.PeopleProductID /* ignore people product */)
             {
                 return !await webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
             }
@@ -243,11 +230,8 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             }
         }
 
-        commonLinkUtility.GetLocationByRequest(out var product, out var module);
-        if (product == null && CallContext.GetData("asc.web.product_id") != null)
-        {
-            product = webItemManager[(Guid)CallContext.GetData("asc.web.product_id")] as IProduct;
-        }
+        var productid = CallContext.GetData("asc.web.product_id");
+        var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
         var logoText = TenantWhiteLabelSettings.DefaultLogoText;
         if ((tenantExtra.Enterprise || coreBaseSettings.CustomMode) && !await MailWhiteLabelSettings.IsDefaultAsync(settingsManager))
@@ -260,8 +244,6 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))));
         request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
         request.Arguments.Add(new TagValue(CommonTags.ProductID, product?.ID ?? Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module?.ID ?? Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ProductUrl, commonLinkUtility.GetFullAbsolutePath(product != null ? product.StartURL : "~")));
         request.Arguments.Add(new TagValue(CommonTags.DateTime, tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())));

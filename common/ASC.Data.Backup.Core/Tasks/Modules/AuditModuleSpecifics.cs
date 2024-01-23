@@ -33,14 +33,15 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => Enumerable.Empty<RelationInfo>();
 
-    private readonly TableInfo[] _tables = {
-            new("audit_events", "tenant_id", "id")
+    private readonly TableInfo[] _tables =
+    [
+        new("audit_events", "tenant_id", "id")
             {
-                UserIDColumns = new[] {"user_id"}
+                UserIDColumns = ["user_id"]
             },
             new("login_events", "tenant_id", "id")
             {
-                UserIDColumns = new[] {"user_id"}
+                UserIDColumns = ["user_id"]
             }
-        };
+    ];
 }

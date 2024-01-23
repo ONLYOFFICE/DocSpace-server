@@ -487,95 +487,6 @@ O link só é válido por 7 dias.
 
 Você receberá mais dicas sobre como usar seu web-office. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.</value>
   </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Olá, $UserName
-Você foi registrado com sucesso na ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Conecte seu armazenamento em nuvem favorito: Dropbox, Google Drive, OneDrive ou Box para criar um único espaço de trabalho para seus documentos, acessível de qualquer lugar.
-
-Saiba mais sobre ONLYOFFICE Personal em "nosso blog":"$TagBlogLink".
-
-Estamos felizes por você estar aqui. Fique atento!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Bem-vindo à ONLYOFFICE Personal
-
-Você acabou de criar seu escritório pessoal na nuvem.
-
-h3.É um espaço de trabalho virtual onde você pode editar e armazenar documentos, trabalhar com eles de qualquer lugar dando acesso a seus amigos ou colegas.
-
-h3.Para um começo rápido, eis o que você pode fazer em ONLYOFFICE:
-
-- Criar, visualizar e editar documentos de texto, planilhas, apresentações.
-
-- Trabalhar com todos os formatos populares. Maior compatibilidade com arquivos do MS Office.
-
-- Criar e coeditar "formulários prontos para preenchimento":"https://www.onlyoffice.com/pt/form-creator.aspx".
-
-- Compartilhe e colabore em documentos online.
-
-- Usar vários addons para recursos de edição estendida.
-
-- Acesse facilmente sua nuvem pessoal via "Chrome extension":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=pt-BR".
-
-Você também pode editar documentos offline com nossos "editores desktop":"https://www.onlyoffice.com/download-desktop.aspx" gratuitos ou obter uma suite de edição móvel para seu dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Deseja alterar o e-mail em sua conta ONLYOFFICE?
-
-Clique no botão abaixo e faça o login* em sua nuvem.
-
-$OrangeButton
-
-O link é válido por 7 dias.
-
-*Se você não estiver conectado ao ONLYOFFICE neste navegador, você precisará usar seu e-mail antigo para confirmação.
-
-Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
-  </data>
-  <data name="pattern_personal_change_password" xml:space="preserve">
-    <value>Houve um pedido para alterar sua senha utilizada para entrar no portal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Por favor, siga o link abaixo para alterar sua senha:
-
-$OrangeButton
-
-*Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
-
-Se você não deseja alterar sua senha ou recebeu este e-mail por engano, por favor, ignore-a.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Olá,
-
-Você acabou de registrar uma conta na solução ONLYOFFICE para uso pessoal. Clique "aqui":"$InviteLink" para confirmar o registro e criar uma senha.
-
-Se você não conseguir abrir o link, copie o seguinte "$InviteLink":"$InviteLink" e cole-o na barra de endereço do seu navegador.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
-
-$OrangeButton
-
-*Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente, de acordo com nossa "Declaração de privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Leia mais sobre encerramento de conta":"${__HelpLink}/administration/configuration.aspx"
-
-Ignore este e-mail se você não quiser prosseguir. 
-
-Se tiver alguma dúvida, entre em contato conosco em "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Desativação do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -985,18 +896,6 @@ O link só é válido por 7 dias.</value>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Junte-se a ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Bem vindo ao ONLYOFFICE para uso pessoal!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Bem vindo ao ONLYOFFICE Pessoal</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Encerramento de conta pessoal ONLYOFFICE</value>
-  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Desativação do portal ${__VirtualRootPath}</value>
   </data>
@@ -1194,15 +1093,6 @@ O seu tarifário atual é STARTUP. É totalmente gratuito e inclui:
 *Desfrute de uma nova forma de colaboração de documentos!*
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Quer mudar a senha em sua conta pessoal ONLYOFFICE? Clique no botão abaixo para confirmar.
-
-$OrangeButton
-
-O link é válido por 7 dias.
-
-Não deseja alterar sua senha? Simplesmente ignore esta mensagem.</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Qual é a novidade em seu portal para $Date</value>
@@ -1564,20 +1454,6 @@ Email: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Obtenha aplicativos &lt;span style="color:#FF6F3D;"&gt;gratuitos&lt;/span&gt; do ONLYOFFICE
-
-
-Olá, $UserName!
-
-Obtenha aplicativos gratuitos do ONLYOFFICE para trabalhar em documentos de qualquer um dos seus dispositivos.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para trabalhar em documentos offline, obtenha ONLYOFFICE Desktop Editors para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Obtenha aplicativos &lt;span style="color:#FF6F3D;"&gt;gratuitos&lt;/span&gt; do ONLYOFFICE
 
@@ -1591,15 +1467,6 @@ Obtenha aplicativos gratuitos do ONLYOFFICE para trabalhar em documentos de qual
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Olá!
-Houve uma tentativa de registrar uma nova conta "ONLYOFFICE Personal":"$PortalUrl" usando este e-mail. Se foi você, queremos informar que a conta já existe — vá para o ONLYOFFICE Personal e faça o login.
-Se você perdeu sua senha, você pode recuperá-la na "página de recuperação de senha":"$LinkToRecovery".
-Se você não tentou registrar uma nova conta, provavelmente outra pessoa o fez por engano. Neste caso, ignore este e-mail.
-
-Tenha um bom dia!
-Equipe ONLYOFFICE</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. O ONLYOFFICE DocSpace foi &lt;span style="color:#FF6F3D;"&gt;desativado&lt;/span&gt;
@@ -1751,9 +1618,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenha aplicativos gratuitos do ONLYOFFICE</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Obtenha aplicativos gratuitos do ONLYOFFICE</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenha aplicativos gratuitos do ONLYOFFICE</value>
   </data>
@@ -1801,9 +1665,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Solicitação do departamento de vendas</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Faça login em sua conta pessoal do ONLYOFFICE</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>O ONLYOFFICE DocSpace foi desativado</value>

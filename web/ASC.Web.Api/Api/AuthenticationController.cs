@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
@@ -37,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [AllowAnonymous]
+[WebhookDisable]
 public class AuthenticationController(UserManager userManager,
         TenantManager tenantManager,
         SecurityContext securityContext,
@@ -409,7 +412,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 var email = inDto.ConfirmData.Email;
 
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First + inDto.ConfirmData.Module + inDto.ConfirmData.Sms, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
@@ -462,7 +465,7 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile) : 
+                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
@@ -513,29 +516,6 @@ public class AuthenticationController(UserManager userManager,
             }
 
             var isNew = false;
-            if (coreBaseSettings.Personal)
-            {
-                if (await userManager.UserExistsAsync(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
-                {
-                    try
-                    {
-                        await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                        await userManager.DeleteUserAsync(userInfo.Id);
-                        userInfo = Constants.LostUser;
-                    }
-                    finally
-                    {
-                        securityContext.Logout();
-                    }
-                }
-
-                if (!await userManager.UserExistsAsync(userInfo.Id))
-                {
-                    userInfo = await JoinByThirdPartyAccount(loginProfile);
-
-                    isNew = true;
-                }
-            }
 
             if (isNew)
             {
@@ -600,7 +580,7 @@ public class AuthenticationController(UserManager userManager,
             }
         }
 
-        await accountLinker.AddLinkAsync(userInfo.Id.ToString(), loginProfile);
+        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
 
         return userInfo;
     }
