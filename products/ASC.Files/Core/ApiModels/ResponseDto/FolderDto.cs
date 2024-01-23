@@ -90,7 +90,7 @@ public class FolderDto<T> : FileEntryDto<T>
 
     /// <summary>Specifies if the room has a custom quota or not.</summary>
     /// <type>System.Boolean, System</type>
-    public bool IsCustomQuota { get; set; }
+    public bool? IsCustomQuota { get; set; }
 
     /// <summary>Counter</summary>
     /// <type>System.Int32, System</type>
@@ -176,7 +176,9 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
                 result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }
-            if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+
+            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
+                result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;

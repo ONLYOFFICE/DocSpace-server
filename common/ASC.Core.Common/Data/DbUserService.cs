@@ -698,7 +698,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = q.Where(a);
         }
 
-        if(quotaFilter != null)
+        if(quotaFilter != null && isDocSpaceAdmin)
         {
             if (quotaFilter == QuotaFilter.Custom)
             {
