@@ -152,16 +152,16 @@ public class EmployeeFullDto : EmployeeDto
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>
-    public long QuotaLimit { get; set; }
+    public long? QuotaLimit { get; set; }
 
     /// <summary>Portal used space</summary>
     /// <type>System.Double, System</type>
-    public double UsedSpace { get; set; }
+    public double? UsedSpace { get; set; }
     public bool? Shared { get; set; }
 
     /// <summary>Specifies if the user has a custom quota or not.</summary>
     /// <type>System.Boolean, System</type>
-    public bool IsCustomQuota { get; set; }
+    public bool? IsCustomQuota { get; set; }
 
     public static new EmployeeFullDto GetSample()
     {
@@ -200,6 +200,7 @@ public class EmployeeFullDto : EmployeeDto
 public class EmployeeFullDtoHelper(
         ApiContext httpContext,
         UserManager userManager,
+        AuthContext authContext,
         UserPhotoManager userPhotoManager,
         WebItemSecurity webItemSecurity,
         CommonLinkUtility commonLinkUtility,
@@ -211,7 +212,7 @@ public class EmployeeFullDtoHelper(
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
+    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
     {
     public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     {
@@ -298,7 +299,7 @@ public class EmployeeFullDtoHelper(
 
         await InitAsync(result, userInfo);
 
-        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID)))
         {
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
@@ -314,7 +315,7 @@ public class EmployeeFullDtoHelper(
                                     : quotaSettings.DefaultQuota;
             }
         }
-        
+
         if (userInfo.Sex.HasValue)
         {
             result.Sex = userInfo.Sex.Value ? "male" : "female";
