@@ -1,7 +1,7 @@
 ﻿module.exports = (io) => {
   const logger = require("../log.js");
   const moment = require("moment");
-  const filesIO = io; //TODO: Restore .of("/files");
+  const filesIO = io.of("/files");
 
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;

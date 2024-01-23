@@ -5,7 +5,7 @@ const logger = require("morgan");
 const redis = require("redis");
 const expressSession = require("express-session");
 const cookieParser = require("cookie-parser");
-const RedisStore = require("connect-redis")(expressSession);
+const RedisStore = require("connect-redis").default;
 const MemoryStore = require("memorystore")(expressSession);
 const sharedsession = require("express-socket.io-session");
 const process = require('process');
@@ -14,96 +14,100 @@ const config = require("./config");
 const auth = require("./app/middleware/auth.js");
 const winston = require("./app/log.js");
 
-winston.stream = {
-  write: (message) => winston.info(message),
-};
 
-const port = config.get("app").port || 9899;
-const app = express();
+(async () => {
+  winston.stream = {
+    write: (message) => winston.info(message),
+  };
 
-const secret = config.get("core").machinekey + new Date().getTime();
-const secretCookieParser = cookieParser(secret);
-const baseCookieParser = cookieParser();
+  const port = config.get("app").port || 9899;
+  const app = express();
 
-const redisOptions = config.get("Redis");
+  const secret = config.get("core").machinekey + new Date().getTime();
+  const secretCookieParser = cookieParser(secret);
+  const baseCookieParser = cookieParser();
 
-let store;
-if (redisOptions != null) {
-  const redisClient = redis.createClient(redisOptions);
-  store = new RedisStore({ client: redisClient });
-} else {
-  store = new MemoryStore();
-}
+  const redisOptions = config.get("Redis");
 
-const session = expressSession({
-  store: store,
-  secret: secret,
-  resave: true,
-  saveUninitialized: true,
-  cookie: {
-    path: "/",
-    httpOnly: true,
-    secure: false,
-    maxAge: null,
-  },
-  cookieParser: secretCookieParser,
-  name: "socketio.sid",
-});
+  let store;
+  if (redisOptions != null) {
+    const redisClient = await redis.createClient(redisOptions).connect();
+    store = new RedisStore({ client: redisClient });
+  } else {
+    store = new MemoryStore();
+  }
 
-app.use(logger("dev", { stream: winston.stream }));
-app.use(session);
-
-const httpServer = createServer(app);
-
-const options = {
-  cors: {
-    //origin: "http://localhost:8092",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Authorization"],
-    //credentials: true,
-  },
-  allowRequest: (req, cb) => {
-    baseCookieParser(req, null, () => {});
-    const token =
-      req?.headers?.authorization ||
-      req?.cookies?.authorization ||
-      req?.cookies?.asc_auth_key ||
-      req?._query?.share;
-
-    if (!token) {
-      winston.info(`not allowed request: empty token`);
-      return cb("auth", false);
-    }
-    return cb("auth", true);
-  },
-};
-
-const io = new Server(httpServer, options);
-
-io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
-  .use((socket, next) => {
-    baseCookieParser(socket.client.request, null, next);
-  })
-  .use((socket, next) => {
-    auth(socket, next);
+  const session = expressSession({
+    store: store,
+    secret: secret,
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      maxAge: null,
+    },
+    cookieParser: secretCookieParser,
+    name: "socketio.sid",
   });
 
-app.get("/", (req, res) => {
-  res.send("<h1>Invalid Endpoint</h1>");
-});
+  app.use(logger("dev", { stream: winston.stream }));
+  app.use(session);
 
-const filesHub = require("./app/hubs/files.js")(io);
+  const httpServer = createServer(app);
 
-app.use("/controller", require("./app/controllers")(filesHub));
+  const options = {
+    cors: {
+      //origin: "http://localhost:8092",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Authorization"],
+      //credentials: true,
+    },
+    allowRequest: (req, cb) => {
+      baseCookieParser(req, null, () => {});
+      const token =
+        req?.headers?.authorization ||
+        req?.cookies?.authorization ||
+        req?.cookies?.asc_auth_key ||
+        req?._query?.share;
 
-httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
+      if (!token) {
+        winston.info(`not allowed request: empty token`);
+        return cb("auth", false);
+      }
+      return cb("auth", true);
+    },
+  };
 
-process.on('unhandledRejection', (reason, p) => {
-  winston.error('Unhandled rejection at:', p, 'reason:', reason);
-});
+  const io = new Server(httpServer, options);
 
-process.on('uncaughtException', (error) => {
-  winston.error(`Unhandled exception: ${error}\n` + `Exception origin: ${error.stack}`);
-});
+  io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
+    .use((socket, next) => {
+      baseCookieParser(socket.client.request, null, next);
+    })
+    .use((socket, next) => {
+      auth(socket, next);
+    });
 
-module.exports = io;
+  app.get("/", (req, res) => {
+    res.send("<h1>Invalid Endpoint</h1>");
+  });
+
+  const filesHub = require("./app/hubs/files.js")(io);
+  const usersHub = await require("./app/hubs/onlineusers.js")(io);
+
+  app.use("/controller", require("./app/controllers")(filesHub, usersHub));
+
+  httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
+
+  process.on('unhandledRejection', (reason, p) => {
+    winston.error('Unhandled rejection at:', p, 'reason:', reason);
+  });
+
+  process.on('uncaughtException', (error) => {
+    winston.error(`Unhandled exception: ${error}\n` + `Exception origin: ${error.stack}`);
+  });
+
+  module.exports = io;
+})();

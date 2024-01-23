@@ -27,6 +27,8 @@ function getAndSaveAppsettings(){
     nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
     nconf.file("redis", path.join(appsettings, 'redis.json'));
 
+    
+    console.log(appsettings);
     var redis = nconf.get("Redis");
     if(redis != null)
     {
@@ -38,4 +40,6 @@ function getAndSaveAppsettings(){
         redis.password = redis.Password;
         nconf.set("Redis", redis);
     }
+    const redisOptions = nconf.get("Redis");
+    console.log(redisOptions);
 }
