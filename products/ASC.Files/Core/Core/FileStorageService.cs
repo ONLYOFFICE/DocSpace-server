@@ -498,8 +498,10 @@ public class FileStorageService //: IFileStorageService
     {
         var result = await InternalCreateNewFolderAsync(parentId, title, FolderType.FillingFormsRoom, privacy, indexing);
 
-        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
-        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
+        var readyFormFolder = CreateReadyFormFolderAsync(FilesUCResource.ReadyFormFolder, result.Id, false, false);
+        var inProcessFormFolder = CreateInProcessFormFolderAsync(FilesUCResource.InProcessFormFolder, result.Id, false, false);
+
+        await Task.WhenAll(readyFormFolder, inProcessFormFolder);
 
         return result;
     }
@@ -515,6 +517,15 @@ public class FileStorageService //: IFileStorageService
         return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
     }
 
+    private async Task<Folder<T>> CreateReadyFormFolderAsync<T>(string title, T parentId, bool privacy, bool indexing)
+    {
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.ReadyFormFolder, privacy, indexing);
+    }
+
+    private async Task<Folder<T>> CreateInProcessFormFolderAsync<T>(string title, T parentId, bool privacy, bool indexing)
+    {
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.InProcessFormFolder, privacy, indexing);
+    }
     private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)
     {
         var folderDao = GetFolderDao<T>();
