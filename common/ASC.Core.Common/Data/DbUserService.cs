@@ -381,6 +381,18 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 
                 q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
             }
+            else if (sortBy == "department")
+            {
+                var q1 = q.Select(u => new
+                {
+                    user = u,
+                    groupsCount = userDbContext.UserGroups.Count(g =>
+                        g.TenantId == tenant && g.Userid == u.Id && !g.Removed && g.RefType == UserGroupRefType.Contains && 
+                        !Constants.SystemGroups.Select(sg => sg.ID).Contains(g.UserGroupId))
+                });
+
+                q = (sortOrderAsc ? q1.OrderBy(r => r.groupsCount) : q1.OrderByDescending(r => r.groupsCount)).Select(r => r.user);
+            }
             else
             {
                 q = orderedQuery.ThenBy(sortBy, sortOrderAsc);
