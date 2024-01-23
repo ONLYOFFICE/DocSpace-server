@@ -27,19 +27,17 @@ function getAndSaveAppsettings(){
     nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
     nconf.file("redis", path.join(appsettings, 'redis.json'));
 
-    
-    console.log(appsettings);
     var redis = nconf.get("Redis");
     if(redis != null)
     {
-        redis.host = redis.Hosts[0].Host; 
-        redis.port = redis.Hosts[0].Port; 
         redis.connect_timeout = redis.ConnectTimeout;
         redis.db = redis.Database;
-        redis.user = redis.User;
+        redis.username = redis.User;
         redis.password = redis.Password;
+        redis.socket = {
+            host: redis.Hosts[0].Host,
+            port: redis.Hosts[0].Port
+        };
         nconf.set("Redis", redis);
     }
-    const redisOptions = nconf.get("Redis");
-    console.log(redisOptions);
 }
