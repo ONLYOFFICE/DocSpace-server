@@ -40,7 +40,8 @@ public class GroupController(UserManager userManager,
         MessageService messageService,
         MessageTarget messageTarget,
         PermissionContext permissionContext,
-        FileSecurity fileSecurity)
+        FileSecurity fileSecurity,
+        EmployeeFullDtoHelper employeeFullDtoHelper)
     : ControllerBase
 {
     /// <summary>
@@ -57,18 +58,19 @@ public class GroupController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet]
-    public async IAsyncEnumerable<GroupDto> GetGroupsAsync(bool withMembers = false)
+    public async IAsyncEnumerable<GroupDto> GetGroupsAsync()
     {
-        var groups = (await userManager.GetDepartmentsAsync()).Select(r => r);
-        
-        if (!string.IsNullOrEmpty(apiContext.FilterValue))
-        {
-            groups = groups.Where(r => r.Name!.Contains(apiContext.FilterValue, StringComparison.InvariantCultureIgnoreCase));
-        }
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+        var text = apiContext.FilterValue;
 
-        foreach (var g in groups)
+        var totalCount = await userManager.GetGroupsCountAsync(text);
+
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
+
+        await foreach (var g in userManager.GetGroupsAsync(text, offset, count))
         {
-            yield return await groupFullDtoHelper.Get(g, withMembers);
+            yield return await groupFullDtoHelper.Get(g, false);
         }
     }
 
@@ -78,17 +80,17 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Get a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("{groupid:guid}")]
-    public async Task<GroupDto> GetGroupAsync(Guid groupid)
+    [HttpGet("{id:guid}")]
+    public async Task<GroupDto> GetGroupAsync(Guid id)
     {
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(groupid), true);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), false);
     }
 
     /// <summary>
@@ -137,7 +139,7 @@ public class GroupController(UserManager userManager,
 
         await messageService.SendAsync(MessageAction.GroupCreated, messageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, true);
+        return await groupFullDtoHelper.Get(group, false);
     }
 
     /// <summary>
@@ -146,27 +148,22 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Update a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Updated group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{groupid:guid}")]
-    public async Task<GroupDto> UpdateGroupAsync(Guid groupid, GroupRequestDto inDto)
+    [HttpPut("{id:guid}")]
+    public async Task<GroupDto> UpdateGroupAsync(Guid id, GroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = (await userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == groupid);
-
-        if (group == null || group.ID == Constants.LostGroupInfo.ID)
-        {
-            throw new ItemNotFoundException("group not found");
-        }
+        var group = await GetGroupInfoAsync(id);
 
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
 
-        await RemoveMembersFromAsync(groupid, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(groupid, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
+        await RemoveMembersFromAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
 
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
@@ -178,9 +175,9 @@ public class GroupController(UserManager userManager,
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupUpdated, messageTarget.Create(groupid), group.Name);
+        await messageService.SendAsync(MessageAction.GroupUpdated, messageTarget.Create(id), group.Name);
 
-        return await GetGroupAsync(groupid);
+        return await GetGroupAsync(id);
     }
 
     /// <summary>
@@ -189,23 +186,23 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Delete a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("{groupid:guid}")]
-    public async Task<GroupDto> DeleteGroupAsync(Guid groupid)
-    {
-         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+    [HttpDelete("{id:guid}")]
+    public async Task<NoContentResult> DeleteGroupAsync(Guid id)
+    { 
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(groupid);
+        var group = await GetGroupInfoAsync(id);
 
-        await userManager.DeleteGroupAsync(groupid);
-        await fileSecurity.RemoveSubjectAsync<int>(groupid, false);
+        await userManager.DeleteGroupAsync(id);
+        await fileSecurity.RemoveSubjectAsync<int>(id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, false);
+        return NoContent();
     }
 
     /// <summary>
@@ -214,27 +211,27 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Move group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID to move from</param>
-    /// <param type="System.Guid, System" method="url" name="newgroupid">Group ID to move to</param>
+    /// <param type="System.Guid, System" method="url" name="fromId">Group ID to move from</param>
+    /// <param type="System.Guid, System" method="url" name="toId">Group ID to move to</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{fromId}/members/transfer/{toId}</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{groupid:guid}/members/{newgroupid:guid}")]
-    public async Task<GroupDto> TransferMembersToAsync(Guid groupid, Guid newgroupid)
+    [HttpPut("{fromId:guid}/members/{toId:guid}")]
+    public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var oldGroup = await GetGroupInfoAsync(groupid);
-        var newGroup = await GetGroupInfoAsync(newgroupid);
+        var fromGroup = await GetGroupInfoAsync(fromId);
+        var toGroup = await GetGroupInfoAsync(toId);
 
-        var users = await userManager.GetUsersByGroupAsync(oldGroup.ID);
+        var users = await userManager.GetUsersByGroupAsync(fromGroup.ID);
         
         foreach (var userInfo in users)
         {
-            await TransferUserToDepartmentAsync(userInfo.Id, newGroup, false);
+            await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
         }
 
-        return await GetGroupAsync(newgroupid);
+        return await GetGroupAsync(toId);
     }
 
     /// <summary>
@@ -243,18 +240,34 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Replace group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("{groupid:guid}/members")]
-    public async Task<GroupDto> SetMembersToAsync(Guid groupid, GroupRequestDto inDto)
+    [HttpPost("{id:guid}/members")]
+    public async Task<GroupDto> SetMembersToAsync(Guid id, GroupRequestDto inDto)
     {
-        await RemoveMembersFromAsync(groupid, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(groupid)).Select(x => x.Id) });
-        await AddMembersToAsync(groupid, inDto);
+        await RemoveMembersFromAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
+        await AddMembersToAsync(id, inDto);
+        
+        return await GetGroupAsync(id);
+    }
 
-        return await GetGroupAsync(groupid);
+    [HttpGet("{id:guid}/members")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetGroupMembersAsync(Guid id)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+
+        var totalCount = await userManager.GetGroupMembersCountAsync(id);
+
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
+
+        await foreach (var user in userManager.GetGroupMembersAsync(id, offset, count))
+        {
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
+        }
     }
 
     /// <summary>
@@ -263,17 +276,17 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Add group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{groupid:guid}/members")]
-    public async Task<GroupDto> AddMembersToAsync(Guid groupid, GroupRequestDto inDto)
+    [HttpPut("{id:guid}/members")]
+    public async Task<GroupDto> AddMembersToAsync(Guid id, GroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(groupid);
+        var group = await GetGroupInfoAsync(id);
 
         foreach (var userId in inDto.Members)
         {
@@ -289,15 +302,15 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Set a group manager
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.SetManagerRequestDto, ASC.People" name="inDto">Request parameters for setting a group manager</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}/manager</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{groupid:guid}/manager")]
-    public async Task<GroupDto> SetManagerAsync(Guid groupid, SetManagerRequestDto inDto)
+    [HttpPut("{id:guid}/manager")]
+    public async Task<GroupDto> SetManagerAsync(Guid id, SetManagerRequestDto inDto)
     {
-        var group = await GetGroupInfoAsync(groupid);
+        var group = await GetGroupInfoAsync(id);
         
         if (await userManager.UserExistsAsync(inDto.UserId))
         {
@@ -308,7 +321,7 @@ public class GroupController(UserManager userManager,
             throw new ItemNotFoundException("user not found");
         }
 
-        return await GetGroupAsync(groupid);
+        return await GetGroupAsync(id);
     }
 
     /// <summary>
@@ -317,17 +330,17 @@ public class GroupController(UserManager userManager,
     /// <short>
     /// Remove group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="groupid">Group ID</param>
+    /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("{groupid:guid}/members")]
-    public async Task<GroupDto> RemoveMembersFromAsync(Guid groupid, GroupRequestDto inDto)
+    [HttpDelete("{id:guid}/members")]
+    public async Task<GroupDto> RemoveMembersFromAsync(Guid id, GroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(groupid);
+        var group = await GetGroupInfoAsync(id);
 
         foreach (var userId in inDto.Members)
         {
@@ -339,9 +352,8 @@ public class GroupController(UserManager userManager,
 
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
     {
-        var group = (await userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == id).NotFoundIfNull("group not found");
-        
-        if (group.ID == Constants.LostGroupInfo.ID)
+        var group = await userManager.GetGroupInfoAsync(id);
+        if (group == null || group.ID == Constants.LostGroupInfo.ID)
         {
             throw new ItemNotFoundException("group not found");
         }
@@ -360,6 +372,7 @@ public class GroupController(UserManager userManager,
         {
             await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
+        
         await userManager.AddUserIntoGroupAsync(userId, group.ID);
     }
 

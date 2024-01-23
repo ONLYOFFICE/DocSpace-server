@@ -64,6 +64,10 @@ public interface IUserService
     Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant);
     IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant);
     Task<IEnumerable<Group>> GetGroupsAsync(int tenant);
+    IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, int offset = 0, int count = -1);
+    IAsyncEnumerable<UserInfo> GetGroupMembersAsync(int tenant, Guid id, int offset = 0, int count = -1);
+    Task<int> GetGroupMembersCountAsync(int tenant, Guid id);
+    Task<int> GetGroupsCountAsync(int tenant, string text);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds);
     Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType);
     UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType);

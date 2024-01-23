@@ -51,6 +51,90 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             .ToListAsync();
     }
 
+    public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, int offset = 0, int count = -1)
+    {
+        if (count == 0)
+        {
+            yield break;
+        }
+        
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            q = q.Where(g => g.Name.Contains(text));
+        }
+        
+        q = q.OrderBy(g => g.Name);
+
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+        
+        await foreach (var group in q.ProjectTo<Group>(mapper.ConfigurationProvider).ToAsyncEnumerable())
+        {
+            yield return group;
+        }
+    }
+
+    public async Task<int> GetGroupsCountAsync(int tenant, string text)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = userDbContext.Groups.Where(t => t.TenantId == tenant);
+        
+        if (!string.IsNullOrEmpty(text))
+        {
+            q = q.Where(g => g.Name.Contains(text));
+        }
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<UserInfo> GetGroupMembersAsync(int tenant, Guid id, int offset = 0, int count = -1)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = userDbContext.UserGroups.Where(g => g.TenantId == tenant && g.UserGroupId == id)
+            .Join(userDbContext.Users, g => g.Userid, u => u.Id, (group, user) => new { group, user })
+            .OrderBy(r => r.group.RefType).ThenBy(r => r.user.FirstName)
+            .Select(r => r.user)
+            .Distinct()
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider);
+
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        await foreach (var user in q.ToAsyncEnumerable())
+        {
+            yield return user;
+        }
+    }
+
+    public async Task<int> GetGroupMembersCountAsync(int tenant, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var q = userDbContext.UserGroups.Where(g => g.TenantId == tenant && g.UserGroupId == id);
+
+        return await q.CountAsync();
+    }
+
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();

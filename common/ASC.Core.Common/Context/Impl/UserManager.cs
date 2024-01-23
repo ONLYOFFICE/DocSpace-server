@@ -885,6 +885,32 @@ public class UserManager
 
     #region Groups
 
+    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, int offset = 0, int count = -1)
+    {
+        return _userService.GetGroupsAsync(Tenant.Id, text, offset, count)
+            .Select(group => new GroupInfo(group.CategoryId)
+            {
+                ID = group.Id,
+                Name = group.Name,
+                Sid = group.Sid
+            });
+    }
+
+    public Task<int> GetGroupsCountAsync(string text)
+    {
+        return _userService.GetGroupsCountAsync(Tenant.Id, text);
+    }
+
+    public IAsyncEnumerable<UserInfo> GetGroupMembersAsync(Guid id, int offset = 0, int count = -1)
+    {
+        return _userService.GetGroupMembersAsync(Tenant.Id, id, offset, count);
+    }
+
+    public Task<int> GetGroupMembersCountAsync(Guid id)
+    {
+        return _userService.GetGroupMembersCountAsync(Tenant.Id, id);
+    }
+    
     public async Task<GroupInfo[]> GetGroupsAsync()
     {
         return await GetGroupsAsync(Guid.Empty);
