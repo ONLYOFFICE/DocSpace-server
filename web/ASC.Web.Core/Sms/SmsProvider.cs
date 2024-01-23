@@ -144,7 +144,7 @@ public abstract class SmsProvider : Consumer
             {
                 RequestUri = new Uri(url)
             };
-            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             var httpClient = ClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMilliseconds(15000);
@@ -239,7 +239,7 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
                 {
                     RequestUri = new Uri(url)
                 };
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
                 var httpClient = ClientFactory.CreateClient();
                 httpClient.Timeout = TimeSpan.FromMilliseconds(1000);

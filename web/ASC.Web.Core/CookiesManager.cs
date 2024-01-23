@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Net.Http.Headers;
-
 using Constants = ASC.Core.Users.Constants;
 using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
@@ -126,14 +124,21 @@ public class CookiesManager
             }
         }
 
-        var cookieName = GetCookiesName(type);
-
-        if (!string.IsNullOrEmpty(itemId))
-        {
-            cookieName += itemId;
-        }
+        var cookieName = GetFullCookiesName(type, itemId);
 
         _httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
+    }
+
+    public string GetCookies(IReadOnlyDictionary<string, StringValues> headers, CookiesType type, string itemId)
+    {
+        if (headers == null)
+        {
+            return string.Empty;
+        }
+
+        var name = GetFullCookiesName(type, itemId);
+
+        return headers.TryGetValue(name, out var value) ? value : string.Empty;
     }
 
     public string GetCookies(CookiesType type)
@@ -150,12 +155,7 @@ public class CookiesManager
             return string.Empty;
         }
 
-        var cookieName = GetCookiesName(type);
-
-        if (!string.IsNullOrEmpty(itemId))
-        {
-            cookieName += itemId;
-        }
+        var cookieName = GetFullCookiesName(type, itemId);
 
         if (_httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie))
         {
@@ -177,12 +177,7 @@ public class CookiesManager
             return;
         }
 
-        var cookieName = GetCookiesName(type);
-
-        if (!string.IsNullOrEmpty(itemId))
-        {
-            cookieName += itemId;
-        }
+        var cookieName = GetFullCookiesName(type, itemId);
 
         if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
         {
@@ -318,6 +313,18 @@ public class CookiesManager
     public string GetConfirmCookiesName()
     {
         return GetCookiesName(CookiesType.ConfirmKey);
+    }
+    
+    private string GetFullCookiesName(CookiesType type, string itemId = null)
+    {
+        var name = GetCookiesName(type);
+
+        if (!string.IsNullOrEmpty(itemId))
+        {
+            name += itemId;
+        }
+
+        return name;
     }
 
     private string GetCookiesName(CookiesType type)

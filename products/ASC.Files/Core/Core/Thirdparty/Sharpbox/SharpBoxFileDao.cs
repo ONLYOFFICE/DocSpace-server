@@ -166,7 +166,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, BaseFilter baseFilter, string roomId = default)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, BaseFilter baseFilter, string roomId = default, bool withShared = false)
     {
         ArgumentNullException.ThrowIfNull(baseFilter);
         if (baseFilter.FilterType == FilterType.FoldersOnly)
@@ -417,22 +417,22 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(false);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharpBoxDaoSelector.ConvertId,
@@ -443,7 +443,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return moved.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var entry = GetFileById(fileId);
         var folder = GetFolderById(toFolderId);
