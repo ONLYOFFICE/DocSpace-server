@@ -23,7 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 namespace ASC.Data.Backup.Tasks;
 
 public class ProgressChangedEventArgs : EventArgs
@@ -291,14 +290,22 @@ public abstract class PortalTaskBase
         {
             while ((commandText = await reader.ReadLineAsync()) != null)
             {
-                while (!commandText.EndsWith(delimiter))
+                var sb = new StringBuilder(commandText);
+                if (!commandText.EndsWith(delimiter))
                 {
-                    var newline = await reader.ReadLineAsync();
-                    if (newline == null)
+                    var newline = "";
+                    while (!newline.EndsWith(delimiter))
                     {
-                        break;
+                        newline = await reader.ReadLineAsync();
+                        if (string.IsNullOrEmpty(newline))
+                        {
+                            break;
+                        }
+
+                        sb.Append(newline);
                     }
-                    commandText += newline;
+
+                    commandText = sb.ToString();
                 }
 
                 try

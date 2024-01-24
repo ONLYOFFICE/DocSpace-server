@@ -453,7 +453,7 @@ public class BackupPortalTask : PortalTaskBase
     {
         _logger.DebugSaveTable(t);
         List<object[]> portion;
-        while ((portion = data.Take(BatchLimit).ToList()).Any())
+        while ((portion = data.Take(BatchLimit).ToList()).Count > 0)
         {
             using (var sw = new StreamWriter(path, true))
             using (var writer = new JsonTextWriter(sw))
