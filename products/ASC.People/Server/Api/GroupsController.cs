@@ -40,8 +40,7 @@ public class GroupController(UserManager userManager,
         MessageService messageService,
         MessageTarget messageTarget,
         PermissionContext permissionContext,
-        FileSecurity fileSecurity,
-        EmployeeFullDtoHelper employeeFullDtoHelper)
+        FileSecurity fileSecurity)
     : ControllerBase
 {
     /// <summary>
@@ -90,7 +89,7 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), false);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
     /// <summary>
@@ -139,7 +138,7 @@ public class GroupController(UserManager userManager,
 
         await messageService.SendAsync(MessageAction.GroupCreated, messageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, false);
+        return await groupFullDtoHelper.Get(group, true);
     }
 
     /// <summary>
