@@ -461,16 +461,6 @@ public class CachedUserService : IUserService, ICachedService
         return _service.GetGroupsCountAsync(tenant, text);
     }
 
-    public IAsyncEnumerable<UserInfo> GetGroupMembersAsync(int tenant, Guid id, int offset = 0, int count = -1)
-    {
-        return _service.GetGroupMembersAsync(tenant, id, offset, count);
-    }
-
-    public Task<int> GetGroupMembersCountAsync(int tenant, Guid id)
-    {
-        return _service.GetGroupMembersCountAsync(tenant, id);
-    }
-
     public void InvalidateCache()
     {
     }

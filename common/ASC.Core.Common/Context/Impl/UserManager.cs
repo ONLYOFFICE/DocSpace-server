@@ -900,16 +900,6 @@ public class UserManager
     {
         return _userService.GetGroupsCountAsync(Tenant.Id, text);
     }
-
-    public IAsyncEnumerable<UserInfo> GetGroupMembersAsync(Guid id, int offset = 0, int count = -1)
-    {
-        return _userService.GetGroupMembersAsync(Tenant.Id, id, offset, count);
-    }
-
-    public Task<int> GetGroupMembersCountAsync(Guid id)
-    {
-        return _userService.GetGroupMembersCountAsync(Tenant.Id, id);
-    }
     
     public async Task<GroupInfo[]> GetGroupsAsync()
     {

@@ -254,22 +254,6 @@ public class GroupController(UserManager userManager,
         return await GetGroupAsync(id);
     }
 
-    [HttpGet("{id:guid}/members")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetGroupMembersAsync(Guid id)
-    {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-
-        var totalCount = await userManager.GetGroupMembersCountAsync(id);
-
-        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
-
-        await foreach (var user in userManager.GetGroupMembersAsync(id, offset, count))
-        {
-            yield return await employeeFullDtoHelper.GetFullAsync(user);
-        }
-    }
-
     /// <summary>
     /// Adds new group members to the group with the ID specified in the request.
     /// </summary>

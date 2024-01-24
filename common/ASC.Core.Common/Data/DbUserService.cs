@@ -99,42 +99,6 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         return await q.CountAsync();
     }
 
-    public async IAsyncEnumerable<UserInfo> GetGroupMembersAsync(int tenant, Guid id, int offset = 0, int count = -1)
-    {
-        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var q = userDbContext.UserGroups.Where(g => g.TenantId == tenant && g.UserGroupId == id)
-            .Join(userDbContext.Users, g => g.Userid, u => u.Id, (group, user) => new { group, user })
-            .OrderBy(r => r.group.RefType).ThenBy(r => r.user.FirstName)
-            .Select(r => r.user)
-            .Distinct()
-            .ProjectTo<UserInfo>(mapper.ConfigurationProvider);
-
-        if (offset > 0)
-        {
-            q = q.Skip(offset);
-        }
-
-        if (count > 0)
-        {
-            q = q.Take(count);
-        }
-
-        await foreach (var user in q.ToAsyncEnumerable())
-        {
-            yield return user;
-        }
-    }
-
-    public async Task<int> GetGroupMembersCountAsync(int tenant, Guid id)
-    {
-        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        
-        var q = userDbContext.UserGroups.Where(g => g.TenantId == tenant && g.UserGroupId == id);
-
-        return await q.CountAsync();
-    }
-
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
