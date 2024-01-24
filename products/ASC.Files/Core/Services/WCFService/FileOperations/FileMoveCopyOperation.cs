@@ -240,8 +240,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         {
             FilterType = FilterType.FilesOnly,
             OrderBy = new OrderBy(SortedByType.AZ, true),
-            WithSubfolders = true,
-            Count = -1
+            WithSubfolders = true
         };
 
         var files = await fileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
@@ -332,8 +331,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 {
                     FilterType = FilterType.FilesOnly,
                     OrderBy = new OrderBy(SortedByType.AZ, true),
-                    WithSubfolders = true,
-                    Count = -1
+                    WithSubfolders = true
                 };
                 var files = await FileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
                 var (isError, message) = await WithErrorAsync(scope, files, checkPermissions);

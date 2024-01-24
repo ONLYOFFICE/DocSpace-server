@@ -318,8 +318,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
             var baseFilter = new FileFilter
             {
-                SearchInContent = true,
-                Count = -1
+                SearchInContent = true
             };
 
             var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, baseFilter));

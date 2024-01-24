@@ -386,9 +386,8 @@ public class EntryManager(IDaoFactory daoFactory,
             fileFilter.SearchText = searchText;
             fileFilter.OrderBy = orderBy;
             fileFilter.WithSubfolders = withSubfolders;
-            fileFilter.Count = -1;
 
-            var folderFilter = new FolderFilter() { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, Count = -1 };
+            var folderFilter = new FolderFilter() { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders };
 
             var folders = folderDao.GetFoldersAsync(parent.Id, folderFilter);
             var files = fileDao.GetFilesAsync(parent.Id, fileFilter);
@@ -425,7 +424,7 @@ public class EntryManager(IDaoFactory daoFactory,
             fileFilter.Extension = fileExtension;
             fileFilter.ExcludeSubject = excludeSubject;
 
-            var folderFilter = new FolderFilter() { FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject};
+            var folderFilter = new FolderFilter { FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject};
 
             var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, folderFilter, roomId);
             
@@ -467,9 +466,8 @@ public class EntryManager(IDaoFactory daoFactory,
             fileFilter.WithSubfolders = withSubfolders;
             fileFilter.Extension = fileExtension;
             fileFilter.ExcludeSubject = excludeSubject;
-            fileFilter.Count = -1;
 
-            var folderFilter = new FolderFilter() { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject, Count = -1};
+            var folderFilter = new FolderFilter { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject };
 
             var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, folderFilter);
             var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, fileFilter, withShared: withShared);

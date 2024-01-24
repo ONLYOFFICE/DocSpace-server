@@ -91,7 +91,6 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         //TODO: think about loop by N
         var baseFilter = new FileFilter
         {
-            Count = -1,
             WithSubfolders = true,
             OrderBy = new OrderBy(SortedByType.CustomOrder, true)
         };

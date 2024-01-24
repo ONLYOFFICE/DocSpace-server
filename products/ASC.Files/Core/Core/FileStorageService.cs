@@ -130,7 +130,6 @@ public class FileStorageService //: IFileStorageService
         {
             var baseFilter = new FileFilter
             {
-                Count = -1,
                 FilterType = FilterType.FoldersOnly,
                 OrderBy = new OrderBy(SortedByType.AZ, true)
             };
@@ -2966,8 +2965,7 @@ public class FileStorageService //: IFileStorageService
             {
                 FilterType = FilterType.FilesOnly,
                 SearchText = path,
-                OrderBy = new OrderBy(SortedByType.AZ, true),
-                Count = -1
+                OrderBy = new OrderBy(SortedByType.AZ, true)
             };
             var list = fileDao.GetFilesAsync(folder.Id, baseFilter);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
@@ -3117,11 +3115,11 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var folderFilter = new FolderFilter { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
+        var folderFilter = new FolderFilter { OrderBy = new OrderBy(SortedByType.AZ, true) };
         var folders = await folderDao.GetFoldersAsync(folderId, folderFilter).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
 
-        var baseFilter = new FileFilter { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
+        var baseFilter = new FileFilter { OrderBy = new OrderBy(SortedByType.AZ, true) };
         var files = await fileDao.GetFilesAsync(folderId, baseFilter).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 

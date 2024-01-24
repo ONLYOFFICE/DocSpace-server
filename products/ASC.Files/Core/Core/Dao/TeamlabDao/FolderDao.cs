@@ -137,8 +137,7 @@ internal class FolderDao(
     }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
-        var folderFilter = new FolderFilter { OrderBy = default, SubjectId = default, Count = -1};
-        return GetFoldersAsync(parentId, folderFilter);
+        return GetFoldersAsync(parentId, new FolderFilter());
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, FolderFilter folderFilter)

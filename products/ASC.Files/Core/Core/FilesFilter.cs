@@ -26,11 +26,10 @@
 
 namespace ASC.Web.Files.Core;
 
-
 public record FileFilter
 {
     public int From { get; set; }
-    public int Count { get; set; } 
+    public int Count { get; set; } = -1;
     public OrderBy OrderBy { get; set; }
     public Guid SubjectId { get; set; }
     public FilterType FilterType { get; set; }

@@ -221,8 +221,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         {
                             FilterType = FilterType.FilesOnly,
                             OrderBy = new OrderBy(SortedByType.AZ, true),
-                            WithSubfolders = true,
-                            Count = -1
+                            WithSubfolders = true
                         };
                         var files = await FileDao.GetFilesAsync(folder.Id, baseFilter).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
