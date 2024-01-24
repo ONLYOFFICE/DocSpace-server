@@ -387,7 +387,7 @@ public class EntryManager(IDaoFactory daoFactory,
             fileFilter.OrderBy = orderBy;
             fileFilter.WithSubfolders = withSubfolders;
 
-            var folderFilter = new FolderFilter() { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders };
+            var folderFilter = new FolderFilter { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders };
 
             var folders = folderDao.GetFoldersAsync(parent.Id, folderFilter);
             var files = fileDao.GetFilesAsync(parent.Id, fileFilter);
@@ -406,7 +406,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
-            var folderFilter = new FolderFilter() { FilterType = filterType, SubjectId = subjectId, SearchText = searchText, SearchInContent = searchInContent, WithSubfolders = withSubfolders, SearchArea = searchArea,
+            var folderFilter = new FolderFilter
+            { FilterType = filterType, SubjectId = subjectId, SearchText = searchText, SearchInContent = searchInContent, WithSubfolders = withSubfolders, SearchArea = searchArea,
                 WithoutTags = withoutTags, TagNames = tagNames, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter };
             entries = await fileSecurity.GetVirtualRoomsAsync(folderFilter);
 

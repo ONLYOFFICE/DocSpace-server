@@ -60,6 +60,6 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
             return 0;
         }
         
-        return await folderDao.GetFoldersCountAsync(parentId, new FolderFilter());
+        return await folderDao.GetFoldersCountAsync(parentId, FolderFilter.Default);
     }
 }

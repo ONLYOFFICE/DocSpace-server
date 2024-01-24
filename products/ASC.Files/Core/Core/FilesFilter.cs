@@ -28,6 +28,7 @@ namespace ASC.Web.Files.Core;
 
 public record FileFilter
 {
+    public static readonly FileFilter Default = new();
     public int From { get; set; }
     public int Count { get; set; } = -1;
     public OrderBy OrderBy { get; set; }
@@ -59,6 +60,7 @@ public record FileFilter
 
 public record FolderFilter : FileFilter
 {
+    public static new readonly FolderFilter Default = new();
     public IEnumerable<string> SubjectEntriesIds { get; set; }
 }
 

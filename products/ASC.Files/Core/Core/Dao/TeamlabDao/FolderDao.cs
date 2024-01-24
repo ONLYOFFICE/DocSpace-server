@@ -137,7 +137,7 @@ internal class FolderDao(
     }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
-        return GetFoldersAsync(parentId, new FolderFilter());
+        return GetFoldersAsync(parentId, FolderFilter.Default);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, FolderFilter folderFilter)
@@ -217,9 +217,7 @@ internal class FolderDao(
             return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
         }
 
-        var filter = new FolderFilter();
-        filter = folderFilter;
-        filter.OrderBy = null;
+        var filter = folderFilter with { OrderBy = null };
         var q = await GetFoldersQueryWithFilters(parentId, filter, roomId, filesDbContext);
 
         return await q.CountAsync();
@@ -1575,9 +1573,7 @@ internal class FolderDao(
     {
         var q1 = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id));
 
-        var filter = new FolderFilter{};
-        filter = folderFilter;
-        filter.WithSubfolders = true;
+        var filter = folderFilter with { WithSubfolders = true };
 
         q1 = BuildRoomsQuery(filesDbContext, q1, filterByType, searchByTags, searchByFilter, filter);
 
