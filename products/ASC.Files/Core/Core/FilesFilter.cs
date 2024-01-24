@@ -62,5 +62,14 @@ public record FolderFilter : FileFilter
 {
     public static new readonly FolderFilter Default = new();
     public IEnumerable<string> SubjectEntriesIds { get; set; }
+
+    private FolderFilter()
+    {
+        
+    }
+
+    public FolderFilter(FileFilter fileFilter): base(fileFilter)
+    {
+    }
 }
 

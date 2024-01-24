@@ -115,9 +115,10 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return parentFolder.OfType<ICloudDirectoryEntry>().Select(ToFolder).ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderFilter folderFilter, string roomId = default)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FileFilter fileFilter,
+        string roomId = default)
     {
-        if (CheckInvalidFilter(folderFilter.FilterType))
+        if (CheckInvalidFilter(fileFilter.FilterType))
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
@@ -125,19 +126,19 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         var folders = GetFoldersAsync(parentId); //TODO:!!!
 
         //Filter
-        if (folderFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => folderFilter.SubjectGroup
-                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, folderFilter.SubjectId)
-                                             : x.CreateBy == folderFilter.SubjectId);
+            folders = folders.WhereAwait(async x => fileFilter.SubjectGroup
+                                             ? await _userManager.IsUserInGroupAsync(x.CreateBy, fileFilter.SubjectId)
+                                             : x.CreateBy == fileFilter.SubjectId);
         }
 
-        if (!string.IsNullOrEmpty(folderFilter.SearchText))
+        if (!string.IsNullOrEmpty(fileFilter.SearchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(folderFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.IndexOf(fileFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        var orderBy = folderFilter.OrderBy;
+        var orderBy = fileFilter.OrderBy;
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         folders = orderBy.SortedBy switch

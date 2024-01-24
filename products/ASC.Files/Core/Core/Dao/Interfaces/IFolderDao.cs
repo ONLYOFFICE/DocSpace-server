@@ -82,10 +82,10 @@ public interface IFolderDao<T>
     /// Get a list of folders.
     /// </summary>
     /// <param name="parentId"></param>
-    /// <param name="folderFilter"></param>
+    /// <param name="fileFilter"></param>
     /// <param name="roomId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, FolderFilter folderFilter, T roomId = default);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, FileFilter fileFilter, T roomId = default);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -368,7 +368,7 @@ public interface IFolderDao<T>
     /// <param name="entry"></param>
     /// <returns></returns>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
-    Task<int> GetFoldersCountAsync(T parentId, FolderFilter folderFilter, T roomId = default);
+    Task<int> GetFoldersCountAsync(T parentId, FileFilter fileFilter, T roomId = default);
 
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 

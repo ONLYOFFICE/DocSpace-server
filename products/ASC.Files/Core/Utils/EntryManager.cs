@@ -262,7 +262,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, FileFilter baseFilter, T roomId = default)
     {
-        var (from, count, orderBy, subjectId, filterType, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = baseFilter;
+        var fileFilter = baseFilter with { };
 
         int total;
         var withShared = false;
@@ -284,11 +284,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var entries = new List<FileEntry>();
 
-        searchInContent = searchInContent && filterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
+        fileFilter.SearchInContent = fileFilter.SearchInContent && fileFilter.FilterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
 
         if (parent.FolderType == FolderType.TRASH)
         {
-            withSubfolders = false;
+            fileFilter.WithSubfolders = false;
         }
 
         if (parent.RootFolderType == FolderType.USER)
@@ -296,28 +296,20 @@ public class EntryManager(IDaoFactory daoFactory,
             withShared = true;
         }
 
-        var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
+        (fileFilter.FilterType, fileFilter.SearchText) = fileFilter.ApplyFilterOption != ApplyFilterOption.Files ? (fileFilter.FilterType, fileFilter.SearchText) : (FilterType.None, string.Empty);
 
-        if (!extension.IsNullOrEmpty())
+        if (!fileFilter.Extension.IsNullOrEmpty())
         {
-            extension = extension.Select(e => e.Trim()).Select(e => e.StartsWith('.') ? e : $".{e}").ToArray();
+            fileFilter.Extension = fileFilter.Extension.Select(e => e.Trim()).Select(e => e.StartsWith('.') ? e : $".{e}").ToArray();
 
-            if (applyFilterOption == ApplyFilterOption.All)
+            if (fileFilter.ApplyFilterOption == ApplyFilterOption.All)
             {
-                filterType = foldersFilterType = FilterType.FilesOnly;
+                fileFilter.FilterType = FilterType.FilesOnly;
             }
         }
 
-        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] { });
-
-        var fileFilter = new FileFilter
-        {
-            FilterType = filterType,
-            SubjectGroup = subjectGroup,
-            SubjectId = subjectId,
-            SearchInContent = searchInContent,
-            Extension = extension
-        };
+        (fileFilter.FilterType, fileFilter.SearchText, fileFilter.Extension) = fileFilter.ApplyFilterOption != ApplyFilterOption.Folders ? (fileFilter.FilterType, fileFilter.SearchText, fileFilter.Extension) : (FilterType.None, string.Empty, new string[] { });
+        
 
         if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await globalFolderHelper.FolderProjectsAsync))
         {
@@ -325,8 +317,6 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType == FolderType.SHARE)
         {
-            fileFilter.SearchText = searchText;
-            fileFilter.WithSubfolders = withSubfolders;
             //share
             var shared = await fileSecurity.GetSharesForMeAsync(fileFilter).ToListAsync();
 
@@ -336,14 +326,13 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType == FolderType.Recent)
         {
-            fileFilter.SearchText = searchText;
-            if (searchArea == SearchArea.RecentByLinks)
+            if (fileFilter.SearchArea == SearchArea.RecentByLinks)
             {
                 var fileDao = daoFactory.GetFileDao<T>();
                 var userId = authContext.CurrentAccount.ID;
 
-                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, fileFilter.Extension, fileFilter.SearchInContent, fileFilter.ExcludeSubject);
+                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, fileFilter.Extension, fileFilter.SearchInContent, fileFilter.ExcludeSubject, fileFilter.OrderBy, fileFilter.From, fileFilter.Count).ToListAsync();
                 
                 entries.AddRange(files);
 
@@ -361,7 +350,6 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType == FolderType.Favorites)
         {
-            fileFilter.SearchText = searchText;
             var (files, folders) = await GetFavoritesAsync(fileFilter);
 
             entries.AddRange(folders);
@@ -373,7 +361,6 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
-            fileFilter.SearchText = searchText;
             var files = await GetTemplatesAsync(folderDao, fileDao, fileFilter).ToListAsync();
             entries.AddRange(files);
 
@@ -383,13 +370,8 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
-            fileFilter.SearchText = searchText;
-            fileFilter.OrderBy = orderBy;
-            fileFilter.WithSubfolders = withSubfolders;
 
-            var folderFilter = new FolderFilter { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders };
-
-            var folders = folderDao.GetFoldersAsync(parent.Id, folderFilter);
+            var folders = folderDao.GetFoldersAsync(parent.Id, fileFilter);
             var files = fileDao.GetFilesAsync(parent.Id, fileFilter);
             //share
             var shared = fileSecurity.GetPrivacyForMeAsync(fileFilter);
@@ -406,10 +388,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
-            var folderFilter = new FolderFilter
-            { FilterType = filterType, SubjectId = subjectId, SearchText = searchText, SearchInContent = searchInContent, WithSubfolders = withSubfolders, SearchArea = searchArea,
-                WithoutTags = withoutTags, TagNames = tagNames, ExcludeSubject = excludeSubject, Provider = provider, SubjectFilter = subjectFilter };
-            entries = await fileSecurity.GetVirtualRoomsAsync(folderFilter);
+            entries = await fileSecurity.GetVirtualRoomsAsync(new FolderFilter(fileFilter));
 
             CalculateTotal();
         }
@@ -418,27 +397,13 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
 
-            fileFilter.FilterType = filesFilterType;
-            fileFilter.SearchText = filesSearchText;
-            fileFilter.OrderBy = orderBy;
-            fileFilter.WithSubfolders = withSubfolders;
-            fileFilter.Extension = fileExtension;
-            fileFilter.ExcludeSubject = excludeSubject;
-
-            var folderFilter = new FolderFilter { FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject};
-
-            var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, folderFilter, roomId);
-            
+            var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, fileFilter, roomId);
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, fileFilter, roomId);
+            
+            var folders = await folderDao.GetFoldersAsync(parent.Id, fileFilter, roomId).ToListAsync();
 
-            folderFilter.OrderBy = orderBy;
-            folderFilter.From = from;
-            folderFilter.Count = count;
-            var folders = await folderDao.GetFoldersAsync(parent.Id, folderFilter, roomId)
-                .ToListAsync();
-
-            var filesCount = count - folders.Count;
-            var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
+            var filesCount = fileFilter.Count - folders.Count;
+            var filesOffset = Math.Max(folders.Count > 0 ? 0 : fileFilter.From - await allFoldersCountTask, 0);
 
             fileFilter.From = filesOffset;
             fileFilter.Count = filesCount;
@@ -461,25 +426,16 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else
         {
-            fileFilter.FilterType = filesFilterType;
-            fileFilter.SearchText = filesSearchText;
-            fileFilter.OrderBy = orderBy;
-            fileFilter.WithSubfolders = withSubfolders;
-            fileFilter.Extension = fileExtension;
-            fileFilter.ExcludeSubject = excludeSubject;
-
-            var folderFilter = new FolderFilter { OrderBy = orderBy, FilterType = foldersFilterType, SubjectGroup = subjectGroup, SubjectId = subjectId, SearchText = foldersSearchText, WithSubfolders = withSubfolders, ExcludeSubject = excludeSubject };
-
-            var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, folderFilter);
+            var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, fileFilter);
             var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, fileFilter, withShared: withShared);
 
             var task1 = fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = fileSecurity.FilterReadAsync(files).ToListAsync();
 
-            if (filterType is FilterType.None or FilterType.FoldersOnly)
+            if (fileFilter.FilterType is FilterType.None or FilterType.FoldersOnly)
             {
-                var folderList = GetThirpartyFoldersAsync(parent, searchText);
-                var thirdPartyFolder = FilterEntries(folderList, filterType, subjectGroup, subjectId, searchText, searchInContent);
+                var folderList = GetThirpartyFoldersAsync(parent, fileFilter.SearchText);
+                var thirdPartyFolder = FilterEntries(folderList, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, fileFilter.SearchInContent);
 
                 var task3 = thirdPartyFolder.ToListAsync();
 
@@ -503,21 +459,21 @@ public class EntryManager(IDaoFactory daoFactory,
 
         IEnumerable<FileEntry> data = entries;
 
-        if (orderBy.SortedBy != SortedByType.New)
+        if (fileFilter.OrderBy.SortedBy != SortedByType.New)
         {
             if (parent.FolderType != FolderType.Recent)
             {
-                data = SortEntries<T>(data, orderBy);
+                data = SortEntries<T>(data, fileFilter.OrderBy);
             }
 
-            if (0 < from)
+            if (fileFilter.From > 0)
             {
-                data = data.Skip(from);
+                data = data.Skip(fileFilter.From);
             }
 
-            if (0 < count)
+            if (fileFilter.Count > 0)
             {
-                data = data.Take(count);
+                data = data.Take(fileFilter.Count);
             }
 
             data = data.ToList();
@@ -526,20 +482,20 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.SetTagsNewAsync(parent, data);
 
         //sorting after marking
-        if (orderBy.SortedBy == SortedByType.New)
+        if (fileFilter.OrderBy.SortedBy == SortedByType.New)
         {
-            data = SortEntries<T>(data, orderBy);
-
-            if (0 < from)
+            data = SortEntries<T>(data, fileFilter.OrderBy);
+            
+            if (fileFilter.From > 0)
             {
-                data = data.Skip(from);
+                data = data.Skip(fileFilter.From);
             }
 
-            if (0 < count)
+            if (fileFilter.Count > 0)
             {
-                data = data.Take(count);
+                data = data.Take(fileFilter.Count);
             }
-
+            
             data = data.ToList();
         }
 

@@ -247,7 +247,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFoldersCountAsync(string parentId, FolderFilter folderFilter, string roomId = default)
+    public Task<int> GetFoldersCountAsync(string parentId, FileFilter baseFilter, string roomId = default)
     {
         throw new NotImplementedException();
     }

@@ -137,7 +137,7 @@ internal class FolderDao(
     }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
-        return GetFoldersAsync(parentId, FolderFilter.Default);
+        return GetFoldersAsync(parentId, FileFilter.Default);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, FolderFilter folderFilter)
@@ -203,41 +203,41 @@ internal class FolderDao(
         }
     }
 
-    public async Task<int> GetFoldersCountAsync(int parentId, FolderFilter folderFilter, int roomId = default)
+    public async Task<int> GetFoldersCountAsync(int parentId, FileFilter fileFilter, int roomId = default)
     {
-        if (CheckInvalidFilter(folderFilter.FilterType))
+        if (CheckInvalidFilter(fileFilter.FilterType))
         {
             return 0;
         }
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (folderFilter.FilterType == FilterType.None && folderFilter.SubjectId == default && string.IsNullOrEmpty(folderFilter.SearchText) && !folderFilter.WithSubfolders && !folderFilter.ExcludeSubject && roomId == default)
+        if (fileFilter.FilterType == FilterType.None && fileFilter.SubjectId == default && string.IsNullOrEmpty(fileFilter.SearchText) && !fileFilter.WithSubfolders && !fileFilter.ExcludeSubject && roomId == default)
         {
             return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
         }
 
-        var filter = folderFilter with { OrderBy = null };
+        var filter = fileFilter with { OrderBy = null };
         var q = await GetFoldersQueryWithFilters(parentId, filter, roomId, filesDbContext);
 
         return await q.CountAsync();
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, FolderFilter folderFilter, int roomId = default)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, FileFilter fileFilter, int roomId = default)
     {
-        if (CheckInvalidFilter(folderFilter.FilterType) || folderFilter.Count == 0)
+        if (CheckInvalidFilter(fileFilter.FilterType) || fileFilter.Count == 0)
         {
             yield break;
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = await GetFoldersQueryWithFilters(parentId, folderFilter, roomId, filesDbContext);
+        var q = await GetFoldersQueryWithFilters(parentId, fileFilter, roomId, filesDbContext);
 
-        q = q.Skip(folderFilter.From);
+        q = q.Skip(fileFilter.From);
 
-        if (folderFilter.Count > 0)
+        if (fileFilter.Count > 0)
         {
-            q = q.Take(folderFilter.Count);
+            q = q.Take(fileFilter.Count);
         }
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
@@ -1642,13 +1642,13 @@ internal class FolderDao(
         return (await globalStore.GetStoreAsync()).CreateDataWriteOperator(chunkedUploadSession, sessionHolder);
     }
 
-    private async Task<IQueryable<DbFolder>> GetFoldersQueryWithFilters(int parentId, FolderFilter folderFilter, int roomId, FilesDbContext filesDbContext)
+    private async Task<IQueryable<DbFolder>> GetFoldersQueryWithFilters(int parentId, FileFilter fileFilter, int roomId, FilesDbContext filesDbContext)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         var q = await GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (folderFilter.WithSubfolders)
+        if (fileFilter.WithSubfolders)
         {
             q = (await GetFolderQuery(filesDbContext))
                 .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
@@ -1656,18 +1656,18 @@ internal class FolderDao(
                 .Select(r => r.folder);
         }
 
-        if (!string.IsNullOrEmpty(folderFilter.SearchText))
+        if (!string.IsNullOrEmpty(fileFilter.SearchText))
         {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(folderFilter.SearchText));
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, folderFilter.SearchText, SearchType.Any);
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(fileFilter.SearchText));
+            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, fileFilter.SearchText, SearchType.Any);
         }
 
-        q = folderFilter.OrderBy == null ? q : folderFilter.OrderBy.SortedBy switch
+        q = fileFilter.OrderBy == null ? q : fileFilter.OrderBy.SortedBy switch
         {
-            SortedByType.Author => folderFilter.OrderBy.IsAsc ? q.OrderBy(r => r.CreateBy) : q.OrderByDescending(r => r.CreateBy),
-            SortedByType.AZ => folderFilter.OrderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
-            SortedByType.DateAndTime => folderFilter.OrderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
-            SortedByType.DateAndTimeCreation => folderFilter.OrderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
+            SortedByType.Author => fileFilter.OrderBy.IsAsc ? q.OrderBy(r => r.CreateBy) : q.OrderByDescending(r => r.CreateBy),
+            SortedByType.AZ => fileFilter.OrderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
+            SortedByType.DateAndTime => fileFilter.OrderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
+            SortedByType.DateAndTimeCreation => fileFilter.OrderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
             SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
                 .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
                 .OrderBy(r => r.order.Order)
@@ -1675,16 +1675,16 @@ internal class FolderDao(
             _ => q.OrderBy(r => r.Title)
         };
 
-        if (folderFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            if (folderFilter.SubjectGroup)
+            if (fileFilter.SubjectGroup)
             {
-                var users = (await _userManager.GetUsersByGroupAsync(folderFilter.SubjectId)).Select(u => u.Id).ToArray();
+                var users = (await _userManager.GetUsersByGroupAsync(fileFilter.SubjectId)).Select(u => u.Id).ToArray();
                 q = q.Where(r => users.Contains(r.CreateBy));
             }
             else
             {
-                q = folderFilter.ExcludeSubject ? q.Where(r => r.CreateBy != folderFilter.SubjectId) : q.Where(r => r.CreateBy == folderFilter.SubjectId);
+                q = fileFilter.ExcludeSubject ? q.Where(r => r.CreateBy != fileFilter.SubjectId) : q.Where(r => r.CreateBy == fileFilter.SubjectId);
             }
         }
 

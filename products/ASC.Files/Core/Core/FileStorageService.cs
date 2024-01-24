@@ -700,7 +700,6 @@ public class FileStorageService //: IFileStorageService
 
     public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FileFilter fileFilter)
     {
-
         var (from, count, orderBy, subjectId, filter, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = fileFilter;
 
         var fileDao = GetFileDao<T>();
@@ -3115,12 +3114,12 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var folderFilter = new FolderFilter { OrderBy = new OrderBy(SortedByType.AZ, true) };
-        var folders = await folderDao.GetFoldersAsync(folderId, folderFilter).Select(r => r.Id).ToListAsync();
+        var filter = new FileFilter { OrderBy = new OrderBy(SortedByType.AZ, true) };
+        
+        var folders = await folderDao.GetFoldersAsync(folderId, filter).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
 
-        var baseFilter = new FileFilter { OrderBy = new OrderBy(SortedByType.AZ, true) };
-        var files = await fileDao.GetFilesAsync(folderId, baseFilter).Select(r=> r.Id).ToListAsync();
+        var files = await fileDao.GetFilesAsync(folderId, filter).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 
         if (subfolders)
