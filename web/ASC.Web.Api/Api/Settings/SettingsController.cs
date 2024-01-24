@@ -935,8 +935,10 @@ public class SettingsController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
     [HttpGet("authservice")]
-    public IEnumerable<AuthServiceRequestsDto> GetAuthServices()
-    {
+    public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
+    {        
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         return _consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
