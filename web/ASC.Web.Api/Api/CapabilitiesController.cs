@@ -40,6 +40,7 @@ public class CapabilitiesController : ControllerBase
     private readonly ProviderManager _providerManager;
     private readonly SettingsManager _settingsManager;
     private readonly ILogger _log;
+    private readonly CommonLinkUtility _commonLinkUtility;
 
 
     public CapabilitiesController(
@@ -47,13 +48,15 @@ public class CapabilitiesController : ControllerBase
         TenantManager tenantManager,
         ProviderManager providerManager,
         SettingsManager settingsManager,
-        ILogger<CapabilitiesController> logger)
+        ILogger<CapabilitiesController> logger,
+        CommonLinkUtility commonLinkUtility)
     {
         _coreBaseSettings = coreBaseSettings;
         _tenantManager = tenantManager;
         _providerManager = providerManager;
         _settingsManager = settingsManager;
         _log = logger;
+        _commonLinkUtility = commonLinkUtility;
     }
 
     ///<summary>
@@ -128,7 +131,7 @@ public class CapabilitiesController : ControllerBase
 
                 if (settings.EnableSso.GetValueOrDefault())
                 {
-                    result.SsoUrl = settings.IdpSettings.SsoUrl;
+                    result.SsoUrl = _commonLinkUtility.GetFullAbsolutePath("/sso/login"); //TODO: get it from config
                     result.SsoLabel = settings.SpLoginLabel;
                 }
             }
