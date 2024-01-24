@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Polly;
+using Polly.Extensions.Http;
+
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -42,6 +45,17 @@ public static class DocumentService
     /// </summary>
     public static readonly int MaxTry = 3;
 
+    private static readonly JsonSerializerOptions _bodySettings = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
+    private static readonly JsonSerializerOptions _commonSettings = new()
+    {
+        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
+    };
+    
     /// <summary>
     /// Translation key to a supported form.
     /// </summary>
@@ -144,8 +158,7 @@ public static class DocumentService
         };
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         var body = new ConvertionBody
         {
@@ -167,12 +180,7 @@ public static class DocumentService
 
         if (!string.IsNullOrEmpty(signatureSecret))
         {
-            var payload = new Dictionary<string, object>
-                    {
-                        { "payload", body }
-                    };
-
-            var token = JsonWebToken.Encode(payload, signatureSecret);
+            var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
@@ -180,55 +188,14 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        });
+        var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
-
         string dataResponse;
-        HttpResponseMessage response = null;
-        Stream responseStream = null;
-        try
+
+        using (var response = await httpClient.SendAsync(request))
         {
-            var countTry = 0;
-            while (countTry < MaxTry)
-            {
-                try
-                {
-                    countTry++;
-                    response = await httpClient.SendAsync(request);
-                    responseStream = await response.Content.ReadAsStreamAsync();
-                    break;
-                }
-                catch (HttpRequestException ex)
-                {
-                    throw new HttpException((int)HttpStatusCode.BadRequest, ex.Message, ex);
-                }
-            }
-            if (countTry == MaxTry)
-            {
-                throw new HttpRequestException("Timeout");
-            }
-
-            if (responseStream == null)
-            {
-                throw new WebException("Could not get an answer");
-            }
-
-            using var reader = new StreamReader(responseStream);
-            dataResponse = await reader.ReadToEndAsync();
-        }
-        finally
-        {
-            if (responseStream != null)
-            {
-                await responseStream.DisposeAsync();
-            }
-
-            response?.Dispose();
+            dataResponse = await response.Content.ReadAsStringAsync();
         }
 
         return GetResponseUri(dataResponse);
@@ -291,13 +258,8 @@ public static class DocumentService
 
         if (!string.IsNullOrEmpty(signatureSecret))
         {
-            var payload = new Dictionary<string, object>
-                {
-                    { "payload", body }
-                };
-
-            var token = JsonWebToken.Encode(payload, signatureSecret);
-
+            var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
+            
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
@@ -305,34 +267,19 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        });
+        var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
         string dataResponse;
         using (var response = await httpClient.SendAsync(request, cancellationTokenSource.Token))
-        await using (var stream = await response.Content.ReadAsStreamAsync(cancellationTokenSource.Token))
         {
-            if (stream == null)
-            {
-                throw new Exception("Response is null");
-            }
-
-            using var reader = new StreamReader(stream);
-            dataResponse = await reader.ReadToEndAsync(cancellationTokenSource.Token);
+            dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
         }
         
         try
         {
-            var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            });
+            var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
             return commandResponse;
         }
         catch (Exception ex)
@@ -391,12 +338,7 @@ public static class DocumentService
 
         if (!string.IsNullOrEmpty(signatureSecret))
         {
-            var payload = new Dictionary<string, object>
-                    {
-                        { "payload", body }
-                    };
-
-            var token = JsonWebToken.Encode(payload, signatureSecret);
+            var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
@@ -404,21 +346,15 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        });
+        var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
         string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
-        await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            using var reader = new StreamReader(responseStream);
-            dataResponse = await reader.ReadToEndAsync();
+            dataResponse = await  response.Content.ReadAsStringAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -469,13 +405,7 @@ public static class DocumentService
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
 
         using var response = await httpClient.SendAsync(request);
-        await using var responseStream = await response.Content.ReadAsStreamAsync();
-        if (responseStream == null)
-        {
-            throw new Exception("Empty response");
-        }
-        using var reader = new StreamReader(responseStream);
-        var dataResponse = await reader.ReadToEndAsync();
+        var dataResponse = await response.Content.ReadAsStringAsync();
         return dataResponse.Equals("true", StringComparison.InvariantCultureIgnoreCase);
     }
 
@@ -494,25 +424,18 @@ public static class DocumentService
     [DebuggerDisplay("{Key}")]
     public class CommandResponse
     {
-        [JsonPropertyName("error")]
         public ErrorTypes Error { get; set; }
-
-        [JsonPropertyName("errorString")]
+        
         public string ErrorString { get; set; }
-
-        [JsonPropertyName("key")]
+        
         public string Key { get; set; }
-
-        [JsonPropertyName("license")]
+        
         public License License { get; set; }
-
-        [JsonPropertyName("server")]
+        
         public ServerInfo Server { get; set; }
-
-        [JsonPropertyName("quota")]
+        
         public QuotaInfo Quota { get; set; }
-
-        [JsonPropertyName("version")]
+        
         public string Version { get; set; }
 
         public enum ErrorTypes
@@ -530,22 +453,15 @@ public static class DocumentService
         [DebuggerDisplay("{BuildVersion}")]
         public class ServerInfo
         {
-            [JsonPropertyName("buildDate")]
             public DateTime BuildDate { get; set; }
-
-            [JsonPropertyName("buildNumber")]
+            
             public int BuildNumber { get; set; }
-
-            [JsonPropertyName("buildVersion")]
             public string BuildVersion { get; set; }
-
-            [JsonPropertyName("packageType")]
+            
             public PackageTypes PackageType { get; set; }
-
-            [JsonPropertyName("resultType")]
+            
             public ResultTypes ResultType { get; set; }
-
-            [JsonPropertyName("workersCount")]
+            
             public int WorkersCount { get; set; }
 
             public enum PackageTypes
@@ -571,10 +487,8 @@ public static class DocumentService
             }
         }
 
-        [DataContract(Name = "Quota", Namespace = "")]
         public class QuotaInfo
         {
-            [JsonPropertyName("users")]
             public List<User> Users { get; set; }
 
             [DebuggerDisplay("{UserId} ({Expire})")]
@@ -582,8 +496,7 @@ public static class DocumentService
             {
                 [JsonPropertyName("userid")]
                 public string UserId { get; set; }
-
-                [JsonPropertyName("expire")]
+                
                 public DateTime Expire { get; set; }
             }
         }
@@ -592,39 +505,25 @@ public static class DocumentService
     [DebuggerDisplay("{Command} ({Key})")]
     private class CommandBody
     {
-        [Newtonsoft.Json.JsonIgnore]
         [JsonIgnore]
-        public CommandMethod Command { get; set; }
+        public CommandMethod Command { get; init; }
 
-        [JsonProperty(PropertyName = "c", Required = Required.Always)]
-        [JsonPropertyName("c")]
+        [System.Text.Json.Serialization.JsonRequired]
         public string C
         {
             get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
         }
 
-        [JsonProperty(PropertyName = "callback", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("callback")]
         public string Callback { get; set; }
-
-        [JsonProperty(PropertyName = "key", Required = Required.AllowNull)]
-        [JsonPropertyName("key")]
-        public string Key { get; set; }
-
-        [JsonProperty(PropertyName = "meta", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("meta")]
+        
+        public string Key { get; init; }
         public MetaData Meta { get; set; }
-
-        [JsonProperty(PropertyName = "users", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("users")]
+        
         public string[] Users { get; set; }
-
-        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("token")]
+        
         public string Token { get; set; }
 
         //not used
-        [JsonProperty(PropertyName = "userdata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("userdata")]
         public string UserData { get; set; }
     }
@@ -632,97 +531,44 @@ public static class DocumentService
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
-        [JsonProperty(PropertyName = "title")]
-        [JsonPropertyName("title")]
         public string Title { get; set; }
     }
 
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
     {
-        [JsonProperty(PropertyName = "aspect")]
-        [JsonPropertyName("aspect")]
         public int Aspect { get; set; }
-
-        [JsonProperty(PropertyName = "first")]
-        [JsonPropertyName("first")]
         public bool First { get; set; }
-
-        [JsonProperty(PropertyName = "height")]
-        [JsonPropertyName("height")]
         public int Height { get; set; }
-
-        [JsonProperty(PropertyName = "width")]
-        [JsonPropertyName("width")]
         public int Width { get; set; }
     }
 
-    [DataContract(Name = "spreadsheetLayout", Namespace = "")]
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
     {
-        [JsonProperty(PropertyName = "ignorePrintArea")]
-        [JsonPropertyName("ignorePrintArea")]
         public bool IgnorePrintArea { get; set; }
-
-        [JsonProperty(PropertyName = "orientation")]
-        [JsonPropertyName("orientation")]
         public string Orientation { get; set; }
-
-        [JsonProperty(PropertyName = "fitToHeight")]
-        [JsonPropertyName("fitToHeight")]
         public int FitToHeight { get; set; }
-
-        [JsonProperty(PropertyName = "fitToWidth")]
-        [JsonPropertyName("fitToWidth")]
         public int FitToWidth { get; set; }
-
-        [JsonProperty(PropertyName = "headings")]
-        [JsonPropertyName("headings")]
         public bool Headings { get; set; }
-
-        [JsonProperty(PropertyName = "gridLines")]
-        [JsonPropertyName("gridLines")]
         public bool GridLines { get; set; }
-
-        [JsonProperty(PropertyName = "margins")]
-        [JsonPropertyName("margins")]
         public LayoutMargins Margins { get; set; }
-
-        [JsonProperty(PropertyName = "pageSize")]
-        [JsonPropertyName("pageSize")]
         public LayoutPageSize PageSize { get; set; }
 
 
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
         {
-            [JsonProperty(PropertyName = "left")]
-            [JsonPropertyName("left")]
             public string Left { get; set; }
-
-            [JsonProperty(PropertyName = "right")]
-            [JsonPropertyName("right")]
             public string Right { get; set; }
-
-            [JsonProperty(PropertyName = "top")]
-            [JsonPropertyName("top")]
             public string Top { get; set; }
-
-            [JsonProperty(PropertyName = "bottom")]
-            [JsonPropertyName("bottom")]
             public string Bottom { get; set; }
         }
 
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize
         {
-            [JsonProperty(PropertyName = "height")]
-            [JsonPropertyName("height")]
             public string Height { get; set; }
-
-            [JsonProperty(PropertyName = "width")]
-            [JsonPropertyName("width")]
             public string Width { get; set; }
         }
     }
@@ -730,83 +576,37 @@ public static class DocumentService
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
     private sealed class ConvertionBody
     {
-        [JsonProperty(PropertyName = "async")]
-        [JsonPropertyName("async")]
         public bool Async { get; set; }
 
-        [JsonProperty(PropertyName = "filetype", Required = Required.Always)]
         [JsonPropertyName("filetype")]
-        public string FileType { get; set; }
+        public required string FileType { get; init; }
+        public required string Key { get; init; }
 
-        [JsonProperty(PropertyName = "key", Required = Required.Always)]
-        [JsonPropertyName("key")]
-        public string Key { get; set; }
-
-        [JsonProperty(PropertyName = "outputtype", Required = Required.Always)]
         [JsonPropertyName("outputtype")]
-        public string OutputType { get; set; }
-
-        [JsonProperty(PropertyName = "password", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("password")]
+        public required string OutputType { get; init; }
         public string Password { get; set; }
-
-        [JsonProperty(PropertyName = "title")]
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-
-        [JsonProperty(PropertyName = "thumbnail", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("thumbnail")]
+        public string Title { get; init; }
         public ThumbnailData Thumbnail { get; set; }
-
-        [JsonProperty(PropertyName = "spreadsheetLayout", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("spreadsheetLayout")]
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
-
-        [JsonProperty(PropertyName = "url", Required = Required.Always)]
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
-
-        [JsonProperty(PropertyName = "region", Required = Required.Always)]
-        [JsonPropertyName("region")]
-        public string Region { get; set; }
-
-        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("token")]
+        public required string Url { get; set; }
+        public required string Region { get; set; }
         public string Token { get; set; }
     }
 
     [DebuggerDisplay("{Key}")]
     private sealed class BuilderBody
     {
-        [JsonProperty(PropertyName = "async")]
-        [JsonPropertyName("async")]
         public bool Async { get; set; }
-
-        [JsonProperty(PropertyName = "key", Required = Required.Always)]
-        [JsonPropertyName("key")]
-        public string Key { get; set; }
-
-        [JsonProperty(PropertyName = "url", Required = Required.Always)]
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
-
-        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("token")]
+        public required string Key { get; init; }
+        public required string Url { get; set; }
         public string Token { get; set; }
     }
 
     public class FileLink
     {
-        [JsonProperty(PropertyName = "filetype")]
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
-
-        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonPropertyName("token")]
         public string Token { get; set; }
-
-        [JsonProperty(PropertyName = "url")]
-        [JsonPropertyName("url")]
         public string Url { get; set; }
     }
 
@@ -905,5 +705,18 @@ public static class DocumentService
         }
 
         return (resultPercent, responseUri, responseType);
+    }
+}
+
+public static class DocumentServiceHttpClientExtension
+{
+    public static void AddDocumentServiceHttpClient(this IServiceCollection services)
+    {
+        services.AddHttpClient(nameof(DocumentService))
+            .SetHandlerLifetime(TimeSpan.FromMilliseconds(DocumentService.Timeout))
+            .AddPolicyHandler((_, _) => 
+                HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }
