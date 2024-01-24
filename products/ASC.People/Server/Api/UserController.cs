@@ -1603,14 +1603,61 @@ public class UserController(ICache cache,
         bool? withoutGroup)
     {
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
-                      await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
+                              await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
-        var filter = GroupBasedFilter.Create(groupId.HasValue ? [groupId.Value] : Array.Empty<Guid>(), employeeType, employeeTypes, isDocSpaceAdministrator, payments, withoutGroup, webItemManager);
+        var excludeGroups = new List<Guid>();
+        var includeGroups = new List<List<Guid>>();
+        var combinedGroups = new List<Tuple<List<List<Guid>>, List<Guid>>>();
 
-        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
+        if (groupId.HasValue && (!withoutGroup.HasValue || !withoutGroup.Value))
+        {
+            includeGroups.Add([groupId.Value]);
+        }
+
+        if (employeeType.HasValue)
+        {
+            FilterByUserType(employeeType.Value, includeGroups, excludeGroups);
+        }
+        else if (employeeTypes != null && employeeTypes.Any())
+        {
+            foreach (var et in employeeTypes)
+            {
+                var combinedIncludeGroups = new List<List<Guid>>();
+                var combinedExcludeGroups = new List<Guid>();
+                FilterByUserType(et, combinedIncludeGroups, combinedExcludeGroups);
+                combinedGroups.Add(new Tuple<List<List<Guid>>, List<Guid>>(combinedIncludeGroups, combinedExcludeGroups));
+            }
+        }
+
+        if (payments != null)
+        {
+            switch (payments)
+            {
+                case Payments.Paid:
+                    excludeGroups.Add(Constants.GroupUser.ID);
+                    break;
+                case Payments.Free:
+                    includeGroups.Add([Constants.GroupUser.ID]);
+                    break;
+            }
+        }
+
+        if (isDocSpaceAdministrator.HasValue && isDocSpaceAdministrator.Value)
+        {
+            var adminGroups = new List<Guid>
+            {
+                Constants.GroupAdmin.ID
+            };
+            var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
+            adminGroups.AddRange(products.Select(r => r.ID));
+
+            includeGroups.Add(adminGroups);
+        }
+
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue, withoutGroup ?? false);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, filter.IncludeGroups, filter.ExcludeGroups, filter.CombinedGroups, activationStatus, accountLoginType,
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
@@ -1623,6 +1670,29 @@ public class UserController(ICache cache,
         }
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+        
+        yield break;
+
+        void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
+        {
+            switch (eType)
+            {
+                case EmployeeType.DocSpaceAdmin:
+                    iGroups.Add([Constants.GroupAdmin.ID]);
+                    break;
+                case EmployeeType.RoomAdmin:
+                    eGroups.Add(Constants.GroupUser.ID);
+                    eGroups.Add(Constants.GroupAdmin.ID);
+                    eGroups.Add(Constants.GroupCollaborator.ID);
+                    break;
+                case EmployeeType.Collaborator:
+                    iGroups.Add([Constants.GroupCollaborator.ID]);
+                    break;
+                case EmployeeType.User:
+                    iGroups.Add([Constants.GroupUser.ID]);
+                    break;
+            }
+        }
     }
 
     ///// <summary>
