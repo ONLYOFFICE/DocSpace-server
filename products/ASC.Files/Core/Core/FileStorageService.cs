@@ -128,7 +128,7 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
-            var baseFilter = new BaseFilter()
+            var baseFilter = new FileFilter
             {
                 Count = -1,
                 FilterType = FilterType.FoldersOnly,
@@ -147,10 +147,10 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
         T parentId,
-        BaseFilter baseFilter,
+        FileFilter fileFilter,
         T roomId = default)
     {
-        var (from, count, orderBy, subjectId, filterType, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = baseFilter;
+        var (from, count, orderBy, subjectId, filterType, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = fileFilter;
 
         var folderDao = GetFolderDao<T>();
 
@@ -218,7 +218,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FileEntry> entries;
         try
         {
-            var filter = new BaseFilter
+            var filter = new FileFilter
             {
                 From = from,
                 Count = count,
@@ -699,10 +699,10 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, BaseFilter baseFilter)
+    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FileFilter fileFilter)
     {
 
-        var (from, count, orderBy, subjectId, filter, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = baseFilter;
+        var (from, count, orderBy, subjectId, filter, subjectGroup, searchText, extension, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption) = fileFilter;
 
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
@@ -754,7 +754,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var filterBase = new BaseFilter
+                var filterBase = new FileFilter
                 {
                     FilterType = filter,
                     SubjectGroup = subjectGroup,
@@ -2638,7 +2638,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = GetFolderDao<T>();
         var fileDao = GetFileDao<T>();
 
-        var baseFilter = new BaseFilter()
+        var baseFilter = new FileFilter
         {
             FilterType = filter,
             SubjectGroup = subjectGroup,
@@ -2962,7 +2962,7 @@ public class FileStorageService //: IFileStorageService
                     Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
                 };
             }
-            var baseFilter = new BaseFilter()
+            var baseFilter = new FileFilter
             {
                 FilterType = FilterType.FilesOnly,
                 SearchText = path,
@@ -3121,7 +3121,7 @@ public class FileStorageService //: IFileStorageService
         var folders = await folderDao.GetFoldersAsync(folderId, folderFilter).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
 
-        var baseFilter = new BaseFilter() { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
+        var baseFilter = new FileFilter { OrderBy = new OrderBy(SortedByType.AZ, true), Count = -1 };
         var files = await fileDao.GetFilesAsync(folderId, baseFilter).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 

@@ -82,10 +82,10 @@ public interface IFileDao<T>
     ///     Gets the file (s) by ID (s) for share
     /// </summary>
     /// <param name="fileIds">id file</param>
-    /// <param name="baseFilter"></param>
+    /// <param name="fileFilter"></param>
     /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, BaseFilter baseFilter, bool checkShared = false);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FileFilter fileFilter, bool checkShared = false);
 
     /// <summary>
     /// 
@@ -98,14 +98,14 @@ public interface IFileDao<T>
     ///     Get files in folder
     /// </summary>
     /// <param name="parentId">folder id</param>
-    /// <param name="baseFilter"></param>
+    /// <param name="fileFilter"></param>
     /// <param name="roomId"></param>
     /// <param name="withShared"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
-    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, BaseFilter baseFilter, T roomId = default, bool withShared = false);
+    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, FileFilter fileFilter, T roomId = default, bool withShared = false);
 
     /// <summary>
     /// Get stream of file
@@ -249,9 +249,9 @@ public interface IFileDao<T>
     /// Search files in SharedWithMe &amp; Projects
     /// </summary>
     /// <param name="parentIds"></param>
-    /// <param name="baseFilter"></param>
+    /// <param name="fileFilter"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, BaseFilter baseFilter);
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FileFilter fileFilter);
     /// <summary>
     /// Search the list of files containing text
     /// Only in TMFileDao
@@ -292,7 +292,7 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, BaseFilter baseFilter, T roomId = default);
+    Task<int> GetFilesCountAsync(T parentId, FileFilter fileFilter, T roomId = default);
 
     Task SetCustomOrder(T fileId, T parentFolderId, int order);
 

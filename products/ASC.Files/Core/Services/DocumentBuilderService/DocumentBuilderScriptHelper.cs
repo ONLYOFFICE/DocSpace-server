@@ -89,7 +89,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
 
         //TODO: think about loop by N
-        var baseFilter = new BaseFilter
+        var baseFilter = new FileFilter
         {
             Count = -1,
             WithSubfolders = true,

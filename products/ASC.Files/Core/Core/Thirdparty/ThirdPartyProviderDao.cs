@@ -35,7 +35,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, BaseFilter baseFilter)
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FileFilter fileFilter)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -242,7 +242,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFilesCountAsync(string parentId, BaseFilter baseFilter, string roomId = default)
+    public Task<int> GetFilesCountAsync(string parentId, FileFilter baseFilter, string roomId = default)
     {
         throw new NotImplementedException();
     }

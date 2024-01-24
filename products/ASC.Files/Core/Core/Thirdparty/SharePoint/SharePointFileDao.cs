@@ -91,10 +91,10 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, BaseFilter baseFilter, bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FileFilter fileFilter, bool checkShared = false)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
-        if (fileIds == null || !fileIds.Any() || baseFilter.FilterType == FilterType.FoldersOnly)
+        ArgumentNullException.ThrowIfNull(fileFilter);
+        if (fileIds == null || !fileIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return AsyncEnumerable.Empty<File<string>>();
         }
@@ -102,15 +102,15 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         var files = GetFilesAsync(fileIds);
 
         //Filter
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            files = files.WhereAwait(async x => baseFilter.SubjectGroup
-                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, baseFilter.SubjectId)
-                                         : x.CreateBy == baseFilter.SubjectId);
+            files = files.WhereAwait(async x => fileFilter.SubjectGroup
+                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, fileFilter.SubjectId)
+                                         : x.CreateBy == fileFilter.SubjectId);
         }
 
-        var searchText = baseFilter.SearchText;
-        switch (baseFilter.FilterType)
+        var searchText = fileFilter.SearchText;
+        switch (fileFilter.FilterType)
         {
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
@@ -142,9 +142,9 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
                 });
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(baseFilter.SearchText))
+                if (!string.IsNullOrEmpty(fileFilter.SearchText))
                 {
-                    searchText = baseFilter.SearchText.Trim().ToLower();
+                    searchText = fileFilter.SearchText.Trim().ToLower();
                     files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
                 }
                 break;
@@ -155,9 +155,9 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (!baseFilter.Extension.IsNullOrEmpty())
+        if (!fileFilter.Extension.IsNullOrEmpty())
         {
-            var extension = baseFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
+            var extension = fileFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
             files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
@@ -174,10 +174,10 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, BaseFilter baseFilter, string roomId = default, bool withShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, FileFilter fileFilter, string roomId = default, bool withShared = false)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
-        if (baseFilter.FilterType == FilterType.FoldersOnly)
+        ArgumentNullException.ThrowIfNull(fileFilter);
+        if (fileFilter.FilterType == FilterType.FoldersOnly)
         {
             yield break;
         }
@@ -187,14 +187,14 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         var files = folderFiles.Select(r => SharePointProviderInfo.ToFile(r)).ToAsyncEnumerable();
 
         //Filter
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            files = files.WhereAwait(async x => baseFilter.SubjectGroup
-                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, baseFilter.SubjectId)
-                                         : x.CreateBy == baseFilter.SubjectId);
+            files = files.WhereAwait(async x => fileFilter.SubjectGroup
+                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, fileFilter.SubjectId)
+                                         : x.CreateBy == fileFilter.SubjectId);
         }
-        var searchText = baseFilter.SearchText;
-        switch (baseFilter.FilterType)
+        var searchText = fileFilter.SearchText;
+        switch (fileFilter.FilterType)
         {
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
@@ -228,7 +228,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    searchText = baseFilter.SearchText.Trim().ToLower();
+                    searchText = fileFilter.SearchText.Trim().ToLower();
                     files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
                 }
                 break;
@@ -239,13 +239,13 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (!baseFilter.Extension.IsNullOrEmpty())
+        if (!fileFilter.Extension.IsNullOrEmpty())
         {
-            var extension = baseFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
+            var extension = fileFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
             files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
-        var orderBy = baseFilter.OrderBy;
+        var orderBy = fileFilter.OrderBy;
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         files = orderBy.SortedBy switch

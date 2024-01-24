@@ -104,10 +104,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, BaseFilter baseFilter,  bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FileFilter fileFilter,  bool checkShared = false)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
-        if (fileIds == null || !fileIds.Any() || baseFilter.FilterType == FilterType.FoldersOnly)
+        ArgumentNullException.ThrowIfNull(fileFilter);
+        if (fileIds == null || !fileIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return AsyncEnumerable.Empty<File<string>>();
         }
@@ -115,14 +115,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         var files = GetFilesAsync(fileIds);
 
         //Filter
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            files = files.Where(x => baseFilter.SubjectGroup
-                                         ? userManager.IsUserInGroup(x.CreateBy, baseFilter.SubjectId)
-                                         : x.CreateBy == baseFilter.SubjectId);
+            files = files.Where(x => fileFilter.SubjectGroup
+                                         ? userManager.IsUserInGroup(x.CreateBy, fileFilter.SubjectId)
+                                         : x.CreateBy == fileFilter.SubjectId);
         }
 
-        switch (baseFilter.FilterType)
+        switch (fileFilter.FilterType)
         {
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
@@ -153,23 +153,23 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
                 });
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(baseFilter.SearchText))
+                if (!string.IsNullOrEmpty(fileFilter.SearchText))
                 {
-                    baseFilter.SearchText = baseFilter.SearchText.Trim().ToLower();
-                    files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(baseFilter.SearchText));
+                    fileFilter.SearchText = fileFilter.SearchText.Trim().ToLower();
+                    files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(fileFilter.SearchText));
                 }
                 break;
         }
 
-        if (!string.IsNullOrEmpty(baseFilter.SearchText))
+        if (!string.IsNullOrEmpty(fileFilter.SearchText))
         {
-            files = files.Where(x => x.Title.IndexOf(baseFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.IndexOf(fileFilter.SearchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (!baseFilter.Extension.IsNullOrEmpty())
+        if (!fileFilter.Extension.IsNullOrEmpty())
         {
-            baseFilter.Extension = baseFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
-            files = files.Where(x => baseFilter.Extension.Contains(FileUtility.GetFileExtension(x.Title)));
+            fileFilter.Extension = fileFilter.Extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => fileFilter.Extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         return files;
@@ -185,7 +185,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, BaseFilter baseFilter, string roomId = default, bool withShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, FileFilter baseFilter, string roomId = default, bool withShared = false)
     {
         ArgumentNullException.ThrowIfNull(baseFilter);
         if (baseFilter.FilterType == FilterType.FoldersOnly)
@@ -586,7 +586,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, BaseFilter baseFilter)
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FileFilter baseFilter)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -668,7 +668,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         throw new NotImplementedException();
     }
 
-    public Task<int> GetFilesCountAsync(string parentId, BaseFilter baseFilter, string roomId = default)
+    public Task<int> GetFilesCountAsync(string parentId, FileFilter baseFilter, string roomId = default)
     {
         throw new NotImplementedException();
     }

@@ -236,7 +236,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
 
-        var baseFilter = new BaseFilter()
+        var baseFilter = new FileFilter
         {
             FilterType = FilterType.FilesOnly,
             OrderBy = new OrderBy(SortedByType.AZ, true),
@@ -328,7 +328,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {
-                var baseFilter = new BaseFilter()
+                var baseFilter = new FileFilter
                 {
                     FilterType = FilterType.FilesOnly,
                     OrderBy = new OrderBy(SortedByType.AZ, true),

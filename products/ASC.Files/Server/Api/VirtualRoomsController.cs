@@ -574,7 +574,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var baseFilter = new BaseFilter
+        var baseFilter = new FileFilter
         {
             From = startIndex,
             Count = count,

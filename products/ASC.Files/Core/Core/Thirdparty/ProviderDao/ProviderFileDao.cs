@@ -115,7 +115,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, BaseFilter baseFilter, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FileFilter fileFilter, bool checkShared = false)
     {
         foreach (var group in _selectorFactory.GetSelectors(fileIds))
         {
@@ -130,7 +130,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
             {
                 var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
 
-                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), baseFilter))
+                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), fileFilter))
                 {
                     if (file != null)
                     {
@@ -153,12 +153,12 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, BaseFilter baseFilter, string roomId = default, bool withShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, FileFilter fileFilter, string roomId = default, bool withShared = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), baseFilter);
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), fileFilter);
         var result = await files.Where(r => r != null).ToListAsync();
 
         foreach (var r in result)

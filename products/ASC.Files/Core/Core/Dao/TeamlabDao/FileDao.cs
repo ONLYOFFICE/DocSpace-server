@@ -160,11 +160,11 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, BaseFilter baseFilter, bool checkShared = false)
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FileFilter fileFilter, bool checkShared = false)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
+        ArgumentNullException.ThrowIfNull(fileFilter);
 
-        if (fileIds == null || !fileIds.Any() || baseFilter.FilterType == FilterType.FoldersOnly)
+        if (fileIds == null || !fileIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             yield break;
         }
@@ -172,10 +172,10 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var query = await GetFileQuery(filesDbContext, r => fileIds.Contains(r.Id) && r.CurrentVersion);
 
-        var searchByText = !string.IsNullOrEmpty(baseFilter.SearchText);
-        var searchByExtension = !baseFilter.Extension.IsNullOrEmpty();
+        var searchByText = !string.IsNullOrEmpty(fileFilter.SearchText);
+        var searchByExtension = !fileFilter.Extension.IsNullOrEmpty();
         
-        var extension = baseFilter.Extension;
+        var extension = fileFilter.Extension;
         if (extension.IsNullOrEmpty())
         {
             extension = [""];
@@ -187,7 +187,7 @@ internal class FileDao(
             var success = false;
             foreach (var e in extension)
             {
-                var func = GetFuncForSearch(null, null, baseFilter.FilterType, baseFilter.SubjectGroup, baseFilter.SubjectId, baseFilter.SearchText, e, baseFilter.SearchInContent);
+                var func = GetFuncForSearch(null, null, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, e, fileFilter.SearchInContent);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
                 if(!success)
@@ -205,30 +205,30 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    query = BuildSearch(query, baseFilter.SearchText, SearchType.Any);
+                    query = BuildSearch(query, fileFilter.SearchText, SearchType.Any);
                 }
 
                 if (searchByExtension)
                 {
-                    query = BuildSearch(query, baseFilter.Extension, SearchType.End);
+                    query = BuildSearch(query, fileFilter.Extension, SearchType.End);
                 }
             }
         }
 
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            if (baseFilter.SubjectGroup)
+            if (fileFilter.SubjectGroup)
             {
-                var users = (await _userManager.GetUsersByGroupAsync(baseFilter.SubjectId)).Select(u => u.Id).ToArray();
+                var users = (await _userManager.GetUsersByGroupAsync(fileFilter.SubjectId)).Select(u => u.Id).ToArray();
                 query = query.Where(r => users.Contains(r.CreateBy));
             }
             else
             {
-                query = query.Where(r => r.CreateBy == baseFilter.SubjectId);
+                query = query.Where(r => r.CreateBy == fileFilter.SubjectId);
             }
         }
 
-        switch (baseFilter.FilterType)
+        switch (fileFilter.FilterType)
         {
             case FilterType.OFormOnly:
             case FilterType.OFormTemplateOnly:
@@ -238,12 +238,12 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                query = query.Where(r => r.Category == (int)baseFilter.FilterType);
+                query = query.Where(r => r.Category == (int)fileFilter.FilterType);
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(baseFilter.SearchText))
+                if (!string.IsNullOrEmpty(fileFilter.SearchText))
                 {
-                    query = BuildSearch(query, baseFilter.SearchText, SearchType.End);
+                    query = BuildSearch(query, fileFilter.SearchText, SearchType.End);
                 }
                 break;
         }
@@ -266,24 +266,24 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, BaseFilter baseFilter, int roomId = default, bool withShared = false)
+    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, FileFilter fileFilter, int roomId = default, bool withShared = false)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
+        ArgumentNullException.ThrowIfNull(fileFilter);
 
-        if (baseFilter.FilterType == FilterType.FoldersOnly || baseFilter.Count == 0)
+        if (fileFilter.FilterType == FilterType.FoldersOnly || fileFilter.Count == 0)
         {
             yield break;
         }
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, baseFilter, roomId, filesDbContext);
+        var q = await GetFilesQueryWithFilters(parentId, fileFilter, roomId, filesDbContext);
 
-        q = q.Skip(baseFilter.From);
+        q = q.Skip(fileFilter.From);
 
-        if (baseFilter.Count > 0)
+        if (fileFilter.Count > 0)
         {
-            q = q.Take(baseFilter.Count);
+            q = q.Take(fileFilter.Count);
         }
 
         var result = withShared ? FromQueryWithShared(filesDbContext, q) : FromQuery(filesDbContext, q);
@@ -500,21 +500,18 @@ internal class FileDao(
         return await GetFileAsync(file.Id);
     }
 
-    public async Task<int> GetFilesCountAsync(int parentId, BaseFilter baseFilter, int roomId = default)
+    public async Task<int> GetFilesCountAsync(int parentId, FileFilter fileFilter, int roomId = default)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
-        if (baseFilter.FilterType == FilterType.FoldersOnly)
+        ArgumentNullException.ThrowIfNull(fileFilter);
+        if (fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return 0;
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var filter = new BaseFilter() { };
-        filter = baseFilter;
-        filter.OrderBy = null;
-        return await (await GetFilesQueryWithFilters(parentId, filter, roomId, filesDbContext))
-            .CountAsync();
+        var filter = fileFilter with { OrderBy = null};
+        return await (await GetFilesQueryWithFilters(parentId, filter, roomId, filesDbContext)).CountAsync();
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -1129,20 +1126,20 @@ internal class FileDao(
         }
     }
 
-    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, BaseFilter baseFilter)
+    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FileFilter fileFilter)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
-        if (parentIds == null || !parentIds.Any() || baseFilter.FilterType == FilterType.FoldersOnly)
+        ArgumentNullException.ThrowIfNull(fileFilter);
+        if (parentIds == null || !parentIds.Any() || fileFilter.FilterType == FilterType.FoldersOnly)
         {
             return AsyncEnumerable.Empty<File<int>>();
         }
 
-        return InternalGetFilesAsync(parentIds, baseFilter);
+        return InternalGetFilesAsync(parentIds, fileFilter);
     }
 
-    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, BaseFilter baseFilter)
+    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FileFilter fileFilter)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
+        ArgumentNullException.ThrowIfNull(fileFilter);
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
@@ -1150,10 +1147,10 @@ internal class FileDao(
             .Where(r => parentIds.Contains(r.tree.ParentId))
             .Select(r => r.file);
 
-        var searchByText = !string.IsNullOrEmpty(baseFilter.SearchText);
-        var searchByExtension = !baseFilter.Extension.IsNullOrEmpty();
+        var searchByText = !string.IsNullOrEmpty(fileFilter.SearchText);
+        var searchByExtension = !fileFilter.Extension.IsNullOrEmpty();
         
-        var extension = baseFilter.Extension;
+        var extension = fileFilter.Extension;
         if (extension.IsNullOrEmpty())
         {
             extension = [""];
@@ -1165,7 +1162,7 @@ internal class FileDao(
             var success = false;
             foreach (var e in extension)
             {
-                var func = GetFuncForSearch(null, null, baseFilter.FilterType, baseFilter.SubjectGroup, baseFilter.SubjectId, baseFilter.SearchText, e, baseFilter.SearchInContent);
+                var func = GetFuncForSearch(null, null, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, e, fileFilter.SearchInContent);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s));
                 if (!success)
@@ -1183,7 +1180,7 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    q = BuildSearch(q, baseFilter.SearchText, SearchType.Any);
+                    q = BuildSearch(q, fileFilter.SearchText, SearchType.Any);
                 }
 
                 if (searchByExtension)
@@ -1193,20 +1190,20 @@ internal class FileDao(
             }
         }
 
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
-            if (baseFilter.SubjectGroup)
+            if (fileFilter.SubjectGroup)
             {
-                var users = (await _userManager.GetUsersByGroupAsync(baseFilter.SubjectId)).Select(u => u.Id).ToArray();
+                var users = (await _userManager.GetUsersByGroupAsync(fileFilter.SubjectId)).Select(u => u.Id).ToArray();
                 q = q.Where(r => users.Contains(r.CreateBy));
             }
             else
             {
-                q = q.Where(r => r.CreateBy == baseFilter.SubjectId);
+                q = q.Where(r => r.CreateBy == fileFilter.SubjectId);
             }
         }
 
-        switch (baseFilter.FilterType)
+        switch (fileFilter.FilterType)
         {
             case FilterType.OFormOnly:
             case FilterType.OFormTemplateOnly:
@@ -1216,12 +1213,12 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)baseFilter.FilterType);
+                q = q.Where(r => r.Category == (int)fileFilter.FilterType);
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(baseFilter.SearchText))
+                if (!string.IsNullOrEmpty(fileFilter.SearchText))
                 {
-                    q = BuildSearch(q, baseFilter.SearchText, SearchType.End);
+                    q = BuildSearch(q, fileFilter.SearchText, SearchType.End);
                 }
                 break;
         }
@@ -1712,13 +1709,13 @@ internal class FileDao(
         return dbFile;
     }
 
-    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, BaseFilter baseFilter, int roomId, FilesDbContext filesDbContext)
+    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, FileFilter fileFilter, int roomId, FilesDbContext filesDbContext)
     {
-        ArgumentNullException.ThrowIfNull(baseFilter);
+        ArgumentNullException.ThrowIfNull(fileFilter);
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
 
-        if (baseFilter.WithSubfolders)
+        if (fileFilter.WithSubfolders)
         {
             q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
                 .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
@@ -1726,10 +1723,10 @@ internal class FileDao(
                 .Select(r => r.file);
         }
 
-        var searchByText = !string.IsNullOrEmpty(baseFilter.SearchText);
-        var searchByExtension = !baseFilter.Extension.IsNullOrEmpty();
+        var searchByText = !string.IsNullOrEmpty(fileFilter.SearchText);
+        var searchByExtension = !fileFilter.Extension.IsNullOrEmpty();
 
-        var extension = baseFilter.Extension;
+        var extension = fileFilter.Extension;
         if (extension.IsNullOrEmpty())
         {
             extension = [""];
@@ -1741,7 +1738,7 @@ internal class FileDao(
             var success = false;
             foreach (var e in extension)
             {
-                var func = GetFuncForSearch(null, null, baseFilter.FilterType, baseFilter.SubjectGroup, baseFilter.SubjectId, baseFilter.SearchText, e, baseFilter.SearchInContent);
+                var func = GetFuncForSearch(null, null, fileFilter.FilterType, fileFilter.SubjectGroup, fileFilter.SubjectId, fileFilter.SearchText, e, fileFilter.SearchInContent);
 
                 Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
@@ -1761,7 +1758,7 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    q = BuildSearch(q, baseFilter.SearchText, SearchType.Any);
+                    q = BuildSearch(q, fileFilter.SearchText, SearchType.Any);
                 }
 
                 if (searchByExtension)
@@ -1771,7 +1768,7 @@ internal class FileDao(
             }
         }
 
-        var orderBy = baseFilter.OrderBy;
+        var orderBy = fileFilter.OrderBy;
         q = orderBy == null
             ? q
             : orderBy.SortedBy switch
@@ -1791,21 +1788,21 @@ internal class FileDao(
                 _ => q.OrderBy(r => r.Title)
             };
 
-        if (baseFilter.SubjectId != Guid.Empty)
+        if (fileFilter.SubjectId != Guid.Empty)
         {
 
-            if (baseFilter.SubjectGroup)
+            if (fileFilter.SubjectGroup)
             {
-                var users = (await _userManager.GetUsersByGroupAsync(baseFilter.SubjectId)).Select(u => u.Id).ToArray();
+                var users = (await _userManager.GetUsersByGroupAsync(fileFilter.SubjectId)).Select(u => u.Id).ToArray();
                 q = q.Where(r => users.Contains(r.CreateBy));
             }
             else
             {
-                q = baseFilter.ExcludeSubject ? q.Where(r => r.CreateBy != baseFilter.SubjectId) : q.Where(r => r.CreateBy == baseFilter.SubjectId);
+                q = fileFilter.ExcludeSubject ? q.Where(r => r.CreateBy != fileFilter.SubjectId) : q.Where(r => r.CreateBy == fileFilter.SubjectId);
             }
         }
 
-        switch (baseFilter.FilterType)
+        switch (fileFilter.FilterType)
         {
             case FilterType.OFormOnly:
             case FilterType.OFormTemplateOnly:
@@ -1815,12 +1812,12 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)baseFilter.FilterType);
+                q = q.Where(r => r.Category == (int)fileFilter.FilterType);
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(baseFilter.SearchText))
+                if (!string.IsNullOrEmpty(fileFilter.SearchText))
                 {
-                    q = BuildSearch(q, baseFilter.SearchText, SearchType.End);
+                    q = BuildSearch(q, fileFilter.SearchText, SearchType.End);
                 }
 
                 break;

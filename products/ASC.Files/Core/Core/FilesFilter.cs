@@ -26,9 +26,8 @@
 
 namespace ASC.Web.Files.Core;
 
-public record FileFilter { }
 
-public record BaseFilter : FileFilter
+public record FileFilter
 {
     public int From { get; set; }
     public int Count { get; set; } 
@@ -59,7 +58,7 @@ public record BaseFilter : FileFilter
             SearchArea, WithoutTags, TagNames, ExcludeSubject, Provider, SubjectFilter, ApplyFilterOption);
 }
 
-public record FolderFilter : BaseFilter
+public record FolderFilter : FileFilter
 {
     public IEnumerable<string> SubjectEntriesIds { get; set; }
 }

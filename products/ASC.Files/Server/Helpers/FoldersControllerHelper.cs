@@ -57,9 +57,9 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, T roomId, BaseFilter baseFilter)
+    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, T roomId, FileFilter fileFilter)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, roomId, baseFilter);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, roomId, fileFilter);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -103,7 +103,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, T roomId, BaseFilter baseFilter)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, T roomId, FileFilter fileFilter)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(_apiContext.SortBy, true, out var sortBy))
@@ -113,13 +113,13 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
 
         var startIndex = Convert.ToInt32(_apiContext.StartIndex);
 
-        baseFilter.From = startIndex;
-        baseFilter.Count = Convert.ToInt32(_apiContext.Count);
-        baseFilter.SubjectGroup = baseFilter.FilterType == FilterType.ByUser;
-        baseFilter.SearchText = _apiContext.FilterValue;
-        baseFilter.OrderBy = orderBy;
+        fileFilter.From = startIndex;
+        fileFilter.Count = Convert.ToInt32(_apiContext.Count);
+        fileFilter.SubjectGroup = fileFilter.FilterType == FilterType.ByUser;
+        fileFilter.SearchText = _apiContext.FilterValue;
+        fileFilter.OrderBy = orderBy;
 
-        var items = await _fileStorageService.GetFolderItemsAsync(folderId, baseFilter, roomId);
+        var items = await _fileStorageService.GetFolderItemsAsync(folderId, fileFilter, roomId);
 
         return await _folderContentDtoHelper.GetAsync(folderId, items, startIndex);
     }

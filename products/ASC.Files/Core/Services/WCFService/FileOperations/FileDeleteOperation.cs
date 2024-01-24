@@ -217,10 +217,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     else
                     {
-                        var baseFilter = new BaseFilter()
+                        var baseFilter = new FileFilter
                         {
                             FilterType = FilterType.FilesOnly,
-                            OrderBy = new ASC.Files.Core.OrderBy(SortedByType.AZ, true),
+                            OrderBy = new OrderBy(SortedByType.AZ, true),
                             WithSubfolders = true,
                             Count = -1
                         };

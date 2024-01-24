@@ -355,7 +355,7 @@ public class EditorConfiguration<T>
             };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
-            var baseFilter = new BaseFilter()
+            var baseFilter = new FileFilter
             {
                 FilterType = filter
             };
@@ -407,7 +407,7 @@ public class EditorConfiguration<T>
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var fileDao = _daoFactory.GetFileDao<int>();
-            var baseFilter = new BaseFilter() { FilterType = filter };
+            var baseFilter = new FileFilter { FilterType = filter };
             var files = _entryManager.GetTemplatesAsync(folderDao, fileDao, baseFilter).ToListAsync().Result;
             var listTemplates = from file in files
                                 select

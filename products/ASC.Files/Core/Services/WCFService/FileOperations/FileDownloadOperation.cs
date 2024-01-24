@@ -316,7 +316,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var baseFilter = new BaseFilter()
+            var baseFilter = new FileFilter
             {
                 SearchInContent = true,
                 Count = -1
