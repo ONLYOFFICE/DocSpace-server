@@ -451,9 +451,9 @@ public class CachedUserService : IUserService, ICachedService
         return groups;
     }
 
-    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, int offset = 0, int count = -1)
+    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, bool sortOrderAsc, int offset = 0, int count = -1)
     {
-        return _service.GetGroupsAsync(tenant, text, offset, count);
+        return _service.GetGroupsAsync(tenant, text, sortOrderAsc, offset, count);
     }
 
     public Task<int> GetGroupsCountAsync(int tenant, string text)

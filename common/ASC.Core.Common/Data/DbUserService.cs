@@ -51,7 +51,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             .ToListAsync();
     }
 
-    public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, bool sortOrderAsc, int offset = 0, int count = -1)
     {
         if (count == 0)
         {
@@ -67,7 +67,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = q.Where(g => g.Name.Contains(text));
         }
         
-        q = q.OrderBy(g => g.Name);
+        q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
 
         if (offset > 0)
         {

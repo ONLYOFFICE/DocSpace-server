@@ -67,7 +67,7 @@ public class GroupController(UserManager userManager,
 
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
-        await foreach (var g in userManager.GetGroupsAsync(text, offset, count))
+        await foreach (var g in userManager.GetGroupsAsync(text, !apiContext.SortDescending, offset, count))
         {
             yield return await groupFullDtoHelper.Get(g, false);
         }

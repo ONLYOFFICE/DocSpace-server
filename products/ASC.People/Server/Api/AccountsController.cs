@@ -73,7 +73,7 @@ public class AccountsController(
 
         var groupsCount = 0;
 
-        await foreach (var group in userManager.GetGroupsAsync(text, offset, count))
+        await foreach (var group in userManager.GetGroupsAsync(text, true, offset, count))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(group, false);
