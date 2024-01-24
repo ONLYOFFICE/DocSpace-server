@@ -371,3 +371,48 @@ public class GroupController(UserManager userManager,
         await userManager.UpdateUserInfoAsync(user);
     }
 }
+
+[ConstraintRoute("int")]
+public class GroupControllerInternal(
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GroupFullDtoHelper groupFullDtoHelper)
+    : GroupControllerAdditional<int>(apiContext, daoFactory, fileSecurity, groupFullDtoHelper);
+
+public class GroupControllerThirdParty(
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GroupFullDtoHelper groupFullDtoHelper)
+    : GroupControllerAdditional<string>(apiContext, daoFactory, fileSecurity, groupFullDtoHelper);
+
+[Scope]
+[DefaultRoute]
+[ApiController]
+[ControllerName("group")]
+public class GroupControllerAdditional<T>(
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GroupFullDtoHelper groupFullDtoHelper)
+{
+    [HttpGet("room/{id}")]
+    public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(T id, bool? excludeShared)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+        var text = apiContext.FilterValue;
+        
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        var totalGroups = await fileSecurity.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
+
+        apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
+
+        await foreach (var item in fileSecurity.GetGroupInfoWithSharedAsync(room, text, excludeShared ?? false, offset, count))
+        {
+            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
+        }
+    }
+}
