@@ -88,13 +88,20 @@ public class UserServiceCache
     private void UpdateUserGroupRefCache(UserGroupRef r)
     {
         var key = GetRefCacheKey(r.TenantId);
-        var refs = Cache.Get<UserGroupRefStore>(key);
-        if (refs != null)
+        var usersRefs = Cache.Get<UserGroupRefStore>(key);
+        if (usersRefs != null)
         {
-            lock (refs)
+            lock (usersRefs)
             {
-                refs[r.CreateKey()] = r;
+                usersRefs[r.CreateKey()] = r;
             }
+        }
+
+        var groupRef = GetRefCacheKey(r.TenantId, r.GroupId, r.RefType);
+
+        if (groupRef != null && r.Removed)
+        {
+            Cache.Remove(groupRef);
         }
     }
 
