@@ -24,7 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WhiteLabel;
+
 namespace ASC.Files.Service;
+
 public class Startup : BaseWorkerStartup
 {
     private readonly IConfiguration _configuration;
@@ -97,7 +100,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
-
+        DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
+        
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();
 
@@ -109,13 +113,11 @@ public class Startup : BaseWorkerStartup
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
 
         services.AddScoped<UsersInRoomStatistic>();
-
-
+        
         services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
-        }
-
     }
+}
