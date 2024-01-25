@@ -129,33 +129,4 @@ public class CommonChunkedUploadSessionHolder(TempPath tempPath,
 
         await cache.InsertAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
     }
-
-    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
-        long chunkLength)
-    {
-        if (uploadSession.BytesTotal == 0)
-        {
-            uploadSession.BytesTotal = chunkLength;
-        }
-
-        if (uploadSession.BytesTotal >= chunkLength)
-        {
-            //This is hack fixing strange behaviour of plupload in flash mode.
-
-            if (string.IsNullOrEmpty(uploadSession.ChunksBuffer))
-            {
-                uploadSession.ChunksBuffer = tempPath.GetTempFileName();
-            }
-
-            await using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
-            {
-                await stream.CopyToAsync(bufferStream);
-            }
-
-            return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
-                4096, FileOptions.DeleteOnClose);
-        }
-
-        return Stream.Null;
-    }
 }

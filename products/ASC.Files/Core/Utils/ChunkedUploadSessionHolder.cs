@@ -98,11 +98,6 @@ public class ChunkedUploadSessionHolder(GlobalStore globalStore,
         await (await CommonSessionHolderAsync()).AbortAsync(uploadSession);
     }
 
-    public async Task<Stream> UploadSingleChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long chunkLength)
-    {
-        return await (await CommonSessionHolderAsync()).UploadSingleChunkAsync(uploadSession, stream, chunkLength);
-    }
-
     private async ValueTask<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
     {
         if (currentTenant)
