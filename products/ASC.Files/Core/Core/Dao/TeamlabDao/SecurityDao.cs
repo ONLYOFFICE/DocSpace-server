@@ -212,7 +212,8 @@ internal abstract class SecurityBaseDao<T>(
             yield break;
         }
 
-        var usersQuery = filesDbContext.UserGroup.Where(g => g.TenantId == tenantId && g.UserGroupId == groupId && g.Userid != entry.CreateBy)
+        var usersQuery = filesDbContext.UserGroup.Where(g =>
+                g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy)
             .Join(filesDbContext.Users, ug => ug.Userid, u => u.Id,
                 (ug, u) => new
                 {
@@ -266,7 +267,8 @@ internal abstract class SecurityBaseDao<T>(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = filesDbContext.UserGroup.Where(g => g.TenantId == tenantId && g.UserGroupId == groupId && g.Userid != entry.CreateBy);
+        var q = filesDbContext.UserGroup.Where(g =>
+            g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy);
 
         if (!string.IsNullOrEmpty(text))
         {
