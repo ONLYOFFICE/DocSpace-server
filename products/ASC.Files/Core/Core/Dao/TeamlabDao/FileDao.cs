@@ -1034,26 +1034,31 @@ internal class FileDao(
         return await chunkedUploadSessionHolder.CreateUploadSessionAsync(file, contentLength);
     }
 
-    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
-            await using var streamToSave = await chunkedUploadSessionHolder.UploadSingleChunkAsync(uploadSession, stream, chunkLength);
-            if (streamToSave != Stream.Null)
+            if (uploadSession.BytesTotal == 0)
             {
-                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), streamToSave);
+                uploadSession.BytesTotal = chunkLength;
+            }
+    
+            if (uploadSession.BytesTotal >= chunkLength)
+            {
+                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), stream);
             }
 
             return uploadSession.File;
         }
 
-        await chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength);
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
+        if (!chunkNumber.HasValue)
         {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
+            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
+            number++;
+            uploadSession.Items["ChunksUploaded"] = number.ToString();
+            chunkNumber = number;
         }
+        await chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber.Value);
 
         return uploadSession.File;
     }

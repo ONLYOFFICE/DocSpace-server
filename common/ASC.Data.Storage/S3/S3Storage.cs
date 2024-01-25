@@ -37,7 +37,8 @@ public class S3Storage(TempStream tempStream,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        CoreBaseSettings coreBaseSettings)
+        CoreBaseSettings coreBaseSettings,
+        AscDistributedCache cache)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportCdnUri => true;
@@ -270,7 +271,7 @@ public class S3Storage(TempStream tempStream,
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {
@@ -459,7 +460,7 @@ public class S3Storage(TempStream tempStream,
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
 
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream);
+        return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream, cache);
     }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
@@ -666,7 +667,7 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
         var request = new TransferUtilityUploadRequest
         {
             BucketName = _bucket,

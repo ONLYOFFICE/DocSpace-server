@@ -190,7 +190,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                   string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
 
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {
@@ -580,7 +580,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         using var storage = await GetStorageAsync();
 
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         var uploadObjectOptions = new UploadObjectOptions
         {

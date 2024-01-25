@@ -29,14 +29,14 @@ namespace ASC.Common;
 [Singleton]
 public class TempStream(TempPath tempPath)
 {
-    public Stream GetBuffered(Stream srcStream)
+    public async Task<Stream> GetBufferedAsync(Stream srcStream)
     {
         ArgumentNullException.ThrowIfNull(srcStream);
         if (!srcStream.CanSeek || srcStream.CanTimeout)
         {
             //Buffer it
             var memStream = Create();
-            srcStream.CopyTo(memStream);
+            await srcStream.CopyToAsync(memStream);
             memStream.Position = 0;
 
             return memStream;

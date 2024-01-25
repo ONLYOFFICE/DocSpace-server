@@ -574,7 +574,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
 
     public abstract Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength);
 
-    public abstract Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength);
+    public abstract Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null);
 
     public abstract Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession);
 
