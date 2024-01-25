@@ -89,7 +89,7 @@
 
       changeFunc(roomParts);
 
-      if (individual && !session.anonymous) {
+      if (individual) {
         if (Array.isArray(roomParts)) {
           changeFunc(roomParts.map((p) => `${p}-${userId}`));
         } else {

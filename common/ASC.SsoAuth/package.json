@@ -35,8 +35,8 @@
     "winston-daily-rotate-file": "^4.5.5"
   },
   "engines": {
-    "node": ">=18",
-    "yarn": ">=3"
+    "node": ">=20",
+    "yarn": ">=4"
   },
-  "packageManager": "yarn@3.2.4"
+  "packageManager": "yarn@4.0.2"
 }

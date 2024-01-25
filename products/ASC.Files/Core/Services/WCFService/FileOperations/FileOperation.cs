@@ -182,13 +182,13 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     }
 }
 
-abstract class FileOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, ExternalShareData externalShareData, bool holdResult = true)
+abstract class FileOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, IDictionary<string, StringValues> headers, bool holdResult = true)
 {
     public List<T> Folders { get; private set; } = folders?.ToList() ?? new List<T>();
     public List<T> Files { get; private set; } = files?.ToList() ?? new List<T>();
     public Tenant Tenant { get; } = tenant;
-    public ExternalShareData ExternalShareData { get; } = externalShareData;
     public bool HoldResult { get; set; } = holdResult;
+    public IDictionary<string, StringValues> Headers = headers;
 }
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
@@ -203,7 +203,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected ILogger Logger { get; private set; }
     protected internal List<TId> Folders { get; private set; }
     protected internal List<TId> Files { get; private set; }
-    protected ExternalShareData CurrentShareData { get; private set; }
+    protected IDictionary<string, StringValues> Headers { get; private set; }
 
     protected readonly IServiceProvider _serviceProvider;
 
@@ -214,14 +214,14 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         Folders = fileOperationData.Folders;
         this[Hold] = fileOperationData.HoldResult;
         CurrentTenant = fileOperationData.Tenant;
-        CurrentShareData = fileOperationData.ExternalShareData;
+        Headers = fileOperationData.Headers;
 
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenant(CurrentTenant);
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
+        externalShare.Init(fileOperationData.Headers);
         
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
@@ -242,7 +242,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             tenantManager.SetCurrentTenant(CurrentTenant);
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.SetCurrentShareData(CurrentShareData);
+            externalShare.Init(Headers);
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -261,7 +261,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         }
         catch (AuthorizingException authError)
         {
-            this[Err] = FilesCommonResource.ErrorMassage_SecurityException;
+            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
             Logger.ErrorWithException(new SecurityException(this[Err], authError));
         }
         catch (AggregateException ae)
@@ -289,7 +289,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenant(CurrentTenant);
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
+        externalShare.Init(Headers);
 
         return scope;
     }

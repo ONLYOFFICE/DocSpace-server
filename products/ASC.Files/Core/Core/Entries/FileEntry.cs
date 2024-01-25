@@ -104,12 +104,7 @@ public abstract class FileEntry : ICloneable
     }
 }
 
-public interface IFileEntry
-{
-    string UniqID { get; }
-}
-
-public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry<T>>
+public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 {
     public T Id { get; set; }
     public T ParentId { get; set; }

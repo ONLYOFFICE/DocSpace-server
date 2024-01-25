@@ -37,9 +37,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FolderDtoHelper folderDtoHelper,
         UserManager userManager,
         SecurityContext securityContext,
-        GlobalFolderHelper globalFolderHelper,
-        CoreBaseSettings coreBaseSettings,
-        FileUtility fileUtility)
+        GlobalFolderHelper globalFolderHelper)
     : FilesHelperBase(filesSettingsHelper,
     fileUploader,
     socketManager,
@@ -57,9 +55,9 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, string[] extension = null)
+    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -71,24 +69,23 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash, bool withoutAdditionalFolder)
+    public async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var IsUser = await userManager.IsUserAsync(user);
-        var IsOutsider = await userManager.IsOutsiderAsync(user);
+        var isUser = await userManager.IsUserAsync(user);
+        var isOutsider = await userManager.IsOutsiderAsync(user);
 
-        if (IsOutsider)
+        if (isOutsider)
         {
             withoutTrash = true;
-            withoutAdditionalFolder = true;
         }
 
-        if (!IsUser)
+        if (!isUser)
         {
             yield return await globalFolderHelper.FolderMyAsync;
         }
 
-        if (!withoutTrash && !IsUser)
+        if (!withoutTrash && !isUser)
         {
             yield return await globalFolderHelper.FolderTrashAsync;
         }
@@ -104,7 +101,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(_apiContext.SortBy, true, out var sortBy))
@@ -114,7 +111,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
 
         var startIndex = Convert.ToInt32(_apiContext.StartIndex);
         var items = await _fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(_apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), _apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
-            roomId: roomId, applyFilterOption: applyFilterOption);
+            roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea);
 
         return await _folderContentDtoHelper.GetAsync(folderId, items, startIndex);
     }

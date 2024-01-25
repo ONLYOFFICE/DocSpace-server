@@ -73,6 +73,7 @@ public class Startup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSession();
 
@@ -99,6 +100,7 @@ public class Startup
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
+        _diHelper.TryAdd<FileStorageService>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {

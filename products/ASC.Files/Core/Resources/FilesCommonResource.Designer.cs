@@ -399,423 +399,423 @@ namespace ASC.Files.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
-        public static string ErrorMassage_BadRequest {
+        public static string ErrorMessage_BadRequest {
             get {
-                return ResourceManager.GetString("ErrorMassage_BadRequest", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_BadRequest", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You cannot select this user.
         /// </summary>
-        public static string ErrorMassage_ChangeOwner {
+        public static string ErrorMessage_ChangeOwner {
             get {
-                return ResourceManager.GetString("ErrorMassage_ChangeOwner", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_ChangeOwner", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Conversion takes too much time..
         /// </summary>
-        public static string ErrorMassage_ConvertTimeout {
+        public static string ErrorMessage_ConvertTimeout {
             get {
-                return ResourceManager.GetString("ErrorMassage_ConvertTimeout", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_ConvertTimeout", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Error occurred in the Documents Service.
         /// </summary>
-        public static string ErrorMassage_DocServiceException {
+        public static string ErrorMessage_DocServiceException {
             get {
-                return ResourceManager.GetString("ErrorMassage_DocServiceException", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_DocServiceException", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The file is opened for editing by {0}. Currently, the co-editing feature is not supported for this file format..
         /// </summary>
-        public static string ErrorMassage_EditingCoauth {
+        public static string ErrorMessage_EditingCoauth {
             get {
-                return ResourceManager.GetString("ErrorMassage_EditingCoauth", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_EditingCoauth", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The file is open for editing in a mobile application by {0}.
         /// </summary>
-        public static string ErrorMassage_EditingMobile {
+        public static string ErrorMessage_EditingMobile {
             get {
-                return ResourceManager.GetString("ErrorMassage_EditingMobile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_EditingMobile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Empty file.
         /// </summary>
-        public static string ErrorMassage_EmptyFile {
+        public static string ErrorMessage_EmptyFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_EmptyFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_EmptyFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The required file was not found.
         /// </summary>
-        public static string ErrorMassage_FileNotFound {
+        public static string ErrorMessage_FileNotFound {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileNotFound", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileNotFound", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be converted.
         /// </summary>
-        public static string ErrorMassage_FileSizeConvert {
+        public static string ErrorMessage_FileSizeConvert {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileSizeConvert", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileSizeConvert", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be copied.
         /// </summary>
-        public static string ErrorMassage_FileSizeCopy {
+        public static string ErrorMessage_FileSizeCopy {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileSizeCopy", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileSizeCopy", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be edited.
         /// </summary>
-        public static string ErrorMassage_FileSizeEdit {
+        public static string ErrorMessage_FileSizeEdit {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileSizeEdit", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileSizeEdit", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be moved.
         /// </summary>
-        public static string ErrorMassage_FileSizeMove {
+        public static string ErrorMessage_FileSizeMove {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileSizeMove", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileSizeMove", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The new version cannot be the same as the current one.
         /// </summary>
-        public static string ErrorMassage_FileUpdateToVersion {
+        public static string ErrorMessage_FileUpdateToVersion {
             get {
-                return ResourceManager.GetString("ErrorMassage_FileUpdateToVersion", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FileUpdateToVersion", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You cannot copy the folder to its subfolder.
         /// </summary>
-        public static string ErrorMassage_FolderCopyError {
+        public static string ErrorMessage_FolderCopyError {
             get {
-                return ResourceManager.GetString("ErrorMassage_FolderCopyError", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FolderCopyError", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The required folder was not found.
         /// </summary>
-        public static string ErrorMassage_FolderNotFound {
+        public static string ErrorMessage_FolderNotFound {
             get {
-                return ResourceManager.GetString("ErrorMassage_FolderNotFound", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_FolderNotFound", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Incorrect title.
         /// </summary>
-        public static string ErrorMassage_InvalidTitle {
+        public static string ErrorMessage_InvalidTitle {
             get {
-                return ResourceManager.GetString("ErrorMassage_InvalidTitle", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_InvalidTitle", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The file is currently locked by another user.
         /// </summary>
-        public static string ErrorMassage_LockedFile {
+        public static string ErrorMessage_LockedFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_LockedFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_LockedFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to At least {0} mail messages could not be sent. Please visit the Mail module to see what the reason for the failure could be..
         /// </summary>
-        public static string ErrorMassage_MailMergeCount {
+        public static string ErrorMessage_MailMergeCount {
             get {
-                return ResourceManager.GetString("ErrorMassage_MailMergeCount", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_MailMergeCount", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Too many downloads..
         /// </summary>
-        public static string ErrorMassage_ManyDownloads {
+        public static string ErrorMessage_ManyDownloads {
             get {
-                return ResourceManager.GetString("ErrorMassage_ManyDownloads", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_ManyDownloads", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Sorry, this file format isn&apos;t supported.
         /// </summary>
-        public static string ErrorMassage_NotSupportedFormat {
+        public static string ErrorMessage_NotSupportedFormat {
             get {
-                return ResourceManager.GetString("ErrorMassage_NotSupportedFormat", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_NotSupportedFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Author of the save is unknown.
         /// </summary>
-        public static string ErrorMassage_SaveAnonymous {
+        public static string ErrorMessage_SaveAnonymous {
             get {
-                return ResourceManager.GetString("ErrorMassage_SaveAnonymous", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SaveAnonymous", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The file was corrupted when you tried to save it.
         /// </summary>
-        public static string ErrorMassage_SaveCorrupted {
+        public static string ErrorMessage_SaveCorrupted {
             get {
-                return ResourceManager.GetString("ErrorMassage_SaveCorrupted", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SaveCorrupted", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Failed to get the file to be saved.
         /// </summary>
-        public static string ErrorMassage_SaveUrlLost {
+        public static string ErrorMessage_SaveUrlLost {
             get {
-                return ResourceManager.GetString("ErrorMassage_SaveUrlLost", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SaveUrlLost", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to perform the operation.
         /// </summary>
-        public static string ErrorMassage_SecurityException {
+        public static string ErrorMessage_SecurityException {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Can&apos;t authorize at {0} provider with given credentials..
         /// </summary>
-        public static string ErrorMassage_SecurityException_Auth {
+        public static string ErrorMessage_SecurityException_Auth {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_Auth", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_Auth", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to copy the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_CopyFile {
+        public static string ErrorMessage_SecurityException_CopyFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_CopyFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_CopyFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to copy the folder.
         /// </summary>
-        public static string ErrorMassage_SecurityException_CopyFolder {
+        public static string ErrorMessage_SecurityException_CopyFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_CopyFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_CopyFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to create.
         /// </summary>
-        public static string ErrorMassage_SecurityException_Create {
+        public static string ErrorMessage_SecurityException_Create {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_Create", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_Create", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the file because it is opened for editing.
         /// </summary>
-        public static string ErrorMassage_SecurityException_DeleteEditingFile {
+        public static string ErrorMessage_SecurityException_DeleteEditingFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_DeleteEditingFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteEditingFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the folder because one of the files is opened for editing.
         /// </summary>
-        public static string ErrorMassage_SecurityException_DeleteEditingFolder {
+        public static string ErrorMessage_SecurityException_DeleteEditingFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_DeleteEditingFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteEditingFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to delete the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_DeleteFile {
+        public static string ErrorMessage_SecurityException_DeleteFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_DeleteFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to delete the folder.
         /// </summary>
-        public static string ErrorMassage_SecurityException_DeleteFolder {
+        public static string ErrorMessage_SecurityException_DeleteFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_DeleteFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You do not have enough permissions to edit the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_EditFile {
+        public static string ErrorMessage_SecurityException_EditFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_EditFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_EditFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to This document is being edited by you in another tab.
         /// </summary>
-        public static string ErrorMassage_SecurityException_EditFileTwice {
+        public static string ErrorMessage_SecurityException_EditFileTwice {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_EditFileTwice", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_EditFileTwice", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to move the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_MoveFile {
+        public static string ErrorMessage_SecurityException_MoveFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_MoveFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_MoveFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to move the folder.
         /// </summary>
-        public static string ErrorMassage_SecurityException_MoveFolder {
+        public static string ErrorMessage_SecurityException_MoveFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_MoveFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_MoveFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_ReadFile {
+        public static string ErrorMessage_SecurityException_ReadFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_ReadFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_ReadFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the folder content.
         /// </summary>
-        public static string ErrorMassage_SecurityException_ReadFolder {
+        public static string ErrorMessage_SecurityException_ReadFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_ReadFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_ReadFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to rename the file.
         /// </summary>
-        public static string ErrorMassage_SecurityException_RenameFile {
+        public static string ErrorMessage_SecurityException_RenameFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_RenameFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_RenameFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to rename the folder.
         /// </summary>
-        public static string ErrorMassage_SecurityException_RenameFolder {
+        public static string ErrorMessage_SecurityException_RenameFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_RenameFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_RenameFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Cannot update the file because it&apos;s opened for editing.
         /// </summary>
-        public static string ErrorMassage_SecurityException_UpdateEditingFile {
+        public static string ErrorMessage_SecurityException_UpdateEditingFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_UpdateEditingFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_UpdateEditingFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the folder content.
         /// </summary>
-        public static string ErrorMassage_SecurityException_ViewFolder {
+        public static string ErrorMessage_SecurityException_ViewFolder {
             get {
-                return ResourceManager.GetString("ErrorMassage_SecurityException_ViewFolder", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SecurityException_ViewFolder", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The content of third party folder are not available. Try to reconnect the account..
         /// </summary>
-        public static string ErrorMassage_SharpBoxException {
+        public static string ErrorMessage_SharpBoxException {
             get {
-                return ResourceManager.GetString("ErrorMassage_SharpBoxException", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_SharpBoxException", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to File editing start error.
         /// </summary>
-        public static string ErrorMassage_StartEditing {
+        public static string ErrorMessage_StartEditing {
             get {
-                return ResourceManager.GetString("ErrorMassage_StartEditing", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_StartEditing", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You cannot update a file which is opened for editing.
         /// </summary>
-        public static string ErrorMassage_UpdateEditingFile {
+        public static string ErrorMessage_UpdateEditingFile {
             get {
-                return ResourceManager.GetString("ErrorMassage_UpdateEditingFile", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_UpdateEditingFile", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to User could not be found.
         /// </summary>
-        public static string ErrorMassage_UserNotFound {
+        public static string ErrorMessage_UserNotFound {
             get {
-                return ResourceManager.GetString("ErrorMassage_UserNotFound", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_UserNotFound", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to You are not allowed to preview the elements in the Trash.
         /// </summary>
-        public static string ErrorMassage_ViewTrashItem {
+        public static string ErrorMessage_ViewTrashItem {
             get {
-                return ResourceManager.GetString("ErrorMassage_ViewTrashItem", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_ViewTrashItem", resourceCulture);
             }
         }
         

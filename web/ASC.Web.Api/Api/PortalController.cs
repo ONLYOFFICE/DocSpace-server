@@ -166,6 +166,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -208,6 +209,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
@@ -229,7 +231,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
-        return coreBaseSettings.Personal ? 1 : (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
+        return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
     /// <summary>
@@ -320,6 +322,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("thumb")]
     public FileResult GetThumb(string url)
     {
@@ -382,6 +385,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -426,11 +430,6 @@ public class PortalController(ILogger<PortalController> logger,
             throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
         }
 
-        if (coreBaseSettings.Personal)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
-
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
@@ -444,7 +443,7 @@ public class PortalController(ILogger<PortalController> logger,
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -523,7 +522,6 @@ public class PortalController(ILogger<PortalController> logger,
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
@@ -583,8 +581,6 @@ public class PortalController(ILogger<PortalController> logger,
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
-
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -667,9 +663,6 @@ public class PortalController(ILogger<PortalController> logger,
                 await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
-
-            await messageService.SendAsync(MessageAction.PortalDeleted);
-
         }
         finally
         {

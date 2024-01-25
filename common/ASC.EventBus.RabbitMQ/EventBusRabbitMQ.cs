@@ -337,18 +337,35 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += (_, ea) =>
-        {
-            _logger.WarningRecreatingConsumerChannel(ea.Exception);
-
-            _consumerChannel.Dispose();
-            _consumerChannel = CreateConsumerChannel();
-            _consumerTag = String.Empty;
-
-            StartBasicConsume();
-        };
-
+        channel.CallbackException += RecreateChannel;
+       
         return channel;
+    }
+
+
+    private async void RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    {
+        _logger.WarningRecreatingConsumerChannel(e.Exception);
+
+        _consumerChannel.Dispose();
+
+        while (!_consumerChannel.IsOpen)
+        {
+            try
+            {
+                await Task.Run(() => { 
+                    _consumerChannel = CreateConsumerChannel();
+                    _consumerTag = String.Empty;
+
+                    StartBasicConsume();
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.ErrorCreatingConsumerChannel(exception);
+            }
+        }
+        _logger.InfoCreatedConsumerChannel();
     }
 
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
@@ -407,7 +424,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                 var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
 
                 await Task.Yield();
-                await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+                await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
             }
         }
     }

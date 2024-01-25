@@ -51,7 +51,7 @@ public class FileUploader(
     {
         if (contentLength <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
 
         var file = await VerifyFileUploadAsync(folderId, title, contentLength, !createNewIfExist);
@@ -78,7 +78,7 @@ public class FileUploader(
 
         if (global.EnableUploadFilter && !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(fileName)))
         {
-            throw new NotSupportedException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new NotSupportedException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
 
         folderId = await GetFolderIdAsync(folderId, string.IsNullOrEmpty(relativePath) ? null : relativePath.Split('/').ToList());
@@ -110,7 +110,7 @@ public class FileUploader(
     {
         if (fileSize <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
 
         var maxUploadSize = await GetMaxFileSizeAsync(folderId);
@@ -144,12 +144,12 @@ public class FileUploader(
 
         if (folder == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         if (relativePath is { Count: > 0 })
@@ -207,7 +207,7 @@ public class FileUploader(
 
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var maxUploadSize = await GetMaxFileSizeAsync(file.ParentId, true);
@@ -219,7 +219,7 @@ public class FileUploader(
 
         if (!await CanEditAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         file.ConvertedType = null;
@@ -265,7 +265,7 @@ public class FileUploader(
 
         if (chunkLength <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
         if (chunkLength > setupInfo.ChunkUploadSize)
         {

@@ -255,6 +255,18 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
+    }
+
+    public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+    {
+        return default;
+    }
+
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
@@ -369,13 +381,13 @@ internal abstract class ThirdPartyProviderDao
     {
         var filter = providerFilter switch
         {
-            ProviderFilter.WebDav => new[] { ProviderTypes.WebDav.ToStringFast() },
-            ProviderFilter.GoogleDrive => new[] { ProviderTypes.GoogleDrive.ToStringFast() },
-            ProviderFilter.OneDrive => new[] { ProviderTypes.OneDrive.ToStringFast() },
-            ProviderFilter.DropBox => new[] { ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast() },
-            ProviderFilter.kDrive => new[] { ProviderTypes.kDrive.ToStringFast() },
-            ProviderFilter.Yandex => new[] { ProviderTypes.Yandex.ToStringFast() },
-            ProviderFilter.SharePoint => new[] { ProviderTypes.SharePoint.ToStringFast() },
+            ProviderFilter.WebDav => [ProviderTypes.WebDav.ToStringFast()],
+            ProviderFilter.GoogleDrive => [ProviderTypes.GoogleDrive.ToStringFast()],
+            ProviderFilter.OneDrive => [ProviderTypes.OneDrive.ToStringFast()],
+            ProviderFilter.DropBox => [ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast()],
+            ProviderFilter.kDrive => [ProviderTypes.kDrive.ToStringFast()],
+            ProviderFilter.Yandex => [ProviderTypes.Yandex.ToStringFast()],
+            ProviderFilter.SharePoint => [ProviderTypes.SharePoint.ToStringFast()],
             ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
             _ => throw new NotImplementedException()
         };

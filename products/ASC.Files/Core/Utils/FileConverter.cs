@@ -43,7 +43,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                         string url,
                         string serverRootPath,
                         bool updateIfExist,
-                        ExternalShareData externalShareData = null)
+                        IDictionary<string, string> headers)
     {
         var cacheKey = GetCacheKey<T>();
 
@@ -77,7 +77,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                 Url = url,
                 Password = password,
                 ServerRootPath = serverRootPath,
-                ExternalShareData = externalShareData != null ? JsonSerializer.Serialize(externalShareData) : null
+                Headers = headers
             };
 
             Enqueue(queueResult, cacheKey);
@@ -278,10 +278,9 @@ public class FileConverter(FileUtility fileUtility,
         IServiceProvider serviceProvider,
         IHttpClientFactory clientFactory,
         SocketManager socketManager,
-        FileConverterQueue fileConverterQueue,
-        ExternalShare externalShare)
+        FileConverterQueue fileConverterQueue)
     {
-    private readonly IHttpContextAccessor _httpContextAccesor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FileConverter(
         FileUtility fileUtility,
@@ -304,16 +303,16 @@ public class FileConverter(FileUtility fileUtility,
         BaseCommonLinkUtility baseCommonLinkUtility,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        IHttpContextAccessor httpContextAccesor,
+        IHttpContextAccessor httpContextAccessor,
         IHttpClientFactory clientFactory,
         SocketManager socketManager,
-        FileConverterQueue fileConverterQueue, ExternalShare externalShare)
+        FileConverterQueue fileConverterQueue)
         : this(fileUtility, filesLinkUtility, daoFactory, setupInfo, pathProvider, fileSecurity,
               fileMarker, tenantManager, authContext, entryManager, filesSettingsHelper,
               globalFolderHelper, filesMessageService, fileShareLink, documentServiceHelper, documentServiceConnector, fileTracker,
-              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue, externalShare)
+              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue)
     {
-        _httpContextAccesor = httpContextAccesor;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
@@ -328,6 +327,14 @@ public class FileConverter(FileUtility fileUtility,
         var ext = FileUtility.GetFileExtension(file.Title);
 
         return fileUtility.ExtsMustConvert.Contains(ext);
+    }
+
+    private IDictionary<string, string> GetHttpHeaders()
+    {
+        var request = _httpContextAccessor?.HttpContext?.Request;
+
+        return MessageSettings.GetHttpHeaders(request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 
     public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension)
@@ -373,7 +380,7 @@ public class FileConverter(FileUtility fileUtility,
 
         if (file.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -402,11 +409,11 @@ public class FileConverter(FileUtility fileUtility,
             (var readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
             if (file == null)
             {
-                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
             if (!readLink)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
         }
 
@@ -434,10 +441,10 @@ public class FileConverter(FileUtility fileUtility,
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
-            Url = _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
+            Url = _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             Password = null,
             ServerRootPath = baseCommonLinkUtility.ServerRootPath,
-            ExternalShareData = await externalShare.GetLinkIdAsync() != Guid.Empty ? JsonSerializer.Serialize(externalShare.GetCurrentShareDataAsync()) : null
+            Headers = GetHttpHeaders()
         };
 
         var operationResultError = string.Empty;
@@ -468,7 +475,7 @@ public class FileConverter(FileUtility fileUtility,
     {
         if (!MustConvert(file))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
         if (!string.IsNullOrEmpty(file.ConvertedType) || fileUtility.InternalExtension.ContainsValue(FileUtility.GetFileExtension(file.Title)))
         {
@@ -480,10 +487,10 @@ public class FileConverter(FileUtility fileUtility,
         await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
-            _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
+            _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             baseCommonLinkUtility.ServerRootPath, 
             updateIfExist,
-            await externalShare.GetLinkIdAsync() != Guid.Empty ? await externalShare.GetCurrentShareDataAsync() : null);
+            GetHttpHeaders());
     }
 
     public bool IsConverting<T>(File<T> file)
@@ -538,7 +545,7 @@ public class FileConverter(FileUtility fileUtility,
 
             if (Equals(folderId, 0))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
@@ -596,9 +603,9 @@ public class FileConverter(FileUtility fileUtility,
             var errorString = $"HttpRequestException: {e.StatusCode}";
 
             if (e.StatusCode != HttpStatusCode.NotFound)
-            {
-                    errorString += $" Error {e.Message}";
-                }
+            { 
+                errorString += $" Error {e.Message}";
+            }
 
             throw new Exception(errorString);
         }

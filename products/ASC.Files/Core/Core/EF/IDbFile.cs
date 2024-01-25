@@ -35,3 +35,8 @@ public interface IDbSearch
 {
     public string Title { get; set; }
 }
+
+public interface IQueryResult<T> where T: IDbSearch
+{
+    public T Entry { get; set; }
+}

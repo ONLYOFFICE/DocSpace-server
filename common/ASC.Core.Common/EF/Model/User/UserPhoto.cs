@@ -36,7 +36,7 @@ public class UserPhoto : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { UserId };
+        return [UserId];
     }
 }
 public static class UserPhotoExtension

@@ -27,12 +27,10 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
-        IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool holdResult = true)
-    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+        IDictionary<string, StringValues> headers, bool holdResult = true)
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, headers, holdResult)
 {
     public Dictionary<T, string> FilesDownload { get; } = files;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
@@ -115,7 +113,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
                 if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
                 path = $@"{linkId}\{sessionId}\{fileName}";
@@ -201,10 +199,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             if (Files.Count > 0)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         Total = _entriesPathId.Count + 1;
@@ -377,7 +375,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (file == null)
                     {
-                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                         continue;
                     }
 

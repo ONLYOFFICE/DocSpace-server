@@ -43,7 +43,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
         fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
-{
+    {
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = ToFolder(GetFolderById(folderId));
@@ -52,7 +52,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         {
             return folder;
         }
-        
+
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -102,7 +102,10 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
             yield return room;
         }
     }
-
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        return GetFoldersAsync(parentId);
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var parentFolder = SharpBoxProviderInfo.Storage.GetFolder(MakePath(parentId));
@@ -110,7 +113,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return parentFolder.OfType<ICloudDirectoryEntry>().Select(ToFolder).ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (CheckInvalidFilter(filterType))
@@ -219,7 +222,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
                 var response = (HttpWebResponse)webException.Response;
                 if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
                 throw;
             }
@@ -402,9 +405,9 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
                 if (DocSpaceHelper.IsRoom(folder.FolderType) && SharpBoxProviderInfo.FolderId != null)
                 {
                     await DaoSelector.RenameRoomProviderAsync(SharpBoxProviderInfo, newTitle, newId);
+                    }
                 }
             }
-        }
 
         await UpdateIdAsync(oldId, newId);
 

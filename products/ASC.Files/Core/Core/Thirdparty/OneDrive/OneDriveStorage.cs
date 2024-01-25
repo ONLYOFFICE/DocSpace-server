@@ -118,7 +118,7 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
 
     public async Task<List<Item>> GetItemsAsync(string folderId)
     {
-        return new List<Item>(await GetItemRequest(folderId).Children.Request().GetAsync());
+        return [..await GetItemRequest(folderId).Children.Request().GetAsync()];
     }
 
     public async Task<Stream> DownloadStreamAsync(Item file, int offset = 0)
