@@ -356,7 +356,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/tenantquotasettings</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("tenantquotasettings")]
-    public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -364,12 +364,19 @@ public class SettingsController(MessageService messageService,
         {
             throw new NotSupportedException("Not available.");
         }
-
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-        tenantQuotaSetting.DisableQuota = !inDto.EnableQuota;
 
-        await settingsManager.SaveAsync(tenantQuotaSetting);
-
+        if (inDto.Quota >= 0)
+        {
+            tenantQuotaSetting.EnableQuota = true;
+            tenantQuotaSetting.Quota = inDto.Quota;
+        }
+        else
+        {
+            tenantQuotaSetting.EnableQuota = false;
+            tenantQuotaSetting.Quota = -1;
+        }
+        await settingsManager.SaveAsync(tenantQuotaSetting, inDto.TenantId);
         return tenantQuotaSetting;
     }
 

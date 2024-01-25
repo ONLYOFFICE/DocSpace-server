@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage;
 
 [Transient]
-public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext,
+public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager,
         TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
         TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
     : IQuotaController
@@ -149,6 +149,14 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             if (quota.MaxTotalSize != 0)
             {
                 await maxTotalSizeChecker.CheckAddAsync(_tenant, CurrentSize + size);
+            }
+        }
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+        if (tenantQuotaSetting.EnableQuota)
+        {
+            if (tenantQuotaSetting.Quota < CurrentSize + size)
+            {
+                throw new TenantQuotaException(string.Format(maxTotalSizeChecker.Exception, CurrentSize + size));
             }
         }
     }
