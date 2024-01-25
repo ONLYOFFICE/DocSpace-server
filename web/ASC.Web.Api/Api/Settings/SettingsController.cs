@@ -183,9 +183,9 @@ public class SettingsController : BaseSettingsController
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = tenant.TimeZone;
-            settings.Timezone = _timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
-            settings.UtcOffset = _timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
+            var timeZone = _timeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = _timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
             settings.NameSchemaId = _customNamingPeople.Current.Id;
@@ -407,7 +407,7 @@ public class SettingsController : BaseSettingsController
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = _timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
+                Id = _timeZoneConverter.GetIanaTimeZoneId(tz),
                 DisplayName = _timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
