@@ -26,7 +26,7 @@
 
 namespace ASC.Core.ChunkedUploader;
 
-public class CommonChunkedUploadSessionHolder(TempPath tempPath,
+public class CommonChunkedUploadSessionHolder(
     IDataStore dataStore,
     string domain,
     AscDistributedCache cache,

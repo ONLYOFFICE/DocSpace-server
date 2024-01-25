@@ -29,9 +29,9 @@ using ASC.Data.Storage.ChunkedUploader;
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class ChunkedUploadSessionHolder(GlobalStore globalStore,
+public class ChunkedUploadSessionHolder(
+    GlobalStore globalStore,
     SetupInfo setupInfo,
-    TempPath tempPath,
     AscDistributedCache cache,
     FileHelper fileHelper)
 {
@@ -104,9 +104,7 @@ public class ChunkedUploadSessionHolder(GlobalStore globalStore,
         {
             if (_currentHolder == null)
             {
-                _currentHolder = new CommonChunkedUploadSessionHolder(tempPath,
-                    await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache,
-                    setupInfo.ChunkUploadSize);
+                _currentHolder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
             }
 
             return _currentHolder;
@@ -115,8 +113,7 @@ public class ChunkedUploadSessionHolder(GlobalStore globalStore,
         {
             if (_holder == null)
             {
-                _holder = new CommonChunkedUploadSessionHolder(tempPath, await globalStore.GetStoreAsync(false),
-                    FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
+                _holder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(false), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
             }
 
             return _holder;

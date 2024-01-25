@@ -134,7 +134,6 @@ public class MigrateOperation : DistributedTaskProgress
             Status = DistributedTaskStatus.Running;
 
             await using var scope = _serviceProvider.CreateAsyncScope();
-            var tempPath = scope.ServiceProvider.GetService<TempPath>();
             var scopeClass = scope.ServiceProvider.GetService<MigrateOperationScope>();
             var (tenantManager, securityContext, storageFactory, options, storageSettingsHelper, settingsManager) = scopeClass;
             var tenant = await tenantManager.GetTenantAsync(_tenantId);
@@ -148,7 +147,7 @@ public class MigrateOperation : DistributedTaskProgress
                 var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
-                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store, _cache);
+                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, oldStore, store, _cache);
 
                 string[] files;
                 foreach (var domain in domains)

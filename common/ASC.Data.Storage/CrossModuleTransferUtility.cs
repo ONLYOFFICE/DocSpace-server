@@ -28,7 +28,6 @@ namespace ASC.Data.Storage;
 
 public class CrossModuleTransferUtility(ILogger option,
     TempStream tempStream,
-    TempPath tempPath,
     IDataStore source,
     IDataStore destination,
     AscDistributedCache cache)
@@ -53,7 +52,7 @@ public class CrossModuleTransferUtility(ILogger option,
         else
         {
             var session = new CommonChunkedUploadSession(stream.Length);
-            var holder = new CommonChunkedUploadSessionHolder(tempPath, _destination, destDomain, cache);
+            var holder = new CommonChunkedUploadSessionHolder(_destination, destDomain, cache);
             await holder.InitAsync(session);
             try
             {
