@@ -95,7 +95,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             var j = 0;
             var tasks = new List<Task>();
 
-            foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (_settings.Threads == 1)
                 {
@@ -124,6 +124,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+
+        return;
 
         List<int> GetIds(DateTime lastIndexed)
         {
