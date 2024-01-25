@@ -330,7 +330,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(await tempStream.GetBufferedAsync(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {

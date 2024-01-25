@@ -83,7 +83,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             _gZipOutputStream.baseOutputStream_ = _fileStream;
         }
 
-        await using (var buffered = _tempStream.GetBuffered(stream))
+        await using (var buffered = await _tempStream.GetBufferedAsync(stream))
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;

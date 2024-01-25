@@ -146,19 +146,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         }
                        
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
-                        if (resumedSession.UseChunks)
-                        {
-                            await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                            await WriteSuccess(context,
-                                await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
-                            return;
-                        }
-                        else
-                        {
-                            await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                            await socketManager.CreateFileAsync(resumedSession.File);
-                            return;
-                        }
+                        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+                        await WriteSuccess(context,
+                            await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        return;
                     }
                 case ChunkedRequestType.Finalize:
                     var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);

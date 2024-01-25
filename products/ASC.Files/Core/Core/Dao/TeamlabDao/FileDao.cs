@@ -1029,10 +1029,14 @@ internal class FileDao(
     {
         if (!uploadSession.UseChunks)
         {
-            await using var streamToSave = await chunkedUploadSessionHolder.UploadSingleChunkAsync(uploadSession, stream, chunkLength);
-            if (streamToSave != Stream.Null)
+            if (uploadSession.BytesTotal == 0)
             {
-                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), streamToSave);
+                uploadSession.BytesTotal = chunkLength;
+            }
+    
+            if (uploadSession.BytesTotal >= chunkLength)
+            {
+                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), stream);
             }
 
             return uploadSession.File;

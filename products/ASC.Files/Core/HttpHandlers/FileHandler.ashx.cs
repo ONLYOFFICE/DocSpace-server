@@ -1340,7 +1340,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return await fileDao.SaveFileAsync(file, fileStream);
         }
 
-        await using var buffered = tempStream.GetBuffered(fileStream);
+        await using var buffered = await tempStream.GetBufferedAsync(fileStream);
         file.ContentLength = buffered.Length;
         return await fileDao.SaveFileAsync(file, buffered);
 
