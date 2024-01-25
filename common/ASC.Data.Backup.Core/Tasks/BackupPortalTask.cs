@@ -123,26 +123,6 @@ public class BackupPortalTask : PortalTaskBase
     {
         var databases = new Dictionary<Tuple<string, string>, List<string>>();
 
-        try
-        {
-            await using var connection = DbFactory.OpenConnection();
-            var command = connection.CreateCommand();
-            command.CommandText = "select id, connection_string from mail_server_server";
-            ExecuteList(command).ForEach(r =>
-            {
-                var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
-
-                var command = connection.CreateCommand();
-                command.CommandText = "show tables";
-                var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
-                databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
-            });
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorWithException(e);
-        }
-
         await using (var connection = DbFactory.OpenConnection())
         {
             var command = connection.CreateCommand();
