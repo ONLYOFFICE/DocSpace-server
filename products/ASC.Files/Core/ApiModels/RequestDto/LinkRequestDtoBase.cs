@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,35 +26,17 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
-public class LinkRequestDto
+public abstract class LinkRequestDtoBase
 {
     /// <summary>Link ID</summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
-
-    /// <summary>Link name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
+    
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
-
+    
     /// <summary>Link expiration date</summary>
     /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
     public ApiDateTime ExpirationDate { get; set; }
-
-    /// <summary>Link type</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
-    public LinkType LinkType { get; set; }
-
-    /// <summary>Link password</summary>
-    /// <type>System.String, System</type>
-    public string Password { get; set; }
-    
-    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool DenyDownload { get; set; }
 }

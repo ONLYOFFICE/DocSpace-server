@@ -171,7 +171,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sessionId = await externalShare.GetSessionIdAsync();
 
             if (session != null && sessionId != Guid.Empty && session.Id == sessionId &&
-                (await externalShare.ValidateAsync(session.LinkId)) == Status.Ok)
+                (await externalShare.ValidateAsync(session.LinkId, securityContext.IsAuthenticated)) == Status.Ok)
             {
                 path = $@"{session.LinkId}\{session.Id}\{filename}";
             }
@@ -391,7 +391,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             {
                                 if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
-                                    context.Response.Redirect((await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString(), false);
+                                    var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                                    
+                                    context.Response.Redirect(externalShare.GetUrlWithShare(url), false);
 
                                     return;
                                 }
@@ -424,7 +426,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     {
                         if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                         {
-                            context.Response.Redirect((await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString(), true);
+                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                            
+                            context.Response.Redirect(externalShare.GetUrlWithShare(url), true);
 
                             return;
                         }

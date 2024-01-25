@@ -116,12 +116,13 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
+    /// <param name="withShared"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false);
 
     /// <summary>
     /// Get stream of file
@@ -187,15 +188,17 @@ public interface IFileDao<T>
     /// <param name="folderId">folder id</param>
     /// <returns>Returns true if the file exists, otherwise false</returns>
     Task<bool> IsExistAsync(string title, object folderId);
+
     /// <summary>
     ///   Moves a file or set of files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>
     /// <param name="toFolderId">The ID of the destination folder</param>
-    Task<T> MoveFileAsync(T fileId, T toFolderId);
-    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId);
-    Task<string> MoveFileAsync(T fileId, string toFolderId);
-    Task<int> MoveFileAsync(T fileId, int toFolderId);
+    /// <param name="deleteLinks">Flag for removing links when moving</param>
+    Task<T> MoveFileAsync(T fileId, T toFolderId, bool deleteLinks = false);
+    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks = false);
+    Task<string> MoveFileAsync(T fileId, string toFolderId, bool deleteLinks = false);
+    Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
 
     /// <summary>
     ///  Copy the files in a folder
@@ -318,6 +321,12 @@ public interface IFileDao<T>
     Task SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(IEnumerable<T> fileIds, T parentFolderId);
+
+    IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1);
+
+    Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject);
 
     #endregion
 }

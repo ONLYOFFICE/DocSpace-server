@@ -162,36 +162,48 @@ public class MessagesRepository : IDisposable
 
         var dict = new Dictionary<string, ClientInfo>();
 
-        foreach (var message in events)
+        var groups = events.GroupBy(e => e.TenantId);
+        foreach (var group in groups)
         {
-            if (!string.IsNullOrEmpty(message.UAHeader))
+            try
             {
-                try
+                foreach (var message in group)
                 {
-                    MessageSettings.AddInfoMessage(message, dict);
-                }
-                catch (Exception e)
-                {
-                    _logger.ErrorFlushCache(message.Id, e);
-                }
-            }
+                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    {
+                        try
+                        {
+                            MessageSettings.AddInfoMessage(message, dict);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.ErrorFlushCache(message.Id, e);
+                        }
+                    }
 
-            if (!ForseSave(message))
+                    if (!ForseSave(message))
+                    {
+                        // messages with action code < 2000 are related to login-history
+                        if ((int)message.Action < 2000)
+                        {
+                            var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+                            await ef.LoginEvents.AddAsync(loginEvent);
+                        }
+                        else
+                        {
+                            var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
+                            await ef.AuditEvents.AddAsync(auditEvent);
+                        }
+                    }
+                }
+
+                await ef.SaveChangesAsync();
+            }
+            catch(Exception e)
             {
-                // messages with action code < 2000 are related to login-history
-                if ((int)message.Action < 2000)
-                {
-                    var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
-                    await ef.LoginEvents.AddAsync(loginEvent);
-                }
-                else
-                {
-                    var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
-                    await ef.AuditEvents.AddAsync(auditEvent);
-                }
+                _logger.ErrorFlushCache(group.Key, e);
             }
         }
-        await ef.SaveChangesAsync();
     }
 
     private void FlushCache()
@@ -213,36 +225,47 @@ public class MessagesRepository : IDisposable
 
         var dict = new Dictionary<string, ClientInfo>();
 
-        foreach (var message in events)
+        var groups = events.GroupBy(e => e.TenantId);
+        foreach (var group in groups)
         {
-            if (!string.IsNullOrEmpty(message.UAHeader))
+            try
             {
-                try
+                foreach (var message in group)
                 {
-                    MessageSettings.AddInfoMessage(message, dict);
-                }
-                catch (Exception e)
-                {
-                    _logger.ErrorFlushCache(message.Id, e);
-                }
-            }
+                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    {
+                        try
+                        {
+                            MessageSettings.AddInfoMessage(message, dict);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.ErrorFlushCache(message.Id, e);
+                        }
+                    }
 
-            if (!ForseSave(message))
+                    if (!ForseSave(message))
+                    {
+                        // messages with action code < 2000 are related to login-history
+                        if ((int)message.Action < 2000)
+                        {
+                            var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+                            ef.LoginEvents.Add(loginEvent);
+                        }
+                        else
+                        {
+                            var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
+                            ef.AuditEvents.Add(auditEvent);
+                        }
+                    }
+                }
+                ef.SaveChanges();
+            }
+            catch(Exception e)
             {
-                // messages with action code < 2000 are related to login-history
-                if ((int)message.Action < 2000)
-                {
-                    var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
-                    ef.LoginEvents.Add(loginEvent);
-                }
-                else
-                {
-                    var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
-                    ef.AuditEvents.Add(auditEvent);
-                }
+                _logger.ErrorFlushCache(group.Key, e);
             }
         }
-        ef.SaveChanges();
     }
 
     private async Task<int> AddLoginEventAsync(EventMessage message, MessagesContext dbContext)

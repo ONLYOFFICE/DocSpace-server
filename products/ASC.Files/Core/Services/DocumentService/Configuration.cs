@@ -233,6 +233,7 @@ public class EditorConfiguration<T>
     private readonly FileUtility _fileUtility;
     private readonly UserInfo _userInfo;
     private readonly UserManager _userManager;
+    private readonly ExternalShare _externalShare;
     private Configuration<T> _configuration;
 
     private EmbeddedConfig _embeddedConfig;
@@ -265,7 +266,14 @@ public class EditorConfiguration<T>
     {
         get
         {
-            return ModeWrite ? _documentServiceTrackerHelper.GetCallbackUrl(_configuration.Document.Info.GetFile().Id.ToString()) : null;
+            if (!ModeWrite)
+            {
+                return null;
+            }
+
+            var callbackUrl = _documentServiceTrackerHelper.GetCallbackUrl(_configuration.Document.Info.GetFile().Id.ToString());
+
+            return _externalShare.GetUrlWithShare(callbackUrl);
         }
     }
 
@@ -423,7 +431,8 @@ public class EditorConfiguration<T>
         FilesSettingsHelper filesSettingsHelper,
         IDaoFactory daoFactory,
         EntryManager entryManager,
-        DocumentServiceTrackerHelper documentServiceTrackerHelper)
+        DocumentServiceTrackerHelper documentServiceTrackerHelper, 
+        ExternalShare externalShare)
     {
         _userManager = userManager;
         _authContext = authContext;
@@ -435,6 +444,7 @@ public class EditorConfiguration<T>
         _daoFactory = daoFactory;
         _entryManager = entryManager;
         _documentServiceTrackerHelper = documentServiceTrackerHelper;
+        _externalShare = externalShare;
         Plugins = pluginsConfig;
         Embedded = embeddedConfig;
         _userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);

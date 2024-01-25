@@ -27,12 +27,10 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
-        IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool holdResult = true)
-    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+        IDictionary<string, StringValues> headers, bool holdResult = true)
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, headers, holdResult)
 {
     public Dictionary<T, string> FilesDownload { get; } = files;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]

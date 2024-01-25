@@ -230,9 +230,9 @@ internal abstract class SecurityBaseDao<T>(
 
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
-        if (filterType == ShareFilterType.User)
+        if (filterType == ShareFilterType.User && entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
         {
-            var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share);
+            var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 
             var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, 
                 (s, u) => new SecurityUserRecord { Security = s, User = u }).Where(r => !r.User.Removed);
@@ -250,9 +250,14 @@ internal abstract class SecurityBaseDao<T>(
                     .Select(s => s.Security);
             }
         }
+        else if (filterType == ShareFilterType.ExternalLink)
+        {
+            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+            q = q.OrderBy(predicate).ThenByDescending(s => s.SubjectType);
+        }
         else
         {
-            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share);
+            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
             q = q.OrderBy(predicate);
         }
 
@@ -612,7 +617,7 @@ internal class SecurityDao(UserManager userManager,
         var records = q.ToAsyncEnumerable()
             .Select(ToFileShareRecord)
             .OrderBy(r => r.Level)
-            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer());
+            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(entry.RootFolderType));
 
         return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
     }

@@ -113,7 +113,9 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
-
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }
+    public string RequestToken { get; set; }
+    
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -152,10 +154,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FileSharingHelper fileSharingHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime, 
+        FileDateTime fileDateTime,
         ExternalShare externalShare)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
-    {
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+{
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
@@ -184,9 +186,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 }
             }
         }
-
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
-
+        result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        
         return result;
     }
 
@@ -229,9 +232,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
+            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            {
+                result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+            
+            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)));
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)),
+                result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -239,7 +248,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"); 
+                result.ThumbnailUrl =
+                    externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
+                                                              $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)

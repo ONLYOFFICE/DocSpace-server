@@ -69,6 +69,12 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return;
         }
+        
+        if (storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return;
+        }
 
         var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
 
@@ -102,12 +108,6 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         //}
 
         //context.Response.Headers.ETag = etag;
-
-        if (securityContext.IsAuthenticated && storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return;
-        }
         
         string encoding = null;
 
