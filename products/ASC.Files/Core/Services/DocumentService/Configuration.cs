@@ -817,8 +817,9 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
     public bool SubmitForm
     {
         get
-        {
-            if (_configuration.EditorConfig.ModeWrite)
+        {  
+            if (_configuration.EditorConfig.ModeWrite &&
+                    FileUtility.GetFileTypeByFileName(_configuration.Document.Info.GetFile().Title) == FileType.Pdf)
             {
                 var linkDao = daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;
