@@ -297,7 +297,7 @@ public class GroupController(UserManager userManager,
         
         if (await userManager.UserExistsAsync(inDto.UserId))
         {
-            await userManager.SetDepartmentManagerAsync(group.ID, inDto.UserId);
+            await TransferUserToDepartmentAsync(inDto.UserId, group, true);
         }
         else
         {
