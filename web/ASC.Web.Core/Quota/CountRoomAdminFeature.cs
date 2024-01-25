@@ -35,6 +35,10 @@ public class CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, 
 {
     public override string Exception => Resource.TariffsFeature_manager_exception;
 
+    public override string GetExceptionMessage(long count)
+    {
+        return string.Format(Resource.TariffsFeature_manager_exception, count);
+    }
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
