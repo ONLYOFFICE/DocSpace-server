@@ -34,6 +34,11 @@ public class FormFillingReportCreator
     private readonly IDaoFactory _daoFactory;
     private readonly IHttpClientFactory _clientFactory;
 
+    private static readonly JsonSerializerOptions _options = new() {
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
+    };
+
     public FormFillingReportCreator(
         ExportToCSV exportToCSV,
         SocketManager socketManager,
@@ -87,13 +92,7 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var options = new JsonSerializerOptions
-        {
-            AllowTrailingCommas = true,
-            PropertyNameCaseInsensitive = true
-        };
-
-        return JsonSerializer.Deserialize<SubmitFormsData>(data, options);
+        return JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
     }
 
 }
