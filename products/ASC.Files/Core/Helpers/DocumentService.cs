@@ -508,7 +508,6 @@ public static class DocumentService
         [JsonIgnore]
         public CommandMethod Command { get; init; }
 
-        [System.Text.Json.Serialization.JsonRequired]
         public string C
         {
             get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
