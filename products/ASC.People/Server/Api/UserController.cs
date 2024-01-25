@@ -575,7 +575,7 @@ public class UserController(ICache cache,
     [HttpGet("{username}", Order = 1)]
     public async Task<EmployeeFullDto> GetById(string username)
     {
-        var isInvite = _httpContextAccessor.HttpContext.User.Claims
+        var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
         await _apiContext.AuthByClaimAsync();
@@ -628,7 +628,7 @@ public class UserController(ICache cache,
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null, null, false);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null, false, false);
     }
 
     /// <summary>
@@ -647,14 +647,24 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType, bool? withoutGroup)
+    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus,
+        Guid? groupId,
+        EmployeeActivationStatus? activationStatus,
+        EmployeeType? employeeType,
+        [FromQuery] EmployeeType[] employeeTypes,
+        bool? isAdministrator,
+        Payments? payments,
+        AccountLoginType? accountLoginType,
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -739,14 +749,24 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("simple/filter")]
-    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType, bool? withoutGroup)
+    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus,
+        Guid? groupId,
+        EmployeeActivationStatus? activationStatus,
+        EmployeeType? employeeType,
+        [FromQuery] EmployeeType[] employeeTypes,
+        bool? isAdministrator,
+        Payments? payments,
+        AccountLoginType? accountLoginType,
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -1600,7 +1620,8 @@ public class UserController(ICache cache,
         bool? isDocSpaceAdministrator,
         Payments? payments,
         AccountLoginType? accountLoginType, 
-        bool? withoutGroup)
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
@@ -1611,7 +1632,14 @@ public class UserController(ICache cache,
 
         if (groupId.HasValue && (!withoutGroup.HasValue || !withoutGroup.Value))
         {
-            includeGroups.Add([groupId.Value]);
+            if (excludeGroup.HasValue && excludeGroup.Value)
+            {
+                excludeGroups.Add(groupId.Value);
+            }
+            else
+            {
+                includeGroups.Add([groupId.Value]);
+            }
         }
 
         if (employeeType.HasValue)
