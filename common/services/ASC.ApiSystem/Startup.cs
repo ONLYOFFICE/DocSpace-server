@@ -73,6 +73,7 @@ public class Startup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSession();
 
