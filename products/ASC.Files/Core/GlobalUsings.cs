@@ -165,6 +165,7 @@ global using ASC.Web.Files.ThirdPartyApp;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
+global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Utility;
 
 global using AutoMapper;

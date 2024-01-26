@@ -132,6 +132,7 @@ global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Core.WebZones;
 global using ASC.Web.Core.WhiteLabel;
+global using ASC.Web.Files;
 global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;

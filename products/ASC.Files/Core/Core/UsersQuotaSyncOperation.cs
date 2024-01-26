@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.WebZones;
-
 namespace ASC.Web.Files;
 
 [Singleton(Additional = typeof(UsersQuotaOperationExtension))]
@@ -84,7 +82,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     }
 }
 
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager) : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager, QuotaSyncOperation quotaSyncOperation) : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -109,7 +107,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
     {
         try
         {
-           await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
@@ -119,6 +117,8 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
             var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
 
             await tenantManager.SetCurrentTenantAsync(TenantId);
+
+            quotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
 
             var users = await userManager.GetUsersAsync();
 

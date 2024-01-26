@@ -63,7 +63,8 @@ public class SettingsController(MessageService messageService,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
         UserFormatter userFormatter, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        UsersQuotaSyncOperation usersQuotaSyncOperation)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
 
@@ -480,7 +481,7 @@ public class SettingsController(MessageService messageService,
     public async Task RecalculateQuotaAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        quotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
