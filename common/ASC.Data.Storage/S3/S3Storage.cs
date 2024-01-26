@@ -373,14 +373,28 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
+        Stream bufferStream = null;
+        
         var request = new UploadPartRequest
         {
             BucketName = _bucket,
             Key = MakePath(domain, path),
             UploadId = uploadId,
-            PartNumber = chunkNumber,
-            InputStream = stream
+            PartNumber = chunkNumber
         };
+        
+        if (stream.CanSeek)
+        {
+            request.InputStream = stream;
+        }
+        else
+        { 
+            bufferStream = tempStream.Create();
+            await stream.CopyToAsync(bufferStream);
+            bufferStream.Position = 0;
+            
+            request.InputStream = bufferStream;
+        }
 
         try
         {
@@ -397,6 +411,13 @@ public class S3Storage(TempStream tempStream,
             }
 
             throw;
+        }
+        finally
+        {
+            if (bufferStream != null)
+            {
+                await bufferStream.DisposeAsync();
+            }
         }
     }
 
