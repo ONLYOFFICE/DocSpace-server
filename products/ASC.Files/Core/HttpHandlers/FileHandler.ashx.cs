@@ -780,15 +780,13 @@ public class FileHandlerService
                 return;
             }
 
-            context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
-            context.Response.ContentType = MimeMapping.GetMimeMapping(file.Title);
+            long offset = 0;
+            var length = ProcessRangeHeader(context, file.ContentLength, ref offset);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
-            context.Response.Headers.Add("Content-Length",
-                stream.CanSeek
-                ? stream.Length.ToString(CultureInfo.InvariantCulture)
-                : file.ContentLength.ToString(CultureInfo.InvariantCulture));
-            await stream.CopyToAsync(context.Response.Body);
+            stream.Seek(offset, SeekOrigin.Begin);
+
+            await SendStreamByChunksAsync(context, length, file.Title, stream, true);
         }
         catch (Exception ex)
         {
