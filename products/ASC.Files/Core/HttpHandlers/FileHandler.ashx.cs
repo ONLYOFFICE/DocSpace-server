@@ -289,7 +289,7 @@ public class FileHandlerService
                     readStream.Seek(offset, SeekOrigin.Begin);
                 }
 
-                await SendStreamByChunksAsync(context, length, filename, readStream, false);
+                await SendStreamByChunksAsync(context, length, filename, readStream);
             }
 
             await context.Response.Body.FlushAsync();
@@ -490,7 +490,7 @@ public class FileHandlerService
                             }
                         }
 
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream);
                     }
                     else
                     {
@@ -513,7 +513,7 @@ public class FileHandlerService
                             fileStream.Seek(offset, SeekOrigin.Begin);
                         }
 
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream);
                     }
                 }
                 catch (ThreadAbortException tae)
@@ -609,7 +609,7 @@ public class FileHandlerService
         return length;
     }
 
-    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream, bool flushed)
+    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream)
     {
         context.Response.Headers.Add("Connection", "Keep-Alive");
         context.Response.ContentLength = toRead;
@@ -618,6 +618,7 @@ public class FileHandlerService
 
         var bufferSize = Convert.ToInt32(Math.Min(32 * 1024, toRead)); // 32KB
         var buffer = new byte[bufferSize];
+        var flushed = false;
         while (toRead > 0)
         {
             var length = await fileStream.ReadAsync(buffer, 0, bufferSize);
@@ -786,7 +787,7 @@ public class FileHandlerService
             await using var stream = await fileDao.GetFileStreamAsync(file);
             stream.Seek(offset, SeekOrigin.Begin);
 
-            await SendStreamByChunksAsync(context, length, file.Title, stream, true);
+            await SendStreamByChunksAsync(context, length, file.Title, stream);
         }
         catch (Exception ex)
         {
