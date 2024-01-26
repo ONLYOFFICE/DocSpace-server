@@ -281,16 +281,32 @@ internal class FolderDao(
             switch (rootFolder.FolderType)
             {
                 case FolderType.USER:
-                    result.MyDocumentsUsedSpace = rootFolder.UsedSpace;
+                    result.MyDocumentsUsedSpace = new FilesStatisticsFolder()
+                    {
+                        Title = FilesUCResource.MyFiles,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
                     break;
                 case FolderType.Archive:
-                    result.ArchiveUsedSpace = rootFolder.UsedSpace;
+                    result.ArchiveUsedSpace = new FilesStatisticsFolder()
+                    {
+                        Title = FilesUCResource.Archive,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
                     break;
                 case FolderType.TRASH:
-                    result.TrashUsedSpace = rootFolder.UsedSpace;
+                    result.TrashUsedSpace = new FilesStatisticsFolder()
+                    {
+                        Title = FilesUCResource.Trash,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
                     break;
                 case FolderType.VirtualRooms:
-                    result.RoomsUsedSpace = rootFolder.UsedSpace;
+                    result.RoomsUsedSpace = new FilesStatisticsFolder()
+                    {
+                        Title = FilesUCResource.VirtualRooms,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
                     break;
             }
         }

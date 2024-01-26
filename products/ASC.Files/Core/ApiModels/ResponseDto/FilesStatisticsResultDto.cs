@@ -26,23 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FilesStatisticsResultDto
 {
-    /// <summary>My documents used space</summary>
-    /// <type>System.Int64, System</type>
-    public long MyDocumentsUsedSpace { get; set; }
+    public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
-    /// <summary>Trash used space</summary>
-    /// <type>System.Int64, System</type>
-    public long TrashUsedSpace { get; set; }
+    public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
-    /// <summary>Archive used space</summary>
-    /// <type>System.Int64, System</type>
-    public long ArchiveUsedSpace { get; set; }
+    public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
-    /// <summary>My documents used space</summary>
-    /// <type>System.Int64, System</type>
-    public long RoomsUsedSpace { get; set; }
+    public FilesStatisticsFolder RoomsUsedSpace { get; set; }
+}
+
+public class FilesStatisticsFolder
+{
+    public string Title { get; set; }
+    public long UsedSpace { get; set; }
 }
