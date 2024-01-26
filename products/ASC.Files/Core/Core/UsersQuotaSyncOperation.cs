@@ -84,7 +84,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     }
 }
 
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager) : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -117,12 +117,10 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
-            var _filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
 
             await tenantManager.SetCurrentTenantAsync(TenantId);
 
             var users = await userManager.GetUsersAsync();
-            var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {
@@ -138,25 +136,15 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
                 var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
                 await securityContext.AuthenticateMeAsync(account);
 
-                foreach (var item in webItems)
-                {
-                    if (item.ID == WebItemManager.DocumentsProductID)
-                    {
-                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
-                        if (manager == null)
-                        {
-                            continue;
-                        }
-                        await manager.RecalculateUserQuota(TenantId, user.Id);
-                    }
-                }
+                await filesSpaceUsageStatManager.RecalculateUserQuota(TenantId, user.Id);
+
             }
 
             var userQuotaSettings = settingsManager.Load<TenantUserQuotaSettings>();
             userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
             settingsManager.Save(userQuotaSettings);
 
-            await _filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
+            await filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
 
             var roomQuotaSettings = settingsManager.Load<TenantRoomQuotaSettings>();
             roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
