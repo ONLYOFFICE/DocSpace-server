@@ -69,7 +69,7 @@ global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
-global using ASC.Web.Files.Services.WCFService;
+global using ASC.Web.Files;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
