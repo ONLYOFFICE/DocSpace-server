@@ -35,14 +35,12 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-    ExternalShare externalShare,
-        AuthContext authContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
-            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext);
+        ExternalShare externalShare,
+        AuthContext authContext,
+        ConfigurationConverter<int> configurationConverter)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -53,14 +51,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         IHttpContextAccessor httpContextAccessor,
         ThirdPartySelector thirdPartySelector,
         IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-    ExternalShare externalShare,
-        AuthContext authContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
-            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext)
+        ExternalShare externalShare,
+        AuthContext authContext,
+        ConfigurationConverter<string> configurationConverter)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter)
 {
     /// <summary>
     /// Opens a third-party file with the ID specified in the request for editing.
@@ -120,12 +116,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
-        AuthContext authContext)
+        AuthContext authContext,
+        ConfigurationConverter<T> configurationConverter)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
@@ -224,9 +219,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
-        var result = mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
-        result.EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
-        result.File = await _fileDtoHelper.GetAsync(file);
+        var result = await configurationConverter.Convert(configuration, file);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)

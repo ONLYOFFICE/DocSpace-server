@@ -32,7 +32,7 @@ public class ConfigurationDto<T>
 {
     /// <summary>Document config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
-    public DocumentConfig<T> Document { get; set; }
+    public DocumentConfigDto<T> Document { get; set; }
 
     /// <summary>Document type</summary>
     /// <type>System.String, System</type>
@@ -40,7 +40,7 @@ public class ConfigurationDto<T>
 
     /// <summary>Editor config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
-    public EditorConfiguration<T> EditorConfig { get; set; }
+    public EditorConfigurationDto<T> EditorConfig { get; set; }
 
     /// <summary>Editor type</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
@@ -65,4 +65,302 @@ public class ConfigurationDto<T>
     /// <summary>Error message</summary>
     /// <type>System.String, System</type>
     public string ErrorMessage { get; set; }
+}
+
+public class EditorConfigurationDto<T>
+{
+    public string CallbackUrl { get; set; }
+
+    public CoEditingConfig CoEditing { get; set; }
+
+    public string CreateUrl { get; set; }
+
+    public CustomizationConfigDto<T> Customization { get; set; }
+
+    public EmbeddedConfig Embedded { get; set; }
+
+    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    
+    public string Lang { get; set; }
+
+    public string Mode { get; set; }
+    
+    public bool ModeWrite { get; set; }
+
+    public PluginsConfig Plugins { get; set; }
+
+    public List<RecentConfig> Recent { get; set; }
+    
+    public List<TemplatesConfig> Templates { get; set; }
+
+    public UserConfig User { get; set; }
+}
+public class CustomizationConfigDto<T>
+{
+    public bool About { get; set; }
+
+    public CustomerConfigDto Customer { get; set; }
+
+    public FeedbackConfig Feedback  { get; set; }
+
+    public bool? Forcesave { get; set; }
+
+    public GobackConfig Goback { get; set; }
+
+    public LogoConfigDto Logo { get; set; }
+
+    public bool MentionShare { get; set; }
+
+    public string ReviewDisplay { get; set; }
+
+    public bool SubmitForm { get; set; }
+}
+
+public class LogoConfigDto
+{
+    public string Image { get; set; }
+
+    public string ImageDark { get; set; }
+
+    public string ImageEmbedded { get; set; }
+
+    public string Url { get; set; }
+}
+
+public class CustomerConfigDto
+{
+    public string Address { get; set; }
+
+    public string Logo { get; set; }
+
+    public string Mail { get; set; }
+
+    public string Name  { get; set; }
+
+    public string Www  { get; set; }
+}
+
+public class DocumentConfigDto<T>
+{
+    public string FileType  { get; set; }
+    
+    public InfoConfigDto Info { get; set; }
+    
+    public bool IsLinkedForMe { get; set; }
+
+    public string Key { get; set; }
+
+    public PermissionsConfig Permissions { get; set; }
+    
+    public string SharedLinkParam { get; set; }
+    
+    public string SharedLinkKey { get; set; }
+    
+    public FileReferenceData<T> ReferenceData { get; set; }
+
+    public string Title { get; set; }
+
+    public string Url { get; set; }
+}
+
+public class InfoConfigDto
+{
+    public bool? Favorite { get; set; }
+
+    public string Folder { get; set; }
+
+    public string Owner { get; set; }
+
+    public List<AceShortWrapper> SharingSettings{ get; set; }
+    
+    public EditorType Type { get; set; }
+
+    public string Uploaded { get; set; }
+}
+
+[Scope]
+public class ConfigurationConverter<T>(
+    CommonLinkUtility commonLinkUtility, 
+    FilesLinkUtility filesLinkUtility, 
+    FileDtoHelper fileDtoHelper,
+    EditorConfigurationConverter<T> editorConfigurationConverter,
+    DocumentConfigConverter<T> documentConfigConverter)
+{
+    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
+    {   
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new ConfigurationDto<T>
+        {
+            File = await fileDtoHelper.GetAsync(file), 
+            Document = await documentConfigConverter.Convert(source.Document),
+            DocumentType = source.DocumentType,
+            EditorConfig = await editorConfigurationConverter.Convert(source.EditorConfig),
+            EditorType = source.EditorType,
+            EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
+            Token = source.Token,
+            Type = source.Type,
+            ErrorMessage = source.ErrorMessage
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
+{
+    public async Task<EditorConfigurationDto<T>> Convert(EditorConfiguration<T> source)
+    {   
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new EditorConfigurationDto<T>
+        {
+            CallbackUrl = source.CallbackUrl,
+            CoEditing = source.CoEditing,
+            CreateUrl = source.CreateUrl,
+            Customization = await configConverter.Convert(source.Customization),
+            Embedded = source.Embedded,
+            EncryptionKeys = source.EncryptionKeys,
+            Lang = source.Lang,
+            Mode = source.Mode,
+            ModeWrite = source.ModeWrite,
+            Plugins = source.Plugins,
+            Recent = await source.GetRecent().ToListAsync(),
+            Templates = await source.GetTemplates(),
+            User = source.User
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class CustomizationConfigConverter<T>(LogoConfigConverter<T> configConverter, CustomerConfigConverter customerConfigConverter)
+{
+    public async Task<CustomizationConfigDto<T>> Convert(CustomizationConfig<T> source)
+    {   
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new CustomizationConfigDto<T>
+        {
+            About = source.About,
+            Customer = await customerConfigConverter.Convert(source.Customer),
+            Feedback = source.Feedback,
+            Forcesave = source.Forcesave,
+            Goback = await source.GetGoback(),
+            Logo = await configConverter.Convert(source.Logo),
+            MentionShare = await source.GetMentionShare(),
+            ReviewDisplay = source.ReviewDisplay,
+            SubmitForm = await source.GetSubmitForm()
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class LogoConfigConverter<T>
+{
+    public async Task<LogoConfigDto> Convert(LogoConfig<T> source)
+    {   
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new LogoConfigDto
+        {
+            Image = await source.GetImage(),
+            ImageDark = await source.GetImageDark(),
+            ImageEmbedded = await source.GetImageEmbedded(),
+            Url = source.Url
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class CustomerConfigConverter
+{
+    public async Task<CustomerConfigDto> Convert(CustomerConfig source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new CustomerConfigDto
+        {
+            Address = source.Address,
+            Logo = await source.GetLogo(),
+            Mail = source.Mail,
+            Name = source.Name,
+            Www = source.Www
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
+{
+    public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source)
+    {        
+        if (source == null)
+        {
+            return null;
+        }
+        
+        var result = new DocumentConfigDto<T>
+        {
+            FileType = source.FileType,
+            Info = await configConverter.Convert(source.Info),
+            IsLinkedForMe = source.IsLinkedForMe,
+            Key = source.Key,
+            Permissions = source.Permissions,
+            SharedLinkParam = source.SharedLinkParam,
+            SharedLinkKey = source.SharedLinkKey,
+            ReferenceData = source.ReferenceData,
+            Title = source.Title,
+            Url = source.Url
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class InfoConfigConverter<T>
+{
+    public async Task<InfoConfigDto> Convert(InfoConfig<T> source)
+    {   
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new InfoConfigDto
+        {
+            Favorite = source.Favorite,
+            Folder = await source.GetFolder(),
+            Owner = source.Owner,
+            SharingSettings = await source.GetSharingSettings(),
+            Type = source.Type,
+            Uploaded = source.Uploaded
+        };
+
+        return result;
+    }
 }
