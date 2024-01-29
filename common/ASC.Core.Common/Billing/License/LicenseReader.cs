@@ -201,7 +201,6 @@ public class LicenseReader
             Oauth = true,
             ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,
-            MaxTotalSize = defaultQuota.MaxTotalSize,
             DocsEdition = true,
             Customization = license.Customization,
             Statistic = true
