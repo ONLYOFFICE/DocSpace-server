@@ -196,14 +196,14 @@ public class ConfigurationConverter<T>(
         var result = new ConfigurationDto<T>
         {
             File = await fileDtoHelper.GetAsync(file), 
-            Document = await documentConfigConverter.Convert(source.Document),
-            DocumentType = source.DocumentType,
-            EditorConfig = await editorConfigurationConverter.Convert(source.EditorConfig),
+            Document = await documentConfigConverter.Convert(source.Document, file),
+            DocumentType = source.GetDocumentType(file),
+            EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             Token = source.Token,
             Type = source.Type,
-            ErrorMessage = source.ErrorMessage
+            ErrorMessage = source.Error
         };
 
         return result;
@@ -213,27 +213,30 @@ public class ConfigurationConverter<T>(
 [Scope]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
-    public async Task<EditorConfigurationDto<T>> Convert(EditorConfiguration<T> source)
-    {   
+    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    {
+        var source = configuration.EditorConfig;
+        
         if (source == null)
         {
             return null;
         }
 
+        var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto<T>
         {
-            CallbackUrl = source.CallbackUrl,
+            CallbackUrl = source.GetCallbackUrl(file.Id.ToString()),
             CoEditing = source.CoEditing,
-            CreateUrl = source.CreateUrl,
-            Customization = await configConverter.Convert(source.Customization),
-            Embedded = source.Embedded,
+            CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
+            Customization = await configConverter.Convert(configuration, file),
+            Embedded = source.GetEmbedded(configuration.EditorType),
             EncryptionKeys = source.EncryptionKeys,
             Lang = source.Lang,
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Recent = await source.GetRecent().ToListAsync(),
-            Templates = await source.GetTemplates(),
+            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
+            Templates = await source.GetTemplates(fileType, configuration.Document.Title),
             User = source.User
         };
 
@@ -242,10 +245,15 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
 }
 
 [Scope]
-public class CustomizationConfigConverter<T>(LogoConfigConverter<T> configConverter, CustomerConfigConverter customerConfigConverter)
+public class CustomizationConfigConverter<T>(
+    LogoConfigConverter<T> configConverter, 
+    CustomerConfigConverter customerConfigConverter,
+    CoreBaseSettings coreBaseSettings)
 {
-    public async Task<CustomizationConfigDto<T>> Convert(CustomizationConfig<T> source)
-    {   
+    public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    {    
+        var source = configuration.EditorConfig?.Customization;
+        
         if (source == null)
         {
             return null;
@@ -254,14 +262,14 @@ public class CustomizationConfigConverter<T>(LogoConfigConverter<T> configConver
         var result = new CustomizationConfigDto<T>
         {
             About = source.About,
-            Customer = await customerConfigConverter.Convert(source.Customer),
+            Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = source.Feedback,
-            Forcesave = source.Forcesave,
-            Goback = await source.GetGoback(),
-            Logo = await configConverter.Convert(source.Logo),
-            MentionShare = await source.GetMentionShare(),
-            ReviewDisplay = source.ReviewDisplay,
-            SubmitForm = await source.GetSubmitForm()
+            Forcesave = source.GetForceSave(file),
+            Goback = await source.GetGoBack(configuration.EditorType, file),
+            Logo = await configConverter.Convert(configuration),
+            MentionShare = await source.GetMentionShare(file),
+            ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
+            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite)
         };
 
         return result;
@@ -271,8 +279,10 @@ public class CustomizationConfigConverter<T>(LogoConfigConverter<T> configConver
 [Scope]
 public class LogoConfigConverter<T>
 {
-    public async Task<LogoConfigDto> Convert(LogoConfig<T> source)
-    {   
+    public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
+    {
+        var source = configuration.EditorConfig?.Customization?.Logo;
+        
         if (source == null)
         {
             return null;
@@ -280,9 +290,9 @@ public class LogoConfigConverter<T>
 
         var result = new LogoConfigDto
         {
-            Image = await source.GetImage(),
+            Image = await source.GetImage(configuration.Document.Title, configuration.EditorType),
             ImageDark = await source.GetImageDark(),
-            ImageEmbedded = await source.GetImageEmbedded(),
+            ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
             Url = source.Url
         };
 
@@ -316,7 +326,7 @@ public class CustomerConfigConverter
 [Scope]
 public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
 {
-    public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source)
+    public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source, File<T> file)
     {        
         if (source == null)
         {
@@ -325,16 +335,16 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
         
         var result = new DocumentConfigDto<T>
         {
-            FileType = source.FileType,
-            Info = await configConverter.Convert(source.Info),
+            FileType = source.GetFileType(file),
+            Info = await configConverter.Convert(source.Info, file),
             IsLinkedForMe = source.IsLinkedForMe,
             Key = source.Key,
             Permissions = source.Permissions,
             SharedLinkParam = source.SharedLinkParam,
             SharedLinkKey = source.SharedLinkKey,
-            ReferenceData = source.ReferenceData,
-            Title = source.Title,
-            Url = source.Url
+            ReferenceData = await source.GetReferenceData(file),
+            Title = source.Title ?? file.Title,
+            Url = await source.GetUrl(file)
         };
 
         return result;
@@ -344,7 +354,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
 [Scope]
 public class InfoConfigConverter<T>
 {
-    public async Task<InfoConfigDto> Convert(InfoConfig<T> source)
+    public async Task<InfoConfigDto> Convert(InfoConfig<T> source, File<T> file)
     {   
         if (source == null)
         {
@@ -353,12 +363,12 @@ public class InfoConfigConverter<T>
 
         var result = new InfoConfigDto
         {
-            Favorite = source.Favorite,
-            Folder = await source.GetFolder(),
-            Owner = source.Owner,
-            SharingSettings = await source.GetSharingSettings(),
+            Favorite = await source.GetFavorite(file),
+            Folder = await source.GetFolder(file),
+            Owner = source.GetOwner(file),
+            SharingSettings = await source.GetSharingSettings(file),
             Type = source.Type,
-            Uploaded = source.Uploaded
+            Uploaded = source.GetUploaded(file)
         };
 
         return result;

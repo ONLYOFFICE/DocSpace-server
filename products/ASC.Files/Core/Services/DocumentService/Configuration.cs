@@ -72,9 +72,10 @@ public class CoEditingConfig
     }
 }
 
-/// <summary>
-/// </summary>
-public class Configuration<T>
+[Scope]
+public class Configuration<T>(
+    DocumentConfig<T> document,
+    EditorConfiguration<T> editorConfig)
 {
     internal static readonly Dictionary<FileType, string> DocType = new()
     {
@@ -88,23 +89,20 @@ public class Configuration<T>
 
     /// <summary>Document config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
-    public DocumentConfig<T> Document { get; set; }
+    public DocumentConfig<T> Document { get; } = document;
 
     /// <summary>Document type</summary>
     /// <type>System.String, System</type>
-    public string DocumentType
+    public string GetDocumentType(File<T> file)
     {
-        get
-        {
-            DocType.TryGetValue(GetFileType, out var documentType);
+        DocType.TryGetValue(GetFileType(file), out var documentType);
 
-            return documentType;
-        }
+        return documentType;
     }
 
     /// <summary>Editor config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
-    public EditorConfiguration<T> EditorConfig { get; set; }
+    public EditorConfiguration<T> EditorConfig { get; } = editorConfig;
 
     /// <summary>Editor type</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
@@ -113,9 +111,7 @@ public class Configuration<T>
         set => Document.Info.Type = value;
         get => Document.Info.Type;
     }
-
-    [JsonPropertyName("Error")]
-    public string ErrorMessage { get; init; }
+    public string Error { get; set; }
 
     /// <summary>Token</summary>
     /// <type>System.String, System</type>
@@ -129,40 +125,30 @@ public class Configuration<T>
         get => EditorType.ToString().ToLower();
     }
 
-    internal FileType GetFileType
+    internal FileType GetFileType(File<T> file)
     {
-        get
+        if (_fileTypeCache == FileType.Unknown)
         {
-            if (_fileTypeCache == FileType.Unknown)
-            {
-                _fileTypeCache = FileUtility.GetFileTypeByFileName(Document.Info.GetFile().Title);
-            }
-
-            return _fileTypeCache;
+            _fileTypeCache = FileUtility.GetFileTypeByFileName(file.Title);
         }
-    }
 
-    public Configuration(
-        File<T> file,
-        IServiceProvider serviceProvider)
-    {
-        Document = serviceProvider.GetService<DocumentConfig<T>>();
-        Document.Info.SetFile(file);
-        EditorConfig = serviceProvider.GetService<EditorConfiguration<T>>();
-        EditorConfig.SetConfiguration(this);
+        return _fileTypeCache;
     }
 }
 
 #region Nested Classes
 
 [Transient]
-public class DocumentConfig<T>(DocumentServiceConnector documentServiceConnector, PathProvider pathProvider, InfoConfig<T> infoConfig, TenantManager tenantManager)
+public class DocumentConfig<T>(
+    DocumentServiceConnector documentServiceConnector, 
+    PathProvider pathProvider, 
+    InfoConfig<T> infoConfig, 
+    TenantManager tenantManager)
 {
     private string _fileUri;
     private string _key = string.Empty;
-    private string _title;
     private FileReferenceData<T> _referenceData;
-    public string FileType => Info.GetFile().ConvertedExtension.Trim('.');
+    public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; set; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
@@ -175,39 +161,33 @@ public class DocumentConfig<T>(DocumentServiceConnector documentServiceConnector
     public PermissionsConfig Permissions { get; set; } = new();
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public FileReferenceData<T> ReferenceData
+    public async Task<FileReferenceData<T>> GetReferenceData(File<T> file)
     {
-        get 
+        return _referenceData ??= new FileReferenceData<T>
         {
-            return _referenceData ??= new FileReferenceData<T>
-            {
-                FileKey = Info.GetFile().Id, 
-                InstanceId = tenantManager.GetCurrentTenant().Id.ToString()
-            };
-        }
+            FileKey = file.Id, 
+            InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
+        };
     }
 
-    public string Title
+    public string Title { get; set; }
+
+    public void SetUrl(string val)
     {
-        set => _title = value;
-        get => _title ?? Info.GetFile().Title;
+        _fileUri = documentServiceConnector.ReplaceCommunityAdress(val);
     }
-
-    public string Url
+    
+    public async Task<string> GetUrl(File<T> file)
     {
-        set => _fileUri = documentServiceConnector.ReplaceCommunityAdress(value);
-        get
+        if (!string.IsNullOrEmpty(_fileUri))
         {
-            if (!string.IsNullOrEmpty(_fileUri))
-            {
-                return _fileUri;
-            }
-
-            var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-            _fileUri = documentServiceConnector.ReplaceCommunityAdress(pathProvider.GetFileStreamUrl(Info.GetFile(), SharedLinkKey, SharedLinkParam, last));
-
             return _fileUri;
         }
+
+        var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
+        _fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(pathProvider.GetFileStreamUrl(file, SharedLinkKey, SharedLinkParam, last));
+
+        return _fileUri;
     }
 }
 
@@ -225,23 +205,19 @@ public class EditorConfiguration<T>
     private readonly UserInfo _userInfo;
     private readonly UserManager _userManager;
     private readonly ExternalShare _externalShare;
-    private Configuration<T> _configuration;
 
     private EmbeddedConfig _embeddedConfig;
 
-    public string CallbackUrl
+    public string GetCallbackUrl(string fileId)
     {
-        get
+        if (!ModeWrite)
         {
-            if (!ModeWrite)
-            {
-                return null;
-            }
-
-            var callbackUrl = _documentServiceTrackerHelper.GetCallbackUrl(_configuration.Document.Info.GetFile().Id.ToString());
-
-            return _externalShare.GetUrlWithShare(callbackUrl);
+            return null;
         }
+
+        var callbackUrl = _documentServiceTrackerHelper.GetCallbackUrl(fileId);
+
+        return _externalShare.GetUrlWithShare(callbackUrl);
     }
 
     public CoEditingConfig CoEditing =>
@@ -253,30 +229,51 @@ public class EditorConfiguration<T>
             }
             : null;
 
-    public string CreateUrl
+    public async Task<string> GetCreateUrl(EditorType editorType, FileType fileType)
     {
-        get
+        if (editorType != EditorType.Desktop)
         {
-            if (_configuration.Document.Info.Type != EditorType.Desktop)
-            {
-                return null;
-            }
-
-            if (!_authContext.IsAuthenticated || _userManager.IsUser(_authContext.CurrentAccount.ID))
-            {
-                return null;
-            }
-
-            return GetCreateUrl(_configuration.GetFileType);
+            return null;
         }
+
+        if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+        string title;
+        switch (fileType)
+        {
+            case FileType.Document:
+            case FileType.OForm:
+            case FileType.OFormTemplate:
+                title = FilesJSResource.TitleNewFileText;
+                break;
+
+            case FileType.Spreadsheet:
+                title = FilesJSResource.TitleNewFileSpreadsheet;
+                break;
+
+            case FileType.Presentation:
+                title = FilesJSResource.TitleNewFilePresentation;
+                break;
+
+            default:
+                return null;
+        }
+
+        Configuration<T>.DocType.TryGetValue(fileType, out var documentType);
+
+        return _baseCommonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath)
+               + "?" + FilesLinkUtility.Action + "=create"
+               + "&doctype=" + documentType
+               + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
 
     public CustomizationConfig<T> Customization { get; set; }
-
-    public EmbeddedConfig Embedded
+    
+    public EmbeddedConfig GetEmbedded(EditorType editorType)
     {
-        set => _embeddedConfig = value;
-        get => _configuration.Document.Info.Type == EditorType.Embedded ? _embeddedConfig : null;
+        return editorType == EditorType.Embedded ? _embeddedConfig : null;
     }
 
     public EncryptionKeysConfig EncryptionKeys { get; set; }
@@ -289,7 +286,7 @@ public class EditorConfiguration<T>
 
     public PluginsConfig Plugins { get; set; }
 
-    public async IAsyncEnumerable<RecentConfig> GetRecent()
+    public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
         if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
         {
@@ -301,7 +298,7 @@ public class EditorConfiguration<T>
             yield break;
         }
 
-        var filter = _configuration.GetFileType switch
+        var filter = fileType switch
         {
             FileType.Document => FilterType.DocumentsOnly,
             FileType.OForm => FilterType.OFormOnly,
@@ -313,7 +310,6 @@ public class EditorConfiguration<T>
 
         var folderDao = _daoFactory.GetFolderDao<int>();
         var files = (await _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false)).Cast<File<int>>();
-        var fileId = _configuration.Document.Info.GetFile().Id;
         foreach (var file in  files.Where(file => !Equals(fileId, file.Id)))
         {
             yield return new RecentConfig
@@ -325,7 +321,7 @@ public class EditorConfiguration<T>
         }
     }
 
-    public async Task<List<TemplatesConfig>> GetTemplates()
+    public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
             if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
             {
@@ -337,8 +333,8 @@ public class EditorConfiguration<T>
                 return null;
             }
 
-            var extension = _fileUtility.GetInternalExtension(_configuration.Document.Title).TrimStart('.');
-            var filter = _configuration.GetFileType switch
+            var extension = _fileUtility.GetInternalExtension(title).TrimStart('.');
+            var filter = fileType switch
             {
                 FileType.Document => FilterType.DocumentsOnly,
                 FileType.OForm => FilterType.OFormOnly,
@@ -392,7 +388,7 @@ public class EditorConfiguration<T>
         _documentServiceTrackerHelper = documentServiceTrackerHelper;
         _externalShare = externalShare;
         Plugins = pluginsConfig;
-        Embedded = embeddedConfig;
+        _embeddedConfig = embeddedConfig;
         _userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
 
         if (!_userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -404,82 +400,45 @@ public class EditorConfiguration<T>
             };
         }
     }
-
-    internal void SetConfiguration(Configuration<T> configuration)
-    {
-        _configuration = configuration;
-        Customization.SetConfiguration(_configuration);
-    }
-
-    private string GetCreateUrl(FileType fileType)
-    {
-        string title;
-        switch (fileType)
-        {
-            case FileType.Document:
-            case FileType.OForm:
-            case FileType.OFormTemplate:
-                title = FilesJSResource.TitleNewFileText;
-                break;
-
-            case FileType.Spreadsheet:
-                title = FilesJSResource.TitleNewFileSpreadsheet;
-                break;
-
-            case FileType.Presentation:
-                title = FilesJSResource.TitleNewFilePresentation;
-                break;
-
-            default:
-                return null;
-        }
-
-        Configuration<T>.DocType.TryGetValue(fileType, out var documentType);
-
-        return _baseCommonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath)
-               + "?" + FilesLinkUtility.Action + "=create"
-               + "&doctype=" + documentType
-               + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
-    }
 }
 
 [Transient]
-public class InfoConfig<T>(BreadCrumbsManager breadCrumbsManager, FileSharing fileSharing, SecurityContext securityContext, UserManager userManager)
+public class InfoConfig<T>(
+    BreadCrumbsManager breadCrumbsManager,
+    FileSharing fileSharing,
+    SecurityContext securityContext,
+    UserManager userManager)
 {
     private string _breadCrumbs;
     private bool? _favorite;
     private bool _favoriteIsSet;
-    private File<T> _file;
 
-    public bool? Favorite
+    public async Task<bool?> GetFavorite(File<T> file)
     {
-        get
+        if (_favoriteIsSet)
         {
-            if (_favoriteIsSet)
-            {
-                return _favorite;
-            }
-
-            if (!securityContext.IsAuthenticated || userManager.IsUser(securityContext.CurrentAccount.ID))
-            {
-                return null;
-            }
-
-            if (_file.ParentId == null || _file.Encrypted)
-            {
-                return null;
-            }
-
-            return _file.IsFavorite;
+            return _favorite;
         }
-        set
+
+        if (!securityContext.IsAuthenticated || await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
         {
-            _favoriteIsSet = true;
-            _favorite = value;
+            return null;
         }
+
+        if (file.ParentId == null || file.Encrypted)
+        {
+            return null;
+        }
+
+        return file.IsFavorite;
+    }
+    public void SetFavorite(bool? newValue)
+    {
+        _favoriteIsSet = true;
+        _favorite = newValue;
     }
 
-    public async Task<string> GetFolder()
+    public async Task<string> GetFolder(File<T> file)
     {
         if (Type == EditorType.Embedded)
         {
@@ -490,25 +449,25 @@ public class InfoConfig<T>(BreadCrumbsManager breadCrumbsManager, FileSharing fi
         {
             const string separator = " \\ ";
 
-            var breadCrumbsList = await breadCrumbsManager.GetBreadCrumbsAsync(_file.ParentId);
+            var breadCrumbsList = await breadCrumbsManager.GetBreadCrumbsAsync(file.ParentId);
             _breadCrumbs = string.Join(separator, breadCrumbsList.Select(folder => folder.Title).ToArray());
         }
 
         return _breadCrumbs;
     }
 
-    public string Owner => _file.CreateByString;
+    public string GetOwner(File<T> file) => file.CreateByString;
 
-    public async Task<List<AceShortWrapper>> GetSharingSettings()
+    public async Task<List<AceShortWrapper>> GetSharingSettings(File<T> file)
     {
-        if (Type == EditorType.Embedded || !await fileSharing.CanSetAccessAsync(_file))
+        if (Type == EditorType.Embedded || !await fileSharing.CanSetAccessAsync(file))
         {
             return null;
         }
 
         try
         {
-            return await fileSharing.GetSharedInfoShortFileAsync(_file.Id);
+            return await fileSharing.GetSharedInfoShortFileAsync(file.Id);
         }
         catch
         {
@@ -518,17 +477,7 @@ public class InfoConfig<T>(BreadCrumbsManager breadCrumbsManager, FileSharing fi
 
     public EditorType Type { get; set; } = EditorType.Desktop;
 
-    public string Uploaded => _file.CreateOnString;
-
-    public File<T> GetFile()
-    {
-        return _file;
-    }
-
-    public void SetFile(File<T> file)
-    {
-        _file = file;
-    }
+    public string GetUploaded(File<T> file) => file.CreateOnString;
 }
 
 public class PermissionsConfig
@@ -615,7 +564,8 @@ public class CustomerConfig(
 }
 
 [Transient]
-public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
+public class CustomizationConfig<T>(
+    CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -632,8 +582,6 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
 {
     [JsonIgnore]
     public string GobackUrl;
-
-    private Configuration<T> _configuration;
 
     public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
 
@@ -662,93 +610,88 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
         }
     }
 
-    public bool? Forcesave
+    public bool? GetForceSave(File<T> file)
     {
-        get
-        {
-            return fileUtility.CanForcesave
-                   && !_configuration.Document.Info.GetFile().ProviderEntry
-                   && thirdPartySelector.GetAppByFileId(_configuration.Document.Info.GetFile().Id.ToString()) == null
-                   && filesSettingsHelper.Forcesave;
-        }
+        return fileUtility.CanForcesave
+               && !file.ProviderEntry
+               && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
+               && filesSettingsHelper.Forcesave;
     }
 
-    public async Task<GobackConfig> GetGoback()
+    public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-            if (_configuration.EditorType == EditorType.Embedded)
-            {
-                return null;
-            }
+        if (editorType == EditorType.Embedded)
+        {
+            return null;
+        }
 
-            if (!authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
+        {
+            return null;
+        }
+        if (GobackUrl != null)
+        {
+            return new GobackConfig
             {
-                return null;
-            }
-            if (GobackUrl != null)
-            {
-                return new GobackConfig
-                {
-                    Url = GobackUrl
-                };
-            }
+                Url = GobackUrl
+            };
+        }
 
-            var folderDao = daoFactory.GetFolderDao<T>();
-            try
+        var folderDao = daoFactory.GetFolderDao<T>();
+        try
+        {
+            var parent = await folderDao.GetFolderAsync(file.ParentId);
+            if (file.RootFolderType == FolderType.USER && 
+                !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
+                !await fileSecurity.CanReadAsync(parent))
             {
-                var file = _configuration.Document.Info.GetFile();
-                var parent = await folderDao.GetFolderAsync(file.ParentId);
-                if (file.RootFolderType == FolderType.USER && 
-                    !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
-                    !await fileSecurity.CanReadAsync(parent))
+                if (await fileSecurity.CanReadAsync(file))
                 {
-                    if (await fileSecurity.CanReadAsync(file))
+                    return new GobackConfig
                     {
-                        return new GobackConfig
-                        {
-                            Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderShareAsync)
-                        };
-                    }
-
-                    return null;
+                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderShareAsync)
+                    };
                 }
 
-                if (_configuration.Document.Info.GetFile().Encrypted
-                    && _configuration.Document.Info.GetFile().RootFolderType == FolderType.Privacy
-                    && !await fileSecurity.CanReadAsync(parent))
-                {
-                    parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
-                }
-
-                return new GobackConfig
-                {
-                    Url = await pathProvider.GetFolderUrlAsync(parent)
-                };
-            }
-            catch (Exception)
-            {
                 return null;
             }
+
+            if (file.Encrypted && 
+                file.RootFolderType == FolderType.Privacy && 
+                !await fileSecurity.CanReadAsync(parent))
+            {
+                parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
+            }
+
+            return new GobackConfig
+            {
+                Url = await pathProvider.GetFolderUrlAsync(parent)
+            };
+        }
+        catch (Exception)
+        {
+            return null;
+        }
         
     }
 
     public LogoConfig<T> Logo { get; set; } = logoConfig;
 
-    public async Task<bool> GetMentionShare()
+    public async Task<bool> GetMentionShare(File<T> file)
     {
         return authContext.IsAuthenticated
-               && !_configuration.Document.Info.GetFile().Encrypted
-               && await FileSharing.CanSetAccessAsync(_configuration.Document.Info.GetFile());
+               && !file.Encrypted
+               && await FileSharing.CanSetAccessAsync(file);
     }
 
-    public string ReviewDisplay
+    public string GetReviewDisplay(bool modeWrite)
     {
-        get { return _configuration.EditorConfig.ModeWrite ? null : "markup"; }
+        return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm()
+    public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        var file = _configuration.Document.Info.GetFile();
-        if (!_configuration.EditorConfig.ModeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
+        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
         {
             return false;
         }
@@ -769,36 +712,18 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
-
-    internal void SetConfiguration(Configuration<T> configuration)
-    {
-        _configuration = configuration;
-
-        if (coreBaseSettings.Standalone)
-        {
-        }
-        else
-        {
-            Customer = null;
-        }
-
-        Logo.SetConfiguration(_configuration);
-    }
 }
 
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath
-                                                                        + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
 
-    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?"
-        + FilesLinkUtility.Action + "=download" + ShareLinkParam);
+    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
     public string ShareLinkParam { get; set; }
 
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath
-        + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
 
     public string ToolbarDocked => "top";
 }
@@ -827,14 +752,13 @@ public class LogoConfig<T>(
     TenantLogoHelper tenantLogoHelper,
     FileUtility fileUtility)
 {
-    private Configuration<T> _configuration;
 
-    public async Task<string> GetImage()
+    public async Task<string> GetImage(string title, EditorType editorType)
     {
-        var fillingForm = fileUtility.CanWebRestrictedEditing(_configuration.Document.Title);
+        var fillingForm = fileUtility.CanWebRestrictedEditing(title);
 
-        return _configuration.EditorType == EditorType.Embedded
-            || fillingForm
+        return editorType == EditorType.Embedded
+               || fillingForm
                 ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
                 : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
     }
@@ -844,9 +768,9 @@ public class LogoConfig<T>(
         return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
     }
 
-    public async Task<string> GetImageEmbedded()
+    public async Task<string> GetImageEmbedded(EditorType editorType)
     {
-        return _configuration.EditorType != EditorType.Embedded
+        return editorType != EditorType.Embedded
                 ? null
                 : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
     }
@@ -854,11 +778,6 @@ public class LogoConfig<T>(
     public string Url
     {
         get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
-    }
-
-    internal void SetConfiguration(Configuration<T> configuration)
-    {
-        _configuration = configuration;
     }
 }
 
@@ -926,10 +845,13 @@ public class UserConfig
     public string Name { get; set; }
 }
 
-public static class ConfigurationExtention
+public static class ConfigurationFilesExtension
 {
     public static void Register(DIHelper services)
     {
+        services.TryAdd<Configuration<int>>();
+        services.TryAdd<Configuration<string>>();
+        
         services.TryAdd<DocumentConfig<string>>();
         services.TryAdd<DocumentConfig<int>>();
 
