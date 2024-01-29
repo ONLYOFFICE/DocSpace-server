@@ -74,6 +74,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
         {
             result.UsersQuota = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             result.RoomsQuota = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            result.TenantCustomQuota = await settingsManager.LoadAsync<TenantQuotaSettings>();
         }
 
         return result;

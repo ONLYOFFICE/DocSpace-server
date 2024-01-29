@@ -120,6 +120,10 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
 
             quotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
 
+            var tenantQuotaSettings = settingsManager.Load<TenantQuotaSettings>();
+            tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            settingsManager.Save(tenantQuotaSettings);
+
             var users = await userManager.GetUsersAsync();
 
             foreach (var user in users)

@@ -60,7 +60,9 @@ public class CommonMethods(
             status = t.Status.ToString(),
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
-            quota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? tenantQuotaSettings.Quota : hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize,
+            quota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
+                    tenantQuotaSettings.Quota :
+                    tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
             usedSize = hostedSolution.FindTenantQuotaRowsAsync(t.Id).Result
                             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
                             .Sum(q => q.Counter),

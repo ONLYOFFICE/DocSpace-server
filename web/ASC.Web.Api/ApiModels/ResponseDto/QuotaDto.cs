@@ -64,6 +64,9 @@ public class QuotaDto
     /// <summary>Rooms quota</summary>
     /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
+    /// <summary>Rooms quota</summary>
+    /// <type>ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common</type>
+    public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 /// <summary>

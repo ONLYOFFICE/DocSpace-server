@@ -37,6 +37,7 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
 
     public bool EnableQuota { get; set; }
     public long Quota { get; set; }
+    public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()
     {
