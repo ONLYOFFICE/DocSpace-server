@@ -76,7 +76,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsSharedAsync(T entryId, FileEntryType type)
+    protected async Task<bool> IsSharedAsync(T entryId, FileEntryType type)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -565,6 +565,30 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
         IMapper mapper) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
     {
     }
+    
+    public async Task<bool> IsSharedAsync(FileEntry<int> entry, IEnumerable<SubjectType> subjectTypes, bool checkInheritances)
+    {
+        var shared = await base.IsSharedAsync(entry.Id, entry.FileEntryType);
+
+        if (shared || !checkInheritances)
+        {
+            return shared;
+        }
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = (await Query(filesDbContext.Security))
+            .Join(filesDbContext.Tree, s => s.EntryId, a => a.ParentId.ToString(), (security, tree) => new { security, tree })
+            .Where(r => r.tree.FolderId == entry.ParentId)
+            .Select(r => r.security);
+
+        if (subjectTypes != null && subjectTypes.Any())
+        {
+            q = q.Where(s => subjectTypes.Contains(s.SubjectType));
+        }
+
+        return await q.AnyAsync();
+    }
 
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
@@ -656,6 +680,32 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
         SelectorFactory selectorFactory) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
     {
         _selectorFactory = selectorFactory;
+    }
+    
+    public async Task<bool> IsSharedAsync(FileEntry<string> entry, IEnumerable<SubjectType> subjectTypes, bool checkInheritances)
+    {
+        var shared = await base.IsSharedAsync(entry.Id, entry.FileEntryType);
+
+        if (shared || !checkInheritances)
+        {
+            return shared;
+        }
+        
+        var selector = _selectorFactory.GetSelector(entry.ParentId);
+        var folderDao = selector.GetFolderDao(entry.ParentId);
+
+        var parentsIds = await folderDao.GetParentFoldersAsync(entry.ParentId).Select(s => s.Id).ToListAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = (await Query(filesDbContext.Security)).Where(s => parentsIds.Contains(s.EntryId) && s.EntryType == FileEntryType.Folder);
+
+        if (subjectTypes != null && subjectTypes.Any())
+        {
+            q = q.Where(s => subjectTypes.Contains(s.SubjectType));
+        }
+
+        return await q.AnyAsync();
     }
 
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)

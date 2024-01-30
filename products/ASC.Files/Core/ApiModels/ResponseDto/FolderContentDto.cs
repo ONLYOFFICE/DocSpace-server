@@ -153,6 +153,8 @@ public class FolderContentDtoHelper
         var foldersIntWithRights = await foldersIntWithRightsTask;
         var foldersStringWithRights = await foldersStringWithRightsTask;
 
+        var sharedStatus = folderItems.FolderInfo.Shared;
+
         var filesTask = GetFilesDto(files).ToListAsync();
         var foldersTask = GetFoldersDto(folders).ToListAsync();
         var currentTask = GetFoldersDto(new [] { folderItems.FolderInfo }).FirstOrDefaultAsync();
@@ -190,13 +192,15 @@ public class FolderContentDtoHelper
         {
             foreach (var r in fileEntries)
             {
+                r.Shared = r.Shared || sharedStatus;
+                
                 switch (r)
                 {
                     case File<int> fol1:
-                        yield return await _fileDtoHelper.GetAsync(fol1, foldersIntWithRights);
+                        yield return await _fileDtoHelper.GetAsync(fol1, foldersIntWithRights, false);
                         break;
                     case File<string> fol2:
-                        yield return await _fileDtoHelper.GetAsync(fol2, foldersStringWithRights);
+                        yield return await _fileDtoHelper.GetAsync(fol2, foldersStringWithRights, false);
                         break;
                 }
             }
@@ -208,6 +212,8 @@ public class FolderContentDtoHelper
 
             foreach (var r in folderEntries)
             {
+                r.Shared = r.Shared || sharedStatus;
+                
                 switch (r)
                 {
                     case Folder<int> fol1:
@@ -230,7 +236,7 @@ public class FolderContentDtoHelper
                     currentUsersRecords = await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
                 }
                 
-                return await _folderDtoHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords);
+                return await _folderDtoHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords, false);
             }
         }
     }

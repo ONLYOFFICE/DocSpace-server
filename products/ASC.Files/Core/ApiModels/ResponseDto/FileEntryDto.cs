@@ -147,6 +147,7 @@ public class FileEntryDtoHelper
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly FilesSettingsHelper _filesSettingsHelper;
     private readonly FileDateTime _fileDateTime;
+    private readonly EntryStatusManager _entryStatusManager;
 
     public FileEntryDtoHelper(
         ApiDateTimeHelper apiDateTimeHelper,
@@ -155,8 +156,8 @@ public class FileEntryDtoHelper
         FileSecurity fileSecurity,
         GlobalFolderHelper globalFolderHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime
-        )
+        FileDateTime fileDateTime, 
+        EntryStatusManager entryStatusManager)
     {
         _apiDateTimeHelper = apiDateTimeHelper;
         _employeeWrapperHelper = employeeWrapperHelper;
@@ -165,14 +166,17 @@ public class FileEntryDtoHelper
         _globalFolderHelper = globalFolderHelper;
         _filesSettingsHelper = filesSettingsHelper;
         _fileDateTime = fileDateTime;
+        _entryStatusManager = entryStatusManager;
     }
 
-    protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
+    protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry, bool checkShared) where T : FileEntryDto<TId>, new()
     {
         if (entry.Security == null)
         {
             entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
         }
+
+        var sharedTask = checkShared ? _entryStatusManager.GetSharedStatusAsync(entry) : Task.FromResult(entry.Shared);
 
         CorrectSecurityByLockedStatus(entry);
 
@@ -183,7 +187,7 @@ public class FileEntryDtoHelper
             Id = entry.Id,
             Title = entry.Title,
             Access = entry.Access,
-            Shared = entry.Shared,
+            Shared = await sharedTask,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),
             CreatedBy = await _employeeWrapperHelper.GetAsync(entry.CreateBy),
             Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),

@@ -126,8 +126,9 @@ public class FolderDtoHelper : FileEntryDtoHelper
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime, 
-        FileSecurityCommon fileSecurityCommon)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        FileSecurityCommon fileSecurityCommon,
+        EntryStatusManager entryStatusManager)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, entryStatusManager)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -138,9 +139,9 @@ public class FolderDtoHelper : FileEntryDtoHelper
         _badgesSettingsHelper = badgesSettingsHelper;
     }
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null, bool checkShared = true)
     {
-        var result = await GetFolderWrapperAsync(folder);
+        var result = await GetFolderWrapperAsync(folder, checkShared);
 
         result.ParentId = folder.ParentId;
 
@@ -207,7 +208,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         return result;
     }
 
-    private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder)
+    private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder, bool checkShared = true)
     {
         var newBadges = folder.NewForMe;
 
@@ -221,7 +222,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
             }
         }
 
-        var result = await GetAsync<FolderDto<T>, T>(folder);
+        var result = await GetAsync<FolderDto<T>, T>(folder, checkShared);
         result.FilesCount = folder.FilesCount;
         result.FoldersCount = folder.FoldersCount;
         result.IsShareable = folder.Shareable.NullIfDefault();

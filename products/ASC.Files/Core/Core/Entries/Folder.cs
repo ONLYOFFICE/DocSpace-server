@@ -85,7 +85,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public bool IsFavorite { get; set; }
-
+    public bool IsRoot => FolderType == RootFolderType;
+    
     public Folder()
     {
         Title = string.Empty;

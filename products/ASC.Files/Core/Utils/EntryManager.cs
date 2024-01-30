@@ -246,6 +246,22 @@ public class EntryStatusManager
             folder.IsFavorite = true;
         }
     }
+
+    public async Task<bool> GetSharedStatusAsync<T>(FileEntry<T> entry)
+    {
+        if (entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        {
+            return false;
+        }
+
+        if (entry is Folder<T> { IsRoot: true })
+        {
+            return false;
+        }
+
+        return await _daoFactory.GetSecurityDao<T>()
+            .IsSharedAsync(entry, new [] { SubjectType.PrimaryExternalLink }, true);
+    }
 }
 
 [Scope]

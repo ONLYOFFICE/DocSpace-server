@@ -335,6 +335,7 @@ public class FileStorageService //: IFileStorageService
         var breadCrumbsTask = _entryManager.GetBreadCrumbsAsync(parentId, folderDao);
         var shareableTask = _fileSharing.CanSetAccessAsync(parent);
         var newTask = _fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
+        var sharedTask = _entryStatusManager.GetSharedStatusAsync(parent);
 
         var breadCrumbs = await breadCrumbsTask;
 
@@ -355,6 +356,8 @@ public class FileStorageService //: IFileStorageService
             parent.FolderType == FolderType.SHARE ||
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
+
+        parent.Shared = await sharedTask;
 
         entries = entries.Where(x =>
         {
@@ -2745,7 +2748,7 @@ public class FileStorageService //: IFileStorageService
 
         var securityDao = GetSecurityDao<T>();
 
-        return await securityDao.IsSharedAsync(file.Id, FileEntryType.File);
+        return await securityDao.IsSharedAsync(file, null, false);
     }
 
     public async Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)

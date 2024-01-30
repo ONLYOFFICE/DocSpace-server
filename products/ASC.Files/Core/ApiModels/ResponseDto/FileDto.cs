@@ -161,8 +161,9 @@ public class FileDtoHelper : FileEntryDtoHelper
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime, 
-        ExternalShare externalShare)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        ExternalShare externalShare,
+        EntryStatusManager entryStatusManager)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, entryStatusManager)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -174,9 +175,9 @@ public class FileDtoHelper : FileEntryDtoHelper
         _externalShare = externalShare;
     }
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, bool checkShared = true)
     {
-        var result = await GetFileWrapperAsync(file);
+        var result = await GetFileWrapperAsync(file, checkShared);
 
         result.FolderId = file.ParentId;
         if (file.RootFolderType == FolderType.USER
@@ -208,9 +209,9 @@ public class FileDtoHelper : FileEntryDtoHelper
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, bool checkShared = true)
     {
-        var result = await GetAsync<FileDto<T>, T>(file);
+        var result = await GetAsync<FileDto<T>, T>(file, checkShared);
         var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
         
         result.FileExst = FileUtility.GetFileExtension(file.Title);
