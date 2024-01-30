@@ -179,12 +179,12 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     (result.RootFolderType == FolderType.Archive && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+                     ((result.RootFolderType == FolderType.Archive || result.RootFolderType == FolderType.TRASH) && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
 
-                if (quotaRoomSettings.EnableQuota)
+                if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
                 {
                     result.IsCustomQuota = folder.Quota > -2;
                     result.QuotaLimit = folder.Quota > -2 ? folder.Quota : quotaRoomSettings.DefaultQuota;
