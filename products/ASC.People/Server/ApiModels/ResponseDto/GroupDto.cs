@@ -48,30 +48,17 @@ public class GroupDto
 
     /// <summary>Manager</summary>
     /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
-    public EmployeeDto Manager { get; set; }
+    public EmployeeFullDto Manager { get; set; }
 
     /// <summary>List of members</summary>
     /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
-    public List<EmployeeDto> Members { get; set; }
+    public List<EmployeeFullDto> Members { get; set; }
     
     public bool? Shared { get; set; }
-
-    public static GroupDto GetSample()
-    {
-        return new GroupDto
-        {
-            Id = Guid.NewGuid(),
-            Manager = EmployeeDto.GetSample(),
-            Category = Guid.NewGuid(),
-            Name = "Sample group",
-            Parent = Guid.NewGuid(),
-            Members = [EmployeeDto.GetSample()]
-        };
-    }
 }
 
 [Scope]
-public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
+public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper employeeFullDtoHelper)
 {
     public async Task<GroupDto> Get(GroupInfo group, bool includeMembers, bool? shared = null)
     {
@@ -81,7 +68,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper emplo
             Category = group.CategoryID,
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await employeeWraperHelper.GetAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
+            Manager = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
             Shared = shared
         };
 
@@ -93,7 +80,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper emplo
         result.Members = [];
         foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
         { 
-            result.Members.Add(await employeeWraperHelper.GetAsync(m));
+            result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }
 
         return result;
