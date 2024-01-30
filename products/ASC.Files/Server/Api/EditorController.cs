@@ -71,7 +71,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("app-{fileId}/openedit")]
-    public async Task<Configuration<string>> OpenEditThirdPartyAsync(string fileId)
+    public async Task<ConfigurationDto<string>> OpenEditThirdPartyAsync(string fileId)
     {
         fileId = "app-" + fileId;
         var app = thirdPartySelector.GetAppByFileId(fileId);
@@ -103,7 +103,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
 
         configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
-        return configuration;
+        return  await configurationConverter.Convert(configuration, file);
     }
 }
 
