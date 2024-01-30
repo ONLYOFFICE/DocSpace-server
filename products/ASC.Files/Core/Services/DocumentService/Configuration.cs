@@ -192,21 +192,58 @@ public class DocumentConfig<T>(
 }
 
 [Transient]
-public class EditorConfiguration<T>
+public class EditorConfiguration<T>(
+    UserManager userManager,
+    AuthContext authContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    PluginsConfig pluginsConfig,
+    EmbeddedConfig embeddedConfig,
+    CustomizationConfig<T> customizationConfig,
+    FilesSettingsHelper filesSettingsHelper,
+    IDaoFactory daoFactory,
+    EntryManager entryManager,
+    DocumentServiceTrackerHelper documentServiceTrackerHelper, 
+    ExternalShare externalShare)
 {
-    private readonly AuthContext _authContext;
-    private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
-    private readonly IDaoFactory _daoFactory;
-    private readonly DocumentServiceTrackerHelper _documentServiceTrackerHelper;
-    private readonly EntryManager _entryManager;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FilesSettingsHelper _filesSettingsHelper;
-    private readonly FileUtility _fileUtility;
-    private readonly UserInfo _userInfo;
-    private readonly UserManager _userManager;
-    private readonly ExternalShare _externalShare;
+    public PluginsConfig Plugins { get; } = pluginsConfig;
+    public CustomizationConfig<T> Customization { get; } = customizationConfig;
+    public EncryptionKeysConfig EncryptionKeys { get; set; }
 
-    private EmbeddedConfig _embeddedConfig;
+    public string Lang => UserInfo.GetCulture().Name;
+
+    public string Mode => ModeWrite ? "edit" : "view";
+
+    public bool ModeWrite { get; set; }
+    
+    private UserInfo _userInfo;
+    private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
+    
+    private UserConfig user;
+    public UserConfig User
+    {
+        get
+        {
+            if (user != null)
+            {
+                return user;
+                
+            }
+            
+            if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                user = new UserConfig
+                {
+                    Id = UserInfo.Id.ToString(),
+                    Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper)
+                };
+            }
+
+            return user;
+        }
+    }
 
     public string GetCallbackUrl(string fileId)
     {
@@ -215,9 +252,9 @@ public class EditorConfiguration<T>
             return null;
         }
 
-        var callbackUrl = _documentServiceTrackerHelper.GetCallbackUrl(fileId);
+        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(fileId);
 
-        return _externalShare.GetUrlWithShare(callbackUrl);
+        return externalShare.GetUrlWithShare(callbackUrl);
     }
 
     public CoEditingConfig CoEditing =>
@@ -236,7 +273,7 @@ public class EditorConfiguration<T>
             return null;
         }
 
-        if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             return null;
         }
@@ -263,37 +300,25 @@ public class EditorConfiguration<T>
 
         Configuration<T>.DocType.TryGetValue(fileType, out var documentType);
 
-        return _baseCommonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath)
+        return baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath)
                + "?" + FilesLinkUtility.Action + "=create"
                + "&doctype=" + documentType
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
-
-    public CustomizationConfig<T> Customization { get; set; }
     
     public EmbeddedConfig GetEmbedded(EditorType editorType)
     {
-        return editorType == EditorType.Embedded ? _embeddedConfig : null;
+        return editorType == EditorType.Embedded ? embeddedConfig : null;
     }
-
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
-
-    public string Lang => _userInfo.GetCulture().Name;
-
-    public string Mode => ModeWrite ? "edit" : "view";
-
-    public bool ModeWrite { get; set; }
-
-    public PluginsConfig Plugins { get; set; }
-
+    
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
-        if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             yield break;
         }
 
-        if (!_filesSettingsHelper.RecentSection)
+        if (!filesSettingsHelper.RecentSection)
         {
             yield break;
         }
@@ -308,32 +333,32 @@ public class EditorConfiguration<T>
             _ => FilterType.FilesOnly
         };
 
-        var folderDao = _daoFactory.GetFolderDao<int>();
-        var files = (await _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false)).Cast<File<int>>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false)).Cast<File<int>>();
         foreach (var file in  files.Where(file => !Equals(fileId, file.Id)))
         {
             yield return new RecentConfig
             {
                 Folder = (await folderDao.GetFolderAsync(file.ParentId)).Title,
                 Title = file.Title,
-                Url = _baseCommonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
             };
         }
     }
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+            if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
             {
                 return null;
             }
 
-            if (!_filesSettingsHelper.TemplatesSection)
+            if (!filesSettingsHelper.TemplatesSection)
             {
                 return null;
             }
 
-            var extension = _fileUtility.GetInternalExtension(title).TrimStart('.');
+            var extension = fileUtility.GetInternalExtension(title).TrimStart('.');
             var filter = fileType switch
             {
                 FileType.Document => FilterType.DocumentsOnly,
@@ -344,61 +369,18 @@ public class EditorConfiguration<T>
                 _ => FilterType.FilesOnly
             };
 
-            var folderDao = _daoFactory.GetFolderDao<int>();
-            var fileDao = _daoFactory.GetFileDao<int>();
-            var files = await _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var fileDao = daoFactory.GetFileDao<int>();
+            var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
             var listTemplates = from file in files
                                 select
                                     new TemplatesConfig
                                     {
-                                        Image = _baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
+                                        Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
                                         Title = file.Title,
-                                        Url = _baseCommonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                                        Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
                                     };
             return listTemplates.ToList();
-    }
-
-    public UserConfig User { get; }
-
-    public EditorConfiguration(
-        UserManager userManager,
-        AuthContext authContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        FilesLinkUtility filesLinkUtility,
-        FileUtility fileUtility,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        PluginsConfig pluginsConfig,
-        EmbeddedConfig embeddedConfig,
-        CustomizationConfig<T> customizationConfig,
-        FilesSettingsHelper filesSettingsHelper,
-        IDaoFactory daoFactory,
-        EntryManager entryManager,
-        DocumentServiceTrackerHelper documentServiceTrackerHelper, 
-        ExternalShare externalShare)
-    {
-        _userManager = userManager;
-        _authContext = authContext;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _baseCommonLinkUtility = baseCommonLinkUtility;
-        Customization = customizationConfig;
-        _filesSettingsHelper = filesSettingsHelper;
-        _daoFactory = daoFactory;
-        _entryManager = entryManager;
-        _documentServiceTrackerHelper = documentServiceTrackerHelper;
-        _externalShare = externalShare;
-        Plugins = pluginsConfig;
-        _embeddedConfig = embeddedConfig;
-        _userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
-
-        if (!_userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-        {
-            User = new UserConfig
-            {
-                Id = _userInfo.Id.ToString(),
-                Name = _userInfo.DisplayUserName(false, displayUserSettingsHelper)
-            };
-        }
     }
 }
 
@@ -843,6 +825,8 @@ public class UserConfig
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    
+    public string CultureInfo { get; set; }
 }
 
 public static class ConfigurationFilesExtension
