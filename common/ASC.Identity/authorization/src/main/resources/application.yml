@@ -155,3 +155,6 @@ spring:
         - development
         - dev
         - d
+  output:
+    ansi:
+      enabled: always
