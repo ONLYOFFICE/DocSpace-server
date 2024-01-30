@@ -159,6 +159,9 @@ public class OAuth2AuthorizationServerConfiguration {
             Authentication principal = context.getPrincipal();
             var authority = principal.getAuthorities().stream().findFirst()
                     .orElse(null);
+            if (context.getAuthorization().getRegisteredClientId() != null)
+                context.getClaims().claim("cid", context.getAuthorization()
+                        .getRegisteredClientId());
             if (principal.getDetails() != null)
                 context.getClaims()
                         .subject(principal.getDetails().toString());
