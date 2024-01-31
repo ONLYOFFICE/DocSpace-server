@@ -196,17 +196,17 @@ public class ConfigurationConverter<T>(
 
         var result = new ConfigurationDto<T>
         {
-            File = await fileDtoHelper.GetAsync(file), 
             Document = await documentConfigConverter.Convert(source.Document, file),
             DocumentType = source.GetDocumentType(file),
             EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
-            Type = source.Type,
             ErrorMessage = source.Error
         };
         
         result.Token = documentServiceHelper.GetSignature(result);
+        result.File = await fileDtoHelper.GetAsync(file);
+        result.Type = source.Type;
         return result;
     }
 }
