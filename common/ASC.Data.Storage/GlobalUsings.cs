@@ -53,6 +53,7 @@ global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Core;
+global using ASC.Core.Users;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.Quota;
