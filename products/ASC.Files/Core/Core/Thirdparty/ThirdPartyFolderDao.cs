@@ -419,11 +419,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
         else
         {
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
-            {
-                await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
-            }
-
             newTitle = await dao.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
 
             //rename folder
@@ -438,11 +433,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
 
         var newId = dao.MakeId(dao.GetId(renamedThirdFolder));
+        
+        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            await daoSelector.RenameRoomProviderAsync(_providerInfo, newTitle, newId);
+        }
 
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }
