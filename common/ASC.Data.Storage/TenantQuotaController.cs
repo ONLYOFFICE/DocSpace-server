@@ -156,7 +156,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         {
             if (tenantQuotaSetting.Quota < CurrentSize + size)
             {
-                throw new TenantQuotaException(string.Format(maxTotalSizeChecker.Exception, CurrentSize + size));
+                throw new TenantQuotaException(maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
             }
         }
     }
