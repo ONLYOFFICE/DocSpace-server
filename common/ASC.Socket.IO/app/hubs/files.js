@@ -249,9 +249,9 @@
      filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
   }
 
- function changeUserQuotaFeatureValue({ userId, usedSpace, quotaLimit, room } = {}) {
-     logger.info(`changeUserQuotaFeatureValue in room ${room}`, { userId, usedSpace, quotaLimit });
-     filesIO.to(room).emit("s:change-user-quota-used-value", { userId, usedSpace, quotaLimit });
+  function changeUserQuotaFeatureValue({ userId, usedSpace, quotaLimit, room } = {}) {
+     logger.info(`changeUserQuotaFeatureValue user ${userId}, room ${room}`, { userId, usedSpace, quotaLimit });
+     filesIO.to(`${room}-${userId}`).emit("s:change-user-quota-used-value", { userId, usedSpace, quotaLimit });
   }
 
   return {
