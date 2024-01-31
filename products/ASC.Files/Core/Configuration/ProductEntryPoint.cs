@@ -176,7 +176,7 @@ public class ProductEntryPoint : Product
             }
 
             var obj = e.Description.LastOrDefault();
-            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
+            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(obj!);
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
@@ -202,7 +202,12 @@ public class ProductEntryPoint : Product
                     }
             }
 
-            var roomId = additionalInfo.RoomId;
+            var roomId = additionalInfo.RoomId.ValueKind switch
+            {
+                JsonValueKind.String when int.TryParse(additionalInfo.RoomId.GetString(), out var id) => id,
+                JsonValueKind.Number => additionalInfo.RoomId.GetInt32(),
+                _ => 0
+            };
 
             if (e.Action != (int)MessageAction.RoomCreated)
             {
@@ -233,6 +238,7 @@ public class ProductEntryPoint : Product
 
             result.Add(activityInfo);
         }
+        
         return result;
     }
 
