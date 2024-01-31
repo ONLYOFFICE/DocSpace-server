@@ -279,6 +279,17 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+    public Task<long> GetFileSizeAsync(File<string> file)
+    {
+        return default;
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();

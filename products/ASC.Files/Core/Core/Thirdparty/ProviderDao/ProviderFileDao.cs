@@ -195,6 +195,41 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
 
         return stream;
     }
+    
+    
+
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        var fileId = file.Id;
+        var selector = _selectorFactory.GetSelector(fileId);
+        file.Id = selector.ConvertId(fileId);
+
+        var fileDao = selector.GetFileDao(fileId);
+        var stream = await fileDao.GetFileStreamAsync(file, offset, length);
+        file.Id = fileId; //Restore id
+
+        return stream;
+    }
+
+
+    public async Task<long> GetFileSizeAsync(File<string> file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        var fileId = file.Id;
+        var selector = _selectorFactory.GetSelector(fileId);
+        file.Id = selector.ConvertId(fileId);
+
+        var fileDao = selector.GetFileDao(fileId);
+        var size = await fileDao.GetFileSizeAsync(file);
+        file.Id = fileId; //Restore id
+
+        return size;
+    }
+
+
 
     public async Task<bool> IsSupportedPreSignedUriAsync(File<string> file)
     {

@@ -107,6 +107,11 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         IsOpened = false;
     }
 
+    public long GetFileSize(DriveFile file)
+    {
+        return file.Size ?? 0;
+    }
+    
     public async Task<bool> CheckAccessAsync()
     {
         try

@@ -292,6 +292,18 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+
+    public Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = GetFileById(file.Id);
+        return Task.FromResult(fileToDownload.Length);
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();
