@@ -111,11 +111,8 @@ public class Configuration<T>(
         set => Document.Info.Type = value;
         get => Document.Info.Type;
     }
+    
     public string Error { get; set; }
-
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
-    public string Token { get; set; }
 
     /// <summary>Platform type</summary>
     /// <type>System.String, System</type>
@@ -825,8 +822,6 @@ public class UserConfig
 {
     public string Id { get; set; }
     public string Name { get; set; }
-    
-    public string CultureInfo { get; set; }
 }
 
 public static class ConfigurationFilesExtension

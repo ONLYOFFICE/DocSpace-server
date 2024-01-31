@@ -56,6 +56,8 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ConfigurationConverter<string> configurationConverter)
         : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter)
 {
+    private readonly ConfigurationConverter<string> _configurationConverter = configurationConverter;
+
     /// <summary>
     /// Opens a third-party file with the ID specified in the request for editing.
     /// </summary>
@@ -101,9 +103,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
             await _entryManager.MarkAsRecent(file);
         }
 
-        configuration.Token = _documentServiceHelper.GetSignature(configuration);
-
-        return  await configurationConverter.Convert(configuration, file);
+        return await _configurationConverter.Convert(configuration, file);
     }
 }
 
@@ -213,8 +213,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 };
             }
         }
-
-        configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
         var result = await configurationConverter.Convert(configuration, file);
         

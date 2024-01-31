@@ -184,7 +184,8 @@ public class ConfigurationConverter<T>(
     FilesLinkUtility filesLinkUtility, 
     FileDtoHelper fileDtoHelper,
     EditorConfigurationConverter<T> editorConfigurationConverter,
-    DocumentConfigConverter<T> documentConfigConverter)
+    DocumentConfigConverter<T> documentConfigConverter,
+    DocumentServiceHelper documentServiceHelper)
 {
     public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
     {   
@@ -201,11 +202,11 @@ public class ConfigurationConverter<T>(
             EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
-            Token = source.Token,
             Type = source.Type,
             ErrorMessage = source.Error
         };
-
+        
+        result.Token = documentServiceHelper.GetSignature(result);
         return result;
     }
 }
