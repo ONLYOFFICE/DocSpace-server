@@ -45,7 +45,7 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
     {
         var room = GetQuotaRoom();
 
-        await MakeRequest("change-user-quota-used-value", new { userId, usedSpace, quotaLimit });
+        await MakeRequest("change-user-quota-used-value", new { room, userId, usedSpace, quotaLimit });
     }
 
     public async Task ChangeQuotaFeatureValue(string featureId, object value)
