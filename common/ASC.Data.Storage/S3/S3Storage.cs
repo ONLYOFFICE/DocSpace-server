@@ -242,7 +242,7 @@ public class S3Storage(TempStream tempStream,
 
         if (length> 0 && (offset > 0 || offset == 0 && length != int.MaxValue))
         {
-            request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length);
+            request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }
 
         try

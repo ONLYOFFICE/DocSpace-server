@@ -159,7 +159,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         {
             options = new DownloadObjectOptions
             {
-                Range = new RangeHeaderValue(offset, offset + length)
+                Range = new RangeHeaderValue(offset, offset + length - 1)
             };
         }
         
