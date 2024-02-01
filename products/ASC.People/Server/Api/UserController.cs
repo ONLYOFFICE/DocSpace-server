@@ -64,7 +64,9 @@ public class UserController(ICache cache,
         UsersInRoomChecker usersInRoomChecker,
         IUrlShortener urlShortener,
         FileSecurityCommon fileSecurityCommon, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        QuotaSocketManager quotaSocketManager,
+        IQuotaService quotaService)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
 
@@ -1521,6 +1523,9 @@ public class UserController(ICache cache,
         foreach (var user in users)
         {
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(tenant.Id, user.Id.ToString(), userUsedSpace.ToString(), inDto.Quota.ToString());
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

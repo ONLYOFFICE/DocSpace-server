@@ -361,18 +361,7 @@ public abstract class BaseStorage(TempStream tempStream,
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
             var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
-
-            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            if (quotaUserSettings.EnableQuota && ownerId != Guid.Empty && ownerId != Core.Configuration.Constants.CoreSystem.ID)
-            {
-                var currentTenant = await tenantManager.GetCurrentTenantAsync(false);
-                var user = await userManager.GetUsersAsync(ownerId);
-                var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-                var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-
-                _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(currentTenant.Id, ownerId.ToString(), userUsedSpace.ToString(), userQuotaLimit.ToString());
-            }
+            await NotifyChangeUserQuota(ownerId);
         }
     }
 
@@ -387,6 +376,22 @@ public abstract class BaseStorage(TempStream tempStream,
             await QuotaController.QuotaUsedDeleteAsync(Modulename, domain, DataList.GetData(domain), size, ownerId);
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            await NotifyChangeUserQuota(ownerId);
+        }
+    }
+
+    private async Task NotifyChangeUserQuota(Guid ownerId)
+    {
+        var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        if (quotaUserSettings.EnableQuota && ownerId != Guid.Empty && ownerId != Core.Configuration.Constants.CoreSystem.ID)
+        {
+            var currentTenant = await tenantManager.GetCurrentTenantAsync(false);
+            var user = await userManager.GetUsersAsync(ownerId);
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+
+            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(currentTenant.Id, ownerId.ToString(), userUsedSpace.ToString(), userQuotaLimit.ToString());
         }
     }
 
