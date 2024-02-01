@@ -38,7 +38,8 @@ public abstract class BaseStorage(TempStream tempStream,
         QuotaSocketManager quotaSocketManager,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        UserManager userManager)
+        UserManager userManager,
+        CustomQuota customQuota)
     : IDataStore
 {
     public IQuotaController QuotaController { get; set; }
@@ -391,7 +392,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(currentTenant.Id, ownerId.ToString(), userUsedSpace.ToString(), userQuotaLimit.ToString());
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), userQuotaLimit.ToString(), new List<Guid>() { user.Id });
         }
     }
 

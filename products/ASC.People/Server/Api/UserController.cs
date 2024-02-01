@@ -66,7 +66,8 @@ public class UserController(ICache cache,
         FileSecurityCommon fileSecurityCommon, 
         IDistributedLockProvider distributedLockProvider,
         QuotaSocketManager quotaSocketManager,
-        IQuotaService quotaService)
+        IQuotaService quotaService,
+        CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
 
@@ -1525,7 +1526,7 @@ public class UserController(ICache cache,
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(tenant.Id, user.Id.ToString(), userUsedSpace.ToString(), inDto.Quota.ToString());
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), inDto.Quota.ToString(), new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
@@ -1560,7 +1561,7 @@ public class UserController(ICache cache,
             var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
             await settingsManager.SaveAsync(defaulSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(tenant.Id, user.Id.ToString(), userUsedSpace.ToString(), defaulSettings.UserQuota.ToString());
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), defaulSettings.UserQuota.ToString(), new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

@@ -64,7 +64,9 @@ public class SettingsController(MessageService messageService,
         IMapper mapper,
         UserFormatter userFormatter, 
         IDistributedLockProvider distributedLockProvider,
-        UsersQuotaSyncOperation usersQuotaSyncOperation)
+        UsersQuotaSyncOperation usersQuotaSyncOperation,
+        CustomQuota customQuota,
+        QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
 
@@ -378,6 +380,14 @@ public class SettingsController(MessageService messageService,
             tenantQuotaSetting.Quota = -1;
         }
         await settingsManager.SaveAsync(tenantQuotaSetting, inDto.TenantId);
+
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(inDto.TenantId))
+           .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+           .Sum(r => r.Counter);
+        var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
+
+        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, usedSize.ToString(), tenantQuotaSetting.Quota.ToString(), admins);
+
         return tenantQuotaSetting;
     }
 

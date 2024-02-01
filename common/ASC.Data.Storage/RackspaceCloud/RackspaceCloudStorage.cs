@@ -42,8 +42,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         QuotaSocketManager quotaSocketManager,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        UserManager userManager)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager)
+        UserManager userManager,
+        CustomQuota customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
     public TempPath TempPath { get; } = tempPath;
