@@ -310,10 +310,14 @@ public abstract class BaseStartup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();                                            
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
             });
         }
