@@ -191,5 +191,6 @@ static file class Queries
     public static readonly Func<MessagesContext, int, string, string, Task<DbAuditEvent>> AuditEventsAsync =
         EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, string target, string description) =>
-                ctx.AuditEvents.FirstOrDefault(a => a.TenantId == tenantId && a.Target == target && a.DescriptionRaw == description));
+                ctx.AuditEvents.FirstOrDefault(a => 
+                    a.TenantId == tenantId && a.Action == (int)MessageAction.RoomInviteLinkUsed && a.Target == target && a.DescriptionRaw == description));
 }
