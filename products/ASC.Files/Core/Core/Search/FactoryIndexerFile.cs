@@ -94,7 +94,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
         {
             var j = 0;
             var tasks = new List<Task>();
-
+            var now = DateTime.UtcNow;
+            
             await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (_settings.Threads == 1)
@@ -103,7 +104,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
                 }
                 else
                 {
-                    tasks.Add(IndexAsync(data));
+                    tasks.Add(Index(data));
                     j++;
                     if (j >= _settings.Threads)
                     {
@@ -118,6 +119,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             {
                 Task.WaitAll(tasks.ToArray());
             }
+
+            await _indexer.OnComplete(now);
         }
         catch (Exception e)
         {

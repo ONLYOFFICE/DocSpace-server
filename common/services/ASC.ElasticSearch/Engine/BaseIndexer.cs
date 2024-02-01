@@ -99,7 +99,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {        
-        var now = DateTime.UtcNow;
         DateTime lastIndexed;
 
         await using (var webStudioDbContext = await _dbContextFactory.CreateDbContextAsync())
@@ -123,13 +122,16 @@ public class BaseIndexer<T> where T : class, ISearchItem
         {
             yield return getData(ids[i], ids[i + 1], lastIndexed);
         }
+    }
 
+    public async Task OnComplete(DateTime lastModified)
+    {
         await using (var webStudioDbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
             {
                 IndexName = Wrapper.IndexName, 
-                LastModified = now
+                LastModified = lastModified
             });
 
             await webStudioDbContext.SaveChangesAsync();
@@ -137,8 +139,8 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
         _logger.DebugIndexCompleted(Wrapper.IndexName);
     }
-
-    public async Task ReIndrexAsync()
+    
+    public async Task ReIndexAsync()
     {
         await ClearAsync();
     }
