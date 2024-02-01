@@ -1550,14 +1550,17 @@ public class UserController(ICache cache,
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .ToListAsync();
 
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         foreach (var user in users)
         {
             if (_userManager.IsSystemUser(user.Id))
             {
                 throw new SecurityException();
             }
-
-            await settingsManager.SaveAsync(settingsManager.GetDefault<UserQuotaSettings>(), user);
+            var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
+            await settingsManager.SaveAsync(defaulSettings, user);
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            _ = quotaSocketManager.ChangeUserQuotaUsedValueAsync(tenant.Id, user.Id.ToString(), userUsedSpace.ToString(), defaulSettings.UserQuota.ToString());
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
