@@ -199,7 +199,7 @@ public class NotifyEngine(Context context,
         catch (Exception ex)
         {
             responses.Add(new SendResponse(request.NotifyAction, null, request.Recipient, SendResult.Impossible));
-            _logger.ErrorPrepare(ex);
+            _logger.ErrorPrepare(ex, request.NotifyAction, request.Recipient);
         }
 
         if (request._senderNames is { Length: > 0 })

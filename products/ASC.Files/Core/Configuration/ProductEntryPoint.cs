@@ -121,10 +121,13 @@ public class ProductEntryPoint : Product
             : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
     }
 
-    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
+    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType, CultureInfo cultureInfo)
     {
         IEnumerable<AuditEvent> events;
         _tenantManager.SetCurrentTenant(tenant);
+
+        CultureInfo.CurrentCulture = cultureInfo;
+        CultureInfo.CurrentUICulture = cultureInfo;
 
         if (whatsNewType == WhatsNewType.RoomsActivity)
         {

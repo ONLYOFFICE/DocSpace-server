@@ -389,7 +389,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 {
                                     var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                                     
-                                    context.Response.Redirect(externalShare.GetUrlWithShare(url), false);
+                                    context.Response.Redirect(url, false);
 
                                     return;
                                 }
@@ -417,7 +417,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                             
-                            context.Response.Redirect(externalShare.GetUrlWithShare(url), true);
+                            context.Response.Redirect(url, true);
 
                             return;
                         }

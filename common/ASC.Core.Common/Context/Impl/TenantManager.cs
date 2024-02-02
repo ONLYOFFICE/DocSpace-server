@@ -294,9 +294,9 @@ public class TenantManager
         return tenant;
     }
 
-    public async Task<Tenant> GetCurrentTenantAsync()
+    public Task<Tenant> GetCurrentTenantAsync()
     {
-        return await GetCurrentTenantAsync(true);
+        return GetCurrentTenantAsync(true);
     }
 
     public async Task<int> GetCurrentTenantIdAsync()
@@ -304,9 +304,9 @@ public class TenantManager
         return (await GetCurrentTenantAsync(true)).Id;
     }
 
-    public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
+    public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
     {
-        return await GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
+        return GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
     
     public Tenant GetCurrentTenant(bool throwIfNotFound = true)

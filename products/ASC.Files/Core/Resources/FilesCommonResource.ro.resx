@@ -393,7 +393,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
     <value>Documentul PDF spre completare este gata. A fost salvat în {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Copia fișierului OFORM a fost creată în folderul {0}. Completați formularul și încărcați rezultatul în formatul PDF sau DOCX.</value>
+    <value>Copia fișierului PDF a fost creată în folderul {0}. Completați formularul și încărcați rezultatul în formatul PDF sau DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Nu mai este un fișier schiță pentru completarea formularului.</value>

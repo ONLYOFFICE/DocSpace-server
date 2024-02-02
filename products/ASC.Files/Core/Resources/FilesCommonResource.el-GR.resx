@@ -405,7 +405,7 @@
     <value>Το έγγραφο PDF με δυνατότητα συμπλήρωσης είναι έτοιμο. Έχει αποθηκευτεί στο {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Το αντίγραφο OFORM δημιουργείται στον φάκελο {0}. Συμπληρώστε τη φόρμα και κατεβάστε το αποτέλεσμα ως αρχείο PDF ή DOCX.</value>
+    <value>Το αντίγραφο PDF δημιουργείται στον φάκελο {0}. Συμπληρώστε τη φόρμα και κατεβάστε το αποτέλεσμα ως αρχείο PDF ή DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Το αρχείο δεν αποτελεί πλέον προσχέδιο για τη συμπλήρωση της φόρμας.</value>

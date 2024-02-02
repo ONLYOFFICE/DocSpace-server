@@ -105,7 +105,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
             return EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var visitMessage = await GetLinkVisitMessageAsync(email, key);
+        var visitMessage = await GetLinkVisitMessageAsync(user.TenantId, email, key);
 
         if (visitMessage == null)
         {
@@ -126,14 +126,14 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
         return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
-    private async Task<DbAuditEvent> GetLinkVisitMessageAsync(string email, string key)
+    private async Task<DbAuditEvent> GetLinkVisitMessageAsync(int tenantId, string email, string key)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var target = messageTarget.Create(email);
         var description = JsonSerializer.Serialize(new[] { key });
 
-        var message = await Queries.AuditEventsAsync(context, target.ToString(), description);
+        var message = await Queries.AuditEventsAsync(context, tenantId, target.ToString(), description);
 
         return message;
     }
@@ -163,8 +163,9 @@ public class LinkValidationResult
 
 static file class Queries
 {
-    public static readonly Func<MessagesContext, string, string, Task<DbAuditEvent>> AuditEventsAsync =
+    public static readonly Func<MessagesContext, int, string, string, Task<DbAuditEvent>> AuditEventsAsync =
         EF.CompileAsyncQuery(
-            (MessagesContext ctx, string target, string description) =>
-                ctx.AuditEvents.FirstOrDefault(a => a.Target == target && a.DescriptionRaw == description));
+            (MessagesContext ctx, int tenantId, string target, string description) =>
+                ctx.AuditEvents.FirstOrDefault(a => 
+                    a.TenantId == tenantId && a.Action == (int)MessageAction.RoomInviteLinkUsed && a.Target == target && a.DescriptionRaw == description));
 }
