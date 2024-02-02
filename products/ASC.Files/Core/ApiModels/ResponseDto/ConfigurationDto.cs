@@ -291,7 +291,7 @@ public class LogoConfigConverter<T>
 
         var result = new LogoConfigDto
         {
-            Image = await source.GetImage(configuration.Document.Title, configuration.EditorType),
+            Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
             Url = source.Url
