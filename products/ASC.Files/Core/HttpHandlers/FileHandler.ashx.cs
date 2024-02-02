@@ -219,7 +219,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     readStream.Seek(offset, SeekOrigin.Begin);
                 }
 
-                await SendStreamByChunksAsync(context, length, filename, readStream, false);
+                await SendStreamByChunksAsync(context, length, filename, readStream);
             }
 
             await context.Response.Body.FlushAsync();
@@ -393,7 +393,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 {
                                     var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                                     
-                                    context.Response.Redirect(externalShare.GetUrlWithShare(url), false);
+                                    context.Response.Redirect(url, false);
 
                                     return;
                                 }
@@ -420,7 +420,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             }
                         }
 
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream);
                     }
                     else
                     {
@@ -428,7 +428,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                             
-                            context.Response.Redirect(externalShare.GetUrlWithShare(url), true);
+                            context.Response.Redirect(url, true);
 
                             return;
                         }
@@ -443,7 +443,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             fileStream.Seek(offset, SeekOrigin.Begin);
                         }
 
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream);
                     }
                 }
                 catch (ThreadAbortException tae)
@@ -539,7 +539,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         return length;
     }
 
-    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream, bool flushed)
+    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream)
     {
         context.Response.Headers.Append("Connection", "Keep-Alive");
         context.Response.ContentLength = toRead;
@@ -548,6 +548,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         var bufferSize = Convert.ToInt32(Math.Min(32 * 1024, toRead)); // 32KB
         var buffer = new byte[bufferSize];
+        var flushed = false;
         while (toRead > 0)
         {
             var length = await fileStream.ReadAsync(buffer, 0, bufferSize);
@@ -710,15 +711,17 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
-            context.Response.ContentType = MimeMapping.GetMimeMapping(file.Title);
-
             await using var stream = await fileDao.GetFileStreamAsync(file);
-            context.Response.Headers.Append("Content-Length",
-                stream.CanSeek
-                ? stream.Length.ToString(CultureInfo.InvariantCulture)
-                : file.ContentLength.ToString(CultureInfo.InvariantCulture));
-            await stream.CopyToAsync(context.Response.Body);
+
+            long offset = 0;
+            var length = stream.Length;
+            if (stream.CanSeek)
+            {
+                length = ProcessRangeHeader(context, stream.Length, ref offset);
+                stream.Seek(offset, SeekOrigin.Begin);
+        }
+
+            await SendStreamByChunksAsync(context, length, file.Title, stream);
         }
         catch (Exception ex)
         {

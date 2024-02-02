@@ -219,7 +219,10 @@ public class S3Storage(TempStream tempStream,
                       DateTime.UtcNow.Add(expire));
         }
 
-        return Task.FromResult(new Uri(signedUrl));
+
+        var signedUri = new Uri(signedUrl, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = true });
+
+        return Task.FromResult(signedUri);
     }
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path)

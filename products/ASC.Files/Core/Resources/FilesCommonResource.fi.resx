@@ -404,7 +404,7 @@
     <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
+    <value>PDF-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Tiedosto ei ole enää luonnos lomakkeen täyttämiseksi.</value>

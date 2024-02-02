@@ -1662,21 +1662,16 @@ internal class FileDao(
 
     protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile)
     {
-        if (!await factoryIndexer.CanIndexByContentAsync(dbFile))
-        {
             dbFile.Document = new Document
             {
                 Data = Convert.ToBase64String(Encoding.UTF8.GetBytes(""))
             };
 
+        if (!await factoryIndexer.CanIndexByContentAsync(dbFile))
+        {
             return dbFile;
         }
 
-        return await InternalInitDocumentAsync(dbFile);
-    }
-
-    private async Task<DbFile> InternalInitDocumentAsync(DbFile dbFile)
-    {
         var file = _serviceProvider.GetService<File<int>>();
         file.Id = dbFile.Id;
         file.Title = dbFile.Title;
