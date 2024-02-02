@@ -299,10 +299,10 @@
     <value>File creato nella cartella "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Il documento compilabile OFORM è pronto. È salvato in {0}</value>
+    <value>Il documento compilabile PDF è pronto. È salvato in {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>La copia di OFORM è creata nella cartella {0}. Compila il modulo e scarica il risultato come file PDF o DOCX.</value>
+    <value>La copia di PDF è creata nella cartella {0}. Compila il modulo e scarica il risultato come file PDF o DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Il file non è più una bozza da compilare il modulo.</value>
