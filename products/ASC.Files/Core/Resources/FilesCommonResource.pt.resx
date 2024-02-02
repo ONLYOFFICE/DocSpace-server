@@ -402,10 +402,10 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
     <value>Ficheiro criado na pasta "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>O documento preenchível OFORM está pronto. Está guardado no ficheiro {0}</value>
+    <value>O documento preenchível PDF está pronto. Está guardado no ficheiro {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>A cópia OFORM foi criada na pasta {0}. Preencha o formulário e descarregue o resultado como ficheiro PDF ou DOCX.</value>
+    <value>A cópia PDF foi criada na pasta {0}. Preencha o formulário e descarregue o resultado como ficheiro PDF ou DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>O ficheiro já não é um rascunho para preencher o formulário.</value>

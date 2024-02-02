@@ -309,10 +309,10 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
     <value>전송 작업 중 오류가 발생했습니다</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM 사본이 {0} 폴더에 생성되었습니다. 양식을 작성하고 결과를 PDF 또는 DOCX 파일로 다운로드하세요.</value>
+    <value>PDF 사본이 {0} 폴더에 생성되었습니다. 양식을 작성하고 결과를 PDF 또는 DOCX 파일로 다운로드하세요.</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>텍스트를 입력할 수 있는 OFORM 문서가 준비되었습니다. {0}에 저장되었습니다</value>
+    <value>텍스트를 입력할 수 있는 PDF 문서가 준비되었습니다. {0}에 저장되었습니다</value>
   </data>
   <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
     <value>저장하려고 시도할 때 파일이 손상되었습니다</value>

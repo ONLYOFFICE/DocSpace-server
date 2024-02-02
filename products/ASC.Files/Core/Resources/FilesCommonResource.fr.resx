@@ -299,10 +299,10 @@
     <value>Fichier créé dans le dossier "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Le document OFORM remplissable est prêt. Il est enregistré dans le dossier {0}</value>
+    <value>Le document PDF remplissable est prêt. Il est enregistré dans le dossier {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>La copie du fichier OFORM est créée dans le dossier {0}. Veuillez remplir le formulaire et télécharger le résultat sous forme de fichier PDF ou DOCX.</value>
+    <value>La copie du fichier PDF est créée dans le dossier {0}. Veuillez remplir le formulaire et télécharger le résultat sous forme de fichier PDF ou DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Le dossier n'est plus un brouillon pour remplir le formulaire.</value>

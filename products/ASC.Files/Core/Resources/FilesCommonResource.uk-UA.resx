@@ -401,10 +401,10 @@
     <value>Пошук у вмісті документів</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Документ OFORM для заповнення готовий. Його збережено до {0}</value>
+    <value>Документ PDF для заповнення готовий. Його збережено до {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Копія OFORM створюється в папці {0}. Заповніть форму й завантажте результат у форматі PDF або DOCX.</value>
+    <value>Копія PDF створюється в папці {0}. Заповніть форму й завантажте результат у форматі PDF або DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Файл більше не є чернеткою для заповнення форми.</value>

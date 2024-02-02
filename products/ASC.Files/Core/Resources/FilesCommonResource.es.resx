@@ -299,10 +299,10 @@
     <value>Archivo creado en la carpeta "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>El documento OFORM rellenable está listo. Se guarda en la carpeta {0}</value>
+    <value>El documento PDF rellenable está listo. Se guarda en la carpeta {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>La copia OFORM se ha creado en la carpeta {0}. Rellene el formulario y descargue el resultado como archivo PDF o DOCX.</value>
+    <value>La copia PDF se ha creado en la carpeta {0}. Rellene el formulario y descargue el resultado como archivo PDF o DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>El archivo ya no es un borrador para rellenar el formulario.</value>
