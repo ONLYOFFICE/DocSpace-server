@@ -150,7 +150,9 @@ public class StudioNotifySource : NotifySource
                 Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
-                Actions.SaasOwnerPaymentWarningGracePeriodExpired
+                Actions.SaasOwnerPaymentWarningGracePeriodExpired,
+
+                Actions.ZoomWelcome
             );
     }
 

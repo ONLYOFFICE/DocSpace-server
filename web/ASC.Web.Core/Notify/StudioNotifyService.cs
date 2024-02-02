@@ -976,6 +976,33 @@ public class StudioNotifyService
 
     #endregion
 
+
+    #region Zoom
+
+    public async Task SendZoomWelcomeAsync(UserInfo u)
+    {
+        try
+        {
+            var culture = GetCulture(u);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await _client.SendNoticeToAsync(
+                Actions.ZoomWelcome,
+                await _studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
+                new[] { EMailSenderName },
+                new TagValue(CommonTags.Culture, culture.Name),
+                new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
+        }
+        catch (Exception error)
+        {
+            _log.ErrorSendCongratulations(error);
+        }
+    }
+
+    #endregion
+
     private CultureInfo GetCulture(UserInfo user)
     {
         CultureInfo culture = null;
