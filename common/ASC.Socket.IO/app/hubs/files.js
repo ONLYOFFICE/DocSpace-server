@@ -249,9 +249,20 @@
      filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
   }
 
-  function changeUserQuotaFeatureValue({ userId, usedSpace, quotaLimit, room } = {}) {
-     logger.info(`changeUserQuotaFeatureValue user ${userId}, room ${room}`, { userId, usedSpace, quotaLimit });
-     filesIO.to(`${room}-${userId}`).emit("s:change-user-quota-used-value", { userId, usedSpace, quotaLimit });
+  function changeUserQuotaFeatureValue({ customQuotaFeature, usedSpace, quotaLimit, userIds, room } = {}) {
+
+    logger.info(`changeUserQuotaFeatureValue feature ${customQuotaFeature}, room ${room}`, { customQuotaFeature, usedSpace, quotaLimit });
+
+    if (userIds) {
+      userIds.forEach(userId => changeCustomQuota(`${room}-${userId}`, customQuotaFeature, usedSpace, quotaLimit));
+    }
+    else {
+      modifyFolder(room, customQuotaFeature, usedSpace, quotaLimit);
+    }
+  }
+
+  function changeCustomQuota(room, customQuotaFeature, usedSpace, quotaLimit) {
+    filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, usedSpace, quotaLimit });
   }
 
   return {
