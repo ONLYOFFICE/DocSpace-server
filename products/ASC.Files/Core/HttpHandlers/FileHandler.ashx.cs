@@ -213,7 +213,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
-            var stream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path, offset, length);
+            await using var stream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path, offset, length);
             
             await SendStreamByChunksAsync(context, length, offset, fullLength, filename, stream);
             await context.Response.Body.FlushAsync();

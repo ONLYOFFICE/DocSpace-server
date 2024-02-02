@@ -229,7 +229,7 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
-        return await GetReadStreamAsync(domain, path, offset, int.MaxValue);
+        return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
     }
 
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
@@ -240,7 +240,7 @@ public class S3Storage(TempStream tempStream,
             Key = MakePath(domain, path)
         };
 
-        if (length> 0 && (offset > 0 || offset == 0 && length != int.MaxValue))
+        if (length> 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
             request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }

@@ -183,21 +183,9 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     /// <returns>Stream</returns>
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset)
     {
-        ArgumentNullException.ThrowIfNull(file);
-
-        var fileId = file.Id;
-        var selector = _selectorFactory.GetSelector(fileId);
-        file.Id = selector.ConvertId(fileId);
-
-        var fileDao = selector.GetFileDao(fileId);
-        var stream = await fileDao.GetFileStreamAsync(file, offset);
-        file.Id = fileId; //Restore id
-
-        return stream;
+        return await GetFileStreamAsync(file, offset, long.MaxValue);
     }
     
-    
-
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
     {
         ArgumentNullException.ThrowIfNull(file);

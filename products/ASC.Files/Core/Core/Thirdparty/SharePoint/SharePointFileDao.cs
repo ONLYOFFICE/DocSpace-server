@@ -285,9 +285,15 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return await GetFileStreamAsync(file, offset);
     }
 
-    public Task<long> GetFileSizeAsync(File<string> file)
+    public async Task<long> GetFileSizeAsync(File<string> file)
     {
-        return default;
+        var fileToDownload = await SharePointProviderInfo.GetFileByIdAsync(file.Id);
+        if (fileToDownload == null)
+        {
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
     }
     
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
