@@ -728,16 +728,12 @@ public class GobackConfig
 [Transient]
 public class LogoConfig<T>(
     CommonLinkUtility commonLinkUtility,
-    TenantLogoHelper tenantLogoHelper,
-    FileUtility fileUtility)
+    TenantLogoHelper tenantLogoHelper)
 {
 
-    public async Task<string> GetImage(string title, EditorType editorType)
+    public async Task<string> GetImage(EditorType editorType)
     {
-        var fillingForm = fileUtility.CanWebRestrictedEditing(title);
-
         return editorType == EditorType.Embedded
-               || fillingForm
                 ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
                 : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
     }
