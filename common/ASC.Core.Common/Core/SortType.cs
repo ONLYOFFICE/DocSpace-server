@@ -32,3 +32,12 @@ public enum GroupSortType
     Title,
     Manager
 }
+
+[EnumExtensions]
+public enum UserSortType
+{
+    FirstName,
+    Type,
+    Email,
+    Department
+}

@@ -328,7 +328,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         string text,
         bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
@@ -344,43 +344,51 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
 
-        var orderedQuery = q.OrderBy(r => r.ActivationStatus);
-
-        if (!string.IsNullOrEmpty(sortBy))
+        switch (sortBy)
         {
-            if (sortBy == "type")
-            {
-                var q1 = (from user in q
-                    join userGroup in userDbContext.UserGroups.Where(g =>
-                        !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
-                                       g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                    from @group in joinedGroup.DefaultIfEmpty()
-                    select new UserWithGroup { User = user, Group = @group });
-
-                Expression<Func<UserWithGroup, int>> orderByUserType = u => 
-                    u.User.Id == ownerId ? 0 :
-                    u.Group == null ? 2 : 
-                    u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
-                    u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
-                
-                q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
-            }
-            else if (sortBy == "department")
-            {
-                var q1 = q.Select(u => new
+            case UserSortType.Type:
                 {
-                    user = u,
-                    groupsCount = userDbContext.UserGroups.Count(g =>
-                        g.TenantId == tenant && g.Userid == u.Id && !g.Removed && g.RefType == UserGroupRefType.Contains && 
-                        !Constants.SystemGroups.Select(sg => sg.ID).Contains(g.UserGroupId))
-                });
+                    var q1 = (from user in q
+                        join userGroup in userDbContext.UserGroups.Where(g =>
+                            !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
+                                           g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        from @group in joinedGroup.DefaultIfEmpty()
+                        select new UserWithGroup { User = user, Group = @group });
 
-                q = (sortOrderAsc ? q1.OrderBy(r => r.groupsCount) : q1.OrderByDescending(r => r.groupsCount)).Select(r => r.user);
-            }
-            else
-            {
-                q = orderedQuery.ThenBy(sortBy, sortOrderAsc);
-            }
+                    Expression<Func<UserWithGroup, int>> orderByUserType = u => 
+                        u.User.Id == ownerId ? 0 :
+                        u.Group == null ? 2 : 
+                        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+                        u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
+                
+                    q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
+                    break;
+                }
+            case UserSortType.Department:
+                {
+                    var q1 = q.Select(u => new
+                    {
+                        user = u,
+                        groupsCount = userDbContext.UserGroups.Count(g =>
+                            g.TenantId == tenant && g.Userid == u.Id && !g.Removed && g.RefType == UserGroupRefType.Contains && 
+                            !Constants.SystemGroups.Select(sg => sg.ID).Contains(g.UserGroupId))
+                    });
+
+                    q = (sortOrderAsc 
+                            ? q1.OrderBy(r => r.groupsCount).ThenBy(r => r.user.FirstName) 
+                            : q1.OrderByDescending(r => r.groupsCount)).ThenByDescending(r => r.user.FirstName)
+                        .Select(r => r.user);
+                    break;
+                }
+            case UserSortType.Email:
+                q = (sortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
+                break;
+            case UserSortType.FirstName:
+            default:
+                q = sortOrderAsc 
+                    ? q.OrderBy(r => r.ActivationStatus).ThenBy(u => u.FirstName) 
+                    : q.OrderBy(r => r.ActivationStatus).ThenByDescending(u => u.FirstName);
+                break;
         }
 
         if (offset > 0)
@@ -394,15 +402,6 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             yield return mapper.Map<User, UserInfo>(user);
         }
-    }
-
-    public IQueryable<UserInfo> GetUsers(int tenant, out int total)
-    {
-        using var userDbContext = dbContextFactory.CreateDbContext();
-        total = userDbContext.Users.Count(r => r.TenantId == tenant);
-
-        return GetUserQuery(userDbContext, tenant)
-            .ProjectTo<UserInfo>(mapper.ConfigurationProvider);
     }
 
     public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)

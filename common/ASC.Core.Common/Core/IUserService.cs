@@ -53,7 +53,7 @@ public interface IUserService
         string text,
         bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset);
