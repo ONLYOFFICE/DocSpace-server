@@ -885,9 +885,9 @@ public class UserManager
 
     #region Groups
 
-    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, bool sortOrderAsc, int offset = 0, int count = -1)
+    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
     {
-        return _userService.GetGroupsAsync(Tenant.Id, text, sortOrderAsc, offset, count)
+        return _userService.GetGroupsAsync(Tenant.Id, text, sortBy, sortOrderAsc, offset, count)
             .Select(group => new GroupInfo(group.CategoryId)
             {
                 ID = group.Id,

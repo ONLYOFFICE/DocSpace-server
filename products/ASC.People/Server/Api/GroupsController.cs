@@ -63,11 +63,16 @@ public class GroupController(UserManager userManager,
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
 
+        if (!GroupSortTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        {
+            sortBy = GroupSortType.Title;
+        }
+
         var totalCount = await userManager.GetGroupsCountAsync(text);
 
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
-        await foreach (var g in userManager.GetGroupsAsync(text, !apiContext.SortDescending, offset, count))
+        await foreach (var g in userManager.GetGroupsAsync(text, sortBy, !apiContext.SortDescending, offset, count))
         {
             yield return await groupFullDtoHelper.Get(g, false);
         }

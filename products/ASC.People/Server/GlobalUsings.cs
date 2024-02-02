@@ -41,6 +41,7 @@ global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Core.Common.Core;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
