@@ -248,9 +248,22 @@ public class Global
 [Scope]
 public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager)
 {
+    private readonly IDictionary<int, IDataStore> _currentTenantStore = new Dictionary<int, IDataStore>();
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
-        return await storageFactory.GetStorageAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1, FileConstant.StorageModule);
+        if (currentTenant)
+        {
+            var currentTenantId = await tenantManager.GetCurrentTenantIdAsync();
+            if (!_currentTenantStore.TryGetValue(currentTenantId, out var result))
+            {
+                result = await storageFactory.GetStorageAsync(currentTenantId, FileConstant.StorageModule);
+                _currentTenantStore.Add(currentTenantId, result);
+            }
+
+            return result;
+        }
+        
+        return await storageFactory.GetStorageAsync(-1, FileConstant.StorageModule);
     }
 
 
