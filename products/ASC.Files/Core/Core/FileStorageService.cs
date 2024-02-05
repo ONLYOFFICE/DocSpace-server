@@ -418,7 +418,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         return room;
-    }
+        }
     }
 
     private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
@@ -2689,7 +2689,7 @@ public class FileStorageService //: IFileStorageService
                 .FirstOrDefaultAsync();
             if (parentLink == null)
             {
-                return null;
+                throw new ItemNotFoundException();
             }
             
             var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id);
