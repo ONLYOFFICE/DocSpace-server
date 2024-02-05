@@ -67,6 +67,10 @@ public class GeolocationHelper
     {
         try
         {
+            if (string.IsNullOrEmpty(ip))
+            {
+                return new[] { string.Empty, string.Empty };
+            }
             var location = await GetIPGeolocationAsync(IPAddress.Parse(ip));
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
