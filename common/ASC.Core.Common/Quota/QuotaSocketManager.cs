@@ -41,11 +41,11 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
-    public async Task ChangeCustomQuotaUsedValueAsync(int tenantId, string customQuotaFeature, string usedSpace, object quotaLimit, List<Guid> userIds)
+    public async Task ChangeCustomQuotaUsedValueAsync(int tenantId, string customQuotaFeature, bool enableQuota, string usedSpace, object quotaLimit, List<Guid> userIds)
     {
         var room = $"{tenantId}-QUOTA";
 
-        await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, usedSpace, quotaLimit, userIds });
+        await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
     }
 
     public async Task ChangeQuotaFeatureValue(string featureId, object value)

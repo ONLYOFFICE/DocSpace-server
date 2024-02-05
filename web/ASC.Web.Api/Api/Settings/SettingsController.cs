@@ -386,7 +386,7 @@ public class SettingsController(MessageService messageService,
            .Sum(r => r.Counter);
         var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
 
-        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, usedSize.ToString(), tenantQuotaSetting.Quota.ToString(), admins);
+        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize.ToString(), tenantQuotaSetting.Quota.ToString(), admins);
 
         return tenantQuotaSetting;
     }
