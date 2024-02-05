@@ -225,7 +225,9 @@ internal abstract class SecurityBaseDao<T>(
 
         if (!string.IsNullOrEmpty(text))
         {
-            usersQuery = usersQuery.Where(u => u.FirstName.Contains(text) || u.LastName.Contains(text) || u.Email.Contains(text));
+            text = GetSearchText(text);
+            
+            usersQuery = usersQuery.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
         }
 
         var q = from user in usersQuery
@@ -270,13 +272,15 @@ internal abstract class SecurityBaseDao<T>(
         var q = filesDbContext.UserGroup.Where(g =>
             g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy);
 
-        if (!string.IsNullOrEmpty(text))
+        if (string.IsNullOrEmpty(text))
         {
-            return await q.Join(filesDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
-                .Where(u => u.FirstName.Contains(text) || u.LastName.Contains(text) || u.Email.Contains(text)).CountAsync();
+            return await q.CountAsync();
         }
 
-        return await q.CountAsync();
+        text = GetSearchText(text);
+            
+        return await q.Join(filesDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
+            .Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text)).CountAsync();
     }
 
     public async Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
@@ -285,6 +289,8 @@ internal abstract class SecurityBaseDao<T>(
         {
             return 0;
         }
+
+        text = GetSearchText(text);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -302,11 +308,11 @@ internal abstract class SecurityBaseDao<T>(
                 {
                     var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                             (security, user) => new { security, user })
-                        .Where(r => r.user.FirstName.Contains(text) || r.user.LastName.Contains(text) || r.user.Email.Contains(text))
+                        .Where(r => r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text))
                         .Select(r => r.security);
 
                     var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, (s, g) => new { s, g })
-                        .Where(r => r.g.Name.Contains(text))
+                        .Where(r => r.g.Name.ToLower().Contains(text))
                         .Select(r => r.s);
 
                     q = userQuery.Concat(groupQuery);
@@ -319,7 +325,7 @@ internal abstract class SecurityBaseDao<T>(
 
                     if (textSearch)
                     {
-                        q1 = q1.Where(r => r.User.FirstName.Contains(text) || r.User.LastName.Contains(text) || r.User.Email.Contains(text));
+                        q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
                     }
 
                     if (status.HasValue)
@@ -332,7 +338,7 @@ internal abstract class SecurityBaseDao<T>(
                 }
             case ShareFilterType.Group when textSearch:
                 q = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, (security, group) => new { security, group })
-                    .Where(r => r.group.Name.Contains(text))
+                    .Where(r => r.group.Name.ToLower().Contains(text))
                     .Select(r => r.security);
                 break;
         }
@@ -346,6 +352,8 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield break;
         }
+
+        text = GetSearchText(text);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -363,7 +371,7 @@ internal abstract class SecurityBaseDao<T>(
 
                     if (searchByText)
                     {
-                        q1 = q1.Where(r => r.User.FirstName.Contains(text) || r.User.LastName.Contains(text) || r.User.Email.Contains(text));
+                        q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
                     }
 
                     if (status.HasValue)
@@ -381,7 +389,7 @@ internal abstract class SecurityBaseDao<T>(
                     {
                         q = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                                 (security, group) => new { security, group })
-                            .Where(r => r.group.Name.Contains(text))
+                            .Where(r => r.group.Name.ToLower().Contains(text))
                             .Select(r => r.security);
                     }
 
@@ -397,7 +405,7 @@ internal abstract class SecurityBaseDao<T>(
                     {
                         var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                                 (security, user) => new { security, user })
-                            .Where(r => r.user.FirstName.Contains(text) || r.user.LastName.Contains(text) || r.user.Email.Contains(text))
+                            .Where(r => r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text))
                             .Select(r => new SecurityOrderRecord
                             {
                                 Security = r.security, Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2
@@ -405,7 +413,7 @@ internal abstract class SecurityBaseDao<T>(
 
                         var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                                 (security, group) => new { security, group })
-                            .Where(r => r.group.Name.Contains(text))
+                            .Where(r => r.group.Name.ToLower().Contains(text))
                             .Select(r => new SecurityOrderRecord { Security = r.security, Order = 1 });
 
                         q = userQuery.Concat(groupQuery).OrderBy(r => r.Order).ThenBy(predicate).Select(r => r.Security);
@@ -513,7 +521,9 @@ internal abstract class SecurityBaseDao<T>(
 
         if (!string.IsNullOrEmpty(text))
         {
-            q = q.Where(g => g.Name.Contains(text));
+            text = GetSearchText(text);
+            
+            q = q.Where(g => g.Name.ToLower().Contains(text));
         }
 
         var q1 = excludeShared
@@ -594,7 +604,9 @@ internal abstract class SecurityBaseDao<T>(
 
         if (!string.IsNullOrEmpty(text))
         {
-            q = q.Where(u => u.FirstName.Contains(text) || u.LastName.Contains(text) || u.Email.Contains(text));
+            text = GetSearchText(text);
+            
+            q = q.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
         }
 
         var q1 = excludeShared

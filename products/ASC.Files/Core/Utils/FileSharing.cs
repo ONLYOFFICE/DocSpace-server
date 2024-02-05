@@ -976,9 +976,11 @@ public class FileSharing(
 
         if (!string.IsNullOrEmpty(text))
         {
+            text = text.ToLower().Trim();
+            
             var user = await userManager.GetUsersAsync(entry.CreateBy);
 
-            if (!(user.FirstName.Contains(text) || user.LastName.Contains(text) || user.Email.Contains(text)))
+            if (!(user.FirstName.ToLower().Contains(text) || user.LastName.ToLower().Contains(text) || user.Email.ToLower().Contains(text)))
             {
                 yield break;
             }
