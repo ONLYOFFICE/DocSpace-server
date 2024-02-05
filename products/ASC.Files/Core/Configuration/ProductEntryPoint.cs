@@ -140,7 +140,7 @@ public class ProductEntryPoint : Product
         }
     }
 
-    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
+    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType, ILogger logger)
     {
         IEnumerable<AuditEvent> events;
         _tenantManager.SetCurrentTenant(tenant);
@@ -203,8 +203,17 @@ public class ProductEntryPoint : Product
                 activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
             }
 
-            var obj = e.Description.LastOrDefault();
-            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
+            AdditionalNotificationInfo additionalInfo;
+
+            try
+            {
+                additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(e.Description.LastOrDefault());
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException("Error deserializing audit event: " + e.Id, ex);
+                continue;
+            }
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 

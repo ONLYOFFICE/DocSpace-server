@@ -1221,7 +1221,7 @@ public class FileStorageService //: IFileStorageService
 
         comment = await fileDao.UpdateCommentAsync(fileId, version, comment);
 
-        await _filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
+        await _filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, new[] { file.Title, version.ToString(CultureInfo.InvariantCulture) });
 
         return comment;
     }
