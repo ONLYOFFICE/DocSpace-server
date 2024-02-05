@@ -1526,6 +1526,9 @@ public class UserController(ICache cache,
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), inDto.Quota.ToString(), new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
@@ -1561,7 +1564,10 @@ public class UserController(ICache cache,
             var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
             await settingsManager.SaveAsync(defaulSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), defaulSettings.UserQuota.ToString(), new List<Guid>() { user.Id });
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, userUsedSpace.ToString(), userQuotaLimit.ToString(), new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
