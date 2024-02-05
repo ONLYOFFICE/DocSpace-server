@@ -64,7 +64,9 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         if (!string.IsNullOrEmpty(text))
         {
-            q = q.Where(g => g.Name.Contains(text));
+            text = text.ToLower().Trim();
+            
+            q = q.Where(g => g.Name.ToLower().Contains(text));
         }
 
         if (sortBy == GroupSortType.Manager)
@@ -110,11 +112,15 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = userDbContext.Groups.Where(t => t.TenantId == tenant);
-        
-        if (!string.IsNullOrEmpty(text))
+
+        if (string.IsNullOrEmpty(text))
         {
-            q = q.Where(g => g.Name.Contains(text));
+            return await q.CountAsync();
         }
+
+        text = text.ToLower().Trim();
+            
+        q = q.Where(g => g.Name.ToLower().Contains(text));
 
         return await q.CountAsync();
     }
