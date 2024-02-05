@@ -295,7 +295,17 @@ internal class FileDao(
     {
         return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset);
     }
+    
+    public async Task<Stream> GetFileStreamAsync(File<int> file, long offset, long length)
+    {
+        return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset, length);
+    }
 
+    public async Task<long> GetFileSizeAsync(File<int> file)
+    {
+        return await (await globalStore.GetStoreAsync()).GetFileSizeAsync(string.Empty, GetUniqFilePath(file));
+    }
+    
     public async Task<Uri> GetPreSignedUriAsync(File<int> file, TimeSpan expires)
     {
         var storage = await globalStore.GetStoreAsync();
@@ -332,7 +342,7 @@ internal class FileDao(
 
     public async Task<Stream> GetFileStreamAsync(File<int> file)
     {
-        return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
+        return await GetFileStreamAsync(file, 0);
     }
 
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)

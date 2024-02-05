@@ -232,15 +232,20 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
+    }
+
+    public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         var request = new GetObjectRequest
         {
             BucketName = _bucket,
             Key = MakePath(domain, path)
         };
 
-        if (0 < offset)
+        if (length> 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
-            request.ByteRange = new ByteRange(offset, int.MaxValue);
+            request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }
 
         try
