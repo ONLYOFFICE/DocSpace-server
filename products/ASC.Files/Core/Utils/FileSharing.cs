@@ -949,7 +949,7 @@ public class FileSharing(
             return false;
         }
 
-        if (filterType == ShareFilterType.User)
+        if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
         {
             return true;
         }
