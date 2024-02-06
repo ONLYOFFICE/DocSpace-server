@@ -24,35 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Feed.Aggregator.Modules;
+
 using Constants = ASC.Feed.Constants;
-using FeedModule = ASC.Feed.Aggregator.Modules.FeedModule;
 
 namespace ASC.Files.Service.Core;
 
-public class RoomsModule : FeedModule
-{
-    public const string RoomItem = Constants.RoomItem;
-    public const string SharedRoomItem = Constants.SharedRoomItem;
-
-    private readonly IFolderDao<int> _folderDao;
-    private readonly UserManager _userManager;
-    private readonly FileSecurity _fileSecurity;
-    private readonly TenantUtil _tenantUtil;
-
-    public RoomsModule(
-        TenantManager tenantManager,
+public class RoomsModule(TenantManager tenantManager,
         UserManager userManager,
         WebItemSecurity webItemSecurity,
         FileSecurity fileSecurity,
         IDaoFactory daoFactory,
         TenantUtil tenantUtil)
-        : base(tenantManager, webItemSecurity)
-    {
-        _userManager = userManager;
-        _fileSecurity = fileSecurity;
-        _folderDao = daoFactory.GetFolderDao<int>();
-        _tenantUtil = tenantUtil;
-    }
+    : FeedModule(tenantManager, webItemSecurity)
+{
+    public const string RoomItem = Constants.RoomItem;
+    public const string SharedRoomItem = Constants.SharedRoomItem;
+
+    private readonly IFolderDao<int> _folderDao = daoFactory.GetFolderDao<int>();
 
     public override string Name => Constants.RoomsModule;
     public override string Product => Constants.Documents;
@@ -79,7 +68,7 @@ public class RoomsModule : FeedModule
             }
 
             var owner = (Guid)feed.Target;
-            var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
+            var groupUsers = (await userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
             if (groupUsers.Count == 0)
             {
                 groupUsers.Add(owner);
@@ -92,7 +81,7 @@ public class RoomsModule : FeedModule
             targetCond = true;
         }
 
-        return targetCond && await _fileSecurity.CanReadAsync(folder, userId);
+        return targetCond && await fileSecurity.CanReadAsync(folder, userId);
     }
 
     public override async Task<IEnumerable<Tuple<Feed.Aggregator.Feed, object>>> GetFeeds(FeedFilter filter)
@@ -114,7 +103,7 @@ public class RoomsModule : FeedModule
 
         if (shareRecord == null)
         {
-            var roomCreatedUtc = _tenantUtil.DateTimeToUtc(room.CreateOn);
+            var roomCreatedUtc = tenantUtil.DateTimeToUtc(room.CreateOn);
 
             return new Feed.Aggregator.Feed(room.CreateBy, roomCreatedUtc)
             {
@@ -127,7 +116,7 @@ public class RoomsModule : FeedModule
                 ExtraLocation = room.ParentId.ToString(),
                 Keywords = room.Title,
                 AdditionalInfo = ((int)room.FolderType).ToString(),
-                AdditionalInfo4 = room.Private ? "private" : null,
+                AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
                 GroupId = GetGroupId(RoomItem, room.CreateBy, roomCreatedUtc, room.ParentId.ToString())
             };
         }
@@ -145,7 +134,7 @@ public class RoomsModule : FeedModule
             AdditionalInfo = ((int)room.FolderType).ToString(),
             AdditionalInfo2 = ((int)shareRecord.Share).ToString(),
             AdditionalInfo3 = ((int)shareRecord.SubjectType).ToString(),
-            AdditionalInfo4 = room.Private ? "private" : null,
+            AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
             Target = shareRecord.Subject,
             GroupId = GetGroupId(SharedRoomItem, shareRecord.Owner, shareRecord.TimeStamp, room.ParentId.ToString()),
             ContextId = $"{RoomItem}_{room.Id}"

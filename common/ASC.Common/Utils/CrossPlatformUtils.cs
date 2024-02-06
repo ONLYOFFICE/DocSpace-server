@@ -28,7 +28,7 @@ namespace ASC.Common.Utils;
 
 public static class CrossPlatform
 {
-    private static readonly char[] _pathSplitCharacters = new char[] { '/', '\\' };
+    private static readonly char[] _pathSplitCharacters = ['/', '\\'];
 
     public static string PathCombine(string basePath, params string[] additional)
     {

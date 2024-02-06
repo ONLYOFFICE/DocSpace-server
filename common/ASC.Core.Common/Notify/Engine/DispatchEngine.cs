@@ -93,7 +93,7 @@ public class DispatchEngine
                 0 < message.Recipient.Addresses.Length ? message.Recipient.Addresses[0] : string.Empty,
                 DateTime.Now,
                 message.Subject,
-                (message.Body ?? string.Empty).Replace(Environment.NewLine, Environment.NewLine + @"   "),
+                (message.Body ?? string.Empty).Replace(Environment.NewLine, Environment.NewLine + "   "),
                 new string('-', 80));
         }
         catch { }

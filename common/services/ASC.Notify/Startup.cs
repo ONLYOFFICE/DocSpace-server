@@ -35,11 +35,9 @@ public class Startup : BaseWorkerStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
+        await base.ConfigureServices(services);
 
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 

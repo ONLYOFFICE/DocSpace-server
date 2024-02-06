@@ -27,22 +27,7 @@
 namespace ASC.Web.Files;
 
 [Scope(Additional = typeof(FilesSpaceUsageStatExtension))]
-public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
-{
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly TenantManager _tenantManager;
-    private readonly UserManager _userManager;
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly PathProvider _pathProvider;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolder _globalFolder;
-    private readonly FileMarker _fileMarker;
-
-    public FilesSpaceUsageStatManager(
-        IDbContextFactory<FilesDbContext> dbContextFactory,
+public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         UserManager userManager,
         UserPhotoManager userPhotoManager,
@@ -51,26 +36,13 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
         GlobalFolderHelper globalFolderHelper,
         PathProvider pathProvider,
         IDaoFactory daoFactory,
-        GlobalFolder globalFolder,
-        FileMarker fileMarker)
-    {
-        _dbContextFactory = dbContextFactory;
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-        _userPhotoManager = userPhotoManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _globalFolderHelper = globalFolderHelper;
-        _pathProvider = pathProvider;
-        _daoFactory = daoFactory;
-        _globalFolder = globalFolder;
-        _fileMarker = fileMarker;
-    }
-
+        GlobalFolder globalFolder)
+    : SpaceUsageStatManager, IUserSpaceUsage
+{
     public override async ValueTask<List<UsageSpaceStatItem>> GetStatDataAsync()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var myFiles = filesDbContext.Files
             .Join(filesDbContext.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
             .Join(filesDbContext.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
@@ -96,19 +68,19 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
             async r => await Task.FromResult(r.Size),
             async (userId, items) =>
             {
-                var user = await _userManager.GetUsersAsync(userId);
+                var user = await userManager.GetUsersAsync(userId);
                 var item = new UsageSpaceStatItem { SpaceUsage = await items.SumAsync() };
                 if (user.Equals(Constants.LostUser))
                 {
                     item.Name = FilesUCResource.CorporateFiles;
-                    item.ImgUrl = _pathProvider.GetImagePath("corporatefiles_big.png");
-                    item.Url = await _pathProvider.GetFolderUrlByIdAsync(await _globalFolderHelper.FolderCommonAsync);
+                    item.ImgUrl = pathProvider.GetImagePath("corporatefiles_big.png");
+                    item.Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderCommonAsync);
                 }
                 else
                 {
-                    item.Name = user.DisplayUserName(false, _displayUserSettingsHelper);
-                    item.ImgUrl = await user.GetSmallPhotoURL(_userPhotoManager);
-                    item.Url =await user.GetUserProfilePageUrl(_commonLinkUtility);
+                    item.Name = user.DisplayUserName(false, displayUserSettingsHelper);
+                    item.ImgUrl = await user.GetSmallPhotoURL(userPhotoManager);
+                    item.Url =await user.GetUserProfilePageUrl(commonLinkUtility);
                     item.Disabled = user.Status == EmployeeStatus.Terminated;
                 }
                 return item;
@@ -121,20 +93,20 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
 
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var my = await _globalFolder.GetFolderMyAsync(_fileMarker, _daoFactory);
-        var trash = await _globalFolder.GetFolderTrashAsync(_daoFactory);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var my = await globalFolder.GetFolderMyAsync(daoFactory);
+        var trash = await globalFolder.GetFolderTrashAsync(daoFactory);
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
     public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
-        await _tenantManager.SetCurrentTenantAsync(tenantId);
+        await tenantManager.SetCurrentTenantAsync(tenantId);
         var size = await GetUserSpaceUsageAsync(userId);
 
-        await _tenantManager.SetTenantQuotaRowAsync(
+        await tenantManager.SetTenantQuotaRowAsync(
            new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
            false);
     }

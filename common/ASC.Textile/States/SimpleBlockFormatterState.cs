@@ -26,21 +26,16 @@
 
 namespace Textile.States;
 
-public abstract class SimpleBlockFormatterState : FormatterState
+public abstract class SimpleBlockFormatterState(TextileFormatter formatter) : FormatterState(formatter)
 {
     internal const string PatternBegin = @"^\s*(?<tag>";
-    internal const string PatternEnd = @")" + Globals.AlignPattern + Globals.BlockModifiersPattern + @"\.(?:\s+)?(?<content>.*)$";
+    internal const string PatternEnd = ")" + Globals.AlignPattern + Globals.BlockModifiersPattern + @"\.(?:\s+)?(?<content>.*)$";
 
     public string Tag { get; private set; }
 
     public string AlignInfo { get; private set; }
 
     public string AttInfo { get; private set; }
-
-    protected SimpleBlockFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

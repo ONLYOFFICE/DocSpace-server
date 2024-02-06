@@ -27,27 +27,23 @@
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Transient]
-internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
+internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisposableWrapper,
+        ILogger<SharpBoxProviderInfo> logger)
+    : IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
 {
     private nSupportedCloudConfigurations _providerKey;
-    private readonly ILogger<SharpBoxProviderInfo> _logger;
-    private readonly SharpBoxStorageDisposableWrapper _wrapper;
-
-    public SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisposableWrapper, ILogger<SharpBoxProviderInfo> logger)
-    {
-        _wrapper = storageDisposableWrapper;
-        _logger = logger;
-    }
 
     public AuthData AuthData { get; set; }
     public bool HasLogo { get; set; }
     public bool Private { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public FolderType FolderType { get; set; }
     public Guid Owner { get; set; }
     public int ProviderId { get; set; }
     public string CustomerTitle { get; set; }
     public string FolderId { get; set; }
+    public string Color { get; set; }
 
     public string ProviderKey
     {
@@ -60,22 +56,23 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 
     public Selector Selector { get; } = Selectors.SharpBox;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.None;
+    public bool MutableEntityId => true;
 
     internal CloudStorage Storage
     {
         get
         {
 
-            if (!_wrapper.TryGetStorage(ProviderId, out var storage) || !storage.IsOpened)
+            if (!storageDisposableWrapper.TryGetStorage(ProviderId, out var storage) || !storage.IsOpened)
             {
-                return _wrapper.CreateStorage(AuthData, _providerKey, ProviderId);
+                return storageDisposableWrapper.CreateStorage(AuthData, _providerKey, ProviderId);
             }
 
             return storage;
         }
     }
 
-    internal bool StorageOpened => _wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
+    internal bool StorageOpened => storageDisposableWrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>> StorageAsync =>
         throw new NotImplementedException();
@@ -92,7 +89,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
         }
         catch (SharpBoxException ex)
         {
-            _logger.ErrorSharpboxCheckAccess(ex);
+            logger.ErrorSharpboxCheckAccess(ex);
 
             return Task.FromResult(false);
         }
@@ -108,10 +105,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 
     public Task InvalidateStorageAsync()
     {
-        if (_wrapper != null)
-        {
-            _wrapper.Dispose();
-        }
+        storageDisposableWrapper?.Dispose();
 
         return Task.CompletedTask;
     }
@@ -160,7 +154,7 @@ internal class SharpBoxStorageDisposableWrapper : IDisposable
                 uri = Uri.UriSchemeHttp + Uri.SchemeDelimiter + uri;
             }
 
-            prms = new object[] { new Uri(uri) };
+            prms = [new Uri(uri)];
         }
 
         var storage = new CloudStorage();

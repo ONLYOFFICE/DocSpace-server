@@ -32,27 +32,11 @@ namespace ASC.Web.Api.Controllers;
 ///<name>portal</name>
 ///<visible>false</visible>
 [Scope]
-[DefaultRoute]
+[DefaultRoute("payment")]
 [ApiController]
 [AllowNotPayment]
 [ControllerName("portal")]
-public class PaymentController : ControllerBase
-{
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly ITariffService _tariffService;
-    private readonly SecurityContext _securityContext;
-    private readonly RegionHelper _regionHelper;
-    private readonly QuotaHelper _quotaHelper;
-    private readonly IMemoryCache _memoryCache;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly MessageService _messageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly int _maxCount = 10;
-    private readonly int _expirationMinutes = 2;
-
-    public PaymentController(
-        UserManager userManager,
+public class PaymentController(UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
         SecurityContext securityContext,
@@ -62,18 +46,10 @@ public class PaymentController : ControllerBase
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
         StudioNotifyService studioNotifyService)
-    {
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _tariffService = tariffService;
-        _securityContext = securityContext;
-        _regionHelper = regionHelper;
-        _quotaHelper = tariffHelper;
-        _memoryCache = memoryCache;
-        _httpContextAccessor = httpContextAccessor;
-        _messageService = messageService;
-        _studioNotifyService = studioNotifyService;
-    }
+    : ControllerBase
+{
+    private readonly int _maxCount = 10;
+    private readonly int _expirationMinutes = 2;
 
     /// <summary>
     /// Returns the URL to the payment page.
@@ -86,26 +62,26 @@ public class PaymentController : ControllerBase
     /// <returns type="System.Uri, System">The URL to the payment page</returns>
     /// <path>api/2.0/portal/payment/url</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("payment/url")]
+    [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
-        if ((await _tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            !await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID))
+        if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
         {
             return null;
         }
 
-        var currency = await _regionHelper.GetCurrencyFromRequestAsync();
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
         
-        return await _tariffService.GetShoppingUriAsync(
+        return await tariffService.GetShoppingUriAsync(
             tenant.Id,
             tenant.AffiliateId,
             tenant.PartnerId,
             currency,
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-            (await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).Email,
+            (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
             inDto.Quantity,
             inDto.BackUrl);
     }
@@ -121,20 +97,20 @@ public class PaymentController : ControllerBase
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/portal/payment/update</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("payment/update")]
+    [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await _userManager.GetUserByEmailAsync(payerId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
 
-        if (!(await _tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            _securityContext.CurrentAccount.ID != payer.Id)
+        if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            securityContext.CurrentAccount.ID != payer.Id)
         {
             return false;
         }
 
-        return await _tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
+        return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
     }
 
     /// <summary>
@@ -148,20 +124,20 @@ public class PaymentController : ControllerBase
     /// <returns type="System.Object, System">The URL to the payment account</returns>
     /// <path>api/2.0/portal/payment/account</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("payment/account")]
+    [HttpGet("account")]
     public async Task<object> GetPaymentAccountAsync(string backUrl)
     {
-        if (!_tariffService.IsConfigured())
+        if (!tariffService.IsConfigured())
         {
             return null;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await _userManager.GetUserByEmailAsync(payerId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
 
-        if (_securityContext.CurrentAccount.ID != payer.Id &&
-            _securityContext.CurrentAccount.ID != tenant.OwnerId)
+        if (securityContext.CurrentAccount.ID != payer.Id &&
+            securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             return null;
         }
@@ -180,12 +156,12 @@ public class PaymentController : ControllerBase
     /// <returns type="System.Object, System">List of available portal prices</returns>
     /// <path>api/2.0/portal/payment/prices</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("payment/prices")]
+    [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
-        var currency = await _regionHelper.GetCurrencyFromRequestAsync();
-        var result = (await _tenantManager.GetProductPriceInfoAsync())
-            .ToDictionary(pr => pr.Key, pr => pr.Value.TryGetValue(currency, out var value) ? value : 0);
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+        var result = (await tenantManager.GetProductPriceInfoAsync())
+            .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
         return result;
     }
 
@@ -201,11 +177,11 @@ public class PaymentController : ControllerBase
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("payment/currencies")]
+    [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
-        var defaultRegion = _regionHelper.GetDefaultRegionInfo();
-        var currentRegion = await _regionHelper.GetCurrentRegionInfoAsync();
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
 
         yield return new CurrenciesDto(defaultRegion);
 
@@ -226,10 +202,10 @@ public class PaymentController : ControllerBase
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("payment/quotas")]
+    [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
-        return await _quotaHelper.GetQuotasAsync().ToListAsync();
+        return await tariffHelper.GetQuotasAsync().ToListAsync();
     }
 
     /// <summary>
@@ -242,10 +218,10 @@ public class PaymentController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
     /// <path>api/2.0/portal/payment/quota</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("payment/quota")]
+    [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {
-        return await _quotaHelper.GetCurrentQuotaAsync(refresh);
+        return await tariffHelper.GetCurrentQuotaAsync(refresh);
     }
 
     /// <summary>
@@ -259,7 +235,7 @@ public class PaymentController : ControllerBase
     /// <returns></returns>
     /// <path>api/2.0/portal/payment/request</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("payment/request")]
+    [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {
         if (!inDto.Email.TestEmailRegex())
@@ -274,19 +250,19 @@ public class PaymentController : ControllerBase
 
         CheckCache("salesrequest");
 
-        await _studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
-        await _messageService.SendAsync(MessageAction.ContactSalesMailSent);
+        await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
+        await messageService.SendAsync(MessageAction.ContactSalesMailSent);
     }
 
     private void CheckCache(string baseKey)
     {
-        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
+        var key = httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
 
-        if (_memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
+        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
         {
             throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        _memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 }

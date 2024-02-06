@@ -27,13 +27,14 @@
 namespace ASC.ActiveDirectory.Novell;
 
 [Scope]
-public class NovellLdapSearcher : IDisposable
+public class NovellLdapSearcher(IConfiguration configuration,
+        ILogger<NovellLdapSearcher> logger,
+        NovellLdapEntryExtension novellLdapEntryExtension)
+    : IDisposable
 {
-    protected readonly ILogger<NovellLdapSearcher> _logger;
+    protected readonly ILogger<NovellLdapSearcher> _logger = logger;
     private LdapCertificateConfirmRequest _certificateConfirmRequest;
     private static readonly object _rootSync = new();
-    private readonly IConfiguration _configuration;
-    private readonly NovellLdapEntryExtension _novellLdapEntryExtension;
     private LdapConnection _ldapConnection;
 
     public string Login { get; private set; }
@@ -45,24 +46,13 @@ public class NovellLdapSearcher : IDisposable
     public bool AcceptCertificate { get; private set; }
     public string AcceptCertificateHash { get; private set; }
 
-    public string LdapUniqueIdAttribute { get; set; }
+    public string LdapUniqueIdAttribute { get; set; } = configuration["ldap:unique:id"];
 
     private Dictionary<string, string[]> _capabilities;
 
     public bool IsConnected
     {
         get { return _ldapConnection is { Connected: true }; }
-    }
-
-    public NovellLdapSearcher(
-        IConfiguration configuration,
-        ILogger<NovellLdapSearcher> logger,
-        NovellLdapEntryExtension novellLdapEntryExtension)
-    {
-        _logger = logger;
-        _configuration = configuration;
-        _novellLdapEntryExtension = novellLdapEntryExtension;
-        LdapUniqueIdAttribute = configuration["ldap:unique:id"];
     }
 
     public void Init(string login,
@@ -88,7 +78,7 @@ public class NovellLdapSearcher : IDisposable
     {
         if (Server.StartsWith("LDAP://"))
         {
-            Server = Server.Substring("LDAP://".Length);
+            Server = Server["LDAP://".Length..];
         }
 
         LdapConnection ldapConnection;
@@ -225,31 +215,28 @@ public class NovellLdapSearcher : IDisposable
             Connect();
         }
 
-        if (searchBase == null)
-        {
-            searchBase = "";
-        }
+        searchBase ??= "";
 
         var entries = new List<LdapEntry>();
 
         if (string.IsNullOrEmpty(searchFilter))
         {
-            return new List<LdapObject>();
+            return [];
         }
 
         if (attributes == null)
         {
             if (string.IsNullOrEmpty(LdapUniqueIdAttribute))
             {
-                attributes = new[]
-                {
-                        "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
+                attributes =
+                [
+                    "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
                         LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID, LdapConstants.RfcLDAPAttributes.GUID
-                    };
+                ];
             }
             else
             {
-                attributes = new[] { "*", LdapUniqueIdAttribute };
+                attributes = ["*", LdapUniqueIdAttribute];
             }
         }
 
@@ -267,7 +254,7 @@ public class NovellLdapSearcher : IDisposable
             // Specifies whether referrals are followed automatically
             // Referrals of any type other than to an LDAP server (for example, a referral URL other than ldap://something) are ignored on automatic referral following.
             // The default is false.
-            ReferralFollowing = true,
+            ReferralFollowing = true
             // The number of seconds to wait for search results.
             // Sets the maximum number of seconds that the server is to wait when returning search results.
             //ServerTimeLimit = 600000, // 10 minutes
@@ -299,10 +286,7 @@ public class NovellLdapSearcher : IDisposable
                     {
                         _logger.WarnStartTrySearchSimple();
 
-                        List<LdapObject> simpleResults;
-
-                        if (TrySearchSimple(searchBase, scope, searchFilter, out simpleResults, attributes, limit,
-                            searchConstraints))
+                        if (TrySearchSimple(searchBase, scope, searchFilter, out var simpleResults, attributes, limit, searchConstraints))
                         {
                             if (entries.Count >= simpleResults.Count)
                             {
@@ -328,7 +312,7 @@ public class NovellLdapSearcher : IDisposable
             }
         }
 
-        var result = _novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
+        var result = novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
 
         return result;
     }
@@ -360,31 +344,28 @@ public class NovellLdapSearcher : IDisposable
             Connect();
         }
 
-        if (searchBase == null)
-        {
-            searchBase = "";
-        }
+        searchBase ??= "";
 
         var entries = new List<LdapEntry>();
 
         if (string.IsNullOrEmpty(searchFilter))
         {
-            return new List<LdapObject>();
+            return [];
         }
 
         if (attributes == null)
         {
             if (string.IsNullOrEmpty(LdapUniqueIdAttribute))
             {
-                attributes = new[]
-                {
-                        "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
+                attributes =
+                [
+                    "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
                         LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID, LdapConstants.RfcLDAPAttributes.GUID
-                    };
+                ];
             }
             else
             {
-                attributes = new[] { "*", LdapUniqueIdAttribute };
+                attributes = ["*", LdapUniqueIdAttribute];
             }
         }
 
@@ -402,7 +383,7 @@ public class NovellLdapSearcher : IDisposable
             // Specifies whether referrals are followed automatically
             // Referrals of any type other than to an LDAP server (for example, a referral URL other than ldap://something) are ignored on automatic referral following.
             // The default is false.
-            ReferralFollowing = true,
+            ReferralFollowing = true
             // The number of seconds to wait for search results.
             // Sets the maximum number of seconds that the server is to wait when returning search results.
             //ServerTimeLimit = 600000, // 10 minutes
@@ -413,7 +394,7 @@ public class NovellLdapSearcher : IDisposable
 
         // initially, cookie must be set to an empty string
         var pageSize = 2;
-        var cookie = Array.ConvertAll(Encoding.ASCII.GetBytes(""), b => unchecked(b));
+        var cookie = Array.ConvertAll(Encoding.ASCII.GetBytes(""), b => b);
         var i = 0;
 
         do
@@ -478,13 +459,12 @@ public class NovellLdapSearcher : IDisposable
                 foreach (var control in controls)
                 {
                     /* Is this the LdapPagedResultsResponse control? */
-                    if (!(control is SimplePagedResultsControl))
+                    if (control is not SimplePagedResultsControl)
                     {
                         continue;
                     }
 
-                    var response = new SimplePagedResultsControl(control.Id,
-                        control.Critical, control.GetValue());
+                    var response = new SimplePagedResultsControl(control.Id, control.Critical, control.GetValue());
 
                     cookie = response.Cookie;
                 }
@@ -492,7 +472,7 @@ public class NovellLdapSearcher : IDisposable
             // if cookie is empty, we are done.
         } while (cookie is { Length: > 0 });
 
-        var result = _novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
+        var result = novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
 
         return result;
     }
@@ -516,7 +496,7 @@ public class NovellLdapSearcher : IDisposable
             };
 
             var ldapSearchResults = _ldapConnection.Search("", LdapConnection.ScopeBase, LdapConstants.OBJECT_FILTER,
-                new[] { "*", "supportedControls", "supportedCapabilities" }, false, ldapSearchConstraints);
+                ["*", "supportedControls", "supportedCapabilities"], false, ldapSearchConstraints);
 
             while (ldapSearchResults.HasMore())
             {
@@ -578,7 +558,7 @@ public class NovellLdapSearcher : IDisposable
     {
         try
         {
-            var ldapUniqueIdAttribute = _configuration["ldap:unique:id"];
+            var ldapUniqueIdAttribute = configuration["ldap:unique:id"];
 
             if (ldapUniqueIdAttribute != null)
             {
@@ -586,22 +566,22 @@ public class NovellLdapSearcher : IDisposable
             }
 
             if (!string.IsNullOrEmpty(
-                _novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.ADSchemaAttributes.OBJECT_SID) as string))
+                novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.ADSchemaAttributes.OBJECT_SID) as string))
             {
                 ldapUniqueIdAttribute = LdapConstants.ADSchemaAttributes.OBJECT_SID;
             }
             else if (!string.IsNullOrEmpty(
-                _novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.ENTRY_UUID) as string))
+                novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.ENTRY_UUID) as string))
             {
                 ldapUniqueIdAttribute = LdapConstants.RfcLDAPAttributes.ENTRY_UUID;
             }
             else if (!string.IsNullOrEmpty(
-                _novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID) as string))
+                novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID) as string))
             {
                 ldapUniqueIdAttribute = LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID;
             }
             else if (!string.IsNullOrEmpty(
-                _novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.GUID) as string))
+                novellLdapEntryExtension.GetAttributeValue(ldapEntry, LdapConstants.RfcLDAPAttributes.GUID) as string))
             {
                 ldapUniqueIdAttribute = LdapConstants.RfcLDAPAttributes.GUID;
             }

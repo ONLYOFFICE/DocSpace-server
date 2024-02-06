@@ -31,7 +31,7 @@ public static class ConfigurationManagerExtension
     public static ConfigurationManager AddApiSystemConfiguration(this ConfigurationManager config, IHostEnvironment env)
     {
         config
-          .AddJsonFile($"apisystem.json")
+          .AddJsonFile("apisystem.json")
           .AddJsonFile($"apisystem.{env.EnvironmentName}.json", true)
           .AddJsonFile("notify.json")
           .AddJsonFile($"notify.{env.EnvironmentName}.json", true);

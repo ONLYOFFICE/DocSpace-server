@@ -26,31 +26,26 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T> : FileOperationData<T>
+internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
+        IDictionary<string, StringValues> headers, bool holdResult = true)
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, headers, holdResult)
 {
-    public Dictionary<T, string> FilesDownload { get; }
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool holdResult = true)
-        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
-    {
-        FilesDownload = files;
-        Headers = headers;
-    }
+    public Dictionary<T, string> FilesDownload { get; } = files;
 }
 
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
+    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
         : base(serviceProvider, f1, f2)
     {
         _tempStream = tempStream;
+        _baseUri = baseUri;
         this[OpType] = (int)FileOperationType.Download;
     }
 
     private readonly TempStream _tempStream;
+    private readonly string _baseUri;
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -64,6 +59,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            commonLinkUtility.ServerUri = _baseUri;
+        }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
@@ -112,7 +113,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
                 if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
                 path = $@"{linkId}\{sessionId}\{fileName}";
@@ -198,10 +199,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             if (Files.Count > 0)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         Total = _entriesPathId.Count + 1;
@@ -241,7 +242,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-            title = FileUtility.ReplaceFileExtension(title, convertToExt);
+                title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -339,7 +340,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             return;
         }
-        
+
         var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
@@ -374,7 +375,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (file == null)
                     {
-                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                         continue;
                     }
 
@@ -398,7 +399,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     }
                 }
 
-                if (!Equals(entryId, default(T)) && file != null)
+                if (!Equals(entryId, default(T)))
                 {
                     compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
@@ -433,13 +434,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                 counter++;
 
-                if (!Equals(entryId, default(T)) && file != null)
+                if (!Equals(entryId, default(T)))
                 {
                     ProcessedFile(entryId);
                 }
                 else
                 {
-                    ProcessedFolder(default(T));
+                    ProcessedFolder(default);
                 }
             }
 
@@ -461,7 +462,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path.Substring(path.LastIndexOf('/'));
+            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
             entriesPathId.Add(newtitle, ids);
         }
     }

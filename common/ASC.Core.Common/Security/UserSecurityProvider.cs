@@ -65,11 +65,11 @@ public class UserSecurityProvider : SecurityObject
     {
         return _employeeType switch
         {
-            EmployeeType.DocSpaceAdmin => new[] { AuthConstants.DocSpaceAdmin },
-            EmployeeType.RoomAdmin => new[] { AuthConstants.RoomAdmin },
-            EmployeeType.Collaborator => new[] { AuthConstants.Collaborator },
-            EmployeeType.User => new[] { AuthConstants.User },
-            _ => Array.Empty<IRole>(),
+            EmployeeType.DocSpaceAdmin => [AuthConstants.DocSpaceAdmin],
+            EmployeeType.RoomAdmin => [AuthConstants.RoomAdmin],
+            EmployeeType.Collaborator => [AuthConstants.Collaborator],
+            EmployeeType.User => [AuthConstants.User],
+            _ => Array.Empty<IRole>()
         };
     }
 

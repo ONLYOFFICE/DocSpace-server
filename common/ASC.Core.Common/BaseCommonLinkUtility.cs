@@ -68,7 +68,7 @@ public class BaseCommonLinkUtility
 
                 _serverRoot = new UriBuilder(u.Scheme, LocalHost, u.Port);
             }
-            else if (_serverRoot == null)
+            else
             {
                 var serverRoot = coreBaseSettings.ServerRoot;
 

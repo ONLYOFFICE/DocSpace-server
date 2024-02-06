@@ -36,7 +36,8 @@ public static class DocSpaceHelper
             FolderType.ReviewRoom or 
             FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
+            FolderType.PublicRoom or
+            FolderType.FormRoom;
     }
 
     public static RoomType? GetRoomType(FolderType folderType)
@@ -49,7 +50,8 @@ public static class DocSpaceHelper
             FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
-            _ => null,
+            FolderType.FormRoom => RoomType.FormRoom,
+            _ => null
         };
     }
 
@@ -58,6 +60,6 @@ public static class DocSpaceHelper
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
         var room = parents.Find(f => IsRoom(f.FolderType));
 
-        return room is { Private: true };
+        return room is { SettingsPrivate: true };
     }
 }

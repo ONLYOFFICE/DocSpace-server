@@ -24,22 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class PeopleController : ControllerBase
-{
-    private readonly ILogger<PeopleController> _log;
-    private readonly HostedSolution _hostedSolution;
-    private readonly UserFormatter _userFormatter;
-    private readonly ICache _cache;
-    private readonly CoreSettings _coreSettings;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public PeopleController(
+public class PeopleController(
         ILogger<PeopleController> option,
         HostedSolution hostedSolution,
         UserFormatter userFormatter,
@@ -47,16 +38,8 @@ public class PeopleController : ControllerBase
         CoreSettings coreSettings,
         CommonLinkUtility commonLinkUtility,
         IHttpContextAccessor httpContextAccessor)
-    {
-        _log = option;
-        _hostedSolution = hostedSolution;
-        _userFormatter = userFormatter;
-        _cache = cache;
-        _coreSettings = coreSettings;
-        _commonLinkUtility = commonLinkUtility;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
+    : ControllerBase
+{
     #region For TEST api
 
     [HttpGet("test")]
@@ -79,18 +62,18 @@ public class PeopleController : ControllerBase
         var sw = Stopwatch.StartNew();
         var userIds = model.UserIds ?? new List<Guid>();
 
-        var users = await _hostedSolution.FindUsersAsync(userIds);
+        var users = await hostedSolution.FindUsersAsync(userIds);
 
         var result = await users.ToAsyncEnumerable().SelectAwait(async user => new
         {
             id = user.Id,
-            name = _userFormatter.GetUserName(user),
+            name = userFormatter.GetUserName(user),
             email = user.Email,
 
             link = await GetUserProfileLinkAsync(user)
         }).ToListAsync();
 
-        _log.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count(), userIds.Count(), sw.ElapsedMilliseconds);
+        option.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count, userIds.Count(), sw.ElapsedMilliseconds);
         sw.Stop();
 
         return Ok(new
@@ -105,12 +88,12 @@ public class PeopleController : ControllerBase
 
     private async Task<string> GetTenantDomainAsync(int tenantId)
     {
-        var domain = _cache.Get<string>(tenantId.ToString());
+        var domain = cache.Get<string>(tenantId.ToString());
         if (string.IsNullOrEmpty(domain))
         {
-            var tenant = await _hostedSolution.GetTenantAsync(tenantId);
-            domain = tenant.GetTenantDomain(_coreSettings);
-            _cache.Insert(tenantId.ToString(), domain, TimeSpan.FromMinutes(10));
+            var tenant = await hostedSolution.GetTenantAsync(tenantId);
+            domain = tenant.GetTenantDomain(coreSettings);
+            cache.Insert(tenantId.ToString(), domain, TimeSpan.FromMinutes(10));
         }
         return domain;
     }
@@ -119,10 +102,10 @@ public class PeopleController : ControllerBase
     {
         var tenantDomain = await GetTenantDomainAsync(user.TenantId);
         return string.Format("{0}{1}{2}/{3}",
-                             _httpContextAccessor.HttpContext.Request.Scheme,
+                             httpContextAccessor.HttpContext.Request.Scheme,
                              Uri.SchemeDelimiter,
                              tenantDomain,
-                             "Products/People/Profile.aspx?" + _commonLinkUtility.GetUserParamsPair(user));
+                             "Products/People/Profile.aspx?" + commonLinkUtility.GetUserParamsPair(user));
     }
 
     #endregion

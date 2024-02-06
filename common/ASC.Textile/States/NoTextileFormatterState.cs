@@ -27,14 +27,9 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<notextile>\s*$")]
-public class NoTextileFormatterState : FormatterState
+public class NoTextileFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private bool _shouldExitNextTime;
-
-    public NoTextileFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

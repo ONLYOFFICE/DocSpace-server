@@ -56,7 +56,7 @@ public interface IThirdPartyFileStorage<TFile> : IThirdPartyStorage
     public Task<TFile> CopyFileAsync(string fileId, string newFileName, string toFolderId);
     public Task<TFile> RenameFileAsync(string fileId, string newName);
     public Task<TFile> SaveStreamAsync(string fileId, Stream fileStream);
-
+    public long GetFileSize(TFile file);
 }
 
 public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
@@ -69,7 +69,4 @@ public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
 }
 
 [Transient]
-public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>
-{
-
-}
+public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>;

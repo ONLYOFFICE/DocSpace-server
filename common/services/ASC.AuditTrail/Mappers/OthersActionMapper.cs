@@ -28,31 +28,15 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class OthersActionsMapper : IProductActionMapper
 {
-    public ProductType Product { get; }
-    public List<IModuleActionMapper> Mappers { get; }
-
-    public OthersActionsMapper()
-    {
-        Product = ProductType.Others;
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new OthersNoneModuleActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.Others;
+    public List<IModuleActionMapper> Mappers { get; } = [new OthersNoneModuleActionMapper()];
 }
 
 internal class OthersNoneModuleActionMapper : IModuleActionMapper
 {
-    public ModuleType Module { get; }
-    public IDictionary<MessageAction, MessageMaps> Actions { get; }
-
-    public OthersNoneModuleActionMapper()
+    public ModuleType Module { get; } = ModuleType.None;
+    public IDictionary<MessageAction, MessageMaps> Actions { get; } = new MessageMapsDictionary
     {
-        Module = ModuleType.None;
-
-        Actions = new MessageMapsDictionary()
-        {
-            { ActionType.Send, new[] { MessageAction.ContactAdminMailSent } }
-        };
-    }
+        { ActionType.Send, new[] { MessageAction.ContactAdminMailSent } }
+    };
 }

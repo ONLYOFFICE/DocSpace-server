@@ -67,41 +67,32 @@ public class GroupDto
             Category = Guid.NewGuid(),
             Name = "Sample group",
             Parent = Guid.NewGuid(),
-            Members = new List<EmployeeDto> { EmployeeDto.GetSample() }
+            Members = [EmployeeDto.GetSample()]
         };
     }
 }
 
 [Scope]
-public class GroupFullDtoHelper
+public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
 {
-    private readonly UserManager _userManager;
-    private readonly EmployeeDtoHelper _employeeWraperHelper;
-
-    public GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
-    {
-        _userManager = userManager;
-        _employeeWraperHelper = employeeWraperHelper;
-    }
-
     public async Task<GroupDto> Get(GroupInfo group, bool includeMembers)
     {
         var result = new GroupDto
         {
             Id = group.ID,
             Category = group.CategoryID,
-            Parent = group.Parent != null ? group.Parent.ID : Guid.Empty,
+            Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await _employeeWraperHelper.GetAsync(await _userManager.GetUsersAsync(await _userManager.GetDepartmentManagerAsync(group.ID)))
+            Manager = await employeeWraperHelper.GetAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID)))
         };
 
         if (includeMembers)
         {
-            result.Members = new List<EmployeeDto>();
+            result.Members = [];
 
-            foreach (var m in await _userManager.GetUsersByGroupAsync(group.ID))
+            foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
             {
-                result.Members.Add(await _employeeWraperHelper.GetAsync(m));
+                result.Members.Add(await employeeWraperHelper.GetAsync(m));
             }
         }
 

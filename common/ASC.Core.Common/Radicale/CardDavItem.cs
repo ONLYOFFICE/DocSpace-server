@@ -26,27 +26,27 @@
 
 namespace ASC.Common.Radicale;
 
-public class CardDavItem
+public class CardDavItem(Guid iD, string firstName, string lastName, string userName, DateTime? birthDate, bool? sex, string title, string email, List<string> contacts, string mobilePhone)
 {
-    public Guid ID { get; set; }
+    public Guid ID { get; set; } = iD;
 
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = firstName;
 
-    public string LastName { get; set; }
+    public string LastName { get; set; } = lastName;
 
-    public string UserName { get; set; }
+    public string UserName { get; set; } = userName;
 
-    public DateTime? BirthDate { get; set; }
+    public DateTime? BirthDate { get; set; } = birthDate;
 
-    public bool? Sex { get; set; }
+    public bool? Sex { get; set; } = sex;
 
-    public string Title { get; set; }
+    public string Title { get; set; } = title;
 
-    public string Email { get; set; }
+    public string Email { get; set; } = email;
 
-    public List<string> Contacts { get; set; }
+    public List<string> Contacts { get; set; } = contacts;
 
-    public string MobilePhone { get; set; }
+    public string MobilePhone { get; set; } = mobilePhone;
 
     public override string ToString()
     {
@@ -57,18 +57,4 @@ public class CardDavItem
     {
         return ID.GetHashCode();
     }
-
-    public CardDavItem(Guid iD, string firstName, string lastName, string userName, DateTime? birthDate, bool? sex, string title, string email, List<string> contacts, string mobilePhone)
-    {
-        ID = iD;
-        FirstName = firstName;
-        LastName = lastName;
-        UserName = userName;
-        BirthDate = birthDate;
-        Sex = sex;
-        Title = title;
-        Email = email;
-        Contacts = contacts;
-        MobilePhone = mobilePhone;
     }
-}

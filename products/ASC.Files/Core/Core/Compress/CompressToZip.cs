@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Core.Compress;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Archives the data stream into the format .zip

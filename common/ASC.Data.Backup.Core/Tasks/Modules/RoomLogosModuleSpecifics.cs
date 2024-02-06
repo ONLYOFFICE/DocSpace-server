@@ -25,12 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Data.Backup.Tasks.Modules;
-public class RoomLogosModuleSpecifics : ModuleSpecificsBase
+public class RoomLogosModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
-    public RoomLogosModuleSpecifics(Helpers helpers) : base(helpers)
-    {
-    }
-
     public override ModuleName ModuleName => ModuleName.RoomLogos;
 
     public override IEnumerable<TableInfo> Tables => new List<TableInfo>();

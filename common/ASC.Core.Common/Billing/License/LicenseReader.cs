@@ -27,13 +27,9 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class LicenseReaderConfig
+public class LicenseReaderConfig(IConfiguration configuration)
 {
-    public readonly string LicensePath;
-    public LicenseReaderConfig(IConfiguration configuration)
-    {
-        LicensePath = configuration["license:file:path"] ?? "";
-    }
+    public readonly string LicensePath = configuration["license:file:path"] ?? "";
 }
 
 [Scope]
@@ -214,11 +210,11 @@ public class LicenseReader
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = license.DueDate
         };
 
-        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     private void LogError(Exception error)

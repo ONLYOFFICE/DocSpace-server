@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class NovellLdapSearcherLogger
+internal static partial class NovellLdapSearcherLogger
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Connect(Server='{server}', PortNumber='{portNumber}');")]
     public static partial void DebugldapConnection(this ILogger<NovellLdapSearcher> logger, string server, int portNumber);

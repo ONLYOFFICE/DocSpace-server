@@ -29,11 +29,9 @@ using Constants = ASC.Common.Security.Authorizing.Constants;
 namespace ASC.Core.Security.Authorizing;
 
 [Scope]
-class RoleProvider : IRoleProvider
+class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
 {
     //circ dep
-    private readonly IServiceProvider _serviceProvider;
-    public RoleProvider(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
     public async Task<List<IRole>> GetRolesAsync(ISubject account)
     {
@@ -46,7 +44,7 @@ class RoleProvider : IRoleProvider
             }
             else if (account is IUserAccount)
             {
-                roles = (await _serviceProvider.GetService<UserManager>()
+                roles = (await serviceProvider.GetService<UserManager>()
                                    .GetUserGroupsAsync(account.ID, IncludeType.Distinct | IncludeType.InParent))
                                    .Select(g => (IRole)g)
                                    .ToList();
@@ -63,13 +61,13 @@ class RoleProvider : IRoleProvider
 
     public async Task<bool> IsSubjectInRoleAsync(ISubject account, IRole role)
     {
-        return await _serviceProvider.GetService<UserManager>().IsUserInGroupAsync(account.ID, role.ID);
+        return await serviceProvider.GetService<UserManager>().IsUserInGroupAsync(account.ID, role.ID);
     }
 
     private async Task<List<IRole>> GetParentRolesAsync(Guid roleID)
     {
         var roles = new List<IRole>();
-        var gi = await _serviceProvider.GetService<UserManager>().GetGroupInfoAsync(roleID);
+        var gi = await serviceProvider.GetService<UserManager>().GetGroupInfoAsync(roleID);
         if (gi != null)
         {
             var parent = gi.Parent;

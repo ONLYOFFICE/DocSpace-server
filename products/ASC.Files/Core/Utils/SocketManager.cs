@@ -26,18 +26,7 @@
 
 namespace ASC.Web.Files.Utils;
 
-public class SocketManager : SocketServiceClient
-{
-    private readonly FileDtoHelper _filesWrapperHelper;
-    private readonly FolderDtoHelper _folderDtoHelper;
-    private readonly FileSecurity _fileSecurity;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-
-    protected override string Hub => "files";
-
-    public SocketManager(
-        ILogger<SocketServiceClient> logger,
+public class SocketManager(ILogger<SocketServiceClient> logger,
         IHttpClientFactory clientFactory,
         MachinePseudoKeys machinePseudoKeys,
         IConfiguration configuration,
@@ -45,14 +34,10 @@ public class SocketManager : SocketServiceClient
         TenantManager tenantManager,
         FolderDtoHelper folderDtoHelper,
         FileSecurity fileSecurity,
-        UserManager userManager) : base(logger, clientFactory, machinePseudoKeys, configuration)
-    {
-        _filesWrapperHelper = filesWrapperHelper;
-        _tenantManager = tenantManager;
-        _folderDtoHelper = folderDtoHelper;
-        _fileSecurity = fileSecurity;
-        _userManager = userManager;
-    }
+        UserManager userManager)
+    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+{
+    protected override string Hub => "files";
 
     public async Task StartEditAsync<T>(T fileId)
     {
@@ -67,27 +52,27 @@ public class SocketManager : SocketServiceClient
     }
 
     public async Task CreateFileAsync<T>(File<T> file)
-    {                
+    {
         await MakeRequest("create-file", file, true);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
-    {         
+    {
         await MakeRequest("create-folder", folder, true, users);
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
-    {        
+    {
         await MakeRequest("update-file", file, true);
     }
 
     public async Task UpdateFolderAsync<T>(Folder<T> folder)
-    {        
+    {
         await MakeRequest("update-folder", folder, true);
     }
 
     public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
-    {        
+    {
         await MakeRequest("delete-file", file, action: action);
     }
 
@@ -120,7 +105,7 @@ public class SocketManager : SocketServiceClient
                 new {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r => new { owner = r.Owner, count = r.Count}).ToList()
+                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count}).ToList()
                 });
         }
         
@@ -158,14 +143,14 @@ public class SocketManager : SocketServiceClient
 
     private async Task<string> GetFileRoomAsync<T>(T fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
     private async Task<string> GetFolderRoomAsync<T>(T folderId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-DIR-{folderId}";
     }
@@ -174,15 +159,15 @@ public class SocketManager : SocketServiceClient
     {
         return entry switch
         {
-            File<T> file => JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
-            Folder<T> folder => JsonSerializer.Serialize(await _folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            File<T> file => JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
+            Folder<T> folder => JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
             _ => string.Empty
         };
     }
-    
+
     private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanRead = await _fileSecurity.WhoCanReadAsync(entry);
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry, true);
         var userIds = whoCanRead
             .Concat(await GetAdmins())
             .Concat(new []{ entry.CreateBy })
@@ -200,12 +185,12 @@ public class SocketManager : SocketServiceClient
             return _admins;
         }
 
-        _admins = await _userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         
-        _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
+        _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-    }
 }
+    }

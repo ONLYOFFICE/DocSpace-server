@@ -27,30 +27,22 @@
 namespace ASC.AuditTrail.Mappers;
 
 [Singleton]
-public class AuditActionMapper
+public class AuditActionMapper(ILogger<AuditActionMapper> logger)
 {
-    public List<IProductActionMapper> Mappers { get; }
-    private readonly ILogger<AuditActionMapper> _logger;
-
-    public AuditActionMapper(ILogger<AuditActionMapper> logger)
-    {
-        _logger = logger;
-
-        Mappers = new List<IProductActionMapper>()
-            {
-                new DocumentsActionMapper(),
-                new LoginActionsMapper(),
-                new OthersActionsMapper(),
-                new PeopleActionMapper(),
-                new SettingsActionsMapper()
-            };
-    }
+    public List<IProductActionMapper> Mappers { get; } =
+    [
+        new DocumentsActionMapper(),
+        new LoginActionsMapper(),
+        new OthersActionsMapper(),
+        new PeopleActionMapper(),
+        new SettingsActionsMapper()
+    ];
 
     public string GetActionText(MessageMaps action, AuditEvent evt)
     {
         if (action == null)
         {
-            _logger.ErrorThereIsNoActionText(action);
+            logger.ErrorThereIsNoActionText(action);
 
             return string.Empty;
         }
@@ -66,7 +58,8 @@ public class AuditActionMapper
 
             var description = evt.Description
                                  .Select(t => t.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText))).ToArray();
+                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                                 .ToArray();
 
 
             return string.Format(actionText, description);
@@ -97,7 +90,8 @@ public class AuditActionMapper
 
             var description = evt.Description
                                  .Select(t => t.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText))).ToArray();
+                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                                 .ToArray();
 
             return string.Format(actionText, description);
         }
@@ -136,17 +130,13 @@ public class AuditActionMapper
             return null;
         }
 
-        return text.Length < 50 ? text : $"{text.Substring(0, 47)}...";
+        return text.Length < 50 ? text : $"{text[..47]}...";
     }
 
     public MessageMaps GetMessageMaps(int actionInt)
     {
         var action = (MessageAction)actionInt;
         var mapper = Mappers.SelectMany(m => m.Mappers).FirstOrDefault(m => m.Actions.ContainsKey(action));
-        if (mapper != null)
-        {
-            return mapper.Actions[action];
-        }
-        return null;
+        return mapper?.Actions[action];
     }
 }

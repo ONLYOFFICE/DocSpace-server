@@ -49,14 +49,9 @@ public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
 }
 
 [Scope]
-public class UserHelpTourHelper
+public class UserHelpTourHelper(SettingsManager settingsManager)
 {
-    private SettingsManager SettingsManager { get; }
-
-    public UserHelpTourHelper(SettingsManager settingsManager)
-    {
-        SettingsManager = settingsManager;
-    }
+    private SettingsManager SettingsManager { get; } = settingsManager;
 
     public bool IsNewUser
     {

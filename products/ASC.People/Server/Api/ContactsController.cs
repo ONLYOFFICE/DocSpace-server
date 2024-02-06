@@ -26,23 +26,15 @@
 
 namespace ASC.People.Api;
 
-public class ContactsController : PeopleControllerBase
-{
-    private readonly EmployeeFullDtoHelper _employeeFullDtoHelper;
-
-    public ContactsController(
-        UserManager userManager,
+public class ContactsController(UserManager userManager,
         PermissionContext permissionContext,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
         IHttpClientFactory httpClientFactory,
         EmployeeFullDtoHelper employeeFullDtoHelper,
         IHttpContextAccessor httpContextAccessor)
-        : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
-        _employeeFullDtoHelper = employeeFullDtoHelper;
-    }
-
     /// <summary>
     /// Deletes the contacts of the user with the ID specified in the request from the portal.
     /// </summary>
@@ -68,7 +60,7 @@ public class ContactsController : PeopleControllerBase
         await DeleteContactsAsync(inDto.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -97,7 +89,7 @@ public class ContactsController : PeopleControllerBase
         await UpdateContactsAsync(inDto.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -125,7 +117,7 @@ public class ContactsController : PeopleControllerBase
         await UpdateContactsAsync(inDto.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     private async Task DeleteContactsAsync(IEnumerable<Contact> contacts, UserInfo user)
@@ -137,10 +129,7 @@ public class ContactsController : PeopleControllerBase
             return;
         }
 
-        if (user.ContactsList == null)
-        {
-            user.ContactsList = new List<string>();
-        }
+        user.ContactsList ??= new List<string>();
 
         foreach (var contact in contacts)
         {

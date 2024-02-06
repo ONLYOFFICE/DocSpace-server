@@ -38,7 +38,7 @@ public class CollaboratorSettings : ISettings<CollaboratorSettings>
 
     public CollaboratorSettings GetDefault()
     {
-        return new CollaboratorSettings()
+        return new CollaboratorSettings
         {
             FirstVisit = true
         };

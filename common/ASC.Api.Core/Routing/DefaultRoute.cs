@@ -28,7 +28,7 @@ namespace ASC.Web.Api.Routing;
 
 public class DefaultRouteAttribute : RouteAttribute
 {
-    public static string BaseUrl { get; set; }
+    private static string BaseUrl { get; }
 
     static DefaultRouteAttribute()
     {
@@ -36,5 +36,5 @@ public class DefaultRouteAttribute : RouteAttribute
     }
 
     public DefaultRouteAttribute() : base(BaseUrl) { }
-    public DefaultRouteAttribute(string template) : base($"{BaseUrl}{template}") { }
+    public DefaultRouteAttribute(string template) : base($"{BaseUrl}/{template}") { }
 }

@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapObjectExtensionLogger
+internal static partial class LdapObjectExtensionLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Can't get attribute from ldap object (attr = {attribute}, dn = {dn})")]
     public static partial void ErrorCanNotGetAttribute(this ILogger<LdapObjectExtension> logger, string attribute, string dn,Exception exception);

@@ -26,29 +26,19 @@
 
 using ASC.Core.Tenants;
 
+using Constants = ASC.Core.Configuration.Constants;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
-                                  ITypeConverter<AuditEventQuery, AuditEvent>
-{
-    private readonly UserFormatter _userFormatter;
-    private readonly AuditActionMapper _auditActionMapper;
-    private readonly MessageTarget _messageTarget;
-    private readonly TenantUtil _tenantUtil;
-
-    public EventTypeConverter(
-        UserFormatter userFormatter,
+internal class EventTypeConverter(UserFormatter userFormatter,
         AuditActionMapper actionMapper,
         MessageTarget messageTarget,
         TenantUtil tenantUtil)
-    {
-        _userFormatter = userFormatter;
-        _auditActionMapper = actionMapper;
-        _messageTarget = messageTarget;
-        _tenantUtil = tenantUtil;
-    }
-
+    : ITypeConverter<LoginEventQuery, LoginEvent>,
+        ITypeConverter<AuditEventQuery, AuditEvent>
+{
     public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
         var result = context.Mapper.Map<LoginEvent>(source.Event);
@@ -64,7 +54,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
 
         if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
         {
-            result.UserName = _userFormatter.GetUserName(source.FirstName, source.LastName);
+            result.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
         }
         else if (!string.IsNullOrEmpty(source.FirstName))
         {
@@ -78,7 +68,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
         {
             result.UserName = result.Login;
         }
-        else if (result.UserId == Core.Configuration.Constants.Guest.ID)
+        else if (result.UserId == Constants.Guest.ID)
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
@@ -87,9 +77,9 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
             result.UserName = AuditReportResource.UnknownAccount;
         }
 
-        result.ActionText = _auditActionMapper.GetActionText(_auditActionMapper.GetMessageMaps(result.Action), result);
+        result.ActionText = actionMapper.GetActionText(actionMapper.GetMessageMaps(result.Action), result);
 
-        result.Date = _tenantUtil.DateTimeFromUtc(result.Date);
+        result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         result.IP = result.IP.Split(':').Length > 1 ? result.IP.Split(':')[0] : result.IP;
 
         return result;
@@ -101,7 +91,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
         source.Event.Target = null;
         var result = context.Mapper.Map<AuditEvent>(source.Event);
 
-        result.Target = _messageTarget.Parse(target);
+        result.Target = messageTarget.Parse(target);
 
         if (source.Event.DescriptionRaw != null)
         {
@@ -113,17 +103,17 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
                });
         }
 
-        if (result.UserId == Core.Configuration.Constants.CoreSystem.ID)
+        if (result.UserId == Constants.CoreSystem.ID)
         {
             result.UserName = AuditReportResource.SystemAccount;
         }
-        else if (result.UserId == Core.Configuration.Constants.Guest.ID)
+        else if (result.UserId == Constants.Guest.ID)
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
         else if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
         {
-            result.UserName = _userFormatter.GetUserName(source.FirstName, source.LastName);
+            result.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
         }
         else if (!string.IsNullOrEmpty(source.FirstName))
         {
@@ -138,17 +128,17 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
             result.UserName = result.Initiator ?? AuditReportResource.UnknownAccount;
         }
 
-        var map = _auditActionMapper.GetMessageMaps(result.Action);
+        var map = actionMapper.GetMessageMaps(result.Action);
         if (map != null)
         {
-            result.ActionText = _auditActionMapper.GetActionText(map, result);
-            result.ActionTypeText = _auditActionMapper.GetActionTypeText(map);
-            result.Product = _auditActionMapper.GetProductText(map);
-            result.Module = _auditActionMapper.GetModuleText(map);
+            result.ActionText = actionMapper.GetActionText(map, result);
+            result.ActionTypeText = actionMapper.GetActionTypeText(map);
+            result.Product = actionMapper.GetProductText(map);
+            result.Module = actionMapper.GetModuleText(map);
         }
 
 
-        result.Date = _tenantUtil.DateTimeFromUtc(result.Date);
+        result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         if (!string.IsNullOrEmpty(result.IP))
         {
             var ipSplited = result.IP.Split(':');
@@ -164,7 +154,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
-                var notificationInfo = System.Text.Json.JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
+                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
 
                 result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;

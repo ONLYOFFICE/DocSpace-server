@@ -27,23 +27,12 @@
 namespace ASC.FederatedLogin.Helpers;
 
 [Scope]
-public class OAuth20TokenHelper
+public class OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, ConsumerFactory consumerFactory, RequestHelper requestHelper)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly RequestHelper _requestHelper;
-
-    public OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, ConsumerFactory consumerFactory, RequestHelper requestHelper)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _consumerFactory = consumerFactory;
-        _requestHelper = requestHelper;
-    }
-
     public string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
         where T : Consumer, IOAuthProvider, new()
     {
-        var loginProvider = _consumerFactory.Get<T>();
+        var loginProvider = consumerFactory.Get<T>();
         var requestUrl = loginProvider.CodeUrl;
         var clientID = loginProvider.ClientID;
         var redirectUri = loginProvider.RedirectUri;
@@ -73,7 +62,7 @@ public class OAuth20TokenHelper
             query += $"&scope={HttpUtility.UrlEncode(scope)}";
         }
 
-        var u = _httpContextAccessor.HttpContext.Request.Url();
+        var u = httpContextAccessor.HttpContext.Request.Url();
 
         var stateUriBuilder = new UriBuilder(u.Scheme, u.Host, u.Port, $"thirdparty/{loginProvider.Name.ToLower()}/code");
 
@@ -82,9 +71,9 @@ public class OAuth20TokenHelper
             var stateQuery = "";
             stateQuery = additionalStateArgs.Keys
                 .Where(a => a != null)
-                .Aggregate(stateQuery, (current, a) => a != null ? $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}" : null);
+                .Aggregate(stateQuery, (current, a) => $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}");
 
-            stateUriBuilder.Query = stateQuery.Substring(1);
+            stateUriBuilder.Query = stateQuery[1..];
         }
 
         var state = HttpUtility.UrlEncode(stateUriBuilder.Uri.AbsoluteUri);
@@ -94,9 +83,9 @@ public class OAuth20TokenHelper
         {
             query = additionalArgs.Keys.Where(additionalArg => additionalArg != null)
                                   .Aggregate(query, (current, additionalArg) =>
-                                                    additionalArg != null ? current
-                                                                            + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
-                                                                               + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()) : null);
+                                                    current
+                                                    + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
+                                                    + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()));
         }
 
         return uriBuilder.Uri + "?" + query;
@@ -123,7 +112,7 @@ public class OAuth20TokenHelper
 
         data += "&grant_type=authorization_code";
 
-        var json = _requestHelper.PerformRequest(requestUrl, "application/x-www-form-urlencoded", "POST", data);
+        var json = requestHelper.PerformRequest(requestUrl, "application/x-www-form-urlencoded", "POST", data);
         if (json != null)
         {
             if (!json.StartsWith('{'))
@@ -164,7 +153,7 @@ public class OAuth20TokenHelper
 
         var data = $"client_id={HttpUtility.UrlEncode(token.ClientID)}&client_secret={HttpUtility.UrlEncode(token.ClientSecret)}&refresh_token={HttpUtility.UrlEncode(token.RefreshToken)}&grant_type=refresh_token";
 
-        var json = _requestHelper.PerformRequest(requestUrl, "application/x-www-form-urlencoded", "POST", data);
+        var json = requestHelper.PerformRequest(requestUrl, "application/x-www-form-urlencoded", "POST", data);
         if (json != null)
         {
             var refreshed = OAuth20Token.FromJson(json);

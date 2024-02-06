@@ -34,17 +34,20 @@ public interface IProviderInfo : IDisposable
     FolderType RootFolderType { get; }
     FolderType FolderType { get; }
     DateTime CreateOn { get; }
-    string CustomerTitle { get; }
+    DateTime ModifiedOn { get; }
+    string CustomerTitle { get; internal set; }
     string RootFolderId { get; }
     string FolderId { get; set; }
     bool Private { get; }
     bool HasLogo { get; }
+    string Color { get; }
     Task<bool> CheckAccessAsync();
     Task InvalidateStorageAsync();
     Task CacheResetAsync(string id = null, bool? isFile = null);
     void UpdateTitle(string newtitle);
     Selector Selector { get; }
     ProviderFilter ProviderFilter { get; }
+    bool MutableEntityId { get; }
 }
 
 [Transient]
@@ -56,7 +59,4 @@ public interface IProviderInfo<TFile, TFolder, TItem> : IProviderInfo
     Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync { get; }
 }
 
-public class ProviderInfoArgumentException : ArgumentException
-{
-    public ProviderInfoArgumentException(string message) : base(message) { }
-}
+public class ProviderInfoArgumentException(string message) : ArgumentException(message);

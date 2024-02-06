@@ -30,15 +30,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
-{
-    private readonly CrossDao _crossDao;
-    private readonly SharePointDaoSelector _sharePointDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-    private readonly IFolderDao<int> _folderDao;
-
-    public SharePointFolderDao(
-        IServiceProvider serviceProvider,
+internal class SharePointFolderDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -50,19 +42,23 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
+        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
     {
-        _crossDao = crossDao;
-        _sharePointDaoSelector = sharePointDaoSelector;
-        _fileDao = fileDao;
-        _folderDao = folderDao;
-    }
-
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
-        return SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        
+        if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+        {
+            return folder;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+
+        return folder;
     }
 
     public async Task<Folder<string>> GetFolderAsync(string title, string parentId)
@@ -104,11 +100,14 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
-    {
+        {
             yield return room;
         }
         }
-
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
+    {
+        return GetFoldersAsync(parentId);
+    }
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
@@ -150,7 +149,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
             SortedByType.AZ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? folders.OrderBy(x => x.ModifiedOn) : folders.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? folders.OrderBy(x => x.CreateOn) : folders.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title)
         };
 
         return folders;
@@ -240,26 +239,26 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            var link = await Queries.TagLinksAsync(filesDbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+            var link = await Queries.TagLinksAsync(dbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.TagLink.RemoveRange(link);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.TagLink.RemoveRange(link);
+            await dbContext.SaveChangesAsync();
 
-            var tagsToRemove = await Queries.TagsAsync(filesDbContext).ToListAsync();
+            var tagsToRemove = await Queries.TagsAsync(dbContext).ToListAsync();
 
-            filesDbContext.Tag.RemoveRange(tagsToRemove);
+            dbContext.Tag.RemoveRange(tagsToRemove);
 
-            var securityToDelete = await Queries.SecuritiesAsync(filesDbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
+            var securityToDelete = await Queries.SecuritiesAsync(dbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.Security.RemoveRange(securityToDelete);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.Security.RemoveRange(securityToDelete);
+            await dbContext.SaveChangesAsync();
 
-            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(filesDbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
+            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, TenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
+            await dbContext.SaveChangesAsync();
 
             await tx.CommitAsync();
         });
@@ -285,9 +284,9 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
     public async Task<int> MoveFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
-        var moved = await _crossDao.PerformCrossDaoFolderCopyAsync(
-                folderId, this, _sharePointDaoSelector.GetFileDao(folderId), _sharePointDaoSelector.ConvertId,
-                toFolderId, _folderDao, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
+                folderId, this, sharePointDaoSelector.GetFileDao(folderId), sharePointDaoSelector.ConvertId,
+                toFolderId, folderDao, fileDao, r => r,
                 true, cancellationToken)
             ;
 
@@ -324,9 +323,9 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
     public async Task<Folder<int>> CopyFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
-        var moved = await _crossDao.PerformCrossDaoFolderCopyAsync(
-            folderId, this, _sharePointDaoSelector.GetFileDao(folderId), _sharePointDaoSelector.ConvertId,
-            toFolderId, _folderDao, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
+            folderId, this, sharePointDaoSelector.GetFileDao(folderId), sharePointDaoSelector.ConvertId,
+            toFolderId, folderDao, fileDao, r => r,
             false, cancellationToken)
             ;
 
@@ -369,12 +368,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
 
             if (DocSpaceHelper.IsRoom(SharePointProviderInfo.FolderType) && SharePointProviderInfo.FolderId != null)
             {
-                await DaoSelector.RenameProviderAsync(SharePointProviderInfo, newTitle);
-
-                if (SharePointProviderInfo.FolderId == oldId)
-                {
-                    await DaoSelector.UpdateProviderFolderId(SharePointProviderInfo, newFolderId);
-                }
+                await DaoSelector.RenameRoomProviderAsync(SharePointProviderInfo, newTitle, newFolderId);
             }
         }
 
@@ -438,18 +432,27 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
     {
         return Task.FromResult("tar.gz");
     }
+
+    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    {
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
+            ? (string.Empty, string.Empty) 
+            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+    }
+
+    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> HashIdsAsync =
-        EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string idStart) =>
-                ctx.ThirdpartyIdMapping
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id.StartsWith(idStart))
-                    .Select(r => r.HashId));
-
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesTagLink>> TagLinksAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string idStart) =>
@@ -489,4 +492,14 @@ static file class Queries
                     ctx.ThirdpartyIdMapping
                         .Where(r => r.TenantId == tenantId)
                         .Where(m => m.Id.StartsWith(idStart)));
+    
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, SubjectType, Task<bool>>
+        SharedAsync =
+            EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, SubjectType subjectType) =>
+                    ctx.Security
+                        .Where(t => t.TenantId == tenantId && t.EntryType == entryType && t.SubjectType == subjectType)
+                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId, 
+                            (s, m) => new { s, m.Id })
+                        .Any(r => r.Id == entryId));
 }

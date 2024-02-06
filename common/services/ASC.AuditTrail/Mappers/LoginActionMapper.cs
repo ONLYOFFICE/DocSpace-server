@@ -28,18 +28,8 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class LoginActionsMapper : IProductActionMapper
 {
-    public ProductType Product { get; }
-    public List<IModuleActionMapper> Mappers { get; }
-
-    public LoginActionsMapper()
-    {
-        Product = ProductType.Login;
-
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new LoginNoneModuleActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.Login;
+    public List<IModuleActionMapper> Mappers { get; } = [new LoginNoneModuleActionMapper()];
 }
 
 internal class LoginNoneModuleActionMapper : IModuleActionMapper
@@ -51,7 +41,7 @@ internal class LoginNoneModuleActionMapper : IModuleActionMapper
     {
         Module = ModuleType.None;
 
-        Actions = new MessageMapsDictionary()
+        Actions = new MessageMapsDictionary
         {
             MessageAction.LoginSuccess,
             MessageAction.LoginSuccessViaSms,MessageAction.LoginSuccessViaApi,MessageAction.LoginSuccessViaApiSms,

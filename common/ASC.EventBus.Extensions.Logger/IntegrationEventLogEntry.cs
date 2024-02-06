@@ -48,7 +48,7 @@ public class IntegrationEventLogEntry
     public string EventTypeName { get; private set; }
 
     [NotMapped]
-    public string EventTypeShortName => EventTypeName.Split('.')?.Last();
+    public string EventTypeShortName => EventTypeName.Split('.').Last();
 
     [NotMapped]
     public IntegrationEvent IntegrationEvent { get; private set; }
@@ -64,7 +64,7 @@ public class IntegrationEventLogEntry
 
     public IntegrationEventLogEntry DeserializeJsonContent(Type type)
     {
-        IntegrationEvent = JsonSerializer.Deserialize(Content, type, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) as IntegrationEvent;
+        IntegrationEvent = JsonSerializer.Deserialize(Content, type, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) as IntegrationEvent;
         return this;
     }
 }

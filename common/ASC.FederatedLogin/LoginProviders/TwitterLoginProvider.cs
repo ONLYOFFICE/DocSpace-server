@@ -60,10 +60,8 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
     }
 
@@ -72,7 +70,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     {
         if (!string.IsNullOrEmpty(context.Request.Query["denied"]))
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, new Exception("Canceled at provider"));
+            return LoginProfile.FromError(new Exception("Canceled at provider"));
         }
 
         var appClient = new TwitterClient(ClientID, ClientSecret);
@@ -129,7 +127,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
 
         return user == null
                    ? null
-                   : new LoginProfile(Signature, InstanceCrypto)
+                   : new LoginProfile
                    {
                        Name = user.Name,
                        DisplayName = user.ScreenName,
@@ -154,9 +152,12 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     internal LoginProfile ProfileFromTwitter(string twitterProfile)
     {
         var jProfile = JObject.Parse(twitterProfile);
-        if (jProfile == null) throw new Exception("Failed to correctly process the response");
+        if (jProfile == null)
+        {
+            throw new Exception("Failed to correctly process the response");
+        }
 
-        return new LoginProfile(Signature, InstanceCrypto)
+        return new LoginProfile
         {
             DisplayName = jProfile.Value<string>("name"),
             Locale = jProfile.Value<string>("lang"),

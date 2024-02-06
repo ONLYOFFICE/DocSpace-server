@@ -30,15 +30,10 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Common.Notify;
 
-class PushSenderSink : Sink
+class PushSenderSink(INotifySender sender) : Sink
 {
     private static readonly string _senderName = Constants.NotifyPushSenderSysName;
-    private readonly INotifySender _sender;
-
-    public PushSenderSink(INotifySender sender)
-    {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-    }
+    private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
     {
@@ -77,27 +72,18 @@ public class LowerCaseNamingPolicy : JsonNamingPolicy
         name.ToLower();
 }
 [Scope]
-public class PushSenderSinkMessageCreator : SinkMessageCreator
+public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
 {
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-
-    public PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager)
-    {
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-    }
-
     public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
         if (tenant == null)
         {
-            await _tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
-            tenant = await _tenantManager.GetCurrentTenantAsync(false);
+            await tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
+            tenant = await tenantManager.GetCurrentTenantAsync(false);
         }      
 
-        var user = await _userManager.GetUsersAsync(new Guid(message.Recipient.ID));
+        var user = await userManager.GetUsersAsync(new Guid(message.Recipient.ID));
         var username = user.UserName;
 
         var fromTag = message.Arguments.FirstOrDefault(x => x.Tag.Equals("MessageFrom"));
@@ -109,17 +95,17 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
         var rootFolderType = message.Arguments.FirstOrDefault(x => x.Tag.Equals("FolderRootFolderType"));
 
 
-        var notifyData = new NotifyData()
+        var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = (await _tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
+            Portal = (await tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {
                 Id = folderId is { Value: not null } ? folderId.Value.ToString() : "",
                 ParentId = rootFolderId is { Value: not null } ? rootFolderId.Value.ToString() : "",
                 RootFolderType = rootFolderType is { Value: not null } ? (int)rootFolderType.Value : 0
-            },
+            }
         };
 
         var msg = (NoticeMessage)message;
@@ -129,9 +115,9 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
             var documentTitle = message.Arguments.FirstOrDefault(x => x.Tag.Equals("DocumentTitle"));
             var documentExtension = message.Arguments.FirstOrDefault(x => x.Tag.Equals("DocumentExtension"));
 
-            notifyData.File = new NotifyFileData()
+            notifyData.File = new NotifyFileData
             {
-                Id = msg.ObjectID.Substring(5),
+                Id = msg.ObjectID[5..],
                 Title = documentTitle is { Value: not null } ? documentTitle.Value.ToString() : "",
                 Extension = documentExtension is { Value: not null } ? documentExtension.Value.ToString() : ""
 

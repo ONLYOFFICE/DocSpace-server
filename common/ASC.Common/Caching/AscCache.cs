@@ -37,7 +37,7 @@ public class AscCacheNotify
         _cacheNotify = cacheNotify;
         _cache = cache;
 
-        _cacheNotify.Subscribe((_) => { OnClearCache(); }, CacheNotifyAction.Any);
+        _cacheNotify.Subscribe(_ => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
     public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
@@ -49,20 +49,13 @@ public class AscCacheNotify
 }
 
 [Singleton]
-public sealed class AscCache : ICache, IDisposable
+public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
-    private readonly IMemoryCache _memoryCache;
-    private CancellationTokenSource _resetCacheToken;
-
-    public AscCache(IMemoryCache memoryCache)
-    {
-        _memoryCache = memoryCache;
-        _resetCacheToken = new();
-    }
+    private CancellationTokenSource _resetCacheToken = new();
 
     public T Get<T>(string key) where T : class
     {
-        return _memoryCache.Get<T>(key);
+        return memoryCache.Get<T>(key);
     }
 
     public void Insert(string key, object value, TimeSpan slidingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null)
@@ -77,7 +70,7 @@ public sealed class AscCache : ICache, IDisposable
 
     public void Remove(string key)
     {
-        _memoryCache.Remove(key);
+        memoryCache.Remove(key);
     }
 
     public void Remove(ConcurrentDictionary<string, object> keys, Regex pattern)
@@ -87,7 +80,7 @@ public sealed class AscCache : ICache, IDisposable
 
         foreach (var key in matchedKeys)
         {
-            _memoryCache.Remove(key);
+            memoryCache.Remove(key);
         }
     }
 
@@ -103,11 +96,11 @@ public sealed class AscCache : ICache, IDisposable
     }
 
     public ConcurrentDictionary<string, T> HashGetAll<T>(string key) =>
-        _memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
+        memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
 
     public T HashGet<T>(string key, string field)
     {
-        if (_memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
+        if (memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
             && dic.TryGetValue(field, out var value))
         {
             return value;
@@ -128,7 +121,7 @@ public sealed class AscCache : ICache, IDisposable
         {
             dic.AddOrUpdate(field, value, (_, _) => value);
 
-            _memoryCache.Set(key, dic, options);
+            memoryCache.Set(key, dic, options);
         }
         else if (dic != null)
         {
@@ -136,11 +129,11 @@ public sealed class AscCache : ICache, IDisposable
 
             if (dic.IsEmpty)
             {
-                _memoryCache.Remove(key);
+                memoryCache.Remove(key);
             }
             else
             {
-                _memoryCache.Set(key, dic, options);
+                memoryCache.Set(key, dic, options);
             }
         }
     }
@@ -165,14 +158,14 @@ public sealed class AscCache : ICache, IDisposable
             options = options.RegisterPostEvictionCallback(new PostEvictionDelegate(evictionCallback));
         }
 
-        _memoryCache.Set(key, value, options);
+        memoryCache.Set(key, value, options);
     }
     
     private void Dispose(bool disposing)
     {
         if (disposing)
         {
-            _memoryCache?.Dispose();
+            memoryCache?.Dispose();
             _resetCacheToken?.Dispose();
         }
     }

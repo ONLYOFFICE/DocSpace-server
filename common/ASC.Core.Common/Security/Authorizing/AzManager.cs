@@ -27,35 +27,16 @@
 namespace ASC.Common.Security.Authorizing;
 
 [Scope]
-public class AzManager
+public class AzManager(IRoleProvider roleProvider, IPermissionProvider permissionProvider)
 {
-    private readonly IPermissionProvider _permissionProvider;
-    private readonly IRoleProvider _roleProvider;
-
-    internal AzManager() { }
-
-    public AzManager(IRoleProvider roleProvider, IPermissionProvider permissionProvider)
-        : this()
-    {
-        _roleProvider = roleProvider ?? throw new ArgumentNullException(nameof(roleProvider));
-        _permissionProvider = permissionProvider ?? throw new ArgumentNullException(nameof(permissionProvider));
-    }
-
-    public async Task<(bool, ISubject, IAction)> CheckPermissionAsync(ISubject subject, IAction action, ISecurityObjectId objectId,
-                                ISecurityObjectProvider securityObjProvider)
+    private readonly IPermissionProvider _permissionProvider = permissionProvider ?? throw new ArgumentNullException(nameof(permissionProvider));
+    private readonly IRoleProvider _roleProvider = roleProvider ?? throw new ArgumentNullException(nameof(roleProvider));
+    
+    internal async Task<AzManagerAcl> CheckPermissionAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(subject);
-
-        var acl = await GetAzManagerAclAsync(subject, action, objectId, securityObjProvider);
-        var denySubject = acl.DenySubject;
-        var denyAction = acl.DenyAction;
-
-        return (acl.IsAllow, denySubject, denyAction);
-    }
-
-    internal async Task<AzManagerAcl> GetAzManagerAclAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
-    {
+        
         if (action.AdministratorAlwaysAllow && (Constants.DocSpaceAdmin.ID == subject.ID || await _roleProvider.IsSubjectInRoleAsync(subject, Constants.DocSpaceAdmin) 
             || (objectId is SecurityObject obj && await obj.IsMatchDefaultRulesAsync(subject, action, _roleProvider))))
         {
@@ -100,16 +81,13 @@ public class AzManager
         return acl;
     }
 
-    internal async Task<IEnumerable<ISubject>> GetSubjectsAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
+    private async Task<IEnumerable<ISubject>> GetSubjectsAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         var subjects = new List<ISubject>
             {
                 subject
             };
-        subjects.AddRange(
-            (await _roleProvider.GetRolesAsync(subject))
-                .ConvertAll(r => { return (ISubject)r; })
-            );
+        subjects.AddRange((await _roleProvider.GetRolesAsync(subject)).ConvertAll(r => (ISubject)r));
         if (objectId != null)
         {
             var secObjProviderHelper = new AzObjectSecurityProviderHelper(objectId, securityObjProvider);
@@ -132,17 +110,13 @@ public class AzManager
 
         return subjects;
     }
+}
 
-    #region Nested type: AzManagerAcl
-
-    internal class AzManagerAcl
-    {
-        public IAction DenyAction { get; set; }
-        public ISubject DenySubject { get; set; }
-        public bool IsAllow { get; set; }
-        public static AzManagerAcl Allow => new() { IsAllow = true };
-        public static AzManagerAcl Default => new() { IsAllow = false };
-    }
-
-    #endregion
+internal class AzManagerAcl
+{
+    public IAction DenyAction { get; set; }
+    public ISubject DenySubject { get; set; }
+    public bool IsAllow { get; set; }
+    public static AzManagerAcl Allow => new() { IsAllow = true };
+    public static AzManagerAcl Default => new() { IsAllow = false };
 }

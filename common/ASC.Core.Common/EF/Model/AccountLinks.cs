@@ -36,7 +36,7 @@ public class AccountLinks : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { Id, UId };
+        return [Id, UId];
     }
 }
 

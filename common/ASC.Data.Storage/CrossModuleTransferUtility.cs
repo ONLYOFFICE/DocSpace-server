@@ -26,31 +26,16 @@
 
 namespace ASC.Data.Storage;
 
-public class CrossModuleTransferUtility
+public class CrossModuleTransferUtility(ILogger option,
+    TempStream tempStream,
+    IDataStore source,
+    IDataStore destination,
+    AscDistributedCache cache)
 {
-    private readonly ILogger _logger;
-    private readonly IDataStore _source;
-    private readonly IDataStore _destination;
-    private readonly long _maxChunkUploadSize;
-    private readonly int _chunkSize;
-    private readonly TempStream _tempStream;
-    private readonly TempPath _tempPath;
-
-    public CrossModuleTransferUtility(
-        ILogger option,
-        TempStream tempStream,
-        TempPath tempPath,
-        IDataStore source,
-        IDataStore destination)
-    {
-        _logger = option;
-        _tempStream = tempStream;
-        _tempPath = tempPath;
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _destination = destination ?? throw new ArgumentNullException(nameof(destination));
-        _maxChunkUploadSize = 10 * 1024 * 1024;
-        _chunkSize = 5 * 1024 * 1024;
-    }
+    private readonly IDataStore _source = source ?? throw new ArgumentNullException(nameof(source));
+    private readonly IDataStore _destination = destination ?? throw new ArgumentNullException(nameof(destination));
+    private readonly long _maxChunkUploadSize = 10 * 1024 * 1024;
+    private readonly int _chunkSize = 5 * 1024 * 1024;
 
     public async ValueTask CopyFileAsync(string srcDomain, string srcPath, string destDomain, string destPath)
     {
@@ -67,17 +52,18 @@ public class CrossModuleTransferUtility
         else
         {
             var session = new CommonChunkedUploadSession(stream.Length);
-            var holder = new CommonChunkedUploadSessionHolder(_tempPath, _destination, destDomain);
+            var holder = new CommonChunkedUploadSessionHolder(_destination, destDomain, cache);
             await holder.InitAsync(session);
             try
             {
                 Stream memstream = null;
+                var i = 1;
                 try
                 {
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        await holder.UploadChunkAsync(session, memstream, _chunkSize);
+                        await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
                         await memstream.DisposeAsync();
                     }
                 }
@@ -94,7 +80,7 @@ public class CrossModuleTransferUtility
             }
             catch (Exception ex)
             {
-                _logger.ErrorCopyFile(ex);
+                option.ErrorCopyFile(ex);
                 await holder.AbortAsync(session);
             }
         }
@@ -102,7 +88,7 @@ public class CrossModuleTransferUtility
 
     private bool GetStream(Stream stream, out Stream memstream)
     {
-        memstream = _tempStream.Create();
+        memstream = tempStream.Create();
         var total = 0;
         int readed;
         const int portion = 2048;

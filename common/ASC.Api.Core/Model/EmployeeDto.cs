@@ -63,42 +63,25 @@ public class EmployeeDto
             Id = Guid.Empty,
             DisplayName = "Mike Zanyatski",
             Title = "Manager",
-            AvatarSmall = "url to small avatar",
+            AvatarSmall = "url to small avatar"
         };
     }
 }
 
 [Scope]
-public class EmployeeDtoHelper
+public class EmployeeDtoHelper(
+    ApiContext httpContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserPhotoManager userPhotoManager,
+    CommonLinkUtility commonLinkUtility,
+    UserManager userManager,
+    ILogger<EmployeeDtoHelper> logger)
 {
-    protected readonly UserPhotoManager _userPhotoManager;
-    protected readonly UserManager _userManager;
-    protected readonly TenantManager _tenantManager;
-    private readonly ILogger<EmployeeDtoHelper> _logger;
-    private readonly ApiContext _httpContext;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary;
-
-    public EmployeeDtoHelper(
-        ApiContext httpContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserPhotoManager userPhotoManager,
-        CommonLinkUtility commonLinkUtility,
-        UserManager userManager,
-        TenantManager tenantManager,
-        ILogger<EmployeeDtoHelper> logger)
-    {
-        _userPhotoManager = userPhotoManager;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _logger = logger;
-        _httpContext = httpContext;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _dictionary = new ConcurrentDictionary<Guid, EmployeeDto>();
-    }
-
+    private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
+    protected readonly ApiContext _httpContext = httpContext;
+    protected  readonly UserPhotoManager _userPhotoManager = userPhotoManager;
+    protected  readonly UserManager _userManager = userManager;
+    
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))
@@ -120,7 +103,7 @@ public class EmployeeDtoHelper
         }
         catch (Exception e)
         {
-            _logger.ErrorWithException(e);
+            logger.ErrorWithException(e);
             return await GetAsync(Constants.LostUser);
         }
     }
@@ -128,7 +111,7 @@ public class EmployeeDtoHelper
     protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
     {
         result.Id = userInfo.Id;
-        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
+        result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
 
         if (!string.IsNullOrEmpty(userInfo.Title))
@@ -145,8 +128,8 @@ public class EmployeeDtoHelper
 
         if (result.Id != Guid.Empty)
         {
-            var profileUrl = await _commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
-            result.ProfileUrl = _commonLinkUtility.GetFullAbsolutePath(profileUrl);
+            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
+            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 
         return result;

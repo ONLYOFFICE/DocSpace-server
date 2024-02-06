@@ -30,6 +30,7 @@ public class MessageSettings
 {
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
+    private const string XRealIPHeader = "X-Real-IP";
     private const string EditorsUAHeader = "AscDesktopEditor";
     private const string EditorsName = "Desktop Editors";
 
@@ -43,6 +44,28 @@ public class MessageSettings
     public static ClientInfo GetClientInfo(string uaHeader)
     {
         return Parser.Parse(uaHeader);
+    }
+
+    public static IDictionary<string, StringValues> GetHttpHeaders(HttpRequest request)
+    {
+        if (request == null)
+        {
+            return null;
+        }
+
+        var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
+
+        if (!headers.TryGetValue(XRealIPHeader, out var header))
+        {
+            var remoteIpAddress = GetIP(request);
+
+            if (!string.IsNullOrEmpty(remoteIpAddress))
+            {
+                headers.Add(XRealIPHeader, remoteIpAddress);
+            }
+        }
+
+        return headers;
     }
 
     public static string GetUAHeader(HttpRequest request)
@@ -68,6 +91,11 @@ public class MessageSettings
     public static string GetIP(HttpRequest request)
     {
         return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
+    }
+
+    public static string GetIP(IDictionary<string, StringValues> headers)
+    {
+        return headers.TryGetValue(XRealIPHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static void AddInfoMessage(EventMessage message, Dictionary<string, ClientInfo> dict = null)

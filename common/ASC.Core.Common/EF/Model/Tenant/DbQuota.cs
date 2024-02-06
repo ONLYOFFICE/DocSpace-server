@@ -40,7 +40,7 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId };
+        return [TenantId];
     }
 
     public void Mapping(Profile profile)

@@ -26,4 +26,4 @@
 
 namespace ASC.Common.Security.Authorizing;
 
-public interface IRole : ISubject, IRuleData { }
+public interface IRole : ISubject, IRuleData;

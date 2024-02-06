@@ -27,13 +27,8 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<(h[0-9]|p|pre|blockquote)" + Globals.HtmlAttributesPattern + ">")]
-public class PassthroughFormatterState : FormatterState
+public class PassthroughFormatterState(TextileFormatter f) : FormatterState(f)
 {
-    public PassthroughFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
-
     public override string Consume(string input, Match m)
     {
         this.Formatter.ChangeState(this);

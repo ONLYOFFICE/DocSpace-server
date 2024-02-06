@@ -30,6 +30,6 @@ public class SpanPhraseBlockModifier : PhraseBlockModifier
 {
     public override string ModifyLine(string line)
     {
-        return PhraseModifierFormat(line, @"%", "span");
+        return PhraseModifierFormat(line, "%", "span");
     }
 }

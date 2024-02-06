@@ -27,47 +27,31 @@
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRestoreRequestedIntegrationEventHandler : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
-{
-    private readonly BackupAjaxHandler _backupAjaxHandler;
-    private readonly ILogger _logger;
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly AuthManager _authManager;
-    private readonly BackupWorker _backupWorker;
-
-    public BackupRestoreRequestedIntegrationEventHandler(
+public class BackupRestoreRequestedIntegrationEventHandler(
         BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRestoreRequestedIntegrationEventHandler> logger,
+        ILogger logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         AuthManager authManager,
         BackupWorker backupWorker)
-    {
-        _tenantManager = tenantManager;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _backupAjaxHandler = backupAjaxHandler;
-        _logger = logger;
-        _backupWorker = backupWorker;
-    }
-
+    : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
+{
     public async Task Handle(BackupRestoreRequestIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && _backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
 
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _backupAjaxHandler.StartRestoreAsync(@event.BackupId,
+            await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
                                             @event.StorageType,
                                             @event.StorageParams,
                                             @event.Notify,

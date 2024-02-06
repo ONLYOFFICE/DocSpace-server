@@ -24,60 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
-public class CommonMethods
+public class CommonMethods(
+    IHttpContextAccessor httpContextAccessor,
+    IConfiguration configuration,
+    ILogger<CommonMethods> log,
+    CoreSettings coreSettings,
+    CommonLinkUtility commonLinkUtility,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    TimeZoneConverter timeZoneConverter, CommonConstants commonConstants,
+    IMemoryCache memoryCache,
+    HostedSolution hostedSolution,
+    CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
+    IHttpClientFactory clientFactory)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<CommonMethods> _log;
-    private readonly CoreSettings _coreSettings;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly TimeZoneConverter _timeZoneConverter;
-    private readonly CommonConstants _commonConstants;
-    private readonly HostedSolution _hostedSolution;
-    private readonly IMemoryCache _memoryCache;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly TenantManager _tenantManager;
-    private readonly IHttpClientFactory _clientFactory;
-
-    public CommonMethods(
-        IHttpContextAccessor httpContextAccessor,
-        IConfiguration configuration,
-        ILogger<CommonMethods> log,
-        CoreSettings coreSettings,
-        CommonLinkUtility commonLinkUtility,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        TimeZoneConverter timeZoneConverter, CommonConstants commonConstants,
-        IMemoryCache memoryCache,
-        HostedSolution hostedSolution,
-        CoreBaseSettings coreBaseSettings,
-        TenantManager tenantManager,
-        IHttpClientFactory clientFactory)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _configuration = configuration;
-        _log = log;
-        _coreSettings = coreSettings;
-        _commonLinkUtility = commonLinkUtility;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _timeZoneConverter = timeZoneConverter;
-        _commonConstants = commonConstants;
-        _memoryCache = memoryCache;
-        _coreBaseSettings = coreBaseSettings;
-        _tenantManager = tenantManager;
-        _clientFactory = clientFactory;
-        _hostedSolution = hostedSolution;
-    }
-
-    public object ToTenantWrapper(Tenant t)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
         return new
         {
             created = t.CreationDateTime,
-            domain = t.GetTenantDomain(_coreSettings),
+            domain = t.GetTenantDomain(coreSettings),
             hostedRegion = t.HostedRegion,
             industry = t.Industry,
             language = t.Language,
@@ -87,32 +57,34 @@ public class CommonMethods
             portalName = t.Alias,
             status = t.Status.ToString(),
             tenantId = t.Id,
-            timeZoneName = _timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            quotaUsage,
+            owner
         };
     }
 
-    public string CreateReference(int tenantId, string requestUriScheme, string tenantDomain, string email, bool first = false, string module = "", bool sms = false)
+    public string CreateReference(int tenantId, string requestUriScheme, string tenantDomain, string email, bool first = false)
     {
-        var url = _commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, (first ? "true" : "") + module + (sms ? "true" : ""));
-        return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}{(string.IsNullOrEmpty(module) ? "" : "&module=" + module)}{(sms ? "&sms=true" : "")}";
+        var url = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, first ? "true" : "");
+        return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}";
     }
 
     public bool SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome, out string url)
     {
-        var validationKey = _emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + ConfirmType.Auth);
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + ConfirmType.Auth);
 
         url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
-                            tenant.GetTenantDomain(_coreSettings),
-                            _commonConstants.WebApiBaseUrl,
+                            tenant.GetTenantDomain(coreSettings),
+                            commonConstants.WebApiBaseUrl,
                             "portal/sendcongratulations",
                             tenant.OwnerId,
                             validationKey);
 
         if (skipWelcome)
         {
-            _log.LogDebug("congratulations skiped");
+            log.LogDebug("congratulations skiped");
             return false;
         }
 
@@ -125,10 +97,10 @@ public class CommonMethods
 
         try
         {
-            var httpClient = _clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var response = httpClient.Send(request);
 
-            _log.LogDebug("congratulations result = {0}", response.StatusCode);
+            log.LogDebug("congratulations result = {0}", response.StatusCode);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -140,7 +112,7 @@ public class CommonMethods
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "SendCongratulations error");
+            log.LogError(ex, "SendCongratulations error");
             return false;
         }
 
@@ -150,38 +122,79 @@ public class CommonMethods
 
     public async Task<(bool, Tenant)> TryGetTenantAsync(IModel model)
     {
-        Tenant tenant = null;
-        if (_coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        Tenant tenant;
+        if (coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
         {
-            tenant = await _tenantManager.GetTenantAsync((model.PortalName ?? "").Trim());
+            tenant = await tenantManager.GetTenantAsync((model.PortalName ?? "").Trim());
             return (true, tenant);
         }
 
         if (model is { TenantId: not null })
         {
-            tenant = await _hostedSolution.GetTenantAsync(model.TenantId.Value);
+            tenant = await hostedSolution.GetTenantAsync(model.TenantId.Value);
             return (true, tenant);
         }
 
         if (model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
         {
-            tenant = (await _hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+            tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
             return (true, tenant);
         }
 
         return (false, null);
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(TenantModel model)
+    {
+        var tenants = new List<Tenant>();
+        var empty = true;
+
+        if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
+        {
+            empty = false;
+            tenants.AddRange(await hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
+        }
+
+        if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        {
+            empty = false;
+            var tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (model.TenantId.HasValue)
+        {
+            empty = false;
+            var tenant = await hostedSolution.GetTenantAsync(model.TenantId.Value);
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (empty)
+        {
+            tenants.AddRange((await hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
+        }
+
+        return tenants;
+    }
+
     public bool IsTestEmail(string email)
     {
         //the point is not needed in gmail.com
         email = Regex.Replace(email ?? "", "\\.*(?=\\S*(@gmail.com$))", "").ToLower();
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(_commonConstants.AutotestSecretEmails))
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(commonConstants.AutotestSecretEmails))
         {
             return false;
         }
 
-        var regex = new Regex(_commonConstants.AutotestSecretEmails, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+        var regex = new Regex(commonConstants.AutotestSecretEmails, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
         return regex.IsMatch(email);
     }
 
@@ -192,18 +205,18 @@ public class CommonMethods
             return false;
         }
 
-        _log.LogDebug("clientIP = {0}", clientIP);
+        log.LogDebug("clientIP = {0}", clientIP);
 
         var cacheKey = "ip_" + clientIP;
 
-        if (_memoryCache.TryGetValue(cacheKey, out int ipAttemptsCount))
+        if (memoryCache.TryGetValue(cacheKey, out int ipAttemptsCount))
         {
-            _memoryCache.Remove(cacheKey);
+            memoryCache.Remove(cacheKey);
         }
 
         ipAttemptsCount++;
 
-        _memoryCache.Set(
+        memoryCache.Set(
             // String that represents the name of the cache item,
             // could be any string
             cacheKey,
@@ -216,17 +229,17 @@ public class CommonMethods
                 // Cache will expire after one hour
                 // You can change this time interval according
                 // to your requriements
-                SlidingExpiration = _commonConstants.MaxAttemptsTimeInterval,
+                SlidingExpiration = commonConstants.MaxAttemptsTimeInterval,
                 // Cache will not be removed before expired
                 Priority = CacheItemPriority.NeverRemove
             });
 
-        if (ipAttemptsCount <= _commonConstants.MaxAttemptsCount)
+        if (ipAttemptsCount <= commonConstants.MaxAttemptsCount)
         {
             return false;
         }
 
-        _log.LogDebug("PortalName = {PortalName}; Too much requests from ip: {Ip}", model.PortalName, clientIP);
+        log.LogDebug("PortalName = {PortalName}; Too much requests from ip: {Ip}", model.PortalName, clientIP);
         sw.Stop();
 
         return true;
@@ -234,7 +247,7 @@ public class CommonMethods
 
     public string GetClientIp()
     {
-        return _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version
 
@@ -252,26 +265,26 @@ public class CommonMethods
         //return null;
     }
 
+    public async Task<IEnumerable<string>> GetHostIpsAsync()
+    {
+        var hostName = Dns.GetHostName();
+        var hostEntry = await Dns.GetHostEntryAsync(hostName);
+        return hostEntry.AddressList.Select(ip => ip.ToString());
+    }
+
     public bool ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
     {
         try
         {
-            string privateKey;
-            switch (recaptchaType)
+            var privateKey = recaptchaType switch
             {
-                case RecaptchaType.AndroidV2:
-                    privateKey = _configuration["recaptcha:private-key:android"];
-                    break;
-                case RecaptchaType.iOSV2:
-                    privateKey = _configuration["recaptcha:private-key:ios"];
-                    break;
-                default:
-                    privateKey = _configuration["recaptcha:private-key:default"];
-                    break;
-            }
+                RecaptchaType.AndroidV2 => configuration["recaptcha:private-key:android"],
+                RecaptchaType.iOSV2 => configuration["recaptcha:private-key:ios"],
+                _ => configuration["recaptcha:private-key:default"]
+            };
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
-            var url = _configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
+            var url = configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
 
             var request = new HttpRequestMessage
             {
@@ -280,7 +293,7 @@ public class CommonMethods
                 Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
             };
 
-            var httpClient = _clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = httpClient.Send(request);
             using var stream = httpClientResponse.Content.ReadAsStream();
             using var reader = new StreamReader(stream);
@@ -292,19 +305,17 @@ public class CommonMethods
             {
                 return true;
             }
-            else
-            {
-                _log.LogDebug("Recaptcha error: {0}", resp);
-            }
+
+            log.LogDebug("Recaptcha error: {0}", resp);
 
             if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
             {
-                _log.LogDebug("Recaptcha api returns errors: {0}", resp);
+                log.LogDebug("Recaptcha api returns errors: {0}", resp);
             }
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "ValidateRecaptcha");
+            log.LogError(ex, "ValidateRecaptcha");
         }
         return false;
     }

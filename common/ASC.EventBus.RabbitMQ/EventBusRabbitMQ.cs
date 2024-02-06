@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Collections.Generic;
-
 using ASC.EventBus.RabbitMQ.Log;
 
 namespace ASC.EventBus.RabbitMQ;
@@ -195,10 +193,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     public void Dispose()
     {
-        if (_consumerChannel != null)
-        {
-            _consumerChannel.Dispose();
-        }
+        _consumerChannel?.Dispose();
 
         _subsManager.Clear();
     }
@@ -350,7 +345,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 arguments: arguments);
 
         channel.CallbackException += RecreateChannel;
-    
+       
         return channel;
     }
 
@@ -382,7 +377,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         _logger.InfoCreatedConsumerChannel();
 
     }
-     
+
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
     {
         var eventType = _subsManager.GetEventTypeByName(eventName);
@@ -418,8 +413,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             if (subscription.IsDynamic)
             {
-                var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                if (handler == null)
+                if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                 {
                     continue;
                 }
@@ -440,7 +434,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                 var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
 
                 await Task.Yield();
-                await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+                await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
             }
         }
     }

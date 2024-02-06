@@ -46,7 +46,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 
     public static TenantCookieSettings GetInstance()
     {
-        return new TenantCookieSettings()
+        return new TenantCookieSettings
         {
             LifeTime = 1440
         };
@@ -57,25 +57,17 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 }
 
 [Scope]
-public class TenantCookieSettingsHelper
+public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsManager settingsManager)
 {
-    public bool IsVisibleSettings { get; internal set; }
-    private readonly SettingsManager _settingsManager;
-
-    public TenantCookieSettingsHelper(IConfiguration configuration, SettingsManager settingsManager)
-    {
-        IsVisibleSettings = !(configuration["web:hide-settings"] ?? string.Empty)
+    public bool IsVisibleSettings { get; internal set; } = !(configuration["web:hide-settings"] ?? string.Empty)
         .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
         .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
-
-        _settingsManager = settingsManager;
-    }
 
 
     public async Task<TenantCookieSettings> GetForTenantAsync(int tenantId)
     {
         return IsVisibleSettings
-                   ? await _settingsManager.LoadAsync<TenantCookieSettings>(tenantId)
+                   ? await settingsManager.LoadAsync<TenantCookieSettings>(tenantId)
                    : TenantCookieSettings.GetInstance();
     }
 
@@ -86,20 +78,20 @@ public class TenantCookieSettingsHelper
             return;
         }
 
-        await _settingsManager.SaveAsync(settings ?? TenantCookieSettings.GetInstance(), tenantId);
+        await settingsManager.SaveAsync(settings ?? TenantCookieSettings.GetInstance(), tenantId);
     }
 
     public async Task<TenantCookieSettings> GetForUserAsync(Guid userId)
     {
         return IsVisibleSettings
-                   ? await _settingsManager.LoadAsync<TenantCookieSettings>(userId)
+                   ? await settingsManager.LoadAsync<TenantCookieSettings>(userId)
                    : TenantCookieSettings.GetInstance();
     }
 
     public async Task<TenantCookieSettings> GetForUserAsync(int tenantId, Guid userId)
     {
         return IsVisibleSettings
-                   ? await _settingsManager.LoadAsync<TenantCookieSettings>(tenantId, userId)
+                   ? await settingsManager.LoadAsync<TenantCookieSettings>(tenantId, userId)
                    : TenantCookieSettings.GetInstance();
     }
 
@@ -110,7 +102,7 @@ public class TenantCookieSettingsHelper
             return;
         }
 
-        await _settingsManager.SaveAsync(settings ?? TenantCookieSettings.GetInstance(), userId);
+        await settingsManager.SaveAsync(settings ?? TenantCookieSettings.GetInstance(), userId);
     }
 
     public async Task<DateTime> GetExpiresTimeAsync(int tenantId)

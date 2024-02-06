@@ -28,19 +28,13 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class SettingsActionsMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; }
-    public ProductType Product { get; }
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
+        new GeneralActionMapper(),
+        new ProductsActionMapper()
+    ];
 
-    public SettingsActionsMapper()
-    {
-        Product = ProductType.Settings;
-
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new GeneralActionMapper(),
-            new ProductsActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.Settings;
 }
 
 internal class GeneralActionMapper : IModuleActionMapper
@@ -59,7 +53,7 @@ internal class GeneralActionMapper : IModuleActionMapper
                 {
                     MessageAction.LanguageSettingsUpdated, MessageAction.TimeZoneSettingsUpdated, MessageAction.DnsSettingsUpdated,
                     MessageAction.TrustedMailDomainSettingsUpdated,MessageAction.PasswordStrengthSettingsUpdated,MessageAction.TwoFactorAuthenticationSettingsUpdated,
-                    MessageAction.AdministratorMessageSettingsUpdated,MessageAction.DefaultStartPageSettingsUpdated,
+                    MessageAction.AdministratorMessageSettingsUpdated,MessageAction.DefaultStartPageSettingsUpdated
                 }
             }
         };
@@ -87,20 +81,20 @@ internal class ProductsActionMapper : IModuleActionMapper
                 {
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
-                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated,
+                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
                     MessageAction.SSOEnabled,MessageAction.SSODisabled,MessageAction.PortalAccessSettingsUpdated,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,
                     MessageAction.StartBackupSetting,MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,
                     MessageAction.StartStorageDecryption, MessageAction.CookieSettingsUpdated,  MessageAction.MailServiceSettingsUpdated,
                     MessageAction.CustomNavigationSettingsUpdated,MessageAction.AuditSettingsUpdated,MessageAction.PrivacyRoomEnable,
-                    MessageAction.PrivacyRoomDisable,
+                    MessageAction.PrivacyRoomDisable
                 }
             },
             {
                 ActionType.Create, new[]
                 {
-                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator,
+                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator
                 }
             },
             {
@@ -112,13 +106,13 @@ internal class ProductsActionMapper : IModuleActionMapper
             {
                 ActionType.Delete, new[]
                 {
-                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted,
+                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted
                 }
             },
             {
                 ActionType.Send, new[]
                 {
-                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions,
+                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
                 }
             },
             {
@@ -126,7 +120,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                 {
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded
                 }
-            },
+            }
         };
 
         Actions.Add(MessageAction.UsersOpenedProductAccess, new MessageMaps("ProductAccessOpenedForUsers", ActionType.UpdateAccess, productType, Module));

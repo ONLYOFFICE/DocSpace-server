@@ -27,52 +27,36 @@
 namespace ASC.Web.Studio.Utility;
 
 [Scope]
-public class TenantLogoHelper
+public class TenantLogoHelper(TenantLogoManager tenantLogoManager,
+    SettingsManager settingsManager,
+    TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper)
 {
-    private readonly TenantLogoManager _tenantLogoManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
-    private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
-
-    public TenantLogoHelper(
-        TenantLogoManager tenantLogoManager,
-        SettingsManager settingsManager,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper)
-    {
-        _tenantLogoManager = tenantLogoManager;
-        _settingsManager = settingsManager;
-        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
-        _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
-    }
-
     public async Task<string> GetLogo(WhiteLabelLogoType type, bool isDefIfNoWhiteLabel = false, bool dark = false)
     {
         string imgUrl;
-        if (_tenantLogoManager.WhiteLabelEnabled)
+        if (tenantLogoManager.WhiteLabelEnabled)
         {
-            var _tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-            return await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(_tenantWhiteLabelSettings, type, dark);
+            var _tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(_tenantWhiteLabelSettings, type, dark);
+        }
+
+        if (isDefIfNoWhiteLabel)
+        {
+            imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
         }
         else
         {
-            if (isDefIfNoWhiteLabel)
+            if (type == WhiteLabelLogoType.LoginPage)
             {
-                imgUrl = await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
+                /*** simple scheme ***/
+                var _tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
+                imgUrl = await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(_tenantInfoSettings);
+                /***/
             }
             else
             {
-                if (type == WhiteLabelLogoType.LoginPage)
-                {
-                    /*** simple scheme ***/
-                    var _tenantInfoSettings = await _settingsManager.LoadAsync<TenantInfoSettings>();
-                    imgUrl = await _tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(_tenantInfoSettings);
-                    /***/
-                }
-                else
-                {
-                    imgUrl = await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
-                }
+                imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
             }
         }
 

@@ -27,13 +27,12 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
+public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 {
     private IConnection _connection;
     private readonly ConnectionFactory _factory;
 
     private IModel _consumerChannel;
-    private readonly Guid _instanceId;
     private readonly string _exchangeName;
     private readonly string _queueName;
 
@@ -46,9 +45,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)
     {
         _logger = logger;
-        _instanceId = Guid.NewGuid();
+        var instanceId = Guid.NewGuid();
         _exchangeName = $"asc:cache_notify:event_bus:{typeof(T).FullName}";
-        _queueName = $"asc:cache_notify:queue:{typeof(T).FullName}:{_instanceId}";
+        _queueName = $"asc:cache_notify:queue:{typeof(T).FullName}:{instanceId}";
         _actions = new ConcurrentDictionary<string, List<Action<T>>>();
 
         var rabbitMQConfiguration = configuration.GetSection("rabbitmq").Get<RabbitMQSettings>();
@@ -133,11 +132,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     {
         var body = e.Body.Span.ToArray();
 
-        var parser = new MessageParser<T>(() => new T());
-
         var data = body.Take(body.Length - 1);
 
-        var obj = parser.ParseFrom(data.ToArray());
+        var obj = BaseProtobufSerializer.Deserialize<T>(data.ToArray());
 
         var action = (CacheNotifyAction)body[body.Length - 1];
 
@@ -149,7 +146,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
 
     public void Publish(T obj, CacheNotifyAction action)
     {
-        var objAsByteArray = obj.ToByteArray();
+        var objAsByteArray = BaseProtobufSerializer.Serialize(obj);
 
         var body = new byte[objAsByteArray.Length + 1];
 

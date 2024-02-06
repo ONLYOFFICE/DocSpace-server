@@ -37,9 +37,9 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {

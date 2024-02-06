@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Users;
+
 namespace ASC.IPSecurity;
 
 [Scope]
@@ -108,9 +110,9 @@ public class IPSecurity
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
                           ? Array.Empty<string>()
-                          : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                          : requestIps.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
-            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
+            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);
 
             if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && IPAddressRange.MatchIPs(requestIp, restriction.Ip))))
             {
@@ -142,7 +144,7 @@ public class IPSecurity
         {
             if (!string.IsNullOrEmpty(_myNetworks))
             {
-                var myNetworkIps = _myNetworks.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                var myNetworkIps = _myNetworks.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
                 if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => IPAddressRange.MatchIPs(requestIp, ipAddress))))
                 {

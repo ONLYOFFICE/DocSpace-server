@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
@@ -38,20 +39,18 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
     public ConfirmAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock) :
-        base(options, logger, encoder, clock)
+        UrlEncoder encoder) :
+        base(options, logger, encoder)
     { }
 
     public ConfirmAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         SecurityContext securityContext,
         UserManager userManager,
         EmailValidationKeyModelHelper emailValidationKeyModelHelper) :
-        base(options, logger, encoder, clock)
+        base(options, logger, encoder)
     {
         _securityContext = securityContext;
         _userManager = userManager;
@@ -79,7 +78,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
             checkKeyResult = EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
                 new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };
@@ -95,14 +94,9 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
                 }
                 else
                 {
-                    if (emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite)
-                    {
-                        userId = ASC.Core.Configuration.Constants.CoreSystem.ID;
-                    }
-                    else
-                    {
-                        userId = (await _userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
-                    }
+                    userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite ? 
+                        Constants.CoreSystem.ID : 
+                        (await _userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
                 }
             }
             else

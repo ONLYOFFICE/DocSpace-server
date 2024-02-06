@@ -125,39 +125,21 @@ public abstract class DIAttribute : Attribute
     public abstract void TryAdd(IServiceCollection services, Type service, Type implementation = null);
 }
 
-public class DIHelper
+public class DIHelper()
 {
-    private readonly Dictionary<DIAttributeType, List<string>> _services;
-    private readonly List<string> _added;
-    private readonly List<string> _configured;
-    public IServiceCollection ServiceCollection { get; private set; }
-
-    public DIHelper()
+    private readonly Dictionary<DIAttributeType, List<string>> _services = new()
     {
-        _services = new Dictionary<DIAttributeType, List<string>>()
-            {
-                { DIAttributeType.Singleton, new List<string>() },
-                { DIAttributeType.Scope, new List<string>() },
-                { DIAttributeType.Transient, new List<string>() }
-            };
-
-        _added = new List<string>();
-        _configured = new List<string>();
-    }
+        { DIAttributeType.Singleton, [] },
+        { DIAttributeType.Scope, [] },
+        { DIAttributeType.Transient, [] }
+    };
+    private readonly List<string> _added = [];
+    private readonly List<string> _configured = [];
+    public IServiceCollection ServiceCollection { get; private set; }
 
     public DIHelper(IServiceCollection serviceCollection) : this()
     {
         ServiceCollection = serviceCollection;
-    }
-
-    public void RegisterProducts(IConfiguration configuration, string path)
-    {
-        var types = AutofacExtension.FindAndLoad(configuration, path);
-
-        foreach (var t in types.Select(Type.GetType).Where(r => r != null))
-        {
-            TryAdd(t);
-        }
     }
 
     public void AddControllers()
@@ -224,7 +206,7 @@ public class DIHelper
             if (di.Additional != null)
             {
                 var m = di.Additional.GetMethod("Register", BindingFlags.Public | BindingFlags.Static);
-                m.Invoke(null, new[] { this });
+                m.Invoke(null, [this]);
             }
 
             if (!service.IsInterface || implementation != null)

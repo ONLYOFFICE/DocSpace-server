@@ -38,8 +38,9 @@ public class MessagesRepository : IDisposable
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-    private readonly HashSet<MessageAction> _forceSaveAuditActions = new() { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
+    private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly HashSet<MessageAction> _forceSaveAuditActions =
+        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions];
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -145,7 +146,7 @@ public class MessagesRepository : IDisposable
                 _timer.Change(-1, -1);
                 _timerStarted = false;
 
-                events = new List<EventMessage>(_cache.Values);
+                events = [.._cache.Values];
                 _cache.Clear();
                 _lastSave = DateTime.UtcNow;
             }
@@ -214,7 +215,7 @@ public class MessagesRepository : IDisposable
             _timer.Change(-1, -1);
             _timerStarted = false;
 
-            events = new List<EventMessage>(_cache.Values);
+            events = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
         }
@@ -289,10 +290,7 @@ public class MessagesRepository : IDisposable
 
     public void Dispose()
     {
-        if (_timer != null)
-        {
-            _timer.Dispose();
-        }
+        _timer?.Dispose();
     }
 }
 

@@ -35,7 +35,7 @@ public static class XrdsHelper
             @"xmlns=""xri://$xrd*($v*2.0)""><XRD><Service " +
             @"priority=""1""><Type>http://specs.openid.net/auth/2.0/return_to</Type><URI " +
             $@"priority=""1"">{location}</URI></Service><Service><Type>http://specs.openid.net/extensions/ui/icon</Type><UR" +
-            $@"I>{iconlink}</URI></Service></XRD></xrds:XRDS>";
+            $"I>{iconlink}</URI></Service></XRD></xrds:XRDS>";
 
         await responce.WriteAsync(xrds);
     }
