@@ -537,15 +537,17 @@ public class PortalController : ControllerBase
             return (false, error);
         }
 
+        portalName = portalName.Trim().ToLowerInvariant();
+
         try
         {
             if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await ValidateTenantAliasAsync(portalName.Trim());
+                await ValidateTenantAliasAsync(portalName);
             }
             else
             {
-                await _hostedSolution.CheckTenantAddressAsync(portalName.Trim());
+                await _hostedSolution.CheckTenantAddressAsync(portalName);
             }
         }
         catch (TenantAlreadyExistsException ex)

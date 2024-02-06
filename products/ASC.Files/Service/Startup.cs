@@ -35,6 +35,11 @@ public class Startup : BaseWorkerStartup
     {
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override void ConfigureServices(IServiceCollection services)

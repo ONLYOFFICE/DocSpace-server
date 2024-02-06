@@ -68,6 +68,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 {
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly Settings _settings;
+    private readonly FileUtility _fileUtility;
 
     public FactoryIndexerFile(
         ILoggerProvider options,
@@ -78,11 +79,13 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
         IServiceProvider serviceProvider,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
-        Settings settings)
+        Settings settings,
+        FileUtility fileUtility)
         : base(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
     {
         _dbContextFactory = dbContextFactory;
         _settings = settings;
+        _fileUtility = fileUtility;
     }
 
     public override async Task IndexAllAsync()
@@ -175,6 +178,11 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
     }
 
     public override string SettingsTitle => FilesCommonResource.IndexTitle;
+
+    public override async Task<bool> CanIndexByContentAsync(DbFile t)
+    {
+        return await base.CanIndexByContentAsync(t) && _fileUtility.CanIndex(t.Title);
+    }
 }
 
 public class FileTenant

@@ -56,7 +56,7 @@ internal class SharpBoxTagDao : SharpBoxDaoBase, IThirdPartyTagDao
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, _tenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

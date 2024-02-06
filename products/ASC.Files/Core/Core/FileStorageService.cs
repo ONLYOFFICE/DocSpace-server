@@ -241,7 +241,7 @@ public class FileStorageService //: IFileStorageService
         {
             (entries, _) = await _entryManager.GetEntriesAsync(
                 await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, string.Empty, false, false, new OrderBy(SortedByType.AZ, true));
+                false, Guid.Empty, string.Empty, new string[] { }, false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -259,7 +259,7 @@ public class FileStorageService //: IFileStorageService
         bool subjectGroup,
         string subject,
         string searchText,
-        string extension,
+        string[] extension,
         bool searchInContent,
         bool withSubfolders,
         OrderBy orderBy,
@@ -710,7 +710,7 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string[] extension, 
         bool searchInContent, bool withSubfolders, OrderBy orderBy)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
@@ -1075,6 +1075,7 @@ public class FileStorageService //: IFileStorageService
             if (file != null)
             {
                 await _filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
+                await _socketManager.UpdateFileAsync(file);
             }
 
             return file;
@@ -2478,7 +2479,7 @@ public class FileStorageService //: IFileStorageService
         return files;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string extension,
+    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
@@ -2538,6 +2539,24 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        if (entry.FileEntryType == FileEntryType.File && entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            var room = await _daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).
+                FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            
+            var parentLink = await _fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+                .FirstOrDefaultAsync();
+            if (parentLink == null)
+            {
+                return null;
+            }
+            
+            var data = await _externalShare.GetLinkDataAsync(entry, parentLink.Id);
+            parentLink.Link = await _urlShortener.GetShortenLinkAsync(data.Url);
+
+            return parentLink;
+        }
+
         var link = await _fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, 0, 1)
             .FirstOrDefaultAsync();
 
@@ -2549,7 +2568,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null)
+    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true)
     {
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
@@ -2571,7 +2590,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await _fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture);
+                var result = await _fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -2597,16 +2616,15 @@ public class FileStorageService //: IFileStorageService
                         switch (eventType)
                         {
                             case EventType.Create:
-                                await _filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name, 
+                                await _filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name,
                                     FileShareExtensions.GetAccessString(ace.Access, true));
                                 break;
                             case EventType.Remove:
-                                await _filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name, 
+                                await _filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name,
                                     FileShareExtensions.GetAccessString(ace.Access, true));
                                 break;
                             case EventType.Update:
-                                await _filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, name,
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
+                                await _filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
                                 break;
                         }
                     }
@@ -3040,7 +3058,7 @@ public class FileStorageService //: IFileStorageService
                               Id = createBy
                         }
                     }
-                }, false);
+                }, false, socket: false);
 
                 var folderAccess = folder.Access;
 
@@ -3049,8 +3067,7 @@ public class FileStorageService //: IFileStorageService
                 var newFolderID = await folderDao.SaveFolderAsync(newFolder);
                 newFolder = await folderDao.GetFolderAsync(newFolderID);
                 newFolder.Access = folderAccess;
-
-                await _socketManager.CreateFolderAsync(newFolder);
+                
                 await _entryStatusManager.SetIsFavoriteFolderAsync(folder);
 
                 await _filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, new[] { newFolder.Title, userInfo.DisplayUserName(false, _displayUserSettingsHelper) });

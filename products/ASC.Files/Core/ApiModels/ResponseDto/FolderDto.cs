@@ -111,7 +111,8 @@ public class FolderDtoHelper : FileEntryDtoHelper
     private readonly RoomLogoManager _roomLogoManager;
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
     private readonly BadgesSettingsHelper _badgesSettingsHelper;
-
+    private readonly FileSecurityCommon _fileSecurityCommon;
+    
     public FolderDtoHelper(
         ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
@@ -124,7 +125,8 @@ public class FolderDtoHelper : FileEntryDtoHelper
         BadgesSettingsHelper badgesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime, 
+        FileSecurityCommon fileSecurityCommon)
         : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
@@ -132,10 +134,11 @@ public class FolderDtoHelper : FileEntryDtoHelper
         _globalFolderHelper = globalFolderHelper;
         _roomLogoManager = roomLogoManager;
         _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
+        _fileSecurityCommon = fileSecurityCommon;
         _badgesSettingsHelper = badgesSettingsHelper;
     }
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -146,7 +149,6 @@ public class FolderDtoHelper : FileEntryDtoHelper
             if (folder.Tags == null)
             {
                 var tagDao = _daoFactory.GetTagDao<T>();
-
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
             }
             else
@@ -161,10 +163,19 @@ public class FolderDtoHelper : FileEntryDtoHelper
             {
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
             }
-
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            
+            result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            
+            if (folder.CreateBy == _authContext.CurrentAccount.ID ||
+                !await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
             {
-                result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+                result.InRoom = true;
+            }
+            else
+            {
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
+
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }
         }
 

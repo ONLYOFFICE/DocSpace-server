@@ -332,18 +332,14 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     {
         var offset = Convert.ToInt32(_apiContext.StartIndex);
         var count = Convert.ToInt32(_apiContext.Count);
-        var counter = 0;
 
-        var totalCountTask = _fileStorageService.GetRoomSharesCountAsync(id, filterType);
-
+        var totalCountTask = await _fileStorageService.GetRoomSharesCountAsync(id, filterType);
+        _apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
+        
         await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, offset, count))
         {
-            counter++;
-
             yield return await _fileShareDtoHelper.Get(ace);
         }
-
-        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 
     /// <summary>
@@ -363,7 +359,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title, 
-                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate ?? default, inDto.Password, inDto.DenyDownload),
+                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate, inDto.Password, inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 
@@ -659,7 +655,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
         var count = Convert.ToInt32(_apiContext.Count);
         var filterValue = _apiContext.FilterValue;
 
-        var content = await _fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, string.Empty,
+        var content = await _fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, new string[] { },
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 

@@ -124,7 +124,7 @@ public class EmailValidationKeyModelHelper
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + _authContext.CurrentAccount.ID, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, _provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await _userManager.GetUserByEmailAsync(email);

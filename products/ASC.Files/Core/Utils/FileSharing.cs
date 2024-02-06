@@ -48,7 +48,8 @@ public class FileSharingAceHelper
     private readonly UserManagerWrapper _userManagerWrapper;
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly IUrlShortener _urlShortener;
-    
+    private readonly SocketManager _socketManager;
+
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
@@ -70,7 +71,8 @@ public class FileSharingAceHelper
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         CountPaidUserChecker countPaidUserChecker,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        SocketManager socketManager)
     {
         _fileSecurity = fileSecurity;
         _coreBaseSettings = coreBaseSettings;
@@ -89,9 +91,10 @@ public class FileSharingAceHelper
         _userManagerWrapper = userManagerWrapper;
         _countPaidUserChecker = countPaidUserChecker;
         _urlShortener = urlShortener;
+        _socketManager = socketManager;
     }
 
-    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
+    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true)
     {
         if (entry == null)
         {
@@ -118,7 +121,7 @@ public class FileSharingAceHelper
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == currentUserId && w.Id == currentUserId)
+            if (entry.CreateBy == currentUserId && w.Id == currentUserId && w.Access != FileShare.RoomAdmin)
             {
                 continue;
             }
@@ -140,25 +143,6 @@ public class FileSharingAceHelper
                     || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
                 {
                     continue;
-                }
-
-                if (w.IsLink && eventType == EventType.Create)
-                {
-                    var (filter, maxCount) = w.SubjectType switch
-                    {
-                        SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
-                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
-                        _ => (ShareFilterType.Link, 0)
-                    };
-                    
-                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
-
-                    if (linksCount >= maxCount)
-                    {
-                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
-                        continue;
-                    }
                 }
 
                 if (w.SubjectType == SubjectType.PrimaryExternalLink && w.FileShareOptions != null)
@@ -259,7 +243,48 @@ public class FileSharingAceHelper
                     : w.Access;
             }
 
-            await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            try
+            {
+                if (w.IsLink && eventType == EventType.Create)
+                {
+                    var (filter, maxCount) = w.SubjectType switch
+                    {
+                        SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
+                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
+                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
+                        _ => (ShareFilterType.Link, 0)
+                    };
+
+                    //TODO: Replace with a distributed lock
+                    await _semaphore.WaitAsync();
+                    
+                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+                    if (linksCount >= maxCount)
+                    {
+                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
+                        continue;
+                    }
+                }
+
+                await _fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+            
+            if (socket && room != null)
+            {
+                if (share == FileShare.None)
+                {
+                    await _socketManager.DeleteFolder(room, new [] { w.Id });
+                }
+                else if(existedShare == null)
+                {
+                    await _socketManager.CreateFolderAsync(room, new [] { w.Id });
+                }
+            }
+
             changed = true;
             handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
 
@@ -681,7 +706,7 @@ public class FileSharing
 
                 var link = r.SubjectType == SubjectType.InvitationLink
                     ? _invitationLinkService.GetInvitationLink(r.Subject, _authContext.CurrentAccount.ID)
-                    : (await _externalShare.GetLinkDataAsync(r.Subject)).Url;
+                    : (await _externalShare.GetLinkDataAsync(entry, r.Subject)).Url;
 
                 w.Link = await _urlShortener.GetShortenLinkAsync(link);
                 w.SubjectGroup = true;
@@ -949,7 +974,7 @@ public class FileSharing
         yield return owner;
     }
     
-    private async Task<AceWrapper> ToAceAsync(FileEntry entry, FileShareRecord record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord record, bool canEditAccess)
     {
         var w = new AceWrapper
         {
@@ -983,7 +1008,7 @@ public class FileSharing
         }
         else
         {
-            var linkData = await _externalShare.GetLinkDataAsync(record.Subject);
+            var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
             link = linkData.Url;
             w.RequestToken = linkData.Token;
         }

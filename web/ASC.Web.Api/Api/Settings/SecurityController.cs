@@ -426,28 +426,11 @@ public class SecurityController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var attemptsCount = inDto.AttemptCount;
-        var checkPeriod = inDto.CheckPeriod;
-        var blockTime = inDto.BlockTime;
-
-        if (attemptsCount < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(attemptsCount));
-        }
-
-        if (checkPeriod < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(checkPeriod));
-        }
-
-        if (blockTime < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(blockTime));
-        }
-
         var settings = new LoginSettings
         {
-            AttemptCount = attemptsCount, CheckPeriod = checkPeriod, BlockTime = blockTime
+            AttemptCount = inDto.AttemptCount, 
+            CheckPeriod = inDto.CheckPeriod, 
+            BlockTime = inDto.BlockTime
         };
 
         await _settingsManager.SaveAsync(settings);

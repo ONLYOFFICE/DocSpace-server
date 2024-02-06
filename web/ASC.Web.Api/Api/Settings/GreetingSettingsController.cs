@@ -58,10 +58,10 @@ public class GreetingSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("greetingsettings")]
-    public async Task<ContentResult> GetGreetingSettings()
+    public async Task<object> GetGreetingSettings()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        return new ContentResult { Content = tenant.Name == "" ? Resource.PortalName : tenant.Name };
+        return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ public class GreetingSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("greetingsettings")]
-    public async Task<ContentResult> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
+    public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -99,7 +99,7 @@ public class GreetingSettingsController : BaseSettingsController
 
         await _messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
 
-        return new ContentResult { Content = Resource.SuccessfullySaveGreetingSettingsMessage };
+        return Resource.SuccessfullySaveGreetingSettingsMessage;
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ public class GreetingSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("greetingsettings/restore")]
-    public async Task<ContentResult> RestoreGreetingSettingsAsync()
+    public async Task<object> RestoreGreetingSettingsAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -119,9 +119,6 @@ public class GreetingSettingsController : BaseSettingsController
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         
-        return new ContentResult
-        {
-            Content = tenant.Name == "" ? Resource.PortalName : tenant.Name
-        };
+        return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 }

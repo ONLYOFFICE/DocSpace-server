@@ -233,6 +233,7 @@ public class PortalController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -275,6 +276,7 @@ public class PortalController : ControllerBase
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await _tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
@@ -387,6 +389,7 @@ public class PortalController : ControllerBase
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("thumb")]
     public FileResult GetThumb(string url)
     {
@@ -457,6 +460,7 @@ public class PortalController : ControllerBase
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -519,7 +523,7 @@ public class PortalController : ControllerBase
 
         var localhost = _coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -597,7 +601,6 @@ public class PortalController : ControllerBase
             {
                 await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
@@ -662,9 +665,7 @@ public class PortalController : ControllerBase
                         !(await _tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         await _studioNotifyService.SendMsgPortalDeletionAsync(tenant, await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
-
-        await _messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
-    }
+      }
 
     /// <summary>
     /// Restores the current portal.
@@ -745,9 +746,6 @@ public class PortalController : ControllerBase
                 await _securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
-
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
-
         }
         finally
         {

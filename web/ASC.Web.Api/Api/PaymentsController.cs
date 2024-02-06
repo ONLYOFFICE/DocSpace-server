@@ -30,6 +30,7 @@ namespace ASC.Web.Api.Controllers;
 /// Portal information access.
 ///</summary>
 ///<name>portal</name>
+///<visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]

@@ -24,21 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.DataOperators;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public interface IDataWriteOperator : IAsyncDisposable
-{
-    Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action);
-    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action);
-    bool NeedUpload { get; }
-    string Hash { get; }
-    string StoragePath { get; }
-}
-
-public interface IDataReadOperator : IDisposable
-{
-    Stream GetEntry(string key);
-    IEnumerable<string> GetEntries(string key);
-    IEnumerable<string> GetDirectories(string key);
-
+public class DocServiceUrlDto
+{   
+    /// <type>System.String, System</type>
+    public required string Version { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrlApi { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrl { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServiceUrlInternal { get; set; }
+    
+    /// <type>System.String, System</type>
+    public required string DocServicePortalUrl { get; set; }
+    
+    /// <type>System.Boolean, System</type>
+    public required bool IsDefault { get; set; }
 }

@@ -70,7 +70,6 @@ public class SetupInfo
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
-    public string UserForum { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
     public TimeSpan ValidEmailKeyInterval { get; private set; }
@@ -137,7 +136,6 @@ public class SetupInfo
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .OrderBy(l => l.DisplayName)
             .ToList();
 
         EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
@@ -160,7 +158,6 @@ public class SetupInfo
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
-        UserForum = GetAppSettings("web.user-forum", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
 
         ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
@@ -37,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [AllowAnonymous]
+[WebhookDisable]
 public class AuthenticationController : ControllerBase
 {
     private readonly UserManager _userManager;
@@ -261,7 +264,7 @@ public class AuthenticationController : ControllerBase
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser))
+        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }

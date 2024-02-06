@@ -400,15 +400,39 @@ public class SecurityController : ControllerBase
 
         ArgumentNullException.ThrowIfNull(request);
 
+        if (request.Domains != null)
+        {
+            foreach (var domain in request.Domains)
+            {
+                var uriString = domain.Replace($"{Uri.SchemeDelimiter}*.", Uri.SchemeDelimiter);
+
+                if (uriString.StartsWith("*."))
+                {
+                    uriString = uriString.Replace("*.", "");
+                }
+                
+                if (!uriString.Contains(Uri.SchemeDelimiter))
+                {
+                    uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
+                }
+
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _))
+                {
+                    throw new ArgumentException(domain, nameof(request.Domains));
+                }
+            }
+        }
+
         var header = await _cspSettingsHelper.SaveAsync(request.Domains, request.SetDefaultIfEmpty);
 
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
+    [AllowAnonymous]
     [HttpGet("csp")]
     public async Task<CspDto> Csp()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await _cspSettingsHelper.LoadAsync();
         return new CspDto
         {

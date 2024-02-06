@@ -461,7 +461,9 @@ public class FileHandlerService
                             {
                                 if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
-                                    context.Response.Redirect((await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString(), false);
+                                    var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                                    
+                                    context.Response.Redirect(_externalShare.GetUrlWithShare(url), false);
 
                                     return;
                                 }
@@ -494,7 +496,9 @@ public class FileHandlerService
                     {
                         if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                         {
-                            context.Response.Redirect((await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString(), true);
+                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                            
+                            context.Response.Redirect(_externalShare.GetUrlWithShare(url), true);
 
                             return;
                         }
@@ -651,7 +655,7 @@ public class FileHandlerService
                 version = 0;
             }
             var doc = context.Request.Query[FilesLinkUtility.DocShareKey];
-            var share = context.Request.Query[FilesLinkUtility.FolderShareKey];
+            var share = context.Request.Query[FilesLinkUtility.ShareKey];
 
             await fileDao.InvalidateCacheAsync(id);
 

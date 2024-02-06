@@ -218,7 +218,7 @@ public class StudioWhatsNewNotify
 
         var user = _userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data;
+        var date = activityInfo.Data.ConvertNumerals("g");
         var userName = user.DisplayUserName(_displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -365,7 +365,12 @@ public class StudioWhatsNewNotify
             d = d.AddHours(-1);
         }
 
-        return d.ToString(c.TwoLetterISOLanguageName == "ru" ? "d MMMM" : "M", c);
+        if (c.TwoLetterISOLanguageName == "ru")
+        {
+            return d.ToString("d MMMM", c);
+        }
+        
+        return d.ConvertNumerals("M");
     }
 }
 

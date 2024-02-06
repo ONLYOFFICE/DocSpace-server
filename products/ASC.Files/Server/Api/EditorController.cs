@@ -282,6 +282,7 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpGet("file/{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {
@@ -326,6 +327,7 @@ public class EditorController : ApiControllerBase
     private readonly MessageService _messageService;
     private readonly DocumentServiceConnector _documentServiceConnector;
     private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly PermissionContext _permissionContext;
 
     public EditorController(
         FilesLinkUtility filesLinkUtility,
@@ -333,12 +335,14 @@ public class EditorController : ApiControllerBase
         DocumentServiceConnector documentServiceConnector,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _filesLinkUtility = filesLinkUtility;
         _messageService = messageService;
         _documentServiceConnector = documentServiceConnector;
         _commonLinkUtility = commonLinkUtility;
+        _permissionContext = permissionContext;
     }
 
 
@@ -353,13 +357,17 @@ public class EditorController : ApiControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("docservice")]
-    public async Task<IEnumerable<string>> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
-    {
+    public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
+    {        
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var currentDocServiceUrl = _filesLinkUtility.DocServiceUrl;
+        var currentDocServiceUrlInternal = _filesLinkUtility.DocServiceUrlInternal;
+        var currentDocServicePortalUrl = _filesLinkUtility.DocServicePortalUrl;
+        
         _filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         _filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         _filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
-
-        await _messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -368,14 +376,21 @@ public class EditorController : ApiControllerBase
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
-        await _documentServiceConnector.CheckDocServiceUrlAsync();
+        try
+        {        
+            await _documentServiceConnector.CheckDocServiceUrlAsync();
+            
+            await _messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+        }
+        catch (Exception)
+        {        
+            _filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
+            _filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
+            _filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+            throw;
+        }
 
-        return new[]
-        {
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl
-        };
+        return await GetDocServiceUrlAsync(false);
     }
 
     /// <summary>
@@ -391,7 +406,7 @@ public class EditorController : ApiControllerBase
     /// <visible>false</visible>
     [AllowAnonymous]
     [HttpGet("docservice")]
-    public async Task<object> GetDocServiceUrlAsync(bool version)
+    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(bool version)
     {
         var url = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.DocServiceApiUrl);
 
@@ -402,14 +417,14 @@ public class EditorController : ApiControllerBase
             dsVersion = await _documentServiceConnector.GetVersionAsync();
         }
 
-        return new
+        return new DocServiceUrlDto
         {
-            version = dsVersion,
-            docServiceUrlApi = url,
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl,
-            _filesLinkUtility.IsDefault
+            Version = dsVersion,
+            DocServiceUrlApi = url,
+            DocServiceUrl = _filesLinkUtility.DocServiceUrl,
+            DocServiceUrlInternal =_filesLinkUtility.DocServiceUrlInternal,
+            DocServicePortalUrl = _filesLinkUtility.DocServicePortalUrl,
+            IsDefault = _filesLinkUtility.IsDefault
         };
     }
 }

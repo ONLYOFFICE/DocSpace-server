@@ -112,7 +112,7 @@ public class IPSecurity
 
             var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
 
-            if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
+            if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && IPAddressRange.MatchIPs(requestIp, restriction.Ip))))
             {
                 return true;
             }
@@ -134,33 +134,7 @@ public class IPSecurity
         return false;
     }
 
-    public static bool MatchIPs(string requestIp, string restrictionIp)
-    {
-        var dividerIdx = restrictionIp.IndexOf('-');
-        if (dividerIdx > 0)
-        {
-            var lower = IPAddress.Parse(restrictionIp.Substring(0, dividerIdx).Trim());
-            var upper = IPAddress.Parse(restrictionIp.Substring(dividerIdx + 1).Trim());
 
-            var range = new IPAddressRange(lower, upper);
-
-            return range.IsInRange(IPAddress.Parse(requestIp));
-        }
-
-        if (restrictionIp.IndexOf('/') > 0)
-        {
-            return IPAddressRange.IsInRange(requestIp, restrictionIp);
-        }
-
-        return requestIp == restrictionIp;
-    }
-
-    private static string GetIpWithoutPort(string ip)
-    {
-        var portIdx = ip.IndexOf(':');
-
-        return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
-    }
 
     private bool IsMyNetwork(string[] ips)
     {
@@ -170,7 +144,7 @@ public class IPSecurity
             {
                 var myNetworkIps = _myNetworks.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => MatchIPs(GetIpWithoutPort(requestIp), ipAddress))))
+                if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => IPAddressRange.MatchIPs(requestIp, ipAddress))))
                 {
                     return true;
                 }

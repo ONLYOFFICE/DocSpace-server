@@ -486,6 +486,7 @@ public static class DocumentService
         return dataResponse.Equals("true", StringComparison.InvariantCultureIgnoreCase);
     }
 
+    [EnumExtensions]
     public enum CommandMethod
     {
         Info,

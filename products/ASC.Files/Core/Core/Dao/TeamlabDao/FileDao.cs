@@ -51,6 +51,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
     private readonly TenantQuotaController _tenantQuotaController;
     private readonly FileUtility _fileUtility;
 
+    private const string FilePathPart = "file_";
+    private const string FolderPathPart = "folder_";
+    private const string FileIdGroupName = "id";
+
+    private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
+
     public FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
@@ -195,7 +201,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
@@ -207,13 +213,28 @@ internal class FileDao : AbstractDao, IFileDao<int>
         var query = await GetFileQuery(filesDbContext, r => fileIds.Contains(r.Id) && r.CurrentVersion);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
-        
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
+
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                if(!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {
@@ -284,7 +305,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
@@ -523,7 +544,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await GetFileAsync(file.Id);
     }
 
-    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, 
+    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -678,7 +699,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
     private async Task DeleteVersionStreamAsync(File<int> file)
     {
-        await (await _globalStore.GetStoreAsync()).DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        _tenantQuotaController.Init(tenantId, ThumbnailTitle);
+        var store = await _storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, _tenantQuotaController);
+        await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream)
@@ -901,11 +925,14 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var dataStore = await _storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, (IQuotaController)null);
+
                 foreach (var size in _thumbnailSettings.Sizes)
                 {
-                    await (await _globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                    await dataStore.CopyAsync(string.Empty,
                                          GetUniqThumbnailPath(file, size.Width, size.Height),
-                                         String.Empty,
+                                         string.Empty,
                                          GetUniqThumbnailPath(copy, size.Width, size.Height));
                 }
 
@@ -998,10 +1025,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
     {
         if (fileId == 0)
         {
-            throw new ArgumentNullException("fileIdObject");
+            throw new ArgumentNullException(nameof(fileId));
         }
 
-        return string.Format("folder_{0}/file_{1}", (fileId / 1000 + 1) * 1000, fileId);
+        var folderId = (fileId / 1000 + 1) * 1000;
+
+        return $"{FolderPathPart}{folderId}/{FilePathPart}{fileId}";
     }
 
     public string GetUniqFilePath(File<int> file)
@@ -1023,6 +1052,17 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return fileId != 0
                    ? string.Format("{0}/v{1}", GetUniqFileDirectory(fileId), version)
                    : null;
+    }
+
+    public static bool TryGetFileId(string path, out int fileId)
+    {
+        fileId = 0;
+        
+        ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
+
+        var match = _pattern.Match(path);
+        
+        return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
     private async Task RecalculateFilesCountAsync(int folderId)
@@ -1126,7 +1166,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, bool searchInContent)
+    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         if (parentIds == null || !parentIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -1136,7 +1176,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return InternalGetFilesAsync(parentIds, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
     }
 
-    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension,
+    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1147,13 +1187,28 @@ internal class FileDao : AbstractDao, IFileDao<int>
             .Select(r => r.file);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
-        
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
+
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s));
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(s => func(s));
+                if (!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {
@@ -1542,30 +1597,34 @@ internal class FileDao : AbstractDao, IFileDao<int>
         file.Version = dbFile.Version;
         file.ContentLength = dbFile.ContentLength;
 
-        if (!await IsExistOnStorageAsync(file) || file.ContentLength > _settings.MaxContentLength)
+        if (!await IsExistOnStorageAsync(file) || file.ContentLength > _settings.MaxFileSize)
         {
             return dbFile;
         }
 
-        await using var stream = await GetFileStreamAsync(file);
-
-        if (stream == null)
+        byte[] buffer;
+        await using(var stream = await GetFileStreamAsync(file))
         {
-            return dbFile;
-        }
+            if (stream == null)
+            {
+                return dbFile;
+            }
 
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            buffer = ms.GetBuffer();
+        }
+        
         dbFile.Document = new Document
         {
-            Data = Convert.ToBase64String(ms.GetBuffer())
+            Data = Convert.ToBase64String(buffer)
         };
 
         return dbFile;
     }
 
     private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
-        bool withSubfolders, bool excludeSubject, int roomId, string extension, FilesDbContext filesDbContext)
+        bool withSubfolders, bool excludeSubject, int roomId, string[] extension, FilesDbContext filesDbContext)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
@@ -1579,15 +1638,30 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
         
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
 
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(expression);
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(expression);
+                if (!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {

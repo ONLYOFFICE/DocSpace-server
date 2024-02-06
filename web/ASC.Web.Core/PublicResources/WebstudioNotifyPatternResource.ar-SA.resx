@@ -521,11 +521,11 @@
 البوابة الإلكترونية متاحة مرة أخرى.</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
-    <value>h1. قم بتنشيط بريدك الإلكتروني لبوابة "${__VirtualRootPath}":"$InviteLink".
+    <value>h1. قم بتنشيط بريدك الإلكتروني لبوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink".
 
 مرحباً!
 
-لبدء المشاركة في فترة صلاحية البوابة "${__VirtualRootPath}":"$InviteLink" تحتاج إلى تنشيط عنوان بريدك الإلكتروني. يتم ذلك لأسباب أمنية.
+لبدء المشاركة في فترة صلاحية البوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink" تحتاج إلى تنشيط عنوان بريدك الإلكتروني. يتم ذلك لأسباب أمنية.
 
 $OrangeButton
 
@@ -550,7 +550,7 @@ $OrangeButton
 
 مرحبا، $UserName!
 
-أنت مدعو للانضمام الى "${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام الى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -566,9 +566,9 @@ $OrangeButton
       إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
   </data>
   <data name="pattern_user_has_join" xml:space="preserve">
-    <value>h1.عنوان رئيسي. تمت إضافة مستخدم جديد إلى بوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.عنوان رئيسي. تمت إضافة مستخدم جديد إلى بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
-"$__AuthorName":"$__AuthorUrl"انضم إلى البوابة الإلكترونية في "${__VirtualRootPath}":"${__VirtualRootPath}".
+"$__AuthorName":"$__AuthorUrl"انضم إلى البوابة الإلكترونية في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 
 ^إذا كنت لا ترغب في تلقي إشعارات حول المستخدمين الجدد، فيرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
@@ -580,7 +580,7 @@ $OrangeButton
   <data name="pattern_user_ldap_activation" xml:space="preserve">
     <value>مرحبا $UserName!
 
-لقد تمت دعوتك للانضمام إلى مكتب الويب الآمن والآمن لشركتك والذي من شأنه تعزيز تعاونك. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}". تعد إضافة هذا الرابط إلى إشاراتك المرجعية فكرة جيدة، فمن المحتمل أن تستخدمه كثيرا.
+لقد تمت دعوتك للانضمام إلى مكتب الويب الآمن والآمن لشركتك والذي من شأنه تعزيز تعاونك. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". تعد إضافة هذا الرابط إلى إشاراتك المرجعية فكرة جيدة، فمن المحتمل أن تستخدمه كثيرا.
 
 اقبل الدعوة باتباع الرابط أدناه واستخدم معلومات تسجيل الدخول وكلمة المرور من حساب الشركة لتسجيل الدخول.
 
@@ -589,11 +589,11 @@ $OrangeButton
 الرابط صالح لمدة 7 أيام فقط.</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية
+    <value>h1."{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية
 
 عزيزي $OwnerName،
 
-تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة "${__VirtualRootPath}":"${__VirtualRootPath}".
+تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم "النسخ الاحتياطي للبيانات":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block"
 
@@ -648,11 +648,11 @@ $OrangeButton
 $OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
-    <value>h1.تغيير مالك البوابة الإلكترونية "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 عزيزي $OwnerName,
 
-كان هناك طلب لتغيير مالك البوابة الإلكترونية "${__VirtualRootPath}":"${__VirtualRootPath}"الى $UserName.
+كان هناك طلب لتغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"الى $UserName.
 
 يرجى اتباع الرابط أدناه لتأكيد العملية:
 
@@ -666,7 +666,7 @@ $OrangeButton
 
 عزيزي $OwnerName ،
 
-كان هناك طلب لتغيير عنوان البوابة الإلكترونية "${__VirtualRootPath}":"${__VirtualRootPath}" الى "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
+كان هناك طلب لتغيير عنوان البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الى "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
 
 يرجى اتباع الرابط أدناه لتأكيد العملية:
 
@@ -680,7 +680,7 @@ $OrangeButton
 
 مرحبا، $UserName!
 
-لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
 
@@ -776,7 +776,7 @@ $TrulyYours</comment>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -799,7 +799,7 @@ $TrulyYours</value>
 
 مرحبا!
 
-أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -811,7 +811,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -834,7 +834,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
 
@@ -873,7 +873,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-دعاك $__AuthorName كمستخدم ضيف إلى "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+دعاك $__AuthorName كمستخدم ضيف إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -887,7 +887,7 @@ $OrangeButton
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -910,7 +910,7 @@ $TrulyYours</value>
 
 مرحبا!
 
-أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -922,7 +922,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -940,7 +940,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
-    <value>h1.رسالة من البوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.رسالة من البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 البريد الإلكتروني: $UserEmail
 
@@ -954,7 +954,7 @@ $Body</value>
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1.رسالة من البوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.رسالة من البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 الاسم: $UserName
 
@@ -963,11 +963,11 @@ $Body</value>
 $Body</value>
   </data>
   <data name="pattern_join" xml:space="preserve">
-    <value>h1.دعوة للانضمام إلى البوابة "${__VirtualRootPath}":"$InviteLink"
+    <value>h1.دعوة للانضمام إلى البوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink"
 
 مرحبا،
 
-لقد طلبت الانضمام إلى بوابة "${__VirtualRootPath}":"$InviteLink" على ${LetterLogoText} - منصة لإدارة المستندات والمشاريع. انضم إلى البوابة وابدأ التعاون مع زملائك أو أصدقائك على الفور.
+لقد طلبت الانضمام إلى بوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink" على ${LetterLogoText} - منصة لإدارة المستندات والمشاريع. انضم إلى البوابة وابدأ التعاون مع زملائك أو أصدقائك على الفور.
 
 لقبول الدعوة يرجى إدخال اسمك وكلمة المرور باتباع هذا الرابط:
 
@@ -978,7 +978,7 @@ $OrangeButton
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>عزيزي $UserName،
 
-      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
       استخدم الإعدادات التالية لبرامج البريد الإلكتروني الأخرى:
       تسجيل دخول: &lt;b&gt;$Login&lt;/b&gt;
@@ -999,7 +999,7 @@ SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
   <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
     <value>عزيزي $UserName،
 
-      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "${__VirtualRootPath}":"${__VirtualRootPath}".
+      قام المسؤول بإنشاء علبة بريد &lt;b&gt;$Address&lt;/b&gt; جديدة لك في البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
       إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية لمعرفة التفاصيل.</value>
   </data>
@@ -1057,7 +1057,7 @@ $OrangeButton
 
 مرحبا، $UserName!
 
-لقد قمت للتو بإنشاء ONLYOFFICE DocSpace ، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace ، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
 
@@ -1139,7 +1139,7 @@ $TrulyYours</comment>
 
 مرحباً!
 
-أنت مدعو للانضمام إلى "${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
 
 "$ActivateUrl":"$ActivateUrl"
 
@@ -1153,7 +1153,7 @@ $TrulyYours</comment>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1174,7 +1174,7 @@ $TrulyYours</value>
 
 Hello, $UserName!
 
-Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
+Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;Work with other users in the room you are invited to: &lt;b&gt;collaboration rooms for real-time co-authoring or custom rooms with flexible settings for any purpose&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1198,7 +1198,7 @@ $TrulyYours
 
 مرحبا!
 
-أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1232,7 +1232,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1253,7 +1253,7 @@ $TrulyYours</value>
 
 Hello, $UserName!
 
-Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
+Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". Now you can:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt;Work with other users in the room you are invited to: &lt;b&gt;collaboration rooms for real-time co-authoring or custom rooms with flexible settings for any purpose&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1273,7 +1273,7 @@ $TrulyYours
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>مرحباً، $UserName
-لقد تم تسجيلك بنجاح في ONLYOFFICE الشخصي "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد تم تسجيلك بنجاح في ONLYOFFICE الشخصي "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 قم بتوصيل التخزين السحابي المفضل لديك: Dropbox أو Google Drive أو OneDrive أو Box لإنشاء مساحة عمل واحدة لمستنداتك يمكن الوصول إليها من أي مكان.
 
@@ -1379,11 +1379,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
-    <value>h1.إلغاء تنشيط بوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.إلغاء تنشيط بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 عزيزي $OwnerName،
 
-لقد طلبت إلغاء تنشيط مؤقت لبوابة "${__VirtualRootPath}":"${__VirtualRootPath}" يرجى اتباع الرابط أدناه لتأكيد العملية:
+لقد طلبت إلغاء تنشيط مؤقت لبوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" يرجى اتباع الرابط أدناه لتأكيد العملية:
 
 $OrangeButton
 
@@ -1418,7 +1418,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>عزيزي $OwnerName،
 
-لقد طلبت حذف مساحة "${__VirtualRootPath}":"${__VirtualRootPath}"
+لقد طلبت حذف مساحة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 *مهم! ستفقد جميع البيانات المخزنة في مساحتك، بالإضافة إلى تفاصيل التسجيل الخاصة بك ولا يمكن استردادها.*
 
@@ -1426,7 +1426,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 قبل حذف المساحة، يرجى التأكد من إيقاف الرسوم التلقائية. يمكنك التحقق من حالة الفوترة التلقائية في ا"لحساب Avangate":"https://secure.avangate.com/myaccount/".
 #end
 
-إذا كنت لا تزال ترغب في حذف مساحة "$ "${__VirtualRootPath}":"${__VirtualRootPath}"، فيرجى اتباع الرابط أدناه لتأكيد العملية:
+إذا كنت لا تزال ترغب في حذف مساحة "$ "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"، فيرجى اتباع الرابط أدناه لتأكيد العملية:
 
 $OrangeButton
 
@@ -1478,14 +1478,14 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 
 عزيزي $UserDisplayName،
 
-تم تغيير عنوان البوابة الإلكترونية $PortalUrl إلى عنوان "${__VirtualRootPath}":"${__VirtualRootPath}" جديد.
+تم تغيير عنوان البوابة الإلكترونية $PortalUrl إلى عنوان "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" جديد.
 
 *ملاحظة*: تتوقف إعدادات DNS وخيارات تسجيل الدخول لمرة واحدة عن العمل حتى تقوم بتغييرها.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.إزالة ملف التعريف من بوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.إزالة ملف التعريف من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
-لقد طلبت حذف ملف التعريف الخاص بك نهائيا من بوابة "${__VirtualRootPath}":"${__VirtualRootPath}"
+لقد طلبت حذف ملف التعريف الخاص بك نهائيا من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 إذا كنت لا تزال ترغب في حذف ملف التعريف الخاص بك، فيرجى اتباع الرابط أدناه لتأكيد العملية 
 
@@ -1577,10 +1577,10 @@ h3.طلب محتوى
 $Body
 
 h3.عنوان البوابة
-"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="pattern_request_tariff1" xml:space="preserve">
-    <value>h1.طلب التعريفة الجمركية SAAS لـ "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.طلب التعريفة الجمركية SAAS لـ "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 h3.الاسم الأول
 $UserName
@@ -1611,7 +1611,7 @@ $Body</value>
   </data>
   <data name="pattern_restore_completed_v115" xml:space="preserve">
     <value>h1.استعادة البوابة
-h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+h1."{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
 تمت استعادة البوابة الإلكترونية. للوصول إليه، تحتاج إلى تعيين كلمة مرور جديدة:
 
@@ -1619,7 +1619,7 @@ $OrangeButton
 
 *ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط.
 
-إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية "${__VirtualRootPath}":"${__VirtualRootPath}" لمعرفة التفاصيل.</value>
+إذا تلقيت هذا البريد الإلكتروني عن طريق الخطأ، فيرجى تجاهله أو الاتصال بمسؤول البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" لمعرفة التفاصيل.</value>
   </data>
   <data name="pattern_restore_started" xml:space="preserve">
     <value>h1.تم بدء استعادة البوابة
@@ -1640,7 +1640,7 @@ $TrulyYours
 
 مرحباً، $UserName!
 
-لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 يرجى تأكيد بريدك الإلكتروني (الرابط صالح لمدة 7 أيام):
 $OrangeButton
@@ -1673,7 +1673,7 @@ $TrulyYours</value>
     <value>h1. سيتم حذف ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;الخاص بك&lt;/span&gt;
 
   
-لم تقم بإدخال "${__VirtualRootPath}":"${__VirtualRootPath}" لأكثر من نصف عام.
+لم تقم بإدخال "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" لأكثر من نصف عام.
 
 نظرا لأنك قررت عدم استخدامه بعد الآن ، حذف ONLYOFFICE DocSpace وجميع البيانات وفقا ل "سياسة الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
 
@@ -1748,7 +1748,7 @@ $TrulyYours</value>
 
 مرحبا!
 
-أنت مدعو للانضمام إلى ONLYOFFICE DocSpace على "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1762,7 +1762,7 @@ $TrulyYours</value>
 
 مرحبا!
 
-أنت مدعو للانضمام إلى "${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1776,7 +1776,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1840,7 +1840,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>مرحبا!
 
-أنت مدعو للانضمام إلى $Message الغرفة على "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى $Message الغرفة على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1854,7 +1854,7 @@ $TrulyYours</value>
 
 مرحبا!
 
-أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى ONLYOFFICE DocSpace في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1866,7 +1866,7 @@ $TrulyYours</value>
 
 مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 24px; padding-right: 48px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 40px; padding-right: 0px; padding-bottom: 0px;"&gt; العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: &lt;b&gt;غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1884,9 +1884,9 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
-    <value>h1.عنوان رئيسي. إشعار تغيير ملف تعريف البوابة الإلكترونية "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.عنوان رئيسي. إشعار تغيير ملف تعريف البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
-"$__AuthorName":"$__AuthorUrl" قام بتغيير تفاصيل ملفه الشخصي في بوابة "${__VirtualRootPath}":"${__VirtualRootPath}".
+"$__AuthorName":"$__AuthorUrl" قام بتغيير تفاصيل ملفه الشخصي في بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
 
 ^إذا كنت لا ترغب في تلقي إشعارات حول تحديثات الملف الشخصي، فيرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>

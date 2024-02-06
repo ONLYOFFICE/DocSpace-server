@@ -192,8 +192,10 @@ public class ConnectionsController : ControllerBase
     [HttpPut("activeconnections/logoutall/{userId}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
-        if (!await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID)
-            && !await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID))
+        var currentUserId = _securityContext.CurrentAccount.ID;
+        if (!await _userManager.IsDocSpaceAdminAsync(currentUserId) && 
+            !await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+            (currentUserId != userId && await _userManager.IsDocSpaceAdminAsync(userId)))
         {
             throw new SecurityException("Method not available");
         }
@@ -248,9 +250,17 @@ public class ConnectionsController : ControllerBase
     {
         try
         {
-            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+            var currentUserId = _securityContext.CurrentAccount.ID;
+            var loginEvent = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
+            
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await _userManager.IsDocSpaceAdminAsync(currentUserId))
+            {
+                throw new SecurityException("Method not available");
+            }
+            
+            var user = await _userManager.GetUsersAsync(currentUserId);
             var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
-
+            
             await _dbLoginEventsManager.LogOutEventAsync(loginEventId);
 
             await _messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);

@@ -32,10 +32,11 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
     where TFolder : class, TItem
     where TItem : class
 {
-    public int TenantID { get; private set; }
+    private int TenantId => _tenantManager.GetCurrentTenant().Id;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly IDaoSelector<TFile, TFolder, TItem> _daoSelector;
     private readonly IDaoBase<TFile, TFolder, TItem> _dao;
+    private readonly TenantManager _tenantManager;
     private string PathPrefix { get; set; }
 
     public ThirdPartyTagDao(
@@ -48,7 +49,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
         _dbContextFactory = dbContextFactory;
         _daoSelector = daoSelector;
         _dao = dao;
-        TenantID = tenantManager.GetCurrentTenant().Id;
+        _tenantManager = tenantManager;
     }
 
     public void Init(string pathPrefix)
@@ -68,7 +69,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantID, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

@@ -41,6 +41,8 @@ global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.LoginProviders;
+global using ASC.Files.Core.Security;
+global using ASC.Files.Core.VirtualRooms;
 global using ASC.Web.Core.HttpHandlers;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Studio;

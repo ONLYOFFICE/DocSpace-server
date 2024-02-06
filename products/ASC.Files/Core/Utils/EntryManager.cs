@@ -282,6 +282,7 @@ public class EntryManager
     private readonly FilesMessageService _filesMessageService;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SocketManager _socketManager;
+    private readonly BaseCommonLinkUtility _commonLinkUtility;
 
     public EntryManager(
         IDaoFactory daoFactory,
@@ -312,7 +313,8 @@ public class EntryManager
         FilesMessageService filesMessageService,
         ThumbnailSettings thumbnailSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        BaseCommonLinkUtility commonLinkUtility)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
@@ -343,10 +345,11 @@ public class EntryManager
         _thumbnailSettings = thumbnailSettings;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _socketManager = socketManager;
+        _commonLinkUtility = commonLinkUtility;
     }
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string extension, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
+        string searchText, string[] extension, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
         bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All)
     {
         int total;
@@ -376,19 +379,19 @@ public class EntryManager
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
-        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, string.Empty);
 
-        if (!string.IsNullOrEmpty(extension))
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim();
-            extension = extension.StartsWith('.') ? extension : $".{extension}";
-            
+            extension = extension.Select(e => e.Trim()).Select(e => e.StartsWith('.') ? e : $".{e}").ToArray();
+
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
             }
         }
-        
+
+        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
+
         if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await _globalFolderHelper.FolderProjectsAsync))
         {
             
@@ -616,7 +619,7 @@ public class EntryManager
     }
 
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, FilterType filter, bool subjectGroup, Guid subjectId, string searchText,
-        string extension, bool searchInContent)
+        string[] extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<T>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Template);
@@ -671,7 +674,7 @@ public class EntryManager
         }
     }
 
-    public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent)
+    public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Recent).Where(tag => tag.EntryType == FileEntryType.File).Select(r => r.EntryId);
@@ -721,7 +724,7 @@ public class EntryManager
 
         return result;
 
-        async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string ext, bool searchInContent)
+        async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] ext, bool searchInContent)
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
@@ -736,7 +739,7 @@ public class EntryManager
         }
     }
 
-    public async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent)
+    public async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Favorite);
@@ -784,7 +787,7 @@ public class EntryManager
         return (files, folders);
 
         async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesByIdAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, FilterType filter, bool subjectGroup, 
-            Guid subjectId, string searchText, string extension, bool searchInContent)
+            Guid subjectId, string searchText, string[] extension, bool searchInContent)
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
@@ -1373,7 +1376,7 @@ public class EntryManager
             throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
         }
 
-        if (checkRight && !editLink && (!await _fileSecurity.CanFillFormsAsync(file) || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID)))
+        if (checkRight && !editLink && (!await _fileSecurity.CanFillFormsAsync(file) || !await _fileSecurity.CanEditAsync(file)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
         }
@@ -1535,7 +1538,7 @@ public class EntryManager
         bool checkRight;
         if (_fileTracker.GetEditingBy(fileId).Contains(userId))
         {
-            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, _commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1574,7 +1577,7 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
         }
 
-        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
+        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, _commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
             _fileTracker.ChangeRight(fileId, userId, false);
@@ -1909,60 +1912,6 @@ public class EntryManager
 
             fileEntry.OriginId = data.OriginFolder.Id;
             fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
-        }
-    }
-
-    //Long operation
-    public async Task DeleteSubitemsAsync<T>(T parentId, IFolderDao<T> folderDao, IFileDao<T> fileDao, ILinkDao linkDao)
-    {
-        var folders = folderDao.GetFoldersAsync(parentId);
-        await foreach (var folder in folders)
-        {
-            await DeleteSubitemsAsync(folder.Id, folderDao, fileDao, linkDao);
-
-            _logger.InformationDeleteFolder(folder.Id.ToString(), parentId.ToString());
-            await folderDao.DeleteFolderAsync(folder.Id);
-            await _socketManager.DeleteFolder(folder);
-        }
-
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true);
-        await foreach (var file in files)
-        {
-            _logger.InformationDeletefile(file.Id.ToString(), parentId.ToString());
-            await fileDao.DeleteFileAsync(file.Id);
-            await _socketManager.DeleteFileAsync(file);
-
-            await linkDao.DeleteAllLinkAsync(file.Id.ToString());
-        }
-    }
-
-    public async Task MoveSharedItemsAsync<T>(T parentId, T toId, IFolderDao<T> folderDao, IFileDao<T> fileDao)
-    {
-        var folders = folderDao.GetFoldersAsync(parentId);
-        await foreach (var folder in folders)
-        {
-            var shares = await _fileSecurity.GetSharesAsync(folder);
-            var shared = folder.Shared
-                         && shares.Any(record => record.Share != FileShare.Restrict);
-            if (shared)
-            {
-                _logger.InformationMoveSharedFolder(folder.Id.ToString(), parentId.ToString(), toId.ToString());
-                await folderDao.MoveFolderAsync(folder.Id, toId, null);
-            }
-            else
-            {
-                await MoveSharedItemsAsync(folder.Id, toId, folderDao, fileDao);
-            }
-        }
-
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true)
-            .WhereAwait(async file => file.Shared &&
-            (await _fileSecurity.GetSharesAsync(file)).Any(record => record.Subject != FileConstant.ShareLinkId && record.Share != FileShare.Restrict));
-
-        await foreach (var file in files)
-        {
-            _logger.InformationMoveSharedFile(file.Id.ToString(), parentId.ToString(), toId.ToString());
-            await fileDao.MoveFileAsync(file.Id, toId);
         }
     }
 }

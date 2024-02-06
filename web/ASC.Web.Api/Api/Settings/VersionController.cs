@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+/// <visible>false</visible>
 public class VersionController : BaseSettingsController
 {
     private readonly TenantManager _tenantManager;
@@ -55,6 +56,7 @@ public class VersionController : BaseSettingsController
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <returns type="ASC.Api.Settings.BuildVersion, ASC.Web.Api">Current product versions</returns>
+    /// <visible>false</visible>
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("version/build")]
@@ -73,6 +75,7 @@ public class VersionController : BaseSettingsController
     /// <path>api/2.0/settings/version</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
+    /// <visible>false</visible>
     [HttpGet("version")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
@@ -91,6 +94,7 @@ public class VersionController : BaseSettingsController
     /// <path>api/2.0/settings/version</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
+    /// <visible>false</visible>
     [HttpPut("version")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {

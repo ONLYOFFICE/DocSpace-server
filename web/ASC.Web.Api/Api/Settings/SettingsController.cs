@@ -171,6 +171,7 @@ public class SettingsController : BaseSettingsController
             LegalTerms = _setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = _userFormatter.UserNameRegex.ToString(),
+            ForumLink = await _commonLinkUtility.GetUserForumLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper)
         };
 
         if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() != default)
@@ -183,7 +184,7 @@ public class SettingsController : BaseSettingsController
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
             var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZone;
+            settings.Timezone = _timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
             settings.UtcOffset = _timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -228,7 +229,15 @@ public class SettingsController : BaseSettingsController
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = _configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(_configuration["plugins:upload"], out var pluginsUpload))
+            {
+                settings.Plugins.Upload = pluginsUpload;
+            }
+
+            if (bool.TryParse(_configuration["plugins:delete"], out var pluginsDelete))
+            {
+                settings.Plugins.Delete = pluginsDelete;
+            }
 
             var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
@@ -323,6 +332,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.QuotaUsageDto, ASC.Web.Api">Space usage and limits for upload</returns>
     /// <path>api/2.0/settings/quota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -340,6 +350,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
     /// <path>api/2.0/settings/userquotasettings</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("userquotasettings")]
     public async Task<object> SaveUserQuotaSettingsAsync(UserQuotaSettingsRequestsDto inDto)
     {
@@ -363,9 +374,9 @@ public class SettingsController : BaseSettingsController
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return _setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return _setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -396,7 +407,7 @@ public class SettingsController : BaseSettingsController
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = _timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = _timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -445,6 +456,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -462,6 +474,7 @@ public class SettingsController : BaseSettingsController
     /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -1061,6 +1074,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
+    /// <visible>false</visible>
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1076,6 +1090,7 @@ public class SettingsController : BaseSettingsController
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

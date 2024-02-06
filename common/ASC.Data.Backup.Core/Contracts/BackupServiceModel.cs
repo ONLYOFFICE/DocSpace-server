@@ -44,6 +44,7 @@ public class StartBackupRequest
     public BackupStorageType StorageType { get; init; }
     public string StorageBasePath { get; set; }
     public Dictionary<string, string> StorageParams { get; init; }
+    public string ServerBaseUri { get; init; }
 }
 
 /// <summary>
@@ -93,6 +94,7 @@ public class StartRestoreRequest
     public string FilePathOrId { get; set; }
     public bool NotifyAfterCompletion { get; init; }
     public Dictionary<string, string> StorageParams { get; set; }
+    public string ServerBaseUri { get; init; }
 }
 
 public class CreateScheduleRequest : StartBackupRequest

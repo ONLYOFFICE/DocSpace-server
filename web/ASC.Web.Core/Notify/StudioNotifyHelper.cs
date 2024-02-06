@@ -31,7 +31,6 @@ namespace ASC.Web.Studio.Core.Notify;
 [Scope]
 public class StudioNotifyHelper
 {
-    public readonly string Helplink;
     public readonly string SiteLink;
     public readonly StudioNotifySource NotifySource;
     public readonly ISubscriptionProvider SubscriptionProvider;
@@ -52,7 +51,6 @@ public class StudioNotifyHelper
         StudioNotifySource studioNotifySource,
         UserManager userManager,
         SettingsManager settingsManager,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager,
@@ -62,7 +60,6 @@ public class StudioNotifyHelper
         IConfiguration configuration,
         ILogger<StudioNotifyHelper> logger)
     {
-        Helplink = commonLinkUtility.GetHelpLink(settingsManager, additionalWhiteLabelSettingsHelper, false);
         SiteLink = commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
         NotifySource = studioNotifySource;
         _userManager = userManager;

@@ -97,7 +97,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        string extension, bool searchInContent, bool checkShared = false)
+        string[] extension, bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -161,10 +161,10 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
         
-        if (!string.IsNullOrEmpty(extension))
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         return files;
@@ -181,7 +181,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        string extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -245,11 +245,11 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
-        if (!string.IsNullOrEmpty(extension))
+
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -397,10 +397,10 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteTagLinksAsync(filesDbContext, TenantId, id);
             await Queries.DeleteTagsAsync(filesDbContext);
-            await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteSecuritiesAsync(filesDbContext, TenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, TenantId, id);
             await tx.CommitAsync();
         });
 

@@ -155,7 +155,7 @@ public class FolderContentDtoHelper
 
         var filesTask = GetFilesDto(files).ToListAsync();
         var foldersTask = GetFoldersDto(folders).ToListAsync();
-        var currentTask = _folderDtoHelper.GetAsync(folderItems.FolderInfo);
+        var currentTask = GetFoldersDto(new [] { folderItems.FolderInfo }).FirstOrDefaultAsync();
 
         var isEnableBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -166,7 +166,7 @@ public class FolderContentDtoHelper
             Total = folderItems.Total,
             New = isEnableBadges ? folderItems.New : 0,
             Count = folderItems.Entries.Count,
-            Current = await currentTask
+            Current = (FolderDto<T>)(await currentTask)
         };
 
         var tasks = await Task.WhenAll(filesTask.AsTask(), foldersTask.AsTask());
@@ -177,27 +177,27 @@ public class FolderContentDtoHelper
 
         IAsyncEnumerable<Tuple<FileEntry<T1>, bool>> GetFoldersWithRightsAsync<T1>(IEnumerable<T1> ids)
         {
-            if (ids.Any())
+            if (!ids.Any())
             {
-                var folderDao = _daoFactory.GetFolderDao<T1>();
-
-                return _fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
+                return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
             }
 
-            return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
+            var folderDao = _daoFactory.GetFolderDao<T1>();
+            return _fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
         }
 
         async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
         {
             foreach (var r in fileEntries)
             {
-                if (r is File<int> fol1)
+                switch (r)
                 {
-                    yield return await _fileDtoHelper.GetAsync(fol1, foldersIntWithRights);
-                }
-                else if (r is File<string> fol2)
-                {
-                    yield return await _fileDtoHelper.GetAsync(fol2, foldersStringWithRights);
+                    case File<int> fol1:
+                        yield return await _fileDtoHelper.GetAsync(fol1, foldersIntWithRights);
+                        break;
+                    case File<string> fol2:
+                        yield return await _fileDtoHelper.GetAsync(fol2, foldersStringWithRights);
+                        break;
                 }
             }
         }
@@ -208,40 +208,29 @@ public class FolderContentDtoHelper
 
             foreach (var r in folderEntries)
             {
-                if (r is Folder<int> fol1)
+                switch (r)
                 {
-                    yield return await GetFolder(fol1, foldersIntWithRights);
-                }
-                else if (r is Folder<string> fol2)
-                {
-                    yield return await GetFolder(fol2, foldersStringWithRights);
+                    case Folder<int> fol1:
+                        yield return await GetFolder(fol1, foldersIntWithRights);
+                        break;
+                    case Folder<string> fol2:
+                        yield return await GetFolder(fol2, foldersStringWithRights);
+                        break;
                 }
             }
 
+            yield break;
+
             async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights)
             {
-                var result = await _folderDtoHelper.GetAsync(fol1, foldersWithRights);
-                if (DocSpaceHelper.IsRoom(fol1.FolderType))
+                if (currentUsersRecords == null && 
+                    DocSpaceHelper.IsRoom(fol1.FolderType) && 
+                    await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
                 {
-                    if (fol1.CreateBy == _authContext.CurrentAccount.ID)
-                    {
-                        result.InRoom = true;
-                    }
-                    else
-                    {
-                        if (currentUsersRecords == null && await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
-                        {
-                            var securityDao = _daoFactory.GetSecurityDao<T>();
-                            var currentUserSubjects = await _fileSecurity.GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
-                            currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
-                        }
-                        if (currentUsersRecords != null)
-                        {
-                            result.InRoom = currentUsersRecords.Exists(c => c.EntryId.Equals(fol1.Id));
-                        }
-                    }
+                    currentUsersRecords = await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
                 }
-                return result;
+                
+                return await _folderDtoHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords);
             }
         }
     }

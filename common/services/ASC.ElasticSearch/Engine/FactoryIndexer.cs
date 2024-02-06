@@ -170,7 +170,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         return (true, result, total);
     }
 
-    public async Task<bool> CanIndexByContentAsync(T t)
+    public virtual async Task<bool> CanIndexByContentAsync(T t)
     {
         return await SupportAsync(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>();
     }
