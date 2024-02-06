@@ -132,6 +132,7 @@ public class StudioNotifyService(UserManager userManager,
                     await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                     [EMailSenderName],
                 new TagValue(Tags.InviteLink, confirmationUrl),
+                new TagValue(CommonTags.Culture, user.GetCulture().Name),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
