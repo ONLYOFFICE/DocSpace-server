@@ -27,22 +27,20 @@
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBase<Item, Item, Item>
+internal class OneDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<Item, Item, Item>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory,
+        setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<Item, Item, Item>
 {
     private OneDriveProviderInfo _providerInfo;
-
-    public OneDriveDaoBase(IServiceProvider serviceProvider, 
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<Item, Item, Item> providerInfo)
     {
@@ -124,10 +122,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFolder is ErrorItem)
+        if (onedriveFolder is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFolder(onedriveFolder as ErrorItem);
+            return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -142,9 +140,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         folder.Id = MakeId(isRoot ? string.Empty : onedriveFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         folder.Title = MakeFolderTitle(onedriveFolder);
@@ -192,10 +191,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFile is ErrorItem)
+        if (onedriveFile is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFile(onedriveFile as ErrorItem);
+            return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)
@@ -206,7 +205,7 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         var file = GetFile();
 
         file.Id = MakeId(onedriveFile.Id);
-        file.ContentLength = onedriveFile.Size.HasValue ? (long)onedriveFile.Size : 0;
+        file.ContentLength = onedriveFile.Size ?? 0;
         file.CreateOn = onedriveFile.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.CreatedDateTime.Value.DateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(onedriveFile));
         file.ModifiedOn = onedriveFile.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.LastModifiedDateTime.Value.DateTime) : default;
@@ -322,7 +321,7 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

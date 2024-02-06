@@ -38,7 +38,7 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
 
     public static implicit operator SubscriptionMethod(SubscriptionMethodCache cache)
     {
-        return new SubscriptionMethod()
+        return new SubscriptionMethod
         {
             Tenant = cache.Tenant,
             Source = cache.SourceId,

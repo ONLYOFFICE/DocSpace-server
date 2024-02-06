@@ -36,7 +36,7 @@ public class DbFilesThirdpartyIdMapping : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { HashId };
+        return [HashId];
     }
 }
 

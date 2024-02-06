@@ -8,10 +8,12 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
+using System.Resources;
+using System.Runtime.CompilerServices;
+
 namespace ASC.Web.Core.PublicResources {
-    using System;
-    
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,27 +21,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [DebuggerNonUserCode()]
+    [CompilerGenerated()]
     public class WebstudioNotifyPatternResource {
         
-        private static global::System.Resources.ResourceManager resourceMan;
+        private static ResourceManager resourceMan;
         
-        private static global::System.Globalization.CultureInfo resourceCulture;
+        private static CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal WebstudioNotifyPatternResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static ResourceManager ResourceManager {
             get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
+                if (ReferenceEquals(resourceMan, null)) {
+                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -50,8 +52,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -1216,140 +1218,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello, $UserName
-        ///You’ve been successfully registered at ONLYOFFICE Personal &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
-        ///
-        ///Connect your favorite cloud storage: Dropbox, Google Drive, OneDrive or Box to create a single workspace for your documents accessible from anywhere.
-        ///
-        ///Learn more about ONLYOFFICE Personal in &quot;our blog&quot;:&quot;$TagBlogLink&quot;.
-        ///
-        ///We&apos;re glad you&apos;re here. Stay tuned!
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_personal_activate {
-            get {
-                return ResourceManager.GetString("pattern_personal_activate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.Welcome to ONLYOFFICE Personal
-        ///
-        ///You have just created your personal office in the cloud.
-        ///
-        ///h3.It&apos;s a virtual workspace where you can edit and store documents, work with them from anywhere providing access to your friends or colleagues.
-        ///
-        ///h3.For a quick start, here&apos;s what you can do in ONLYOFFICE:
-        ///
-        ///- Create, view and edit text documents, spreadsheets, presentations.
-        ///
-        ///- Work with all popular formats. Highest compatibility with MS Office files.
-        ///
-        ///- Create and co-edit &quot;ready-to-fill-out forms&quot;:&quot;http [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_after_registration1 {
-            get {
-                return ResourceManager.GetString("pattern_personal_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Get &lt;span style=&quot;color:#FF6F3D;&quot;&gt;free&lt;/span&gt; ONLYOFFICE apps
-        ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///Get free ONLYOFFICE apps to work on documents from any of your devices.
-        ///
-        ///&lt;table bgcolor=&quot;#FF6F3D&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)&quot; style=&quot;background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; he [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_after_registration14_v1 {
-            get {
-                return ResourceManager.GetString("pattern_personal_after_registration14_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hi there!
-        ///There was an attempt to register a new &quot;ONLYOFFICE Personal&quot;:&quot;$PortalUrl&quot; account using this email. If it was you, we want to inform you that the account already exists — proceed to ONLYOFFICE Personal and log in.
-        ///If you lost your password, you can recover it on &quot;password recovery page&quot;:&quot;$LinkToRecovery&quot;.
-        ///If you didn’t attempt to register a new account, probably someone else did it by mistake. In this case, please ignore this email.
-        ///
-        ///Have a nice day!
-        ///ONLYOFFICE team.
-        /// </summary>
-        public static string pattern_personal_already_exist {
-            get {
-                return ResourceManager.GetString("pattern_personal_already_exist", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the email on your ONLYOFFICE account?
-        ///
-        ///Click the button below and log in* to your cloud.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///*If you are not signed in to ONLYOFFICE in this browser, you’ll need to use your old email for confirmation.
-        ///
-        ///Don’t want to change your email? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_change_email_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_change_email_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the password on your ONLYOFFICE Personal account? Click the button below to confirm.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///Don’t want to change your password? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_change_password_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_change_password_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hello,
-        ///
-        ///You&apos;ve just registered an account at the ONLYOFFICE solution for personal use. Click &quot;here&quot;:&quot;$InviteLink&quot; to confirm the registration and create a password.
-        ///
-        ///If you can&apos;t open the link, please copy the following &quot;$InviteLink&quot;:&quot;$InviteLink&quot; and paste it into your browser address bar.
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_personal_confirmation {
-            get {
-                return ResourceManager.GetString("pattern_personal_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have requested a termination of your account at personal.onlyoffice.com. Follow the link to complete the request (the link is active for a 7-day period): 
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: After the deletion, your account and all data associated with it will be erased permanently in accordance with our &quot;Privacy statement&quot;:&quot;https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0&quot;.
-        ///
-        ///&quot;Read more about account terminat [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_profile_delete {
-            get {
-                return ResourceManager.GetString("pattern_personal_profile_delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Deactivation of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
         ///Dear $OwnerName,
@@ -2508,60 +2376,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_opensource_user_welcome_v1 {
             get {
                 return ResourceManager.GetString("subject_opensource_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE for personal use!.
-        /// </summary>
-        public static string subject_personal_activate {
-            get {
-                return ResourceManager.GetString("subject_personal_activate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE Personal.
-        /// </summary>
-        public static string subject_personal_after_registration1 {
-            get {
-                return ResourceManager.GetString("subject_personal_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Get free ONLYOFFICE apps.
-        /// </summary>
-        public static string subject_personal_after_registration14_v1 {
-            get {
-                return ResourceManager.GetString("subject_personal_after_registration14_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log in to your ONLYOFFICE Personal account.
-        /// </summary>
-        public static string subject_personal_already_exist {
-            get {
-                return ResourceManager.GetString("subject_personal_already_exist", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal. Please activate your email address.
-        /// </summary>
-        public static string subject_personal_confirmation {
-            get {
-                return ResourceManager.GetString("subject_personal_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal account termination.
-        /// </summary>
-        public static string subject_personal_profile_delete {
-            get {
-                return ResourceManager.GetString("subject_personal_profile_delete", resourceCulture);
             }
         }
         

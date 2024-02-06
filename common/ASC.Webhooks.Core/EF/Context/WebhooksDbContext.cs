@@ -26,13 +26,11 @@
 
 namespace ASC.Webhooks.Core.EF.Context;
 
-public class WebhooksDbContext : DbContext
+public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : DbContext(options)
 {
     public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<WebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
-
-    public WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

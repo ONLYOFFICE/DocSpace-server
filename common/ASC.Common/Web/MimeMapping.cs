@@ -853,15 +853,10 @@ public static class MimeMapping
 
         if (0 <= startIndex && fileName.LastIndexOf('\\') < startIndex)
         {
-            str = (string)_extensionToMimeMappingTable[fileName.Substring(startIndex)];
+            str = (string)_extensionToMimeMappingTable[fileName[startIndex..]];
         }
 
-        if (str == null)
-        {
-            str = (string)_extensionToMimeMappingTable[".*"];
-        }
-
-        return str;
+        return str ?? (string)_extensionToMimeMappingTable[".*"];
     }
 
     private static void AddMimeMapping(string extension, string MimeType)

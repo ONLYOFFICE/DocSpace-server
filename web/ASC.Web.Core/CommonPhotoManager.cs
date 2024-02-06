@@ -50,8 +50,6 @@ public static class CommonPhotoManager
             scaleFactor = 1;
         }
 
-        int locationX, locationY;
-
         var finalWidth = (int)(realWidth / scaleFactor);
         var finalHeigth = (int)(realHeight / scaleFactor);
 
@@ -59,8 +57,8 @@ public static class CommonPhotoManager
         if (rectangle)
         {
             thumbnail = new Image<Rgba32>(width, height);
-            locationY = (int)((height / 2.0) - (finalHeigth / 2.0));
-            locationX = (int)((width / 2.0) - (finalWidth / 2.0));
+            var locationY = (int)((height / 2.0) - (finalHeigth / 2.0));
+            var locationX = (int)((width / 2.0) - (finalWidth / 2.0));
 
             if (!transparent)
             {

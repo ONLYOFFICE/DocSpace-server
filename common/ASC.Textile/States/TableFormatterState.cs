@@ -31,15 +31,10 @@ namespace Textile.States;
                 Globals.AlignPattern +
                 Globals.BlockModifiersPattern +
                 @"\.\s*$")]
-public class TableFormatterState : FormatterState
+public class TableFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private string _attsInfo;
     private string _alignInfo;
-
-    public TableFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

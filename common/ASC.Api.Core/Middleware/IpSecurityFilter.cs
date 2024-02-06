@@ -27,35 +27,22 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class IpSecurityFilter : IAsyncResourceFilter
-{
-    private readonly AuthContext _authContext;
-    private readonly IPSecurity.IPSecurity _iPSecurity;
-    private readonly ILogger<IpSecurityFilter> _logger;
-    private readonly SettingsManager _settingsManager;
-
-    public IpSecurityFilter(
+public class IpSecurityFilter(
         ILogger<IpSecurityFilter> logger,
         AuthContext authContext,
-        IPSecurity.IPSecurity IPSecurity,
-        SettingsManager settingsManager)
-    {
-        _logger = logger;
-        _authContext = authContext;
-        _iPSecurity = IPSecurity;
-        _settingsManager = settingsManager;
-    }
-
+        IPSecurity.IPSecurity ipSecurity)
+    : IAsyncResourceFilter
+{
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (_authContext.IsAuthenticated && !(await _iPSecurity.VerifyAsync()))
+        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
         {
             context.Result = new ObjectResult(Resource.ErrorIpSecurity)
             {
                 StatusCode = (int)HttpStatusCode.Forbidden
             };
             
-            _logger.WarningIPSecurity(_authContext.CurrentAccount.ID);
+            logger.WarningIPSecurity(authContext.CurrentAccount.ID);
             
             return;
         }

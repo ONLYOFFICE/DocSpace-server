@@ -28,8 +28,6 @@ namespace ASC.People;
 
 public class Startup : BaseStartup
 {
-    protected override bool ConfirmAddScheme => true;
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
@@ -40,9 +38,9 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddBaseDbContextPool<FilesDbContext>();
 

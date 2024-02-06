@@ -38,7 +38,7 @@ public class DbSubscriptionMethod : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Source, Action, Recipient };
+        return [TenantId, Source, Action, Recipient];
     }
 }
 

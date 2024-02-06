@@ -27,20 +27,14 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-public class BackupCleanerTempFileService : BackgroundService
+public class BackupCleanerTempFileService(ILogger<BackupCleanerTempFileService> logger, BackupWorker backupWorker)
+    : BackgroundService
 {
-    private readonly string _tempFolder;
-    private readonly ILogger<BackupCleanerTempFileService> _logger;
-
-    public BackupCleanerTempFileService(ILogger<BackupCleanerTempFileService> logger, BackupWorker backupWorker)
-    {
-        _logger = logger;
-        _tempFolder = backupWorker.TempFolder;
-    }
+    private readonly string _tempFolder = backupWorker.TempFolder;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.InfoBeginBackupCleaner();
+        logger.InfoBeginBackupCleaner();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -52,12 +46,12 @@ public class BackupCleanerTempFileService : BackgroundService
                 foreach (var file in files)
                 {
                     File.Delete(file);
-                    _logger.InfoBackupCleanerDeleteFile(Path.GetFileName(file));
+                    logger.InfoBackupCleanerDeleteFile(Path.GetFileName(file));
                 }
             }
             await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
 
-        _logger.InfoStopBackupCleaner();
+        logger.InfoStopBackupCleaner();
     }
 }

@@ -27,11 +27,13 @@
 namespace ASC.Core.Data;
 
 [Scope]
-public class DbLoginEventsManager
+public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFactory,
+    IMapper mapper,
+    ICache cache)
 {
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
-    private static readonly List<int> _loginActions = new()
-    {
+    private static readonly List<int> _loginActions =
+    [
         (int)MessageAction.LoginSuccess,
         (int)MessageAction.LoginSuccessViaSocialAccount,
         (int)MessageAction.LoginSuccessViaSms,
@@ -42,33 +44,22 @@ public class DbLoginEventsManager
         (int)MessageAction.LoginSuccessViaApiSocialAccount,
         (int)MessageAction.LoginSuccesViaTfaApp,
         (int)MessageAction.LoginSuccessViaApiTfa
-    };
-
-    private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-    private readonly ICache _cache;
-
-    public DbLoginEventsManager(
-        IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper,
-        ICache cache)
-    {
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-        _cache = cache;
-    }
+    ];
 
     public async Task<DbLoginEvent> GetByIdAsync(int id)
     {
-        if (id < 0) return null;
+        if (id < 0)
+        {
+            return null;
+        }
 
-        var loginEvent = _cache.Get<DbLoginEvent>($"{GuidLoginEvent} - {id}");
+        var loginEvent = cache.Get<DbLoginEvent>($"{GuidLoginEvent} - {id}");
         if(loginEvent == null)
         {
-            await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
             loginEvent = await loginEventContext.LoginEvents.FindAsync(id);
 
-            _cache.Insert($"{GuidLoginEvent} - {id}", loginEvent, TimeSpan.FromMinutes(10));
+            cache.Insert($"{GuidLoginEvent} - {id}", loginEvent, TimeSpan.FromMinutes(10));
         }
         return loginEvent;
     }
@@ -77,16 +68,16 @@ public class DbLoginEventsManager
     {
         var date = DateTime.UtcNow.AddYears(-1);
 
-        await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
         var loginInfo = await Queries.LoginEventsAsync(loginEventContext, tenantId, userId, _loginActions, date).ToListAsync();
 
-        return _mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
+        return mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
     }
 
     public async Task LogOutEventAsync(int loginEventId)
     {
-        await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteLoginEventsAsync(loginEventContext, loginEventId);
 
@@ -95,7 +86,7 @@ public class DbLoginEventsManager
 
     public async Task LogOutAllActiveConnectionsAsync(int tenantId, Guid userId)
     {
-        await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
         var loginEvents = await Queries.LoginEventsByUserIdAsync(loginEventContext, tenantId, userId).ToListAsync();
 
@@ -104,7 +95,7 @@ public class DbLoginEventsManager
 
     public async Task LogOutAllActiveConnectionsForTenantAsync(int tenantId)
     {
-        await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
         var loginEvents = await Queries.LoginEventsByTenantIdAsync(loginEventContext, tenantId).ToListAsync();
 
@@ -113,7 +104,7 @@ public class DbLoginEventsManager
 
     public async Task LogOutAllActiveConnectionsExceptThisAsync(int loginEventId, int tenantId, Guid userId)
     {
-        await using var loginEventContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
         var loginEvents = await Queries.LoginEventsExceptThisAsync(loginEventContext, tenantId, userId, loginEventId).ToListAsync();
 
@@ -135,14 +126,14 @@ public class DbLoginEventsManager
 
     private void ResetCache(int id)
     {
-        _cache.Remove($"{GuidLoginEvent} - {id}");
+        cache.Remove($"{GuidLoginEvent} - {id}");
     }
 
     private void ResetCache(List<DbLoginEvent> loginEvents)
     {
         foreach(var loginEvent in loginEvents)
         {
-            _cache.Remove($"{GuidLoginEvent} - {loginEvent.Id}");
+            cache.Remove($"{GuidLoginEvent} - {loginEvent.Id}");
         }
     }
 }

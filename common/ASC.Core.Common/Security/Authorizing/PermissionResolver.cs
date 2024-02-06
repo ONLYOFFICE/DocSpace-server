@@ -29,88 +29,99 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Core.Security.Authorizing;
 
 [Scope]
-class PermissionResolver : IPermissionResolver
+class PermissionResolver(AzManager azManager) : IPermissionResolver
 {
-    private readonly AzManager _azManager;
-
-    public PermissionResolver(AzManager azManager)
+    private readonly AzManager _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
+    
+    public async Task<bool> CheckAsync(ISubject subject, IAction action)
     {
-        _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
+        return await CheckAsync(subject, null, null, action);
+    }
+    
+    public async Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action)
+    {
+        var denyActions = await GetDenyActionsAsync(subject, action, objectId, securityObjProvider);
+        return denyActions == null;
     }
 
-    public async Task<bool> CheckAsync(ISubject subject, params IAction[] actions)
+    public async Task DemandAsync(ISubject subject, IAction action)
     {
-        return await CheckAsync(subject, null, null, actions);
+        await DemandAsync(subject, null, null, action);
     }
 
-    public async Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
+    public async Task DemandAsync(ISubject subject, IAction action1, IAction action2)
     {
-        var denyActions = await GetDenyActionsAsync(subject, actions, objectId, securityObjProvider);
-        return denyActions.Length == 0;
-    }
-
-    public async Task DemandAsync(ISubject subject, params IAction[] actions)
-    {
-        await DemandAsync(subject, null, null, actions);
-    }
-
-    public async Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
-    {
-        var denyActions = await GetDenyActionsAsync(subject, actions, objectId, securityObjProvider);
-        if (0 < denyActions.Length)
+        IAction[] actions = [action1, action2];
+        
+        var denyActions = await GetDenyActionsAsync(subject, actions, null, null);
+        if (denyActions.Length > 0)
         {
             throw new AuthorizingException(
                 subject,
-                Array.ConvertAll(denyActions, r => r._targetAction),
-                Array.ConvertAll(denyActions, r => r._denySubject),
-                Array.ConvertAll(denyActions, r => r._denyAction));
+                Array.ConvertAll(denyActions, r => r.TargetAction),
+                Array.ConvertAll(denyActions, r => r.Acl?.DenySubject),
+                Array.ConvertAll(denyActions, r => r.Acl?.DenyAction));
         }
     }
 
-
+    public async Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action)
+    {
+        var denyActions = await GetDenyActionsAsync(subject, action, objectId, securityObjProvider);
+        if (denyActions != null)
+        {
+            throw new AuthorizingException(
+                subject,
+                denyActions.TargetAction,
+                denyActions.Acl?.DenySubject,
+                denyActions.Acl?.DenyAction);
+        }
+    }
+    
     private async Task<DenyResult[]> GetDenyActionsAsync(ISubject subject, IAction[] actions, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
-        var denyActions = new List<DenyResult>();
-        if (actions == null)
-        {
-            actions = Array.Empty<IAction>();
-        }
+        actions ??= Array.Empty<IAction>();
 
         if (subject == null)
         {
-            denyActions = actions.Select(a => new DenyResult(a, null, null)).ToList();
+            return actions.Select(a => new DenyResult(a)).ToArray();
         }
-        else if (subject is ISystemAccount && subject.ID == Constants.CoreSystem.ID)
+
+        if (subject is ISystemAccount && subject.ID == Constants.CoreSystem.ID)
         {
-            // allow all
+            return Array.Empty<DenyResult>();
         }
-        else
+        
+        var denyActions = new List<DenyResult>();
+        foreach (var action in actions)
         {
-            foreach (var action in actions)
+            var acl = await _azManager.CheckPermissionAsync(subject, action, objectId, securityObjProvider);
+            if (acl.IsAllow)
             {
-                var (allow, denySubject, denyAction) = await _azManager.CheckPermissionAsync(subject, action, objectId, securityObjProvider);
-                if (!allow)
-                {
-                    denyActions.Add(new DenyResult(action, denySubject, denyAction));
-                    break;
-                }
+                continue;
             }
+
+            denyActions.Add(new DenyResult(action, acl));
+            break;
         }
 
         return denyActions.ToArray();
     }
-
-    private class DenyResult
+    
+    private async Task<DenyResult> GetDenyActionsAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
-        public readonly IAction _targetAction;
-        public readonly ISubject _denySubject;
-        public readonly IAction _denyAction;
-
-        public DenyResult(IAction targetAction, ISubject denySubject, IAction denyAction)
+        if (subject == null)
         {
-            _targetAction = targetAction;
-            _denySubject = denySubject;
-            _denyAction = denyAction;
+            return new DenyResult(action);
         }
+
+        if (subject is ISystemAccount && subject.ID == Constants.CoreSystem.ID)
+        {
+            return null;
+        }
+
+        var acl = await _azManager.CheckPermissionAsync(subject, action, objectId, securityObjProvider);
+        return !acl.IsAllow ? new DenyResult(action, acl) : null;
     }
+
+    private record DenyResult(IAction TargetAction, AzManagerAcl Acl = null);
 }

@@ -25,6 +25,4 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.EF.Teamlabsite;
-public interface ITeamlabsiteDb
-{
-}
+public interface ITeamlabsiteDb;

@@ -26,16 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T> : FileOperationData<T>
-{
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileMarkAsReadOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
-        bool holdResult = true) : base(folders, files, tenant, externalShareData, holdResult)
-    {
-        Headers = headers;
-    }
-}
+class FileMarkAsReadOperationData<T>(
+    IEnumerable<T> folders,
+    IEnumerable<T> files,
+    Tenant tenant,
+    IDictionary<string, StringValues> headers,
+    bool holdResult = true)
+    : FileOperationData<T>(folders, files, tenant, headers, holdResult);
 
 [Transient]
 class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
@@ -102,11 +99,11 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 
         var rootIds = new List<int>
             {
-                await globalFolder.GetFolderMyAsync(fileMarker, daoFactory),
+                await globalFolder.GetFolderMyAsync(daoFactory),
                 await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),
+                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
@@ -127,34 +124,8 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 }
 
 [Scope]
-public class FileMarkAsReadOperationScope
-{
-    private readonly FileMarker _fileMarker;
-    private readonly GlobalFolder _globalFolder;
-    private readonly IDaoFactory _daoFactory;
-    private readonly SettingsManager _settingsManager;
-
-    public FileMarkAsReadOperationScope(
-        FileMarker fileMarker,
-        GlobalFolder globalFolder,
-        IDaoFactory daoFactory,
-        SettingsManager settingsManager)
-    {
-        _fileMarker = fileMarker;
-        _globalFolder = globalFolder;
-        _daoFactory = daoFactory;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(
-        out FileMarker fileMarker,
-        out GlobalFolder globalFolder,
-        out IDaoFactory daoFactory,
-        out SettingsManager settingsManager)
-    {
-        fileMarker = _fileMarker;
-        globalFolder = _globalFolder;
-        daoFactory = _daoFactory;
-        settingsManager = _settingsManager;
-    }
-}
+public record FileMarkAsReadOperationScope(
+    FileMarker FileMarker,
+    GlobalFolder GlobalFolder,
+    IDaoFactory DaoFactory,
+    SettingsManager SettingsManager);

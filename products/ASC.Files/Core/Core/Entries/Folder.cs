@@ -49,7 +49,12 @@ public enum FolderType
     CustomRoom = 19,
     Archive = 20,
     ThirdpartyBackup = 21,
-    PublicRoom = 22
+    PublicRoom = 22,
+    FormRoom = 24,
+    ReadyFormFolder = 25,
+    InProcessFormFolder = 26,
+    FormFillingFolderDone = 27,
+    FormFillingFolderInProgress = 28
 }
 
 public interface IFolder
@@ -75,9 +80,10 @@ public class Folder<T> : FileEntry<T>, IFolder
     public int NewForMe { get; set; }
     public string FolderUrl { get; set; }
     public bool Pinned { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
+    public bool SettingsPrivate { get; set; }
+    public bool SettingsHasLogo { get; set; }
+    public string SettingsColor { get; set; }
+    public bool SettingsIndexing { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);
@@ -94,10 +100,7 @@ public class Folder<T> : FileEntry<T>, IFolder
 
     public Folder(
         FileHelper fileHelper,
-        Global global,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global)
+        Global global) : base(fileHelper, global)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

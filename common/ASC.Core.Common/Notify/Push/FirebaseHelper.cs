@@ -27,30 +27,14 @@
 namespace ASC.Core.Common.Notify.Push;
 
 [Scope]
-public class FirebaseHelper
+public class FirebaseHelper(AuthContext authContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    IConfiguration configuration,
+    ILogger<FirebaseHelper> logger,
+    FirebaseDao firebaseDao)
 {
-    protected readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly ILogger<FirebaseHelper> _logger;
-    private readonly IConfiguration _configuration;
-    private readonly FirebaseDao _firebaseDao;
-
-    public FirebaseHelper(
-        AuthContext authContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        IConfiguration configuration,
-        ILogger<FirebaseHelper> logger,
-        FirebaseDao firebaseDao)
-    {
-        _authContext = authContext;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _configuration = configuration;
-        _logger = logger;
-        _firebaseDao = firebaseDao;
-    }
+    protected readonly UserManager _userManager = userManager;
 
     public async Task SendMessageAsync(NotifyMessage msg)
     {
@@ -59,19 +43,19 @@ public class FirebaseHelper
         {
             try
             {
-                var credentials = JsonConvert.SerializeObject(new FirebaseApiKey(_configuration)).Replace("\\\\", "\\");
-                FirebaseApp.Create(new AppOptions()
+                var credentials = JsonConvert.SerializeObject(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
+                FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromJson(credentials)
                 });
             }
             catch (Exception e)
             {
-                _logger.ErrorUnexpected(e);
+                logger.ErrorUnexpected(e);
             }
         }
 
-        await _tenantManager.SetCurrentTenantAsync(msg.TenantId);
+        await tenantManager.SetCurrentTenantAsync(msg.TenantId);
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
@@ -86,18 +70,18 @@ public class FirebaseHelper
 
         if (productID == new Guid("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}")) //documents product
         {
-            fireBaseUser = await _firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
+            fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
         }
 
         foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {
-            var m = new FirebaseAdminMessaging.Message()
+            var m = new FirebaseAdminMessaging.Message
             {
                 Data = new Dictionary<string, string>{
                         { "data", msg.Data }
                     },
                 Token = fb.FirebaseDeviceToken,
-                Notification = new FirebaseAdminMessaging.Notification()
+                Notification = new FirebaseAdminMessaging.Notification
                 {
                     Body = msg.Content
                 }
@@ -108,17 +92,17 @@ public class FirebaseHelper
 
     public async Task<FireBaseUser> RegisterUserDeviceAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
-        var userId = _authContext.CurrentAccount.ID;
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return await _firebaseDao.RegisterUserDeviceAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
+        return await firebaseDao.RegisterUserDeviceAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }
 
     public async Task<FireBaseUser> UpdateUserAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
-        var userId = _authContext.CurrentAccount.ID;
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return await _firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
+        return await firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }
 }

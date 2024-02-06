@@ -32,7 +32,7 @@ public static class ConfigurationManagerExtension
     this ConfigurationManager config,
     IHostEnvironment env)
     {
-        config.AddJsonFile($"appsettings.services.json", optional: false, reloadOnChange: true)
+        config.AddJsonFile("appsettings.services.json", optional: false, reloadOnChange: true)
               .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
               .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 

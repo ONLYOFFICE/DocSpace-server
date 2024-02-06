@@ -26,14 +26,12 @@
 
 namespace ASC.Feed.Context;
 
-public class FeedDbContext : DbContext
+public class FeedDbContext(DbContextOptions<FeedDbContext> options) : DbContext(options)
 {
     public DbSet<FeedLast> FeedLast { get; set; }
     public DbSet<FeedAggregate> FeedAggregates { get; set; }
     public DbSet<FeedUsers> FeedUsers { get; set; }
     public DbSet<FeedReaded> FeedReaded { get; set; }
-
-    public FeedDbContext(DbContextOptions<FeedDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

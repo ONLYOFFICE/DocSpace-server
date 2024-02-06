@@ -88,6 +88,7 @@ public abstract class FileEntry : ICloneable
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
     public FileShareRecord ShareRecord { get; set; }
+    public int Order { get; set; }
 
     private string _modifiedByString;
     private string _createByString;
@@ -103,17 +104,14 @@ public abstract class FileEntry : ICloneable
     }
 }
 
-public interface IFileEntry
-{
-    string UniqID { get; }
-}
-
-public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry<T>>
+public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 {
     public T Id { get; set; }
     public T ParentId { get; set; }
     public T OriginId { get; set; }
     public T OriginRoomId { get; set; }
+    public T PreviousId { get; set; }
+    public bool MutableId { get; set; }
 
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 

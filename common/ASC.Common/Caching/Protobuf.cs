@@ -24,34 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SerializationContext = Confluent.Kafka.SerializationContext;
+
 namespace ASC.Common.Caching;
 
-public class ProtobufSerializer<T> : ISerializer<T> where T : IMessage<T>, new()
+public class ProtobufSerializer<T> : ISerializer<T> where T : new()
 {
-    public byte[] Serialize(T data, Confluent.Kafka.SerializationContext context)
+    public byte[] Serialize(T data, SerializationContext context)
     {
-        return data.ToByteArray();
+        return BaseProtobufSerializer.Serialize(data);
     }
 }
 
-public class ProtobufDeserializer<T> : IDeserializer<T> where T : IMessage<T>, new()
+public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
 {
-    private readonly MessageParser<T> _parser;
-
-    public ProtobufDeserializer()
+    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
     {
-        _parser = new MessageParser<T>(() => new T());
-    }
-
-    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, Confluent.Kafka.SerializationContext context)
-    {
-        return _parser.ParseFrom(data.ToArray());
+        return BaseProtobufSerializer.Deserialize<T>(data);
     }
 }
 
-public static class GuidExtension
+public class BaseProtobufSerializer
 {
-    public static ByteString ToByteString(this Guid id) => ByteString.CopyFrom(id.ToByteArray());
+    public static byte[] Serialize<T>(T data)
+    {
+        using var memoryStream = new MemoryStream();
+        Serializer.Serialize(memoryStream, data);
+        return memoryStream.ToArray();
+    }
 
-    public static Guid FromByteString(this ByteString id) => new(id.ToByteArray());
+    public static T Deserialize<T>(byte[] data)
+    {
+        return Deserialize<T>(new ReadOnlySpan<byte>(data));
+    }
+
+    public static T Deserialize<T>(ReadOnlySpan<byte> data)
+    {
+        return Serializer.Deserialize<T>(data);
+    }
 }

@@ -29,8 +29,8 @@ public partial class TextileFormatter
 {
     #region State Registration
 
-    private static readonly List<Type> _registeredStates = new();
-    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new();
+    private static readonly List<Type> _registeredStates = [];
+    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = [];
 
     public static void RegisterFormatterState(Type formatterStateType)
     {
@@ -39,7 +39,7 @@ public partial class TextileFormatter
             throw new ArgumentException("The formatter state must be a sub-public class of FormatterStateBase.");
         }
 
-        if (formatterStateType.GetConstructor(new[] { typeof(TextileFormatter) }) == null)
+        if (formatterStateType.GetConstructor([typeof(TextileFormatter)]) == null)
         {
             throw new ArgumentException("The formatter state must have a constructor that takes a TextileFormatter reference.");
         }
@@ -58,7 +58,7 @@ public partial class TextileFormatter
 
     #region State Management
 
-    private readonly List<Type> _disabledFormatterStates = new();
+    private readonly List<Type> _disabledFormatterStates = [];
     private readonly Stack<FormatterState> _stackOfStates = new();
 
     private bool IsFormatterStateEnabled(Type type)
@@ -110,10 +110,8 @@ public partial class TextileFormatter
             {
                 return _stackOfStates.Peek();
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
     }
 

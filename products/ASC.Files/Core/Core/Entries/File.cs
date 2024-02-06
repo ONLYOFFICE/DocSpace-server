@@ -196,11 +196,12 @@ public class File<T> : FileEntry<T>
                 FileType.Image => ConvertedType.Trim('.') == "zip" ? ".pptt" : ConvertedType,
                 FileType.Spreadsheet => ConvertedType.Trim('.') != "xlsx" ? ".xlst" : ConvertedType,
                 FileType.Document => ConvertedType.Trim('.') == "zip" ? ".doct" : ConvertedType,
-                _ => ConvertedType,
+                _ => ConvertedType
             };
         }
     }
 
+    [JsonIgnore]
     public object NativeAccessor { get; set; }
 }
 

@@ -236,7 +236,7 @@ public class TimeZoneConverter
         }
         catch (Exception error)
         {
-            _mapZones = new MapZone[0];
+            _mapZones = Array.Empty<MapZone>();
             _logger.ErrorInitMapZones(error);
         }
     }
@@ -281,7 +281,7 @@ public class TimeZoneConverter
                                 FileName = "/bin/bash",
                                 Arguments = "date +%Z",
                                 RedirectStandardOutput = true,
-                                UseShellExecute = false,
+                                UseShellExecute = false
                             };
 
                             using var p = Process.Start(psi);

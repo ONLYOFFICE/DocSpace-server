@@ -27,24 +27,13 @@
 namespace ASC.Core.Security.Authentication;
 
 [Scope]
-public class CookieStorage
+public class CookieStorage(InstanceCrypto instanceCrypto,
+    TenantCookieSettingsHelper tenantCookieSettingsHelper,
+    ILogger<CookieStorage> logger)
 {
     private const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss,fff";
 
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly TenantCookieSettingsHelper _tenantCookieSettingsHelper;
     private readonly HttpContext _httpContext;
-    private readonly ILogger<CookieStorage> _logger;
-
-    public CookieStorage(
-        InstanceCrypto instanceCrypto,
-        TenantCookieSettingsHelper tenantCookieSettingsHelper,
-        ILogger<CookieStorage> logger)
-    {
-        _instanceCrypto = instanceCrypto;
-        _tenantCookieSettingsHelper = tenantCookieSettingsHelper;
-        _logger = logger;
-    }
 
     public CookieStorage(
         IHttpContextAccessor httpContextAccessor,
@@ -73,7 +62,7 @@ public class CookieStorage
         try
         {
             cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
-            var s = _instanceCrypto.Decrypt(cookie).Split('$');
+            var s = instanceCrypto.Decrypt(cookie).Split('$');
 
             if (1 < s.Length)
             {
@@ -103,7 +92,7 @@ public class CookieStorage
         }
         catch (Exception err)
         {
-            _logger.AuthenticateError(cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat, CultureInfo.InvariantCulture), loginEventId, err);
+            logger.AuthenticateError(cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat, CultureInfo.InvariantCulture), loginEventId, err);
         }
 
         return false;
@@ -121,7 +110,7 @@ public class CookieStorage
         try
         {
             cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
-            var s = _instanceCrypto.Decrypt(cookie).Split('$');
+            var s = instanceCrypto.Decrypt(cookie).Split('$');
             if (8 < s.Length)
             {
                 loginEventId = !string.IsNullOrEmpty(s[8]) ? int.Parse(s[8]) : 0;
@@ -129,16 +118,16 @@ public class CookieStorage
         }
         catch (Exception err)
         {
-            _logger.ErrorLoginEvent(cookie, loginEventId, err);
+            logger.ErrorLoginEvent(cookie, loginEventId, err);
         }
         return loginEventId;
     }
 
     public async Task<string> EncryptCookieAsync(int tenant, Guid userid, int loginEventId)
     {
-        var settingsTenant = await _tenantCookieSettingsHelper.GetForTenantAsync(tenant);
-        var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
-        var settingsUser = await _tenantCookieSettingsHelper.GetForUserAsync(tenant, userid);
+        var settingsTenant = await tenantCookieSettingsHelper.GetForTenantAsync(tenant);
+        var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+        var settingsUser = await tenantCookieSettingsHelper.GetForUserAsync(tenant, userid);
 
         return EncryptCookie(tenant, userid, settingsTenant.Index, expires, settingsUser.Index, loginEventId);
     }
@@ -156,7 +145,7 @@ public class CookieStorage
             indexUser,
             loginEventId != 0 ? loginEventId.ToString() : null);
 
-        return _instanceCrypto.Encrypt(s);
+        return instanceCrypto.Encrypt(s);
     }
 
     private string GetUserDependencySalt()

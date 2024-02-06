@@ -30,7 +30,7 @@ public class ThirdPartyAppHandler
 {
     public static readonly string HandlerPath = "~/ThirdPartyApp";
 
-    public ThirdPartyAppHandler(RequestDelegate next)
+    public ThirdPartyAppHandler(RequestDelegate _)
     {
     }
 
@@ -41,38 +41,24 @@ public class ThirdPartyAppHandler
 }
 
 [Scope]
-public class ThirdPartyAppHandlerService
+public class ThirdPartyAppHandlerService(ILogger<ThirdPartyAppHandlerService> logger,
+    AuthContext authContext,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    CommonLinkUtility commonLinkUtility,
+    ThirdPartySelector thirdPartySelector)
 {
-    private readonly AuthContext _authContext;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly ILogger<ThirdPartyAppHandlerService> _log;
-    private readonly ThirdPartySelector _thirdPartySelector;
-    public string HandlerPath { get; set; }
-
-    public ThirdPartyAppHandlerService(
-        ILogger<ThirdPartyAppHandlerService> logger,
-        AuthContext authContext,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        CommonLinkUtility commonLinkUtility,
-        ThirdPartySelector thirdPartySelector)
-    {
-        _authContext = authContext;
-        _commonLinkUtility = commonLinkUtility;
-        _log = logger;
-        _thirdPartySelector = thirdPartySelector;
-        HandlerPath = baseCommonLinkUtility.ToAbsolute(ThirdPartyAppHandler.HandlerPath);
-    }
+    public string HandlerPath { get; set; } = baseCommonLinkUtility.ToAbsolute(ThirdPartyAppHandler.HandlerPath);
 
     public async Task InvokeAsync(HttpContext context)
     {
-        _log.DebugThirdPartyAppHandlerRequest(context.Request.Url());
+        logger.DebugThirdPartyAppHandlerRequest(context.Request.Url());
 
         var message = string.Empty;
 
         try
         {
-            var app = _thirdPartySelector.GetApp(context.Request.Query[ThirdPartySelector.AppAttr]);
-            _log.DebugThirdPartyAppApp(app);
+            var app = thirdPartySelector.GetApp(context.Request.Query[ThirdPartySelector.AppAttr]);
+            logger.DebugThirdPartyAppApp(app);
 
             if (await app.RequestAsync(context))
             {
@@ -86,7 +72,7 @@ public class ThirdPartyAppHandlerService
         }
         catch (Exception e)
         {
-            _log.ErrorThirdPartyApp(e);
+            logger.ErrorThirdPartyApp(e);
             message = e.Message;
         }
 
@@ -95,17 +81,17 @@ public class ThirdPartyAppHandlerService
             message = context.Request.Query["error_description"].FirstOrDefault() ?? FilesCommonResource.AppAccessDenied;
         }
 
-        var redirectUrl = _commonLinkUtility.GetDefault();
+        var redirectUrl = commonLinkUtility.GetDefault();
         if (!string.IsNullOrEmpty(message))
         {
-            redirectUrl += _authContext.IsAuthenticated ? "#error/" : "?m=";
+            redirectUrl += authContext.IsAuthenticated ? "#error/" : "?m=";
             redirectUrl += HttpUtility.UrlEncode(message);
         }
         context.Response.Redirect(redirectUrl, true);
     }
 }
 
-public static class ThirdPartyAppHandlerExtention
+public static class ThirdPartyAppHandlerExtension
 {
     public static IApplicationBuilder UseThirdPartyAppHandler(this IApplicationBuilder builder)
     {

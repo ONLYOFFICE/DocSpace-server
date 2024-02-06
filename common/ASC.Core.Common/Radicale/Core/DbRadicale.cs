@@ -27,25 +27,18 @@
 namespace ASC.Common.Radicale.Core;
 
 [Scope]
-public class DbRadicale
+public class DbRadicale(IDbContextFactory<UserDbContext> dbContextFactory)
 {
-    private readonly IDbContextFactory<UserDbContext> _dbContextFactory;
-
-    public DbRadicale(IDbContextFactory<UserDbContext> dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
-
     public async Task SaveCardDavUserAsync(int tenant, Guid id)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await userDbContext.AddOrUpdateAsync(q => q.UsersDav, new UserDav() { TenantId = tenant, UserId = id });
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.UsersDav, new UserDav { TenantId = tenant, UserId = id });
         await userDbContext.SaveChangesAsync();
     }
 
     public async Task RemoveCardDavUserAsync(int tenant, Guid id)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         var userDav = await Queries.UserDavAsync(userDbContext, tenant, id);
         if (userDav != null)
         {
@@ -56,7 +49,7 @@ public class DbRadicale
 
     public async Task<bool> IsExistCardDavUserAsync(int tenant, Guid id)
     {
-        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.UserDavAnyAsync(userDbContext, tenant, id);
     }
 }

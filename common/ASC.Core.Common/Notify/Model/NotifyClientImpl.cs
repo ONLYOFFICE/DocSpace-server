@@ -29,30 +29,24 @@ using System.Threading.Channels;
 namespace ASC.Notify.Model;
 
 [Transient]
-class NotifyClientImpl : INotifyClient
-{
-    private readonly InterceptorStorage _interceptors = new();
-    private readonly ILoggerProvider _loggerFactory;
-    private INotifySource _notifySource;
-    private readonly NotifyEngine _notifyEngine;
-    private readonly ChannelWriter<NotifyRequest> _channelWriter;
-    private readonly IServiceProvider _serviceProvider;
-
-    public NotifyClientImpl(
+class NotifyClientImpl(
         ILoggerProvider loggerFactory,
         NotifyEngine notifyEngine,
         IServiceProvider serviceProvider,
         ChannelWriter<NotifyRequest> channelWriter)
-    {
-        _loggerFactory = loggerFactory;
-        _notifyEngine = notifyEngine;
-        _serviceProvider = serviceProvider;
-        _channelWriter = channelWriter;
-    }
+    : INotifyClient
+{
+    private readonly InterceptorStorage _interceptors = new();
+    private INotifySource _notifySource;
 
     public void Init(INotifySource notifySource)
     {
         _notifySource = notifySource;
+    }
+    
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames, params ITagValue[] args)
+    {
+        await SendNoticeToAsync(action, null, recipient, [senderNames], false, args);
     }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
@@ -60,24 +54,19 @@ class NotifyClientImpl : INotifyClient
         await SendNoticeToAsync(action, null, recipients, senderNames, false, args);
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
-    {
-        await SendNoticeToAsync(action, objectID, recipients, senderNames, false, args);
-    }
-
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, null, false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, false, args);
     }
 
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string sendername, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, new[] { sendername }, false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], [sendername], false, args);
     }
 
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args)
     {
-        await SendNoticeToAsync(action, objectID, new[] { recipient }, null, checkSubscription, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription, args);
     }
 
     public void BeginSingleRecipientEvent(string name)
@@ -98,15 +87,29 @@ class NotifyClientImpl : INotifyClient
 
         foreach (var recipient in recipients)
         {
-            var r = CreateRequest(action, objectID, recipient, args, senderNames, checkSubsciption);
-            r._interceptors = _interceptors.GetAll();
-            foreach (var a in _notifyEngine.Actions)
-            {
-                await ((INotifyEngineAction)_serviceProvider.GetRequiredService(a)).BeforeTransferRequestAsync(r);
-            }
-
-            await _channelWriter.WriteAsync(r);
+            await SendNoticeToAsync(action, objectID, recipient, senderNames, checkSubsciption, args);
         }
+    }
+    
+    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
+    {
+        ArgumentNullException.ThrowIfNull(recipient);
+
+        BeginSingleRecipientEvent("__syspreventduplicateinterceptor");
+        
+        await SendRequest(action, objectID, recipient, senderNames, checkSubsciption, args);
+    }
+    
+    private async Task SendRequest(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
+    {
+        var r = CreateRequest(action, objectID, recipient, args, senderNames, checkSubsciption);
+        r._interceptors = _interceptors.GetAll();
+        foreach (var a in notifyEngine.Actions)
+        {
+            await ((INotifyEngineAction)serviceProvider.GetRequiredService(a)).BeforeTransferRequestAsync(r);
+        }
+
+        await channelWriter.WriteAsync(r);
     }
 
     private NotifyRequest CreateRequest(INotifyAction action, string objectID, IRecipient recipient, ITagValue[] args, string[] senders, bool checkSubsciption)
@@ -114,7 +117,7 @@ class NotifyClientImpl : INotifyClient
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
 
-        var request = new NotifyRequest(_loggerFactory, _notifySource, action, objectID, recipient)
+        var request = new NotifyRequest(loggerFactory, _notifySource, action, objectID, recipient)
         {
             _senderNames = senders,
             _isNeedCheckSubscriptions = checkSubsciption

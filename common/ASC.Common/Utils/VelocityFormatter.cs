@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Commons.Collections;
+
+using NVelocity.Runtime.Resource;
+
 namespace ASC.Common.Utils;
 
 public class TextLoader : ResourceLoader
 {
-    public override void Init(Commons.Collections.ExtendedProperties configuration)
+    public override void Init(ExtendedProperties configuration)
     {
         //nothing to configure
     }
@@ -38,12 +42,12 @@ public class TextLoader : ResourceLoader
         return new MemoryStream(Encoding.UTF8.GetBytes(source));
     }
 
-    public override long GetLastModified(NVelocity.Runtime.Resource.Resource resource)
+    public override long GetLastModified(Resource resource)
     {
         return 1;
     }
 
-    public override bool IsSourceModified(NVelocity.Runtime.Resource.Resource resource)
+    public override bool IsSourceModified(Resource resource)
     {
         return false;
     }
@@ -70,7 +74,7 @@ public static class VelocityFormatter
     {
         if (!_initialized)
         {
-            var properties = new Commons.Collections.ExtendedProperties();
+            var properties = new ExtendedProperties();
             properties.AddProperty("resource.loader", "custom");
             properties.AddProperty("custom.resource.loader.class", "ASC.Common.Utils.TextLoader; ASC.Common");
             properties.AddProperty("input.encoding", Encoding.UTF8.WebName);

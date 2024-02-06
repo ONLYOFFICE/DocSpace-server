@@ -30,6 +30,8 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Core.Helpers;
 
 [Scope]
@@ -67,8 +69,8 @@ public class ApiSystemHelper
         _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
         _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
-        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName : "docspace-tenants_region";
-    }
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
+        }
 
     public string CreateAuthToken(string pkey)
     {
@@ -87,7 +89,7 @@ public class ApiSystemHelper
             PortalName = HttpUtility.UrlEncode(domain)
         };
 
-        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var dataJson = JsonSerializer.Serialize(data);
         var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
         var resObj = JsonNode.Parse(result)?.AsObject();
         if (resObj?["error"] != null)
@@ -121,12 +123,12 @@ public class ApiSystemHelper
             TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
-                { TenantDomainKey, new AttributeValue
+                { TenantDomainKey, new AttributeValue 
                     {
                         S = tenantDomain
                     }
                 },
-                { TenantRegionKey, new AttributeValue
+                { TenantRegionKey, new AttributeValue 
                     {
                         S = tenantRegion
                     }
@@ -168,7 +170,7 @@ public class ApiSystemHelper
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
-            },
+            }
         };
 
         await awsDynamoDbClient.DeleteItemAsync(request);
@@ -195,7 +197,10 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0) return null;
+        if (getItemResponse.Item.Count == 0)
+        {
+            return null;
+        }
 
         //// cut number suffix
         //while (true)
@@ -227,12 +232,12 @@ public class ApiSystemHelper
     }
 
     #endregion
-
+    
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
         return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
-
+    
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))

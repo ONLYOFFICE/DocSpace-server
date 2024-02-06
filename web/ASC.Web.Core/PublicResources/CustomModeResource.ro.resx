@@ -136,15 +136,6 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" s
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
-    <value>Doriți să modificați parola biroului dvs în cloud? Faceți clic pe butonul de mai jos pentru a confirma.
- 
-$OrangeButton
- 
-Linkul este valabil timp de 7 zile.
- 
-Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
-  </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>&gt;${LetterLogoText}. Eliminarea datelor de utilizator finalizată</value>
   </data>
@@ -162,31 +153,6 @@ După eliminarea datelor personale s-a eliberat:
 # Mail - $MailSpace
 # Talk - $TalkSpace</value>
   </data>
-  <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1.Bun venit pe ONLYOFFICE Personal
-
-Tocmai v-ați creat un birou personal în cloud.
-
-h3.Este un spațiu virtual de lucru în care puteți edita și stoca documente, puteți lucra cu documente de oriunde și oferi acces prietenilor sau colegilor dumneavoastră.
-
-h3.Pentru un start rapid, iată ce puteți face cu ONLYOFFICE:
-
-- Creare, vizualizare și editare a documentelor text, foilor de calcul și prezentărilor.
-
-- Lucru cu formate de fișiere cele mai uzuale. Compatibilitatea maximă cu fișiere MS Office.
-
-- Creare și co-editare "formularelor gata de completare":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Partajare și colaborare online pe documente.
-
-- Utilizarea diferitor pluginuri pentru a încorpora noile funcții.
-
-- Un acces ușor la cloud Personal utilizând "Extensia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ro".
-
-De asemenea, puteți edita documente offline cu ajutorul "editorului de birou":"https://www.onlyoffice.com/download-desktop.aspx" gratuit sau instalați aplicația de editare pentru dispozitivul "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" sau "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
-  </data>
   <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
     <value>Faceţi aceleaşi lucruri în calitate de utilizator|Conectați Dropbox, Box și alte conturi în secțiunea Comun |Configurați drepturi de acces la documente și dosare în secțiunea Comun</value>
   </data>
@@ -200,53 +166,7 @@ $TrulyYours</value>
 # Telefon: $Phone
 # Data creării: $Date</value>
   </data>
-  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>Salut,
-
-Tocmai v-ați înregistrat contul în cadrul soluției personale ONLYOFFICE. Faceți clic "aici":"$InviteLink" pentru a confirma înregistrarea și pentru a crea parola.
-
-Dacă nu puteți deschide linkul, copiați acest link "$InviteLink":"$InviteLink" și lipiți-l în bara de adrese a browserului.
-
-$TrulyYours</value>
-  </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>A fost înregistrat un portal nou</value>
-  </data>
-  <data name="subject_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Închiderea contului ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Activați adresa dvs de e-mail</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
-    <value>Doriți să modificați adresa e-mail pentru biroul dvs cloud?
-
-Apăsați pe butonul de mai jos și vă conectați la contul dvs cloud.
-
-$GreenButton
-
-Linkul este valabil timp de 7 zile.
-
-*Dacă nu v-ați conectat la biroul dvs cloud din acest browser, utilizați adresa dvs de e-mail veche pentru confirmare.
-
-Nu doriți să modificați adresa de e-mail? Atunci ignorați acest mesaj.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
-    <value>Referitor la solicitarea dumneavoastră de închiderea contului pe personal.onlyoffice.com. Urmăriţi linkul pentru a finaliza solicitarea (link-ul este valabil timp de 7 zile): 
-
-$OrangeButton
-
-*Mențiune*: După demararea procesului de ştergere, contul dvs și toate datele asociate vor fi şterse definitiv conform "Declaraţiei de Confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Aflați mai multe despre închiderea contului":"${__HelpLink}/administration/configuration.aspx"
-
-Ignorați acest mesaj, dacă nu doriți să continuați. 
-
-Dacă aveți întrebări, ne contactați la "${__SupportEmail}":"mailto:${__SupportEmail}"
-
-$TrulyYours</value>
-  </data>
-  <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>Bun venit în ONLYOFFICE Personal</value>
   </data>
 </root>

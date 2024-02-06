@@ -108,19 +108,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Запит на зміну пароля для порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
-
-Отримано запит на зміну вашого пароля, який використовується для входу в портал "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Будь ласка, перейдіть за посиланням нижче, щоб змінити пароль:
-
-$OrangeButton
-
-*Примітка*: це посилання дійсно лише 7 днів. Пройдіть процес зміни пароля протягом цього періоду.
-
-Якщо ви не бажаєте змінювати пароль або отримали це повідомлення помилково, будь ласка, ігноруйте його або зверніться до свого адміністратора порталу "${__VirtualRootPath}":"${__VirtualRootPath}", щоб дізнатись деталі.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Запит на зміну мобільний телефон
 
@@ -983,20 +970,6 @@ $TrulyYours</value>
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Отримайте &lt;span style="color:#FF6F3D;"&gt;безкоштовні&lt;/span&gt; застосунки ONLYOFFICE
-
-
-Вітаємо, $UserName!
-
-Отримайте безплатні застосунки ONLYOFFICE для роботи з документами на будь-якому пристрої.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Щоб працювати з документами в автономному режимі завантажте Настільні редактори ONLYOFFICE для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Щоб редагувати документи на мобільних пристроях, завантажте застосунок ONLYOFFICE Documents для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Отримайте &lt;span style="color:#FF6F3D;"&gt;безкоштовні&lt;/span&gt; застосунки ONLYOFFICE
 
@@ -1010,24 +983,6 @@ $TrulyYours</value>
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Щоб редагувати документи на мобільних пристроях, завантажте застосунок ONLYOFFICE Documents для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Вітаємо!
-Повідомляємо про спробу реєстрації нового облікового запису "ONLYOFFICE Personal":"$PortalUrl" з використанням цієї адреси електронної пошти. Якщо це були ви, інформуємо вас, що обліковий запис вже існує. Перейдіть до ONLYOFFICE Personal та увійдіть до системи.
-Якщо ви забули пароль, то можете відновити його на "сторінці відновлення пароля":"$LinkToRecovery".
-Якщо ви не намагалися зареєструвати новий обліковий запис, напевно, хтось зробив це помилково. У такому разі проігноруйте цей лист.
-
-Гарного дня!
-Команда ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Хочете змінити пароль до облікового запису ONLYOFFICE Personal? Для підтвердження натисніть кнопку нижче.
-
-$OrangeButton 
-
-Посилання дійсне протягом 7 днів.
-
-Не хочете змінювати пароль? Просто проігноруйте це повідомлення.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;деактивовано&lt;/span&gt;
@@ -1275,9 +1230,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
   </data>
@@ -1316,21 +1268,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_mailbox_password_changed" xml:space="preserve">
     <value>${LetterLogoText}. Зміна паролю до поштової скриньки</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Ласкаво просимо до ONLYOFFICE для особистого використання!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Ласкаво просимо до ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Увійдіть до свого облікового запису ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Активуйте адресу електронної пошти</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Закриття облікового запису ONLYOFFICE</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace деактивовано</value>
@@ -1532,80 +1469,6 @@ $OrangeButton
 Посилання дійсне лише протягом 7 днів.
 
 Ви отримаєте додаткові поради щодо використання вебофісу. Ви можете будь-коли скасовувати підписки на сторінці свого профілю, а також вмикати їх знову.</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Вітаємо, $UserName!
-Ви успішно зареєструвалися в "${__VirtualRootPath}":"${__VirtualRootPath}" ONLYOFFICE Personal.
-
-Під’єднайте своє улюблене хмарне сховище: Dropbox, Google Диск, OneDrive або Box, щоб створити єдиний робочий простір для своїх документів, доступний із будь-якого місця.
-
-Дізнайтеся більше про ONLYOFFICE Personal у "нашому блозі":"$TagBlogLink".
-
-Ми раді, що ви тут. Слідкуйте за оновленнями!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Ласкаво просимо до ONLYOFFICE Personal!
-
-Ви щойно створили свій персональний офіс у хмарі.
-
-h3.Це віртуальний робочий простір, де можна редагувати та зберігати документи, працювати з ними з будь-якого місця, а також надавати до них доступ друзям і колегам.
-
-h3.Спочатку про те, що можна робити в ONLYOFFICE:
-
-- Створювати, переглядати й редагувати текстові документи, електронні таблиці й презентації.
-
-- Працювати з усіма популярними форматами. Забезпечується максимальна сумісність із файлами MS Office.
-
-- Створювати й спільно редагувати "готові до заповнення форми":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Надавати доступ до документів і спільно працювати над ними онлайн.
-
-- Використовувати різні плагіни для застосування додаткових функцій.
-
-- Легко отримувати доступ до своєї персональної хмари через "розширення для Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=uk".
-
-Крім того, ви можете редагувати документи в автономному режимі за допомогою наших "настільних редакторів":"https://www.onlyoffice.com/download-desktop.aspx" і отримати набір застосунків для редагування на мобільному пристрої "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" або "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Хочете змінити адресу електронної пошти у своєму обліковому записі ONLYOFFICE?
-
-Натисніть кнопку нижче та увійдіть* до своєї хмари.
-
-$OrangeButton
-
-Посилання дійсне протягом 7 днів.
-
-*Якщо ви не увійшли до ONLYOFFICE у цьому браузері, вам потрібно буде використати стару адресу електронної пошти для підтвердження.
-
-Не хочете змінювати адресу електронної пошти? Просто проігноруйте це повідомлення.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Вітаємо!
-
-Ви щойно зареєстрували обліковий запис ONLYOFFICE для особистого використання. Натисніть "тут":"$InviteLink", щоб підтвердити реєстрацію та створити пароль.
-
-Якщо ви не можете відкрити посилання, скопіюйте "$InviteLink":"$InviteLink" та вставте до адресного рядка браузера.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Ви подали запит на закриття вашого облікового запису на personal.onlyoffice.com. Для виконання запиту перейдіть за посиланням (посилання активне протягом 7 днів): 
-
-$OrangeButton
-
-*Примітка*. Після видалення ваш обліковий запис і всі пов’язані з ним дані буде знищено назавжди відповідно до нашого "Положення про конфіденційність":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Ознайомитися з додатковою інформацією про закриття облікового запису":"${__HelpLink}/administration/configuration.aspx"
-
-Якщо ви не хочете продовжувати, проігноруйте цей лист. 
-
-Якщо у вас виникли запитання, напишіть нам на адресу "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Деактивація порталу [${__VirtualRootPath}](${__VirtualRootPath}) 

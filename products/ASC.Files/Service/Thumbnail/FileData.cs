@@ -26,18 +26,10 @@
 
 namespace ASC.Files.ThumbnailBuilder;
 
-public class FileData<T>
+public class FileData<T>(int tenantId, T fileId, string baseUri, TariffState tariffState)
 {
-    public TariffState TariffState { get; private set; }
-    public int TenantId { get; private set; }
-    public T FileId { get; private set; }
-    public string BaseUri { get; private set; }
-
-    public FileData(int tenantId, T fileId, string baseUri, TariffState tariffState)
-    {
-        TenantId = tenantId;
-        FileId = fileId;
-        BaseUri = baseUri;
-        TariffState = tariffState;
-    }
+    public TariffState TariffState { get; private set; } = tariffState;
+    public int TenantId { get; private set; } = tenantId;
+    public T FileId { get; private set; } = fileId;
+    public string BaseUri { get; private set; } = baseUri;
 }

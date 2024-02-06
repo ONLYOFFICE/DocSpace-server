@@ -25,10 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Quota.Features;
-public class FreeFeature : TenantQuotaFeatureFlag
+public class FreeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureFlag(tenantQuota)
 {
     public override string Name { get => "free"; }
-    public FreeFeature(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
 }

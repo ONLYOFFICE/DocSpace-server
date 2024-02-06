@@ -33,5 +33,5 @@ public enum CacheNotifyAction
     Update = 2,
     Remove = 4,
     InsertOrUpdate = Insert | Update,
-    Any = InsertOrUpdate | Remove,
+    Any = InsertOrUpdate | Remove
 }

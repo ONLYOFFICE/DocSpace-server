@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public interface ICacheNotify<T> where T : IMessage<T>, new()
+public interface ICacheNotify<T> where T : new()
 {
     void Publish(T obj, CacheNotifyAction action);
 

@@ -28,9 +28,8 @@ namespace ASC.Web.Api.Core;
 
 public class PaymentAccountHandler
 {
-    public PaymentAccountHandler(RequestDelegate next)
+    public PaymentAccountHandler(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke

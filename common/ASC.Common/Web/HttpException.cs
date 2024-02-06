@@ -61,9 +61,4 @@ public class HttpException : Exception
     }
 }
 
-public class CustomHttpException : HttpException
-{
-    public CustomHttpException(HttpStatusCode httpStatusCode, string message) : base(httpStatusCode, message)
-    {
-    }
-}
+public class CustomHttpException(HttpStatusCode httpStatusCode, string message) : HttpException(httpStatusCode, message);

@@ -24,15 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MailKit.Net.Smtp;
+
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class SmtpSender : INotifySender
+public class SmtpSender(IConfiguration configuration,
+        IServiceProvider serviceProvider,
+        ILoggerProvider options)
+    : INotifySender
 {
-    protected ILogger _logger;
-    private IDictionary<string, string> _initProperties;
-    protected readonly IConfiguration _configuration;
-    protected readonly IServiceProvider _serviceProvider;
+    protected ILogger _logger = options.CreateLogger("ASC.Notify");
+    private IDictionary<string, string> _initProperties = new Dictionary<string, string>();
+    protected readonly IConfiguration _configuration = configuration;
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
 
     private string _host;
     private int _port;
@@ -41,17 +46,6 @@ public class SmtpSender : INotifySender
     private SaslMechanism _saslMechanism;
     protected bool _useCoreSettings;
     const int NetworkTimeout = 30000;
-
-    public SmtpSender(
-        IConfiguration configuration,
-        IServiceProvider serviceProvider,
-        ILoggerProvider options)
-    {
-        _initProperties = new Dictionary<string, string>();
-        _logger = options.CreateLogger("ASC.Notify");
-        _configuration = configuration;
-        _serviceProvider = serviceProvider;
-    }
 
     public virtual void Init(IDictionary<string, string> properties)
     {
@@ -114,26 +108,26 @@ public class SmtpSender : INotifySender
         {
             result = NoticeSendResult.TryOnceAgain;
         }
-        catch (MailKit.Net.Smtp.SmtpProtocolException)
+        catch (SmtpProtocolException)
         {
             result = NoticeSendResult.SendingImpossible;
         }
-        catch (MailKit.Net.Smtp.SmtpCommandException e)
+        catch (SmtpCommandException e)
         {
             switch (e.StatusCode)
             {
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxBusy:
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxUnavailable:
-                case MailKit.Net.Smtp.SmtpStatusCode.ExceededStorageAllocation:
+                case SmtpStatusCode.MailboxBusy:
+                case SmtpStatusCode.MailboxUnavailable:
+                case SmtpStatusCode.ExceededStorageAllocation:
                     result = NoticeSendResult.TryOnceAgain;
                     break;
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxNameNotAllowed:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalWillForward:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalTryAlternatePath:
+                case SmtpStatusCode.MailboxNameNotAllowed:
+                case SmtpStatusCode.UserNotLocalWillForward:
+                case SmtpStatusCode.UserNotLocalTryAlternatePath:
                     result = NoticeSendResult.MessageIncorrect;
                     break;
                 default:
-                    if (e.StatusCode != MailKit.Net.Smtp.SmtpStatusCode.Ok)
+                    if (e.StatusCode != SmtpStatusCode.Ok)
                     {
                         result = NoticeSendResult.TryOnceAgain;
                     }
@@ -305,9 +299,9 @@ public class SmtpSender : INotifySender
                       </html>";
     }
 
-    private MailKit.Net.Smtp.SmtpClient GetSmtpClient()
+    private SmtpClient GetSmtpClient()
     {
-        var smtpClient = new MailKit.Net.Smtp.SmtpClient
+        var smtpClient = new SmtpClient
         {
             Timeout = NetworkTimeout
         };

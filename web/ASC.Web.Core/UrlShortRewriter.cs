@@ -27,17 +27,16 @@
 namespace ASC.Web.Core;
 public class UrlShortRewriter
 {
-    public const string BasePath = "/s/";
-
-    public UrlShortRewriter(RequestDelegate next)
+    public UrlShortRewriter(RequestDelegate _)
     {
-
     }
+
+    public const string BasePath = "/s/";
 
     public async Task InvokeAsync(HttpContext httpContext, IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
     {
         var path = httpContext.Request.Path.ToString();
-        path = path.Substring(BasePath.Length);
+        path = path[BasePath.Length..];
 
         var id = ShortUrl.Decode(path);
 

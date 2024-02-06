@@ -51,7 +51,7 @@ internal class MappedPath
 
         return new MappedPath(_pathUtils)
         {
-            PhysicalPath = CrossPlatform.PathCombine(PhysicalPath, PathUtils.Normalize(domain, true)),
+            PhysicalPath = CrossPlatform.PathCombine(PhysicalPath, PathUtils.Normalize(domain, true))
         };
     }
 }

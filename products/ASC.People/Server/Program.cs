@@ -41,7 +41,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
+                                s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -55,7 +55,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
@@ -68,10 +68,7 @@ try
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }
@@ -84,5 +81,5 @@ finally
 public partial class Program
 {
     public static readonly string Namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }

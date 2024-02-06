@@ -27,23 +27,14 @@
 namespace ASC.Notify;
 
 [Singleton]
-public class ServiceLauncher : BackgroundService
-{
-    private readonly StudioNotifyServiceSender _studioNotifyServiceSender;
-    private readonly NotifyConfiguration _notifyConfiguration;
-
-    public ServiceLauncher(
-        StudioNotifyServiceSender studioNotifyServiceSender,
+public class ServiceLauncher(StudioNotifyServiceSender studioNotifyServiceSender,
         NotifyConfiguration notifyConfiguration)
-    {
-        _studioNotifyServiceSender = studioNotifyServiceSender;
-        _notifyConfiguration = notifyConfiguration;
-    }
-
+    : BackgroundService
+{
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _notifyConfiguration.Configure();
-        _studioNotifyServiceSender.RegisterSendMethod();
+        notifyConfiguration.Configure();
+        studioNotifyServiceSender.RegisterSendMethod();
 
         return Task.CompletedTask;
     }

@@ -27,24 +27,13 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 [Scope]
-public class RoomLogoValidator : IDataStoreValidator
+public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity, SecurityContext securityContext) : IDataStoreValidator
 {
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly SecurityContext _securityContext;
-
-    public RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity, SecurityContext securityContext)
-    {
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _securityContext = securityContext;
-    }
-    
     public async Task<bool> Validate(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
 
-        if (!_securityContext.IsAuthenticated)
+        if (!securityContext.IsAuthenticated)
         {
             return true;
         }
@@ -63,14 +52,20 @@ public class RoomLogoValidator : IDataStoreValidator
             return await CheckRoomAccess(internalId);
         }
 
+        var provider = await daoFactory.ProviderDao.GetProviderInfoByEntryIdAsync(id);
+        if (provider is { MutableEntityId: true })
+        {
+            id = provider.FolderId;
+        }
+
         return await CheckRoomAccess(id);
     }
     
     private async Task<bool> CheckRoomAccess<T>(T id)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(id);
 
-        return DocSpaceHelper.IsRoom(folder.FolderType) && await _fileSecurity.CanReadAsync(folder);
+        return DocSpaceHelper.IsRoom(folder.FolderType) && await fileSecurity.CanReadAsync(folder);
     }
 }

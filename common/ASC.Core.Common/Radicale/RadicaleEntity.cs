@@ -26,23 +26,13 @@
 
 namespace ASC.Common.Radicale;
 
-public abstract class RadicaleEntity
+public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypto instanceCrypto)
 {
     public string Uid { get; set; }
 
-    protected readonly string _defaultRadicaleUrl;
+    protected readonly string _defaultRadicaleUrl = (configuration["radicale:path"] != null) ? configuration["radicale:path"] : "http://localhost:5232";
     protected const string DefaultAddBookName = "11111111-1111-1111-1111-111111111111";
     protected const string ReadonlyAddBookName = "11111111-1111-1111-1111-111111111111-readonly";
-
-    private readonly IConfiguration _configuration;
-    private readonly InstanceCrypto _instanceCrypto;
-
-    public RadicaleEntity(IConfiguration configuration, InstanceCrypto instanceCrypto)
-    {
-        _defaultRadicaleUrl = (configuration["radicale:path"] != null) ? configuration["radicale:path"] : "http://localhost:5232";
-        _configuration = configuration;
-        _instanceCrypto = instanceCrypto;
-    }
 
     public string GetRadicaleUrl(string url, string email, bool isReadonly = false, bool isCardDav = false, bool isRedirectUrl = false, string entityId = "", string itemID = "")
     {
@@ -69,11 +59,11 @@ public abstract class RadicaleEntity
 
     public string GetSystemAuthorization()
     {   
-        if(_configuration["radicale:admin"] == null || _configuration["radicale:admin"] == "")
+        if(configuration["radicale:admin"] == null || configuration["radicale:admin"] == "")
         {
             return null;
         }
-        return _configuration["radicale:admin"] + ":" + _instanceCrypto.Encrypt(_configuration["radicale:admin"]);
+        return configuration["radicale:admin"] + ":" + instanceCrypto.Encrypt(configuration["radicale:admin"]);
     }
 
     protected string GetData(string sample, string name, string description, string backgroundColor)

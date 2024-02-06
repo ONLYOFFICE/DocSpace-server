@@ -45,7 +45,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
+                                s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger("ASC.ClearEvents");
@@ -57,10 +57,10 @@ try
     builder.Host.ConfigureDefault();
 
     builder.Services.AddClearEventsServices(builder.Configuration);
-    
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, false, false);
+        containerBuilder.Register(context.Configuration, false);
 
         if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
         {
@@ -72,11 +72,11 @@ try
 
     app.UseRouting();
 
-    app.MapHealthChecks("/health", new HealthCheckOptions()
+    app.MapHealthChecks("/health", new HealthCheckOptions
     {
         Predicate = _ => true,
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    });
+    }).ShortCircuit();
 
     app.MapHealthChecks("/liveness", new HealthCheckOptions
     {
@@ -89,10 +89,7 @@ try
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }
@@ -105,5 +102,5 @@ finally
 public partial class Program
 {
     public static readonly string Namespace = "ASC.ClearEvents";
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }

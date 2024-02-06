@@ -26,15 +26,15 @@
 
 namespace ASC.Web.Core.Users;
 
-public class UserInfoComparer : IComparer<UserInfo>
+public class UserInfoComparer(UserSortOrder sortOrder, bool descending) : IComparer<UserInfo>
 {
     public static readonly IComparer<UserInfo> Default = new UserInfoComparer(UserSortOrder.DisplayName, false);
     public static readonly IComparer<UserInfo> FirstName = new UserInfoComparer(UserSortOrder.FirstName, false);
     public static readonly IComparer<UserInfo> LastName = new UserInfoComparer(UserSortOrder.LastName, false);
 
 
-    public UserSortOrder SortOrder { get; set; }
-    public bool Descending { get; set; }
+    public UserSortOrder SortOrder { get; set; } = sortOrder;
+    public bool Descending { get; set; } = descending;
 
 
     public UserInfoComparer(UserSortOrder sortOrder)
@@ -42,28 +42,16 @@ public class UserInfoComparer : IComparer<UserInfo>
     {
     }
 
-    public UserInfoComparer(UserSortOrder sortOrder, bool descending)
-    {
-        SortOrder = sortOrder;
-        Descending = descending;
-    }
-
 
     public int Compare(UserInfo x, UserInfo y)
     {
-        var result = 0;
-        switch (SortOrder)
+        var result = SortOrder switch
         {
-            case UserSortOrder.DisplayName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.Default);
-                break;
-            case UserSortOrder.FirstName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.FirstLast);
-                break;
-            case UserSortOrder.LastName:
-                result = UserFormatter.Compare(x, y, DisplayUserNameFormat.LastFirst);
-                break;
-        }
+            UserSortOrder.DisplayName => UserFormatter.Compare(x, y, DisplayUserNameFormat.Default),
+            UserSortOrder.FirstName => UserFormatter.Compare(x, y, DisplayUserNameFormat.FirstLast),
+            UserSortOrder.LastName => UserFormatter.Compare(x, y, DisplayUserNameFormat.LastFirst),
+            _ => 0
+        };
 
         return !Descending ? result : -result;
     }
