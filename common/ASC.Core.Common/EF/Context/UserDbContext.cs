@@ -37,6 +37,7 @@ public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : D
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DbSubscriptionMethod> SubscriptionMethods { get; set; }
     public DbSet<UserDav> UsersDav { get; set; }
+    public DbSet<AccountLinks> AccountLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,6 +52,7 @@ public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : D
         .AddUserGroup()
         .AddSubscription()
         .AddUserDav()
-        .AddDbTenant();
+        .AddDbTenant()
+        .AddAccountLinks();
     }
 }
