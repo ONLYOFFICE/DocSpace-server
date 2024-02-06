@@ -167,7 +167,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry, true);
         var userIds = whoCanRead
             .Concat(await GetAdmins())
             .Concat(new []{ entry.CreateBy })
