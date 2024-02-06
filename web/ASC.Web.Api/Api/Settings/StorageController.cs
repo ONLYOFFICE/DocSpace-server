@@ -476,8 +476,6 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await tenantExtra.DemandAccessSpacePermissionAsync();
-
         var schedule = await backupAjaxHandler.GetScheduleAsync();
         var current = new StorageSettings();
 

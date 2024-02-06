@@ -1271,6 +1271,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Portal Renamed.
+        /// </summary>
+        public static string PortalRenamed {
+            get {
+                return ResourceManager.GetString("PortalRenamed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Private Room is disabled.
         /// </summary>
         public static string PrivacyRoomDisable {

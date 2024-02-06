@@ -64,7 +64,8 @@ public class FactoryIndexerFile(ILoggerProvider options,
         IServiceProvider serviceProvider,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
-        Settings settings)
+        Settings settings,
+        FileUtility fileUtility)
     : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()
@@ -73,8 +74,9 @@ public class FactoryIndexerFile(ILoggerProvider options,
         {
             var j = 0;
             var tasks = new List<Task>();
-
-            foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            var now = DateTime.UtcNow;
+            
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (settings.Threads == 1)
                 {
@@ -82,7 +84,7 @@ public class FactoryIndexerFile(ILoggerProvider options,
                 }
                 else
                 {
-                    tasks.Add(IndexAsync(data));
+                    tasks.Add(Index(data));
                     j++;
                     if (j >= settings.Threads)
                     {
@@ -97,12 +99,16 @@ public class FactoryIndexerFile(ILoggerProvider options,
             {
                 Task.WaitAll(tasks.ToArray());
             }
+
+            await _indexer.OnComplete(now);
         }
         catch (Exception e)
         {
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+
+        return;
 
         List<int> GetIds(DateTime lastIndexed)
         {
@@ -157,6 +163,11 @@ public class FactoryIndexerFile(ILoggerProvider options,
     }
 
     public override string SettingsTitle => FilesCommonResource.IndexTitle;
+
+    public override async Task<bool> CanIndexByContentAsync(DbFile t)
+    {
+        return await base.CanIndexByContentAsync(t) && fileUtility.CanIndex(t.Title);
+}
 }
 
 public class FileTenant

@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage;
+using ASC.Web.Core;
 
 namespace ASC.Files;
 
@@ -34,6 +35,11 @@ public class Startup : BaseStartup
         : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
+
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public override async Task ConfigureServices(IServiceCollection services)
@@ -70,6 +76,8 @@ public class Startup : BaseStartup
 
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
+        services.AddDocumentServiceHttpClient();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

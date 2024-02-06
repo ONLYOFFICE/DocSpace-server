@@ -76,100 +76,100 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Jaz</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Slaba zahteva.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Zgodila se je napaka v storitvi dokumenta</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Prazna datoteka</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Potrebne datoteke ni bilo mogoče najti</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>Datoteka večja od {0} ne bo pretvorjena</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Te mape ne morete kopirati v podmapo</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potrebne mape ni bilo mogoče najti</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nepravilen naslov</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Datoteko je trenutno zaklenil drug uporabnik</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Preveč prenosov.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Oprostite, ta format datoteke ni podprt</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Avtor shranitve je neznan</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Datoteka je bila poškodovana, ko ste jo poskusili shraniti</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Neuspešno sem shranil datoteko</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za izvajanje operacije</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Ne morem dovoliti {0} ponudniku z danimi poverilnicami.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ustvarjanje</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Ne morem izbrisati datoteke, saj je odprta za urejanje</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Ne morem zbrisati mape, saj je ena izmed njenih detotek odprta za urejanje</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za izbrisanje datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za izbrisanje mape</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenj za urejanje datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Ta dokument urejate vi v drugem zavihku</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ogled datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ogled vsebine mape</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za preimenovanje datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za preimenovanje mape</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Ne morem posodobiti datoteke, saj se odprta za urejanje</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ogled vsebine mape</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Napaka pri začenjanju urejanja datoteke</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Ne morete posodobiti datoteke, ki je odprta za urejanje</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Ni dovoljeno, da si elemente predogledate v košu</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -226,13 +226,13 @@
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Sodelavec</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nova različica ne more biti enaka trenutni</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Nimate dovoljenja za kopiranje datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nimate dovoljenja za kopiranje mape</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -358,40 +358,40 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Razveljavljeno</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Tega uporabnika ne morete izbrati</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Pretvorba traja predolgo.</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Datoteko je za urejanje odprl {0}. Trenutno funkcija sourejanja ni podprta za ta format datoteke.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Datoteko je za urejanje v mobilni aplikaciji odprl {0}</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo kopirana</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo urejena</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo premaknjena</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Vsaj {0} email sporočil ni bilo mogoče poslati. Obiščite modul za email, da poiščete razlog za težavo.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenj za premikanje datoteke</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenj za premikanje mape</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Vsebina mape tretjih strani ni na voljo. Poskusite znova povezati račun.</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Uporabnika ni bilo mogoče najti</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
@@ -401,10 +401,10 @@
     <value>Datoteka ustvarjena v mapi "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Dokument OFORM za izpolnjevanje je pripravljen. Shranjen je v {0}</value>
+    <value>Dokument PDF za izpolnjevanje je pripravljen. Shranjen je v {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopija OFORM je ustvarjena v mapi {0}. Izpolnite obrazec in prenesite rezultat kot datoteko PDF ali DOCX.</value>
+    <value>Kopija PDF je ustvarjena v mapi {0}. Izpolnite obrazec in prenesite rezultat kot datoteko PDF ali DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Datoteka ni več osnutek za izpolnjevanje obrazca.</value>

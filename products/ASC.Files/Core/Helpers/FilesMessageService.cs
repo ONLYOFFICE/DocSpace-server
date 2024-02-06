@@ -71,9 +71,9 @@ public class FilesMessageService(ILoggerProvider options,
         await SendAsync(action, entry, null, userId, FileShare.None, description);
     }
 
-    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, params string[] description)
+    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
     {
-        description = description.Append(FileShareExtensions.GetAccessString(userRole)).ToArray();
+        description = description.Append(FileShareExtensions.GetAccessString(userRole, useRoomFormat)).ToArray();
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
@@ -203,14 +203,22 @@ public class FilesMessageService(ILoggerProvider options,
 
     private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
         var info = new AdditionalNotificationInfo
         {
-            RoomId = roomInfo.RoomId,
             RoomTitle = roomInfo.RoomTitle
         };
+
+        if (entry.ProviderEntry)
+        {
+            info.RoomIdString = Convert.ToString(roomInfo.RoomId);
+        }
+        else
+        {
+            info.RoomId = Convert.ToInt32(roomInfo.RoomId);
+        }
 
         if (action == MessageAction.RoomRenamed && !string.IsNullOrEmpty(oldTitle))
         {
@@ -220,14 +228,14 @@ public class FilesMessageService(ILoggerProvider options,
         if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
             && userid != Guid.Empty)
         {
-            info.UserIds = new List<Guid> { userid };
+            info.UserIds = [userid];
         }
 
         if (action == MessageAction.RoomUpdateAccessForUser
             && (userRole != FileShare.None)
             && userid != Guid.Empty)
         {
-            info.UserIds = new List<Guid> { userid };
+            info.UserIds = [userid];
             info.UserRole = (int)userRole;
         }
 

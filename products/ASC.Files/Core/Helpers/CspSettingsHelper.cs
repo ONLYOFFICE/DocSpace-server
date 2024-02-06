@@ -41,10 +41,7 @@ public class CspSettingsHelper(SettingsManager settingsManager,
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(coreSettings);
-        List<string> headerKeys = new()
-        {
-            GetKey(domain)
-        };
+        List<string> headerKeys = [GetKey(domain)];
 
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
@@ -162,9 +159,9 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         {
             options.Add(new CspOptions
             {
-                Script = new List<string> { filesLinkUtility.DocServiceUrl },
-                Frame = new List<string> { filesLinkUtility.DocServiceUrl },
-                Connect = new List<string> { filesLinkUtility.DocServiceUrl }
+                Script = [filesLinkUtility.DocServiceUrl],
+                Frame = [filesLinkUtility.DocServiceUrl],
+                Connect = [filesLinkUtility.DocServiceUrl]
             });
         }
 
@@ -251,14 +248,14 @@ public class CspSettingsHelper(SettingsManager settingsManager,
 
 public class CspOptions
 {
-    public List<string> Def { get; set; } = new();
-    public List<string> Script { get; set; } = new();
-    public List<string> Style { get; set; } = new();
-    public List<string> Img { get; set; } = new();
-    public List<string> Frame { get; set; } = new();
-    public List<string> Fonts { get; set; } = new();
-    public List<string> Connect { get; set; } = new();
-    public List<string> Media { get; set; } = new();
+    public List<string> Def { get; set; } = [];
+    public List<string> Script { get; set; } = [];
+    public List<string> Style { get; set; } = [];
+    public List<string> Img { get; set; } = [];
+    public List<string> Frame { get; set; } = [];
+    public List<string> Fonts { get; set; } = [];
+    public List<string> Connect { get; set; } = [];
+    public List<string> Media { get; set; } = [];
 
     public CspOptions()
     {
@@ -267,13 +264,13 @@ public class CspOptions
 
     public CspOptions(string domain)
     {
-        Def = new List<string>();
-        Script = new List<string> { domain };
-        Style = new List<string> { domain };
-        Img = new List<string> { domain };
-        Frame = new List<string> { domain };
-        Fonts = new List<string> { domain };
-        Connect = new List<string> { domain };
-        Media = new List<string> { domain };
+        Def = [];
+        Script = [domain];
+        Style = [domain];
+        Img = [domain];
+        Frame = [domain];
+        Fonts = [domain];
+        Connect = [domain];
+        Media = [domain];
     }
 }

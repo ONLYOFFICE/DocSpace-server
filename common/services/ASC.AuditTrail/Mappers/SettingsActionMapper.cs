@@ -28,11 +28,11 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class SettingsActionsMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } = new()
-    {
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
         new GeneralActionMapper(),
         new ProductsActionMapper()
-    };
+    ];
 
     public ProductType Product { get; } = ProductType.Settings;
 }
@@ -81,7 +81,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                 {
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
-                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated,
+                    MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
                     MessageAction.SSOEnabled,MessageAction.SSODisabled,MessageAction.PortalAccessSettingsUpdated,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,

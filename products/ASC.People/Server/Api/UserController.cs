@@ -29,7 +29,6 @@ namespace ASC.People.Api;
 public class UserController(ICache cache,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
-        CoreBaseSettings coreBaseSettings,
         CustomNamingPeople customNamingPeople,
         EmployeeDtoHelper employeeDtoHelper,
         EmployeeFullDtoHelper employeeFullDtoHelper,
@@ -37,7 +36,6 @@ public class UserController(ICache cache,
         PasswordHasher passwordHasher,
         QueueWorkerReassign queueWorkerReassign,
         QueueWorkerRemove queueWorkerRemove,
-        Recaptcha recaptcha,
         TenantUtil tenantUtil,
         UserFormatter userFormatter,
         UserManagerWrapper userManagerWrapper,
@@ -491,13 +489,6 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-        if (coreBaseSettings.Personal)
-        {
-            await _userPhotoManager.RemovePhotoAsync(user.Id);
-            await _userManager.DeleteUserAsync(user.Id);
-            await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
-        }
-
             //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
             //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -519,11 +510,6 @@ public class UserController(ICache cache,
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(EmployeeStatus status, [FromQuery] string query)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method not available");
-        }
-
         var list = (await _userManager.GetUsersAsync(status)).ToAsyncEnumerable();
 
         if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
@@ -574,13 +560,7 @@ public class UserController(ICache cache,
     [AllowNotPayment]
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
-    {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        if (coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).IsOwner(tenant))
-        {
-            throw new MethodAccessException("Method not available");
-        }
-
+    {   
         var user = await _userManager.GetUserByEmailAsync(email);
         if (user.Id == Constants.LostUser.Id)
         {
@@ -606,11 +586,6 @@ public class UserController(ICache cache,
     [HttpGet("{username}", Order = 1)]
     public async Task<EmployeeFullDto> GetById(string username)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method not available");
-        }
-
         var isInvite = _httpContextAccessor.HttpContext.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
@@ -657,11 +632,6 @@ public class UserController(ICache cache,
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(EmployeeStatus status)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new Exception("Method not available");
-        }
-
         Guid? groupId = null;
         if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
@@ -749,11 +719,6 @@ public class UserController(ICache cache,
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(string query)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method not available");
-        }
-
         var groupId = Guid.Empty;
         if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
@@ -796,111 +761,6 @@ public class UserController(ICache cache,
         {
             yield return await employeeDtoHelper.GetAsync(user);
         }
-    }
-
-    /// <summary>
-    /// Registers a user on the Personal portal.
-    /// </summary>
-    /// <short>
-    /// Register a Personal account
-    /// </short>
-    /// <category>Profiles</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.RegisterPersonalUserRequestDto, ASC.People" name="inDto">Request parameters for registering a Personal account</param>
-    /// <returns type="System.String, System">Error message or empty string</returns>
-    /// <path>api/2.0/people/register</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
-    [HttpPost("register")]
-    public async Task<string> RegisterUserOnPersonalAsync(RegisterPersonalUserRequestDto inDto)
-    {
-        if (!coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method is only available on personal.onlyoffice.com");
-        }
-
-        try
-        {
-            if (coreBaseSettings.CustomMode)
-            {
-                inDto.Lang = "ru-RU";
-            }
-
-            var cultureInfo = setupInfo.GetPersonalCulture(inDto.Lang).Value;
-
-            if (cultureInfo != null)
-            {
-                CultureInfo.CurrentUICulture = cultureInfo;
-            }
-
-            inDto.Email.ThrowIfNull(new ArgumentException(Resource.ErrorEmailEmpty, inDto.Email));
-
-            if (!inDto.Email.TestEmailRegex())
-            {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail, inDto.Email);
-            }
-
-            if (!SetupInfo.IsSecretEmail(inDto.Email)
-                && !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) && !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey))
-            {
-                var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
-
-                if (string.IsNullOrEmpty(inDto.RecaptchaResponse)
-                    || !await recaptcha.ValidateRecaptchaAsync(inDto.RecaptchaResponse, ip))
-                {
-                    throw new RecaptchaException(Resource.RecaptchaInvalid);
-                }
-            }
-
-            var newUserInfo = await _userManager.GetUserByEmailAsync(inDto.Email);
-
-            if (await _userManager.UserExistsAsync(newUserInfo.Id))
-            {
-                if (!SetupInfo.IsSecretEmail(inDto.Email) || securityContext.IsAuthenticated)
-                {
-                    await studioNotifyService.SendAlreadyExistAsync(inDto.Email);
-                    return string.Empty;
-                }
-
-                try
-                {
-                    await securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
-                    await _userManager.DeleteUserAsync(newUserInfo.Id);
-                }
-                finally
-                {
-                    securityContext.Logout();
-                }
-            }
-            if (!inDto.Spam)
-            {
-                try
-                {
-                    //TODO
-                    //const string _databaseID = "com";
-                    //using (var db = DbManager.FromHttpContext(_databaseID))
-                    //{
-                    //    db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
-                    //                           .InColumnValue("email", email.ToLowerInvariant())
-                    //                           .InColumnValue("reason", "personal")
-                    //        );
-                    //    Log.Debug(String.Format("Write to template_unsubscribe {0}", email.ToLowerInvariant()));
-                    //}
-                }
-                catch (Exception ex)
-                {
-                    logger.DebugWriteToTemplateUnsubscribe(inDto.Email.ToLowerInvariant(), ex);
-                }
-            }
-
-            await studioNotifyService.SendInvitePersonalAsync(inDto.Email);
-        }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
-
-        return string.Empty;
     }
 
     /// <summary>
@@ -1611,6 +1471,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -1628,6 +1489,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
@@ -1647,6 +1509,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/quota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    /// <visible>false</visible>
     [HttpPut("quota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1748,11 +1611,6 @@ public class UserController(ICache cache,
         Payments? payments,
         AccountLoginType? accountLoginType)
     {
-        if (coreBaseSettings.Personal)
-        {
-            throw new MethodAccessException("Method not available");
-        }
-
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
@@ -1762,7 +1620,7 @@ public class UserController(ICache cache,
 
         if (groupId.HasValue)
         {
-            includeGroups.Add(new List<Guid> { groupId.Value });
+            includeGroups.Add([groupId.Value]);
         }
 
         if (employeeType.HasValue)
@@ -1788,7 +1646,7 @@ public class UserController(ICache cache,
                     excludeGroups.Add(Constants.GroupUser.ID);
                     break;
                 case Payments.Free:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    includeGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }
@@ -1827,7 +1685,7 @@ public class UserController(ICache cache,
             switch (eType)
             {
                 case EmployeeType.DocSpaceAdmin:
-                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
                 case EmployeeType.RoomAdmin:
                     eGroups.Add(Constants.GroupUser.ID);
@@ -1835,10 +1693,10 @@ public class UserController(ICache cache,
                     eGroups.Add(Constants.GroupCollaborator.ID);
                     break;
                 case EmployeeType.Collaborator:
-                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    iGroups.Add([Constants.GroupCollaborator.ID]);
                     break;
                 case EmployeeType.User:
-                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    iGroups.Add([Constants.GroupUser.ID]);
                     break;
             }
         }

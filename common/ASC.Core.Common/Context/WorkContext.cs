@@ -45,7 +45,7 @@ public class WorkContext(IConfiguration configuration,
     private bool _notifyStarted;
     private static bool? _isMono;
 
-    public static string[] DefaultClientSenders => new[] { Constants.NotifyEMailSenderSysName };
+    public static string[] DefaultClientSenders => [Constants.NotifyEMailSenderSysName];
     public event Action<NotifyContext, INotifyClient> NotifyClientRegistration;
     public static bool IsMono
     {

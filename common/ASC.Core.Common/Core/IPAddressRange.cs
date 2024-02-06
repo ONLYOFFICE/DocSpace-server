@@ -24,15 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.IPSecurity;
+using System.Net.Sockets;
 
-internal class IPAddressRange(IPAddress lower, IPAddress upper)
+public class IPAddressRange(IPAddress lower, IPAddress upper)
 {
     private readonly AddressFamily _addressFamily = lower.AddressFamily;
     private readonly byte[] _lowerBytes = lower.GetAddressBytes();
     private readonly byte[] _upperBytes = upper.GetAddressBytes();
 
-    public bool IsInRange(IPAddress address)
+    public static bool MatchIPs(string requestIp, string restrictionIp)
+    {
+        var ipWithoutPort = GetIpWithoutPort(requestIp);
+        var dividerIdx = restrictionIp.IndexOf('-');
+        if (dividerIdx > 0)
+        {
+            var lower = IPAddress.Parse(restrictionIp.Substring(0, dividerIdx).Trim());
+            var upper = IPAddress.Parse(restrictionIp.Substring(dividerIdx + 1).Trim());
+
+            var range = new IPAddressRange(lower, upper);
+
+            return range.IsInRange(IPAddress.Parse(ipWithoutPort));
+        }
+
+        if (restrictionIp.IndexOf('/') > 0)
+        {
+            return IsInRange(ipWithoutPort, restrictionIp);
+        }
+
+        return ipWithoutPort == restrictionIp;
+    }
+    
+    private bool IsInRange(IPAddress address)
     {
         if (address.AddressFamily != _addressFamily)
         {
@@ -43,8 +65,7 @@ internal class IPAddressRange(IPAddress lower, IPAddress upper)
 
         bool lowerBoundary = true, upperBoundary = true;
 
-        for (var i = 0; i < _lowerBytes.Length &&
-                        (lowerBoundary || upperBoundary); i++)
+        for (var i = 0; i < _lowerBytes.Length && (lowerBoundary || upperBoundary); i++)
         {
             var addressByte = addressBytes[i];
             var upperByte = _upperBytes[i];
@@ -62,12 +83,12 @@ internal class IPAddressRange(IPAddress lower, IPAddress upper)
         return true;
     }
 
-    public static bool IsInRange(string ipAddress, string CIDRmask)
+    private static bool IsInRange(string ipAddress, string CIDRmask)
     {
-        var parts = CIDRmask.Split('/');
+        var network =  IPNetwork.Parse(CIDRmask);
 
         var requestIP = IPAddress.Parse(ipAddress);
-        var restrictionIP = IPAddress.Parse(parts[0]);
+        var restrictionIP = network.BaseAddress;
 
         if (requestIP.AddressFamily != restrictionIP.AddressFamily)
         {
@@ -76,8 +97,15 @@ internal class IPAddressRange(IPAddress lower, IPAddress upper)
 
         var IP_addr = BitConverter.ToInt32(requestIP.GetAddressBytes(), 0);
         var CIDR_addr = BitConverter.ToInt32(restrictionIP.GetAddressBytes(), 0);
-        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - int.Parse(parts[1])));
+        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - network.PrefixLength));
 
         return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask);
     }
+    
+    private static string GetIpWithoutPort(string ip)
+    {
+        var portIdx = ip.IndexOf(':');
+
+        return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
+}
 }

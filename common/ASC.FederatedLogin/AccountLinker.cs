@@ -84,11 +84,11 @@ public class AccountLinker(
         return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
-    public async Task AddLinkAsync(string obj, LoginProfile profile)
+    public async Task AddLinkAsync(Guid obj, LoginProfile profile)
     {
         var accountLink = new AccountLinks
         {
-            Id = obj,
+            Id = obj.ToString(),
             UId = profile.HashId,
             Provider = profile.Provider,
             Profile = profile.ToSerializedString(),
@@ -105,10 +105,10 @@ public class AccountLinker(
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        accountLinkerStorage.RemoveFromCache(obj);
+        accountLinkerStorage.RemoveFromCache(obj.ToString());
     }
 
-    public async Task AddLinkAsync(string obj, string id, string provider)
+    public async Task AddLinkAsync(Guid obj, string id, string provider)
     {
         await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
     }

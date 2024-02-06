@@ -166,7 +166,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -261,7 +261,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         if (fileToDownload == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (fileToDownload is ErrorEntry errorEntry)
@@ -292,6 +292,18 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+
+    public Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = GetFileById(file.Id);
+        return Task.FromResult(fileToDownload.Length);
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();
@@ -330,7 +342,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(await tempStream.GetBufferedAsync(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {
@@ -340,7 +352,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
                 var response = (HttpWebResponse)webException.Response;
                 if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
                 throw;
             }
@@ -377,10 +389,10 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+                await Queries.DeleteTagLinksAsync(dbContext, TenantId, id);
                 await Queries.DeleteTagsAsync(dbContext);
-                await Queries.DeleteSecuritiesAsync(dbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
+                await Queries.DeleteSecuritiesAsync(dbContext, TenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, TenantId, id);
                 await tx.CommitAsync();
         });
 
@@ -414,22 +426,22 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(false);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharpBoxDaoSelector.ConvertId,
@@ -440,7 +452,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return moved.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var entry = GetFileById(fileId);
         var folder = GetFolderById(toFolderId);
@@ -454,7 +466,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         var newFileId = MakeId(entry);
 
-        await UpdatePathInDBAsync(oldFileId, newFileId);
+        await UpdateIdAsync(oldFileId, newFileId);
 
         return newFileId;
     }
@@ -474,15 +486,30 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         throw new NotImplementedException();
     }
 
-    public Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
+    public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
     {
         var file = GetFileById(fileId);
-        if (!SharpBoxProviderInfo.Storage.CopyFileSystemEntry(MakePath(fileId), MakePath(toFolderId)))
+        var parentPath = MakePath(toFolderId);
+
+        var parent = GetFolderById(toFolderId);
+        var newFileName = await GetAvailableTitleAsync(file.Name, parent, IsExistAsync);
+
+        if (file.Name == newFileName)
         {
-            throw new Exception("Error while copying");
+            if (!SharpBoxProviderInfo.Storage.CopyFileSystemEntry(MakePath(fileId), parentPath))
+            {
+                throw new Exception("Error while copying");
+            }
+        }
+        else
+        {
+            using var fs = file.GetDataTransferAccessor().GetDownloadStream();
+
+            var createdFile = SharpBoxProviderInfo.Storage.CreateFile(parentPath + '/' + newFileName);
+            createdFile.GetDataTransferAccessor().Transfer(fs, nTransferDirection.nUpload);
         }
 
-        return Task.FromResult(ToFile(GetFolderById(toFolderId).FirstOrDefault(x => x.Name == file.Name)));
+        return ToFile(GetFolderById(toFolderId).FirstOrDefault(x => x.Name == file.Name));
     }
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
@@ -502,7 +529,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         if (entry == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var oldFileId = MakeId(entry);
@@ -519,7 +546,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             newFileId = MakeId(entry);
         }
 
-        await UpdatePathInDBAsync(oldFileId, newFileId);
+        await UpdateIdAsync(oldFileId, newFileId);
 
         return newFileId;
     }
@@ -585,7 +612,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return uploadSession;
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -595,7 +622,6 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -620,17 +646,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = MakeId(uploadSession.File);
-        }
+        uploadSession.File = MakeId(uploadSession.File);
 
         return uploadSession.File;
     }

@@ -30,7 +30,8 @@ namespace ASC.Api.Core.Middleware;
 public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
     : IAsyncResourceFilter
 {
-    private readonly string[] _passthroughtRequestEndings = { "preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme.json", "logos.json", "build.json", "@self.json" }; //TODO add or update when "preparation-portal" will be done
+    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme.json", "logos.json", "build.json", "@self.json"
+    ]; //TODO add or update when "preparation-portal" will be done
 
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)

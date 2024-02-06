@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationExtention))]
+[Scope(Additional = typeof(ConfigurationFilesExtension))]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
@@ -74,7 +74,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!string.IsNullOrEmpty(file.Error))
@@ -135,17 +135,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && !await fileSecurity.CanReadAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         if (file.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         string strError = null;
@@ -154,7 +154,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (tryEdit)
             {
-                strError = FilesCommonResource.ErrorMassage_LockedFile;
+                strError = FilesCommonResource.ErrorMessage_LockedFile;
             }
 
             rightToRename = false;
@@ -191,7 +191,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!editPossible && !fileUtility.CanWebView(file.Title))
         {
-            throw new Exception($"{FilesCommonResource.ErrorMassage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
+            throw new Exception($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
         }
 
         if (reviewPossible &&
@@ -227,8 +227,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 {
                     var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
                     strError = string.Format(!coauth
-                                                 ? FilesCommonResource.ErrorMassage_EditingCoauth
-                                                 : FilesCommonResource.ErrorMassage_EditingMobile,
+                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
+                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
                                              await global.GetUserNameAsync(editingBy, true));
                 }
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
@@ -252,34 +252,28 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var rightToDownload = await CanDownloadAsync(fileSecurity, file, linkRight);
 
-        var configuration = new Configuration<T>(file, serviceProvider)
+        var configuration = serviceProvider.GetService<Configuration<T>>();
+        configuration.Document.Key = docKey;
+        configuration.Document.Permissions = new PermissionsConfig
         {
-            Document =
-                {
-                    Key = docKey,
-                    Permissions =
-                    {
-                        Edit = rightToEdit && lastVersion,
-                        Rename = rightToRename && lastVersion && !file.ProviderEntry,
-                        Review = rightToReview && lastVersion,
-                        FillForms = rightToFillForms && lastVersion,
-                        Comment = rightToComment && lastVersion,
-                        ChangeHistory = rightChangeHistory,
-                        ModifyFilter = rightModifyFilter,
-                        Print = rightToDownload,
-                        Download = rightToDownload
-                    }
-                },
-            EditorConfig =
-                {
-                    ModeWrite = modeWrite
-                },
-            ErrorMessage = strError
+            Edit = rightToEdit && lastVersion,
+            Rename = rightToRename && lastVersion && !file.ProviderEntry,
+            Review = rightToReview && lastVersion,
+            FillForms = rightToFillForms && lastVersion,
+            Comment = rightToComment && lastVersion,
+            ChangeHistory = rightChangeHistory,
+            ModifyFilter = rightModifyFilter,
+            Print = rightToDownload,
+            Download = rightToDownload,
+            Copy = rightToDownload
         };
+
+        configuration.EditorConfig.ModeWrite = modeWrite;
+        configuration.Error = strError;
 
         if (!lastVersion)
         {
-            configuration.Document.Title += $" ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -294,7 +288,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return (file, configuration, locatedInPrivateRoom);
         }
 
-        configuration.Document.SharedLinkParam = FilesLinkUtility.FolderShareKey;
+        configuration.Document.SharedLinkParam = FilesLinkUtility.ShareKey;
         configuration.Document.SharedLinkKey = externalShare.GetKey();
 
         return (file, configuration, locatedInPrivateRoom);

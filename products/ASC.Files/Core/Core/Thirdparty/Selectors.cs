@@ -35,8 +35,8 @@ public static class Selectors
     public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
     public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
 
-    public static readonly List<Selector> All = new() { SharpBox, SharePoint, GoogleDrive, Box, Dropbox, OneDrive };
-    public static readonly List<Selector> StoredCache = new() { GoogleDrive, Box, Dropbox, OneDrive };
+    public static readonly List<Selector> All = [SharpBox, SharePoint, GoogleDrive, Box, Dropbox, OneDrive];
+    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive];
 }
 
 public class Selector

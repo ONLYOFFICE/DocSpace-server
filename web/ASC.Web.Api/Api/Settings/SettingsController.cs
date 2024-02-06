@@ -92,8 +92,7 @@ public class SettingsController(MessageService messageService,
         {
             Culture = tenant.GetCulture().ToString(),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
-            Personal = coreBaseSettings.Personal,
-            DocSpace = !coreBaseSettings.DisableDocSpace,
+            DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
             BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
@@ -115,9 +114,9 @@ public class SettingsController(MessageService messageService,
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
-            settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
+            var timeZone = timeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
             settings.NameSchemaId = customNamingPeople.Current.Id;
@@ -265,6 +264,7 @@ public class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.QuotaUsageDto, ASC.Web.Api">Space usage and limits for upload</returns>
     /// <path>api/2.0/settings/quota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -282,6 +282,7 @@ public class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
     /// <path>api/2.0/settings/userquotasettings</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("userquotasettings")]
     public async Task<object> SaveUserQuotaSettingsAsync(UserQuotaSettingsRequestsDto inDto)
     {
@@ -338,7 +339,7 @@ public class SettingsController(MessageService messageService,
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
+                Id = timeZoneConverter.GetIanaTimeZoneId(tz),
                 DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -387,6 +388,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -404,6 +406,7 @@ public class SettingsController(MessageService messageService,
     /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -858,8 +861,10 @@ public class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
     [HttpGet("authservice")]
-    public IEnumerable<AuthServiceRequestsDto> GetAuthServices()
+    public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         return consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
@@ -995,6 +1000,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
+    /// <visible>false</visible>
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1010,6 +1016,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    /// <visible>false</visible>
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

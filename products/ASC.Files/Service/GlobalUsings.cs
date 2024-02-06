@@ -90,6 +90,7 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Primitives;
 
 global using SixLabors.ImageSharp;
 global using SixLabors.ImageSharp.Processing;

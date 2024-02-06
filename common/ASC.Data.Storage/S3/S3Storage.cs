@@ -37,7 +37,8 @@ public class S3Storage(TempStream tempStream,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        CoreBaseSettings coreBaseSettings)
+        CoreBaseSettings coreBaseSettings,
+        AscDistributedCache cache)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportCdnUri => true;
@@ -218,7 +219,10 @@ public class S3Storage(TempStream tempStream,
                       DateTime.UtcNow.Add(expire));
         }
 
-        return Task.FromResult(new Uri(signedUrl));
+
+        var signedUri = new Uri(signedUrl, new UriCreationOptions { DangerousDisablePathAndQueryCanonicalization = true });
+
+        return Task.FromResult(signedUri);
     }
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path)
@@ -228,15 +232,20 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
+    }
+
+    public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         var request = new GetObjectRequest
         {
             BucketName = _bucket,
             Key = MakePath(domain, path)
         };
 
-        if (0 < offset)
+        if (length> 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
-            request.ByteRange = new ByteRange(offset, int.MaxValue);
+            request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }
 
         try
@@ -270,7 +279,7 @@ public class S3Storage(TempStream tempStream,
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {
@@ -372,14 +381,28 @@ public class S3Storage(TempStream tempStream,
 
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
+        Stream bufferStream = null;
+        
         var request = new UploadPartRequest
         {
             BucketName = _bucket,
             Key = MakePath(domain, path),
             UploadId = uploadId,
-            PartNumber = chunkNumber,
-            InputStream = stream
+            PartNumber = chunkNumber
         };
+        
+        if (stream.CanSeek)
+        {
+            request.InputStream = stream;
+        }
+        else
+        { 
+            bufferStream = tempStream.Create();
+            await stream.CopyToAsync(bufferStream);
+            bufferStream.Position = 0;
+            
+            request.InputStream = bufferStream;
+        }
 
         try
         {
@@ -396,6 +419,13 @@ public class S3Storage(TempStream tempStream,
             }
 
             throw;
+        }
+        finally
+        {
+            if (bufferStream != null)
+            {
+                await bufferStream.DisposeAsync();
+            }
         }
     }
 
@@ -459,7 +489,7 @@ public class S3Storage(TempStream tempStream,
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
 
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream);
+        return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream, cache);
     }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
@@ -666,7 +696,7 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
         var request = new TransferUtilityUploadRequest
         {
             BucketName = _bucket,

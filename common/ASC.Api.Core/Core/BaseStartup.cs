@@ -40,14 +40,10 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
-
-    protected bool AddControllersAsServices { get; }
-    protected virtual bool ConfirmAddScheme { get; }
+    
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
-    protected bool LoadProducts { get; set; } = true;
-    protected bool LoadConsumers { get; } = true;
-    protected bool WebhooksEnabled { get; set; }
+    protected bool WebhooksEnabled { get; init; }
 
     public BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -57,11 +53,6 @@ public abstract class BaseStartup
         _corsOrigin = _configuration["core:cors"];
 
         DIHelper = new DIHelper();
-
-        if (bool.TryParse(_configuration["core:products"], out var loadProducts))
-        {
-            LoadProducts = loadProducts;
-        }
     }
 
     public virtual async Task ConfigureServices(IServiceCollection services)
@@ -121,11 +112,52 @@ public abstract class BaseStartup
 
         services.AddRateLimiter(options =>
         {
+            bool EnableNoLimiter(IPAddress address)
+            {
+                var knownNetworks = _configuration.GetSection("core:hosting:rateLimiterOptions:knownNetworks").Get<List<String>>();
+                var knownIPAddresses = _configuration.GetSection("core:hosting:rateLimiterOptions:knownIPAddresses").Get<List<String>>();
+
+                if (knownIPAddresses is { Count: > 0 })
+                {
+                    foreach (var knownIPAddress in knownIPAddresses)
+                    {
+                        if (IPAddress.Parse(knownIPAddress).Equals(address)) return true;
+                    }
+                }
+
+                if (knownNetworks is { Count: > 0 })
+                {
+                    foreach (var knownNetwork in knownNetworks)
+                    {
+                        var prefix = IPAddress.Parse(knownNetwork.Split("/")[0]);
+                        var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
+                        var ipNetwork = new IPNetwork(prefix, prefixLength);
+
+                        if (ipNetwork.Contains(address)) return true;
+                    }
+                }
+
+                return false;
+            }
+
+
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                if (userId == null)
+                {
+                    userId = remoteIpAddress.ToInvariantString();
+                }
 
                 var permitLimit = 1500;
 
@@ -144,7 +176,17 @@ public abstract class BaseStartup
                     string partitionKey;
                     int permitLimit;
 
-                    userId ??= httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                    var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                    if (EnableNoLimiter(remoteIpAddress))
+                    {
+                        return RateLimitPartition.GetNoLimiter("no_limiter");
+                    }
+
+                    if (userId == null)
+                    {
+                        userId = remoteIpAddress.ToInvariantString();
+                    }
 
                     if (String.Compare(httpContext.Request.Method, "GET", true) == 0)
                     {
@@ -170,6 +212,18 @@ public abstract class BaseStartup
                        var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                                     httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
+                       var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                       if (EnableNoLimiter(remoteIpAddress))
+                       {
+                           return RateLimitPartition.GetNoLimiter("no_limiter");
+                       }
+
+                       if (userId == null)
+                       {
+                           userId = remoteIpAddress.ToInvariantString();
+                       }
+
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
 
@@ -193,6 +247,12 @@ public abstract class BaseStartup
                 var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                 var permitLimit = 5;
                 var partitionKey = $"sensitive_api_{userId}";
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
 
                 return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
@@ -261,8 +321,12 @@ public abstract class BaseStartup
                                       policy.WithOrigins(_corsOrigin)
                                       .SetIsOriginAllowedToAllowWildcardSubdomains()
                                       .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .AllowAnyMethod();                                            
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
             });
         }
@@ -277,11 +341,6 @@ public abstract class BaseStartup
         services.RegisterFeature();
 
         DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
-
-        if (LoadProducts)
-        {
-            DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
-        }
 
         services.AddOptions();
 
@@ -381,6 +440,14 @@ public abstract class BaseStartup
 
         app.UseAuthentication();
 
+        // TODO: if some client requests very slow, this line will need to remove
+        bool.TryParse(_configuration["core:hosting:rateLimiterOptions:enable"], out var enableRateLimiter);
+
+        if (enableRateLimiter)
+        {
+            app.UseRateLimiter();
+        }
+
         app.UseAuthorization();
 
         app.UseCultureMiddleware();
@@ -422,7 +489,7 @@ public abstract class BaseStartup
 
     public void ConfigureContainer(ContainerBuilder builder)
     {
-        builder.Register(_configuration, LoadProducts, LoadConsumers);
+        builder.Register(_configuration);
     }
 }
 

@@ -127,121 +127,121 @@
   <data name="DocuSignStatusSended" xml:space="preserve">
     <value>Το έγγραφο απεστάλη για υπογραφή μέσω DocuSign</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Κακό αίτημα.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Δεν μπορείτε να επιλέξετε αυτόν τον χρήστη</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Η μετατροπή παίρνει υπερβολικά πολύ χρόνο.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Προέκυψε σφάλμα στο Documents Service</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Το αρχείο είναι ανοιχτό για επεξεργασία από τον/την {0}. Αυτή τη στιγμή, η ταυτόχρονη επεξεργασία δεν υποστηρίζεται για αυτή τη μορφή αρχείου.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Το αρχείο είναι ανοικτό για τροποποίηση σε μια κινητή εφαρμογή από τον/την {0}</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Κενό αρχείο</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Το απαιτούμενο αρχείο δεν βρέθηκε</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο από {0} δε θα μετατραπεί</value>
   </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο από {0} δε θα αντιγραφεί</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο από {0} δε θα τροποποιηθεί</value>
   </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο {0} από δε θα μετακινηθεί</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Δεν μπορείτε να αντιγράψετε τον φάκελο στους υποφακέλους του</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Ο απαιτούμενος φάκελος δεν βρέθηκε</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Εσφαλμένος τίτλος</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Αυτή τη στιγμή το αρχείο είναι κλειδωμένο από άλλον χρήστη</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Υπερβολικά πολλές λήψεις.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Συγγνώμη, αυτή η μορφή αρχείου δεν υποστηρίζεται</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Ο συγγραφές της αποθήκευσης είναι άγνωστος</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Αποτυχία αποθήκευσης αρχείου</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να εκτελέσετε τη λειτουργία</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να δημιουργήσετε</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Δεν μπορείτε να διαγράψετε το αρχείο, επειδή έχει ανοίξει για επεξεργασία</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Δεν μπορείτε να διαγράψετε το φάκελο, επειδή ένα από τα αρχεία έχει ανοιχτεί για επεξεργασία</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να διαγράψετε το αρχείο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να διαγράψετε το φάκελο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να επεξεργαστείτε το αρχείο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Το έγγραφο αυτό τροποποιείται από εσάς σε μια άλλη καρτέλα</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να μετακινήσετε το αρχείο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να μετακινήσετε τον φάκελο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να δείτε το αρχείο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να δείτε το περιεχόμενο του φακέλου</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να μετονομάσετε το αρχείο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να μετονομάσετε το φάκελο</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Δεν είναι δυνατή η ενημέρωση του αρχείου γιατί έχει ανοιχτεί για επεξεργασία</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για να δείτε το περιεχόμενο του φακέλου</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Δεν μπορείτε να ενημερώσετε ένα αρχείο που έχει ανοιχτεί για επεξεργασία</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Ο χρήστης δε βρέθηκε</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Δεν σας επιτρέπεται η προεπισκόπηση στοιχείων στον κάδο ανακύκλωσης</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -314,13 +314,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Υποβληθείσα φόρμα</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Η νέα έκδοση δεν μπορεί να είναι η ίδια με την τρέχουσα</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Δεν έχετε αρκετά δικαιώματα για την αντιγραφή του αρχείου</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Δεν έχετε επαρκή δικαιώματα για την αντιγραφή του φακέλου</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -386,26 +386,26 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Ακυρωμένο</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Δεν κατέστη δυνατή η αποστολή τουλάχιστον {0} μηνυμάτων email. Επισκεφθείτε την ενότητα αλληλογραφίας για να δείτε ποιος μπορεί να είναι ο λόγος της αποτυχίας.</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Το αρχείο καταστράφηκε όταν προσπαθήσατε να το αποθηκεύσετε</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Δεν είναι δυνατή η εξουσιοδότηση στον πάροχο {0} με τα συγκεκριμένα διαπιστευτήρια.</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Το περιεχόμενο του φακέλου τρίτου μέρους δεν είναι διαθέσιμο. Προσπαθήστε να επανασυνδέσετε τον λογαριασμό.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Σφάλμα έναρξης επεξεργασίας αρχείου</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Το έγγραφο OFORM με δυνατότητα συμπλήρωσης είναι έτοιμο. Έχει αποθηκευτεί στο {0}</value>
+    <value>Το έγγραφο PDF με δυνατότητα συμπλήρωσης είναι έτοιμο. Έχει αποθηκευτεί στο {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Το αντίγραφο OFORM δημιουργείται στον φάκελο {0}. Συμπληρώστε τη φόρμα και κατεβάστε το αποτέλεσμα ως αρχείο PDF ή DOCX.</value>
+    <value>Το αντίγραφο PDF δημιουργείται στον φάκελο {0}. Συμπληρώστε τη φόρμα και κατεβάστε το αποτέλεσμα ως αρχείο PDF ή DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Το αρχείο δεν αποτελεί πλέον προσχέδιο για τη συμπλήρωση της φόρμας.</value>

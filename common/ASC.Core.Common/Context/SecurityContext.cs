@@ -298,39 +298,29 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
     public IPermissionResolver PermissionResolver { get; set; } = permissionResolver;
     private AuthContext AuthContext { get; } = authContext;
 
-    public async Task<bool> CheckPermissionsAsync(params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(IAction action)
     {
-        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, actions);
+        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, action);
     }
 
-    public async Task<bool> CheckPermissionsAsync(ISecurityObject securityObject, params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(ISecurityObject securityObject, IAction action)
     {
-        return await CheckPermissionsAsync(securityObject, null, actions);
+        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, securityObject, null, action);
     }
 
-    public async Task<bool> CheckPermissionsAsync(IAccount account, ISecurityObject securityObject, params IAction[] actions)
+    public async Task DemandPermissionsAsync(IAction action)
     {
-        return await PermissionResolver.CheckAsync(account, securityObject, null, actions);
+        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action);
+    }
+    
+    public async Task DemandPermissionsAsync(IAction action1, IAction action2)
+    {
+        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action1, action2);
     }
 
-    public async Task<bool> CheckPermissionsAsync(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
+    public async Task DemandPermissionsAsync(ISecurityObject securityObject, IAction action)
     {
-        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
-    }
-
-    public async Task DemandPermissionsAsync(params IAction[] actions)
-    {
-        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, actions);
-    }
-
-    public async Task DemandPermissionsAsync(ISecurityObject securityObject, params IAction[] actions)
-    {
-        await DemandPermissionsAsync(securityObject, null, actions);
-    }
-
-    public async Task DemandPermissionsAsync(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
-    {
-        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
+        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, securityObject, null, action);
     }
 }
 
@@ -338,7 +328,8 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
 public class AuthContext
 {
     private IHttpContextAccessor HttpContextAccessor { get; }
-    private static readonly List<string> _typesCheck = new() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
+    private static readonly List<string> _typesCheck =
+        [ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString()];
 
     public AuthContext()
     {

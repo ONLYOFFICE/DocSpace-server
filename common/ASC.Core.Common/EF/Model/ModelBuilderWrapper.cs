@@ -109,12 +109,14 @@ public class ModelBuilderWrapper
         {
             case Provider.MySql:
                 ModelBuilder
-                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex), new[] { typeof(string), typeof(char), typeof(int) })!)
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
+                        [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SUBSTRING_INDEX");
                 break;
             case Provider.PostgreSql:
                 ModelBuilder
-                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex), new[] { typeof(string), typeof(char), typeof(int) })!)
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
+                        [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SPLIT_PART");
                 break;
             default:

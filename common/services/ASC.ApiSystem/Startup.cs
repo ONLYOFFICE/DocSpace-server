@@ -45,6 +45,10 @@ public class Startup
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
         _standalone = _configuration["core:base-domain"] == "localhost";
+        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        {
+            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+        }
     }
 
     public async Task ConfigureServices(IServiceCollection services)
@@ -69,6 +73,7 @@ public class Startup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSession();
 
@@ -94,8 +99,8 @@ public class Startup
         _diHelper.TryAdd<ConfirmAuthHandler>();
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
-        _diHelper.TryAdd<JwtBearerAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
+        _diHelper.TryAdd<FileStorageService>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -105,11 +110,16 @@ public class Startup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
+
             });
         }
 
@@ -142,8 +152,6 @@ public class Startup
         services.AddScoped<CountRoomCheckerStatistic>();
 
         _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
-
-        _diHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 
