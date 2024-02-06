@@ -183,9 +183,9 @@ public class SettingsController : BaseSettingsController
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = tenant.TimeZone;
-            settings.Timezone = _timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
-            settings.UtcOffset = _timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
+            var timeZone = _timeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = _timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
             settings.NameSchemaId = _customNamingPeople.Current.Id;
@@ -407,7 +407,7 @@ public class SettingsController : BaseSettingsController
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = _timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
+                Id = _timeZoneConverter.GetIanaTimeZoneId(tz),
                 DisplayName = _timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
@@ -935,8 +935,10 @@ public class SettingsController : BaseSettingsController
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
     [HttpGet("authservice")]
-    public IEnumerable<AuthServiceRequestsDto> GetAuthServices()
-    {
+    public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
+    {        
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         return _consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)

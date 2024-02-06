@@ -1012,8 +1012,6 @@ public class LogoConfig<T>
 {
     private readonly CommonLinkUtility _commonLinkUtility;
 
-    private readonly FileUtility _fileUtility;
-
     private readonly TenantLogoHelper _tenantLogoHelper;
 
     private Configuration<T> _configuration;
@@ -1022,10 +1020,7 @@ public class LogoConfig<T>
     {
         get
         {
-            var fillingForm = _fileUtility.CanWebRestrictedEditing(_configuration.Document.Title);
-
             return _configuration.EditorType == EditorType.Embedded
-                || fillingForm
                     ? _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed).Result)
                     : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor).Result);
         }
@@ -1055,12 +1050,10 @@ public class LogoConfig<T>
 
     public LogoConfig(
         CommonLinkUtility commonLinkUtility,
-        TenantLogoHelper tenantLogoHelper,
-        FileUtility fileUtility)
+        TenantLogoHelper tenantLogoHelper)
     {
         _commonLinkUtility = commonLinkUtility;
         _tenantLogoHelper = tenantLogoHelper;
-        _fileUtility = fileUtility;
     }
 
     internal void SetConfiguration(Configuration<T> configuration)

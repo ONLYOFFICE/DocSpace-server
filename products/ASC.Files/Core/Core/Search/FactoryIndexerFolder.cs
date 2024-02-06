@@ -50,26 +50,47 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
 
     public override async Task IndexAllAsync()
     {
-        (int, int, int) getCount(DateTime lastIndexed)
+        try
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            var j = 0;
+            var tasks = new List<Task>();
+            var now = DateTime.UtcNow;
+            
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            {
+                if (_settings.Threads == 1)
+                {
+                    await Index(data);
+                }
+                else
+                {
+                    tasks.Add(Index(data));
+                    j++;
+                    if (j >= _settings.Threads)
+                    {
+                        Task.WaitAll(tasks.ToArray());
+                        tasks = new List<Task>();
+                        j = 0;
+                    }
+                }
+            }
 
-            var minid = Queries.FolderMinId(filesDbContext, lastIndexed);
-
-            var maxid = Queries.FolderMaxId(filesDbContext, lastIndexed);
-
-            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
-
-            return new(count, maxid, minid);
+            if (tasks.Count > 0)
+            {
+                Task.WaitAll(tasks.ToArray());
+            }
+            
+            await _indexer.OnComplete(now);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFactoryIndexerFolder(e);
+            throw;
         }
 
-        List<DbFolder> getData(long start, long stop, DateTime lastIndexed)
-        {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-            return Queries.FolderData(filesDbContext, lastIndexed, start, stop).ToList();
-        }
+        return;
 
-        List<int> getIds(DateTime lastIndexed)
+        List<int> GetIds(DateTime lastIndexed)
         {
             var start = 0;
             var result = new List<int>();
@@ -93,39 +114,23 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
             return result;
         }
 
-        try
+        List<DbFolder> GetData(long start, long stop, DateTime lastIndexed)
         {
-            var j = 0;
-            var tasks = new List<Task>();
-
-            foreach (var data in await _indexer.IndexAllAsync(getCount, getIds, getData))
-            {
-                if (_settings.Threads == 1)
-                {
-                    await Index(data);
-                }
-                else
-                {
-                    tasks.Add(IndexAsync(data));
-                    j++;
-                    if (j >= _settings.Threads)
-                    {
-                        Task.WaitAll(tasks.ToArray());
-                        tasks = new List<Task>();
-                        j = 0;
-                    }
-                }
-            }
-
-            if (tasks.Count > 0)
-            {
-                Task.WaitAll(tasks.ToArray());
-            }
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            return Queries.FolderData(filesDbContext, lastIndexed, start, stop).ToList();
         }
-        catch (Exception e)
+
+        (int, int, int) GetCount(DateTime lastIndexed)
         {
-            Logger.ErrorFactoryIndexerFolder(e);
-            throw;
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+            var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
+
+            var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
+
+            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
+
+            return new(count, maxId, minId);
         }
     }
 }

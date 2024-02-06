@@ -408,10 +408,10 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>ルームを固定することはできません</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>記入可能なOFORM文書が出来上がりました。{0}に保存されます</value>
+    <value>記入可能なPDF文書が出来上がりました。{0}に保存されます</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORMのコピーは{0}フォルダーに作成されました。フォームに必要事項を記入し、結果ファイルをPDFまたはDOCXファイルとしてダウンロードしてください。</value>
+    <value>PDFのコピーは{0}フォルダーに作成されました。フォームに必要事項を記入し、結果ファイルをPDFまたはDOCXファイルとしてダウンロードしてください。</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>このファイルは、もはや記入用の下書きではありません。</value>
