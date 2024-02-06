@@ -55,7 +55,11 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
     {
         try
         {
-            var location = await GetIPGeolocationAsync(IPAddress.Parse(ip));
+            if (!IPAddress.TryParse(ip, out var address))
+            {
+                return new[] { string.Empty, string.Empty };
+            }
+            var location = await GetIPGeolocationAsync(address);
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
                 return [string.Empty, string.Empty];
