@@ -176,7 +176,7 @@ public class StudioWhatsNewNotify
 
                 foreach (var p in products)
                 {
-                    auditEvents.AddRange(await p.GetAuditEventsAsync(scheduleDate, user.Id, tenant, whatsNewType, _log));
+                    auditEvents.AddRange(await p.GetAuditEventsAsync(scheduleDate, user.Id, tenant, whatsNewType));
                 }
 
                 _log.Debug($"SendMsgWhatsNew auditEvents count : {auditEvents.Count}");//temp

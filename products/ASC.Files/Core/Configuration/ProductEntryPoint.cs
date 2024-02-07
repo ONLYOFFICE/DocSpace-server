@@ -45,6 +45,7 @@ public class ProductEntryPoint : Product
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FileSecurity _fileSecurity;
     private readonly GlobalFolder _globalFolder;
+    private readonly ILogger<ProductEntryPoint> _logger;
 
     //public SubscriptionManager SubscriptionManager { get; }
 
@@ -64,7 +65,8 @@ public class ProductEntryPoint : Product
         FilesLinkUtility filesLinkUtility,
         FileSecurity fileSecurity,
         GlobalFolder globalFolder,
-        CommonLinkUtility commonLinkUtility
+        CommonLinkUtility commonLinkUtility,
+        ILogger<ProductEntryPoint> logger
         //            SubscriptionManager subscriptionManager
         )
     {
@@ -82,6 +84,7 @@ public class ProductEntryPoint : Product
         _fileSecurity = fileSecurity;
         _globalFolder = globalFolder;
         _commonLinkUtility = commonLinkUtility;
+        _logger = logger;
         //SubscriptionManager = subscriptionManager;
     }
 
@@ -140,7 +143,7 @@ public class ProductEntryPoint : Product
         }
     }
 
-    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType, ILogger logger)
+    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
     {
         IEnumerable<AuditEvent> events;
         _tenantManager.SetCurrentTenant(tenant);
@@ -211,7 +214,7 @@ public class ProductEntryPoint : Product
             }
             catch (Exception ex)
             {
-                logger.ErrorWithException("Error deserializing audit event: " + e.Id, ex);
+                _logger.ErrorDeserializingAuditEvent(e.Id, ex);
                 continue;
             }
 
