@@ -397,7 +397,7 @@ public class S3Storage(TempStream tempStream,
         }
         else
         { 
-            bufferStream = tempStream.Create();
+            bufferStream = _tempStream.Create();
             await stream.CopyToAsync(bufferStream);
             bufferStream.Position = 0;
             
