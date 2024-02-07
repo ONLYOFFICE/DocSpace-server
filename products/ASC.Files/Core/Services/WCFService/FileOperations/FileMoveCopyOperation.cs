@@ -326,7 +326,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 try
                 {
                     //if destination folder contains folder with same name then merge folders
-                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom)
+                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom|| 
+                                          (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate))
                         ? null
                         : await folderDao.GetFolderAsync(folder.Title, toFolderId);
                     Folder<TTo> newFolder;
