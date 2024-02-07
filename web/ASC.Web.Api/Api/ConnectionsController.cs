@@ -221,9 +221,10 @@ public class ConnectionsController(UserManager userManager,
         {
             var currentUserId = securityContext.CurrentAccount.ID;
             var user = await userManager.GetUsersAsync(currentUserId);
-            var loginEvent = await dbLoginEventsManager.GetByIdAsync(loginEventId);
 
-            if (loginEvent == null || loginEvent.TenantId != user.TenantId)
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+
+            if (loginEvent == null)
             {
                 return false;
             }
@@ -235,7 +236,7 @@ public class ConnectionsController(UserManager userManager,
 
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-            await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+            await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;
