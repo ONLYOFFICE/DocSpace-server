@@ -57,22 +57,25 @@ public class GroupController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet]
-    public async IAsyncEnumerable<GroupDto> GetGroupsAsync()
+    public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
+
+        var memberId = userId ?? Guid.Empty;
+        var asManager = manager ?? false;
 
         if (!GroupSortTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
         {
             sortBy = GroupSortType.Title;
         }
 
-        var totalCount = await userManager.GetGroupsCountAsync(text);
+        var totalCount = await userManager.GetGroupsCountAsync(text, memberId, asManager);
 
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
-        await foreach (var g in userManager.GetGroupsAsync(text, sortBy, !apiContext.SortDescending, offset, count))
+        await foreach (var g in userManager.GetGroupsAsync(text, memberId, asManager, sortBy, !apiContext.SortDescending, offset, count))
         {
             yield return await groupFullDtoHelper.Get(g, false);
         }

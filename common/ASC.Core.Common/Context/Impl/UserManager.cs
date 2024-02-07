@@ -890,9 +890,9 @@ public class UserManager
 
     #region Groups
 
-    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
     {
-        return _userService.GetGroupsAsync(Tenant.Id, text, sortBy, sortOrderAsc, offset, count)
+        return _userService.GetGroupsAsync(Tenant.Id, text, userId, manager, sortBy, sortOrderAsc, offset, count)
             .Select(group => new GroupInfo(group.CategoryId)
             {
                 ID = group.Id,
@@ -901,9 +901,9 @@ public class UserManager
             });
     }
 
-    public Task<int> GetGroupsCountAsync(string text)
+    public Task<int> GetGroupsCountAsync(string text, Guid userId, bool manager)
     {
-        return _userService.GetGroupsCountAsync(Tenant.Id, text);
+        return _userService.GetGroupsCountAsync(Tenant.Id, text, userId, manager);
     }
     
     public async Task<GroupInfo[]> GetGroupsAsync()

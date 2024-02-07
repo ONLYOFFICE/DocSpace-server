@@ -458,14 +458,14 @@ public class CachedUserService : IUserService, ICachedService
         return groups;
     }
 
-    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
     {
-        return _service.GetGroupsAsync(tenant, text, sortBy, sortOrderAsc, offset, count);
+        return _service.GetGroupsAsync(tenant, text, userId, manager, sortBy, sortOrderAsc, offset, count);
     }
 
-    public Task<int> GetGroupsCountAsync(int tenant, string text)
+    public Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager)
     {
-        return _service.GetGroupsCountAsync(tenant, text);
+        return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
     public void InvalidateCache()

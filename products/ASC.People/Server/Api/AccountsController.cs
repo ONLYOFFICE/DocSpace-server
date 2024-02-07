@@ -63,7 +63,7 @@ public class AccountsController(
         var isDocSpaceAdmin = (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                               await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
-        var totalGroups = await userManager.GetGroupsCountAsync(text);
+        var totalGroups = await userManager.GetGroupsCountAsync(text, Guid.Empty, false);
         var totalUsers = await userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, [], [], [], activationStatus, null, text, false);
         var total = totalGroups + totalUsers;
 
@@ -71,7 +71,7 @@ public class AccountsController(
 
         var groupsCount = 0;
 
-        await foreach (var group in userManager.GetGroupsAsync(text, GroupSortType.Title, true, offset, count))
+        await foreach (var group in userManager.GetGroupsAsync(text, Guid.Empty, false, GroupSortType.Title, true, offset, count))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(group, false);

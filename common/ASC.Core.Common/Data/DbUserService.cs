@@ -51,7 +51,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             .ToListAsync();
     }
 
-    public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
     {
         if (count == 0)
         {
@@ -62,33 +62,51 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
 
-        if (!string.IsNullOrEmpty(text))
-        {
-            text = text.ToLower().Trim();
-            
-            q = q.Where(g => g.Name.ToLower().Contains(text));
-        }
+        q = BuildTextSearch(text, q);
 
-        if (sortBy == GroupSortType.Manager)
+        if (userId != Guid.Empty)
         {
-            var q1 = from dbGroup in q
-                join userGroup in userDbContext.UserGroups on dbGroup.Id equals userGroup.UserGroupId
-                    into userGroups
-                from userGroup in userGroups.DefaultIfEmpty()
-                where userGroup == null || (userGroup.RefType == UserGroupRefType.Manager && !userGroup.Removed)
-                join user in userDbContext.Users on userGroup.Userid equals user.Id
-                    into users
-                from user in users.DefaultIfEmpty()
-                select new { dbGroup, user };
-            
-            q = (sortOrderAsc 
-                    ? q1.OrderBy(r => r.user == null).ThenBy(r => r.user.FirstName) 
-                    : q1.OrderBy(r => r.user == null).ThenByDescending(r => r.user.FirstName))
-                .Select(r => r.dbGroup);
+            var q1 = BuildUserGroupSearch(userId, manager, q, userDbContext);
+
+            if (sortBy == GroupSortType.Manager)
+            {
+                var q2 = q1.Join(userDbContext.UserGroups, group => group.Id, userGroup => userGroup.UserGroupId,
+                    (group, userGroup) => new { group, userGroup })
+                    .Where(r => !r.userGroup.Removed && r.userGroup.RefType == UserGroupRefType.Manager)
+                    .Join(userDbContext.Users, record => record.userGroup.Userid, 
+                        user => user.Id, (record, user) => new { record.group, user });
+                
+                q = (sortOrderAsc ? q2.OrderBy(r => r.user.FirstName) : q2.OrderByDescending(r => r.user.FirstName))
+                    .Select(r => r.group);
+            }
+            else
+            { 
+                q = sortOrderAsc ? q1.OrderBy(g => g.Name) : q1.OrderByDescending(g => g.Name);
+            }
         }
         else
         {
-            q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+            if (sortBy == GroupSortType.Manager)
+            {
+                var q1 = from dbGroup in q
+                    join userGroup in userDbContext.UserGroups on dbGroup.Id equals userGroup.UserGroupId
+                        into userGroups
+                    from userGroup in userGroups.DefaultIfEmpty()
+                    where userGroup == null || (userGroup.RefType == UserGroupRefType.Manager && !userGroup.Removed)
+                    join user in userDbContext.Users on userGroup.Userid equals user.Id
+                        into users
+                    from user in users.DefaultIfEmpty()
+                    select new { dbGroup, user };
+            
+                q = (sortOrderAsc 
+                        ? q1.OrderBy(r => r.user == null).ThenBy(r => r.user.FirstName) 
+                        : q1.OrderBy(r => r.user == null).ThenByDescending(r => r.user.FirstName))
+                    .Select(r => r.dbGroup);
+            }
+            else
+            {
+                q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+            }
         }
 
         if (offset > 0)
@@ -107,20 +125,20 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         }
     }
 
-    public async Task<int> GetGroupsCountAsync(int tenant, string text)
+    public async Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = userDbContext.Groups.Where(t => t.TenantId == tenant);
 
-        if (string.IsNullOrEmpty(text))
+        q = BuildTextSearch(text, q);
+
+        if (userId == Guid.Empty)
         {
             return await q.CountAsync();
         }
 
-        text = text.ToLower().Trim();
-            
-        q = q.Where(g => g.Name.ToLower().Contains(text));
+        q = BuildUserGroupSearch(userId, manager, q, userDbContext);
 
         return await q.CountAsync();
     }
@@ -864,6 +882,30 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     private string GetPasswordHash(Guid userId, string password)
     {
         return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
+    }
+    
+    private static IQueryable<DbGroup> BuildTextSearch(string text, IQueryable<DbGroup> q)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return q;
+        }
+
+        text = text.ToLower().Trim();
+            
+        q = q.Where(g => g.Name.ToLower().Contains(text));
+
+        return q;
+    }
+
+    private static IQueryable<DbGroup> BuildUserGroupSearch(Guid userId, bool manager, IQueryable<DbGroup> q, UserDbContext userDbContext)
+    {
+        var refType = manager ? UserGroupRefType.Manager : UserGroupRefType.Contains;
+
+        var q1 = q.Join(userDbContext.UserGroups, group => group.Id, userGroup => userGroup.UserGroupId,
+                (group, userGroup) => new { group, userGroup })
+            .Where(r => !r.userGroup.Removed && r.userGroup.Userid == userId && r.userGroup.RefType == refType).Select(r => r.group);
+        return q1;
     }
 }
 
