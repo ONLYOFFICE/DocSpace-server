@@ -39,7 +39,8 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
     FileUtility fileUtility,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     PathProvider pathProvider,
-    BreadCrumbsManager breadCrumbsManager)
+    BreadCrumbsManager breadCrumbsManager,
+    DocumentServiceConnector documentServiceConnector)
 {
     private record FolderIndex(int ChildFoldersCount, string Order);
     
@@ -102,6 +103,8 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
         var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
+
+        logoPath = await documentServiceConnector.ReplaceCommunityAdressAsync(logoPath);
 
         var items = new List<object>
         {
