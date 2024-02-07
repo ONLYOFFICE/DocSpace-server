@@ -40,12 +40,12 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
-    
+
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool WebhooksEnabled { get; init; }
 
-    public BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
@@ -72,7 +72,7 @@ public abstract class BaseStartup
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
 
-            if (knownProxies != null && knownProxies.Count > 0)
+            if (knownProxies is { Count: > 0 })
             {
                 foreach (var knownProxy in knownProxies)
                 {
@@ -81,7 +81,7 @@ public abstract class BaseStartup
             }
 
 
-            if (knownNetworks != null && knownNetworks.Count > 0)
+            if (knownNetworks is { Count: > 0 })
             {
                 foreach (var knownNetwork in knownNetworks)
                 {
@@ -188,7 +188,7 @@ public abstract class BaseStartup
                         userId = remoteIpAddress.ToInvariantString();
                     }
 
-                    if (String.Compare(httpContext.Request.Method, "GET", true) == 0)
+                    if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         permitLimit = 50;
                         partitionKey = $"cr_read_{userId}";
@@ -200,46 +200,46 @@ public abstract class BaseStartup
                         partitionKey = $"cr_write_{userId}";
                     }
 
-                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, key => new RedisConcurrencyRateLimiterOptions
+                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, _ => new RedisConcurrencyRateLimiterOptions
                     {
                         PermitLimit = permitLimit,
                         QueueLimit = 0,
                         ConnectionMultiplexerFactory = () => connectionMultiplexer
                     });
-                }), 
+                }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                   {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
-                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                {
+                    var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                 httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                       var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+                    var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                       if (EnableNoLimiter(remoteIpAddress))
-                       {
-                           return RateLimitPartition.GetNoLimiter("no_limiter");
-                       }
+                    if (EnableNoLimiter(remoteIpAddress))
+                    {
+                        return RateLimitPartition.GetNoLimiter("no_limiter");
+                    }
 
-                       if (userId == null)
-                       {
-                           userId = remoteIpAddress.ToInvariantString();
-                       }
+                    if (userId == null)
+                    {
+                        userId = remoteIpAddress.ToInvariantString();
+                    }
 
-                       var partitionKey = $"fw_post_put_{userId}";
-                       var permitLimit = 10000;
+                    var partitionKey = $"fw_post_put_{userId}";
+                    var permitLimit = 10000;
 
-                       if (!(String.Compare(httpContext.Request.Method, "POST", true) == 0 ||
-                            String.Compare(httpContext.Request.Method, "PUT", true) == 0))
-                       {
-                           return RateLimitPartition.GetNoLimiter("no_limiter");
-                       }
+                    if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                          String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
+                    {
+                        return RateLimitPartition.GetNoLimiter("no_limiter");
+                    }
 
-                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
-                       {
-                           PermitLimit = permitLimit,
-                           Window = TimeSpan.FromDays(1),
-                           ConnectionMultiplexerFactory = () => connectionMultiplexer
-                       });
-                   }
+                    return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = permitLimit,
+                        Window = TimeSpan.FromDays(1),
+                        ConnectionMultiplexerFactory = () => connectionMultiplexer
+                    });
+                }
             ));
 
             options.AddPolicy("sensitive_api", httpContext =>
@@ -274,6 +274,7 @@ public abstract class BaseStartup
                 .AddBaseDbContextPool<TelegramDbContext>()
                 .AddBaseDbContextPool<FirebaseDbContext>()
                 .AddBaseDbContextPool<CustomDbContext>()
+                .AddBaseDbContextPool<UrlShortenerDbContext>()
                 .AddBaseDbContextPool<WebstudioDbContext>()
                 .AddBaseDbContextPool<InstanceRegistrationContext>()
                 .AddBaseDbContextPool<IntegrationEventLogContext>()
@@ -289,10 +290,10 @@ public abstract class BaseStartup
         DIHelper.Configure(services);
 
         Action<JsonOptions> jsonOptions = options =>
-            {
-                options.JsonSerializerOptions.WriteIndented = false;
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            };
+        {
+            options.JsonSerializerOptions.WriteIndented = false;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
 
@@ -321,7 +322,7 @@ public abstract class BaseStartup
                                       policy.WithOrigins(_corsOrigin)
                                       .SetIsOriginAllowedToAllowWildcardSubdomains()
                                       .AllowAnyHeader()
-                                            .AllowAnyMethod();                                            
+                                            .AllowAnyMethod();
 
                                       if (_corsOrigin != "*")
                                       {
@@ -331,7 +332,7 @@ public abstract class BaseStartup
             });
         }
 
-        
+
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
@@ -356,7 +357,7 @@ public abstract class BaseStartup
             config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
-        
+
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
@@ -453,10 +454,10 @@ public abstract class BaseStartup
         app.UseCultureMiddleware();
 
         app.UseLoggerMiddleware();
-        
-        app.UseEndpoints(async endpoints =>
+
+        app.UseEndpoints(endpoints =>
         {
-            await endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices);
+            endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
@@ -492,4 +493,3 @@ public abstract class BaseStartup
         builder.Register(_configuration);
     }
 }
-
