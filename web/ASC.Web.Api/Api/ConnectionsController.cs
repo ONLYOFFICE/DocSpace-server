@@ -220,14 +220,19 @@ public class ConnectionsController(UserManager userManager,
         try
         {
             var currentUserId = securityContext.CurrentAccount.ID;
+            var user = await userManager.GetUsersAsync(currentUserId);
             var loginEvent = await dbLoginEventsManager.GetByIdAsync(loginEventId);
-            
-            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(currentUserId))
+
+            if (loginEvent == null || loginEvent.TenantId != user.TenantId)
+            {
+                return false;
+            }
+
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(user))
             {
                 throw new SecurityException("Method not available");
             }
-            
-            var user = await userManager.GetUsersAsync(currentUserId);
+
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
             await dbLoginEventsManager.LogOutEventAsync(loginEventId);
