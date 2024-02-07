@@ -1405,7 +1405,7 @@ public class FileStorageService //: IFileStorageService
         {
             FileType = file.ConvertedExtension.Trim('.'),
             Key = await documentServiceHelper.GetDocKeyAsync(file),
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file, doc)),
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, doc)),
             Version = version
         };
 
@@ -1454,11 +1454,11 @@ public class FileStorageService //: IFileStorageService
             result.Previous = new EditHistoryUrl
             {
                 Key = previouseKey,
-                Url = await documentServiceConnector.ReplaceCommunityAdressAsync(sourceFileUrl),
+                Url = await documentServiceConnector.ReplaceCommunityAddressAsync(sourceFileUrl),
                 FileType = sourceExt.Trim('.')
             };
 
-            result.ChangesUrl = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileChangesUrlAsync(file, doc));
+            result.ChangesUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileChangesUrlAsync(file, doc));
         }
 
         result.Token = documentServiceHelper.GetSignature(result);
@@ -1495,7 +1495,7 @@ public class FileStorageService //: IFileStorageService
         var result = new FileLink
         {
             FileType = FileUtility.GetFileExtension(file.Title),
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file))
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file))
         };
 
         result.Token = documentServiceHelper.GetSignature(result);
@@ -2967,7 +2967,7 @@ public class FileStorageService //: IFileStorageService
                 FileKey = file.Id,
                 InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
             },
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file, lastVersion: true)),
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, lastVersion: true)),
             FileType = file.ConvertedExtension.Trim('.'),
             Key = docKey,
             Link = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))

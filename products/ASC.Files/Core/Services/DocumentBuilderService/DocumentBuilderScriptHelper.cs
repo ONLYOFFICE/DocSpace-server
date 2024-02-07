@@ -104,7 +104,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
 
         var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
 
-        logoPath = await documentServiceConnector.ReplaceCommunityAdressAsync(logoPath);
+        logoPath = await documentServiceConnector.ReplaceCommunityAddressAsync(logoPath);
 
         var items = new List<object>
         {
