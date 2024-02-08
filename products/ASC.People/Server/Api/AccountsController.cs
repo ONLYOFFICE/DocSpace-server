@@ -26,69 +26,6 @@
 
 namespace ASC.People.Api;
 
-[Scope]
-[DefaultRoute]
-[ApiController]
-public class AccountsController(
-    ApiContext apiContext,
-    SecurityContext securityContext,
-    UserManager userManager,
-    WebItemSecurity webItemSecurity,
-    GroupFullDtoHelper groupFullDtoHelper,
-    EmployeeFullDtoHelper employeeFullDtoHelper) : ControllerBase
-{
-    /// <summary>
-    /// Returns a list of users or groups with full information about them matching the parameters specified in the request.
-    /// </summary>
-    /// <short>
-    /// Search users and groups by extended filter
-    /// </short>
-    /// <category>accounts</category>
-    /// <path>api/2.0/accounts</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <collection>list</collection>
-    [HttpGet("search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesAsync(EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus)
-    {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var text = apiContext.FilterValue;
-
-        if (string.IsNullOrEmpty(text))
-        {
-            apiContext.SetCount(0).SetTotalCount(0);
-            yield break;
-        }
-        
-        var isDocSpaceAdmin = (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
-                              await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
-
-        var totalGroups = await userManager.GetGroupsCountAsync(text, Guid.Empty, false);
-        var totalUsers = await userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, [], [], [], activationStatus, null, text, false);
-        var total = totalGroups + totalUsers;
-
-        apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
-
-        var groupsCount = 0;
-
-        await foreach (var group in userManager.GetGroupsAsync(text, Guid.Empty, false, GroupSortType.Title, true, offset, count))
-        {
-            groupsCount++;
-            yield return await groupFullDtoHelper.Get(group, false);
-        }
-
-        var usersCount = count - groupsCount;
-        var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
-
-        await foreach (var user in userManager.GetUsers(isDocSpaceAdmin, employeeStatus, [], [], [], activationStatus, null, text, false,
-                           "firstname", true, usersCount, usersOffset))
-        {
-            yield return await employeeFullDtoHelper.GetFullAsync(user);
-        }
-    }
-}
-
-
 [ConstraintRoute("int")]
 public class AccountsControllerInternal(
     IDaoFactory daoFactory,
@@ -96,7 +33,7 @@ public class AccountsControllerInternal(
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
     FileSecurity fileSecurity)
-    : AccountsControllerAdditional<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+    : AccountsController<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
 
 public class AccountsControllerThirdParty(
     IDaoFactory daoFactory,
@@ -104,18 +41,18 @@ public class AccountsControllerThirdParty(
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
     FileSecurity fileSecurity)
-    : AccountsControllerAdditional<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+    : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
 
 [Scope]
 [DefaultRoute]
 [ApiController]
 [ControllerName("accounts")]
-public class AccountsControllerAdditional<T>(
+public class AccountsController<T>(
     IDaoFactory daoFactory,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity) : ControllerBase
 {
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(T id,
@@ -123,6 +60,13 @@ public class AccountsControllerAdditional<T>(
         EmployeeActivationStatus? activationStatus,
         bool? excludeShared)
     {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        if (!await fileSecurity.CanEditAccessAsync(room))
+        {
+            throw new SecurityException();
+        }
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -132,18 +76,18 @@ public class AccountsControllerAdditional<T>(
             apiContext.SetCount(0).SetTotalCount(0);
             yield break;
         }
-        
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
-        var totalGroups = await fileSecurity.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
-        var totalUsers = await fileSecurity.GetUsersWithSharedCountAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false);
+        var securityDao = daoFactory.GetSecurityDao<T>();
+
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false);
         var total = totalGroups + totalUsers;
         
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
 
         var groupsCount = 0;
 
-        await foreach (var item in fileSecurity.GetGroupInfoWithSharedAsync(room, text, excludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, excludeShared ?? false, offset, count))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
@@ -152,7 +96,7 @@ public class AccountsControllerAdditional<T>(
         var usersCount = count - groupsCount;
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
-        await foreach (var item in fileSecurity.GetUsersWithSharedAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, 
+        await foreach (var item in securityDao.GetUsersWithSharedAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, 
                            usersOffset, usersCount))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);

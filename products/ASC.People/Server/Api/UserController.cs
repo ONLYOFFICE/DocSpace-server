@@ -1812,22 +1812,26 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        if (!await fileSecurity.CanEditAccessAsync(room))
+        {
+            throw new SecurityException();
+        }
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
-        var totalCountTask = fileSecurity.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+        var securityDao = daoFactory.GetSecurityDao<T>();
+        
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
 
-        var counter = 0;
+        apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
                            count))
         {
-            counter++;
-            
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }
-
-        apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 }

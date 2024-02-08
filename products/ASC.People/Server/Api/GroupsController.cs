@@ -403,22 +403,29 @@ public class GroupControllerAdditional<T>(
     ApiContext apiContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    GroupFullDtoHelper groupFullDtoHelper)
+    GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(T id, bool? excludeShared)
     {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        if (!await fileSecurity.CanEditAccessAsync(room))
+        {
+            throw new SecurityException();
+        }
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
         
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+        var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await fileSecurity.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in fileSecurity.GetGroupInfoWithSharedAsync(room, text, excludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, excludeShared ?? false, offset, count))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }
