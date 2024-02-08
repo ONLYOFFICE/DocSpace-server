@@ -181,7 +181,7 @@ public class ProductEntryPoint : Product
                     break;
             }
 
-            AdditionalNotificationInfo additionalInfo;
+            AdditionalNotificationInfo<JsonElement> additionalInfo;
 
             try
             {
