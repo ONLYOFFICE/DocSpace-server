@@ -69,6 +69,8 @@ public class Startup : BaseStartup
         await base.ConfigureServices(services);
 
         services.AddMemoryCache();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        
         DIHelper.TryAdd<Login>();
         DIHelper.TryAdd<PathUtils>();
         DIHelper.TryAdd<StorageFactory>();

@@ -2011,6 +2011,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+        ///
+        ///
+        ///Hello, $UserName!
+        ///
+        ///You have just created ONLYOFFICE DocSpace, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///Your current tariff plan is STARTUP. It is absolutely free and includes:
+        ///
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; borde [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_zoom_welcome {
+            get {
+                return ResourceManager.GetString("pattern_zoom_welcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Please activate your email address.
         /// </summary>
         public static string subject_activate_email {
@@ -2745,6 +2763,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_user_ldap_activation {
             get {
                 return ResourceManager.GetString("subject_user_ldap_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        /// </summary>
+        public static string subject_zoom_welcome {
+            get {
+                return ResourceManager.GetString("subject_zoom_welcome", resourceCulture);
             }
         }
         

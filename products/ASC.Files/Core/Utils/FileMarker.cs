@@ -707,7 +707,7 @@ public class FileMarker(
             yield break;
         }
 
-        if (Equals(folder.Id, await globalFolder.GetFolderMyAsync(this, daoFactory)) ||
+        if (Equals(folder.Id, await globalFolder.GetFolderMyAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
@@ -930,7 +930,7 @@ public class FileMarker(
                     {
                         cacheFolderId = rootFolderId = await globalFolder.GetFolderProjectsAsync<T>(daoFactory);
                     }
-                    else if (rootFolder.RootFolderType == FolderType.USER && !Equals(rootFolder.RootId, await globalFolder.GetFolderMyAsync(this, daoFactory)))
+                    else if (rootFolder.RootFolderType == FolderType.USER && !Equals(rootFolder.RootId, await globalFolder.GetFolderMyAsync(daoFactory)))
                     {
                         cacheFolderId = rootFolderId = shareFolder;
                     }

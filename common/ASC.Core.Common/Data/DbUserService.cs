@@ -472,12 +472,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         });
     }
 
-    public async Task RemoveUserAsync(int tenant, Guid id)
-    {
-        await RemoveUserAsync(tenant, id, false);
-    }
-
-    private async Task RemoveUserAsync(int tenant, Guid id, bool immediate)
+    public async Task RemoveUserAsync(int tenant, Guid id, bool immediate = false)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -492,6 +487,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             await Queries.DeleteSubscriptionsAsync(dbContext, tenant, id.ToString());
             await Queries.DeleteDbSubscriptionMethodsAsync(dbContext, tenant, id.ToString());
             await Queries.DeleteUserPhotosAsync(dbContext, tenant, id);
+            await Queries.DeleteAccountLinksAsync(dbContext, id.ToString());
 
             if (immediate)
             {
@@ -1044,6 +1040,13 @@ static file class Queries
             (UserDbContext ctx, int tenantId, Guid userId) =>
                 ctx.Photos
                     .Where(r => r.TenantId == tenantId && r.UserId == userId)
+                    .ExecuteDelete());
+    
+    public static readonly Func<UserDbContext, string, Task<int>> DeleteAccountLinksAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, string id) =>
+                ctx.AccountLinks
+                    .Where(r => r.Id == id)
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserGroupsAsync =

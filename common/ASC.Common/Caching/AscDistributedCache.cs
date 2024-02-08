@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,53 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AuditTrail.Repositories;
-using ASC.Web.Core.Notify;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ASC.Files;
+namespace ASC.Common.Caching;
 
-[Scope]
-public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStatManager,
-       CoreBaseSettings coreBaseSettings,
-       AuthContext authContext,
-       UserManager userManager,
-       NotifyConfiguration notifyConfiguration,
-       AuditEventsRepository auditEventsRepository,
-       IDaoFactory daoFactory,
-       TenantManager tenantManager,
-       RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-       PathProvider pathProvider,
-       FilesLinkUtility filesLinkUtility,
-       FileSecurity fileSecurity,
-       GlobalFolder globalFolder,
-       CommonLinkUtility commonLinkUtility,
-       ILogger<ProductEntryPoint> logger)
-    : ProductEntryPoint(filesSpaceUsageStatManager,
-           coreBaseSettings,
-           authContext, 
-           userManager,
-           notifyConfiguration, 
-           auditEventsRepository, 
-           daoFactory, 
-           tenantManager, 
-           roomsNotificationSettingsHelper,
-           pathProvider,
-           filesLinkUtility,
-           fileSecurity,
-           globalFolder,
-           commonLinkUtility,
-           logger)
+[Singleton]
+public class AscDistributedCache(IDistributedCache cache)
+{
+    public async Task<T> GetAsync<T>(string key)
     {
-    public override string ApiURL
-    {
-        get => "api/2.0/files/info.json";
-    }
+        var serializedObject = await cache.GetAsync(key);
+            
+        if (serializedObject == null)
+        {
+            return default;
+        }
 
-    //SubscriptionManager subscriptionManager
+        using var ms = new MemoryStream(serializedObject);
+
+        return await JsonSerializer.DeserializeAsync<T>(ms);
     }
+    
+    public async Task InsertAsync<T>(string key, T value, DateTime absoluteExpiration)
+    {
+        using var ms = new MemoryStream();
+
+        await JsonSerializer.SerializeAsync(ms, value);
+
+        await cache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
+        {
+            AbsoluteExpiration = absoluteExpiration,
+        });
+    }
+    
+    public async Task InsertAsync<T>(string key, T value, TimeSpan slidingExpiration)
+    {
+        using var ms = new MemoryStream();
+
+        await JsonSerializer.SerializeAsync(ms, value);
+
+        await cache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = slidingExpiration
+        });
+    }
+    
+    public async Task RemoveAsync(string key)
+    {
+        await cache.RemoveAsync(key);
+    }
+}

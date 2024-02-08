@@ -138,7 +138,11 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <returns>Stream</returns>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset);
+    
+    Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
+    Task<long> GetFileSizeAsync(File<T> file);
+    
     /// <summary>
     /// Get presigned uri
     /// </summary>
@@ -247,7 +251,7 @@ public interface IFileDao<T>
     #region chunking
 
     Task<ChunkedUploadSession<T>> CreateUploadSessionAsync(File<T> file, long contentLength);
-    Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength);
+    Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null);
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     #endregion

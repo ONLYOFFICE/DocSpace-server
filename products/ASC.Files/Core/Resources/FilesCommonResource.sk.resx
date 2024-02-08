@@ -393,7 +393,7 @@
     <value>Môžete si prezerať a sťahovať zdieľané dokumenty. Nahrávajte súbory do zdieľaných priečinkov. Zaručená najvyššia kompatibilita s formátmi docx, xlsx, pptx.</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kópia dokumentu OFORM je vytvorená v priečinku {0}. Vyplňte formulár a stiahnite si výsledok ako súbor PDF alebo DOCX.</value>
+    <value>Kópia dokumentu PDF je vytvorená v priečinku {0}. Vyplňte formulár a stiahnite si výsledok ako súbor PDF alebo DOCX.</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
     <value>Vyplniteľný dokument PDF je pripravený. Je uložený v priečinku {0}</value>

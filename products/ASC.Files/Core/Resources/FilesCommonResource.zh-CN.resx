@@ -299,7 +299,7 @@
     <value>可填写的PDF文件已准备就绪。该文件已保存在 {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM副本是在 {0} 文件夹中创建的。请填写表单并下载为PDF或DOCX。</value>
+    <value>PDF副本是在 {0} 文件夹中创建的。请填写表单并下载为PDF或DOCX。</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>该文件不再是填写表单的草稿。</value>

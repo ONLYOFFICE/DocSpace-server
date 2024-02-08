@@ -220,17 +220,23 @@ public class ConnectionsController(UserManager userManager,
         try
         {
             var currentUserId = securityContext.CurrentAccount.ID;
-            var loginEvent = await dbLoginEventsManager.GetByIdAsync(loginEventId);
-            
-            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(currentUserId))
+            var user = await userManager.GetUsersAsync(currentUserId);
+
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+
+            if (loginEvent == null)
+            {
+                return false;
+            }
+
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(user))
             {
                 throw new SecurityException("Method not available");
             }
-            
-            var user = await userManager.GetUsersAsync(currentUserId);
+
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-            await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+            await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;

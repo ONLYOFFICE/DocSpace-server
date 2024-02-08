@@ -132,6 +132,7 @@ public class StudioNotifyService(UserManager userManager,
                     await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                     [EMailSenderName],
                 new TagValue(Tags.InviteLink, confirmationUrl),
+                new TagValue(CommonTags.Culture, user.GetCulture().Name),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
@@ -841,6 +842,33 @@ public class StudioNotifyService(UserManager userManager,
         }
 
         return serverRootPath + "/" + controlPanelUrl.TrimStart('~', '/').TrimEnd('/');
+    }
+
+    #endregion
+
+
+    #region Zoom
+
+    public async Task SendZoomWelcomeAsync(UserInfo u)
+    {
+        try
+        {
+            var culture = GetCulture(u);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.ZoomWelcome,
+                await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
+                [EMailSenderName],
+                new TagValue(CommonTags.Culture, culture.Name),
+                new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
+                new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+        catch (Exception error)
+        {
+            _log.ErrorSendCongratulations(error);
+        }
     }
 
     #endregion

@@ -82,6 +82,8 @@ public class ExportToCSV
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(resultData));
 
             file.Version++;
+            file.ContentLength = textStream.Length;
+
             await fileDao.SaveFileAsync(file, textStream);
             return file.Id;
         }

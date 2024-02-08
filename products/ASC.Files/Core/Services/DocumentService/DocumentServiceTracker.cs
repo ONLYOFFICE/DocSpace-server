@@ -145,8 +145,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-        IHttpClientFactory clientFactory,
-        ThirdPartySelector thirdPartySelector)
+    IHttpClientFactory clientFactory,
+    ThirdPartySelector thirdPartySelector)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
@@ -154,18 +154,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                                                                 + "?" + FilesLinkUtility.Action + "=track"
                                                                 + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
                                                                 + "&" + FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString()));
-        callbackUrl = await documentServiceConnector.ReplaceCommunityAdressAsync(callbackUrl);
-
-        return callbackUrl;
-    }
-
-    public string GetCallbackUrl<T>(T fileId)
-    {
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
-                                                                + "?" + FilesLinkUtility.Action + "=track"
-                                                                + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
-                                                                + "&" + FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(fileId.ToString()));
-        callbackUrl = documentServiceConnector.ReplaceCommunityAdress(callbackUrl);
+        callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 
         return callbackUrl;
     }
@@ -313,7 +302,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             {
                 logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
-                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
+                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
                 return new TrackResponse { Message = "Expected key " + docKey };
             }
@@ -392,7 +381,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
@@ -400,7 +389,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 logger.ErrorDocServiceSave(fileId.ToString(), userId, fileData.Key, fileData.Url, ex);
                 saveMessage = ex.Message;
 
-                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
+                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
             }
         }
 
@@ -419,7 +408,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             if (!forceSave)
             {
-                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
+                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
             }
 
         }
@@ -464,7 +453,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 case MailMergeType.AttachPdf:
                     var requestDownload = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAdress(fileData.Url))
+                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
                     };
 
                     using (var responseDownload = await httpClient.SendAsync(requestDownload))
@@ -500,7 +489,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 case MailMergeType.Html:
                     var httpRequest = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAdress(fileData.Url))
+                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
                     };
 
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))

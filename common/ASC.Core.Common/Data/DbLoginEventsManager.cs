@@ -46,20 +46,24 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         (int)MessageAction.LoginSuccessViaApiTfa
     ];
 
-    public async Task<DbLoginEvent> GetByIdAsync(int id)
+    public async Task<DbLoginEvent> GetByIdAsync(int tenantId, int id)
     {
-        if (id < 0)
+        if (tenantId < 0 || id < 0)
         {
             return null;
         }
 
-        var loginEvent = cache.Get<DbLoginEvent>($"{GuidLoginEvent} - {id}");
-        if(loginEvent == null)
+        var cacheKey = GetCacheKey(id);
+        var loginEvent = cache.Get<DbLoginEvent>(cacheKey);
+        if (loginEvent == null)
         {
             await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
-            loginEvent = await loginEventContext.LoginEvents.FindAsync(id);
+            loginEvent = await loginEventContext.LoginEvents.SingleOrDefaultAsync(e => e.TenantId == tenantId && e.Id == id);
 
-            cache.Insert($"{GuidLoginEvent} - {id}", loginEvent, TimeSpan.FromMinutes(10));
+            if (loginEvent != null)
+            {
+                cache.Insert(cacheKey, loginEvent, TimeSpan.FromMinutes(10));
+            }
         }
         return loginEvent;
     }
@@ -75,11 +79,11 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         return mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
     }
 
-    public async Task LogOutEventAsync(int loginEventId)
+    public async Task LogOutEventAsync(int tenantId, int loginEventId)
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteLoginEventsAsync(loginEventContext, loginEventId);
+        await Queries.DeleteLoginEventsAsync(loginEventContext, tenantId, loginEventId);
 
         ResetCache(loginEventId);
     }
@@ -124,16 +128,21 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         await loginEventContext.SaveChangesAsync();
     }
 
+    private string GetCacheKey(int id)
+    {
+        return $"{GuidLoginEvent} - {id}";
+    }
+
     private void ResetCache(int id)
     {
-        cache.Remove($"{GuidLoginEvent} - {id}");
+        cache.Remove(GetCacheKey(id));
     }
 
     private void ResetCache(List<DbLoginEvent> loginEvents)
     {
         foreach(var loginEvent in loginEvents)
         {
-            cache.Remove($"{GuidLoginEvent} - {loginEvent.Id}");
+            cache.Remove(GetCacheKey(loginEvent.Id));
         }
     }
 }
@@ -152,11 +161,11 @@ static file class Queries
                     .OrderByDescending(r => r.Id)
                     .AsQueryable());
 
-    public static readonly Func<MessagesContext, int, Task<int>> DeleteLoginEventsAsync =
+    public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
         EF.CompileAsyncQuery(
-            (MessagesContext ctx, int loginEventId) =>
+            (MessagesContext ctx, int tenantId, int loginEventId) =>
                 ctx.LoginEvents
-                    .Where(r => r.Id == loginEventId)
+                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
                     .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
 
     public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =

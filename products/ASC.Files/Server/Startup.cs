@@ -77,6 +77,7 @@ public class Startup : BaseStartup
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
+        services.AddDocumentServiceHttpClient();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

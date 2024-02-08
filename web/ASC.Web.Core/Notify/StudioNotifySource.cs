@@ -127,7 +127,9 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
-                Actions.SaasOwnerPaymentWarningGracePeriodExpired
+                Actions.SaasOwnerPaymentWarningGracePeriodExpired,
+
+                Actions.ZoomWelcome
             );
     }
 

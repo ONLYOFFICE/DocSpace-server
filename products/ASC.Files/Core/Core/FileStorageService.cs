@@ -498,8 +498,10 @@ public class FileStorageService //: IFileStorageService
     {
         var result = await InternalCreateNewFolderAsync(parentId, title, FolderType.FillingFormsRoom, privacy, indexing);
 
-        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
-        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
+        var readyFormFolder = CreateReadyFormFolderAsync(result.Id, false, false);
+        var inProcessFormFolder = CreateInProcessFormFolderAsync(result.Id, false, false);
+
+        await Task.WhenAll(readyFormFolder, inProcessFormFolder);
 
         return result;
     }
@@ -515,6 +517,15 @@ public class FileStorageService //: IFileStorageService
         return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
     }
 
+    private async Task<Folder<T>> CreateReadyFormFolderAsync<T>(T parentId, bool privacy, bool indexing)
+    {
+        return await InternalCreateNewFolderAsync(parentId, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder, privacy, indexing);
+    }
+
+    private async Task<Folder<T>> CreateInProcessFormFolderAsync<T>(T parentId, bool privacy, bool indexing)
+    {
+        return await InternalCreateNewFolderAsync(parentId, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder, privacy, indexing);
+    }
     private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)
     {
         var folderDao = GetFolderDao<T>();
@@ -1120,7 +1131,7 @@ public class FileStorageService //: IFileStorageService
             if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
                 || configuration.Document.Permissions.FillForms || configuration.Document.Permissions.Comment))
             {
-                throw new InvalidOperationException(!string.IsNullOrEmpty(configuration.ErrorMessage) ? configuration.ErrorMessage : FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                throw new InvalidOperationException(!string.IsNullOrEmpty(configuration.Error) ? configuration.Error : FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }
             var key = configuration.Document.Key;
 
@@ -1231,7 +1242,7 @@ public class FileStorageService //: IFileStorageService
 
         comment = await fileDao.UpdateCommentAsync(fileId, version, comment);
 
-        await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
+        await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, new[] { file.Title, version.ToString(CultureInfo.InvariantCulture) });
 
         return comment;
     }
@@ -1394,7 +1405,7 @@ public class FileStorageService //: IFileStorageService
         {
             FileType = file.ConvertedExtension.Trim('.'),
             Key = await documentServiceHelper.GetDocKeyAsync(file),
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file, doc)),
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, doc)),
             Version = version
         };
 
@@ -1443,11 +1454,11 @@ public class FileStorageService //: IFileStorageService
             result.Previous = new EditHistoryUrl
             {
                 Key = previouseKey,
-                Url = await documentServiceConnector.ReplaceCommunityAdressAsync(sourceFileUrl),
+                Url = await documentServiceConnector.ReplaceCommunityAddressAsync(sourceFileUrl),
                 FileType = sourceExt.Trim('.')
             };
 
-            result.ChangesUrl = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileChangesUrlAsync(file, doc));
+            result.ChangesUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileChangesUrlAsync(file, doc));
         }
 
         result.Token = documentServiceHelper.GetSignature(result);
@@ -1484,7 +1495,7 @@ public class FileStorageService //: IFileStorageService
         var result = new FileLink
         {
             FileType = FileUtility.GetFileExtension(file.Title),
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file))
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file))
         };
 
         result.Token = documentServiceHelper.GetSignature(result);
@@ -2746,12 +2757,10 @@ public class FileStorageService //: IFileStorageService
                         switch (eventType)
                         {
                             case EventType.Create:
-                                await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, name, 
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
+                                await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, true, name);
                                 break;
                             case EventType.Remove:
-                                await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name, 
-                                    FileShareExtensions.GetAccessString(ace.Access, true));
+                                await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
                                 break;
                             case EventType.Update:
                                 await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
@@ -2958,7 +2967,7 @@ public class FileStorageService //: IFileStorageService
                 FileKey = file.Id,
                 InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
             },
-            Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file, lastVersion: true)),
+            Url = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, lastVersion: true)),
             FileType = file.ConvertedExtension.Trim('.'),
             Key = docKey,
             Link = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
@@ -3252,7 +3261,10 @@ public class FileStorageService //: IFileStorageService
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
-        if(Equals(userInfo, Constants.LostUser) || await userManager.IsUserAsync(userInfo) || await userManager.IsCollaboratorAsync(userInfo))
+        if(Equals(userInfo, Constants.LostUser) || 
+           userInfo.Status != EmployeeStatus.Active || 
+           await userManager.IsUserAsync(userInfo) || 
+           await userManager.IsCollaboratorAsync(userInfo))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ChangeOwner);
         }

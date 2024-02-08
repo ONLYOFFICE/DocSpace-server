@@ -74,8 +74,9 @@ public class FactoryIndexerFile(ILoggerProvider options,
         {
             var j = 0;
             var tasks = new List<Task>();
-
-            foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            var now = DateTime.UtcNow;
+            
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (settings.Threads == 1)
                 {
@@ -83,7 +84,7 @@ public class FactoryIndexerFile(ILoggerProvider options,
                 }
                 else
                 {
-                    tasks.Add(IndexAsync(data));
+                    tasks.Add(Index(data));
                     j++;
                     if (j >= settings.Threads)
                     {
@@ -98,12 +99,16 @@ public class FactoryIndexerFile(ILoggerProvider options,
             {
                 Task.WaitAll(tasks.ToArray());
             }
+
+            await _indexer.OnComplete(now);
         }
         catch (Exception e)
         {
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+
+        return;
 
         List<int> GetIds(DateTime lastIndexed)
         {

@@ -463,14 +463,20 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
     }
     
-    public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry)
+    public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
-        return await WhoCanAsync(entry, FilesSecurityActions.Read);
+        return await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
     }
 
-    private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action)
+    private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
-        var shares = (await GetSharesAsync(entry)).Where(r => !r.IsLink);
+        var shares = await GetSharesAsync(entry);
+
+        if (!includeLinks)
+        {
+            shares = shares.Where(r => !r.IsLink);
+        }
+        
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
 
         FileShareRecord[] defaultRecords;

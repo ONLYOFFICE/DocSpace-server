@@ -144,6 +144,8 @@ public abstract class BaseStorage(TempStream tempStream,
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
+    public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
+    
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
 
