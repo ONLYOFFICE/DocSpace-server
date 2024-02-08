@@ -415,7 +415,7 @@
     <value>المستند القابل للملئ PDF جاهز. الملف محفوظ في {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>تم انشاء نسخة من OFORM في المجلد {0}. يرجى ملئ النموذج وتنزيل النتائج كملف بصيغة  PDF أو DOCX.</value>
+    <value>تم انشاء نسخة من PDF في المجلد {0}. يرجى ملئ النموذج وتنزيل النتائج كملف بصيغة  PDF أو DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>الملف لم يعد مسودة للقيام بتعبئة النموذج.</value>

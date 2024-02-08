@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,8 +34,9 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-    : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, fileShareDtoHelper);
+        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -44,8 +45,9 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-    : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, fileShareDtoHelper)
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
     {
     /// <summary>
     /// Returns the detailed information about a third-party file with the ID specified in the request.
@@ -72,6 +74,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper, 
+        ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
@@ -294,6 +297,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(T fileId)
     {
@@ -383,6 +387,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <httpMethod>PUT</httpMethod>
+    [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFileAsync(T fileId, UpdateFileRequestDto inDto)
     {
@@ -423,13 +428,57 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 
-
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(T fileId, OrderRequestDto inDto)
     {
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
     
+    /// <summary>
+    /// Returns the external links of a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Returns file external links</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security info</returns>
+    /// <path>api/2.0/files/file/{id}/links</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("file/{fileId}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T fileId)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
+
+        apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
+
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
+        {
+            yield return await fileShareDtoHelper.Get(ace);
+        }
+    }
+
+    /// <summary>
+    /// Sets an external link with the ID specified in the request.
+    /// </summary>
+    /// <short>Set an external link</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <path>api/2.0/files/file/{id}/links</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("file/{id}/links")]
+    public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
+    {
+        var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
+            primary: inDto.Primary, expirationDate: inDto.ExpirationDate ?? default);
+        
+        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
+
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {

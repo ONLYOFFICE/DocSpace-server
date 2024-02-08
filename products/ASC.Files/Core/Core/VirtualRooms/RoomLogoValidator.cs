@@ -27,11 +27,16 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 [Scope]
-public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity) : IDataStoreValidator
+public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity, SecurityContext securityContext) : IDataStoreValidator
 {
     public async Task<bool> Validate(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
+
+        if (!securityContext.IsAuthenticated)
+        {
+            return true;
+        }
 
         var data = path.Split(RoomLogoManager.LogosPathSplitter);
 

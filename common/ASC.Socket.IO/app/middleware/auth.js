@@ -37,6 +37,15 @@ module.exports = (socket, next) => {
   const basePath = portalManager(req)?.replace(/\/$/g, "");
   let headers = {};
 
+  const validateExternalLink = () => {
+    return request({
+      method: "get",
+      url: `/files/share/${share}`,
+      headers,
+      basePath
+    })
+  }
+
   if (cookie) {
     headers.Authorization = cookie;
 
@@ -57,12 +66,25 @@ module.exports = (socket, next) => {
         basePath,
       });
     };
+    
+    const validateLink = () => {
+      if (!share) {
+        return Promise.resolve({ status: 1 });
+      }
+      
+      return validateExternalLink();
+    }
 
-    return Promise.all([getUser(), getPortal()])
-      .then(([user, portal]) => {
+    return Promise.all([getUser(), getPortal(), validateLink()])
+      .then(([user, portal, { status, linkId } = { }]) => {
         logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
+        
+        if (status === 0){
+          session.linkId = linkId;
+        }
+        
         session.save();
         next();
       })
@@ -86,12 +108,7 @@ module.exports = (socket, next) => {
       }
     }
 
-    return request({
-      method: "get",
-      url: `/files/share/${share}`,
-      headers,
-      basePath,
-    })
+    return validateExternalLink()
       .then(({ status, tenantId, linkId } = { }) => {
         if (status !== 0) {
           const err = new Error("Invalid share key");

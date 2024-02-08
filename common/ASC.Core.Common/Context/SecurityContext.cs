@@ -143,7 +143,7 @@ public class SecurityContext(UserManager userManager,
 
             if (loginEventId != 0)
             {
-                var loginEventById = await dbLoginEventsManager.GetByIdAsync(loginEventId);
+                var loginEventById = await dbLoginEventsManager.GetByIdAsync(tenant, loginEventId);
                 if (loginEventById == null || !loginEventById.Active)
                 {
                     return false;

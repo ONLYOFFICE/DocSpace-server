@@ -166,7 +166,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -292,6 +292,18 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+
+    public Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = GetFileById(file.Id);
+        return Task.FromResult(fileToDownload.Length);
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();
@@ -330,7 +342,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(await tempStream.GetBufferedAsync(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {
@@ -414,22 +426,22 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(false);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharpBoxDaoSelector.ConvertId,
@@ -440,7 +452,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return moved.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var entry = GetFileById(fileId);
         var folder = GetFolderById(toFolderId);
@@ -600,7 +612,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return uploadSession;
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -610,7 +622,6 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -635,17 +646,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = MakeId(uploadSession.File);
-        }
+        uploadSession.File = MakeId(uploadSession.File);
 
         return uploadSession.File;
     }

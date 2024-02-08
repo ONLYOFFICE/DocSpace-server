@@ -90,7 +90,7 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
-        return request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)

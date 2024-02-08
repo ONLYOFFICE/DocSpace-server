@@ -113,7 +113,7 @@ public class ApiSystemHelper
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-            tenantRegion = "default";
+           throw new ArgumentNullException("tenantRegion");
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();

@@ -44,11 +44,10 @@ internal class FileMoveCopyOperationData<T> : FileOperationData<T>
     public int DaoFolderId { get; }
     public bool Copy { get; }
     public FileConflictResolveType ResolveType { get; }
-    public IDictionary<string, StringValues> Headers { get; }
 
-    public FileMoveCopyOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, JsonElement toFolderId, bool copy, FileConflictResolveType resolveType,
-        ExternalShareData externalShareData, bool holdResult = true, IDictionary<string, StringValues> headers = null)
-        : base(folders, files, tenant, externalShareData, holdResult)
+    public FileMoveCopyOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, JsonElement toFolderId, bool copy, FileConflictResolveType resolveType, 
+        bool holdResult = true, IDictionary<string, StringValues> headers = null)
+        : base(folders, files, tenant, headers, holdResult)
     {
         if (toFolderId.ValueKind == JsonValueKind.String)
         {
@@ -327,7 +326,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 try
                 {
                     //if destination folder contains folder with same name then merge folders
-                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom)
+                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom|| 
+                                          (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate))
                         ? null
                         : await folderDao.GetFolderAsync(folder.Title, toFolderId);
                     Folder<TTo> newFolder;
@@ -626,6 +626,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else
             {
+                var deleteLinks = file.RootFolderType == FolderType.USER && 
+                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+                
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
@@ -675,7 +678,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
                                 TTo newFileId = default;
-                                await socketManager.DeleteFileAsync(file, action: async () => newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId));
+                                await socketManager.DeleteFileAsync(file, action: async () => newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks));
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 await filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);

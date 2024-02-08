@@ -24,9 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.VirtualRooms;
-
 namespace ASC.Web.Studio;
+
 public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
@@ -70,6 +69,8 @@ public class Startup : BaseStartup
         await base.ConfigureServices(services);
 
         services.AddMemoryCache();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        
         DIHelper.TryAdd<Login>();
         DIHelper.TryAdd<PathUtils>();
         DIHelper.TryAdd<StorageFactory>();
@@ -79,6 +80,7 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<SsoHandlerService>();
         DIHelper.TryAdd<RemovePortalIntegrationEventHandler>();
         DIHelper.TryAdd<RoomLogoValidator>();
+        DIHelper.TryAdd<FileValidator>();
         
         services.AddHttpClient();
 

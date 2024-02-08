@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
@@ -37,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [AllowAnonymous]
+[WebhookDisable]
 public class AuthenticationController(UserManager userManager,
         TenantManager tenantManager,
         SecurityContext securityContext,
@@ -280,7 +283,8 @@ public class AuthenticationController(UserManager userManager,
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
-        await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -409,7 +413,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 var email = inDto.ConfirmData.Email;
 
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First + inDto.ConfirmData.Module + inDto.ConfirmData.Sms, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {

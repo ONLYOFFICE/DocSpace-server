@@ -112,11 +112,52 @@ public abstract class BaseStartup
 
         services.AddRateLimiter(options =>
         {
+            bool EnableNoLimiter(IPAddress address)
+            {
+                var knownNetworks = _configuration.GetSection("core:hosting:rateLimiterOptions:knownNetworks").Get<List<String>>();
+                var knownIPAddresses = _configuration.GetSection("core:hosting:rateLimiterOptions:knownIPAddresses").Get<List<String>>();
+
+                if (knownIPAddresses is { Count: > 0 })
+                {
+                    foreach (var knownIPAddress in knownIPAddresses)
+                    {
+                        if (IPAddress.Parse(knownIPAddress).Equals(address)) return true;
+                    }
+                }
+
+                if (knownNetworks is { Count: > 0 })
+                {
+                    foreach (var knownNetwork in knownNetworks)
+                    {
+                        var prefix = IPAddress.Parse(knownNetwork.Split("/")[0]);
+                        var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
+                        var ipNetwork = new IPNetwork(prefix, prefixLength);
+
+                        if (ipNetwork.Contains(address)) return true;
+                    }
+                }
+
+                return false;
+            }
+
+
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
                 var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                if (userId == null)
+                {
+                    userId = remoteIpAddress.ToInvariantString();
+                }
 
                 var permitLimit = 1500;
 
@@ -135,7 +176,17 @@ public abstract class BaseStartup
                     string partitionKey;
                     int permitLimit;
 
-                    userId ??= httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                    var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                    if (EnableNoLimiter(remoteIpAddress))
+                    {
+                        return RateLimitPartition.GetNoLimiter("no_limiter");
+                    }
+
+                    if (userId == null)
+                    {
+                        userId = remoteIpAddress.ToInvariantString();
+                    }
 
                     if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -161,6 +212,18 @@ public abstract class BaseStartup
                        var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                                     httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
+                       var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                       if (EnableNoLimiter(remoteIpAddress))
+                       {
+                           return RateLimitPartition.GetNoLimiter("no_limiter");
+                       }
+
+                       if (userId == null)
+                       {
+                           userId = remoteIpAddress.ToInvariantString();
+                       }
+
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
 
@@ -184,6 +247,12 @@ public abstract class BaseStartup
                 var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                 var permitLimit = 5;
                 var partitionKey = $"sensitive_api_{userId}";
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
 
                 return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
@@ -252,8 +321,12 @@ public abstract class BaseStartup
                                       policy.WithOrigins(_corsOrigin)
                                       .SetIsOriginAllowedToAllowWildcardSubdomains()
                                       .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .AllowAnyMethod();                                            
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
             });
         }
@@ -404,7 +477,12 @@ public abstract class BaseStartup
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove
-        app.UseRateLimiter();
+        bool.TryParse(_configuration["core:hosting:rateLimiterOptions:enable"], out var enableRateLimiter);
+
+        if (enableRateLimiter)
+        {
+            app.UseRateLimiter();
+        }
 
         app.UseAuthorization();
 

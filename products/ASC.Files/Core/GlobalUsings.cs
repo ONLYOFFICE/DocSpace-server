@@ -27,6 +27,7 @@
 global using System.Data;
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.Diagnostics;
 global using System.Extensions;
@@ -87,6 +88,7 @@ global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
+global using ASC.Data.Storage.ChunkedUploader;
 global using ASC.Data.Storage.DataOperators;
 global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;

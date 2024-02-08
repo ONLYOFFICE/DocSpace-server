@@ -85,10 +85,10 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
 
     private static bool IsInRange(string ipAddress, string CIDRmask)
     {
-        var parts = CIDRmask.Split('/');
+        var network =  IPNetwork.Parse(CIDRmask);
 
         var requestIP = IPAddress.Parse(ipAddress);
-        var restrictionIP = IPAddress.Parse(parts[0]);
+        var restrictionIP = network.BaseAddress;
 
         if (requestIP.AddressFamily != restrictionIP.AddressFamily)
         {
@@ -97,7 +97,7 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
 
         var IP_addr = BitConverter.ToInt32(requestIP.GetAddressBytes(), 0);
         var CIDR_addr = BitConverter.ToInt32(restrictionIP.GetAddressBytes(), 0);
-        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - int.Parse(parts[1])));
+        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - network.PrefixLength));
 
         return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask);
     }

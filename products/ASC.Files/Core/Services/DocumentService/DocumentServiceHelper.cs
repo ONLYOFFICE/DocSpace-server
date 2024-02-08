@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationExtention))]
+[Scope(Additional = typeof(ConfigurationFilesExtension))]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
@@ -252,35 +252,28 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var rightToDownload = await CanDownloadAsync(fileSecurity, file, linkRight);
 
-        var configuration = new Configuration<T>(file, serviceProvider)
+        var configuration = serviceProvider.GetService<Configuration<T>>();
+        configuration.Document.Key = docKey;
+        configuration.Document.Permissions = new PermissionsConfig
         {
-            Document =
-                {
-                    Key = docKey,
-                    Permissions =
-                    {
-                        Edit = rightToEdit && lastVersion,
-                        Rename = rightToRename && lastVersion && !file.ProviderEntry,
-                        Review = rightToReview && lastVersion,
-                        FillForms = rightToFillForms && lastVersion,
-                        Comment = rightToComment && lastVersion,
-                        ChangeHistory = rightChangeHistory,
-                        ModifyFilter = rightModifyFilter,
-                        Print = rightToDownload,
-                        Download = rightToDownload,
-                        Copy = rightToDownload
-                    }
-                },
-            EditorConfig =
-                {
-                    ModeWrite = modeWrite
-                },
-            ErrorMessage = strError
+            Edit = rightToEdit && lastVersion,
+            Rename = rightToRename && lastVersion && !file.ProviderEntry,
+            Review = rightToReview && lastVersion,
+            FillForms = rightToFillForms && lastVersion,
+            Comment = rightToComment && lastVersion,
+            ChangeHistory = rightChangeHistory,
+            ModifyFilter = rightModifyFilter,
+            Print = rightToDownload,
+            Download = rightToDownload,
+            Copy = rightToDownload
         };
+
+        configuration.EditorConfig.ModeWrite = modeWrite;
+        configuration.Error = strError;
 
         if (!lastVersion)
         {
-            configuration.Document.Title += $" ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))

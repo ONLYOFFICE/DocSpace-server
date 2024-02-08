@@ -142,7 +142,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 foreach (var p in products)
                 {
-                    auditEvents.AddRange(await p.GetAuditEventsAsync(scheduleDate, user.Id, tenant, whatsNewType));
+                    auditEvents.AddRange(await p.GetAuditEventsAsync(scheduleDate, user.Id, tenant, whatsNewType, culture));
                 }
 
                 _log.Debug($"SendMsgWhatsNew auditEvents count : {auditEvents.Count}");//temp

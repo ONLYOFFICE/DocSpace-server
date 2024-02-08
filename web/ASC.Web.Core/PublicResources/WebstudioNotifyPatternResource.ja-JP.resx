@@ -802,9 +802,6 @@ $TrulyYours</value>
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>DocSpaceの招待を確認する</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>ポータルのアドレス変更の確認</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>ポータル所有者の更新を確認する</value>
   </data>
@@ -941,19 +938,6 @@ $OrangeButton</value>
 $OwnerName 様
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの所有者を $UserName に変更したいとのリクエストがありました。
-
-以下のリンクから操作をご確認ください：
-
-$OrangeButton
-
-*ご注意*: このリンクは 7 日間のみ有効です。期間内にポータル所有者の変更手続きを完了してください。</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.ポータルアドレスの変更
-
-$OwnerName 様
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" のポータルアドレスを "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end に変更したいとのリクエストがありました。
 
 以下のリンクから操作をご確認ください：
 
@@ -1532,5 +1516,170 @@ $TrulyYours</value>
 $OrangeButton
 
 リンクは7日間のみ有効です。</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}.メールアドレスを有効にしてください</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} ポータルのバックアップが作成されました</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>メールアドレス変更をご確認ください</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText}.パスワード支援</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>パスワード変更をご確認ください</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}.電話番号の変更依頼</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}.セキュリティ警告</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}.ポータル所有者変更</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>管理者へのユーザーメッセージ</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>営業部へのお問い合わせ</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルへの招待</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}.メールボックス作成</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}.メールボックスのパスワード変更</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行エラー</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行開始</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行完了</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルの停止</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルの削除</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}.ポータルアドレス変更</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルからのプロフィールの削除</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>ユーザーが自分のプロフィールを解除しました</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath}のプロフィールが変更されました</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ割り当て完了</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ割り当て失敗</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ削除完了</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ削除失敗</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>企業向けライセンスの依頼</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>SaaSプランの見積り依頼</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}.復元完了</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}.復元開始</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限開始</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのサブスクリプションは間も無く終了します</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限終了</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限は明日終了します</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルのプロフィール変更通知</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>$Dateのポータル新着情報</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>SMTP テストメッセージ</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}.複合化処理失敗</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}.複合化処理開始</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理完了</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理失敗</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理開始</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理完了</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>新しいユーザが ${LetterLogoText} ポータルに追加されました</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>${__VirtualRootPath}への招待が届きました</value>
   </data>
 </root>

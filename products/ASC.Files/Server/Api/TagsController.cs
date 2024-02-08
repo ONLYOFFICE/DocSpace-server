@@ -177,6 +177,25 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return true;
     }
 
+    /// <summary>
+    /// Removes files with the IDs specified in the request from the recent by links list.
+    /// </summary>
+    /// <short>Delete recent files</short>
+    /// <category>Files</category>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
+    /// <returns type="Microsoft.AspNetCore.Mvc.NoContentResult, Microsoft.AspNetCore.Mvc">No content</returns>
+    /// <path>api/2.0/files/recent</path>
+    /// <httpMethod>DELETE</httpMethod>
+    [HttpDelete("recent")]
+    public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
+    {
+        var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
+        
+        await fileStorageService.DeleteFromRecentAsync(fileIntIds, true);
+
+        return NoContent();
+    }
+
     private async Task<bool> DeleteFavoritesAsync(BaseBatchRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);

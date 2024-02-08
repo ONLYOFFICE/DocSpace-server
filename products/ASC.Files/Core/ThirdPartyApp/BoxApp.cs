@@ -253,7 +253,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
                 if (stream != null)
                 {
                     downloadUrl = await _pathProvider.GetTempUrlAsync(stream, fileType);
-                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAdressAsync(downloadUrl);
+                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAddressAsync(downloadUrl);
                 }
 
                 _logger.DebugBoxAppGetConvertedUri(fileType, currentType, downloadUrl);

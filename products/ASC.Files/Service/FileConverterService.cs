@@ -114,9 +114,9 @@ internal class FileConverterService<T>(
                 {
                     var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
 
-                    if (!string.IsNullOrEmpty(converter.ExternalShareData))
+                    if (converter.Headers != null)
                     {
-                        externalShare.SetCurrentShareData(JsonSerializer.Deserialize<ExternalShareData>(converter.ExternalShareData));
+                        externalShare.Init(converter.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
                     }
 
                     var user = await userManager.GetUsersAsync(converter.Account);
@@ -143,7 +143,7 @@ internal class FileConverterService<T>(
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-                    fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
+                    fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
                     (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, true);
                 }
                 catch (Exception exception)
