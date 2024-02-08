@@ -190,6 +190,11 @@ class CachedTenantService : ITenantService
         await _service.ValidateDomainAsync(domain);
     }
 
+    public void ValidateTenantName(string name)
+    {
+        _service.ValidateTenantName(name);
+    }
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash)
     {
         return await _service.GetTenantsAsync(login, passwordHash);

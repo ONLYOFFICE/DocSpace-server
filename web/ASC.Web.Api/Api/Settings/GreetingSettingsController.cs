@@ -32,6 +32,7 @@ public class GreetingSettingsController : BaseSettingsController
     private readonly TenantManager _tenantManager;
     private readonly PermissionContext _permissionContext;
     private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
+    private readonly CoreBaseSettings _coreBaseSettings;
 
     public GreetingSettingsController(
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
@@ -41,12 +42,14 @@ public class GreetingSettingsController : BaseSettingsController
         PermissionContext permissionContext,
         WebItemManager webItemManager,
         IMemoryCache memoryCache,
+        CoreBaseSettings coreBaseSettings,
         IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
         _messageService = messageService;
         _tenantManager = tenantManager;
         _permissionContext = permissionContext;
+        _coreBaseSettings = coreBaseSettings;
     }
 
     /// <summary>
@@ -94,6 +97,16 @@ public class GreetingSettingsController : BaseSettingsController
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
+
+        if (!_coreBaseSettings.Standalone)
+        {
+            var quota = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
+            if (quota.Free || quota.Trial)
+            {
+                _tenantManager.ValidateTenantName(inDto.Title);
+            }
+        }
+
         tenant.Name = inDto.Title;
         await _tenantManager.SaveTenantAsync(tenant);
 

@@ -128,6 +128,8 @@ public class HostedSolution
             registrationInfo.PasswordHash = Guid.NewGuid().ToString();
         }
 
+        tenantService.ValidateTenantName(registrationInfo.Name);
+
         // create tenant
         var tenant = new Tenant(registrationInfo.Address.ToLowerInvariant())
         {
