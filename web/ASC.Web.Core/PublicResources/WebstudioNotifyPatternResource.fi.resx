@@ -107,9 +107,6 @@ $TrulyYours</value>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Portaalin omistajan muutos</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Portaalin osoitteen muutos</value>
-  </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Käyttäjän viesti pääkäyttäjille</value>
   </data>
@@ -984,9 +981,6 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Määritä todennussovellus</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Vahvista portaalin osoitteenmuutos</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Vahvista portaalin omistajan päivitys</value>
   </data>
@@ -1167,19 +1161,6 @@ Ole hyvä ja seuraa alla olevaa linkkiä vahvistaaksesi toiminto:
 $OrangeButton
 
 *Huom*: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele portaalin omistajanvaihdostoiminto siinä ajassa.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1. Portaalin osoitteenmuutos
-
-Hyvä $OwnerName,
-
-Olemme saaneet pyynnön vaihtaa "${__VirtualRootPath}":"${__VirtualRootPath}" -portaalin osoite osoitteeksi "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Ole hyvä ja seuraa alla olevaa linkkiä vahvistaaksesi toiminto:
-
-$OrangeButton
-
-*Huom*: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele portaalin osoitteenmuutostoiminto siinä ajassa.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Liity &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceen

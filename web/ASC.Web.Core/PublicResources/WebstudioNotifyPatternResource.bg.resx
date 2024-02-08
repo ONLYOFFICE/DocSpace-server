@@ -88,9 +88,6 @@
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Конфигурирайте точно сега</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Потвърдете промяната на адреса на портала</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Потвърдете актуализацията на собственика на портала</value>
   </data>
@@ -181,19 +178,6 @@ $OrangeButton
 
 *Забележка*: този линк е валиден само 7 дни. Моля, завършете процеса на смяна на собственика на портала в рамките на този период.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Промяна на адреса на портала
-
-Уважаеми $OwnerName,
-
-Имало е искане за промяна на адреса на портала "${__VirtualRootPath}":"${__VirtualRootPath}" на "$PortalAddress":"$PortalAddress" #if($PortalDns != "")("$PortalDns":"$PortalDns")#end.
-
-Моля, следвайте връзката по-долу, за да потвърдите операцията:
-
-$OrangeButton
-
-*Забележка*: тази връзка е валидна само за 7 дни. Моля, завършете процеса на промяна на адреса на портала в рамките на този период.</value>
-</data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -607,9 +591,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Промяна на собственика на портала</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Промяна на адреса на портала</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Добре дошли в ONLYOFFICE DocSpace!</value>

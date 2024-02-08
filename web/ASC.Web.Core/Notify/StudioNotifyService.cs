@@ -596,23 +596,6 @@ public class StudioNotifyService(UserManager userManager,
 
     #endregion
 
-    public async Task SendMsgDnsChangeAsync(Tenant t, string confirmDnsUpdateUrl, string portalAddress, string portalDns)
-    {
-        var u = await userManager.GetUsersAsync(t.OwnerId);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalAddressChange", GetCulture(u));
-
-        await studioNotifyServiceHelper.SendNoticeToAsync(
-                Actions.DnsChange,
-                [u],
-                [EMailSenderName],
-                new TagValue("ConfirmDnsUpdate", confirmDnsUpdateUrl),//TODO: Tag is deprecated and replaced by TagGreenButton
-                TagValues.OrangeButton(orangeButtonText, confirmDnsUpdateUrl),
-                new TagValue("PortalAddress", AddHttpToUrl(portalAddress)),
-                new TagValue("PortalDns", AddHttpToUrl(portalDns ?? string.Empty)),
-                    new TagValue(Tags.OwnerName, u.DisplayUserName(displayUserSettingsHelper)));
-    }
-
     public async Task SendMsgConfirmChangeOwnerAsync(UserInfo owner, UserInfo newOwner, string confirmOwnerUpdateUrl)
     {
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalOwnerUpdate", owner.GetCulture());
@@ -721,11 +704,6 @@ public class StudioNotifyService(UserManager userManager,
         return commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
     }
 
-    private static string AddHttpToUrl(string url)
-    {
-        var httpPrefix = Uri.UriSchemeHttp + Uri.SchemeDelimiter;
-        return !string.IsNullOrEmpty(url) && !url.StartsWith(httpPrefix) ? httpPrefix + url : url;
-    }
 
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
