@@ -603,41 +603,45 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
-        if (!canEdit && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+
+        switch (folder.RootFolderType)
         {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
-        }
-        if (folder.RootFolderType == FolderType.TRASH)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-        if (folder.RootFolderType == FolderType.Archive)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
+            case FolderType.TRASH:
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            case FolderType.Archive:
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
         }
 
         var folderAccess = folder.Access;
+        var renamedFolder = folder;
 
         if (!string.Equals(folder.Title, title, StringComparison.OrdinalIgnoreCase))
         {
             var oldTitle = folder.Title;
-            var oldId = folder.Id;
-            var newFolderId = await folderDao.RenameFolderAsync(folder, title);
-            folder = await folderDao.GetFolderAsync(newFolderId);
-            folder.Access = folderAccess;
+            T newFolderId = default;
 
             if (folder.MutableId)
             {
-                folder.PreviousId = oldId;
-            }
-
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
-            {
-                await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                await socketManager.DeleteFolder(folder, action: async () =>
+                {
+                    newFolderId = await folderDao.RenameFolderAsync(folder, title);
+                });
             }
             else
             {
-                await filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                newFolderId = await folderDao.RenameFolderAsync(folder, title);
+            }
+            
+            renamedFolder = await folderDao.GetFolderAsync(newFolderId);
+            renamedFolder.Access = folderAccess;
+
+            if (DocSpaceHelper.IsRoom(renamedFolder.FolderType))
+            {
+                await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, renamedFolder, renamedFolder.Title);
+            }
+            else
+            {
+                await filesMessageService.SendAsync(MessageAction.FolderRenamed, renamedFolder, renamedFolder.Title);
             }
 
             //if (!folder.ProviderEntry)
@@ -646,25 +650,32 @@ public class FileStorageService //: IFileStorageService
             //}
         }
 
-        var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
+        var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, renamedFolder);
         var tag = await newTags.FirstOrDefaultAsync();
         if (tag != null)
         {
-            folder.NewForMe = tag.Count;
+            renamedFolder.NewForMe = tag.Count;
         }
 
-        if (folder.RootFolderType == FolderType.USER
-            && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID)
-            && !await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(folder.ParentId)))
+        if (renamedFolder.RootFolderType == FolderType.USER
+            && !Equals(renamedFolder.RootCreateBy, authContext.CurrentAccount.ID)
+            && !await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(renamedFolder.ParentId)))
         {
-            folder.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
+            renamedFolder.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
         }
 
-        await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+        await entryStatusManager.SetIsFavoriteFolderAsync(renamedFolder);
 
-        await socketManager.UpdateFolderAsync(folder);
+        if (renamedFolder.MutableId)
+        {
+            await socketManager.CreateFolderAsync(renamedFolder);
+        }
+        else
+        {
+            await socketManager.UpdateFolderAsync(renamedFolder);
+        }
 
-        return folder;
+        return renamedFolder;
     }
 
     public async Task<File<T>> GetFileAsync<T>(T fileId, int version)

@@ -382,7 +382,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.ParentId = selector.ConvertId(folder.ParentId);
         var folderDao = selector.GetFolderDao(folderId);
 
-        return await folderDao.RenameFolderAsync(folder, newTitle);
+        var newId = await folderDao.RenameFolderAsync(folder, newTitle);
+        folder.Id = folderId;
+        folder.ParentId = folder.ParentId;
+        
+        return newId;
     }
 
     public async Task<int> GetItemsCountAsync(string folderId)
