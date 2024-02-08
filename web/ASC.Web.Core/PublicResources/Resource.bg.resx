@@ -91,9 +91,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Персонализиран</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Връзка за потвърждаване на операцията е изпратена на {0} (имейл адреса на собственика на портала).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Грешен имейл адрес</value>
   </data>

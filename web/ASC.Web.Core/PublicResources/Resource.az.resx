@@ -91,9 +91,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>İstifadəçi seçimləri</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Əməliyyatı təsdiq etmək üçün keçid {0} ünvanına göndərildi. (portal sahibinin e-poçt ünvanı).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Yanlış Nümunə id.</value>
   </data>
