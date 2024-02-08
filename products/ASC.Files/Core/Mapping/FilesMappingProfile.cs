@@ -32,8 +32,6 @@ public class FilesMappingProfile : Profile
 {
     public FilesMappingProfile()
     {
-        CreateMap(typeof(Configuration<>), typeof(ConfigurationDto<>));
-
         CreateMap<DbFile, File<int>>();
 
         CreateMap<DbFileQuery, File<int>>()

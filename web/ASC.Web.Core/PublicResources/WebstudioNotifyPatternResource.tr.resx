@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Onayla</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Portal Adres Değişikliğini Onaylayın</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Portal Sahibi Güncellemesini Onaylayın</value>
   </data>
@@ -165,19 +162,6 @@ Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 $OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Portal adresi değişikliği
-
-Değerli $OwnerName,
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portal adresini "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end olarak değiştirme talebi ulaşmıştır.
-
-Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
-
-$OrangeButton
-
-*Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal adresi değişikliğini bu sürede tamamlayın.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e hoş geldiniz!
@@ -493,9 +477,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Portal sahibi değişikliği</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Portal adres değişikliği</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace'e hoşgeldiniz!</value>

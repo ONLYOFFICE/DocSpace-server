@@ -208,20 +208,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         context.Response.Clear();
 
         try
-        {
-            await using (var readStream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path))
-            {
-                long offset = 0;
-                var length = readStream.Length;
-                if (readStream.CanSeek)
-                {
-                    length = ProcessRangeHeader(context, readStream.Length, ref offset);
-                    readStream.Seek(offset, SeekOrigin.Begin);
-                }
-
-                await SendStreamByChunksAsync(context, length, filename, readStream, false);
-            }
-
+        { 
+            var fullLength = await store.GetFileSizeAsync(FileConstant.StorageDomainTmp, path);
+            
+            long offset = 0;
+            var length = ProcessRangeHeader(context, fullLength, ref offset);
+            await using var stream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path, offset, length);
+            
+            await SendStreamByChunksAsync(context, length, offset, fullLength, filename, stream);
             await context.Response.Body.FlushAsync();
             await context.Response.CompleteAsync();
         }
@@ -362,6 +356,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                         long offset = 0;
                         long length;
+                        long fullLength;
+                        
                         if (!file.ProviderEntry
                             && string.Equals(context.Request.Query["convpreview"], "true", StringComparison.InvariantCultureIgnoreCase)
                             && fFmpegService.IsConvertable(ext))
@@ -378,7 +374,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 await store.SaveAsync(string.Empty, mp4Path, stream, mp4Name);
                             }
 
-                            var fullLength = await store.GetFileSizeAsync(string.Empty, mp4Path);
+                            fullLength = await store.GetFileSizeAsync(string.Empty, mp4Path);
 
                             length = ProcessRangeHeader(context, fullLength, ref offset);
                             fileStream = await store.GetReadStreamAsync(string.Empty, mp4Path, offset);
@@ -393,34 +389,27 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 {
                                     var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                                     
-                                    context.Response.Redirect(externalShare.GetUrlWithShare(url), false);
+                                    context.Response.Redirect(url, false);
 
                                     return;
                                 }
-
-                                fileStream = await fileDao.GetFileStreamAsync(file); // getStream to fix file.ContentLength
-
-                                if (fileStream.CanSeek)
-                                {
-                                    var fullLength = file.ContentLength;
-                                    length = ProcessRangeHeader(context, fullLength, ref offset);
-                                    fileStream.Seek(offset, SeekOrigin.Begin);
-                                }
-                                else
-                                {
-                                    length = file.ContentLength;
-                                }
+                                
+                                fullLength = await fileDao.GetFileSizeAsync(file);
+            
+                                length = ProcessRangeHeader(context, fullLength, ref offset);
+                                fileStream = await fileDao.GetFileStreamAsync(file, offset, length);
                             }
                             else
                             {
                                 title = FileUtility.ReplaceFileExtension(title, ext);
                                 fileStream = await fileConverter.ExecAsync(file, ext);
-
+                                
                                 length = fileStream.Length;
+                                fullLength = length;
                             }
                         }
 
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
                     }
                     else
                     {
@@ -428,22 +417,18 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
                             
-                            context.Response.Redirect(externalShare.GetUrlWithShare(url), true);
+                            context.Response.Redirect(url, true);
 
                             return;
                         }
-
-                        fileStream = await fileDao.GetFileStreamAsync(file); // getStream to fix file.ContentLength
-
+                        
+                        var fullLength = await fileDao.GetFileSizeAsync(file);
+            
                         long offset = 0;
-                        var length = file.ContentLength;
-                        if (fileStream.CanSeek)
-                        {
-                            length = ProcessRangeHeader(context, file.ContentLength, ref offset);
-                            fileStream.Seek(offset, SeekOrigin.Begin);
-                        }
-
-                        flushed = await SendStreamByChunksAsync(context, length, title, fileStream, flushed);
+                        var length = ProcessRangeHeader(context, fullLength, ref offset);
+                        fileStream = await fileDao.GetFileStreamAsync(file, offset, length);
+            
+                        flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
                     }
                 }
                 catch (ThreadAbortException tae)
@@ -529,25 +514,37 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         logger.InformationStartingFileDownLoad(offset, endOffset);
-        if (length < fullLength)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
-        }
-        context.Response.Headers.Append("Accept-Ranges", "bytes");
-        context.Response.Headers.Append("Content-Range", $" bytes {offset}-{endOffset}/{fullLength}");
 
         return length;
     }
 
-    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream, bool flushed)
+    private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, long offset, long fullLength, string title, Stream fileStream)
     {
         context.Response.Headers.Append("Connection", "Keep-Alive");
         context.Response.ContentLength = toRead;
         context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(title));
         context.Response.ContentType = MimeMapping.GetMimeMapping(title);
 
-        var bufferSize = Convert.ToInt32(Math.Min(32 * 1024, toRead)); // 32KB
+        if (toRead == fullLength)
+        {
+            await fileStream.CopyToAsync(context.Response.Body);
+            return true;
+        }
+        
+
+        context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
+        context.Response.Headers.Append("Accept-Ranges", "bytes");
+        context.Response.Headers.Append("Content-Range", $" bytes {offset}-{offset + toRead}/{fullLength}");
+
+        if (fileStream.Length == toRead)
+        {
+            await fileStream.CopyToAsync(context.Response.Body);
+            return true;
+        }
+        
+        var bufferSize = Convert.ToInt32(Math.Min(80 * 1024, toRead));
         var buffer = new byte[bufferSize];
+        var flushed = false;
         while (toRead > 0)
         {
             var length = await fileStream.ReadAsync(buffer, 0, bufferSize);
@@ -556,8 +553,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             flushed = true;
             toRead -= length;
         }
-
-
         return flushed;
     }
 
@@ -710,15 +705,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
-            context.Response.ContentType = MimeMapping.GetMimeMapping(file.Title);
-
-            await using var stream = await fileDao.GetFileStreamAsync(file);
-            context.Response.Headers.Append("Content-Length",
-                stream.CanSeek
-                ? stream.Length.ToString(CultureInfo.InvariantCulture)
-                : file.ContentLength.ToString(CultureInfo.InvariantCulture));
-            await stream.CopyToAsync(context.Response.Body);
+            var fullLength = await fileDao.GetFileSizeAsync(file);
+            
+            long offset = 0;
+            var length = ProcessRangeHeader(context, fullLength, ref offset);
+            var stream = await fileDao.GetFileStreamAsync(file, offset, length);
+            
+            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
         }
         catch (Exception ex)
         {

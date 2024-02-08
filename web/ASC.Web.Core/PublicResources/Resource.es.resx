@@ -448,9 +448,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizado</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Un enlace para confirmar la operación ha sido enviada al correo electrónico {0} (la dirección del correo electrónico del propietario del portal).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Id. incorrecta de instancia.</value>
   </data>

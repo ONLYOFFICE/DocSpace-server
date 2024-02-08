@@ -110,11 +110,16 @@ public class Startup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
+
             });
         }
 

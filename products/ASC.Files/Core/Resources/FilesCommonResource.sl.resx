@@ -404,7 +404,7 @@
     <value>Dokument PDF za izpolnjevanje je pripravljen. Shranjen je v {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopija OFORM je ustvarjena v mapi {0}. Izpolnite obrazec in prenesite rezultat kot datoteko PDF ali DOCX.</value>
+    <value>Kopija PDF je ustvarjena v mapi {0}. Izpolnite obrazec in prenesite rezultat kot datoteko PDF ali DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Datoteka ni več osnutek za izpolnjevanje obrazca.</value>

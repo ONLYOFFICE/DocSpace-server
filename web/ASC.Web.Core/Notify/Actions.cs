@@ -54,7 +54,6 @@ public static class Actions
     public static readonly INotifyAction RemoveUserDataCompleted = new NotifyAction("remove_user_data_completed", "remove_user_data_completed");
     public static readonly INotifyAction RemoveUserDataCompletedCustomMode = new NotifyAction("remove_user_data_completed_custom_mode");
     public static readonly INotifyAction RemoveUserDataFailed = new NotifyAction("remove_user_data_failed", "remove_user_data_failed");
-    public static readonly INotifyAction DnsChange = new NotifyAction("dns_change", "dns_change");
 
     public static readonly INotifyAction ConfirmOwnerChange = new NotifyAction("owner_confirm_change", "owner_confirm_change");
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
@@ -137,4 +136,6 @@ public static class Actions
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodExpired = new NotifyAction("saas_owner_payment_warning_grace_period_expired");
 
     public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
+
+    public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
 } 

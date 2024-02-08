@@ -161,6 +161,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return null;
+    }
+
+    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         return GetReadStreamAsync(domain, path, offset);
     }
 

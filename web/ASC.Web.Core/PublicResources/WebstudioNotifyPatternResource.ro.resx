@@ -723,9 +723,6 @@ $TrulyYours</value>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Schimbare adresă portal</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Schimbare adresă portal</value>
-  </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Schimbare adresă portal</value>
   </data>
@@ -871,9 +868,6 @@ Echipă de Asistență ONLYOFFICE™
   </data>
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>Confirmare invitație la DocSpace</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Confirmarea schimbării adresei de portal</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmarea actualizării proprietarului de portal</value>
@@ -1161,19 +1155,6 @@ Urmăriţi linkul de mai jos pentru a confirma acţiunea:
 $OrangeButton
 
 *Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a proprietarului de portal în perioada dată.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Schimbarea adresei de portal
-
-Stimată/Stimate $OwnerName,
-
-Am primit o solicitare de schimbare a adresei de portal "${__VirtualRootPath}":"${__VirtualRootPath}" în "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Urmăriţi linkul de mai jos pentru a confirma acţiunea:
-
-$OrangeButton
-
-*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a adresei de portal în perioada dată.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace

@@ -404,7 +404,7 @@
     <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopia OFORM jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
+    <value>Kopia PDF jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Plik nie jest już wersją roboczą umożliwiającą wypełnienie formularza.</value>

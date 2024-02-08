@@ -127,6 +127,11 @@ public class DiscDataStore(TempStream tempStream,
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
     }
 
+    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
+        return GetReadStreamAsync(domain, path, offset);
+    }
+    
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream);
