@@ -90,6 +90,10 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.String, System</type>
     public string Notes { get; set; }
 
+    /// <summary>Original size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarOriginal { get; set; }
+
     /// <summary>Maximum size avatar</summary>
     /// <type>System.String, System</type>
     public string AvatarMax { get; set; }
@@ -166,6 +170,7 @@ public class EmployeeFullDto : EmployeeDto
             Avatar = "url to big avatar",
             AvatarSmall = "url to small avatar",
             AvatarMax = "url to max avatar",
+            AvatarOriginal = "url to original avatar",
             Contacts = [Contact.GetSample()],
             Email = "my@gmail.com",
             FirstName = "Mike",
@@ -333,6 +338,11 @@ public class EmployeeFullDtoHelper(
         await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
+
+        if (_httpContext.Check("avatarOriginal"))
+        {
+            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        }
 
         if (_httpContext.Check("avatarMax"))
         {
