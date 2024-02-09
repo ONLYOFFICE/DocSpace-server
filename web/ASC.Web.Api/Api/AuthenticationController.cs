@@ -283,7 +283,8 @@ public class AuthenticationController(UserManager userManager,
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
-        await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);

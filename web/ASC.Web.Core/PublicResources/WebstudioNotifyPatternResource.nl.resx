@@ -128,19 +128,6 @@ $OrangeButton
 
 *Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om de portaaleigenaar te veranderen alstublieft binnen die periode.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Verandering van portaaladres
-
-Beste $OwnerName,
-
-Er is een verzoek binnengekomen om het "${__VirtualRootPath}":"${__VirtualRootPath}" portaaladres te veranderen naar "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Klik alstublieft op de link hieronder om de actie te bevestigen: 
-
-$OrangeButton
-
-*Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om het portaaladres te veranderen alstublieft binnen die periode.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. bij &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -447,9 +434,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Verandering van Portaal eigenaar</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Verandering van Portaal adres</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Welkom bij ONLYOFFICE DocSpace!</value>
@@ -1236,9 +1220,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Configureer de authenticator app</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Bevestig wijziging portaaladres</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Bevestig update portaaleigenaar</value>

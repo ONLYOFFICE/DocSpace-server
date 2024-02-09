@@ -260,7 +260,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
                 if (stream != null)
                 {
                     downloadUrl = await _pathProvider.GetTempUrlAsync(stream, fileType);
-                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAdressAsync(downloadUrl);
+                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAddressAsync(downloadUrl);
                 }
 
                 _logger.DebugGoogleDriveAppGetConvertedUri(fileType, currentType, downloadUrl);

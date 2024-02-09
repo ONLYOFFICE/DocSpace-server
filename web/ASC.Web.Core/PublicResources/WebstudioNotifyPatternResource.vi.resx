@@ -128,19 +128,6 @@ $OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi người sở hữu cổng thông tin trong khoảng thời gian đó.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Thay đổi địa chỉ cổng thông tin
-
-Thân gửi $OwnerName,
-
-Đã có yêu cầu thay đổi địa chỉ cổng "${__VirtualRootPath}":"${__VirtualRootPath}" thành "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
-
-$OrangeButton
-
-*Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi địa chỉ cổng thông tin trong khoảng thời gian đó.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -453,9 +440,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Thay đổi người sở hữu cổng</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Thay đổi địa chỉ cổng</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
@@ -1215,9 +1199,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace của bạn sẽ bị xóa</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Xác nhận thay đổi địa chỉ cổng thông tin</value>
   </data>
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Xác nhận chấm dứt tài khoản</value>

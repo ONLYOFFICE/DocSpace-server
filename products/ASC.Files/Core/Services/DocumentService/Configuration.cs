@@ -169,9 +169,9 @@ public class DocumentConfig<T>(
 
     public string Title { get; set; }
 
-    public void SetUrl(string val)
+    public async Task SetUrl(string val)
     {
-        _fileUri = documentServiceConnector.ReplaceCommunityAdress(val);
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(val);
     }
     
     public async Task<string> GetUrl(File<T> file)
@@ -182,7 +182,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(pathProvider.GetFileStreamUrl(file, SharedLinkKey, SharedLinkParam, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, SharedLinkKey, SharedLinkParam, last));
 
         return _fileUri;
     }
@@ -242,14 +242,14 @@ public class EditorConfiguration<T>(
         }
     }
 
-    public string GetCallbackUrl(string fileId)
+    public async Task<string> GetCallbackUrl(string fileId)
     {
         if (!ModeWrite)
         {
             return null;
         }
 
-        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(fileId);
+        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
 
         return externalShare.GetUrlWithShare(callbackUrl);
     }

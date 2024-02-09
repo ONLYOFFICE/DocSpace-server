@@ -257,7 +257,12 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
-
+    
+    public long GetFileSize(BoxFile file)
+    {
+        return file.Size ?? 0;
+    }
+    
     public async Task<long> GetMaxUploadSizeAsync()
     {
         var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });

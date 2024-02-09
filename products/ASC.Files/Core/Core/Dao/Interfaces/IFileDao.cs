@@ -138,7 +138,11 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <returns>Stream</returns>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset);
+    
+    Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
+    Task<long> GetFileSizeAsync(File<T> file);
+    
     /// <summary>
     /// Get presigned uri
     /// </summary>

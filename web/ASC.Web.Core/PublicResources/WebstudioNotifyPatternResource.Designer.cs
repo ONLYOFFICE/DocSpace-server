@@ -333,15 +333,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm Portal Address Change.
-        /// </summary>
-        public static string ButtonConfirmPortalAddressChange {
-            get {
-                return ResourceManager.GetString("ButtonConfirmPortalAddressChange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Confirm Portal Owner Update.
         /// </summary>
         public static string ButtonConfirmPortalOwnerUpdate {
@@ -625,25 +616,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_confirm_owner_change {
             get {
                 return ResourceManager.GetString("pattern_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.Change of portal address
-        ///
-        ///Dear $OwnerName,
-        ///
-        ///There has been a request to change the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal address to &quot;$PortalAddress&quot;:&quot;$PortalAddress&quot; #if($PortalDns != &quot;&quot;) (&quot;$PortalDns&quot;:&quot;$PortalDns&quot; )#end.
-        ///
-        ///Please follow the link below to confirm the operation:
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: this link is valid for 7 days only. Please complete the portal address change process within that period..
-        /// </summary>
-        public static string pattern_dns_change {
-            get {
-                return ResourceManager.GetString("pattern_dns_change", resourceCulture);
             }
         }
         
@@ -2097,15 +2069,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_confirm_owner_change {
             get {
                 return ResourceManager.GetString("subject_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. Change of portal address.
-        /// </summary>
-        public static string subject_dns_change {
-            get {
-                return ResourceManager.GetString("subject_dns_change", resourceCulture);
             }
         }
         

@@ -82,9 +82,6 @@
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Teraz konfigurovať</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Potvrďte zmenu adresy portálu</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potvrďte aktualizáciu vlastníka portálu</value>
   </data>
@@ -163,18 +160,6 @@ Prosím postupujte podľa linku nižšie pre potvrdenie operácie:
 $OrangeButton
 
 *Poznámka*: tento link je platný len 7 dní. Prosím dokončite proces zmeny vlastníka portálu v tomto období.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Zmena portálovej adresy
-
-Vážený $OwnerName,
-
-Bola podaná žiadosť o zmenu "${__VirtualRootPath}":"${__VirtualRootPath}" portálovej adresy na  "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Prosím postupujte podľa nižšieho linku pre potvrdenie operácie:
-p=. "Potvrdiť zmenu portálovej adresy":"$ConfirmDnsUpdate"
-
-*Poznámka*: tento link je platný len 7 dní. Prosím dokončite proces zmeny portálovej adresy v tomto období.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. v &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
@@ -487,9 +472,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Zmena vlastníka portálu</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Zmena adresy portálu</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Vitajte v ONLYOFFICE DocSpace!</value>

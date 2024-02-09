@@ -80,7 +80,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         var (file, editable) = await app.GetFileAsync(fileId);
         var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
         var configuration = docParams.Configuration;
-        configuration.Document.SetUrl(app.GetFileStreamUrl(file));
+        await configuration.Document.SetUrl(app.GetFileStreamUrl(file));
         configuration.Document.Info.SetFavorite(null);
         configuration.EditorConfig.Customization.GobackUrl = string.Empty;
         configuration.EditorType = EditorType.Desktop;

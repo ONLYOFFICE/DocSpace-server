@@ -44,7 +44,6 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.PortalDeactivate,
                 Actions.PortalDelete,
                 Actions.PortalDeleteSuccessV1,
-                Actions.DnsChange,
                 Actions.ConfirmOwnerChange,
                 Actions.EmailChangeV115,
                 Actions.PasswordChangeV115,

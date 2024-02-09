@@ -300,6 +300,34 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         return fileStream;
     }
 
+    
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+    public async Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileId = Dao.MakeThirdId(file.Id);
+        await ProviderInfo.CacheResetAsync(fileId, true);
+
+        var thirdFile = await Dao.GetFileAsync(file.Id);
+        if (thirdFile == null)
+        {
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (thirdFile is IErrorItem errorFile)
+        {
+            throw new Exception(errorFile.Error);
+        }
+
+        var storage = await ProviderInfo.StorageAsync;
+        var size = storage.GetFileSize(thirdFile);
+
+        return size;
+    }
+    
     public Task<bool> IsSupportedPreSignedUriAsync(File<string> file)
     {
         return Task.FromResult(false);

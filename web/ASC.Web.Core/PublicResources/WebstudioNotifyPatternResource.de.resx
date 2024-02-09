@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Bestätigen</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Die Änderung der Portaladresse bestätigen</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Die Aktualisierung des Portalbesitzers bestätigen</value>
   </data>
@@ -217,19 +214,6 @@ Bitte folgen Sie dem untenstehenden Link, um es zu bestätigen:
 $OrangeButton
 
 *Hinweis*: Dieser Link ist nur 7 Tage gültig. Bitte enden Sie Änderungsprozes von Portalbesitzer innerhalb dieses Zeitraums.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Änderung der Portaladresse
-
-Sehr geehrte/r Frau/Herr $OwnerName,
-
-Die Anfrage zur Änderung der "${__VirtualRootPath}":"${__VirtualRootPath}" Portaladresse auf "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end wurde erhalten.
-
-Bitte folgen Sie dem untenstehenden Link, um es zu bestätigen:
-
-$OrangeButton
-
-*Hinweis*: Dieser Link ist nur 7 Tage gültig. Bitte enden Sie Prozess von Änderung der Portaladresse innerhalb dieses Zeitraums.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace beitreten
@@ -844,9 +828,6 @@ Dieser Link ist nur 7 Tage gültig.</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Änderung des Portalsbesitzer</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Änderung der Portaladresse</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>${__VirtualRootPath} beitreten</value>
