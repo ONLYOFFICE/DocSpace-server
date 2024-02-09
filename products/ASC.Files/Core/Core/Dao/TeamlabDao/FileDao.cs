@@ -1662,7 +1662,8 @@ internal class FileDao(
                         where f.TenantId == r.Entry.TenantId
                         select f
                     ).FirstOrDefault(),
-                SharedRecord = r.Security
+                SharedRecord = r.Security,
+                LastOpened = r.TagLink.CreateOn
             });
     }
     
@@ -1992,6 +1993,7 @@ public class DbFileQuery
     public bool Shared { get; set; }
     public int Order { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
+    public DateTime? LastOpened { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>
