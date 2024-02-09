@@ -100,17 +100,6 @@ public class OAuth2AuthorizationServerConfiguration {
      * @return
      */
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                .issuer(applicationConfiguration.getInstance().getIssuer())
-                .build();
-    }
-
-    /**
-     *
-     * @return
-     */
-    @Bean
     public ClientSettings clientSettings() {
         return ClientSettings.builder()
                 .requireAuthorizationConsent(true)
