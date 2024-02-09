@@ -81,8 +81,8 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
-    protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
-    protected FileOperation<T2, int> DaoOperation { get; set; }
+    protected FileOperation<T1, string> ThirdPartyOperation { get; }
+    protected FileOperation<T2, int> DaoOperation { get; }
 
     protected ComposeFileOperation(
         IServiceProvider serviceProvider,
