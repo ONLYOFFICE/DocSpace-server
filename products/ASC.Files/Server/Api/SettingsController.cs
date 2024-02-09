@@ -62,7 +62,7 @@ public class SettingsController(FileStorageService fileStorageService,
     [HttpPut("changedeleteconfrim")]
     public bool ChangeDeleteConfrim(SettingsRequestDto inDto)
     {
-        return fileStorageService.ChangeDeleteConfrim(inDto.Set);
+        return fileStorageService.ChangeDeleteConfirm(inDto.Set);
     }
 
     /// <summary>
@@ -351,6 +351,6 @@ public class SettingsController(FileStorageService fileStorageService,
     [HttpPut("settings/dafaultaccessrights")]
     public List<FileShare> ChangeDafaultAccessRights(List<FileShare> value)
     {
-        return fileStorageService.ChangeDafaultAccessRights(value);
+        return fileStorageService.ChangeDefaultAccessRights(value);
     }
 }

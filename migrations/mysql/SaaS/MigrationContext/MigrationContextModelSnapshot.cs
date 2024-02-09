@@ -763,6 +763,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "nonprofit",
                             Price = 0m,
                             Visible = false
+                        },
+                        new
+                        {
+                            TenantId = -8,
+                            Features = "free,total_size:107374182400,manager:100,room:100",
+                            Name = "zoom",
+                            Price = 0m,
+                            Visible = false
                         });
                 });
 
@@ -2024,11 +2032,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".docxf",
                             Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".oform"
                         },
                         new
                         {

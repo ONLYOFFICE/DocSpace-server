@@ -40,6 +40,7 @@
 
     const userId = session?.user?.id;
     const tenantId = session?.portal?.tenantId;
+    const linkId = session?.linkId;
 
     getRoom = (roomPart) => {
       return `${tenantId}-${roomPart}`;
@@ -92,8 +93,17 @@
       if (individual) {
         if (Array.isArray(roomParts)) {
           changeFunc(roomParts.map((p) => `${p}-${userId}`));
+          
+          if (linkId) {
+            changeFunc(roomParts.map((p) => `${p}-${linkId}`));
+          }
+          
         } else {
           changeFunc(`${roomParts}-${userId}`);
+          
+          if (linkId) {
+            changeFunc(`${roomParts}-${linkId}`);
+          }
         }
       }
     }

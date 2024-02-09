@@ -140,6 +140,7 @@ public class BackupAjaxHandler(BackupService backupService,
     public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams, bool dump)
     {
         await DemandPermissionsBackupAsync();
+        await DemandPermissionsAutoBackupAsync();
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup"))
         {
@@ -220,7 +221,7 @@ public class BackupAjaxHandler(BackupService backupService,
             schedule.StorageParams = consumer.AdditionalKeys.ToDictionary(r => r, r => consumer[r]);
             schedule.StorageParams.Add("module", "S3");
 
-            var Schedule = new CreateScheduleRequest
+            var scheduleRequest = new CreateScheduleRequest
             {
                 TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 Cron = schedule.CronParams.ToString(),
@@ -230,7 +231,7 @@ public class BackupAjaxHandler(BackupService backupService,
                 Dump = schedule.Dump
             };
 
-            await backupService.CreateScheduleAsync(Schedule);
+            await backupService.CreateScheduleAsync(scheduleRequest);
 
         }
         else if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
@@ -297,37 +298,31 @@ public class BackupAjaxHandler(BackupService backupService,
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var result = await backupService.GetRestoreProgress(tenant.Id);
 
-        return result;
+        return await backupService.GetRestoreProgress(tenant.Id);
     }
 
-    public async Task DemandPermissionsRestoreAsync()
+    private async Task DemandPermissionsRestoreAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
-        if (!SetupInfo.IsVisibleSettings("Restore") ||
-            (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
+        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
         }
 
-
-        if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings("Restore")
-                || !quota.AutoBackupRestore))
+        if (!coreBaseSettings.Standalone && (!SetupInfo.IsVisibleSettings("Restore") || !quota.AutoBackupRestore))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
         }
     }
 
-    public async Task DemandPermissionsAutoBackupAsync()
+    private async Task DemandPermissionsAutoBackupAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!SetupInfo.IsVisibleSettings("AutoBackup") ||
-            (!coreBaseSettings.Standalone && !(await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).AutoBackupRestore))
+        if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).AutoBackupRestore)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "AutoBackup");
         }

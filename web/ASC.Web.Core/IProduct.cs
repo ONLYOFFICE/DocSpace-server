@@ -38,5 +38,5 @@ public interface IProduct : IWebItem
 
     void Shutdown();
 
-    Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant,WhatsNewType whatsNewType);
+    Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant,WhatsNewType whatsNewType, CultureInfo cultureInfo);
 }

@@ -120,5 +120,6 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+        services.AddDocumentServiceHttpClient();
     }
 }
