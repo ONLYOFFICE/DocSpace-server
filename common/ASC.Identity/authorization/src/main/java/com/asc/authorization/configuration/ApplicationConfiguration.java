@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "application")
 public class ApplicationConfiguration {
-    private InstanceConfiguration instance = new InstanceConfiguration();
     private SecurityCipherConfiguration security = new SecurityCipherConfiguration();
 
     /**
@@ -29,20 +28,5 @@ public class ApplicationConfiguration {
     @AllArgsConstructor
     public class SecurityCipherConfiguration {
         private String cipherSecret = "secret";
-    }
-
-    /**
-     *
-     */
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public class InstanceConfiguration {
-        private String issuer;
-        public InstanceConfiguration() {
-            try {
-                issuer = HttpUtils.getIpAddress();
-            } catch (Exception e) {}
-        }
     }
 }
