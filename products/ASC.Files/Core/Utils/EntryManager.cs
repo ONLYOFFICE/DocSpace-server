@@ -1641,10 +1641,9 @@ public class EntryManager(IDaoFactory daoFactory,
         return lastVersionFile;
     }
 
-    public async Task<FileOptions<T>> FileRenameAsync<T>(T fileId, string title)
+    public async Task<FileOptions<T>> FileRenameAsync<T>(File<T> file, string title)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -1751,6 +1750,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await tagDao.SaveTagsAsync(tag);
     }
+    
     private async Task<EntryProperties> InitFormFillingProperties<T>(string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();

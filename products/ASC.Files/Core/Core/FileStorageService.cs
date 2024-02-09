@@ -1165,10 +1165,24 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            var fileRename = await entryManager.FileRenameAsync(fileId, title);
-            var file = fileRename.File;
+            var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+            FileOptions<T> result = null;
 
-            if (fileRename.Renamed)
+            if (file.MutableId)
+            {
+                await socketManager.DeleteFileAsync(file, async () =>
+                {
+                    result = await entryManager.FileRenameAsync(file, title);
+                });
+            }
+            else
+            {
+                result = await entryManager.FileRenameAsync(file, title);
+            }
+
+            file = result.File;
+
+            if (result.Renamed)
             {
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title);
 
@@ -1186,6 +1200,15 @@ public class FileStorageService //: IFileStorageService
                 {
                     file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
                 }
+            }
+
+            if (file.MutableId)
+            {
+                await socketManager.CreateFileAsync(file);
+            }
+            else
+            {
+                await socketManager.UpdateFileAsync(file);
             }
 
             return file;
@@ -1226,6 +1249,8 @@ public class FileStorageService //: IFileStorageService
                 file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
             }
         }
+        
+        await socketManager.UpdateFileAsync(file);
 
         return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
     }
