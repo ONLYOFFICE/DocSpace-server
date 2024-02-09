@@ -65,7 +65,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/2.0/clients")
+@RequestMapping(value = "${web.api}/clients")
 @RequiredArgsConstructor
 public class ClientController {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
+    @Value("${web.api}")
+    private String webApi;
     private final CheckAscCookieCommonProcessor ascCookieCommonProcessor;
 
     /**
@@ -63,10 +66,10 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
         var path = request.getRequestURI();
-        var first = Pattern.compile("/api/2.0/clients/.*/info");
-        var second = Pattern.compile("/api/2.0/clients/consents");
-        var third = Pattern.compile("/api/2.0/clients/.*/revoke");
-        var fourth = Pattern.compile("/api/2.0/oauth/info");
+        var first = Pattern.compile(String.format("%s/clients/.*/info", webApi));
+        var second = Pattern.compile(String.format("%s/clients/consents", webApi));
+        var third = Pattern.compile(String.format("%s/clients/.*/revoke", webApi));
+        var fourth = Pattern.compile(String.format("%s/oauth/info", webApi));
         var fifth = Pattern.compile("/health/*");
         return first.matcher(path).find() || second
                 .matcher(path).find() || third.matcher(path).find() ||
