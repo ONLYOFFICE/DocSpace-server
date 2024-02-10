@@ -1,3 +1,6 @@
+application:
+  security:
+    cipherSecret: ${CIPHER_SECRET:secret}
 management:
   endpoint:
     env:
