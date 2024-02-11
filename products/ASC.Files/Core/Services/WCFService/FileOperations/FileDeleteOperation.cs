@@ -40,15 +40,6 @@ internal record FileDeleteOperationData<T>(
 [Transient]
 class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
-    public FileDeleteOperation(
-        IServiceProvider serviceProvider, 
-        FileOperation<FileDeleteOperationData<string>, string> f1, 
-        FileOperation<FileDeleteOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
-    {
-        this[OpType] = (int)FileOperationType.Delete;
-    }
-    
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<JsonElement> data)
         : base(serviceProvider)
     {

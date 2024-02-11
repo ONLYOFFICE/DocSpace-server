@@ -203,23 +203,6 @@ public class FileOperationsManager(TempStream tempStream,
 
     #region Delete
 
-    public string Delete<T>(
-        int tenantId, 
-        IEnumerable<T> folders, 
-        IEnumerable<T> files, 
-        bool ignoreException, 
-        bool holdResult,
-        bool immediately,
-        IDictionary<string, StringValues> headers,
-        bool isEmptyTrash = false)
-    {
-        var op = new FileDeleteOperation<T>(serviceProvider, new FileDeleteOperationData<T>(folders, files, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString()), holdResult, ignoreException, immediately, isEmptyTrash));
-        
-        _tasks.EnqueueTask(op);
-            
-        return op.Id;
-    }
-
     public void EnqueueDelete(string taskId)
     {
         var op = _tasks.GetAllTasks().FirstOrDefault(r=> r.Id == taskId);
@@ -232,6 +215,21 @@ public class FileOperationsManager(TempStream tempStream,
         }
     }
 
+    public string PublishDelete<T>(
+        int tenantId, 
+        IEnumerable<T> folders, 
+        IEnumerable<T> files, 
+        bool ignoreException, 
+        bool holdResult,
+        bool immediately,
+        IDictionary<string, StringValues> headers,
+        bool isEmptyTrash = false)
+    {
+        var jsonFolders = folders.Select(r => JsonSerializer.SerializeToElement(r));
+        var jsonFiles = files.Select(r => JsonSerializer.SerializeToElement(r));
+        return PublishDelete(tenantId, jsonFolders, jsonFiles, ignoreException, holdResult, immediately, headers, isEmptyTrash);
+    }
+    
     public string PublishDelete(
         int tenantId, 
         IEnumerable<JsonElement> folderIds, 
