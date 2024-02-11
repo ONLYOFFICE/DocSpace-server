@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/2.0/scopes")
+@RequestMapping(value = "${web.api}/scopes")
 @RequiredArgsConstructor
 public class ScopeController {
     private final ApplicationConfiguration configuration;

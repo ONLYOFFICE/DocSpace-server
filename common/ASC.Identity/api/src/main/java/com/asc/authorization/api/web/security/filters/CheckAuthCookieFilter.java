@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,8 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 public class CheckAuthCookieFilter extends OncePerRequestFilter {
+    @Value("${web.api}")
+    private String webApi;
     private final CheckAscCookieCommonProcessor ascCookieCommonProcessor;
 
     /**
@@ -53,9 +56,9 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
      */
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        var first = Pattern.compile("/api/2.0/oauth/info");
+        var first = Pattern.compile(String.format("%s/oauth/info", webApi));
         var second = Pattern.compile("/health/*");
-        var third = Pattern.compile("/api/2.0/clients/.*/info");
+        var third = Pattern.compile(String.format("%s/clients/.*/info", webApi));
         var path = request.getRequestURI();
         return first.matcher(path).find() || second.matcher(path).find() ||
                 third.matcher(path).find();

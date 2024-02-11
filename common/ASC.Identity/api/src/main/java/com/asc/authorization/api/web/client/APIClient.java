@@ -27,7 +27,7 @@ public interface APIClient {
      * @param cookie
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/@self")
+    @RequestMapping(method = RequestMethod.GET, value = "${web.api}/people/@self")
     @Cacheable(cacheNames = {"ascMe"}, key = "{#cookie}", cacheManager = "ascClientCacheManager")
     APIClientDTOWrapper<PersonDTO> getMe(URI base, @RequestHeader("Cookie") String cookie);
 
@@ -38,7 +38,7 @@ public interface APIClient {
      * @param email
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/email")
+    @RequestMapping(method = RequestMethod.GET, value = "${web.api}/people/email")
     @Cacheable(cacheNames = {"ascEmail"}, key = "{#email}", cacheManager = "ascClientCacheManager")
     APIClientDTOWrapper<PersonDTO> getProfile(URI base, @RequestHeader("Cookie") String cookie, @RequestParam("email") String email);
 
@@ -48,7 +48,7 @@ public interface APIClient {
      * @param cookie
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/portal")
+    @RequestMapping(method = RequestMethod.GET, value = "${web.api}/portal")
     @Cacheable(cacheNames = {"ascTenant"}, key = "{#cookie}", cacheManager = "ascClientCacheManager")
     APIClientDTOWrapper<TenantDTO> getTenant(URI base, @RequestHeader("Cookie") String cookie);
 
@@ -58,7 +58,7 @@ public interface APIClient {
      * @param cookie
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/settings")
+    @RequestMapping(method = RequestMethod.GET, value = "${web.api}/settings")
     @Cacheable(cacheNames = {"ascSettings"}, key = "{#cookie}", cacheManager = "ascClientCacheManager")
     APIClientDTOWrapper<SettingsDTO> getSettings(URI base, @RequestHeader("Cookie") String cookie);
 }

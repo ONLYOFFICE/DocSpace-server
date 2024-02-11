@@ -1,6 +1,6 @@
 application:
-  instance:
-    issuer: ${ISSUER_ADDRESS:http://127.0.0.1:8080}
+  security:
+    cipherSecret: ${CIPHER_SECRET:secret}
 management:
   endpoint:
     env:
