@@ -26,13 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T>(
-    IEnumerable<T> folders,
-    IEnumerable<T> files,
-    Tenant tenant,
-    IDictionary<string, StringValues> headers,
-    bool holdResult = true)
-    : FileOperationData<T>(folders, files, tenant, headers, holdResult);
+record FileMarkAsReadOperationData<T>(
+    IEnumerable<T> Folders,
+    IEnumerable<T> Files,
+    int TenantId,
+    IDictionary<string, string> Headers,
+    bool HoldResult = true)
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
 class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
@@ -51,7 +51,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
-        _headers = fileOperationData.Headers;
+        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 

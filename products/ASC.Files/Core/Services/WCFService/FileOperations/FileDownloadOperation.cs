@@ -26,12 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
-        IDictionary<string, StringValues> headers, bool holdResult = true)
-    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, headers, holdResult)
-{
-    public Dictionary<T, string> FilesDownload { get; } = files;
-}
+internal record FileDownloadOperationData<T>(
+    Dictionary<T, string> FoldersDict,
+    Dictionary<T, string> FilesDownload,
+    int TenantId,
+    IDictionary<string, string> Headers,
+    bool HoldResult = true)
+    : FileOperationData<T>(FoldersDict.Select(f => f.Key).ToList(), FilesDownload.Select(f => f.Key).ToList(), TenantId, Headers, HoldResult);
 
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
@@ -51,7 +52,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
     {
         await base.RunJob(distributedTask, cancellationToken);
 
-        await using var scope = ThirdPartyOperation.CreateScopeAsync();
+        await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
         var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
@@ -182,7 +183,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         : base(serviceProvider, fileDownloadOperationData)
     {
         _files = fileDownloadOperationData.FilesDownload;
-        _headers = fileDownloadOperationData.Headers;
+        _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }
 

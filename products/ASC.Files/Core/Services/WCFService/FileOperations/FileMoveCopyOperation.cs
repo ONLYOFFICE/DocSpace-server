@@ -38,16 +38,23 @@ class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<str
     }
 }
 
-internal class FileMoveCopyOperationData<T> : FileOperationData<T>
+internal record FileMoveCopyOperationData<T> : FileOperationData<T>
 {
     public string ThirdPartyFolderId { get; }
     public int DaoFolderId { get; }
     public bool Copy { get; }
     public FileConflictResolveType ResolveType { get; }
 
-    public FileMoveCopyOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, JsonElement toFolderId, bool copy, FileConflictResolveType resolveType, 
-        bool holdResult = true, IDictionary<string, StringValues> headers = null)
-        : base(folders, files, tenant, headers, holdResult)
+    public FileMoveCopyOperationData(
+        IEnumerable<T> folders, 
+        IEnumerable<T> files, 
+        int tenantId, 
+        JsonElement toFolderId, 
+        bool copy, 
+        FileConflictResolveType resolveType, 
+        bool holdResult = true, 
+        IDictionary<string, string> headers = null)
+        : base(folders, files, tenantId, headers, holdResult)
     {
         if (toFolderId.ValueKind == JsonValueKind.String)
         {
@@ -89,7 +96,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 
-        _headers = data.Headers;
+        _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _thumbnailSettings = thumbnailSettings;
         this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
@@ -465,12 +472,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     if (isRoom)
                                     {
-                                        moveRoomLock = await distributedLockProvider.TryAcquireFairLockAsync($"move_room_{CurrentTenant.Id}");
+                                        moveRoomLock = await distributedLockProvider.TryAcquireFairLockAsync($"move_room_{CurrentTenantId}");
                                         
                                         if (toFolder.FolderType == FolderType.VirtualRooms)
                                         {
-                                            roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(
-                                                LockKeyHelper.GetRoomsCountCheckKey(CurrentTenant.Id));
+                                            roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
                                             
                                             await countRoomChecker.CheckAppend();
                                         

@@ -1454,7 +1454,7 @@ public class FileStorageService //: IFileStorageService
             return;
         }
 
-        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, GetHttpHeaders());
+        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, GetHttpHeaders());
     }
 
     public async Task MarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers = null, string taskId = null)
@@ -1464,7 +1464,7 @@ public class FileStorageService //: IFileStorageService
             return;
         }
 
-        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers ?? GetHttpHeaders(), enqueueTask: true, taskId);
+        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers ?? GetHttpHeaders(), enqueueTask: true, taskId);
     }
 
     public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt)
@@ -1476,7 +1476,7 @@ public class FileStorageService //: IFileStorageService
 
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, enqueueTask: false);
+        var (operations, taskId) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, enqueueTask: false);
 
         return (operations, taskId, headers);
     }
@@ -1801,7 +1801,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers ?? GetHttpHeaders(), enqueueTask: true, taskId, baseUri);
+        fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), folders, files, headers ?? GetHttpHeaders(), enqueueTask: true, taskId, baseUri);
     }
 
     public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishBulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files)
@@ -1813,7 +1813,7 @@ public class FileStorageService //: IFileStorageService
 
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, headers, enqueueTask: false);
+        var (operations, taskId) = fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), folders, files, headers, enqueueTask: false);
 
         return (operations, taskId, headers);
     }
@@ -1932,7 +1932,7 @@ public class FileStorageService //: IFileStorageService
 
         if (foldersId.Count > 0 || filesId.Count > 0)
         {
-            var (operations, _) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders(), content);
+            var (operations, _) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders(), content);
 
             return operations;
         }
@@ -1949,7 +1949,7 @@ public class FileStorageService //: IFileStorageService
 
         if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
         {
-            await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers ?? GetHttpHeaders(), content, enqueueTask: true, taskId);
+            await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers ?? GetHttpHeaders(), content, enqueueTask: true, taskId);
         }
     }
 
@@ -1964,7 +1964,7 @@ public class FileStorageService //: IFileStorageService
         {
             var headers = GetHttpHeaders();
 
-            var (operations, taskId) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers, content, enqueueTask: false);
+            var (operations, taskId) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers, content, enqueueTask: false);
 
             return (operations, taskId, headers);
         }
@@ -1977,57 +1977,74 @@ public class FileStorageService //: IFileStorageService
     #region Delete
 
     public async Task<List<FileOperationResult>> DeleteFileAsync<T>(T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {
-        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T>() { fileId }, ignoreException, !deleteAfter, immediately, GetHttpHeaders());
+    {        
+        var headers = GetHttpHeaders();
+        var taskId = fileOperationsManager.Delete(await tenantManager.GetCurrentTenantIdAsync(), new List<T>(), new List<T> { fileId }, ignoreException, !deleteAfter, immediately, headers);
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return operations;
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId
+        });
+        
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
     public async Task<List<FileOperationResult>> DeleteFolderAsync<T>(T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {
-        var (operations, _) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T> { folderId }, new List<T>(), ignoreException, !deleteAfter, immediately, GetHttpHeaders());
+    {        
+        var headers = GetHttpHeaders();
+        
+        var taskId = fileOperationsManager.Delete(await tenantManager.GetCurrentTenantIdAsync(), new List<T> { folderId }, new List<T>(), ignoreException, !deleteAfter, immediately, headers);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return operations;
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId
+        });
+        
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
-    public async Task DeleteItemsAsync(IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, IDictionary<string, StringValues> headers = null, string taskId = null)
-    {
-        fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, !deleteAfter, immediately, headers ?? GetHttpHeaders(), false, enqueueTask: true, taskId);
-    }
-
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishDeleteItemsAsync(IEnumerable<string> foldersIdString, IEnumerable<string> filesIdString, IEnumerable<int> foldersIdInt, IEnumerable<int> filesIdInt, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
+    public async Task<List<FileOperationResult>> PublishDeleteItemsAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, !deleteAfter, immediately, headers, enqueueTask: false);
+        var taskId = fileOperationsManager.PublishDelete(await tenantManager.GetCurrentTenantIdAsync(), folderIds, fileIds, ignoreException, !deleteAfter, immediately, headers);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return (operations, taskId, headers);
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId
+        });
+        
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
     public async Task DeleteItemsAsync<T>(IEnumerable<T> files, IEnumerable<T> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately, GetHttpHeaders());
+        fileOperationsManager.Delete(await tenantManager.GetCurrentTenantIdAsync(), folders, files, ignoreException, !deleteAfter, immediately, GetHttpHeaders());
     }
 
     #endregion
 
     #region EmptyTrash
-
-    public async Task EmptyTrashAsync(IDictionary<string, StringValues> headers = null, string taskId = null)
-    {
-        var (foldersId, filesId) = await GetTrashContentAsync();
-
-        fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true, false, headers ?? GetHttpHeaders(), true, enqueueTask: true, taskId);
-    }
-
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishEmptyTrashAsync()
+    
+    public async Task<List<FileOperationResult>> PublishEmptyTrashAsync()
     {
         var (foldersId, filesId) = await GetTrashContentAsync();
         var headers = GetHttpHeaders();
 
-        var (operations, taskId) = fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, false, true, false, headers, true, enqueueTask: false);
+        var taskId = fileOperationsManager.Delete(await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, false, true, false, headers, true);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return (operations, taskId, headers);
+        eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId,
+            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
+        });
+        
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
     private async Task<(List<int>, List<int>)> GetTrashContentAsync()

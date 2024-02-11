@@ -26,15 +26,16 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDeleteOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, bool holdResult = true,
-        bool ignoreException = false, bool immediately = false, IDictionary<string, StringValues> headers = null,
-        bool isEmptyTrash = false)
-    : FileOperationData<T>(folders, files, tenant, headers, holdResult)
-{
-    public bool IgnoreException { get; } = ignoreException;
-    public bool Immediately { get; } = immediately;
-    public bool IsEmptyTrash { get; } = isEmptyTrash;
-}
+internal record FileDeleteOperationData<T>(
+    IEnumerable<T> Folders,
+    IEnumerable<T> Files,
+    int TenantId,
+    IDictionary<string, string> Headers,
+    bool HoldResult = true,
+    bool IgnoreException = false,
+    bool Immediately = false,
+    bool IsEmptyTrash = false)
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
 class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
@@ -47,6 +48,25 @@ class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>
     {
         this[OpType] = (int)FileOperationType.Delete;
     }
+    
+    public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<JsonElement> data)
+        : base(serviceProvider)
+    {
+        this[OpType] = (int)FileOperationType.Delete;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
+    }
+
+    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    {
+        var data = JsonSerializer.Deserialize<FileDeleteOperationData<JsonElement>>((string)this[Data]);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
+        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
+        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
+
+        return base.RunJob(distributedTask, cancellationToken);
+    }
 }
 
 class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
@@ -57,13 +77,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _isEmptyTrash;
     private readonly IDictionary<string, StringValues> _headers;
 
-    public FileDeleteOperation(
-        IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
+    public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
         _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
-        _headers = fileOperationData.Headers;
+        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         this[OpType] = (int)FileOperationType.Delete;
     }
@@ -73,7 +92,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(CurrentTenant);
+        await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Init(Headers);

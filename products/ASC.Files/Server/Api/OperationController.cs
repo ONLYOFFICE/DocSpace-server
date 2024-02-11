@@ -142,24 +142,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishDeleteItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            DeleteAfter = inDto.DeleteAfter,
-            Immediately = inDto.Immediately,
-            FolderStringIds = folderStringIds,
-            FileStringIds = fileStringIds,
-            FolderIntIds = folderIntIds,
-            FileIntIds = fileIntIds,
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
+        var tasks = await fileStorageService.PublishDeleteItemsAsync(inDto.FolderIds, inDto.FileIds, false, inDto.DeleteAfter, inDto.Immediately);
 
         foreach (var e in tasks)
         {
@@ -179,15 +162,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishEmptyTrashAsync();
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
+        var tasks = await fileStorageService.PublishEmptyTrashAsync();
 
         foreach (var e in tasks)
         {
