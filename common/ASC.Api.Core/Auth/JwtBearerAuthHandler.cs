@@ -25,10 +25,13 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Protocols;
-using SecurityContext = ASC.Core.SecurityContext;
+using ASC.Core.Common;
+
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+
+using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
@@ -37,9 +40,9 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
 {
     private readonly SecurityContext _securityContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly TenantManager _tenantManager;
-    private readonly CoreSettings _coreSettings;
     private readonly IConfiguration _configuration;
+    private readonly BaseCommonLinkUtility _linkUtility;
+    private readonly ILogger<JwtBearerAuthHandler> _logger;
 
     public JwtBearerAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -47,37 +50,40 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         UrlEncoder encoder,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager,
-        CoreSettings coreSettings,
+        BaseCommonLinkUtility baseCommonLinkUtility,
         IConfiguration configuration)
         : base(options, logger, encoder)
     {
         _securityContext = securityContext;
         _httpContextAccessor = httpContextAccessor;
-        _tenantManager = tenantManager;
-        _coreSettings = coreSettings;
         _configuration = configuration;
+        _linkUtility = baseCommonLinkUtility;
+        _logger = logger.CreateLogger<JwtBearerAuthHandler>();
     }
+
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var tenantDomain = tenant.GetTenantDomain(_coreSettings);
-        var authority = _configuration["core:oidc:authority"] ?? "/oauth2";
+        var serverRootPath = _linkUtility.ServerRootPath;
+        var authority = _configuration["core:oidc:authority"];
 
+        if (string.IsNullOrEmpty(authority))
+        {
+            authority = "/oauth2";
+        }
 
         if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
         {
-            authority = $"{tenantDomain}{authority}";
+            authority = $"{serverRootPath}{authority}";
         }
 
-        var audience = tenantDomain;
+        var audience = serverRootPath;
         var httpDocumentRetriever = new HttpDocumentRetriever();
-        
 
-#if DEBUG
-        IdentityModelEventSource.ShowPII = true;
-        httpDocumentRetriever.RequireHttps = false;
-#endif
+        var showPIIEnable = bool.TryParse(_configuration["core:oidc:showPII"], out var showPII) && showPII;
+        var requireHttpsEnable = bool.TryParse(_configuration["core:oidc:requireHttps"], out var requireHttps) && requireHttps;
+
+        IdentityModelEventSource.ShowPII = showPIIEnable;
+        httpDocumentRetriever.RequireHttps = requireHttpsEnable;
 
         var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(authority + "/.well-known/openid-configuration",
                                                                                         new OpenIdConnectConfigurationRetriever(),
@@ -97,10 +103,25 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
             accessToken = accessToken["Bearer ".Length..];
         }
 
-        var validatedToken = await ValidateToken(accessToken, authority, audience, configurationManager);
+        JwtSecurityToken validatedToken;
+
+        var validationTokenEnable = !(bool.TryParse(_configuration["core:oidc:disableValidateToken"], out var disableValidateToken) && disableValidateToken);
+
+        if (validationTokenEnable)
+        {
+            validatedToken = await ValidateToken(accessToken, authority, audience, configurationManager);
+        }
+        else
+        {
+            _logger.WarningDisableTokenValidation();
+           
+            validatedToken = new JwtSecurityToken(accessToken);
+        }      
 
         if (validatedToken == null)
         {
+            _logger.DebugValidatedTokenIsNull();
+
             return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
         }
 
@@ -115,24 +136,25 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         {
             await _securityContext.AuthenticateMeWithoutCookieAsync(userId, validatedToken.Claims.ToList());
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
+            return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized), ex));
         }
-
 
         return AuthenticateResult.Success(new AuthenticationTicket(Context.User, Scheme.Name));
     }
 
-    private static async Task<JwtSecurityToken> ValidateToken(string token,
+    private async Task<JwtSecurityToken> ValidateToken(string token,
                                                               string issuer,
                                                               string audience,
                                                               IConfigurationManager<OpenIdConnectConfiguration> configurationManager,
                                                               CancellationToken ct = default(CancellationToken))
     {
-        if (string.IsNullOrEmpty(token)) throw new ArgumentNullException(nameof(token));
-        if (string.IsNullOrEmpty(issuer)) throw new ArgumentNullException(nameof(issuer));
-        if (string.IsNullOrEmpty(audience)) throw new ArgumentNullException(nameof(audience));
+        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(issuer);
+        ArgumentNullException.ThrowIfNull(audience);
+
+        _logger.DebugValidateTokenInfo(token, issuer, audience);
 
         var discoveryDocument = await configurationManager.GetConfigurationAsync(ct);
         var signingKeys = discoveryDocument.SigningKeys;
@@ -167,8 +189,10 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
             return (JwtSecurityToken)rawValidatedToken;
 
         }
-        catch (SecurityTokenValidationException)
+        catch (SecurityTokenValidationException ex)
         {
+            _logger.WarningTokenValidationException(ex);
+
             return null;
         }
     }

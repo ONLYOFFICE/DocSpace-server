@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Cors;
+using ASC.Api.Core.Cors.Enums;
+using ASC.Api.Core.Cors.Middlewares;
+
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
@@ -314,9 +318,9 @@ public abstract class BaseStartup
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            services.AddCors(options =>
+            services.AddDynamicCors<DynamicCorsPolicyResolver>(options =>
             {
-                options.AddPolicy(name: CustomCorsPolicyName,
+                options.AddPolicy(name: CorsPoliciesEnums.DynamicCorsPolicyName,
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
@@ -427,11 +431,6 @@ public abstract class BaseStartup
 
         app.UseRouting();
 
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        {
-            app.UseCors(CustomCorsPolicyName);
-        }
-
         if (AddAndUseSession)
         {
             app.UseSession();
@@ -440,6 +439,12 @@ public abstract class BaseStartup
         app.UseSynchronizationContextMiddleware();
 
         app.UseAuthentication();
+
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        {
+            app.UseDynamicCorsMiddleware();
+            //            app.UseCors(CustomCorsPolicyName);
+        }
 
         // TODO: if some client requests very slow, this line will need to remove
         bool.TryParse(_configuration["core:hosting:rateLimiterOptions:enable"], out var enableRateLimiter);
