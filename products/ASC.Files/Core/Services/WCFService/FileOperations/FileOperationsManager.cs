@@ -93,28 +93,29 @@ public class FileOperationsManager(
 
     #region MarkAsRead
 
-    public void MarkAsRead(Guid userId, int tenantId, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds,
-        IDictionary<string, StringValues> headers, bool enqueueTask = true, string taskId = null)
+    public void EnqueueMarkAsRead(string taskId)
     {
-        var (folderIntIds, folderStringIds) = GetIds(folderIds);
-        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        var op = _tasks.GetAllTasks().FirstOrDefault(r => r.Id == taskId);
 
-        MarkAsRead(userId, tenantId, folderStringIds, fileStringIds, folderIntIds, fileIntIds, headers, enqueueTask, taskId);
+        if (op is DistributedTaskProgress task)
+        {
+            var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>(task[FileOperation.Data]);
+            var operation = new FileMarkAsReadOperation(serviceProvider, data) { Id = task.Id };
+            _tasks.EnqueueTask(operation);
+        }
     }
 
-    public (List<FileOperationResult>, string) MarkAsRead(Guid userId, int tenantId, IEnumerable<string> folderIdsString, IEnumerable<string> fileIdsString, IEnumerable<int> folderIdsInt, IEnumerable<int> fileIdsInt,
-        IDictionary<string, StringValues> headers, bool enqueueTask = true, string taskId = null)
+    public string PublishMarkAsRead(
+        int tenantId,
+        IEnumerable<JsonElement> folderIds,
+        IEnumerable<JsonElement> fileIds,
+        IDictionary<string, StringValues> headers)
     {
-        var op1 = new FileMarkAsReadOperation<int>(serviceProvider, new FileMarkAsReadOperationData<int>(folderIdsInt, fileIdsInt, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
-        var op2 = new FileMarkAsReadOperation<string>(serviceProvider, new FileMarkAsReadOperationData<string>(folderIdsString, fileIdsString, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
-        var op = new FileMarkAsReadOperation(serviceProvider, op2, op1);
+        var op = new FileMarkAsReadOperation(serviceProvider, new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
+        
+        _tasks.PublishTask(op);
 
-        if (!string.IsNullOrEmpty(taskId))
-        {
-            op.Id = taskId;
-        }
-
-        return (QueueTask(userId, op, enqueueTask), op.Id);
+        return op.Id;
     }
 
     #endregion

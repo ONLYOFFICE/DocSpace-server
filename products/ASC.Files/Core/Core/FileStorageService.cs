@@ -1434,7 +1434,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Count == 0)
             {
-                await MarkAsReadAsync([JsonSerializer.SerializeToElement(folderId)], []);
+                await PublishMarkAsReadAsync([JsonSerializer.SerializeToElement(folderId)], []);
             }
 
             return result;
@@ -1447,38 +1447,20 @@ public class FileStorageService //: IFileStorageService
 
     #region MarkAsRead
 
-    private async Task MarkAsReadAsync(List<JsonElement> foldersId, List<JsonElement> filesId)
+    
+    public async Task<List<FileOperationResult>> PublishMarkAsReadAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
     {
-        if (foldersId.Count == 0 && filesId.Count == 0)
-        {
-            return;
-        }
-
-        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, GetHttpHeaders());
-    }
-
-    public async Task MarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, IDictionary<string, StringValues> headers = null, string taskId = null)
-    {
-        if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
-        {
-            return;
-        }
-
-        fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers ?? GetHttpHeaders(), enqueueTask: true, taskId);
-    }
-
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt)
-    {
-        if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
-        {
-            return (GetTasksStatuses(), null, null);
-        }
-
         var headers = GetHttpHeaders();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        var taskId = fileOperationsManager.PublishMarkAsRead(tenantId, folderIds, fileIds, headers);
 
-        var (operations, taskId) = fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, headers, enqueueTask: false);
-
-        return (operations, taskId, headers);
+        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId
+        });
+        
+        return GetTasksStatuses();
     }
 
     #endregion

@@ -37,10 +37,23 @@ record FileMarkAsReadOperationData<T>(
 [Transient]
 class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
-    public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileOperation<FileMarkAsReadOperationData<string>, string> f1, FileOperation<FileMarkAsReadOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
+    public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<JsonElement> data)
+        : base(serviceProvider)
     {
         this[OpType] = (int)FileOperationType.MarkAsRead;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
+    }
+
+    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    {
+        var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)this[Data]);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.HoldResult));
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.HoldResult));
+
+        return base.RunJob(distributedTask, cancellationToken);
     }
 }
 

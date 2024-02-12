@@ -182,22 +182,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            FolderStringIds = folderStringIds,
-            FileStringIds = fileStringIds,
-            FolderIntIds = folderIntIds,
-            FileIntIds = fileIntIds,
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
+        var tasks = await fileStorageService.PublishMarkAsReadAsync(inDto.FolderIds, inDto.FileIds);
 
         foreach (var e in tasks)
         {
