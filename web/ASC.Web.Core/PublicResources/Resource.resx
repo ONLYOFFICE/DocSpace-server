@@ -612,9 +612,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Custom</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>A link to confirm the operation has been sent to {0} (the email address of the portal owner).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Incorrect Instance id.</value>
   </data>

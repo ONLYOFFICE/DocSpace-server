@@ -91,7 +91,6 @@ public static class FilesConvertsExtension
            new FilesConverts { Input = ".docxf", Output = ".docx" },
            new FilesConverts { Input = ".docxf", Output = ".dotm" },
            new FilesConverts { Input = ".docxf", Output = ".odt" },
-           new FilesConverts { Input = ".docxf", Output = ".oform" },
            new FilesConverts { Input = ".docxf", Output = ".pdf" },
            new FilesConverts { Input = ".docxf", Output = ".rtf" },
            new FilesConverts { Input = ".docxf", Output = ".txt" },

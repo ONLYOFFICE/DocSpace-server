@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ASC.Migrations.MySql.Migrations.CoreDb
 {
-    [DbContext(typeof(CoreDbContext))]
+    [DbContext(typeof(MigrationContext))]
     [Migration("20230130103905_Standalone_CoreDbContextMigrate")]
     partial class MigrationContextMigrate
     {
