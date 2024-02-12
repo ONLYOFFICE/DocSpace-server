@@ -566,9 +566,12 @@ public class FileStorageService //: IFileStorageService
                 {
                     return null;
                 }
-                
-                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
-                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+
+                if (!folder.ProviderEntry)
+                {
+                    var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                    _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                }
             }
 
             if (action != null)
