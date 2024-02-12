@@ -26,55 +26,38 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
+internal record FileMoveCopyOperationData<T>(
+    IEnumerable<T> Folders,
+    IEnumerable<T> Files,
+    int TenantId,
+    JsonElement DestFolderId,
+    bool Copy,
+    FileConflictResolveType ResolveType,
+    bool HoldResult = true,
+    IDictionary<string, string> Headers = null)
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
+
 [Transient]
 class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>
 {
-    public FileMoveCopyOperation(IServiceProvider serviceProvider,
-        FileOperation<FileMoveCopyOperationData<string>, string> thirdPartyOperation,
-        FileOperation<FileMoveCopyOperationData<int>, int> daoOperation)
-        : base(serviceProvider, thirdPartyOperation, daoOperation)
+    public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<JsonElement> data)
+        : base(serviceProvider)
     {
-        this[OpType] = (int)ThirdPartyOperation[OpType];
+        this[OpType] = (int)(data.Copy ? FileOperationType.Copy : FileOperationType.Move);
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
     }
-}
-
-internal record FileMoveCopyOperationData<T> : FileOperationData<T>
-{
-    public string ThirdPartyFolderId { get; }
-    public int DaoFolderId { get; }
-    public bool Copy { get; }
-    public FileConflictResolveType ResolveType { get; }
-
-    public FileMoveCopyOperationData(
-        IEnumerable<T> folders, 
-        IEnumerable<T> files, 
-        int tenantId, 
-        JsonElement toFolderId, 
-        bool copy, 
-        FileConflictResolveType resolveType, 
-        bool holdResult = true, 
-        IDictionary<string, string> headers = null)
-        : base(folders, files, tenantId, headers, holdResult)
+    
+    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        if (toFolderId.ValueKind == JsonValueKind.String)
-        {
-            if (!int.TryParse(toFolderId.GetString(), out var i))
-            {
-                ThirdPartyFolderId = toFolderId.GetString();
-            }
-            else
-            {
-                DaoFolderId = i;
-            }
-        }
-        else if (toFolderId.ValueKind == JsonValueKind.Number)
-        {
-            DaoFolderId = toFolderId.GetInt32();
-        }
-
-        Copy = copy;
-        ResolveType = resolveType;
-        Headers = headers;
+        var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>((string)this[Data]);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
+        
+        DaoOperation =  new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
+        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
+        
+        return base.RunJob(distributedTask, cancellationToken);
     }
 }
 
@@ -85,19 +68,33 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     private readonly bool _copy;
     private readonly FileConflictResolveType _resolveType;
     private readonly IDictionary<string, StringValues> _headers;
-    private readonly ThumbnailSettings _thumbnailSettings;
     private readonly Dictionary<T, Folder<T>> _parentRooms = new();
 
-    public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data, ThumbnailSettings thumbnailSettings)
+    public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data)
         : base(serviceProvider, data)
     {
-        _daoFolderId = data.DaoFolderId;
-        _thirdPartyFolderId = data.ThirdPartyFolderId;
+        var toFolderId = data.DestFolderId;
+        
+        if (toFolderId.ValueKind == JsonValueKind.String)
+        {
+            if (!int.TryParse(toFolderId.GetString(), out var i))
+            {
+                _thirdPartyFolderId = toFolderId.GetString();
+            }
+            else
+            {
+                _daoFolderId = i;
+            }
+        }
+        else if (toFolderId.ValueKind == JsonValueKind.Number)
+        {
+            _daoFolderId = toFolderId.GetInt32();
+        }
+        
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 
         _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        _thumbnailSettings = thumbnailSettings;
         this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
 
@@ -217,7 +214,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         foreach (var folder in moveOrCopyFoldersTask)
         {
-        if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
+            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
@@ -258,7 +255,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
-        var (filesMessageService, fileMarker, _, _, _) = scopeClass;
+        var (filesMessageService, fileMarker, _, _, _, _) = scopeClass;
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var countRoomChecker = scope.ServiceProvider.GetRequiredService<CountRoomChecker>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -581,7 +578,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
-        var (filesMessageService, fileMarker, fileUtility, global, entryManager) = scopeClass;
+        var (filesMessageService, fileMarker, fileUtility, global, entryManager, _thumbnailSettings) = scopeClass;
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -914,4 +911,5 @@ public record FileMoveCopyOperationScope(
     FileMarker FileMarker,
     FileUtility FileUtility, 
     Global Global, 
-    EntryManager EntryManager);
+    EntryManager EntryManager,
+    ThumbnailSettings ThumbnailSettings);

@@ -27,10 +27,10 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(Additional = typeof(FileOperationsManagerHelperExtension))]
-public class FileOperationsManager(TempStream tempStream,
-        IDistributedTaskQueueFactory queueFactory,
-        IServiceProvider serviceProvider,
-        ThumbnailSettings thumbnailSettings)
+public class FileOperationsManager(
+    TempStream tempStream,
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
@@ -152,39 +152,57 @@ public class FileOperationsManager(TempStream tempStream,
 
     #region MoveOrCopy
 
-    public async Task<(List<FileOperationResult>, string)> MoveOrCopyAsync(Guid userId, int tenantId, IEnumerable<JsonElement> folders, IEnumerable<JsonElement> files, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult,
-        IDictionary<string, StringValues> headers, bool content)
+    public void EnqueueMoveOrCopy(string taskId)
     {
-        var (folderIntIds, folderStringIds) = GetIds(folders);
-        var (fileIntIds, fileStringIds) = GetIds(files);
+        var op = _tasks.GetAllTasks().FirstOrDefault(r => r.Id == taskId);
 
-        return await MoveOrCopyAsync(userId, tenantId, folderStringIds, fileStringIds, folderIntIds, fileIntIds, destFolderId, copy, resolveType, holdResult, headers, content, enqueueTask: true);
+        if (op is DistributedTaskProgress task)
+        {
+            var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>(task[FileOperation.Data]);
+            var operation = new FileMoveCopyOperation(serviceProvider, data) { Id = task.Id };
+            _tasks.EnqueueTask(operation);
+        }
     }
 
-    public async Task<(List<FileOperationResult>, string)> MoveOrCopyAsync(Guid userId, int tenantId, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers, 
-        bool content = false, bool enqueueTask = true, string taskId = null)
+    public async Task<string> PublishMoveOrCopyAsync(
+        int tenantId,
+        IEnumerable<JsonElement> folderIds,
+        IEnumerable<JsonElement> fileIds,
+        JsonElement destFolderId,
+        bool copy,
+        FileConflictResolveType resolveType,
+        bool holdResult,
+        IDictionary<string, StringValues> headers, 
+        bool content = false)
     {
+        var toCopyFolderIds = folderIds;
+        var toCopyFilesIds = fileIds;
         if (content)
-        {
+        {        
+            var (folderIntIds, folderStringIds) = GetIds(folderIds);
+            var (fileIntIds, fileStringIds) = GetIds(fileIds);
             await GetContent(folderIntIds, fileIntIds);
             await GetContent(folderStringIds, fileStringIds);
+
+            toCopyFilesIds = fileIntIds.Select(r => JsonSerializer.SerializeToElement(r))
+                .Concat(fileStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
+                .ToList();
+            
+            toCopyFolderIds = folderIntIds.Select(r => JsonSerializer.SerializeToElement(r))
+                .Concat(folderStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
+                .ToList();
         }
+        
+        var op = new FileMoveCopyOperation(serviceProvider, new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
+        
+        _tasks.PublishTask(op);
 
-        var op1 = new FileMoveCopyOperation<int>(serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, headers.ToDictionary(x => x.Key, x => x.Value.ToString())), thumbnailSettings);
-        var op2 = new FileMoveCopyOperation<string>(serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, headers.ToDictionary(x => x.Key, x => x.Value.ToString())), thumbnailSettings);
-        var op = new FileMoveCopyOperation(serviceProvider, op2, op1);
-
-        if (!string.IsNullOrEmpty(taskId))
+        return op.Id;
+        
+        async Task GetContent<T1>(List<T1> folderForContentIds, List<T1> fileForContentIds)
         {
-            op.Id = taskId;
-        }
-
-        return (QueueTask(userId, op, enqueueTask), op.Id);
-
-        async Task GetContent<T1>(List<T1> folderIds, List<T1> fileIds)
-        {
-            var copyFolderIds = folderIds.ToList();
-            folderIds.Clear();
+            var copyFolderIds = folderForContentIds.ToList();
+            folderForContentIds.Clear();
 
             using var scope = serviceProvider.CreateScope();
             var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
@@ -193,8 +211,8 @@ public class FileOperationsManager(TempStream tempStream,
 
             foreach (var folderId in copyFolderIds)
             {
-                folderIds.AddRange(await folderDao.GetFoldersAsync(folderId).Select(r => r.Id).ToListAsync());
-                fileIds.AddRange(await fileDao.GetFilesAsync(folderId).ToListAsync());
+                folderForContentIds.AddRange(await folderDao.GetFoldersAsync(folderId).Select(r => r.Id).ToListAsync());
+                fileForContentIds.AddRange(await fileDao.GetFilesAsync(folderId).ToListAsync());
             }
         }
     }
@@ -205,7 +223,7 @@ public class FileOperationsManager(TempStream tempStream,
 
     public void EnqueueDelete(string taskId)
     {
-        var op = _tasks.GetAllTasks().FirstOrDefault(r=> r.Id == taskId);
+        var op = _tasks.GetAllTasks().FirstOrDefault(r => r.Id == taskId);
 
         if (op is DistributedTaskProgress task)
         {

@@ -1434,7 +1434,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Count == 0)
             {
-                await MarkAsReadAsync([JsonDocument.Parse(JsonSerializer.Serialize(folderId)).RootElement], []); //TODO
+                await MarkAsReadAsync([JsonSerializer.SerializeToElement(folderId)], []);
             }
 
             return result;
@@ -1447,7 +1447,7 @@ public class FileStorageService //: IFileStorageService
 
     #region MarkAsRead
 
-    public async Task MarkAsReadAsync(List<JsonElement> foldersId, List<JsonElement> filesId)
+    private async Task MarkAsReadAsync(List<JsonElement> foldersId, List<JsonElement> filesId)
     {
         if (foldersId.Count == 0 && filesId.Count == 0)
         {
@@ -1923,7 +1923,7 @@ public class FileStorageService //: IFileStorageService
         return (checkedFiles, checkedFolders);
     }
 
-    public async Task<List<FileOperationResult>> MoveOrCopyItemsAsync(List<JsonElement> foldersId, List<JsonElement> filesId, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false)
+    public async Task<List<FileOperationResult>> MoveOrCopyItemsAsync(List<JsonElement> foldersId, List<JsonElement> filesId, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false)
     {
         if (resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
@@ -1932,44 +1932,31 @@ public class FileStorageService //: IFileStorageService
 
         if (foldersId.Count > 0 || filesId.Count > 0)
         {
-            var (operations, _) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders(), content);
-
-            return operations;
+            await fileOperationsManager.PublishMoveOrCopyAsync(await tenantManager.GetCurrentTenantIdAsync(), foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders());
         }
 
         return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
+    
 
-    public async Task MoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false, IDictionary<string, StringValues> headers = null, string taskId = null)
+    public async Task<List<FileOperationResult>> PublishMoveOrCopyItemsAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false)
     {
         if (resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
+        
+        var headers = GetHttpHeaders();
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var taskId = await fileOperationsManager.PublishMoveOrCopyAsync(tenantId, folderIds, fileIds, destFolderId, copy, resolve, !deleteAfter, headers, content);
 
-        if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
+        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers ?? GetHttpHeaders(), content, enqueueTask: true, taskId);
-        }
-    }
+            TaskId = taskId
+        });
 
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishMoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false)
-    {
-        if (resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
-        {
-            var headers = GetHttpHeaders();
-
-            var (operations, taskId) = await fileOperationsManager.MoveOrCopyAsync(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, copy, resolve, !deleteAfter, headers, content, enqueueTask: false);
-
-            return (operations, taskId, headers);
-        }
-
-        return (fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID), null, null);
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
     #endregion
