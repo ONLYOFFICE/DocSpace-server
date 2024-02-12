@@ -129,7 +129,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var q = userDbContext.Groups.Where(t => t.TenantId == tenant);
+        var q = userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
 
         q = BuildTextSearch(text, q);
 
