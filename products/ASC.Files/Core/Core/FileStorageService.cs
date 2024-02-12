@@ -452,8 +452,6 @@ public class FileStorageService //: IFileStorageService
 
         var room = roomType switch
         {
-            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, privacy, indexing, UpdateProviderAction(FolderType.CustomRoom)),
-            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, privacy, indexing, UpdateProviderAction(FolderType.EditingRoom)),
             RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, privacy, indexing, UpdateProviderAction(FolderType.PublicRoom)),
             _ => await CreateCustomRoomAsync(title, parentId, privacy, indexing, UpdateProviderAction(FolderType.CustomRoom))
         };
