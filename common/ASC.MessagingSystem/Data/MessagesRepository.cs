@@ -81,6 +81,8 @@ public class MessagesRepository : IDisposable
     {
         if (ForseSave(message))
         {
+            _logger.LogDebug("ForseSave: {action}", message.Action.ToStringFast());
+            
             int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
@@ -110,11 +112,12 @@ public class MessagesRepository : IDisposable
 
         var now = DateTime.UtcNow;
         var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
-
-        await _semaphore.WaitAsync();
+        
+        _logger.LogDebug("AddToCache: {key}, semaphore current {CurrentCount}", key, _semaphore.CurrentCount);
 
         try
         {
+            await _semaphore.WaitAsync();
             _cache[key] = message;
 
             if (!_timerStarted)
@@ -160,6 +163,8 @@ public class MessagesRepository : IDisposable
         {
             return;
         }
+        
+        _logger.LogDebug("FlushCache: events count {Count}", events.Count);
 
         using var scope = _serviceScopeFactory.CreateScope();
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
