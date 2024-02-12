@@ -43,7 +43,12 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
         //        using var tr = TenantDbContext.Database.BeginTransaction();
         await ValidateDomainAsync(domain, Tenant.DefaultTenant, true);
     }
-    
+
+    public void ValidateTenantName(string name)
+    {
+        tenantDomainValidator.ValidateTenantName(name);
+    }
+
     public IEnumerable<Tenant> GetTenantsWithCsp()
     {
         var cspSettingsId = new CspSettings().ID;
