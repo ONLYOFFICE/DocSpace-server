@@ -28,7 +28,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(Additional = typeof(FileOperationsManagerHelperExtension))]
 public class FileOperationsManager(
-    TempStream tempStream,
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider)
 {
@@ -121,32 +120,41 @@ public class FileOperationsManager(
     #endregion
 
     #region Download
+    
+    public void EnqueueDownload(string taskId)
+    {
+        var op = _tasks.GetAllTasks().FirstOrDefault(r => r.Id == taskId);
 
-    public (List<FileOperationResult>, string) Download(Guid userId, int tenantId, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files,
-        IDictionary<string, StringValues> headers, bool enqueueTask = true, string taskId = null, string baseUri = null)
+        if (op is DistributedTaskProgress task)
+        {
+            var data = JsonSerializer.Deserialize<FileDownloadOperationData<JsonElement>>((string)task[FileOperation.Data]);
+            var operation = new FileDownloadOperation(serviceProvider, data) { Id = task.Id };
+            _tasks.EnqueueTask(operation);
+        }
+    }
+    
+    public string PublishDownload(
+        Guid userId,
+        int tenantId, 
+        IEnumerable<JsonElement> folders, 
+        IEnumerable<FilesDownloadOperationItem<JsonElement>> files,
+        IDictionary<string, StringValues> headers,
+        string baseUri)
     {
         var operations = _tasks.GetAllTasks()
             .Where(t => new Guid(t[FileOperation.Owner]) == ProcessUserId(userId))
             .Where(t => (FileOperationType)t[FileOperation.OpType] == FileOperationType.Download);
-
-        if (operations.Any(o => o.Status <= DistributedTaskStatus.Running && o.Id != taskId))
+        
+        if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
         }
+        
+        var op = new FileDownloadOperation(serviceProvider, new FileDownloadOperationData<JsonElement>(folders, files, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString()), baseUri));
+        
+        _tasks.PublishTask(op);
 
-        var (folderIntIds, folderStringIds) = GetIds(folders);
-        var (fileIntIds, fileStringIds) = GetIds(files);
-
-        var op1 = new FileDownloadOperation<int>(serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
-        var op2 = new FileDownloadOperation<string>(serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, headers.ToDictionary(x => x.Key, x => x.Value.ToString())));
-        var op = new FileDownloadOperation(serviceProvider, tempStream, baseUri, op2, op1);
-
-        if (!string.IsNullOrEmpty(taskId))
-        {
-            op.Id = taskId;
-        }
-
-        return (QueueTask(userId, op, enqueueTask), op.Id);
+        return op.Id;
     }
 
     #endregion
@@ -268,20 +276,6 @@ public class FileOperationsManager(
 
     #endregion
 
-    private List<FileOperationResult> QueueTask(Guid userId, DistributedTaskProgress op, bool enqueueTask)
-    {
-        if (enqueueTask)
-        {
-            _tasks.EnqueueTask(op);
-        }
-        else
-        {
-            _tasks.PublishTask(op);
-        }
-
-        return GetOperationResults(userId);
-    }
-
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)
     {
         var (resultInt, resultString) = (new List<int>(), new List<string>());
@@ -309,41 +303,41 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    public static (Dictionary<int, string>, Dictionary<string, string>) GetIds(Dictionary<JsonElement, string> items)
+    public static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
     {
-        var (resultInt, resultString) = (new Dictionary<int, string>(), new Dictionary<string, string>());
+        var (resultInt, resultString) = (new List<FilesDownloadOperationItem<int>>(), new List<FilesDownloadOperationItem<string>>());
 
         foreach (var item in items)
         {
-            if (item.Key.ValueKind == JsonValueKind.Number)
+            if (item.Id.ValueKind == JsonValueKind.Number)
             {
-                resultInt.Add(item.Key.GetInt32(), item.Value);
+                resultInt.Add(new FilesDownloadOperationItem<int>(item.Id.GetInt32(), item.Ext));
             }
-            else if (item.Key.ValueKind == JsonValueKind.String)
+            else if (item.Id.ValueKind == JsonValueKind.String)
             {
-                var val = item.Key.GetString();
+                var val = item.Id.GetString();
                 if (int.TryParse(val, out var i))
                 {
-                    resultInt.Add(i, item.Value);
+                    resultInt.Add(new FilesDownloadOperationItem<int>(i, item.Ext));
                 }
                 else
                 {
-                    resultString.Add(val, item.Value);
+                    resultString.Add(new FilesDownloadOperationItem<string>(val, item.Ext));
                 }
             }
-            else if (item.Key.ValueKind == JsonValueKind.Object)
+            else if (item.Id.ValueKind == JsonValueKind.Object)
             {
-                var key = item.Key.GetProperty("key");
+                var key = item.Id.GetProperty("key");
 
-                var val = item.Key.GetProperty("value").GetString();
+                var val = item.Id.GetProperty("value").GetString();
 
                 if (key.ValueKind == JsonValueKind.Number)
                 {
-                    resultInt.Add(key.GetInt32(), val);
+                    resultInt.Add(new FilesDownloadOperationItem<int>(key.GetInt32(), val));
                 }
                 else
                 {
-                    resultString.Add(key.GetString(), val);
+                    resultString.Add(new FilesDownloadOperationItem<string>(key.GetString(), val));
                 }
             }
         }

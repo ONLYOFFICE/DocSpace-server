@@ -1776,28 +1776,23 @@ public class FileStorageService //: IFileStorageService
 
     #region BulkDownload
 
-    public async Task BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers = null, string taskId = null, string baseUri = null)
+    
+    public async Task<List<FileOperationResult>> PublishBulkDownloadAsync(
+        IEnumerable<JsonElement> folders,
+        IEnumerable<FilesDownloadOperationItem<JsonElement>> files,
+        string baseUri)
     {
-        if (folders.Count == 0 && files.Count == 0)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), folders, files, headers ?? GetHttpHeaders(), enqueueTask: true, taskId, baseUri);
-    }
-
-    public async Task<(List<FileOperationResult>, string, IDictionary<string, StringValues>)> PublishBulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files)
-    {
-        if (folders.Count == 0 && files.Count == 0)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
         var headers = GetHttpHeaders();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        var taskId = fileOperationsManager.PublishDownload(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), folders, files, headers, baseUri);
 
-        var (operations, taskId) = fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync(), folders, files, headers, enqueueTask: false);
-
-        return (operations, taskId, headers);
+        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId
+        });
+        
+        return fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
     }
 
     #endregion

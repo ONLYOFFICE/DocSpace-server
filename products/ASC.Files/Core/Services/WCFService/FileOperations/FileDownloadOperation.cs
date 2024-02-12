@@ -27,29 +27,35 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 internal record FileDownloadOperationData<T>(
-    Dictionary<T, string> FoldersDict,
-    Dictionary<T, string> FilesDownload,
+    IEnumerable<T> Folders,
+    IEnumerable<FilesDownloadOperationItem<T>> FilesDownload,
     int TenantId,
     IDictionary<string, string> Headers,
+    string BaseUri =  null,
     bool HoldResult = true)
-    : FileOperationData<T>(FoldersDict.Select(f => f.Key).ToList(), FilesDownload.Select(f => f.Key).ToList(), TenantId, Headers, HoldResult);
+    : FileOperationData<T>(Folders, FilesDownload.Select(f => f.Id).ToList(), TenantId, Headers, HoldResult);
+
+public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
-    {
-        _tempStream = tempStream;
-        _baseUri = baseUri;
+    public FileDownloadOperation(IServiceProvider serviceProvider,FileDownloadOperationData<JsonElement> data)
+        : base(serviceProvider)
+    {        
         this[OpType] = (int)FileOperationType.Download;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
     }
-
-    private readonly TempStream _tempStream;
-    private readonly string _baseUri;
-
+    
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
-    {
+    {        
+        var data = JsonSerializer.Deserialize<FileDownloadOperationData<JsonElement>>((string)this[Data]);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.FilesDownload);
+        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers));
+        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers));
+
         await base.RunJob(distributedTask, cancellationToken);
 
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
@@ -59,12 +65,13 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
-        var stream = _tempStream.Create();
+        var tempStream = scope.ServiceProvider.GetService<TempStream>();
+        var stream = tempStream.Create();
 
-        if (!string.IsNullOrEmpty(_baseUri))
+        if (!string.IsNullOrEmpty(data.BaseUri))
         {
             var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
-            commonLinkUtility.ServerUri = _baseUri;
+            commonLinkUtility.ServerUri = data.BaseUri;
         }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
@@ -175,14 +182,14 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
 class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
-    private readonly Dictionary<T, string> _files;
+    private readonly IDictionary<T, string> _files;
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
 
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
-        _files = fileDownloadOperationData.FilesDownload;
+        _files = fileDownloadOperationData.FilesDownload.ToDictionary(r => r.Id, r => r.Ext);
         _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }

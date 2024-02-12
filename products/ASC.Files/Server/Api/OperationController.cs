@@ -27,16 +27,14 @@
 namespace ASC.Files.Api;
 
 [DefaultRoute("fileops")]
-public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService,
-        IEventBus eventBus,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        CommonLinkUtility commonLinkUtility)
+public class OperationController(
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Starts the download process of files and folders with the IDs specified in the request.
     /// </summary>
@@ -51,36 +49,19 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
     {
-        var folders = new Dictionary<JsonElement, string>();
-        var files = new Dictionary<JsonElement, string>();
+        var files = new List<FilesDownloadOperationItem<JsonElement>>();
 
-        foreach (var fileId in inDto.FileConvertIds.Where(fileId => !files.ContainsKey(fileId.Key)))
+        foreach (var fileId in inDto.FileConvertIds)
         {
-            files.Add(fileId.Key, fileId.Value);
+            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId.Key, fileId.Value));
         }
 
-        foreach (var fileId in inDto.FileIds.Where(fileId => !files.ContainsKey(fileId)))
+        foreach (var fileId in inDto.FileIds)
         {
-            files.Add(fileId, string.Empty);
+            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId, string.Empty));
         }
 
-        foreach (var folderId in inDto.FolderIds.Where(folderId => !folders.ContainsKey(folderId)))
-        {
-            folders.Add(folderId, string.Empty);
-        }
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishBulkDownloadAsync(folders, files);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            FileStringIds = files.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString()),
-            BaseUri = commonLinkUtility.ServerRootPath
-        });
+        var tasks = await fileStorageService.PublishBulkDownloadAsync(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
         foreach (var e in tasks)
         {
