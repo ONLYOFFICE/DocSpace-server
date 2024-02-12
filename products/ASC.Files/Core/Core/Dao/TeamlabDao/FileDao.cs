@@ -777,7 +777,7 @@ internal class FileDao(
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-            var fromFolders = Queries.ParentIdsAsync(context, tenantId, fileId);
+            var fromFolders = await Queries.ParentIdsAsync(context, tenantId, fileId).ToListAsync();
 
             var q = (await Query(context.Files)).Where(r => r.Id == fileId);
 
@@ -800,8 +800,6 @@ internal class FileDao(
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
-
-
                 var tagDao = daoFactory.GetTagDao<int>();
 
                 if (toFolderId == trashId && oldParentId.HasValue)
@@ -820,14 +818,14 @@ internal class FileDao(
                     await Queries.DeleteTagsAsync(filesDbContext, tenantId);
                 }
 
-                await foreach (var f in fromFolders)
+                await tx.CommitAsync();
+                
+                foreach (var f in fromFolders)
                 {
                     await RecalculateFilesCountAsync(f);
                 }
-
+                
                 await RecalculateFilesCountAsync(toFolderId);
-
-                await tx.CommitAsync();
             }
 
             var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
