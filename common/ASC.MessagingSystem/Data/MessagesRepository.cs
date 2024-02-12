@@ -110,7 +110,7 @@ public class MessagesRepository : IDisposable
         }
 
         var now = DateTime.UtcNow;
-        var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
+        var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
 
         await _semaphore.WaitAsync();
 
@@ -141,14 +141,19 @@ public class MessagesRepository : IDisposable
 
         if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit)
         {
-            lock (_cache)
+            try
             {
+                await _semaphore.WaitAsync();
                 _timer.Change(-1, -1);
                 _timerStarted = false;
 
                 events = [.._cache.Values];
                 _cache.Clear();
                 _lastSave = DateTime.UtcNow;
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
@@ -210,14 +215,19 @@ public class MessagesRepository : IDisposable
     {
         List<EventMessage> events;
 
-        lock (_cache)
+        try
         {
+            _semaphore.Wait();
             _timer.Change(-1, -1);
             _timerStarted = false;
 
             events = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
+        }
+        finally
+        {
+            _semaphore.Release();
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
