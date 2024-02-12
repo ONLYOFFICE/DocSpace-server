@@ -32,7 +32,7 @@ public class MessagesRepository : IDisposable
     private DateTime _lastSave = DateTime.UtcNow;
     private bool _timerStarted;
     private readonly TimeSpan _cacheTime;
-    private readonly IDictionary<string, EventMessage> _cache;
+    private readonly ConcurrentDictionary<string, EventMessage> _cache;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagesRepository> _logger;
@@ -44,8 +44,7 @@ public class MessagesRepository : IDisposable
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
-        _cacheTime = TimeSpan.FromMinutes(1);
-        _cache = new Dictionary<string, EventMessage>();
+        _cache = new ConcurrentDictionary<string, EventMessage>();
         _timerStarted = false;
 
         _logger = logger;
@@ -82,6 +81,8 @@ public class MessagesRepository : IDisposable
     {
         if (ForseSave(message))
         {
+            _logger.LogDebug("ForseSave: {action}", message.Action.ToStringFast());
+
             int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
@@ -110,15 +111,15 @@ public class MessagesRepository : IDisposable
         }
 
         var now = DateTime.UtcNow;
-        var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
+        var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, (int)message.Action, now.Ticks);
+
+        _logger.LogDebug("AddToCache: {key}, semaphore current {CurrentCount}", key, _semaphore.CurrentCount);
 
         await _semaphore.WaitAsync();
 
         try
         {
-            _cache[key] = message;
-
-            if (!_timerStarted)
+            if (_cache.TryAdd(key, message) && !_timerStarted)
             {
                 _timer.Change(0, 100);
                 _timerStarted = true;
@@ -137,25 +138,29 @@ public class MessagesRepository : IDisposable
 
     private async Task FlushCacheAsync()
     {
-        List<EventMessage> events = null;
+        var events = new List<EventMessage>();
 
         if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit)
         {
-            lock (_cache)
-            {
-                _timer.Change(-1, -1);
-                _timerStarted = false;
+            _timer.Change(-1, -1);
+            _timerStarted = false;
 
-                events = [.._cache.Values];
-                _cache.Clear();
-                _lastSave = DateTime.UtcNow;
+            foreach (var item in _cache)
+            {
+                if (_cache.TryRemove(item.Key, out var value))
+                {
+                    events.Add(value);
+                }
             }
+            _lastSave = DateTime.UtcNow;
         }
 
-        if (events == null)
+        if (events.Count == 0)
         {
             return;
         }
+
+        _logger.LogDebug("FlushCache: events count {Count}", events.Count);
 
         using var scope = _serviceScopeFactory.CreateScope();
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
@@ -208,16 +213,24 @@ public class MessagesRepository : IDisposable
 
     private void FlushCache()
     {
-        List<EventMessage> events;
+        var events = new List<EventMessage>();
 
-        lock (_cache)
+        _timer.Change(-1, -1);
+        _timerStarted = false;
+
+        foreach (var item in _cache)
         {
-            _timer.Change(-1, -1);
-            _timerStarted = false;
+            if (_cache.TryRemove(item.Key, out var value))
+            {
+                events.Add(value);
+            }
+        }
 
-            events = [.._cache.Values];
-            _cache.Clear();
-            _lastSave = DateTime.UtcNow;
+        _lastSave = DateTime.UtcNow;
+
+        if (events.Count == 0)
+        {
+            return;
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
