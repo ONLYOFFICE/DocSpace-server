@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -204,12 +204,12 @@ internal class FileDao(
                 if (searchByText)
                 {
                     query = BuildSearch(query, searchText, SearchType.Any);
-            }
+                }
 
                 if (searchByExtension)
                 {
                     query = BuildSearch(query, extension, SearchType.End);
-        }
+                }
             }
         }
 
@@ -1343,12 +1343,12 @@ internal class FileDao(
                 if (searchByText)
                 {
                     q = BuildSearch(q, searchText, SearchType.Any);
-            }
+                }
 
                 if (searchByExtension)
                 {
                     q = BuildSearch(q, extension, SearchType.End);
-        }
+                }
             }
         }
 
@@ -1776,7 +1776,7 @@ internal class FileDao(
                             ).Skip(1).FirstOrDefault()
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                     select f.Order
-                          ).FirstOrDefault()
+                ).FirstOrDefault()
             });
     }
 
@@ -1871,7 +1871,7 @@ internal class FileDao(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
-        
+
         if (withSubfolders)
         {
             q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
@@ -1896,7 +1896,7 @@ internal class FileDao(
             {
                 var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(expression);
                 if (!success)
@@ -1915,12 +1915,12 @@ internal class FileDao(
                 if (searchByText)
                 {
                     q = BuildSearch(q, searchText, SearchType.Any);
-            }
+                }
 
                 if (searchByExtension)
                 {
                     q = BuildSearch(q, extension, SearchType.End);
-        }
+                }
             }
         }
 
@@ -1981,13 +1981,13 @@ internal class FileDao(
         if (roomId != default)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
-                {
-                    t.TenantId,
-                    t.Type,
-                    t.Name,
-                    l.EntryId,
-                    l.EntryType
-                }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
+            {
+                t.TenantId,
+                t.Type,
+                t.Name,
+                l.EntryId,
+                l.EntryType
+            }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
                 .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File && filesDbContext.Folders.Where(f =>
                         f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
                             .OrderByDescending(t => t.Level)
@@ -2012,7 +2012,7 @@ internal class FileDao(
         if (extension.IsNullOrEmpty())
         {
             extension = new[] { "" };
-}
+        }
 
         if (searchByText || searchByExtension)
         {
@@ -2165,7 +2165,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2191,7 +2191,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Version == fileVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2219,7 +2219,7 @@ static file class Queries
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
                     .Where(r => fileVersion < 0 || r.Version <= fileVersion)
                     .OrderByDescending(r => r.Version)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2242,7 +2242,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Title == title && r.CurrentVersion && r.ParentId == parentId)
-                    
+
                     .OrderBy(r => r.CreateOn)
                     .Select(r => new DbFileQuery
                     {
@@ -2267,7 +2267,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId)
                     .OrderByDescending(r => r.Version)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2289,7 +2289,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => fileIds.Contains(r.Id) && r.CurrentVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2311,7 +2311,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
-                    
+
                     .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, Task<bool>> FileAnyAsync =
@@ -2470,7 +2470,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
                 ctx.Files
-                    
+
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId)
                     .Where(r => r.Version == fileVersion)
@@ -2511,7 +2511,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.CurrentVersion)
                     .Where(r => r.Title.ToLower().Contains(text))
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,

@@ -197,12 +197,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             await socketManager.DeleteFolder(folder, action: async () =>
                             {
-                            await FolderDao.DeleteFolderAsync(folder.Id);
+                                await FolderDao.DeleteFolderAsync(folder.Id);
 
-                            if (isRoom && folder.ProviderEntry)
-                            {
-                                await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                            }
+                                if (isRoom && folder.ProviderEntry)
+                                {
+                                    await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
+                                }
                             });
 
                             if (isRoom)
@@ -239,14 +239,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     aces = await fileSharing.GetSharedInfoAsync(folder);
                                 }
 
-                                await socketManager.DeleteFolder(folder, action: async () =>
-                                {
-                                await FolderDao.DeleteFolderAsync(folder.Id);
+                                    await socketManager.DeleteFolder(folder, action: async () =>
+                                    {
+                                    await FolderDao.DeleteFolderAsync(folder.Id);
 
-                                if (isRoom && folder.ProviderEntry)
-                                {
-                                    await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                                }
+                                    if (isRoom && folder.ProviderEntry)
+                                    {
+                                        await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
+                                    }
                                 });
 
                                 if (isNeedSendActions)

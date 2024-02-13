@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-//
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -55,10 +55,10 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory, Thir
 
 [Scope]
 public class BreadCrumbsManager(IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        AuthContext authContext)
-    {
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    AuthContext authContext)
+{
     public async Task<string> GetBreadCrumbsOrderAsync<T>(T folderId)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -70,7 +70,7 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
         if (result.Any())
         {
             return result.Aggregate((first, second) => $"{first}.{second}");
-    }
+        }
 
         return null;
     }
@@ -116,7 +116,7 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
                             FolderType.COMMON => await globalFolderHelper.FolderCommonAsync,
                             _ => rootId
                         };
-                        }
+                    }
                     break;
 
                 case FolderType.BUNCH:
@@ -221,44 +221,44 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
-                folder.IsFavorite = true;
-            }
+            folder.IsFavorite = true;
         }
     }
+}
 
 [Scope]
 public class EntryManager(IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        PathProvider pathProvider,
-        AuthContext authContext,
-        FileMarker fileMarker,
-        FileUtility fileUtility,
-        GlobalStore globalStore,
-        FilesSettingsHelper filesSettingsHelper,
-        UserManager userManager,
-        ILogger<EntryManager> logger,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        ThirdpartyConfiguration thirdpartyConfiguration,
-        DocumentServiceConnector documentServiceConnector,
-        LockerManager lockerManager,
-        BreadCrumbsManager breadCrumbsManager,
-        SettingsManager settingsManager,
-        IServiceProvider serviceProvider,
-        ICache cache,
-        FileTrackerHelper fileTracker,
-        EntryStatusManager entryStatusManager,
-        ThirdPartySelector thirdPartySelector,
-        IHttpClientFactory clientFactory,
-        ThumbnailSettings thumbnailSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    PathProvider pathProvider,
+    AuthContext authContext,
+    FileMarker fileMarker,
+    FileUtility fileUtility,
+    GlobalStore globalStore,
+    FilesSettingsHelper filesSettingsHelper,
+    UserManager userManager,
+    ILogger<EntryManager> logger,
+    FileShareLink fileShareLink,
+    DocumentServiceHelper documentServiceHelper,
+    ThirdpartyConfiguration thirdpartyConfiguration,
+    DocumentServiceConnector documentServiceConnector,
+    LockerManager lockerManager,
+    BreadCrumbsManager breadCrumbsManager,
+    SettingsManager settingsManager,
+    IServiceProvider serviceProvider,
+    ICache cache,
+    FileTrackerHelper fileTracker,
+    EntryStatusManager entryStatusManager,
+    ThirdPartySelector thirdPartySelector,
+    IHttpClientFactory clientFactory,
+    ThumbnailSettings thumbnailSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
     SocketManager socketManager,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil)
-    {
+{
     private const string UpdateList = "filesUpdateList";
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
@@ -313,7 +313,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await globalFolderHelper.FolderProjectsAsync))
         {
-            
+
         }
         else if (parent.FolderType == FolderType.SHARE)
         {
@@ -342,11 +342,11 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
-            var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
-            entries.AddRange(files);
+                var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
+                entries.AddRange(files);
 
-            CalculateTotal();
-        }
+                CalculateTotal();
+            }
         }
         else if (parent.FolderType == FolderType.Favorites)
         {
@@ -660,19 +660,19 @@ public class EntryManager(IDaoFactory daoFactory,
         return result;
     }
 
-       private async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] ext, bool searchInContent)
-        {
+    private async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] ext, bool searchInContent)
+    {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
         var files = fileSecurity.FilterReadAsync(fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, ext, searchInContent).Where(file => file.RootFolderType != FolderType.TRASH));
 
-            await foreach (var file in files)
-            {
-                await CheckEntryAsync(folderDao, file);
-                yield return file;
-            }
+        await foreach (var file in files)
+        {
+            await CheckEntryAsync(folderDao, file);
+            yield return file;
         }
+    }
 
     private async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {
@@ -722,37 +722,37 @@ public class EntryManager(IDaoFactory daoFactory,
         return (files, folders);
     }
 
-    private async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesByIdAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, FilterType filter, bool subjectGroup, 
+    private async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesByIdAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, FilterType filter, bool subjectGroup,
             Guid subjectId, string searchText, string[] extension, bool searchInContent)
-        {
+    {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
-            var asyncFolders = folderDao.GetFoldersAsync(folderIds, filter, subjectGroup, subjectId, searchText, false, false);
+        var asyncFolders = folderDao.GetFoldersAsync(folderIds, filter, subjectGroup, subjectId, searchText, false, false);
         var asyncFiles = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent, true);
 
-            List<FileEntry<T>> files = new();
-            List<FileEntry<T>> folders = new();
+        List<FileEntry<T>> files = new();
+        List<FileEntry<T>> folders = new();
 
         if (filter is FilterType.None or FilterType.FoldersOnly)
-            {
-                var tmpFolders = asyncFolders.Where(folder => folder.RootFolderType != FolderType.TRASH);
+        {
+            var tmpFolders = asyncFolders.Where(folder => folder.RootFolderType != FolderType.TRASH);
 
             folders = await fileSecurity.FilterReadAsync(tmpFolders).ToListAsync();
 
-                await CheckFolderIdAsync(folderDao, folders);
-            }
+            await CheckFolderIdAsync(folderDao, folders);
+        }
 
-            if (filter != FilterType.FoldersOnly)
-            {
-                var tmpFiles = asyncFiles.Where(file => file.RootFolderType != FolderType.TRASH);
+        if (filter != FilterType.FoldersOnly)
+        {
+            var tmpFiles = asyncFiles.Where(file => file.RootFolderType != FolderType.TRASH);
 
             files = await fileSecurity.FilterReadAsync(tmpFiles).ToListAsync();
 
-                await CheckFolderIdAsync(folderDao, folders);
-            }
-
-            return (files, folders);
+            await CheckFolderIdAsync(folderDao, folders);
         }
+
+        return (files, folders);
+    }
 
     public IAsyncEnumerable<FileEntry<T>> FilterEntries<T>(IAsyncEnumerable<FileEntry<T>> entries, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
     {
@@ -1083,9 +1083,9 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 if (properties == null)
                 {
-                        var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolder.Id, readyFormFolder.Id, folderIfNew.CreateBy, fileDao, folderDao);
-                        linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
-                    }
+                    var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolder.Id, readyFormFolder.Id, folderIfNew.CreateBy, fileDao, folderDao);
+                    linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
+                }
                 else
                 {
                     linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
@@ -1096,15 +1096,15 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 title = $"{sourceTitle}-{tenantUtil.DateTimeNow():s}";
 
-            if (sourceFile.ProviderEntry)
-            {
-                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-                var displayedName = user.DisplayUserName(displayUserSettingsHelper);
+                if (sourceFile.ProviderEntry)
+                {
+                    var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    var displayedName = user.DisplayUserName(displayUserSettingsHelper);
 
-                title += $" ({displayedName})";
-            }
+                    title += $" ({displayedName})";
+                }
 
-            title += ext;
+                title += ext;
                 linkedFile.ParentId = folderIfNew.Id;
             }
 
@@ -1794,12 +1794,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
         using (var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""))) {
 
-        var csvFile = serviceProvider.GetService<File<T>>();
-        csvFile.ParentId = resultsFolderId;
-        csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+            var csvFile = serviceProvider.GetService<File<T>>();
+            csvFile.ParentId = resultsFolderId;
+            csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
 
-        var file = await fileDao.SaveFileAsync(csvFile, textStream);
-        currentProperies.FormFilling.ResultsFileID = file.Id.ToString();
+            var file = await fileDao.SaveFileAsync(csvFile, textStream);
+            currentProperies.FormFilling.ResultsFileID = file.Id.ToString();
         }
         await fileDao.SaveProperties(sourceFileId, currentProperies);
 

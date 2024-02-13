@@ -415,10 +415,10 @@ public class PortalController(
                 error = "error",
                 message = "Method for server edition only."
             });
-            }
+        }
 
         try
-            {
+        {
             var tenants = (await commonMethods.GetTenantsAsync(model))
                 .Distinct()
                 .Where(t => t.Status == TenantStatus.Active)
@@ -428,7 +428,7 @@ public class PortalController(
 
             var owners = statistics
                 ? (await hostedSolution.FindUsersAsync(tenants.Select(t => t.OwnerId))).Select(owner => new TenantOwnerDto
-            {
+                    {
                         Id = owner.Id,
                         Email = owner.Email,
                         DisplayName = userFormatter.GetUserName(owner)
@@ -436,7 +436,7 @@ public class PortalController(
                 : null;
 
             foreach (var t in tenants)
-                {
+            {
                 if (statistics)
                 {
                     var quotaUsage = await quotaUsageManager.Get(t);
@@ -444,9 +444,9 @@ public class PortalController(
                     tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
                 }
                 else
-            {
+                {
                     tenantsWrapper.Add(commonMethods.ToTenantWrapper(t));
-            }
+                }
             }
 
             return Ok(new

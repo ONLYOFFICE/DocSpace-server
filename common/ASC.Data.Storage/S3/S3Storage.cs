@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-//
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -442,7 +442,7 @@ public class S3Storage(TempStream tempStream,
             if (bufferStream != null)
             {
                 await bufferStream.DisposeAsync();
-    }
+            }
         }
     }
 
@@ -507,7 +507,7 @@ public class S3Storage(TempStream tempStream,
         }
 
         return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream, cache);
-        }
+    }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
     {
@@ -516,8 +516,8 @@ public class S3Storage(TempStream tempStream,
             return "tar.gz";
         }
 
-            return "tar";
-        }
+        return "tar";
+    }
 
     #endregion
 
@@ -627,9 +627,9 @@ public class S3Storage(TempStream tempStream,
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-            await QuotaUsedDeleteAsync(domain, s3Object.Size, ownerId);
-        }
-    }
+                    await QuotaUsedDeleteAsync(domain, s3Object.Size, ownerId);
+                }
+            }
         }
     }
 
@@ -921,11 +921,11 @@ public class S3Storage(TempStream tempStream,
     public override async Task<bool> IsDirectoryAsync(string domain, string path)
     {
         using var client = GetClient();
-            var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-            var response = await client.ListObjectsAsync(request);
+        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
+        var response = await client.ListObjectsAsync(request);
 
-            return response.S3Objects.Count > 0;
-        }
+        return response.S3Objects.Count > 0;
+    }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
     {
@@ -1064,13 +1064,13 @@ public class S3Storage(TempStream tempStream,
 
         if (props.TryGetValue("forcepathstyle", out var style) && bool.TryParse(style, out var fps))
         {
-                _forcepathstyle = fps;
-            }
+            _forcepathstyle = fps;
+        }
 
         if (props.TryGetValue("usehttp", out var use) && bool.TryParse(use, out var uh))
         {
-                _useHttp = uh;
-            }
+            _useHttp = uh;
+        }
 
         if (props.TryGetValue("sse", out var sse) && !string.IsNullOrEmpty(sse))
         {
@@ -1109,7 +1109,7 @@ public class S3Storage(TempStream tempStream,
                 _cdnKeyPairId = props["cdn_keyPairId"];
                 _cdnPrivateKeyPath = props["cdn_privateKeyPath"];
                 CdnDistributionDomain = props["cdn_distributionDomain"];
-        }
+            }
         }
 
         props.TryGetValue("subdir", out _subDir);
@@ -1142,7 +1142,7 @@ public class S3Storage(TempStream tempStream,
         }
 
         return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
-        }
+    }
 
     private S3CannedACL GetS3Acl(ACL acl)
     {
