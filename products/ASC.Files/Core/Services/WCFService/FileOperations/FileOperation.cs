@@ -80,28 +80,25 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(IServiceScope serviceScope);
 }
 
-internal class ComposeFileOperation<T1, T2> : FileOperation
+internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
+    protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    protected ComposeFileOperation(
-        IServiceProvider serviceProvider,
-        FileOperation<T1, string> thirdPartyOperation,
-        FileOperation<T2, int> daoOperation)
-        : base(serviceProvider)
+    public virtual void Init<T>(T data, string taskId = null) where T: FileOperationData<JsonElement>
     {
-        ThirdPartyOperation = thirdPartyOperation;
-        DaoOperation = daoOperation;
-        this[Hold] = ThirdPartyOperation[Hold] || DaoOperation[Hold];
+        this[OpType] = (int)FileOperationType;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
+        if (!string.IsNullOrEmpty(taskId))
+        {
+            Id = taskId;
+        }
     }
-    protected ComposeFileOperation(IServiceProvider serviceProvider)
-        : base(serviceProvider)
-    {
-    }
-
+    
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;

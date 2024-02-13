@@ -35,16 +35,11 @@ record FileMarkAsReadOperationData<T>(
     : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
-class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
+class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
+    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
 {
-    public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<JsonElement> data)
-        : base(serviceProvider)
-    {
-        this[OpType] = (int)FileOperationType.MarkAsRead;
-        this[Data] = JsonSerializer.Serialize(data);
-        this[Hold] = data.HoldResult;
-    }
-
+    protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
+    
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)this[Data]);

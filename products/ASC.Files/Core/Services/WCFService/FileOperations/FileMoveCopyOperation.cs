@@ -38,16 +38,20 @@ internal record FileMoveCopyOperationData<T>(
     : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
-class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>
+class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
 {
-    public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<JsonElement> data)
-        : base(serviceProvider)
+    private FileOperationType _fileOperationType = FileOperationType.Copy;
+    protected override FileOperationType FileOperationType { get => _fileOperationType; }
+
+    public override void Init<T>(T data, string taskId = null)
     {
-        this[OpType] = (int)(data.Copy ? FileOperationType.Copy : FileOperationType.Move);
-        this[Data] = JsonSerializer.Serialize(data);
-        this[Hold] = data.HoldResult;
+        base.Init(data, taskId);
+        if (data is FileMoveCopyOperationData<JsonElement> fileOperationData)
+        {
+            _fileOperationType = (fileOperationData.Copy ? FileOperationType.Copy : FileOperationType.Move);
+        }
     }
-    
+
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>((string)this[Data]);

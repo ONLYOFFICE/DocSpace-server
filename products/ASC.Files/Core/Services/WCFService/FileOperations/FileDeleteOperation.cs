@@ -38,15 +38,9 @@ internal record FileDeleteOperationData<T>(
     : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
-class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
+class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
 {
-    public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<JsonElement> data)
-        : base(serviceProvider)
-    {
-        this[OpType] = (int)FileOperationType.Delete;
-        this[Data] = JsonSerializer.Serialize(data);
-        this[Hold] = data.HoldResult;
-    }
+    protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {

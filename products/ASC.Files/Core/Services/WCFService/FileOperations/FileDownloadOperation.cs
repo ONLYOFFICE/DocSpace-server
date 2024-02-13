@@ -38,15 +38,10 @@ internal record FileDownloadOperationData<T>(
 public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
 [Transient]
-class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
-{
-    public FileDownloadOperation(IServiceProvider serviceProvider,FileDownloadOperationData<JsonElement> data)
-        : base(serviceProvider)
-    {        
-        this[OpType] = (int)FileOperationType.Download;
-        this[Data] = JsonSerializer.Serialize(data);
-        this[Hold] = data.HoldResult;
-    }
+class FileDownloadOperation(IServiceProvider serviceProvider) : 
+    ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
+{    
+    protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {        
