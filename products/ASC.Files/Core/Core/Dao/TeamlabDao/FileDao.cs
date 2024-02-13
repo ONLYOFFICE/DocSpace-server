@@ -811,6 +811,7 @@ internal class FileDao(
         var toFolder = await folderDao.GetFolderAsync(toFolderId);
         var file = await GetFileAsync(fileId);
         var fileContentLength = file.ContentLength;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         if (DocSpaceHelper.IsRoom(toFolder.FolderType))
         {
@@ -826,11 +827,28 @@ internal class FileDao(
                     }
                 }
             }
+        }else if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+        {
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            if (quotaUserSettings.EnableQuota)
+            {
+                var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
+                var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                {
+                    if (userQuotaLimit - userUsedSpace < fileContentLength)
+                    {
+                        throw FileSizeComment.GetPersonalFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
         }
 
         var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
