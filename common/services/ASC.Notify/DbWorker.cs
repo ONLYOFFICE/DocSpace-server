@@ -37,9 +37,9 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyS
 
         var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-        await using var ñontext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
+        await using var context = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
-        var strategy = ñontext.Database.CreateExecutionStrategy();
+        var strategy = context.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
