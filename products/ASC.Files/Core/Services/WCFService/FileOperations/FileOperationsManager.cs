@@ -156,6 +156,11 @@ public class FileOperationsManager(
 
     public async Task PublishMarkAsRead(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
     {
+        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        {
+            return;
+        }
+        
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
@@ -188,6 +193,10 @@ public class FileOperationsManager(
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
         fileOperationsManagerHolder.CheckRunning(authContext.CurrentAccount.ID, FileOperationType.Download);
+        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        {
+            return;
+        }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
@@ -230,6 +239,11 @@ public class FileOperationsManager(
         if (resolveType == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
+        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        {
+            return;
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -317,7 +331,12 @@ public class FileOperationsManager(
         bool holdResult, 
         bool immediately,
         bool isEmptyTrash = false)
-    {        
+    {      
+        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        {
+            return;
+        }
+        
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
