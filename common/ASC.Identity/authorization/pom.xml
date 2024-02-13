@@ -186,6 +186,10 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.codehaus.janino</groupId>
+			<artifactId>janino</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>de.siegmar</groupId>
 			<artifactId>logback-gelf</artifactId>
 			<version>${logback.gelf.version}</version>
