@@ -80,7 +80,7 @@ public interface IFolderDao<T>
     /// </summary>
     /// <param name="parentId"></param>
     /// <param name="type"></param>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(FolderType type, T parentId);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, FolderType type);
 
     /// <summary>
     /// Get a list of folders.

@@ -411,7 +411,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Het invulbare PDF document is klaar. Het is opgeslagen in de {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>De OFORM kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
+    <value>De PDF kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Het bestand is niet langer een concept om het formulier in te vullen.</value>

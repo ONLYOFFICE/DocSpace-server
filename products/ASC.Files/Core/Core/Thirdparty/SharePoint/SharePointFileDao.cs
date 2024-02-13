@@ -279,6 +279,23 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+    public async Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = await SharePointProviderInfo.GetFileByIdAsync(file.Id);
+        if (fileToDownload == null)
+        {
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();
@@ -449,7 +466,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(new ChunkedUploadSession<string>(FixId(file), contentLength) { UseChunks = false });
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -459,7 +476,6 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }

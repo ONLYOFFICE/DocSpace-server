@@ -333,9 +333,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Պատվերով</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Գործողությունը հաստատող հղում է ուղարկվել {0}-ին (պորտալի սեփականատիրոջ էլ. հասցեն).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Սխալ օրինակի ID.</value>
   </data>

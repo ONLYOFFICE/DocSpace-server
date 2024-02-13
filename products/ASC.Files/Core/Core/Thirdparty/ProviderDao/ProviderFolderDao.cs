@@ -152,7 +152,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             yield return ToFakeRoom(providerDao.ToProviderInfo(providerQuery.Account), virtualRoomsFolderId, archiveFolderId, providerQuery.Shared);
         }
     }
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
     }

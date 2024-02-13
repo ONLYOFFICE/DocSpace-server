@@ -802,9 +802,6 @@ $TrulyYours</value>
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>DocSpaceの招待を確認する</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>ポータルのアドレス変更の確認</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>ポータル所有者の更新を確認する</value>
   </data>
@@ -941,19 +938,6 @@ $OrangeButton</value>
 $OwnerName 様
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの所有者を $UserName に変更したいとのリクエストがありました。
-
-以下のリンクから操作をご確認ください：
-
-$OrangeButton
-
-*ご注意*: このリンクは 7 日間のみ有効です。期間内にポータル所有者の変更手続きを完了してください。</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.ポータルアドレスの変更
-
-$OwnerName 様
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" のポータルアドレスを "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end に変更したいとのリクエストがありました。
 
 以下のリンクから操作をご確認ください：
 
@@ -1556,9 +1540,6 @@ $OrangeButton
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}.ポータル所有者変更</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}.ポータルアドレス変更</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>${__VirtualRootPath}に参加しましょう</value>

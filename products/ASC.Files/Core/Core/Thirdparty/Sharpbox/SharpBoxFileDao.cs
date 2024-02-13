@@ -292,6 +292,18 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+
+    public Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = GetFileById(file.Id);
+        return Task.FromResult(fileToDownload.Length);
+    }
+    
     public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
     {
         throw new NotSupportedException();
@@ -330,7 +342,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(await tempStream.GetBufferedAsync(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {
@@ -603,7 +615,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return uploadSession;
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -613,7 +625,6 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -638,17 +649,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = MakeId(uploadSession.File);
-        }
+        uploadSession.File = MakeId(uploadSession.File);
 
         return uploadSession.File;
     }

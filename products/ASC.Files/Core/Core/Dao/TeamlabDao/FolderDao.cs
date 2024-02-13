@@ -122,7 +122,7 @@ internal class FolderDao(
         return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(FolderType type, int parentId)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, FolderType type)
     {
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
 

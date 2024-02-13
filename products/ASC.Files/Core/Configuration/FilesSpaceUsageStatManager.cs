@@ -36,8 +36,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         GlobalFolderHelper globalFolderHelper,
         PathProvider pathProvider,
         IDaoFactory daoFactory,
-        GlobalFolder globalFolder,
-        FileMarker fileMarker)
+        GlobalFolder globalFolder)
     : SpaceUsageStatManager, IUserSpaceUsage
     {
     public override async ValueTask<List<UsageSpaceStatItem>> GetStatDataAsync()
@@ -95,7 +94,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        var my = await globalFolder.GetFolderMyAsync(fileMarker, daoFactory);
+        var my = await globalFolder.GetFolderMyAsync(daoFactory);
         var trash = await globalFolder.GetFolderTrashAsync(daoFactory);
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();

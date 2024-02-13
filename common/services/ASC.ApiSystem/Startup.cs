@@ -73,6 +73,7 @@ public class Startup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSession();
 
@@ -111,9 +112,14 @@ public class Startup
                                       policy.WithOrigins(_corsOrigin)
                                       .SetIsOriginAllowedToAllowWildcardSubdomains()
                                       .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials();
+                                            .AllowAnyMethod();
+
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
                                   });
+
             });
         }
 

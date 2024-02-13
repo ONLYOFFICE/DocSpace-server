@@ -147,19 +147,6 @@ $OrangeButton
 
 *注意*: 此链接仅7天有效。请在此期限内完成您的电子邮件激活。</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.门户地址变更
-
-亲爱的$OwnerName,
-
-有一个请求将 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户地址变更为 "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end。
-
-请使用下列链接，确认操作：
-
-$OrangeButton
-
-*注意*：此链接仅7天有效。请在此期限内完成门户网站地址更改流程。</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. 来到&lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; 协作空间！
 
@@ -472,9 +459,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}。门户所有者更改</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}。门户地址更改</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>欢迎来到 ONLYOFFICE 协作空间！</value>
@@ -1149,9 +1133,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>确认</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>确认门户地址更改</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>确认门户所有者更新</value>

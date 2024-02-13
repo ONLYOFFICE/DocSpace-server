@@ -48,4 +48,5 @@ public interface ITenantService
     Task PermanentlyRemoveTenantAsync(int id);
     void SetTenantSettings(int tenant, string key, byte[] data);
     Task ValidateDomainAsync(string domain);
+    void ValidateTenantName(string name);
 }

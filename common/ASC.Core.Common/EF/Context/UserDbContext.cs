@@ -37,6 +37,7 @@ public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : D
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DbSubscriptionMethod> SubscriptionMethods { get; set; }
     public DbSet<UserDav> UsersDav { get; set; }
+    public DbSet<AccountLinks> AccountLinks { get; set; }
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbQuotaRow> QuotaRow { get; set; }
 
@@ -54,6 +55,7 @@ public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : D
         .AddSubscription()
         .AddUserDav()
         .AddDbTenant()
+        .AddAccountLinks()
         .AddWebstudioSettings()
         .AddDbQuotaRow();
     }

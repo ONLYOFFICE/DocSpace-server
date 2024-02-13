@@ -296,6 +296,16 @@ internal class FileDao(
         return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset);
     }
 
+    public async Task<Stream> GetFileStreamAsync(File<int> file, long offset, long length)
+    {
+        return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset, length);
+    }
+
+    public async Task<long> GetFileSizeAsync(File<int> file)
+    {
+        return await (await globalStore.GetStoreAsync()).GetFileSizeAsync(string.Empty, GetUniqFilePath(file));
+    }
+    
     public async Task<Uri> GetPreSignedUriAsync(File<int> file, TimeSpan expires)
     {
         var storage = await globalStore.GetStoreAsync();
@@ -332,7 +342,7 @@ internal class FileDao(
 
     public async Task<Stream> GetFileStreamAsync(File<int> file)
     {
-        return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
+        return await GetFileStreamAsync(file, 0);
     }
 
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
@@ -472,7 +482,7 @@ internal class FileDao(
 
         if (parentFoldersIds.Count > 0)
         {
-            await Queries.UpdateFoldersAsync(filesDbContext, parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy);
+                await Queries.UpdateFoldersAsync(filesDbContext, parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
         }
 
         toInsert.Folders = parentFolders;
@@ -617,7 +627,7 @@ internal class FileDao(
 
         if (parentFoldersIds.Count > 0)
         {
-            await Queries.UpdateFoldersAsync(filesDbContext, parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy);
+            await Queries.UpdateFoldersAsync(filesDbContext, parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
         }
 
         toUpdate.Folders = parentFolders;
@@ -828,7 +838,7 @@ internal class FileDao(
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-            var fromFolders = Queries.ParentIdsAsync(context, tenantId, fileId);
+            var fromFolders = await Queries.ParentIdsAsync(context, tenantId, fileId).ToListAsync();
 
             var q = (await Query(context.Files)).Where(r => r.Id == fileId);
 
@@ -850,8 +860,6 @@ internal class FileDao(
                     await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
-
-
 
                 var tagDao = daoFactory.GetTagDao<int>();
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
@@ -910,7 +918,9 @@ internal class FileDao(
                     await Queries.DeleteTagsAsync(filesDbContext, tenantId);
                 }
 
-                await foreach (var f in fromFolders)
+                await tx.CommitAsync();
+                
+                foreach (var f in fromFolders)
                 {
                     await RecalculateFilesCountAsync(f);
                 }
@@ -927,8 +937,6 @@ internal class FileDao(
                         trashId);
                 }
                 await RecalculateFilesCountAsync(toFolderId);
-
-                await tx.CommitAsync();
             }
 
             var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
@@ -1170,26 +1178,31 @@ internal class FileDao(
         return await chunkedUploadSessionHolder.CreateUploadSessionAsync(file, contentLength);
     }
 
-    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
-            await using var streamToSave = await chunkedUploadSessionHolder.UploadSingleChunkAsync(uploadSession, stream, chunkLength);
-            if (streamToSave != Stream.Null)
+            if (uploadSession.BytesTotal == 0)
             {
-                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), streamToSave);
+                uploadSession.BytesTotal = chunkLength;
+            }
+
+            if (uploadSession.BytesTotal >= chunkLength)
+            {
+                uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), stream);
             }
 
             return uploadSession.File;
         }
 
-        await chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength);
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
+        if (!chunkNumber.HasValue)
         {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
+            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
+            number++;
+            uploadSession.Items["ChunksUploaded"] = number.ToString();
+            chunkNumber = number;
         }
+        await chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber.Value);
 
         return uploadSession.File;
     }
@@ -1793,21 +1806,16 @@ internal class FileDao(
 
     protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile)
     {
-        if (!await factoryIndexer.CanIndexByContentAsync(dbFile))
-        {
             dbFile.Document = new Document
             {
                 Data = Convert.ToBase64String(Encoding.UTF8.GetBytes(""))
             };
 
+        if (!await factoryIndexer.CanIndexByContentAsync(dbFile))
+        {
             return dbFile;
         }
 
-        return await InternalInitDocumentAsync(dbFile);
-    }
-
-    private async Task<DbFile> InternalInitDocumentAsync(DbFile dbFile)
-    {
         var file = _serviceProvider.GetService<File<int>>();
         file.Id = dbFile.Id;
         file.Title = dbFile.Title;
@@ -2314,11 +2322,11 @@ static file class Queries
                     .OrderByDescending(r => r.Level)
                     .AsQueryable());
 
-    public static readonly Func<FilesDbContext, IEnumerable<int>, DateTime, Guid, Task<int>> UpdateFoldersAsync =
+    public static readonly Func<FilesDbContext, IEnumerable<int>, DateTime, Guid, int, Task<int>> UpdateFoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy) =>
+            (FilesDbContext ctx, IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy, int tenantId) =>
                 ctx.Folders
-                    .Where(r => parentFoldersIds.Contains(r.Id))
+                    .Where(r => parentFoldersIds.Contains(r.Id) && r.TenantId == tenantId)
                     .ExecuteUpdate(f => f
                         .SetProperty(p => p.ModifiedOn, modifiedOn)
                         .SetProperty(p => p.ModifiedBy, modifiedBy)));

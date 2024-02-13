@@ -78,14 +78,17 @@ public class BaseIndexer<T>(Client client,
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly object _locker = new();
 
-    public async Task<IEnumerable<List<T>>> IndexAllAsync(
+    public async IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
-        var now = DateTime.UtcNow;
-        var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
+        DateTime lastIndexed;
+
+        await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName);
+        }
 
         if (lastIndexed.Equals(DateTime.MinValue))
         {
@@ -99,25 +102,29 @@ public class BaseIndexer<T>(Client client,
         ids.AddRange(getIds(lastIndexed));
         ids.Add(max);
 
-        await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
-        {
-            IndexName = Wrapper.IndexName,
-            LastModified = now
-        });
-
-        await webstudioDbContext.SaveChangesAsync();
-
-        _logger.DebugIndexCompleted(Wrapper.IndexName);
-
-        var list = new List<List<T>>();
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            list.Add(getData(ids[i], ids[i + 1], lastIndexed));
+            yield return getData(ids[i], ids[i + 1], lastIndexed);
         }
-        return list;
     }
 
-    public async Task ReIndrexAsync()
+    public async Task OnComplete(DateTime lastModified)
+    {
+        await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
+            {
+            IndexName = Wrapper.IndexName,
+                LastModified = lastModified
+        });
+
+            await webStudioDbContext.SaveChangesAsync();
+        }
+
+        _logger.DebugIndexCompleted(Wrapper.IndexName);
+    }
+
+    public async Task ReIndexAsync()
     {
         await ClearAsync();
     }

@@ -165,6 +165,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return null;
+    }
+
+    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         return GetReadStreamAsync(domain, path, offset);
     }
 
@@ -212,7 +217,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
     DateTime? deleteAt = null, long? deleteAfter = null)
     {
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {

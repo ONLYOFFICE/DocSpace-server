@@ -77,7 +77,7 @@ public interface IUserService
     Task<UserInfo> SaveUserAsync(int tenant, UserInfo user);
     Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from);
     Task RemoveGroupAsync(int tenant, Guid id);
-    Task RemoveUserAsync(int tenant, Guid id);
+    Task RemoveUserAsync(int tenant, Guid id, bool immediate = false);
     Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant);
     Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType);
     Task SetUserPasswordHashAsync(int tenant, Guid id, string passwordHash);

@@ -331,15 +331,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm Portal Address Change.
-        /// </summary>
-        public static string ButtonConfirmPortalAddressChange {
-            get {
-                return ResourceManager.GetString("ButtonConfirmPortalAddressChange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Confirm Portal Owner Update.
         /// </summary>
         public static string ButtonConfirmPortalOwnerUpdate {
@@ -623,25 +614,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_confirm_owner_change {
             get {
                 return ResourceManager.GetString("pattern_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.Change of portal address
-        ///
-        ///Dear $OwnerName,
-        ///
-        ///There has been a request to change the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal address to &quot;$PortalAddress&quot;:&quot;$PortalAddress&quot; #if($PortalDns != &quot;&quot;) (&quot;$PortalDns&quot;:&quot;$PortalDns&quot; )#end.
-        ///
-        ///Please follow the link below to confirm the operation:
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: this link is valid for 7 days only. Please complete the portal address change process within that period..
-        /// </summary>
-        public static string pattern_dns_change {
-            get {
-                return ResourceManager.GetString("pattern_dns_change", resourceCulture);
             }
         }
         
@@ -2009,6 +1981,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+        ///
+        ///
+        ///Hello, $UserName!
+        ///
+        ///You have just created ONLYOFFICE DocSpace, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///Your current tariff plan is STARTUP. It is absolutely free and includes:
+        ///
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; borde [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_zoom_welcome {
+            get {
+                return ResourceManager.GetString("pattern_zoom_welcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Please activate your email address.
         /// </summary>
         public static string subject_activate_email {
@@ -2077,15 +2067,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_confirm_owner_change {
             get {
                 return ResourceManager.GetString("subject_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. Change of portal address.
-        /// </summary>
-        public static string subject_dns_change {
-            get {
-                return ResourceManager.GetString("subject_dns_change", resourceCulture);
             }
         }
         
@@ -2743,6 +2724,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_user_ldap_activation {
             get {
                 return ResourceManager.GetString("subject_user_ldap_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        /// </summary>
+        public static string subject_zoom_welcome {
+            get {
+                return ResourceManager.GetString("subject_zoom_welcome", resourceCulture);
             }
         }
         

@@ -302,7 +302,7 @@
     <value>Die ausfüllbare PDF-Datei ist fertig und im Ordner {0} zugänglich</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Die Kopie der OFORM-Datei ist im Ordner {0} erstellt. Füllen Sie bitte das Formular aus und laden Sie es danach als eine PDF- oder DOCX-Datei herunter.</value>
+    <value>Die Kopie der PDF-Datei ist im Ordner {0} erstellt. Füllen Sie bitte das Formular aus und laden Sie es danach als eine PDF- oder DOCX-Datei herunter.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Die Datei ist kein Entwurf zum Ausfüllen von Formularen mehr.</value>
