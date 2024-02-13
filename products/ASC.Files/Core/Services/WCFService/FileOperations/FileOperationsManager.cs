@@ -148,9 +148,8 @@ public class FileOperationsManager(
 
         if (op is DistributedTaskProgress task)
         {
-            var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)task[FileOperation.Data]);
             var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-            operation.Init(data, taskId);
+            operation.Init<FileMarkAsReadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
             fileOperationsManagerHolder.Enqueue(operation);
         }
     }
@@ -180,9 +179,8 @@ public class FileOperationsManager(
 
         if (op is DistributedTaskProgress task)
         {
-            var data = JsonSerializer.Deserialize<FileDownloadOperationData<JsonElement>>((string)task[FileOperation.Data]);
             var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-            operation.Init(data, taskId);
+            operation.Init<FileDownloadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
             fileOperationsManagerHolder.Enqueue(operation);
         }
     }
@@ -214,9 +212,8 @@ public class FileOperationsManager(
 
         if (op is DistributedTaskProgress task)
         {
-            var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>((string)task[FileOperation.Data]);
             var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-            operation.Init(data, taskId);
+            operation.Init<FileMoveCopyOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
             fileOperationsManagerHolder.Enqueue(operation);
         }
     }
@@ -294,9 +291,8 @@ public class FileOperationsManager(
 
         if (op is DistributedTaskProgress task)
         {
-            var data = JsonSerializer.Deserialize<FileDeleteOperationData<JsonElement>>((string)task[FileOperation.Data]);
             var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-            operation.Init(data, taskId);
+            operation.Init<FileDeleteOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
             fileOperationsManagerHolder.Enqueue(operation);
         }
     }

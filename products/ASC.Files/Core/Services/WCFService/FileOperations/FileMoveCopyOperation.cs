@@ -43,13 +43,26 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
     private FileOperationType _fileOperationType = FileOperationType.Copy;
     protected override FileOperationType FileOperationType { get => _fileOperationType; }
 
-    public override void Init<T>(T data, string taskId = null)
+    public override void Init<T>(T data)
     {
-        base.Init(data, taskId);
+        base.Init(data);
+        
         if (data is FileMoveCopyOperationData<JsonElement> fileOperationData)
         {
             _fileOperationType = (fileOperationData.Copy ? FileOperationType.Copy : FileOperationType.Move);
         }
+    }
+
+    public override T Init<T>(string jsonData, string taskId)
+    {
+        var data  = base.Init<T>(jsonData, taskId);
+        
+        if (data is FileMoveCopyOperationData<JsonElement> fileOperationData)
+        {
+            _fileOperationType = (fileOperationData.Copy ? FileOperationType.Copy : FileOperationType.Move);
+        }
+
+        return data;
     }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)

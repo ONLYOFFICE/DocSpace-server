@@ -46,6 +46,7 @@ public abstract class FileOperation : DistributedTaskProgress
 
     protected int _processed;
     public int Total { get; set; }
+
     protected FileOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -88,17 +89,23 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    public virtual void Init<T>(T data, string taskId = null) where T: FileOperationData<JsonElement>
+    public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
     {
         this[OpType] = (int)FileOperationType;
         this[Data] = JsonSerializer.Serialize(data);
         this[Hold] = data.HoldResult;
-        if (!string.IsNullOrEmpty(taskId))
-        {
-            Id = taskId;
-        }
     }
-    
+
+    public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
+    {
+        var data = JsonSerializer.Deserialize<T>(jsonData);
+        this[OpType] = (int)FileOperationType;
+        this[Data] = jsonData;
+        this[Hold] = data.HoldResult;
+        Id = taskId;
+        return data;
+    }
+
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
@@ -106,13 +113,13 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
 
         DaoOperation[Finish] = !daoOperation;
         ThirdPartyOperation[Finish] = !thirdPartyOperation;
-        
+
         if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
             await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
-        
+
         if (thirdPartyOperation)
         {
             ThirdPartyOperation.Publication = PublishChanges;
@@ -216,7 +223,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Init(fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
-        
+
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
 
@@ -273,7 +280,10 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
                 this[Finish] = true;
                 PublishTaskInfo();
             }
-            catch { /* ignore */ }
+            catch
+            {
+                /* ignore */
+            }
         }
     }
 
@@ -341,7 +351,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
 
 [Scope]
 public record FileOperationScope(
-    TenantManager TenantManager, 
-    IDaoFactory DaoFactory, 
+    TenantManager TenantManager,
+    IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);

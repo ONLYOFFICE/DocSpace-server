@@ -38,8 +38,7 @@ internal record FileDownloadOperationData<T>(
 public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
 [Transient]
-class FileDownloadOperation(IServiceProvider serviceProvider) : 
-    ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
+class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
 {    
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
