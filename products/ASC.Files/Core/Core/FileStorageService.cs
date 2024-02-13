@@ -2143,6 +2143,7 @@ public class FileStorageService //: IFileStorageService
                     ? string.Empty
                     : "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFillFormDraftCreated, folderIfNew.Title));
 
+                await socketManager.StopEditAsync(fileId);
                 return filesLinkUtility.GetFileWebEditorUrl(form.Id) + comment;
             }
 
