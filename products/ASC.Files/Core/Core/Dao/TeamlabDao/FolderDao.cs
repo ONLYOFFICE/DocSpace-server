@@ -472,7 +472,8 @@ internal class FolderDao(
                     Private = folder.SettingsPrivate,
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
-                    Indexing = folder.SettingsIndexing
+                    Indexing = folder.SettingsIndexing,
+                    Quota = folder.SettingsQuota
                 };
             }
 
@@ -498,7 +499,6 @@ internal class FolderDao(
                 ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn),
                 ModifiedBy = folder.ModifiedBy,
                 FolderType = folder.FolderType,
-                Quota = folder.Quota,
                 TenantId = tenantId
             };
 
@@ -511,7 +511,8 @@ internal class FolderDao(
                     Private = folder.SettingsPrivate,
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
-                    Indexing = folder.SettingsIndexing
+                    Indexing = folder.SettingsIndexing,
+                    Quota = folder.SettingsQuota
                 };
             }
             
@@ -929,12 +930,23 @@ internal class FolderDao(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
 
-        toUpdate.Quota = quota >= -1 ? quota : -2;
-        toUpdate.ModifiedOn = DateTime.UtcNow;
-        toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        var toUpdate = await Queries.FolderForUpdateAsync(filesDbContext, tenantId, folder.Id);
 
+        if (DocSpaceHelper.IsRoom(toUpdate.FolderType))
+        {
+            toUpdate.Settings = new DbRoomSettings
+            {
+                RoomId = toUpdate.Id,
+                TenantId = tenantId,
+                Private = folder.SettingsPrivate,
+                HasLogo = folder.SettingsHasLogo,
+                Color = folder.SettingsColor,
+                Indexing = folder.SettingsIndexing,
+                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
+            };
+        };
+        
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
@@ -949,7 +961,10 @@ internal class FolderDao(
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
 
-        toUpdate.Quota = newQuota >= -1 ? newQuota : -2;
+        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            toUpdate.Settings.Quota = newQuota >= TenantEntityQuotaSettings.NoQuota ? newQuota : TenantEntityQuotaSettings.DefaultQuotaValue;
+        }
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
@@ -1756,11 +1771,11 @@ internal class FolderDao(
         {
             if (quotaFilter == QuotaFilter.Default)
             {
-                query = query.Where(f => f.Quota == -2);
+                query = query.Where(f => f.Settings.Quota == TenantEntityQuotaSettings.DefaultQuotaValue);
             }
             else
             {
-                query = query.Where(f => f.Quota != -2);
+                query = query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
             }
         }
 

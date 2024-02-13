@@ -581,7 +581,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = roomLogoManager.GetRandomColour();
             newFolder.SettingsIndexing = indexing;
-            newFolder.Quota = quota;
+            newFolder.SettingsQuota = quota;
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
@@ -645,7 +645,7 @@ public class FileStorageService //: IFileStorageService
         }
         var folderAccess = folder.Access;
 
-        if (folder.Quota != quota)
+        if (folder.SettingsQuota != quota)
         {
             var newFolderID = await folderDao.ChangeFolderQuotaAsync(folder, quota);
             folder = await folderDao.GetFolderAsync(newFolderID);
@@ -696,12 +696,12 @@ public class FileStorageService //: IFileStorageService
         }
         var folderAccess = folder.Access;
 
-        if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.Quota != updateData.Quota && updateData.Quota != null))
+        if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
         {
             var newFolderID = await folderDao.UpdateFolderAsync(
                  folder,
                  !string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) && updateData.Title != null ? updateData.Title : folder.Title,
-                 folder.Quota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.Quota);
+                 folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
 
             folder = await folderDao.GetFolderAsync(newFolderID);
             folder.Access = folderAccess;

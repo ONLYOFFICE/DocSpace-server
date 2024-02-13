@@ -34,7 +34,7 @@ public class DbRoomSettings
     public bool HasLogo { get; set; }
     public string Color { get; set; }
     public bool Indexing { get; set; }
-
+    public long Quota { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -80,6 +80,10 @@ public static class DbRoomSettingsExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+            entity.Property(e => e.Quota)
+                .HasColumnName("quota")
+                .HasDefaultValueSql("'-2'");
         });
     }
 

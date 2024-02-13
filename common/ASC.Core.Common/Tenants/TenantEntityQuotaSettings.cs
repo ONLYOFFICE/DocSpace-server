@@ -30,6 +30,7 @@ namespace ASC.Core.Tenants;
 public abstract class TenantEntityQuotaSettings
 {
     public const int NoQuota = -1;
+    public const int DefaultQuotaValue = -2;
     public bool EnableQuota { get; set; }
 
     public long DefaultQuota { get; set; } = -2;

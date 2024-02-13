@@ -6373,12 +6373,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("parent_id")
                         .HasDefaultValueSql("'0'");
 
-                    b.Property<long>("Quota")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("quota")
-                        .HasDefaultValueSql("'-2'");
-
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
@@ -6467,6 +6461,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("private")
                         .HasDefaultValueSql("'0'");
+
+                    b.Property<long>("Quota")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("quota")
+                        .HasDefaultValueSql("'-2'");
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");

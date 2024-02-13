@@ -84,6 +84,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
     public bool SettingsIndexing { get; set; }
+    public long SettingsQuota { get; set; }
     public long Quota { get; set; }
     public long Counter { get; set; }
     public override bool IsNew

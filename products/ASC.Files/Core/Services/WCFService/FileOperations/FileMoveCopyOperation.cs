@@ -257,6 +257,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
         var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
+        var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
 
         var toFolderId = toFolder.Id;
@@ -275,6 +276,24 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             var canMoveOrCopy = (copy && await FilesSecurity.CanCopyAsync(folder)) || (!copy && await FilesSecurity.CanMoveAsync(folder));
             checkPermissions = isRoom ? !canMoveOrCopy : checkPermissions;
+
+            var canUseQuota = true;
+            long roomQuotaLimit = 0;
+            if (!isRoom && DocSpaceHelper.IsRoom(toFolder.FolderType))
+            {
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaRoomSettings.EnableQuota)
+                {
+                    roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (roomQuotaLimit - toFolder.Counter < folder.Counter)
+                        {
+                            canUseQuota = false;
+                        }
+                    }
+                }
+            }
 
             if (folder == null)
             {
@@ -317,6 +336,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+            }
+            else if (!canUseQuota)
+            {
+                this[Err] = FileSizeComment.GetPersonalFreeSpaceException(roomQuotaLimit);
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {

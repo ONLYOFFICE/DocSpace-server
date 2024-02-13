@@ -373,7 +373,7 @@ internal class FileDao(
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = currentRoom.Quota <= quotaRoomSettings.DefaultQuota ? quotaRoomSettings.DefaultQuota : currentRoom.Quota;
+                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
                     if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
@@ -817,7 +817,7 @@ internal class FileDao(
             var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = toFolder.Quota <= quotaRoomSettings.DefaultQuota ? quotaRoomSettings.DefaultQuota : toFolder.Quota;
+                var roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
                     if (roomQuotaLimit - toFolder.Counter < fileContentLength)

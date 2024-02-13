@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade15 : Migration
+    public partial class MigrationContext_Upgrade17 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.AddColumn<long>(
                 name: "quota",
-                table: "files_folder",
+                table: "files_room_settings",
                 type: "bigint",
                 nullable: false,
                 defaultValueSql: "'-2'");
@@ -90,7 +90,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropColumn(
                 name: "quota",
-                table: "files_folder");
+                table: "files_room_settings");
         }
     }
 }

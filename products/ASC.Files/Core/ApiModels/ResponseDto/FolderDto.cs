@@ -186,8 +186,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
                 if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
                 {
-                    result.IsCustomQuota = folder.Quota > -2;
-                    result.QuotaLimit = folder.Quota > -2 ? folder.Quota : quotaRoomSettings.DefaultQuota;
+                    result.IsCustomQuota = folder.SettingsQuota > -2;
+                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
         }
