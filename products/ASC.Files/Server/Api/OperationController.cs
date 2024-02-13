@@ -32,6 +32,7 @@ public class OperationController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager, 
     CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -60,10 +61,10 @@ public class OperationController(
         {
             files.Add(new FilesDownloadOperationItem<JsonElement>(fileId, string.Empty));
         }
+        
+        await fileOperationsManager.PublishDownload(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
-        var tasks = await fileStorageService.PublishBulkDownloadAsync(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
-
-        foreach (var e in tasks)
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -82,9 +83,9 @@ public class OperationController(
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        var tasks = await fileStorageService.PublishMoveOrCopyItemsAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content);
+        await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in tasks)
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -103,9 +104,9 @@ public class OperationController(
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var tasks = await fileStorageService.PublishDeleteItemsAsync(inDto.FolderIds, inDto.FileIds, false, inDto.DeleteAfter, inDto.Immediately);
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -123,9 +124,11 @@ public class OperationController(
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var tasks = await fileStorageService.PublishEmptyTrashAsync();
+        var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
+        
+        await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
-        foreach (var e in tasks)
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -144,7 +147,7 @@ public class OperationController(
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
-        foreach (var e in fileStorageService.GetTasksStatuses())
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -163,9 +166,9 @@ public class OperationController(
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        var tasks = await fileStorageService.PublishMarkAsReadAsync(inDto.FolderIds, inDto.FileIds);
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishMarkAsRead(inDto.FolderIds, inDto.FileIds);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -184,9 +187,9 @@ public class OperationController(
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        var tasks = await fileStorageService.PublishMoveOrCopyItemsAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content);
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -239,7 +242,7 @@ public class OperationController(
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
     {
-        var tasks = fileStorageService.TerminateTasks(id);
+        var tasks = fileOperationsManager.CancelOperations(id);
 
         foreach (var e in tasks)
         {

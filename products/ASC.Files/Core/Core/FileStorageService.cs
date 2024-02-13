@@ -39,7 +39,6 @@ public class FileStorageService //: IFileStorageService
     FilesLinkUtility filesLinkUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    IHttpContextAccessor httpContextAccessor,
     ILoggerProvider optionMonitor,
     PathProvider pathProvider,
     FileSecurity fileSecurity,
@@ -1433,8 +1432,8 @@ public class FileStorageService //: IFileStorageService
             result = [..entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
 
             if (result.Count == 0)
-            {
-                await PublishMarkAsReadAsync([JsonSerializer.SerializeToElement(folderId)], []);
+            {        
+                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
             }
 
             return result;
@@ -1444,26 +1443,7 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
-
-    #region MarkAsRead
-
     
-    public async Task<List<FileOperationResult>> PublishMarkAsReadAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
-    {
-        var headers = GetHttpHeaders();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        
-        var taskId = await fileOperationsManager.PublishMarkAsRead(folderIds, fileIds, headers);
-
-        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return GetTasksStatuses();
-    }
-
-    #endregion
 
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAsync()
     {
@@ -1763,39 +1743,7 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
-
-    public List<FileOperationResult> GetTasksStatuses()
-    {
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    public List<FileOperationResult> TerminateTasks(string id = null)
-    {
-        return fileOperationsManager.CancelOperations(id);
-    }
-
-    #region BulkDownload
-
     
-    public async Task<List<FileOperationResult>> PublishBulkDownloadAsync(
-        IEnumerable<JsonElement> folders,
-        IEnumerable<FilesDownloadOperationItem<JsonElement>> files,
-        string baseUri)
-    {
-        var headers = GetHttpHeaders();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        
-        var taskId = await fileOperationsManager.PublishDownload(folders, files, headers, baseUri);
-
-        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    #endregion
 
     #region MoveOrCopy
 
@@ -1899,118 +1847,12 @@ public class FileStorageService //: IFileStorageService
 
         return (checkedFiles, checkedFolders);
     }
-
-    public async Task<List<FileOperationResult>> MoveOrCopyItemsAsync(List<JsonElement> foldersId, List<JsonElement> filesId, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false)
-    {
-        if (resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        if (foldersId.Count > 0 || filesId.Count > 0)
-        {
-            await fileOperationsManager.PublishMoveOrCopyAsync(foldersId, filesId, destFolderId, copy, resolve, !deleteAfter, GetHttpHeaders());
-        }
-
-        return fileOperationsManager.GetOperationResults();
-    }
     
 
-    public async Task<List<FileOperationResult>> PublishMoveOrCopyItemsAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds, JsonElement destFolderId, FileConflictResolveType resolve, bool copy, bool deleteAfter = false, bool content = false)
-    {
-        if (resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-        
-        var headers = GetHttpHeaders();
-        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        var taskId = await fileOperationsManager.PublishMoveOrCopyAsync(folderIds, fileIds, destFolderId, copy, resolve, !deleteAfter, headers, content);
-
-        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-
-        return fileOperationsManager.GetOperationResults();
-    }
-
     #endregion
-
-    #region Delete
-
-    public async Task<List<FileOperationResult>> DeleteFileAsync<T>(T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {        
-        var headers = GetHttpHeaders();
-        var taskId = await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, ignoreException, !deleteAfter, immediately, headers);
-        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    public async Task<List<FileOperationResult>> DeleteFolderAsync<T>(T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {        
-        var headers = GetHttpHeaders();
-        
-        var taskId = await fileOperationsManager.PublishDelete(new List<T> { folderId }, new List<T>(), ignoreException, !deleteAfter, immediately, headers);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    public async Task<List<FileOperationResult>> PublishDeleteItemsAsync(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {
-        var headers = GetHttpHeaders();
-
-        var taskId = await fileOperationsManager.PublishDelete(folderIds, fileIds, ignoreException, !deleteAfter, immediately, headers);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    public async Task DeleteItemsAsync<T>(IEnumerable<T> files, IEnumerable<T> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {
-        await fileOperationsManager.PublishDelete(folders, files, ignoreException, !deleteAfter, immediately, GetHttpHeaders());
-    }
-
-    #endregion
-
-    #region EmptyTrash
     
-    public async Task<List<FileOperationResult>> PublishEmptyTrashAsync()
-    {
-        var (foldersId, filesId) = await GetTrashContentAsync();
-        var headers = GetHttpHeaders();
 
-        var taskId = await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, headers, true);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = taskId
-        });
-        
-        return fileOperationsManager.GetOperationResults();
-    }
-
-    private async Task<(List<int>, List<int>)> GetTrashContentAsync()
+    public async Task<(List<int>, List<int>)> GetTrashContentAsync()
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
@@ -2020,8 +1862,6 @@ public class FileStorageService //: IFileStorageService
 
         return (foldersIdTask, filesIdTask);
     }
-
-    #endregion
 
     public async IAsyncEnumerable<FileOperationResult> CheckConversionAsync<T>(List<CheckConversionRequestDto<T>> filesInfoJSON, bool sync = false)
     {
@@ -3412,13 +3252,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         return new InvalidOperationException(error.Message, error);
-    }
-
-    private IDictionary<string, StringValues> GetHttpHeaders()
-    {
-        var request = httpContextAccessor?.HttpContext?.Request;
-
-        return MessageSettings.GetHttpHeaders(request);
     }
 
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
