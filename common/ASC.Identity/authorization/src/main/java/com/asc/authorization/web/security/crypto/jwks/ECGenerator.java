@@ -3,9 +3,12 @@
  */
 package com.asc.authorization.web.security.crypto.jwks;
 
+import com.asc.authorization.core.entities.KeyPairType;
+import com.asc.authorization.web.server.utilities.KeyPairMapper;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -14,13 +17,11 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
-import java.util.UUID;
+import java.security.spec.*;
 
 /**
  *
@@ -29,24 +30,9 @@ import java.util.UUID;
 @Primary
 @Component
 @Qualifier("ec")
+@RequiredArgsConstructor
 public class ECGenerator implements JwksKeyPairGenerator {
-    /**
-     *
-     * @return
-     * @throws NoSuchAlgorithmException
-     */
-    public JWK generateKey() throws NoSuchAlgorithmException {
-        log.info("Generating elliptic curve jwk key");
-
-        KeyPair keyPair = generateKeyPair();
-        ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-        ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-        Curve curve = Curve.forECParameterSpec(publicKey.getParams());
-        return new ECKey.Builder(curve, publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build();
-    }
+    private final KeyPairMapper keyMapper;
 
     /**
      *
@@ -82,5 +68,49 @@ public class ECGenerator implements JwksKeyPairGenerator {
         }
 
         return keyPair;
+    }
+
+    /**
+     *
+     * @param id
+     * @param publicKey
+     * @param privateKey
+     * @return
+     */
+    public JWK buildKey(String id, PublicKey publicKey, PrivateKey privateKey) {
+        ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) privateKey;
+        Curve curve = Curve.forECParameterSpec(ecPublicKey.getParams());
+        return new ECKey.Builder(curve, ecPublicKey)
+                .privateKey(ecPrivateKey)
+                .keyID(id)
+                .build();
+    }
+
+    /**
+     *
+     * @param id
+     * @param publicKey
+     * @param privateKey
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
+    public JWK buildKey(String id, String publicKey, String privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        ECPublicKey ecPublicKey = (ECPublicKey) keyMapper.toPublicKey(publicKey, "EC");
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) keyMapper.toPrivateKey(privateKey, "EC");
+        Curve curve = Curve.forECParameterSpec(ecPublicKey.getParams());
+        return new ECKey.Builder(curve, ecPublicKey)
+                .privateKey(ecPrivateKey)
+                .keyID(id)
+                .build();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public KeyPairType type() {
+        return KeyPairType.EC;
     }
 }

@@ -3,18 +3,18 @@
  */
 package com.asc.authorization.web.security.crypto.jwks;
 
+import com.asc.authorization.core.entities.KeyPairType;
+import com.asc.authorization.web.server.utilities.KeyPairMapper;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateKey;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  *
@@ -22,23 +22,9 @@ import java.util.UUID;
 @Slf4j
 @Component
 @Qualifier("rsa")
+@RequiredArgsConstructor
 public class RSAGenerator implements JwksKeyPairGenerator {
-    /**
-     *
-     * @return
-     * @throws NoSuchAlgorithmException
-     */
-    public JWK generateKey() throws NoSuchAlgorithmException {
-        log.info("Generating rsa jwks key");
-
-        KeyPair keyPair = generateKeyPair();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKey.Builder(publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build();
-    }
+    private final KeyPairMapper keyMapper;
 
     /**
      *
@@ -51,5 +37,44 @@ public class RSAGenerator implements JwksKeyPairGenerator {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         return keyPairGenerator.generateKeyPair();
+    }
+
+    /**
+     *
+     * @param id
+     * @param publicKey
+     * @param privateKey
+     * @return
+     */
+    public JWK buildKey(String id, PublicKey publicKey, PrivateKey privateKey) {
+        return new RSAKey.Builder((RSAPublicKey) publicKey)
+                .privateKey(privateKey)
+                .keyID(id)
+                .build();
+    }
+
+    /**
+     *
+     * @param id
+     * @param publicKey
+     * @param privateKey
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
+    public JWK buildKey(String id, String publicKey, String privateKey)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return new RSAKey.Builder((RSAPublicKey) keyMapper.toPublicKey(publicKey, "RSA"))
+                .privateKey(keyMapper.toPrivateKey(privateKey, "RSA"))
+                .keyID(id)
+                .build();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public KeyPairType type() {
+        return KeyPairType.RSA;
     }
 }
