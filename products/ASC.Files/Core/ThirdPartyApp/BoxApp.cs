@@ -253,7 +253,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
                 if (stream != null)
                 {
                     downloadUrl = await _pathProvider.GetTempUrlAsync(stream, fileType);
-                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAdressAsync(downloadUrl);
+                    downloadUrl = await _documentServiceConnector.ReplaceCommunityAddressAsync(downloadUrl);
                 }
 
                 _logger.DebugBoxAppGetConvertedUri(fileType, currentType, downloadUrl);
@@ -320,7 +320,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             _logger.ErrorBoxAppSaveFile(e);
             if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException, e);
             }
 
             throw;
@@ -398,7 +398,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             var validateResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(fileId + userId, auth, _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
+                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
 
                 _logger.ErrorBoxAppValidateError(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
 
@@ -462,7 +462,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
     {
         _logger.DebugBoxAppAddLinker(boxUserId);
 
-        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID.ToString(), boxUserId, ProviderConstants.Box);
+        await _accountLinker.AddLinkAsync(_authContext.CurrentAccount.ID, boxUserId, ProviderConstants.Box);
     }
 
     private async Task<UserInfoWrapper> GetUserInfo(Token token)

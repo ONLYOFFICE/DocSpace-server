@@ -51,7 +51,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         var fileLines = new List<string>();
         using (var reader = new StreamReader(stream, Encoding, true))
         {
-            fileLines.AddRange(reader.ReadToEnd().Split(new[] { Environment.NewLine, "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
+            fileLines.AddRange(reader.ReadToEnd().Split([Environment.NewLine, "\n", "\r\n"], StringSplitOptions.RemoveEmptyEntries));
         }
 
         if (!string.IsNullOrEmpty(DefaultHeader))

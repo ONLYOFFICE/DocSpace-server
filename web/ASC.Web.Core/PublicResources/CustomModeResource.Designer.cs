@@ -80,91 +80,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Welcome to ONLYOFFICE Personal
-        ///
-        ///You have just created your personal office in the cloud.
-        ///
-        ///h3.It&apos;s a virtual workspace where you can edit and store documents, work with them from anywhere providing access to your friends or colleagues.
-        ///
-        ///h3.For a quick start, here&apos;s what you can do in ONLYOFFICE:
-        ///
-        ///- Create, view and edit text documents, spreadsheets, presentations.
-        ///
-        ///- Work with all popular formats. Highest compatibility with MS Office files.
-        ///
-        ///- Create and co-edit &quot;ready-to-fill-out forms&quot;:&quot;http [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_custom_mode_after_registration1 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the email on your cloud office account?
-        ///
-        ///Click the button below and log in* to your cloud.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///*If you are not signed in to your cloud office in this browser, you’ll need to use your old email for confirmation.
-        ///
-        ///Don’t want to change your email? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_custom_mode_change_email_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_email_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Want to change the password on your cloud office account? Click the button below to confirm.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days.
-        ///
-        ///Don’t want to change your password? Just ignore this message..
-        /// </summary>
-        public static string pattern_personal_custom_mode_change_password_v115 {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_password_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hello,
-        ///
-        ///you&apos;ve just registered an account at the ONLYOFFICE solution for personal use. Click &quot;here&quot;:&quot;$InviteLink&quot; to confirm the registration and create a password.
-        ///
-        ///If you can&apos;t open the link, please copy the following &quot;$InviteLink&quot;:&quot;$InviteLink&quot; and paste it into your browser address bar.
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_personal_custom_mode_confirmation {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have requested a termination of your account at personal.onlyoffice.com. Follow the link to complete the request (the link is active for a 7-day period): 
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: After the deletion, your account and all data associated with it will be erased permanently in accordance with our &quot;Privacy statement&quot;:&quot;https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0&quot;.
-        ///
-        ///&quot;Read more about account terminati [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_personal_custom_mode_profile_delete {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_profile_delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
         ///The process of removing data from user &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; has been successfully completed.
@@ -208,33 +123,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string ProductUserOpportunitiesCustomMode {
             get {
                 return ResourceManager.GetString("ProductUserOpportunitiesCustomMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE Personal.
-        /// </summary>
-        public static string subject_personal_custom_mode_after_registration1 {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_after_registration1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal. Please activate your email address.
-        /// </summary>
-        public static string subject_personal_custom_mode_confirmation {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_confirmation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal account termination.
-        /// </summary>
-        public static string subject_personal_custom_mode_profile_delete {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_profile_delete", resourceCulture);
             }
         }
         

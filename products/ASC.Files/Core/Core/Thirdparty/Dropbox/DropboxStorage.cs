@@ -127,7 +127,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
         var data = await _dropboxClient.Files.ListFolderAsync(folderId);
-        return new List<Metadata>(data.Entries);
+        return [..data.Entries];
     }
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
@@ -175,6 +175,11 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         return tempBuffer;
     }
 
+    public long GetFileSize(FileMetadata file)
+    {
+        return (long)file.Size;
+    }
+    
     public async Task<FolderMetadata> CreateFolderAsync(string title, string parentId)
     {
         var path = MakeDropboxPath(parentId, title);

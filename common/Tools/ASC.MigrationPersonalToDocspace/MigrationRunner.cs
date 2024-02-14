@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core;
-
 namespace ASC.Migration.PersonalToDocspace.Runner;
 
 [Scope]
@@ -79,12 +77,6 @@ public class MigrationRunner
 
             using var dbContextToTenant = _creatorDbContext.CreateDbContext<TenantDbContext>(region);
             var toTenant = dbContextToTenant.Tenants.SingleOrDefault(q => q.Alias == toAlias);
-
-            toTenant.Status = TenantStatus.Restoring;
-            toTenant.StatusChanged = DateTime.UtcNow;
-
-            dbContextTenant.Tenants.Update(toTenant);
-            dbContextToTenant.SaveChanges();
 
             columnMapper.SetMapping("tenants_tenants", "id", fromTenant.Id, toTenant.Id);
             columnMapper.Commit();

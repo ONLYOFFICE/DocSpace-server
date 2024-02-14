@@ -37,7 +37,7 @@ public class DbTenantPartner : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId };
+        return [TenantId];
     }
 }
 

@@ -91,9 +91,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>İstifadəçi seçimləri</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Əməliyyatı təsdiq etmək üçün keçid {0} ünvanına göndərildi. (portal sahibinin e-poçt ünvanı).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Yanlış Nümunə id.</value>
   </data>
@@ -644,7 +641,7 @@
     <value>Twilio-dan telefon nömrəsi (SMS icazəsi üçün tələb olunur)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabından istifadə edərək portala daxil olmaq və kontaktları axtarmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>Twitter hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə Twitter-dən istifadə edərək ONLYOFFICE-a daxil olmaq və müştərilərinin Twitter hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}Twitter Developers Portalına keçin və yeni tətbiq ONLYOFFICE inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>

@@ -76,7 +76,6 @@ public class WorkspaceMigration(
             var data = new DataTable();
             data.ReadXml(stream);
             var progressStep = 50 / data.Rows.Count;
-            var i = 1;
             foreach (var row in data.Rows.Cast<DataRow>())
             {
                 if (_cancellationToken.IsCancellationRequested)

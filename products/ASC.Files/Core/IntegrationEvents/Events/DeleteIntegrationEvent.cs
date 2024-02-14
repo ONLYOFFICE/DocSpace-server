@@ -56,4 +56,7 @@ public record DeleteIntegrationEvent : IntegrationEvent
 
     [ProtoMember(7)]
     public string TaskId { get; set; }
+
+    [ProtoMember(8)]
+    public IDictionary<string, string> Headers { get; set; }
 }

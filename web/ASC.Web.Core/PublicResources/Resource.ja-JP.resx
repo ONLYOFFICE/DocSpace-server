@@ -91,9 +91,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>カスタム</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>操作を確認するためのリンクが{0}（ポータル所有者の電子メールアドレス）に送信されました。</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>インスタンスIDが間違っているようです。</value>
   </data>

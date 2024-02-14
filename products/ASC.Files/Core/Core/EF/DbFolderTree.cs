@@ -37,7 +37,7 @@ public class DbFolderTree : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { ParentId, FolderId };
+        return [ParentId, FolderId];
     }
 }
 

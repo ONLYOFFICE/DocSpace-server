@@ -1593,15 +1593,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A link to confirm the operation has been sent to {0} (the email address of the portal owner)..
-        /// </summary>
-        public static string DnsChangeMsg {
-            get {
-                return ResourceManager.GetString("DnsChangeMsg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Incorrect Instance id..
         /// </summary>
         public static string EmailAndPasswordIncorrectAmiId {

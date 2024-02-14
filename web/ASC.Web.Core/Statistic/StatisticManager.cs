@@ -83,7 +83,7 @@ public class StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFac
         List<UserVisit> visits;
         lock (_cache)
         {
-            visits = new List<UserVisit>(_cache.Values);
+            visits = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
         }

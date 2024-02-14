@@ -275,6 +275,11 @@ public class FileUtility
     {
         extension = extension.ToLower();
 
+        if (ExtsPdf.Contains(extension))
+        {
+            return FileType.Pdf;
+        }
+
         if (ExtsDocument.Contains(extension))
         {
             return FileType.Document;
@@ -681,6 +686,11 @@ public class FileUtility
     public static readonly ImmutableList<string> ExtsOForm = new List<string>
     {
                 ".oform"
+            }.ToImmutableList();
+
+    public static readonly ImmutableList<string> ExtsPdf = new List<string>
+    {
+                ".pdf"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsTemplate = new List<string>

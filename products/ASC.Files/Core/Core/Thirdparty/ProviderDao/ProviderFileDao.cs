@@ -156,7 +156,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
@@ -183,6 +183,11 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     /// <returns>Stream</returns>
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset)
     {
+        return await GetFileStreamAsync(file, offset, long.MaxValue);
+    }
+    
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
         ArgumentNullException.ThrowIfNull(file);
 
         var fileId = file.Id;
@@ -190,11 +195,29 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         file.Id = selector.ConvertId(fileId);
 
         var fileDao = selector.GetFileDao(fileId);
-        var stream = await fileDao.GetFileStreamAsync(file, offset);
+        var stream = await fileDao.GetFileStreamAsync(file, offset, length);
         file.Id = fileId; //Restore id
 
         return stream;
     }
+
+
+    public async Task<long> GetFileSizeAsync(File<string> file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        var fileId = file.Id;
+        var selector = _selectorFactory.GetSelector(fileId);
+        file.Id = selector.ConvertId(fileId);
+
+        var fileDao = selector.GetFileDao(fileId);
+        var size = await fileDao.GetFileSizeAsync(file);
+        file.Id = fileId; //Restore id
+
+        return size;
+    }
+
+
 
     public async Task<bool> IsSupportedPreSignedUriAsync(File<string> file)
     {
@@ -307,29 +330,29 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         return await fileDao.IsExistAsync(title, selector.ConvertId(folderId.ToString()));
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var movedFile = await PerformCrossDaoFileCopyAsync(fileId, toFolderId, true);
 
         return movedFile.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         if (IsCrossDao(fileId, toFolderId))
@@ -341,7 +364,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
 
         var fileDao = selector.GetFileDao(fileId);
 
-        return await fileDao.MoveFileAsync(selector.ConvertId(fileId), selector.ConvertId(toFolderId));
+        return await fileDao.MoveFileAsync(selector.ConvertId(fileId), selector.ConvertId(toFolderId), deleteLinks);
     }
 
     public async Task<File<TTo>> CopyFileAsync<TTo>(string fileId, TTo toFolderId)
@@ -428,8 +451,12 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         return await fileDao.CreateUploadSessionAsync(ConvertId(file), contentLength);
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
+        if (chunkNumber.HasValue)
+        {
+            throw new ArgumentException("Can not async upload in provider folder.");
+        }
         var fileDao = GetFileDao(uploadSession.File);
         uploadSession.File = ConvertId(uploadSession.File);
         await fileDao.UploadChunkAsync(uploadSession, chunkStream, chunkLength);
@@ -484,7 +511,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        return fileDao.GetThumbnailAsync(fileId, width, height);
+        return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
     public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)

@@ -45,7 +45,7 @@ public class BackupRecord : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { Id };
+        return [Id];
     }
 }
 

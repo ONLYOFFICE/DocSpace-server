@@ -60,6 +60,10 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
+    
+    /// <summary>Link ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid LinkId { get; set; }
 
     public void Mapping(Profile profile)
     {

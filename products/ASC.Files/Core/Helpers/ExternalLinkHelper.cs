@@ -49,7 +49,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
             return result;
         }
 
-        var status = await externalShare.ValidateRecordAsync(record, password);
+        var status = await externalShare.ValidateRecordAsync(record, password, securityContext.IsAuthenticated);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)
@@ -76,6 +76,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
+        result.LinkId = linkId;
 
         if (securityContext.IsAuthenticated)
         {

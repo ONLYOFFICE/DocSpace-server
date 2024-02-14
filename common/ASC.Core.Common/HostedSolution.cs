@@ -105,6 +105,8 @@ public class HostedSolution(ITenantService tenantService,
             registrationInfo.PasswordHash = Guid.NewGuid().ToString();
         }
 
+        tenantService.ValidateTenantName(registrationInfo.Name);
+
         // create tenant
         var tenant = new Tenant(registrationInfo.Address.ToLowerInvariant())
         {
@@ -204,7 +206,7 @@ public class HostedSolution(ITenantService tenantService,
         var quota = (await quotaService.GetTenantQuotasAsync()).FirstOrDefault(q => paid ? q.NonProfit : q.Trial);
         if (quota != null)
         {
-            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = new List<Quota> { new(quota.TenantId, 1) }, DueDate = DateTime.MaxValue });
+            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = [new(quota.TenantId, 1)], DueDate = DateTime.MaxValue });
         }
     }
 

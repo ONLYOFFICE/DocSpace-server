@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using CommandLine;
-
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -36,8 +34,9 @@ var param = Parser.Default.ParseArguments<Options>(args).Value;
 /*var param = new Options()
 {
     FromRegion = "personal",
-    ToRegion = "personal",
-    FromAlias = "localhost"
+    ToRegion = "docSpace",
+    FromAlias = "localhost",
+    UserName = "administrator"
 };*/
 
 var builder = WebApplication.CreateBuilder(options);
@@ -72,8 +71,15 @@ builder.Services.RegisterFeature()
     .AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies())
     .AddMemoryCache()
     .AddSingleton<IEventBus, MockEventBusRabbitMQ>()
-    .AddCacheNotify(config);
+    .AddCacheNotify(config)
+    .AddDistributedLock(config);
 
+var redisConfiguration = config.GetSection("Redis").Get<RedisConfiguration>();
+var configurationOption = redisConfiguration?.ConfigurationOptions;
+configurationOption.ClientName = "migration to docspace";
+var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+builder.Services.AddSingleton(redisConfiguration)
+        .AddSingleton(redisConnection);
 
 var diHelper = new DIHelper();
 diHelper.Configure(builder.Services);
@@ -128,6 +134,6 @@ public sealed class Options
     [Option('f', "fromRegion", Required = false, Default = "personal")]
     public string FromRegion { get; set; }
 
-    [Option("toAlias", Required = false, HelpText = "if you wish migration to already exist portal, enter the alias")]
+    [Option("toAlias", Required = false, HelpText = "enter an alias for migration to already an exist portal")]
     public string ToAlias { get; set; }
 }

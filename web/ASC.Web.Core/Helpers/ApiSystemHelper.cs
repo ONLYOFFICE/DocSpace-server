@@ -113,7 +113,7 @@ public class ApiSystemHelper
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-            tenantRegion = "default";
+           throw new ArgumentNullException("tenantRegion");
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();
@@ -179,6 +179,8 @@ public class ApiSystemHelper
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
     {
         using var awsDynamoDbClient = GetDynamoDBClient();
+
+        portalName = portalName.Trim().ToLowerInvariant();
 
         var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
 

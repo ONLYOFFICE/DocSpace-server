@@ -105,51 +105,57 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return result.Distinct();
     }
 
-    public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
-        string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+    public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
+        string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = dbContextFactory.CreateDbContext();
+
+        var q = filesDbContext.ThirdpartyAccount
+            .Where(a => a.TenantId == tenantId && !string.IsNullOrEmpty(a.FolderId));
+
+        var q1 = GetRoomsProvidersQuery(searchArea, filterType, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
+            subjectEntriesIds, q, filesDbContext, tenantId);
+
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
-            .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
-
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
-
-        await foreach (var room in rooms)
+        await foreach (var queryItem in q1.ToAsyncEnumerable())
         {
-            yield return room;
+            yield return ToFakeRoom(providerDao.ToProviderInfo(queryItem.Account), virtualRoomsFolderId, archiveFolderId, queryItem.Shared);
         }
     }
 
-    public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
-        Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
-        IEnumerable<string> subjectEntriesIds)
+    public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+        Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         if (!roomsIds.Any())
         {
             yield break;
         }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = dbContextFactory.CreateDbContext();
+
+        var q = filesDbContext.ThirdpartyAccount
+            .Where(a => a.TenantId == tenantId && !string.IsNullOrEmpty(a.FolderId) 
+                                               && (a.UserId == authContext.CurrentAccount.ID || roomsIds.Contains(a.FolderId)));
+
+        var q1 = GetRoomsProvidersQuery(searchArea, filterType, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
+            subjectEntriesIds, q, filesDbContext, tenantId);
 
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId)
-            .Where(p => !string.IsNullOrEmpty(p.FolderId) && (p.Owner == authContext.CurrentAccount.ID || roomsIds.Contains(p.FolderId)))
-            .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
-
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
-
-        await foreach (var room in rooms)
+        await foreach (var providerQuery in q1.ToAsyncEnumerable())
         {
-            yield return room;
+            yield return ToFakeRoom(providerDao.ToProviderInfo(providerQuery.Account), virtualRoomsFolderId, archiveFolderId, providerQuery.Shared);
         }
     }
-
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
+    {
+        return GetFoldersAsync(parentId);
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var selector = _selectorFactory.GetSelector(parentId);
@@ -203,12 +209,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public IAsyncEnumerable<Folder<string>> GetParentFoldersAsync(string folderId)
     {
+        if (string.IsNullOrEmpty(folderId))
+        {
+            return AsyncEnumerable.Empty<Folder<string>>();
+        }
+        
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
 
         return folderDao.GetParentFoldersAsync(selector.ConvertId(folderId));
     }
-
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
@@ -475,31 +485,88 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folders.Where(x => providerKey == x.ProviderKey);
     }
 
-    private async IAsyncEnumerable<IProviderInfo> GetProvidersAsync(IEnumerable<string> parentsIds, string virtualRoomsFolderId)
+    private static IQueryable<RoomProviderQuery> GetRoomsProvidersQuery(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IQueryable<DbFilesThirdpartyAccount> q,
+        FilesDbContext filesDbContext, int tenantId)
     {
-        IAsyncEnumerable<IProviderInfo> providers;
+        q = searchArea switch
+        {
+            SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
+            SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
+            SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
+            _ => q
+        };
 
-        if (parentsIds.Count() > 1)
+        if (provider != ProviderFilter.None)
         {
-            providers = providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
-            providers = providers.Concat(providerDao.GetProvidersInfoAsync(FolderType.Archive));
-        }
-        else if (parentsIds.FirstOrDefault() == virtualRoomsFolderId)
-        {
-            providers = providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
-        }
-        else
-        {
-            providers = providerDao.GetProvidersInfoAsync(FolderType.Archive);
+            var providers = GetProviderTypes(provider);
+
+            q = q.Where(a => providers.Contains(a.Provider));
         }
 
-        await foreach (var provider in providers)
+        if (filterType is not (FilterType.None or FilterType.FoldersOnly))
         {
-            yield return provider;
+            var roomType = GetRoomFolderType(filterType);
+
+            q = q.Where(a => a.RoomType == roomType);
         }
+
+        if (subjectId != Guid.Empty)
+        {
+            q = subjectFilter switch
+            {
+                SubjectFilter.Owner => excludeSubject
+                    ? q.Where(a => a != null && a.UserId != subjectId)
+                    : q.Where(f => f != null && f.UserId == subjectId),
+                SubjectFilter.Member => excludeSubject
+                    ? q.Where(a => a != null && a.UserId != subjectId && !subjectEntriesIds.Contains(a.FolderId))
+                    : q.Where(a => a != null && (a.UserId == subjectId || subjectEntriesIds.Contains(a.FolderId))),
+                _ => q
+            };
+        }
+
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            q = BuildSearch(q, searchText, SearchType.Any);
+        }
+
+        var q1 = from account in q
+            join mapping in filesDbContext.ThirdpartyIdMapping on account.FolderId equals mapping.Id into result
+            from mapping in result.DefaultIfEmpty()
+            select new
+            {
+                Account = account,
+                Hash = mapping.HashId
+            };
+
+        if (withoutTags)
+        {
+            q1 = q.Join(filesDbContext.ThirdpartyIdMapping, a => a.FolderId, m => m.Id, (a, m) => new { a, m.HashId })
+                .Where(a => filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
+                    .Where(r => r.tag.Type == TagType.Custom)
+                    .Any(t => t.EntryId == a.HashId))
+                .Select(r => new { Account = r.a, Hash = r.HashId });
+        }
+        else if (tags != null && tags.Any())
+        {
+            q1 = q.Join(filesDbContext.ThirdpartyIdMapping, f => f.FolderId, m => m.Id, (account, map) => new { account, map.HashId })
+                .Join(filesDbContext.TagLink, r => r.HashId, t => t.EntryId, (result, tag) => new { result.account, result.HashId, tag.TagId })
+                .Join(filesDbContext.Tag, r => r.TagId, t => t.Id, (result, tagInfo) => new { result.account, result.HashId, tagInfo.Name })
+                .Where(r => tags.Contains(r.Name))
+                .Select(r => new { Account = r.account, Hash = r.HashId });
+        }
+
+        var q2 = q1.Select(r => new RoomProviderQuery
+        {
+            Account = r.Account,
+            Shared = filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == FileEntryType.Folder && s.EntryId == r.Hash
+                                                      && s.SubjectType == SubjectType.PrimaryExternalLink)
+        });
+        
+        return q2;
     }
 
-    private Folder<string> ToFakeRoom(IProviderInfo providerInfo, string roomsFolderId, string archiveFolderId)
+    private Folder<string> ToFakeRoom(IProviderInfo providerInfo, string roomsFolderId, string archiveFolderId, bool shared)
     {
         var rootId = providerInfo.RootFolderType == FolderType.VirtualRooms ? roomsFolderId : archiveFolderId;
 
@@ -518,9 +585,20 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.RootFolderType = providerInfo.RootFolderType;
         folder.SettingsHasLogo = providerInfo.HasLogo;
         folder.ModifiedBy = providerInfo.Owner;
-        folder.ModifiedOn = providerInfo.CreateOn;
+        folder.ModifiedOn = providerInfo.ModifiedOn;
+        folder.MutableId = providerInfo.MutableEntityId;
+        folder.Shared = shared;
+        folder.SettingsColor = providerInfo.Color;
 
         return folder;
+    }
+
+    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    {
+        var selector = _selectorFactory.GetSelector(entry.Id);
+        var folderDao = selector.GetFolderDao(entry.Id);
+
+        return folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
     }
 
     public async Task SetCustomOrder(string folderId, string parentFolderId, int order)
@@ -535,5 +613,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var folderDao = selector.GetFolderDao(parentFolderId);
         await folderDao.InitCustomOrder(folderIds, parentFolderId);
+    }
+    
+    private class RoomProviderQuery
+    {
+        public DbFilesThirdpartyAccount Account { get; init; }
+        public bool Shared { get; init; }
     }
 }

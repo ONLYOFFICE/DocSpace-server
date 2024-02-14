@@ -90,6 +90,10 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.String, System</type>
     public string Notes { get; set; }
 
+    /// <summary>Original size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarOriginal { get; set; }
+
     /// <summary>Maximum size avatar</summary>
     /// <type>System.String, System</type>
     public string AvatarMax { get; set; }
@@ -166,16 +170,17 @@ public class EmployeeFullDto : EmployeeDto
             Avatar = "url to big avatar",
             AvatarSmall = "url to small avatar",
             AvatarMax = "url to max avatar",
-            Contacts = new List<Contact> { Contact.GetSample() },
+            AvatarOriginal = "url to original avatar",
+            Contacts = [Contact.GetSample()],
             Email = "my@gmail.com",
             FirstName = "Mike",
             Id = Guid.Empty,
             IsAdmin = false,
-            ListAdminModules = new List<string> { "projects", "crm" },
+            ListAdminModules = ["projects", "crm"],
             UserName = "Mike.Zanyatski",
             LastName = "Zanyatski",
             Title = "Manager",
-            Groups = new List<GroupSummaryDto> { GroupSummaryDto.GetSample() },
+            Groups = [GroupSummaryDto.GetSample()],
             AvatarMedium = "url to medium avatar",
             Birthday = ApiDateTime.GetSample(),
             Department = "Marketing",
@@ -333,6 +338,11 @@ public class EmployeeFullDtoHelper(
         await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
+
+        if (_httpContext.Check("avatarOriginal"))
+        {
+            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        }
 
         if (_httpContext.Check("avatarMax"))
         {

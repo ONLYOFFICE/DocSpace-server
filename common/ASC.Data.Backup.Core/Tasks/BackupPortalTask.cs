@@ -110,26 +110,6 @@ public class BackupPortalTask(DbFactory dbFactory,
     {
         var databases = new Dictionary<Tuple<string, string>, List<string>>();
 
-        try
-        {
-            await using var connection = DbFactory.OpenConnection();
-            var command = connection.CreateCommand();
-            command.CommandText = "select id, connection_string from mail_server_server";
-            ExecuteList(command).ForEach(r =>
-            {
-                var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
-
-                var dbCommand = connection.CreateCommand();
-                dbCommand.CommandText = "show tables";
-                var tables = ExecuteList(dbCommand).Select(objects => Convert.ToString(objects[0])).ToList();
-                databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
-            });
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
-        }
-
         await using (var connection = DbFactory.OpenConnection())
         {
             var command = connection.CreateCommand();
@@ -457,25 +437,23 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     for (var i = 0; i < obj.Length; i++)
                     {
-                        var value = obj[i];
-                        if (value is byte[] byteArray && byteArray.Length != 0)
+                        var byteArray = obj[i] as byte[];
+                        if (byteArray != null && byteArray.Length != 0)
                         {
                             sw.Write("0x");
                             foreach (var b in byteArray)
-                            {
                                 sw.Write("{0:x2}", b);
                             }
-                        }
                         else
                         {
                             if (obj[i] is string s)
                             {
-                                sw.Write("'" + s.Replace("\r", "\\r").Replace("\n", "\\n") + "'");
+                                sw.Write("'" + s.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("'", "\\'").Replace("\n", "\\n") + "'");
                             }
                             else
                             {
                                 var ser = new JsonSerializer();
-                                ser.Serialize(writer, value);
+                                ser.Serialize(writer, obj[i]);
                             }
                         }
                         if (i != obj.Length - 1)

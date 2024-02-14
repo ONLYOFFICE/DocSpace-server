@@ -56,7 +56,7 @@ internal class BoxFileDao(UserManager userManager,
         return Task.FromResult(uploadSession);
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -66,30 +66,17 @@ internal class BoxFileDao(UserManager userManager,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
 
-        var tempPath = uploadSession.GetItemOrDefault<string>("TempPath");
-        await using (var fs = new FileStream(tempPath, FileMode.Append))
+        var path = uploadSession.GetItemOrDefault<string>("TempPath");
+        await using (var fs = new FileStream(path, FileMode.Append))
         {
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
-                                           FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
-            uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
+        uploadSession.File = RestoreIds(uploadSession.File);
 
         return uploadSession.File;
     }
@@ -104,8 +91,12 @@ internal class BoxFileDao(UserManager userManager,
         return Task.CompletedTask;
     }
 
-    public override Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
+    public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        throw new NotImplementedException();
+        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
+            FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
+
+        return uploadSession.File;
     }
 }

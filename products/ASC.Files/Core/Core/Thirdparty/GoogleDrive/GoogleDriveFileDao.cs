@@ -62,7 +62,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
         else
         {
             var folder = await Dao.GetFolderAsync(file.ParentId);
-            driveFile = storage.FileConstructor(file.Title, null, folder.Id);
+            driveFile = GoogleDriveStorage.FileConstructor(file.Title, null, folder.Id);
         }
 
         var googleDriveSession = await storage.CreateResumableSessionAsync(driveFile, contentLength);
@@ -80,7 +80,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
         return uploadSession;
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -90,7 +90,6 @@ internal class GoogleDriveFileDao(UserManager userManager,
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -99,26 +98,16 @@ internal class GoogleDriveFileDao(UserManager userManager,
         {
             var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
             var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.LastChunk);
+            await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.Items.ContainsKey("lastChunk"));
         }
         else
         {
-            var tempPath = uploadSession.GetItemOrDefault<string>("TempPath");
-            await using var fs = new FileStream(tempPath, FileMode.Append);
+            var path = uploadSession.GetItemOrDefault<string>("TempPath");
+            await using var fs = new FileStream(path, FileMode.Append);
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
+        uploadSession.File = RestoreIds(uploadSession.File);
 
         return uploadSession.File;
     }

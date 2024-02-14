@@ -612,9 +612,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>تخصيص</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>تم إرسال رابط لتأكيد العملية إلى {0} (عنوان البريد الإلكتروني لمالك البوابة).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>هوية غير صحيحة.</value>
   </data>

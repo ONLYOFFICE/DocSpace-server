@@ -44,8 +44,8 @@ public static partial class NotifyEngineLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "NotifySender")]
     public static partial void ErrorNotifySender(this ILogger<NotifySenderService> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Prepare")]
-    public static partial void ErrorPrepare(this ILogger logger, Exception exception);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Prepare {action} {recipient}")]
+    public static partial void ErrorPrepare(this ILogger logger, Exception exception, INotifyAction action, IRecipient recipient);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "UpdateScheduleDate")]
     public static partial void ErrorUpdateScheduleDate(this ILogger logger, Exception exception);

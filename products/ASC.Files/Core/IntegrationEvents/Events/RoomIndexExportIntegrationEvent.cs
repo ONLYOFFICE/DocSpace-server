@@ -34,16 +34,20 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     }
 
-    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, int roomId, bool terminate = false)
+    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, int roomId, string baseUri, bool terminate = false)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
         Terminate = terminate;
+        BaseUri = baseUri;
     }
 
     [ProtoMember(1)]
     public int RoomId { get; set; }
 
     [ProtoMember(2)]
+    public string BaseUri { get; set; }
+
+    [ProtoMember(3)]
     public bool Terminate { get; set; }
 }

@@ -71,25 +71,14 @@ public class QuotaUsageManager
             StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
             UsedSize = (ulong)Math.Max(0, quotaRows.Sum(r => r.Counter)),
             MaxRoomAdminsCount = quota.CountRoomAdmin,
-            RoomAdminCount = _coreBaseSettings.Personal ? 1 : await _countPaidUserStatistic.GetValueAsync(),
+            RoomAdminCount = await _countPaidUserStatistic.GetValueAsync(),
             MaxUsers = _coreBaseSettings.Standalone ? -1 : quota.CountUser,
-            UsersCount = _coreBaseSettings.Personal ? 0 : await _activeUsersStatistic.GetValueAsync(),
+            UsersCount = await _activeUsersStatistic.GetValueAsync(),
 
             StorageUsage = quotaRows
                 .Select(x => new QuotaUsage { Path = x.Path.TrimStart('/').TrimEnd('/'), Size = x.Counter })
                 .ToList()
         };
-
-        if (_coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
-        {
-            result.UserStorageSize = await _configuration.PersonalMaxSpaceAsync(_settingsManager);
-
-            var webItem = _webItemManager[WebItemManager.DocumentsProductID];
-            if (webItem.Context.SpaceUsageStatManager is IUserSpaceUsage spaceUsageManager)
-            {
-                result.UserUsedSize = await spaceUsageManager.GetUserSpaceUsageAsync(_authContext.CurrentAccount.ID);
-            }
-        }
 
         result.MaxFileSize = Math.Min(result.AvailableSize, (ulong)quota.MaxFileSize);
 

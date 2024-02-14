@@ -145,11 +145,25 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
+    }
+    
+    public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         var tempStream = _tempStream.Create();
 
         var storage = await GetStorageAsync();
-
-        await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream);
+        DownloadObjectOptions options = null;
+        
+        if (length > 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
+        {
+            options = new DownloadObjectOptions
+            {
+                Range = new RangeHeaderValue(offset, offset + length - 1)
+            };
+        }
+        
+        await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream, options);
 
         if (offset > 0)
         {
@@ -190,7 +204,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                   string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
 
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {
@@ -580,7 +594,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         using var storage = await GetStorageAsync();
 
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         var uploadObjectOptions = new UploadObjectOptions
         {

@@ -109,6 +109,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to In process.
+        /// </summary>
+        public static string InProcessFormFolder {
+            get {
+                return ResourceManager.GetString("InProcessFormFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to My documents.
         /// </summary>
         public static string MyFiles {
@@ -141,6 +150,15 @@ namespace ASC.Files.Core.Resources {
         public static string ProjectFiles {
             get {
                 return ResourceManager.GetString("ProjectFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready.
+        /// </summary>
+        public static string ReadyFormFolder {
+            get {
+                return ResourceManager.GetString("ReadyFormFolder", resourceCulture);
             }
         }
         

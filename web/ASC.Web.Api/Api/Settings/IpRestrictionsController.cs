@@ -68,6 +68,12 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
+        if (inDto.IpRestrictions.Any(r => !IPAddress.TryParse(r.Ip, out _)))
+        {
+            throw new ArgumentException(nameof(inDto.IpRestrictions));
+        }
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
         return await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
     }

@@ -221,9 +221,9 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
         });
     }
 
-    private static string GetBlockCacheKey(string login, string requestIp) => $"loginblock/{login}/{requestIp}";
+    private static string GetBlockCacheKey(string login, string requestIp) => $"loginblock/{login.ToLowerInvariant()}/{requestIp}";
 
-    private static string GetHistoryCacheKey(string login, string requestIp) => $"loginsec/{login}/{requestIp}";
+    private static string GetHistoryCacheKey(string login, string requestIp) => $"loginsec/{login.ToLowerInvariant()}/{requestIp}";
 
     private static string GetLockKey(string ip, string key)
     {

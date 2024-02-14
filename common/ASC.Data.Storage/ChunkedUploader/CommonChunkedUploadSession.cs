@@ -34,9 +34,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
     public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Expired { get; set; }
     public string Location { get; set; }
-    public long BytesUploaded { get; set; }
     public long BytesTotal { get; set; } = bytesTotal;
-    public bool LastChunk { get; set; }
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
     public bool UseChunks { get; set; } = true;
@@ -85,11 +83,6 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
             }
         }
         return default;
-    }
-
-    public virtual Stream Serialize()
-    {
-        return null;
     }
 
     public void TransformItems()

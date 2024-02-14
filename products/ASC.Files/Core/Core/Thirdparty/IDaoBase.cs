@@ -52,4 +52,5 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist);
     bool CheckInvalidFilter(FilterType filterType);
     Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
+    Task UpdateIdAsync(string oldValue, string newValue);
 }

@@ -86,7 +86,21 @@ internal class DropboxDaoBase(
 
     public string MakeThirdId(object entryId)
     {
-        return Convert.ToString(entryId, CultureInfo.InvariantCulture);
+        var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
+
+        if (string.IsNullOrEmpty(id) || id.StartsWith('/'))
+        {
+            return id;
+        }
+
+        try
+        {
+            return Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(id));
+        }
+        catch
+        {
+            return id;
+        }
     }
 
     public string MakeId(Metadata dropboxItem)
@@ -96,9 +110,12 @@ internal class DropboxDaoBase(
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "/" ? "" : ("-" + path.Replace('/', '|'));
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            return PathPrefix;
+        }
 
-        return $"{PathPrefix}{p}";
+        return path.StartsWith('/') ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(FolderMetadata dropboxFolder)
@@ -141,10 +158,11 @@ internal class DropboxDaoBase(
         folder.Id = MakeId(dropboxFolder);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(dropboxFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : default;
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : default;
         folder.Title = MakeFolderTitle(dropboxFolder);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)

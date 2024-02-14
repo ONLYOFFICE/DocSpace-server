@@ -61,7 +61,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         if (folder == null)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -100,7 +100,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         if (file == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         //NOTE: Always build path to handler!
@@ -128,7 +128,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         if (file == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         //NOTE: Always build path to handler!
@@ -154,7 +154,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         if (file == null)
         {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));

@@ -38,37 +38,37 @@ public class SocketServiceClient
     private readonly byte[] _sKey;
     private readonly string _url;
 
-    public virtual string Hub { get => "default"; }
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+    
+    protected virtual string Hub { get => "default"; }
 
     public SocketServiceClient(
         ILogger<SocketServiceClient> logger,
         IHttpClientFactory clientFactory,
-        MachinePseudoKeys mashinePseudoKeys,
+        MachinePseudoKeys machinePseudoKeys,
         IConfiguration configuration)
     {
         _logger = logger;
         _clientFactory = clientFactory;
-        _sKey = mashinePseudoKeys.GetMachineConstant();
+        _sKey = machinePseudoKeys.GetMachineConstant();
         _url = configuration["web:hub:internal"];
         _enableSocket = !string.IsNullOrEmpty(_url);
     }
 
-    public async Task<string> MakeRequest(string method, object data)
+    public async Task MakeRequest(string method, object data)
     {
         if (!IsAvailable())
         {
-            return string.Empty;
+            return;
         }
         try
         {
             var request = GenerateRequest(method, data);
             var httpClient = _clientFactory.CreateClient();
-
-            //async
-            using var response = await httpClient.SendAsync(request);
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            using var streamReader = new StreamReader(stream);
-            return await streamReader.ReadToEndAsync();
+            await httpClient.SendAsync(request);
         }
         catch (Exception e)
         {
@@ -79,15 +79,6 @@ public class SocketServiceClient
                 _lastErrorTime = DateTime.Now;
             }
         }
-
-        return null;
-    }
-
-    public async Task<T> MakeRequest<T>(string method, object data)
-    {
-        var resultMakeRequest = await MakeRequest(method, data);
-
-        return JsonConvert.DeserializeObject<T>(resultMakeRequest);
     }
     
     protected void SendNotAwaitableRequest(string method, object data)
@@ -110,7 +101,7 @@ public class SocketServiceClient
         request.Method = HttpMethod.Post;
         request.RequestUri = new Uri(GetMethod(method));
 
-        var jsonData = JsonConvert.SerializeObject(data);
+        var jsonData = JsonSerializer.Serialize(data, _options);
         _logger.DebugMakeRequest(method, jsonData);
 
         request.Content = new StringContent(jsonData, Encoding.UTF8, "application/json");

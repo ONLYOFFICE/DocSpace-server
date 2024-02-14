@@ -42,9 +42,6 @@ internal static partial class FactoryIndexerLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "inner")]
     public static partial void ErrorInner(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "IndexAsync")]
-    public static partial void ErrorIndexAsync(this ILogger logger, Exception exception);
-    
     [LoggerMessage(Level = LogLevel.Error, Message = "Update")]
     public static partial void ErrorUpdate(this ILogger logger, Exception exception);  
     

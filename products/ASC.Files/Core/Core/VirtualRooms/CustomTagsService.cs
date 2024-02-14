@@ -37,7 +37,7 @@ public class CustomTagsService(IDaoFactory daoFactory,
     {
         if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         ArgumentException.ThrowIfNullOrEmpty(name);
@@ -68,7 +68,7 @@ public class CustomTagsService(IDaoFactory daoFactory,
     {
         if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         if (!names.Any())
@@ -78,9 +78,10 @@ public class CustomTagsService(IDaoFactory daoFactory,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfo = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType});
 
-        await tagDao.RemoveTagsAsync(tags.Select(t => t.Id));
+        await tagDao.RemoveTagsAsync(tags);
 
         await filesMessageService.SendAsync(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
     }

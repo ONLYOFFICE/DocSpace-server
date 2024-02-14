@@ -221,22 +221,22 @@ public class NovellLdapSearcher(IConfiguration configuration,
 
         if (string.IsNullOrEmpty(searchFilter))
         {
-            return new List<LdapObject>();
+            return [];
         }
 
         if (attributes == null)
         {
             if (string.IsNullOrEmpty(LdapUniqueIdAttribute))
             {
-                attributes = new[]
-                {
-                        "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
+                attributes =
+                [
+                    "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
                         LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID, LdapConstants.RfcLDAPAttributes.GUID
-                    };
+                ];
             }
             else
             {
-                attributes = new[] { "*", LdapUniqueIdAttribute };
+                attributes = ["*", LdapUniqueIdAttribute];
             }
         }
 
@@ -350,22 +350,22 @@ public class NovellLdapSearcher(IConfiguration configuration,
 
         if (string.IsNullOrEmpty(searchFilter))
         {
-            return new List<LdapObject>();
+            return [];
         }
 
         if (attributes == null)
         {
             if (string.IsNullOrEmpty(LdapUniqueIdAttribute))
             {
-                attributes = new[]
-                {
-                        "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
+                attributes =
+                [
+                    "*", LdapConstants.RfcLDAPAttributes.ENTRY_DN, LdapConstants.RfcLDAPAttributes.ENTRY_UUID,
                         LdapConstants.RfcLDAPAttributes.NS_UNIQUE_ID, LdapConstants.RfcLDAPAttributes.GUID
-                    };
+                ];
             }
             else
             {
-                attributes = new[] { "*", LdapUniqueIdAttribute };
+                attributes = ["*", LdapUniqueIdAttribute];
             }
         }
 
@@ -496,7 +496,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
             };
 
             var ldapSearchResults = _ldapConnection.Search("", LdapConnection.ScopeBase, LdapConstants.OBJECT_FILTER,
-                new[] { "*", "supportedControls", "supportedCapabilities" }, false, ldapSearchConstraints);
+                ["*", "supportedControls", "supportedCapabilities"], false, ldapSearchConstraints);
 
             while (ldapSearchResults.HasMore())
             {

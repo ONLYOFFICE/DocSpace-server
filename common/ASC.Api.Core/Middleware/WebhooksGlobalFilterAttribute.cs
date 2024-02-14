@@ -61,7 +61,7 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
 
             try
             {
-                var (method, routePattern) = GetData(context.HttpContext);
+                var (method, routePattern, _) = GetData(context.HttpContext);
 
                 var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
 
@@ -81,24 +81,29 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
         _stream?.Dispose();
     }
 
-    private (string, string) GetData(HttpContext context)
+    private (string, string, bool) GetData(HttpContext context)
     {
         var method = context.Request.Method;
         var endpoint = (RouteEndpoint)context.GetEndpoint();
         var routePattern = endpoint?.RoutePattern.RawText;
-
-        return (method, routePattern);
+        var disabled = endpoint?.Metadata.OfType<WebhookDisableAttribute>().FirstOrDefault();
+        return (method, routePattern, disabled != null);
     }
 
     private async Task<bool> SkipAsync(HttpContext context)
     {
-        var (method, routePattern) = GetData(context);
+        var (method, routePattern, disabled) = GetData(context);
 
         if (routePattern == null)
         {
             return true;
         }
-
+        
+        if (disabled)
+        {
+            return true;
+        }
+        
         if (!DbWorker.MethodList.Contains(method))
         {
             return true;

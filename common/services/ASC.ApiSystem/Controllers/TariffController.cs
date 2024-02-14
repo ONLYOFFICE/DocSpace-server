@@ -109,7 +109,7 @@ public class TariffController(CommonMethods commonMethods,
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
+            Quotas = [new(quota.TenantId, 1)],
             DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1)
         };
 

@@ -643,20 +643,6 @@ $TrulyYours</value>
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. ONLYOFFICEの&lt;span style="color:#FF6F3D;"&gt;無料&lt;/span&gt;アプリを入手しましょう
-
-
-$UserName 様
-
-無料のONLYOFFICEアプリを入手して、どのデバイスからでも文書の管理をしましょう。
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;オフラインで文書編集する場合、ONLYOFFICEデスクトップエディタ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;モバイルデバイスで文書編集する場合、ONLYOFFICE Documentsアプリ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. ONLYOFFICEの&lt;span style="color:#FF6F3D;"&gt;無料&lt;/span&gt;アプリを入手しましょう
 
@@ -670,15 +656,6 @@ $UserName 様
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;モバイルデバイスで文書編集する場合、ONLYOFFICE Documentsアプリ：&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>こんにちは！
-このメールアドレスを使って、新しい"ONLYOFFICE Personal":"$PortalUrl" アカウントを登録しようとする試みがありました。もしそれがあなたであったなら、そのアカウントはすでに存在していることをお知らせいたします。
-パスワードを紛失した場合は、"パスワード回復ページ":"$LinkToRecovery"で回復することができます。
-もし、新しいアカウントを登録しようとしなかった場合、おそらく他の人が間違って登録したのでしょう。この場合、このメールは無視してください。
-
-良い一日をお過ごしください！
-ONLYOFFICE チーム</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpaceが&lt;span style="color:#FF6F3D;"&gt;無効化&lt;/span&gt;されました
@@ -780,15 +757,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>ONLYOFFICE Personalアカウントのパスワードを変更したいですか？下のボタンをクリックして確認してください。
- 
-$OrangeButton 
- 
-リンクは7日間有効です。
- 
-パスワードを変更したくないですか？このメッセージは無視してください。</value>
-  </data>
   <data name="AcceptDocSpace" xml:space="preserve">
     <value>承認</value>
   </data>
@@ -834,9 +802,6 @@ $OrangeButton
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>DocSpaceの招待を確認する</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>ポータルのアドレス変更の確認</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>ポータル所有者の更新を確認する</value>
   </data>
@@ -881,31 +846,6 @@ $OrangeButton
   </data>
   <data name="ButtonVisitPaymentsSection" xml:space="preserve">
     <value>お支払い方法について</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.ONLYOFFICE Personalへようこそ
-
-クラウド上にパーソナルオフィスが作成されました。
-
-h3.バーチャルなワークスペースで、ドキュメントの編集や保存ができ、どこからでも作業でき、友人や同僚にもアクセスできます。
-
-h3.まずはONLYOFFICEでできることをご紹介します：
-
-- テキスト文書、スプレッドシート、プレゼンテーションの作成、閲覧、編集。
-
-- すべての一般的なフォーマットで作業できます。MS Officeファイルとの高い互換性。
-
-- すぐに記入できるフォーム":"https://www.onlyoffice.com/ja/form-creator.aspx"の作成と共同編集。
-
-- オンラインで文書を共有し、共同作業。
-
-- さまざまなプラグインを使用して、追加機能を適用できます。
-
-- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja" を使って、パーソナルクラウドに簡単にアクセスできます。
-
-無料の"デスクトップエディター":"https://www.onlyoffice.com/ja/download-desktop.aspx"を使ってオフラインでドキュメントを編集したり、"iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972"または"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"デバイス用のモバイル編集スイートを入手することもできます。
-
-$TrulyYours</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>何卒よろしくお願いいたします、ONLYOFFICEサポートチーム</value>
@@ -998,19 +938,6 @@ $OrangeButton</value>
 $OwnerName 様
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの所有者を $UserName に変更したいとのリクエストがありました。
-
-以下のリンクから操作をご確認ください：
-
-$OrangeButton
-
-*ご注意*: このリンクは 7 日間のみ有効です。期間内にポータル所有者の変更手続きを完了してください。</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.ポータルアドレスの変更
-
-$OwnerName 様
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" のポータルアドレスを "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end に変更したいとのリクエストがありました。
 
 以下のリンクから操作をご確認ください：
 
@@ -1195,55 +1122,6 @@ $OrangeButton
 
 ウェブオフィスを使用するためのヒントをお送りします。お客様のプロフィールページでいつでも購読をキャンセルしたり、再度有効にすることができます。</value>
   </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>$UserName 様
-ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}" の登録に成功しました。
-
-Dropbox、Google Drive、OneDrive、Boxなど、お好きなクラウドストレージを接続して、どこからでもアクセスできるドキュメント用のワークスペースを作成できます。
-
-ONLYOFFICE Personalの詳細は"公式ブログ":"$TagBlogLink "をご覧ください。
-
-引き続きどうぞよろしくお願いいたします。
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>ONLYOFFICEアカウントのメールアドレスを変更したいですか？
-
-下のボタンをクリックして、クラウドにログイン*してください。
-
-$OrangeButton
-
-リンクは7日間有効です。
-
-*このブラウザでONLYOFFICEにサインインしていない場合、確認のために旧メールアドレスを使用する必要があります。
-
-メールアドレスを変更したくないですか？このメッセージは無視してください。</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>こんにちは、
-
-ONLYOFFICEソリューションの個人用アカウントを登録しました。"こちら":"$InviteLink"をクリックして登録を確認し、パスワードを作成してください。
-
-リンクが開けない場合は、以下の"$InviteLink":"$InviteLink "をコピーし、ブラウザのアドレスバーに貼り付けてください。
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>personal.onlyoffice.comのアカウント停止のリクエストがありました。リンクに従ってリクエストを完了してください（リンクは7日間有効です）： 
-
-$OrangeButton
-
-*ご注意*： 削除後、お客様のアカウントとそれに関連するすべてのデータは、当社の"プライバシーステートメント":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従って永久に消去されます。
-
-"アカウント削除の詳細":"${__HelpLink}/adminration/configuration.aspx"
-
-手続きをお進めにならない場合は、このメールを無視してください。
-
-ご質問がある場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までご連絡ください。
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルの無効化
 
@@ -1332,9 +1210,6 @@ $TrulyYours</value>
     <value>ONLYOFFICE DocSpaceのビジネス向けサブスクリプションのご案内</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>ONLYOFFICEの無料アプリを入手しましょう</value>
-  </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
     <value>ONLYOFFICEの無料アプリを入手しましょう</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
@@ -1641,5 +1516,170 @@ $TrulyYours</value>
 $OrangeButton
 
 リンクは7日間のみ有効です。</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}.メールアドレスを有効にしてください</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} ポータルのバックアップが作成されました</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>メールアドレス変更をご確認ください</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText}.パスワード支援</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>パスワード変更をご確認ください</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}.電話番号の変更依頼</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}.セキュリティ警告</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}.ポータル所有者変更</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>管理者へのユーザーメッセージ</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>営業部へのお問い合わせ</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルへの招待</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}.メールボックス作成</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}.メールボックスのパスワード変更</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行エラー</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行開始</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}.他の地域へのポータル移行完了</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルの停止</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルの削除</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}.ポータルアドレス変更</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルからのプロフィールの削除</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>ユーザーが自分のプロフィールを解除しました</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath}のプロフィールが変更されました</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ割り当て完了</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ割り当て失敗</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ削除完了</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}.ユーザーデータ削除失敗</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>企業向けライセンスの依頼</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>SaaSプランの見積り依頼</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}.復元完了</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}.復元開始</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>${__VirtualRootPath}に参加しましょう</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限開始</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceのサブスクリプションは間も無く終了します</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限終了</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceの猶予期限は明日終了します</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceに参加しましょう</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath}ポータルのプロフィール変更通知</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>$Dateのポータル新着情報</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>SMTP テストメッセージ</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}.複合化処理失敗</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}.複合化処理開始</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理完了</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理失敗</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理開始</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}.暗号化処理完了</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>新しいユーザが ${LetterLogoText} ポータルに追加されました</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>${__VirtualRootPath}への招待が届きました</value>
   </data>
 </root>

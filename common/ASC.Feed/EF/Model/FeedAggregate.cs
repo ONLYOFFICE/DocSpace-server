@@ -46,7 +46,7 @@ public class FeedAggregate : BaseEntity, IMapFrom<FeedRow>
 
     public override object[] GetKeys()
     {
-        return new object[] { Id };
+        return [Id];
     }
 }
 public static class FeedAggregateExtension

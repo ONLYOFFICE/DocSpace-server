@@ -172,6 +172,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Inserted file</returns>
     /// <path>api/2.0/files/@common/insert</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("@common/insert")]
     public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -210,6 +211,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <returns type="System.Object, System">Uploaded file(s)</returns>
     /// <path>api/2.0/files/@common/upload</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {

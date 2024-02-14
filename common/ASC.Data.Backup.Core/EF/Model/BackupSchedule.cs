@@ -41,7 +41,7 @@ public class BackupSchedule : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId };
+        return [TenantId];
     }
 }
 

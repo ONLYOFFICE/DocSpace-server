@@ -85,9 +85,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Vlastný</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Odkaz na potvrdenie operácie bol odoslaný na {0} (e-mailová adresa majiteľa portálu).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Nesprávna e-mailová adresa</value>
   </data>

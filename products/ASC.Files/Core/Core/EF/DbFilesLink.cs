@@ -37,7 +37,7 @@ public class DbFilesLink : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, SourceId, LinkedId };
+        return [TenantId, SourceId, LinkedId];
     }
 }
 

@@ -116,7 +116,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         if (onChange != null)
         {
             _invoctionList.AddOrUpdate(action,
-                new ConcurrentBag<Action<T>> { onChange },
+                [onChange],
                 (_, bag) =>
                 {
                     bag.Add(onChange);

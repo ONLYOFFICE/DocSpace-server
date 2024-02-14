@@ -31,7 +31,9 @@ public static class WebHostExtensions
     public static IWebHostBuilder ConfigureDefaultKestrel(this IWebHostBuilder webHostBuilder, Action<WebHostBuilderContext, KestrelServerOptions> configureDelegate = null)
     {
         webHostBuilder.ConfigureKestrel((hostingContext, serverOptions) =>
-        {
+        {            
+            configureDelegate?.Invoke(hostingContext, serverOptions);
+            
             var kestrelConfig = hostingContext.Configuration.GetSection("Kestrel");
 
             if (!kestrelConfig.Exists())
@@ -47,8 +49,6 @@ public static class WebHostExtensions
 
                 serverOptions.ListenUnixSocket(unixSocket);
             }
-
-            configureDelegate?.Invoke(hostingContext, serverOptions);
         });
 
         return webHostBuilder;

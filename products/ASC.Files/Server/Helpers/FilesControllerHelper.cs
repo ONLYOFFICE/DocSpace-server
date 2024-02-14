@@ -73,7 +73,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)
     {
-        var checkConversation = _fileStorageService.CheckConversionAsync(new List<CheckConversionRequestDto<T>> { checkConversionRequestDto }, checkConversionRequestDto.Sync);
+        var checkConversation = _fileStorageService.CheckConversionAsync([checkConversionRequestDto], checkConversionRequestDto.Sync);
 
         await foreach (var r in checkConversation)
         {

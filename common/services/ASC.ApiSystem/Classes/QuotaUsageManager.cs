@@ -77,9 +77,9 @@ public class QuotaUsageManager
             StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
             UsedSize = (ulong)Math.Max(0, usedSize),
             MaxRoomAdminsCount = quota.CountRoomAdmin,
-            RoomAdminCount = _coreBaseSettings.Personal ? 1 : roomAdminCount,
+            RoomAdminCount = roomAdminCount,
             MaxUsers = _coreBaseSettings.Standalone ? -1 : quota.CountUser,
-            UsersCount = _coreBaseSettings.Personal ? 0 : usersCount,
+            UsersCount = usersCount,
             MaxRoomsCount = _coreBaseSettings.Standalone ? -1 : quota.CountRoom,
             RoomsCount = roomsCount
         };

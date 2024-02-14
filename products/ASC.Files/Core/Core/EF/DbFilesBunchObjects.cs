@@ -36,7 +36,7 @@ public class DbFilesBunchObjects : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, RightNode };
+        return [TenantId, RightNode];
     }
 }
 

@@ -31,35 +31,53 @@ public class ExternalShare(Global global,
     IDaoFactory daoFactory, 
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
-    CommonLinkUtility commonLinkUtility)
+    BaseCommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility)
 {
     private Guid _linkId;
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
+    private IReadOnlyDictionary<string, StringValues> _headers;
 
-    public async Task<LinkData> GetLinkDataAsync(Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
+        string url = null;
+        
+        switch (entry)
+        {
+            case File<T> file:
+                url = fileUtility.CanWebView(file.Title)
+                    ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
+                    : file.DownloadUrl;
+
+                url += $"&{FilesLinkUtility.ShareKey}={key}";
+                break;
+            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+                url = $"rooms/share?key={key}";
+                break;
+        }
         
         return new LinkData
         {
-            Url = commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}"),
+            Url = commonLinkUtility.GetFullAbsolutePath(url),
             Token = key
         };
+        
     }
     
-    public async Task<Status> ValidateAsync(Guid linkId)
+    public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
         var record = await daoFactory.GetSecurityDao<int>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
 
-        return record == null ? Status.Invalid : await ValidateRecordAsync(record, null);
+        return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
     
-    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password)
+    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
-            record.Subject == FileConstant.ShareLinkId ||
             record.Options == null)
         {
             return Status.Ok;
@@ -70,6 +88,11 @@ public class ExternalShare(Global global,
             return Status.Expired;
         }
 
+        if ((record.Options.Internal && !isAuthenticated) || entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
+        {
+            return Status.Invalid;
+        }
+
         if (string.IsNullOrEmpty(record.Options.Password))
         {
             return Status.Ok;
@@ -77,7 +100,7 @@ public class ExternalShare(Global global,
         
         if (string.IsNullOrEmpty(_passwordKey))
         {
-            _passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
+            _passwordKey = GetFromHeaders(CookiesType.ShareLink, record.Subject.ToString());
         }
 
         if (_passwordKey == record.Options.Password)
@@ -115,11 +138,15 @@ public class ExternalShare(Global global,
 
     public string GetKey()
     {
+        if (_headers is { Count: > 0 } && _headers.TryGetValue(HttpRequestExtensions.RequestTokenHeader, out var internalKey))
+        {
+            return internalKey;
+        }
+        
         var key = httpContextAccessor.HttpContext?.Request.Headers[HttpRequestExtensions.RequestTokenHeader].FirstOrDefault();
-
         if (string.IsNullOrEmpty(key))
         {
-            key = httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.FolderShareKey);
+            key = httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.ShareKey);
         }
 
         return string.IsNullOrEmpty(key) ? null : key;
@@ -132,11 +159,6 @@ public class ExternalShare(Global global,
         return Signature.Read<Guid>(key, await GetDbKeyAsync());
     }
 
-    public Guid GetLinkId()
-    {
-        return GetLinkIdAsync().Result;
-    }
-
     public async Task<Guid> GetLinkIdAsync()
     {
         if (_linkId != Guid.Empty)
@@ -145,14 +167,12 @@ public class ExternalShare(Global global,
         }
         
         var key = GetKey();
-        
         if (string.IsNullOrEmpty(key))
         {
             return Guid.Empty;
         }
         
         var linkId = await ParseShareKeyAsync(key);
-        
         if (linkId == Guid.Empty)
         {
             return Guid.Empty;
@@ -167,7 +187,7 @@ public class ExternalShare(Global global,
     {
         return GetSessionIdAsync().Result;
     }
-
+    
     public async Task<Guid> GetSessionIdAsync()
     {
         if (_sessionId != Guid.Empty)
@@ -175,15 +195,13 @@ public class ExternalShare(Global global,
             return _sessionId;
         }
         
-        var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
-        
+        var sessionKey = GetFromHeaders(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
         }
         
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
-        
         if (id == Guid.Empty)
         {
             return Guid.Empty;
@@ -192,35 +210,6 @@ public class ExternalShare(Global global,
         _sessionId = id;
 
         return id;
-    }
-    
-    public async Task<ExternalShareData> GetCurrentShareDataAsync()
-    {
-        var linkId = await GetLinkIdAsync();
-        var sessionId = await GetSessionIdAsync();
-        var password = string.IsNullOrEmpty(_passwordKey) ? cookiesManager.GetCookies(CookiesType.ShareLink, _linkId.ToString(), true) : _passwordKey;
-
-        return new ExternalShareData(linkId, sessionId, password);
-    }
-
-    public void SetCurrentShareData(ExternalShareData data)
-    {
-        ArgumentNullException.ThrowIfNull(data);
-        
-        if (_linkId == Guid.Empty)
-        {
-            _linkId = data.LinkId;
-        }
-
-        if (_sessionId == Guid.Empty)
-        {
-            _sessionId = data.SessionId;
-        }
-
-        if (string.IsNullOrEmpty(_passwordKey))
-        {
-            _passwordKey = data.PasswordKey;
-        }
     }
 
     public async Task<string> CreateDownloadSessionKeyAsync()
@@ -252,14 +241,40 @@ public class ExternalShare(Global global,
         await cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
     }
     
-    private async Task<string> CreateShareKeyAsync(Guid linkId)
+    public string GetUrlWithShare(string url, string key = null)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return url;
+        }
+
+        key ??= GetKey();
+
+        return !string.IsNullOrEmpty(key)
+            ? QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key)
+            : url;
+    }
+    
+    public async Task<string> CreateShareKeyAsync(Guid linkId)
     {
         return Signature.Create(linkId, await GetDbKeyAsync());
+    }
+    
+    public void Init(IDictionary<string, StringValues> headers)
+    {
+        _headers = headers.AsReadOnly();
     }
 
     private async Task<string> GetDbKeyAsync()
     {
         return _dbKey ??= await global.GetDocDbKeyAsync();
+    }
+    
+    private string GetFromHeaders(CookiesType type, string itemId = null)
+    {
+        return _headers is { Count: > 0 } 
+            ? cookiesManager.GetCookies(_headers, type, itemId) 
+            : cookiesManager.GetCookies(type, itemId, true);
     }
 }
 
@@ -304,13 +319,10 @@ public class ValidationInfo
     /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
-}
-
-public class ExternalShareData(Guid linkId, Guid sessionId, string passwordKey)
-{
-    public Guid LinkId { get; } = linkId;
-    public Guid SessionId { get; } = sessionId;
-    public string PasswordKey { get; } = passwordKey;
+    
+    /// <summary>Link ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid LinkId { get; set; }
 }
 
 public class DownloadSession

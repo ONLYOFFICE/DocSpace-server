@@ -27,7 +27,9 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings)
+public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings,
+        UserManager userManager,
+        AuthContext authContext)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
@@ -98,6 +100,8 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
             result.Id = feature.Name;
 
             object used = null;
+            var currentUserId = authContext.CurrentAccount.ID;
+            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && !await userManager.IsCollaboratorAsync(currentUserId);
 
             if (feature is TenantQuotaFeatureSize size)
             {
@@ -126,7 +130,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
                 {
                     result.Used = new FeatureUsedDto
                     {
-                        Value = used,
+                        Value = isUsedAvailable ? used : null,
                         Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{feature.Name}")
                     };
                 }

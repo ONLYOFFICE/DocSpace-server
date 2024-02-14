@@ -481,9 +481,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Пользовательский</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Ссылка для подтверждения операции была отправлена на {0} (адрес электронной почты владельца портала).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Неправильный ID экземпляра.</value>
   </data>

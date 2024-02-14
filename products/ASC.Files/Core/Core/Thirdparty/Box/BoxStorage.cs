@@ -33,7 +33,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 {
     private BoxClient _boxClient;
 
-    private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
+    private readonly List<string> _boxFields = ["created_at", "modified_at", "name", "parent", "size"];
 
     public bool IsOpened { get; private set; }
 
@@ -257,7 +257,12 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
-
+    
+    public long GetFileSize(BoxFile file)
+    {
+        return file.Size ?? 0;
+    }
+    
     public async Task<long> GetMaxUploadSizeAsync()
     {
         var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });

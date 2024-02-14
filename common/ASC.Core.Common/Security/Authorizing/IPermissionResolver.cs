@@ -29,8 +29,9 @@ namespace ASC.Common.Security;
 [Scope(typeof(PermissionResolver))]
 public interface IPermissionResolver
 {
-    Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions);
-    Task<bool> CheckAsync(ISubject subject, params IAction[] actions);
-    Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions);
-    Task DemandAsync(ISubject subject, params IAction[] actions);
+    Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action);
+    Task<bool> CheckAsync(ISubject subject, IAction action);
+    Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action);
+    Task DemandAsync(ISubject subject, IAction action);
+    Task DemandAsync(ISubject subject, IAction action1, IAction action2);
 }

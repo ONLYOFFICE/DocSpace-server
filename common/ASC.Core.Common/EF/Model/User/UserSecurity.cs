@@ -37,7 +37,7 @@ public class UserSecurity : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { UserId };
+        return [UserId];
     }
 }
 

@@ -76,10 +76,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
             Method = method,
             Tenant = tenantId
         };
-        notifyInvoke.Parameters = new List<string>
-        {
-            _serverRootPath
-        };
+        notifyInvoke.Parameters = [_serverRootPath];
 
         try
         {

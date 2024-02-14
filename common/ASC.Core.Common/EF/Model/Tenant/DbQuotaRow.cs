@@ -39,7 +39,7 @@ public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, UserId, Path };
+        return [TenantId, UserId, Path];
     }
 }
 

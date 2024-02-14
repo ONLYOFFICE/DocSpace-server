@@ -359,7 +359,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>PUT</httpMethod>
     /// <visible>false</visible>
     [HttpPut("whitelabel/restore")]
-    public async Task<bool> RestoreWhiteLabelOptionsAsync(WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> RestoreWhiteLabelOptionsAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

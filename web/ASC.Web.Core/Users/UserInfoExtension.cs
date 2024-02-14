@@ -35,7 +35,7 @@ public static class StudioUserInfoExtension
 
     public static async Task<List<string>> GetListAdminModulesAsync(this UserInfo ui, WebItemSecurity webItemSecurity, WebItemManager webItemManager)
     {
-        var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
+        var products = webItemManager.GetItemsAll().Where(i => i is IProduct);
 
         return await products.ToAsyncEnumerable().WhereAwait(async q => await webItemSecurity.IsProductAdministratorAsync(q.ID, ui.Id)).Select(q => q.ProductClassName).ToListAsync();
     }

@@ -35,7 +35,7 @@ public class FeedUsers : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { FeedId, UserId };
+        return [FeedId, UserId];
     }
 }
 

@@ -33,7 +33,7 @@ public class FeedLast : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { LastKey };
+        return [LastKey];
     }
 }
 public static class FeedLastExtension

@@ -50,4 +50,7 @@ public record MarkAsReadIntegrationEvent : IntegrationEvent
 
     [ProtoMember(5)]
     public string TaskId { get; set; }
+
+    [ProtoMember(6)]
+    public IDictionary<string, string> Headers { get; set; }
 }

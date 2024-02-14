@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizado</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Link para confirmar que a operação foi enviada para {0} (o endereço de e-mail do gestor do portal).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Endereço de e-mail incorreto</value>
   </data>

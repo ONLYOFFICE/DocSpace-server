@@ -27,25 +27,25 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
-        IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool holdResult = true)
-    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+        IDictionary<string, StringValues> headers, bool holdResult = true)
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, headers, holdResult)
 {
     public Dictionary<T, string> FilesDownload { get; } = files;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
 class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
 {
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
+    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
         : base(serviceProvider, f1, f2)
     {
         _tempStream = tempStream;
+        _baseUri = baseUri;
         this[OpType] = (int)FileOperationType.Download;
     }
 
     private readonly TempStream _tempStream;
+    private readonly string _baseUri;
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -59,6 +59,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            commonLinkUtility.ServerUri = _baseUri;
+        }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
@@ -107,7 +113,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
                 if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
-                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
                 path = $@"{linkId}\{sessionId}\{fileName}";
@@ -193,10 +199,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             if (Files.Count > 0)
             {
-                throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         Total = _entriesPathId.Count + 1;
@@ -369,7 +375,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (file == null)
                     {
-                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                         continue;
                     }
 

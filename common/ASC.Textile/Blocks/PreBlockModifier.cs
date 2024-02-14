@@ -44,7 +44,7 @@ public class PreBlockModifier : BlockModifier
         line = NoTextileEncoder.DecodeNoTextileZones(line,
                                 @"(?<=(^|\s)<pre(" + Globals.HtmlAttributesPattern + ")>)",
                                 "(?=</pre>)",
-                                new[] { "<", ">" });
+                                ["<", ">"]);
         return line;
     }
 }

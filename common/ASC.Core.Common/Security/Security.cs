@@ -37,25 +37,22 @@ public static class Security
             Constants.RoomAdmin.ID, new Dictionary<Guid, HashSet<Rule>>
             {
                 {
-                    Constants.User.ID, new HashSet<Rule>
-                    {
+                    Constants.User.ID, [
                         new(UserConstants.Action_EditGroups.ID, Constants.User),
                         new(UserConstants.Action_AddRemoveUser.ID)
-                    }
+                    ]
                 },
                 {
-                    Constants.RoomAdmin.ID, new HashSet<Rule>
-                    {
+                    Constants.RoomAdmin.ID, [
                         new(UserConstants.Action_EditGroups.ID, Constants.User),
                         new(UserConstants.Action_AddRemoveUser.ID)
-                    }
+                    ]
                 },
                 {
-                    Constants.Collaborator.ID, new HashSet<Rule>
-                    {
+                    Constants.Collaborator.ID, [
                         new(UserConstants.Action_EditGroups.ID, Constants.Collaborator),
                         new(UserConstants.Action_AddRemoveUser.ID)
-                    }
+                    ]
                 }
             }
         }

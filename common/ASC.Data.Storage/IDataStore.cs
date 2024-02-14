@@ -119,6 +119,8 @@ public interface IDataStore
     ///<returns></returns>
     Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
+    Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
+    
     ///<summary>
     /// Saves the contents of the stream in the repository.
     ///</summary>

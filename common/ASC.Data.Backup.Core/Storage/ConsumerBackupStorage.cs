@@ -27,10 +27,11 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class ConsumerBackupStorage(StorageSettingsHelper storageSettingsHelper,
-        TempPath tempPath,
+public class ConsumerBackupStorage(
+        StorageSettingsHelper storageSettingsHelper,
         SetupInfo setupInfo,
-        StorageFactory storageFactory)
+        StorageFactory storageFactory,
+        AscDistributedCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private IDataStore _store;
@@ -43,14 +44,14 @@ public class ConsumerBackupStorage(StorageSettingsHelper storageSettingsHelper,
     {
         var settings = new StorageSettings { Module = storageParams["module"], Props = storageParams.Where(r => r.Key != "module").ToDictionary(r => r.Key, r => r.Value) };
         _store = await storageSettingsHelper.DataStoreAsync(settings);
-        _sessionHolder = new CommonChunkedUploadSessionHolder(tempPath, _store, Domain, setupInfo.ChunkUploadSize);
+        _sessionHolder = new CommonChunkedUploadSessionHolder(_store, Domain, cache, setupInfo.ChunkUploadSize);
     }
 
     public async Task InitAsync(int tenant)
     {
         _isTemporary = true;
         _store = await storageFactory.GetStorageAsync(tenant, "backup");
-        _sessionHolder = new CommonChunkedUploadSessionHolder(tempPath, _store, Domain, setupInfo.ChunkUploadSize);
+        _sessionHolder = new CommonChunkedUploadSessionHolder(_store, Domain, cache, setupInfo.ChunkUploadSize);
     }
 
     public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)

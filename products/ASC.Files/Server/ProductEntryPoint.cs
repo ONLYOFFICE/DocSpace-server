@@ -43,7 +43,8 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
        FilesLinkUtility filesLinkUtility,
        FileSecurity fileSecurity,
        GlobalFolder globalFolder,
-        CommonLinkUtility commonLinkUtility)
+       CommonLinkUtility commonLinkUtility,
+       ILogger<ProductEntryPoint> logger)
     : ProductEntryPoint(filesSpaceUsageStatManager,
            coreBaseSettings,
            authContext, 
@@ -57,7 +58,8 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
            filesLinkUtility,
            fileSecurity,
            globalFolder,
-           commonLinkUtility)
+           commonLinkUtility,
+           logger)
     {
     public override string ApiURL
     {

@@ -66,6 +66,18 @@ public class TimeZoneConverter
         return displayName;
     }
 
+    public string GetIanaTimeZoneId(TimeZoneInfo timeZone)
+    {
+        if (timeZone.HasIanaId)
+        {
+            return timeZone.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZone.Id, out var ianaTimeZoneId)
+            ? ianaTimeZoneId
+            : WindowsTzId2OlsonTzId(timeZone.Id);
+    }
+
     public string OlsonTzId2WindowsTzId(string olsonTimeZoneId, bool defaultIfNoMatch = true)
     {
         var mapZone = GetMapZoneByWindowsTzId(olsonTimeZoneId);

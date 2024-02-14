@@ -39,7 +39,7 @@ public class Subscription : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Source, Action, Recipient, Object };
+        return [TenantId, Source, Action, Recipient, Object];
     }
 }
 

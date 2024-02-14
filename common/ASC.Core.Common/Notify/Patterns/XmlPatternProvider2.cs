@@ -132,7 +132,7 @@ public class XmlPatternProvider2 : IPatternProvider
             return result;
         }
 
-        var array = result.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+        var array = result.Split(["|"], StringSplitOptions.RemoveEmptyEntries);
         if (array.Length < 2)
         {
             return result;

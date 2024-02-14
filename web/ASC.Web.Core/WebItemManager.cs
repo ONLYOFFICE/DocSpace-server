@@ -124,9 +124,9 @@ public class WebItemManager
     {
         var result = new ConcurrentDictionary<Guid, IWebItem>();
 
-        foreach (var webitem in _serviceProvider.GetService<IEnumerable<IWebItem>>())
+        foreach (var webItem in _serviceProvider.GetServices<IWebItem>())
         {
-            var file = webitem.ID.ToString();
+            var file = webItem.ID.ToString();
             try
             {
                 if (DisabledWebItem(file))
@@ -134,7 +134,7 @@ public class WebItemManager
                     continue;
                 }
 
-                RegistryItem(result, webitem);
+                RegistryItem(result, webItem);
             }
             catch (Exception exc)
             {
@@ -145,33 +145,32 @@ public class WebItemManager
         return result;
     }
 
-    private void RegistryItem(ConcurrentDictionary<Guid, IWebItem> result, IWebItem webitem)
+    private void RegistryItem(ConcurrentDictionary<Guid, IWebItem> result, IWebItem webItem)
     {
-        if (webitem != null && !result.TryGetValue(webitem.ID, out _))
+        if (webItem != null && !result.TryGetValue(webItem.ID, out _))
         {
-            if (webitem is IAddon addon)
+            switch (webItem)
             {
-                addon.Init();
-            }
-            if (webitem is IProduct product)
-            {
-                product.Init();
+                case IAddon addon:
+                    addon.Init();
+                    break;
+                case IProduct product:
+                    product.Init();
+                    break;
+                case IModule { Context.SearchHandler: not null }:
+                    //TODO
+                    //SearchHandlerManager.Registry(module.Context.SearchHandler);
+                    break;
             }
 
-            if (webitem is IModule { Context.SearchHandler: not null })
-            {
-                //TODO
-                //SearchHandlerManager.Registry(module.Context.SearchHandler);
-            }
-
-            result.TryAdd(webitem.ID, webitem);
-            _log.DebugWebItemLoaded(webitem.Name);
+            result.TryAdd(webItem.ID, webItem);
+            _log.DebugWebItemLoaded(webItem.Name);
         }
     }
 
-    public Guid GetParentItemID(Guid itemID)
+    public Guid GetParentItemId(Guid itemId)
     {
-        return this[itemID] is IModule m ? m.ProjectId : Guid.Empty;
+        return this[itemId] is IModule m ? m.ProjectId : Guid.Empty;
     }
 
     public int GetSortOrder(IWebItem item)
@@ -200,17 +199,12 @@ public class WebItemManager
 [Scope]
 public class WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext authContext, WebItemManager webItemManager)
 {
-    public List<IWebItem> GetItems(WebZoneType webZone)
-    {
-        return GetItems(webZone, ItemAvailableState.Normal);
-    }
-
-    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState avaliableState)
+    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState availableState =  ItemAvailableState.Normal)
     {
         var copy = webItemManager.GetItemsAll().ToList();
         var list = copy.Where(item =>
             {
-                if ((avaliableState & ItemAvailableState.Disabled) != ItemAvailableState.Disabled && item.IsDisabledAsync(webItemSecurity, authContext).Result)
+                if ((availableState & ItemAvailableState.Disabled) != ItemAvailableState.Disabled && item.IsDisabledAsync(webItemSecurity, authContext).Result)
                 {
                     return false;
                 }
@@ -220,19 +214,5 @@ public class WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext
 
         list.Sort((x, y) => webItemManager.GetSortOrder(x).CompareTo(webItemManager.GetSortOrder(y)));
         return list;
-    }
-
-    public List<IWebItem> GetSubItems(Guid parentItemID)
-    {
-        return GetSubItems(parentItemID, ItemAvailableState.Normal);
-    }
-
-    public List<IWebItem> GetSubItems(Guid parentItemID, ItemAvailableState avaliableState)
-    {
-        return GetItems(WebZoneType.All, avaliableState)
-            .OfType<IModule>()
-            .Where(p => p.ProjectId == parentItemID)
-            .Cast<IWebItem>()
-            .ToList();
     }
 }

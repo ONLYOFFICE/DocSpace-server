@@ -19,7 +19,7 @@
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
-    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
+    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />

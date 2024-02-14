@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>사용자 정의</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>작업을 확인하기 위해 링크는 {0} (포털 소유자의 이메일 주소)로 발송되었습니다.</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>잘못된 이메일 주소</value>
   </data>

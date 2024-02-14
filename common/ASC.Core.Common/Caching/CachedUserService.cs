@@ -136,8 +136,6 @@ public class CachedUserService : IUserService, ICachedService
 {
     private readonly IUserService _service;
     private readonly ICache _cache;
-    internal CoreBaseSettings CoreBaseSettings { get; set; }
-    internal UserServiceCache UserServiceCache { get; set; }
     private readonly ICacheNotify<UserInfoCacheItem> _cacheUserInfoItem;
     private readonly ICacheNotify<UserPhotoCacheItem> _cacheUserPhotoItem;
     private readonly ICacheNotify<GroupCacheItem> _cacheGroupCacheItem;
@@ -146,26 +144,16 @@ public class CachedUserService : IUserService, ICachedService
     private readonly TimeSpan _cacheExpiration;
     private readonly TimeSpan _photoExpiration;
 
-    public CachedUserService(ICacheNotify<GroupCacheItem> cacheGroupCacheItem)
-    {
-        _cacheGroupCacheItem = cacheGroupCacheItem;
-    }
-
-    public CachedUserService()
-    {
-        _cacheExpiration = TimeSpan.FromMinutes(20);
-        _photoExpiration = TimeSpan.FromMinutes(10);
-    }
-
     public CachedUserService(
         EFUserService service,
-        CoreBaseSettings coreBaseSettings,
-        UserServiceCache userServiceCache
-        ) : this()
+        UserServiceCache userServiceCache,
+        ICacheNotify<GroupCacheItem> cacheGroupCacheItem
+        )
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        CoreBaseSettings = coreBaseSettings;
-        UserServiceCache = userServiceCache;
+        _service = service;
+        _cacheExpiration = TimeSpan.FromMinutes(20);
+        _photoExpiration = TimeSpan.FromMinutes(10);
+        _cacheGroupCacheItem = cacheGroupCacheItem;
         _cache = userServiceCache.Cache;
         _cacheUserInfoItem = userServiceCache.CacheUserInfoItem;
         _cacheUserPhotoItem = userServiceCache.CacheUserPhotoItem;
@@ -275,9 +263,9 @@ public class CachedUserService : IUserService, ICachedService
         return await _service.GetTenantsWithFeedsAsync(from);
     }
 
-    public async Task RemoveUserAsync(int tenant, Guid id)
+    public async Task RemoveUserAsync(int tenant, Guid id, bool immediate = false)
     {
-        await _service.RemoveUserAsync(tenant, id);
+        await _service.RemoveUserAsync(tenant, id, immediate);
         await _cacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Tenant = tenant, Id = id.ToString() }, CacheNotifyAction.Any);
     }
 

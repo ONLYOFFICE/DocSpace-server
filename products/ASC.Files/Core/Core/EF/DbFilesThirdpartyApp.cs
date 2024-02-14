@@ -38,7 +38,7 @@ public class DbFilesThirdpartyApp : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { UserId, App };
+        return [UserId, App];
     }
 }
 

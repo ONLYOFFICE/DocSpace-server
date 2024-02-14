@@ -58,7 +58,7 @@ public class User : BaseEntity, IMapFrom<UserInfo>
 
     public override object[] GetKeys()
     {
-        return new object[] { Id };
+        return [Id];
     }
 }
 

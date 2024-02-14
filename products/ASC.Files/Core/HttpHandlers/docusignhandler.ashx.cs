@@ -70,12 +70,12 @@ public class DocuSignHandlerService(ILogger<DocuSignHandlerService> logger,
                     await WebhookAsync(context);
                     break;
                 default:
-                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMassage_BadRequest);
+                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
             }
         }
         catch (InvalidOperationException e)
         {
-            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMassage_BadRequest, e);
+            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMessage_BadRequest, e);
         }
     }
 
