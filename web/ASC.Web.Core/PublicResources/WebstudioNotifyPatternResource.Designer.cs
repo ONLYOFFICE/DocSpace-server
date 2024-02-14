@@ -8,10 +8,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Core.PublicResources {
-    using System;
-    
-    
+using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
+using System.Resources;
+using System.Runtime.CompilerServices;
+
+namespace ASC.Web.Core.PublicResources
+{
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,461 +22,561 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class WebstudioNotifyPatternResource {
-        
-        private static global::System.Resources.ResourceManager resourceMan;
-        
-        private static global::System.Globalization.CultureInfo resourceCulture;
-        
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal WebstudioNotifyPatternResource() {
+    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [DebuggerNonUserCode()]
+    [CompilerGenerated()]
+    public class WebstudioNotifyPatternResource
+    {
+
+        private static ResourceManager resourceMan;
+
+        private static CultureInfo resourceCulture;
+
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal WebstudioNotifyPatternResource()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static ResourceManager ResourceManager
+        {
+            get
+            {
+                if (ReferenceEquals(resourceMan, null))
+                {
+                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
-            get {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ACCEPT.
         /// </summary>
-        public static string AcceptDocSpace {
-            get {
+        public static string AcceptDocSpace
+        {
+            get
+            {
                 return ResourceManager.GetString("AcceptDocSpace", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
-        public static string ActionFileCreated {
-            get {
+        public static string ActionFileCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionFileCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; edited the document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;.
         /// </summary>
-        public static string ActionFileEdited {
-            get {
+        public static string ActionFileEdited
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionFileEdited", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;.
         /// </summary>
-        public static string ActionFileUploaded {
-            get {
+        public static string ActionFileUploaded
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionFileUploaded", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; added a new comment to the document version: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
-        public static string ActionNewComment {
-            get {
+        public static string ActionNewComment
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionNewComment", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; moved the room: &lt;a href={1}&gt;{2}&lt;/a&gt; to archive - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
-        public static string ActionRoomArchived {
-            get {
+        public static string ActionRoomArchived
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionRoomArchived", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new room: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
-        public static string ActionRoomCreated {
-            get {
+        public static string ActionRoomCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionRoomCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; deleted the room: &lt;b&gt;{1}&lt;/b&gt;.
         /// </summary>
-        public static string ActionRoomRemoved {
-            get {
+        public static string ActionRoomRemoved
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionRoomRemoved", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the room: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
         /// </summary>
-        public static string ActionRoomRenamed {
-            get {
+        public static string ActionRoomRenamed
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionRoomRenamed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the room: &lt;a href={2}&gt;{3}&lt;/a&gt;.
         /// </summary>
-        public static string ActionRoomUpdateAccessForUser {
-            get {
+        public static string ActionRoomUpdateAccessForUser
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionRoomUpdateAccessForUser", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the room: &lt;a href={1}&gt;{2}&lt;/a&gt;.
         /// </summary>
-        public static string ActionUserAddedToRoom {
-            get {
+        public static string ActionUserAddedToRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionUserAddedToRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to New DocSpace user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
-        public static string ActionUserCreated {
-            get {
+        public static string ActionUserCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionUserCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the room: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
-        public static string ActionUserRemovedFromRoom {
-            get {
+        public static string ActionUserRemovedFromRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionUserRemovedFromRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; changed the access level of the users &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
-        public static string ActionUsersUpdatedType {
-            get {
+        public static string ActionUsersUpdatedType
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionUsersUpdatedType", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to DocSpace user updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
-        public static string ActionUserUpdated {
-            get {
+        public static string ActionUserUpdated
+        {
+            get
+            {
                 return ResourceManager.GetString("ActionUserUpdated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Best regards, ONLYOFFICE Support Team.
         /// </summary>
-        public static string BestRegardsText {
-            get {
+        public static string BestRegardsText
+        {
+            get
+            {
                 return ResourceManager.GetString("BestRegardsText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Accept.
         /// </summary>
-        public static string ButtonAccept {
-            get {
+        public static string ButtonAccept
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonAccept", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Access Control Panel.
         /// </summary>
-        public static string ButtonAccessControlPanel {
-            get {
+        public static string ButtonAccessControlPanel
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonAccessControlPanel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Access Your Portal.
         /// </summary>
-        public static string ButtonAccessYourPortal {
-            get {
+        public static string ButtonAccessYourPortal
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonAccessYourPortal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Access Your Web-Office.
         /// </summary>
-        public static string ButtonAccessYouWebOffice {
-            get {
+        public static string ButtonAccessYouWebOffice
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonAccessYouWebOffice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Click here to activate your email address.
         /// </summary>
-        public static string ButtonActivateEmail {
-            get {
+        public static string ButtonActivateEmail
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonActivateEmail", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Change email address.
         /// </summary>
-        public static string ButtonChangeEmail {
-            get {
+        public static string ButtonChangeEmail
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonChangeEmail", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Change password.
         /// </summary>
-        public static string ButtonChangePassword {
-            get {
+        public static string ButtonChangePassword
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonChangePassword", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Change mobile phone number.
         /// </summary>
-        public static string ButtonChangePhone {
-            get {
+        public static string ButtonChangePhone
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonChangePhone", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Configure the authenticator app.
         /// </summary>
-        public static string ButtonChangeTfa {
-            get {
+        public static string ButtonChangeTfa
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonChangeTfa", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Collaborate in DocSpace.
         /// </summary>
-        public static string ButtonCollaborateDocSpace {
-            get {
+        public static string ButtonCollaborateDocSpace
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonCollaborateDocSpace", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Configure Right Now.
         /// </summary>
-        public static string ButtonConfigureRightNow {
-            get {
+        public static string ButtonConfigureRightNow
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfigureRightNow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm.
         /// </summary>
-        public static string ButtonConfirm {
-            get {
+        public static string ButtonConfirm
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm DocSpace Invite.
         /// </summary>
-        public static string ButtonConfirmDocSpaceInvite {
-            get {
+        public static string ButtonConfirmDocSpaceInvite
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirmDocSpaceInvite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to CONFIRM.
         /// </summary>
-        public static string ButtonConfirmEmail {
-            get {
+        public static string ButtonConfirmEmail
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirmEmail", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm Portal Owner Update.
         /// </summary>
-        public static string ButtonConfirmPortalOwnerUpdate {
-            get {
+        public static string ButtonConfirmPortalOwnerUpdate
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirmPortalOwnerUpdate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm Room Invite.
         /// </summary>
-        public static string ButtonConfirmRoomInvite {
-            get {
+        public static string ButtonConfirmRoomInvite
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirmRoomInvite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm account termination.
         /// </summary>
-        public static string ButtonConfirmTermination {
-            get {
+        public static string ButtonConfirmTermination
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonConfirmTermination", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deactivate Portal.
         /// </summary>
-        public static string ButtonDeactivatePortal {
-            get {
+        public static string ButtonDeactivatePortal
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonDeactivatePortal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Delete Portal.
         /// </summary>
-        public static string ButtonDeletePortal {
-            get {
+        public static string ButtonDeletePortal
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonDeletePortal", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Invite Right Now.
         /// </summary>
-        public static string ButtonInviteRightNow {
-            get {
+        public static string ButtonInviteRightNow
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonInviteRightNow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Click here to join the portal.
         /// </summary>
-        public static string ButtonJoin {
-            get {
+        public static string ButtonJoin
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonJoin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Leave Feedback.
         /// </summary>
-        public static string ButtonLeaveFeedback {
-            get {
+        public static string ButtonLeaveFeedback
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonLeaveFeedback", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Remove profile.
         /// </summary>
-        public static string ButtonRemoveProfile {
-            get {
+        public static string ButtonRemoveProfile
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonRemoveProfile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Renew now.
         /// </summary>
-        public static string ButtonRenewNow {
-            get {
+        public static string ButtonRenewNow
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonRenewNow", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Request a Call.
         /// </summary>
-        public static string ButtonRequestCallButton {
-            get {
+        public static string ButtonRequestCallButton
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonRequestCallButton", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Select the Pricing Plans Right Now.
         /// </summary>
-        public static string ButtonSelectPricingPlans {
-            get {
+        public static string ButtonSelectPricingPlans
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonSelectPricingPlans", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Start free trial.
         /// </summary>
-        public static string ButtonStartFreeTrial {
-            get {
+        public static string ButtonStartFreeTrial
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonStartFreeTrial", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Use discount.
         /// </summary>
-        public static string ButtonUseDiscount {
-            get {
+        public static string ButtonUseDiscount
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonUseDiscount", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Visit Payments Section.
         /// </summary>
-        public static string ButtonVisitPaymentsSection {
-            get {
+        public static string ButtonVisitPaymentsSection
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonVisitPaymentsSection", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to WATCH FULL PLAYLIST.
         /// </summary>
-        public static string ButtonWatchFullPlaylist {
-            get {
+        public static string ButtonWatchFullPlaylist
+        {
+            get
+            {
                 return ResourceManager.GetString("ButtonWatchFullPlaylist", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Activate your email for &quot;${__VirtualRootPath}&quot;:&quot;$InviteLink&quot; portal.
         ///
@@ -485,12 +588,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///This link is valid for 7 days only. Please complete your email activation within that period..
         /// </summary>
-        public static string pattern_activate_email {
-            get {
+        public static string pattern_activate_email
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_activate_email", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal backup created
         ///
@@ -505,12 +610,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_backup_created {
-            get {
+        public static string pattern_backup_created
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_backup_created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to [${__VirtualRootPath}](${__VirtualRootPath}) portal backup created
         ///
@@ -526,12 +633,14 @@ namespace ASC.Web.Core.PublicResources {
         ///ONLYOFFICE™ Support Team
         ///[www.onlyof [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_backup_created_tg {
-            get {
+        public static string pattern_backup_created_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_backup_created_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Want to change the email on your ${LetterLogoText} account?
         ///
@@ -545,12 +654,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Don’t want to change your email? Just ignore this message..
         /// </summary>
-        public static string pattern_change_email_v115 {
-            get {
+        public static string pattern_change_email_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_change_email_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Want to change the password on your ONLYOFFICE account? Click the button below to confirm.
         ///
@@ -560,12 +671,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Don’t want to change your password? Just ignore this message.
         /// </summary>
-        public static string pattern_change_password_v115 {
-            get {
+        public static string pattern_change_password_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_change_password_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Mobile phone change request
         ///
@@ -577,12 +690,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///If you do not want to change your mobile phone or received this email by mistake, please ignore it or contact your portal administrator to find out the details..
         /// </summary>
-        public static string pattern_change_phone {
-            get {
+        public static string pattern_change_phone
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_change_phone", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Security notification
         ///
@@ -592,12 +707,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$OrangeButton.
         /// </summary>
-        public static string pattern_change_tfa {
-            get {
+        public static string pattern_change_tfa
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_change_tfa", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Change of &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal owner
         ///
@@ -611,12 +728,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///*Note*: this link is valid for 7 days only. Please complete the portal owner change process within that period..
         /// </summary>
-        public static string pattern_confirm_owner_change {
-            get {
+        public static string pattern_confirm_owner_change
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_confirm_owner_change", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -633,12 +752,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_enterprise_admin_activation_v1 {
-            get {
+        public static string pattern_enterprise_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Get &lt;span style=&quot;color:#FF6F3D;&quot;&gt;free&lt;/span&gt; ONLYOFFICE apps
         ///
@@ -649,12 +770,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#FF6F3D&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)&quot; style=&quot;background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; he [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_admin_user_apps_tips_v1 {
-            get {
+        public static string pattern_enterprise_admin_user_apps_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_admin_user_apps_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
         ///
@@ -665,12 +788,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_admin_user_docs_tips_v1 {
-            get {
+        public static string pattern_enterprise_admin_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_admin_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Discover business subscription of &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -681,12 +806,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#f5f5f5&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align:  [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_admin_welcome_v1 {
-            get {
+        public static string pattern_enterprise_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -701,12 +828,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
         /// </summary>
-        public static string pattern_enterprise_guest_activation_v10 {
-            get {
+        public static string pattern_enterprise_guest_activation_v10
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_guest_activation_v10", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -717,12 +846,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_guest_welcome_v1 {
-            get {
+        public static string pattern_enterprise_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -735,12 +866,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_enterprise_user_activation_v1 {
-            get {
+        public static string pattern_enterprise_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -751,12 +884,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_user_welcome_v1 {
-            get {
+        public static string pattern_enterprise_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -773,12 +908,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_enterprise_whitelabel_admin_activation_v1 {
-            get {
+        public static string pattern_enterprise_whitelabel_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Discover business subscription of &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -789,12 +926,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#f5f5f5&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align:  [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_whitelabel_admin_welcome_v1 {
-            get {
+        public static string pattern_enterprise_whitelabel_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -809,12 +948,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
         /// </summary>
-        public static string pattern_enterprise_whitelabel_guest_activation_v10 {
-            get {
+        public static string pattern_enterprise_whitelabel_guest_activation_v10
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_guest_activation_v10", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -825,12 +966,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_whitelabel_guest_welcome_v1 {
-            get {
+        public static string pattern_enterprise_whitelabel_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -843,12 +986,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_enterprise_whitelabel_user_activation_v1 {
-            get {
+        public static string pattern_enterprise_whitelabel_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -859,12 +1004,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_enterprise_whitelabel_user_welcome_v1 {
-            get {
+        public static string pattern_enterprise_whitelabel_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Message from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
@@ -872,12 +1019,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$Body.
         /// </summary>
-        public static string pattern_for_admin_notify {
-            get {
+        public static string pattern_for_admin_notify
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_for_admin_notify", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Message from the [${__VirtualRootPath}](${__VirtualRootPath}) portal
         ///
@@ -885,12 +1034,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$Body.
         /// </summary>
-        public static string pattern_for_admin_notify_tg {
-            get {
+        public static string pattern_for_admin_notify_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_for_admin_notify_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Message from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
@@ -900,12 +1051,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$Body.
         /// </summary>
-        public static string pattern_for_sales_notify {
-            get {
+        public static string pattern_for_sales_notify
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_for_sales_notify", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Invitation to join &quot;${__VirtualRootPath}&quot;:&quot;$InviteLink&quot; portal
         ///
@@ -919,12 +1072,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///*Note*: this link is valid for 48 hours only. Please complete the operation within that period..
         /// </summary>
-        public static string pattern_join {
-            get {
+        public static string pattern_join
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_join", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -941,14 +1096,16 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      Outgoing Mail (SMTP): 
         ///      Server: &lt;b&gt;$Server&lt;/b&gt;
-        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
+        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_mailbox_created {
-            get {
+        public static string pattern_mailbox_created
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_mailbox_created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -956,12 +1113,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      If you received this email by mistake, please ignore it or contact your portal administrator to find out the details..
         /// </summary>
-        public static string pattern_mailbox_password_changed {
-            get {
+        public static string pattern_mailbox_password_changed
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_mailbox_password_changed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -969,12 +1128,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      If you received this email by mistake, please ignore it or contact your portal administrator to find out the details..
         /// </summary>
-        public static string pattern_mailbox_without_settings_created {
-            get {
+        public static string pattern_mailbox_without_settings_created
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_mailbox_without_settings_created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration error
         ///
@@ -987,12 +1148,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///^To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
-        public static string pattern_migration_error {
-            get {
+        public static string pattern_migration_error
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_migration_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration error
         ///
@@ -1005,12 +1168,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///^To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
-        public static string pattern_migration_server_failure {
-            get {
+        public static string pattern_migration_server_failure
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_migration_server_failure", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration started
         ///
@@ -1022,12 +1187,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_migration_start {
-            get {
+        public static string pattern_migration_start
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_migration_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Portal migration
         ///h1.&quot;$PortalUrl&quot;:&quot;$PortalUrl&quot;
@@ -1041,12 +1208,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///If you received this email by mistake, please ignore it or contact your &quot;$PortalUrl&quot;:&quot;$PortalUrl&quot; portal admini [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_migration_success_v115 {
-            get {
+        public static string pattern_migration_success_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_migration_success_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1063,12 +1232,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_opensource_admin_activation_v1 {
-            get {
+        public static string pattern_opensource_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
         ///
@@ -1079,12 +1250,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_opensource_admin_docs_tips_v1 {
-            get {
+        public static string pattern_opensource_admin_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_admin_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Discover business subscription of &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1095,12 +1268,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#f5f5f5&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align:  [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_opensource_admin_welcome_v1 {
-            get {
+        public static string pattern_opensource_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1115,12 +1290,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
         /// </summary>
-        public static string pattern_opensource_guest_activation_v11 {
-            get {
+        public static string pattern_opensource_guest_activation_v11
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_guest_activation_v11", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1131,12 +1308,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_opensource_guest_welcome_v1 {
-            get {
+        public static string pattern_opensource_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1149,12 +1328,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_opensource_user_activation_v1 {
-            get {
+        public static string pattern_opensource_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
         ///
@@ -1165,12 +1346,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_opensource_user_docs_tips_v1 {
-            get {
+        public static string pattern_opensource_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1181,12 +1364,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_opensource_user_welcome_v1 {
-            get {
+        public static string pattern_opensource_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_opensource_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Deactivation of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
@@ -1201,12 +1386,14 @@ namespace ASC.Web.Core.PublicResources {
         ///You can reactivate your portal any time by clicking the following link:
         ///p=. &quot;Reactivate Portal&quot;:&quot;$ActivateUrl&quot; (this [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_portal_deactivate {
-            get {
+        public static string pattern_portal_deactivate
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_deactivate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deactivation of the [${__VirtualRootPath}](${__VirtualRootPath}) portal
         ///
@@ -1221,12 +1408,14 @@ namespace ASC.Web.Core.PublicResources {
         ///You can reactivate your portal any time by clicking the following link:
         ///[Reactivate Portal]($ActivateUrl) (this link has  [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_portal_deactivate_tg {
-            get {
+        public static string pattern_portal_deactivate_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_deactivate_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Deletion of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; space
         ///
@@ -1239,12 +1428,14 @@ namespace ASC.Web.Core.PublicResources {
         ///#if($AutoRenew == &quot;True&quot;)
         ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your &quot;Avangate account&quot;:&quot;https [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_portal_delete {
-            get {
+        public static string pattern_portal_delete
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. ONLYOFFICE DocSpace has been &lt;span style=&quot;color:#FF6F3D;&quot;&gt;deactivated&lt;/span&gt;
         ///
@@ -1253,12 +1444,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_portal_delete_success_v1 {
-            get {
+        public static string pattern_portal_delete_success_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_delete_success_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deletion of the [${__VirtualRootPath}](${__VirtualRootPath}) portal
         ///
@@ -1271,12 +1464,14 @@ namespace ASC.Web.Core.PublicResources {
         ///#if($AutoRenew == &quot;True&quot;)
         ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your [Avangate account](https:/ [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_portal_delete_tg {
-            get {
+        public static string pattern_portal_delete_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_delete_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Change of portal address
         ///
@@ -1286,12 +1481,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///*Note*: DNS settings and single sign-on options stop working until you change them..
         /// </summary>
-        public static string pattern_portal_rename {
-            get {
+        public static string pattern_portal_rename
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_portal_rename", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Removal of the profile from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
@@ -1303,12 +1500,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///*Note*: this link is valid for 7 days only. Please complete the profile deletion process within that period..
         /// </summary>
-        public static string pattern_profile_delete {
-            get {
+        public static string pattern_profile_delete
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_profile_delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; has deleted his/her profile, and this profile is now blocked. All user’s files are still assigned to him/her and occupy disk space. 
         ///
@@ -1316,12 +1515,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Please go to the user profile using &quot;this link&quot;:&quot;$FromUserLink&quot; to reassign documents to another user or remove the data..
         /// </summary>
-        public static string pattern_profile_has_deleted_itself {
-            get {
+        public static string pattern_profile_has_deleted_itself
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_profile_has_deleted_itself", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Your profile at &quot;$__VirtualRootPath&quot;:&quot;$__VirtualRootPath&quot; has been changed
         ///
@@ -1332,12 +1533,14 @@ namespace ASC.Web.Core.PublicResources {
         ///To view your profile follow the link below:
         ///&quot;$UserName&quot;:&quot;$MyStaffLink&quot;.
         /// </summary>
-        public static string pattern_profile_updated {
-            get {
+        public static string pattern_profile_updated
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_profile_updated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Your profile at [${__VirtualRootPath}](${__VirtualRootPath}) has been changed
         ///
@@ -1348,23 +1551,27 @@ namespace ASC.Web.Core.PublicResources {
         ///To view your profile follow the link below:
         ///[$UserName]($MyStaffLink).
         /// </summary>
-        public static string pattern_profile_updated_tg {
-            get {
+        public static string pattern_profile_updated_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_profile_updated_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
         ///The process of data reassignment from user &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; to user &quot;$ToUserName&quot;:&quot;$ToUserLink&quot; has been successfully completed..
         /// </summary>
-        public static string pattern_reassigns_completed {
-            get {
+        public static string pattern_reassigns_completed
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_reassigns_completed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -1372,12 +1579,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Exception message: $Message.
         /// </summary>
-        public static string pattern_reassigns_failed {
-            get {
+        public static string pattern_reassigns_failed
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_reassigns_failed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -1385,12 +1594,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The deletion of personal data allowed to free $DocsSpace.
         /// </summary>
-        public static string pattern_remove_user_data_completed {
-            get {
+        public static string pattern_remove_user_data_completed
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_remove_user_data_completed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -1398,12 +1609,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Exception message: $Message.
         /// </summary>
-        public static string pattern_remove_user_data_failed {
-            get {
+        public static string pattern_remove_user_data_failed
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_remove_user_data_failed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Enterprise license request
         ///
@@ -1437,12 +1650,14 @@ namespace ASC.Web.Core.PublicResources {
         ///h3.Portal address
         ///&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         /// </summary>
-        public static string pattern_request_license {
-            get {
+        public static string pattern_request_license
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_request_license", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.SAAS Tariff Request for &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
@@ -1473,12 +1688,14 @@ namespace ASC.Web.Core.PublicResources {
         ///h3.Request content
         ///$Body.
         /// </summary>
-        public static string pattern_request_tariff1 {
-            get {
+        public static string pattern_request_tariff1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_request_tariff1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Portal restoration
         ///h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
@@ -1491,12 +1708,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///If you received this email by mistake, please ignore it or contact your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal administrator to find out the details..
         /// </summary>
-        public static string pattern_restore_completed_v115 {
-            get {
+        public static string pattern_restore_completed_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_restore_completed_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Portal restoration started
         ///
@@ -1510,12 +1729,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///^To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
-        public static string pattern_restore_started {
-            get {
+        public static string pattern_restore_started
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_restore_started", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1531,12 +1752,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style= [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_activation_v1 {
-            get {
+        public static string pattern_saas_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Configure your &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1547,12 +1770,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_modules_v1 {
-            get {
+        public static string pattern_saas_admin_modules_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_modules_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Your ONLYOFFICE DocSpace will be &lt;span style=&quot;color:#FF6F3D;&quot;&gt;deleted&lt;/span&gt;
         ///
@@ -1563,12 +1788,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;t [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_trial_warning_after_half_year_v1 {
-            get {
+        public static string pattern_saas_admin_trial_warning_after_half_year_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_trial_warning_after_half_year_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Get &lt;span style=&quot;color:#FF6F3D;&quot;&gt;free&lt;/span&gt; ONLYOFFICE apps
         ///
@@ -1579,12 +1806,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#FF6F3D&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)&quot; style=&quot;background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; he [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_user_apps_tips_v1 {
-            get {
+        public static string pattern_saas_admin_user_apps_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_user_apps_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
         ///
@@ -1595,12 +1824,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;d [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_user_docs_tips_v1 {
-            get {
+        public static string pattern_saas_admin_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Discover business subscription of &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1611,12 +1842,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table bgcolor=&quot;#f5f5f5&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align:  [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_welcome_v1 {
-            get {
+        public static string pattern_saas_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1631,12 +1864,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_docspace_invite {
-            get {
+        public static string pattern_saas_docspace_invite
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_docspace_invite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1651,12 +1886,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_guest_activation_v115 {
-            get {
+        public static string pattern_saas_guest_activation_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_guest_activation_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1667,12 +1904,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_guest_welcome_v1 {
-            get {
+        public static string pattern_saas_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1684,12 +1923,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_owner_payment_warning_grace_period_activation {
-            get {
+        public static string pattern_saas_owner_payment_warning_grace_period_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_owner_payment_warning_grace_period_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1701,12 +1942,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_owner_payment_warning_grace_period_before_activation {
-            get {
+        public static string pattern_saas_owner_payment_warning_grace_period_before_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_owner_payment_warning_grace_period_before_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1718,12 +1961,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_owner_payment_warning_grace_period_expired {
-            get {
+        public static string pattern_saas_owner_payment_warning_grace_period_expired
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_owner_payment_warning_grace_period_expired", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1735,12 +1980,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_owner_payment_warning_grace_period_last_day {
-            get {
+        public static string pattern_saas_owner_payment_warning_grace_period_last_day
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_owner_payment_warning_grace_period_last_day", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
@@ -1752,12 +1999,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_room_invite {
-            get {
+        public static string pattern_saas_room_invite
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_room_invite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
@@ -1770,12 +2019,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_saas_user_activation_v1 {
-            get {
+        public static string pattern_saas_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1786,12 +2037,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_user_welcome_v1 {
-            get {
+        public static string pattern_saas_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. Master ONLYOFFICE DocSpace with &lt;span style=&quot;color:#FF6F3D;&quot;&gt;video guides&lt;/span&gt;
         ///
@@ -1802,12 +2055,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tb [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_video_guides_v1 {
-            get {
+        public static string pattern_saas_video_guides_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_saas_video_guides_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal profile change notification
         ///
@@ -1816,23 +2071,27 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///^If you do not want to receive the notifications about profile updates, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
-        public static string pattern_self_profile_updated {
-            get {
+        public static string pattern_self_profile_updated
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_self_profile_updated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to [${__VirtualRootPath}](${__VirtualRootPath}) portal profile change notification
         ///
         ///[$__AuthorName]($__AuthorUrl) has changed his/her profile details at the [${__VirtualRootPath}](${__VirtualRootPath}) portal..
         /// </summary>
-        public static string pattern_self_profile_updated_tg {
-            get {
+        public static string pattern_self_profile_updated_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_self_profile_updated_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.Here is what’s new in your DocSpace on $Date
         ///
@@ -1841,12 +2100,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///#end.
         /// </summary>
-        public static string pattern_send_whats_new {
-            get {
+        public static string pattern_send_whats_new
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_send_whats_new", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to SMTP test message
         ///
@@ -1855,12 +2116,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$TrulyYours.
         /// </summary>
-        public static string pattern_smtp_test {
-            get {
+        public static string pattern_smtp_test
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_smtp_test", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1868,12 +2131,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Some files could not be decrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
         /// </summary>
-        public static string pattern_storage_decryption_error {
-            get {
+        public static string pattern_storage_decryption_error
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_decryption_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1881,12 +2146,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The decryption might take some time, so the portal will be temporarily unavailable. As soon as the decryption is over, you will be able to work with your data again..
         /// </summary>
-        public static string pattern_storage_decryption_start {
-            get {
+        public static string pattern_storage_decryption_start
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_decryption_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1894,12 +2161,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Your portal is available again..
         /// </summary>
-        public static string pattern_storage_decryption_success {
-            get {
+        public static string pattern_storage_decryption_success
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_decryption_success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1907,12 +2176,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Some files could not be encrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
         /// </summary>
-        public static string pattern_storage_encryption_error {
-            get {
+        public static string pattern_storage_encryption_error
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_encryption_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1920,12 +2191,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The encryption might take some time, so the portal will be temporarily unavailable. As soon as the encryption is over, you will be able to work with your data again..
         /// </summary>
-        public static string pattern_storage_encryption_start {
-            get {
+        public static string pattern_storage_encryption_start
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_encryption_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1933,12 +2206,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Your portal is available again..
         /// </summary>
-        public static string pattern_storage_encryption_success {
-            get {
+        public static string pattern_storage_encryption_success
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_storage_encryption_success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1.New user added to &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
@@ -1947,22 +2222,26 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///^If you do not want to receive the notifications about new users, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
-        public static string pattern_user_has_join {
-            get {
+        public static string pattern_user_has_join
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_user_has_join", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to New user added to [${__VirtualRootPath}](${__VirtualRootPath}) portal
         ///[$__AuthorName]($__AuthorUrl) has joined your portal at [${__VirtualRootPath}](${__VirtualRootPath})..
         /// </summary>
-        public static string pattern_user_has_join_tg {
-            get {
+        public static string pattern_user_has_join_tg
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_user_has_join_tg", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -1974,12 +2253,14 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The link is only valid for 7 days..
         /// </summary>
-        public static string pattern_user_ldap_activation {
-            get {
+        public static string pattern_user_ldap_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_user_ldap_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
         ///
@@ -1992,755 +2273,923 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; borde [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_zoom_welcome {
-            get {
+        public static string pattern_zoom_welcome
+        {
+            get
+            {
                 return ResourceManager.GetString("pattern_zoom_welcome", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Please activate your email address.
         /// </summary>
-        public static string subject_activate_email {
-            get {
+        public static string subject_activate_email
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_activate_email", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootPath} portal backup created.
         /// </summary>
-        public static string subject_backup_created {
-            get {
+        public static string subject_backup_created
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_backup_created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm changing your email.
         /// </summary>
-        public static string subject_change_email_v115 {
-            get {
+        public static string subject_change_email_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_change_email_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText} password assistance.
         /// </summary>
-        public static string subject_change_password {
-            get {
+        public static string subject_change_password
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_change_password", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Confirm changing your password.
         /// </summary>
-        public static string subject_change_password_v115 {
-            get {
+        public static string subject_change_password_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_change_password_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Mobile phone change request.
         /// </summary>
-        public static string subject_change_phone {
-            get {
+        public static string subject_change_phone
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_change_phone", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Security notification.
         /// </summary>
-        public static string subject_change_tfa {
-            get {
+        public static string subject_change_tfa
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_change_tfa", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Change of portal owner.
         /// </summary>
-        public static string subject_confirm_owner_change {
-            get {
+        public static string subject_confirm_owner_change
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_confirm_owner_change", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_admin_activation_v1 {
-            get {
+        public static string subject_enterprise_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Get free ONLYOFFICE apps.
         /// </summary>
-        public static string subject_enterprise_admin_user_apps_tips_v1 {
-            get {
+        public static string subject_enterprise_admin_user_apps_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_admin_user_apps_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to 5 tips for effective work on your docs.
         /// </summary>
-        public static string subject_enterprise_admin_user_docs_tips_v1 {
-            get {
+        public static string subject_enterprise_admin_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_admin_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_enterprise_admin_welcome_v1 {
-            get {
+        public static string subject_enterprise_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
         /// </summary>
-        public static string subject_enterprise_guest_activation_v10 {
-            get {
+        public static string subject_enterprise_guest_activation_v10
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_guest_activation_v10", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_guest_welcome_v1 {
-            get {
+        public static string subject_enterprise_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_enterprise_user_activation_v1 {
-            get {
+        public static string subject_enterprise_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_user_welcome_v1 {
-            get {
+        public static string subject_enterprise_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_whitelabel_admin_activation_v1 {
-            get {
+        public static string subject_enterprise_whitelabel_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_enterprise_whitelabel_admin_welcome_v1 {
-            get {
+        public static string subject_enterprise_whitelabel_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
         /// </summary>
-        public static string subject_enterprise_whitelabel_guest_activation_v10 {
-            get {
+        public static string subject_enterprise_whitelabel_guest_activation_v10
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_guest_activation_v10", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_whitelabel_guest_welcome_v1 {
-            get {
+        public static string subject_enterprise_whitelabel_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_enterprise_whitelabel_user_activation_v1 {
-            get {
+        public static string subject_enterprise_whitelabel_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_enterprise_whitelabel_user_welcome_v1 {
-            get {
+        public static string subject_enterprise_whitelabel_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User message to administrators.
         /// </summary>
-        public static string subject_for_admin_notify {
-            get {
+        public static string subject_for_admin_notify
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_for_admin_notify", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Sales department request.
         /// </summary>
-        public static string subject_for_sales_notify {
-            get {
+        public static string subject_for_sales_notify
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_for_sales_notify", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Invitation to join ${__VirtualRootPath} portal.
         /// </summary>
-        public static string subject_join {
-            get {
+        public static string subject_join
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_join", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Mailbox creation.
         /// </summary>
-        public static string subject_mailbox_created {
-            get {
+        public static string subject_mailbox_created
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_mailbox_created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Change of mailbox password.
         /// </summary>
-        public static string subject_mailbox_password_changed {
-            get {
+        public static string subject_mailbox_password_changed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_mailbox_password_changed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Another region portal migration error.
         /// </summary>
-        public static string subject_migration_error {
-            get {
+        public static string subject_migration_error
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_migration_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Another region portal migration started.
         /// </summary>
-        public static string subject_migration_start {
-            get {
+        public static string subject_migration_start
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_migration_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Another region portal migration successfully completed.
         /// </summary>
-        public static string subject_migration_success {
-            get {
+        public static string subject_migration_success
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_migration_success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_opensource_admin_activation_v1 {
-            get {
+        public static string subject_opensource_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to 5 tips for effective work on your docs.
         /// </summary>
-        public static string subject_opensource_admin_docs_tips_v1 {
-            get {
+        public static string subject_opensource_admin_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_admin_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_opensource_admin_welcome_v1 {
-            get {
+        public static string subject_opensource_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
         /// </summary>
-        public static string subject_opensource_guest_activation_v11 {
-            get {
+        public static string subject_opensource_guest_activation_v11
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_guest_activation_v11", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_opensource_guest_welcome_v1 {
-            get {
+        public static string subject_opensource_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_opensource_user_activation_v1 {
-            get {
+        public static string subject_opensource_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to 5 tips for effective work on your docs.
         /// </summary>
-        public static string subject_opensource_user_docs_tips_v1 {
-            get {
+        public static string subject_opensource_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_opensource_user_welcome_v1 {
-            get {
+        public static string subject_opensource_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_opensource_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootPath} portal.
         /// </summary>
-        public static string subject_portal_deactivate {
-            get {
+        public static string subject_portal_deactivate
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_portal_deactivate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deletion of the ${__VirtualRootPath} portal.
         /// </summary>
-        public static string subject_portal_delete {
-            get {
+        public static string subject_portal_delete
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_portal_delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ONLYOFFICE DocSpace has been deactivated.
         /// </summary>
-        public static string subject_portal_delete_success_v1 {
-            get {
+        public static string subject_portal_delete_success_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_portal_delete_success_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Change of portal address.
         /// </summary>
-        public static string subject_portal_rename {
-            get {
+        public static string subject_portal_rename
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_portal_rename", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deletion of your profile from ${__VirtualRootPath} portal.
         /// </summary>
-        public static string subject_profile_delete {
-            get {
+        public static string subject_profile_delete
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_profile_delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User has deleted his/her profile.
         /// </summary>
-        public static string subject_profile_has_deleted_itself {
-            get {
+        public static string subject_profile_has_deleted_itself
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_profile_has_deleted_itself", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Your profile at ${__VirtualRootPath} has been changed.
         /// </summary>
-        public static string subject_profile_updated {
-            get {
+        public static string subject_profile_updated
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_profile_updated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. User data reassignment is completed.
         /// </summary>
-        public static string subject_reassigns_completed {
-            get {
+        public static string subject_reassigns_completed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_reassigns_completed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. User data reassignment failed.
         /// </summary>
-        public static string subject_reassigns_failed {
-            get {
+        public static string subject_reassigns_failed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_reassigns_failed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. User data removal completed.
         /// </summary>
-        public static string subject_remove_user_data_completed {
-            get {
+        public static string subject_remove_user_data_completed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_remove_user_data_completed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. User data removal failed.
         /// </summary>
-        public static string subject_remove_user_data_failed {
-            get {
+        public static string subject_remove_user_data_failed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_remove_user_data_failed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Enterprise license request.
         /// </summary>
-        public static string subject_request_license {
-            get {
+        public static string subject_request_license
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_request_license", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to SaaS pricing plan request.
         /// </summary>
-        public static string subject_request_tariff {
-            get {
+        public static string subject_request_tariff
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_request_tariff", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Restore completed.
         /// </summary>
-        public static string subject_restore_completed {
-            get {
+        public static string subject_restore_completed
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_restore_completed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Restore started.
         /// </summary>
-        public static string subject_restore_started {
-            get {
+        public static string subject_restore_started
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_restore_started", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_saas_admin_activation_v1 {
-            get {
+        public static string subject_saas_admin_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Configure your ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_saas_admin_modules_v1 {
-            get {
+        public static string subject_saas_admin_modules_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_modules_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace will be deleted.
         /// </summary>
-        public static string subject_saas_admin_trial_warning_after_half_year_v1 {
-            get {
+        public static string subject_saas_admin_trial_warning_after_half_year_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_trial_warning_after_half_year_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Get free ONLYOFFICE apps.
         /// </summary>
-        public static string subject_saas_admin_user_apps_tips_v1 {
-            get {
+        public static string subject_saas_admin_user_apps_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_user_apps_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to 5 tips for effective work on your docs.
         /// </summary>
-        public static string subject_saas_admin_user_docs_tips_v1 {
-            get {
+        public static string subject_saas_admin_user_docs_tips_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_user_docs_tips_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_saas_admin_welcome_v1 {
-            get {
+        public static string subject_saas_admin_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_admin_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_saas_docspace_invite {
-            get {
+        public static string subject_saas_docspace_invite
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_docspace_invite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
         /// </summary>
-        public static string subject_saas_guest_activation_v115 {
-            get {
+        public static string subject_saas_guest_activation_v115
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_guest_activation_v115", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_saas_guest_welcome_v1 {
-            get {
+        public static string subject_saas_guest_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_guest_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace activated.
         /// </summary>
-        public static string subject_saas_owner_payment_warning_grace_period_activation {
-            get {
+        public static string subject_saas_owner_payment_warning_grace_period_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_owner_payment_warning_grace_period_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace subscription is about to expire.
         /// </summary>
-        public static string subject_saas_owner_payment_warning_grace_period_before_activation {
-            get {
+        public static string subject_saas_owner_payment_warning_grace_period_before_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_owner_payment_warning_grace_period_before_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace expired.
         /// </summary>
-        public static string subject_saas_owner_payment_warning_grace_period_expired {
-            get {
+        public static string subject_saas_owner_payment_warning_grace_period_expired
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_owner_payment_warning_grace_period_expired", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace expires tomorrow.
         /// </summary>
-        public static string subject_saas_owner_payment_warning_grace_period_last_day {
-            get {
+        public static string subject_saas_owner_payment_warning_grace_period_last_day
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_owner_payment_warning_grace_period_last_day", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_saas_room_invite {
-            get {
+        public static string subject_saas_room_invite
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_room_invite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
         /// </summary>
-        public static string subject_saas_user_activation_v1 {
-            get {
+        public static string subject_saas_user_activation_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_user_activation_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_saas_user_welcome_v1 {
-            get {
+        public static string subject_saas_user_welcome_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_user_welcome_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Master ONLYOFFICE DocSpace with video guides.
         /// </summary>
-        public static string subject_saas_video_guides_v1 {
-            get {
+        public static string subject_saas_video_guides_v1
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_saas_video_guides_v1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${__VirtualRootPath} portal profile change notification.
         /// </summary>
-        public static string subject_self_profile_updated {
-            get {
+        public static string subject_self_profile_updated
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_self_profile_updated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to What&apos;s new on your portal for $Date.
         /// </summary>
-        public static string subject_send_whats_new {
-            get {
+        public static string subject_send_whats_new
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_send_whats_new", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to SMTP test message.
         /// </summary>
-        public static string subject_smtp_test {
-            get {
+        public static string subject_smtp_test
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_smtp_test", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Decryption process failed.
         /// </summary>
-        public static string subject_storage_decryption_error {
-            get {
+        public static string subject_storage_decryption_error
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_decryption_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Decryption process started.
         /// </summary>
-        public static string subject_storage_decryption_start {
-            get {
+        public static string subject_storage_decryption_start
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_decryption_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Decryption process completed.
         /// </summary>
-        public static string subject_storage_decryption_success {
-            get {
+        public static string subject_storage_decryption_success
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_decryption_success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Encryption process failed.
         /// </summary>
-        public static string subject_storage_encryption_error {
-            get {
+        public static string subject_storage_encryption_error
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_encryption_error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Encryption process started.
         /// </summary>
-        public static string subject_storage_encryption_start {
-            get {
+        public static string subject_storage_encryption_start
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_encryption_start", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Encryption process completed.
         /// </summary>
-        public static string subject_storage_encryption_success {
-            get {
+        public static string subject_storage_encryption_success
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_storage_encryption_success", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to New user added to ${LetterLogoText} portal.
         /// </summary>
-        public static string subject_user_has_join {
-            get {
+        public static string subject_user_has_join
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_user_has_join", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You’re invited to join ${__VirtualRootPath}.
         /// </summary>
-        public static string subject_user_ldap_activation {
-            get {
+        public static string subject_user_ldap_activation
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_user_ldap_activation", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
-        public static string subject_zoom_welcome {
-            get {
+        public static string subject_zoom_welcome
+        {
+            get
+            {
                 return ResourceManager.GetString("subject_zoom_welcome", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Truly Yours, ONLYOFFICE Team.
         /// </summary>
-        public static string TrulyYoursText {
-            get {
+        public static string TrulyYoursText
+        {
+            get
+            {
                 return ResourceManager.GetString("TrulyYoursText", resourceCulture);
             }
         }

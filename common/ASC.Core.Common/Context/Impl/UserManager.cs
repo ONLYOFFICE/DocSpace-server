@@ -397,7 +397,7 @@ public class UserManager
         }
         else
         {
-        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id), Constants.Action_EditUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id), Constants.Action_EditUser);
         }
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
@@ -466,13 +466,13 @@ public class UserManager
         {
             if (type is EmployeeType.User)
             {
-                    lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
                 
                 await _activeUsersFeatureChecker.CheckAppend();
             }
             else if (paidUserQuotaCheck)
             {
-                    lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
                 
                 await _countPaidUserChecker.CheckAppend();
             }

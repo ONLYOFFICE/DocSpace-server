@@ -33,7 +33,7 @@ public abstract class TenantEntityQuotaSettings
     public const int DefaultQuotaValue = -2;
     public bool EnableQuota { get; set; }
 
-    public long DefaultQuota { get; set; } = -2;
+    public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
     public DateTime? LastRecalculateDate { get; set; }
 

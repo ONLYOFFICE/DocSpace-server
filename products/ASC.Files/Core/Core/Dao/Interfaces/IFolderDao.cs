@@ -65,7 +65,7 @@ public interface IFolderDao<T>
 
     IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
-    
+
     IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
@@ -97,7 +97,7 @@ public interface IFolderDao<T>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
@@ -415,7 +415,6 @@ public interface IFolderDao<T>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
-    Task<(int FolderId, FolderType FolderType)> GetParentFolderInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 

@@ -63,13 +63,13 @@ public class UserController(ICache cache,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon, 
+        FileSecurityCommon fileSecurityCommon,
         IDistributedLockProvider distributedLockProvider,
         QuotaSocketManager quotaSocketManager,
         IQuotaService quotaService,
         CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
+{
 
 
     /// <summary>
@@ -124,7 +124,7 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex =  false;
+            user.Sex = false;
         }
 
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
@@ -227,7 +227,7 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex =  false;
+            user.Sex = false;
         }
 
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
@@ -254,18 +254,18 @@ public class UserController(ICache cache,
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
-            if (success)
-            {
+                if (success)
+                {
                     await usersInRoomChecker.CheckAppend();
                     await fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
-            }
-            else
-            {
+                }
+                else
+                {
                     await usersInRoomChecker.CheckAppend();
                     await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
         }
-            }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -422,7 +422,7 @@ public class UserController(ICache cache,
         {
             throw new SecurityException();
         }
-        
+
         await CheckReassignProcessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -480,10 +480,10 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+        //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
+        //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
-        }
+    }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
@@ -1122,8 +1122,8 @@ public class UserController(ICache cache,
 
                     settings.IsFirst = false;
                     await settingsManager.SaveAsync(settings);
-        }
-    }
+                }
+            }
 
             yield return await employeeFullDtoHelper.GetFullAsync(u);
         }
@@ -1157,21 +1157,21 @@ public class UserController(ICache cache,
 
         if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
         {
-                user.CultureName = inDto.CultureName;
+            user.CultureName = inDto.CultureName;
 
-                try
-                {
-                    await _userManager.UpdateUserInfoAsync(user);
-                }
-                catch
-                {
-                    user.CultureName = curLng;
-                    throw;
-                }
+            try
+            {
+                await _userManager.UpdateUserInfoAsync(user);
+            }
+            catch
+            {
+                user.CultureName = curLng;
+                throw;
+            }
 
             await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
-            }
+        }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1203,16 +1203,16 @@ public class UserController(ICache cache,
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
         var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
-        
+
         //Update it
         if (self)
         {
-        var isLdap = user.IsLDAP();
-        var isSso = user.IsSSO();
+            var isLdap = user.IsLDAP();
+            var isSso = user.IsSSO();
 
-        if (!isLdap && !isSso)
-        {
-            //Set common fields
+            if (!isLdap && !isSso)
+            {
+                //Set common fields
 
                 var firstName = inDto.Firstname ?? user.FirstName;
                 var lastName = inDto.Lastname ?? user.LastName;
@@ -1224,18 +1224,18 @@ public class UserController(ICache cache,
 
                 user.FirstName = firstName;
                 user.LastName = lastName;
-            user.Location = inDto.Location ?? user.Location;
+                user.Location = inDto.Location ?? user.Location;
 
-            if (isDocSpaceAdmin)
-            {
-                user.Title = inDto.Title ?? user.Title;
+                if (isDocSpaceAdmin)
+                {
+                    user.Title = inDto.Title ?? user.Title;
+                }
             }
-        }
 
             user.Notes = inDto.Comment ?? user.Notes;
 
             user.Sex = inDto.Sex switch
-        {
+            {
                 "male" => true,
                 "female" => false,
                 _ => user.Sex
@@ -1245,36 +1245,36 @@ public class UserController(ICache cache,
             user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
 
             var resetDate = new DateTime(1900, 01, 01);
-        if (user.BirthDate == resetDate)
-        {
-            user.BirthDate = null;
-        }
+            if (user.BirthDate == resetDate)
+            {
+                user.BirthDate = null;
+            }
 
             user.WorkFromDate = inDto.Worksfrom != null
                 ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom)
                 : user.WorkFromDate;
 
-        if (user.WorkFromDate == resetDate)
-        {
-            user.WorkFromDate = null;
-        }
+            if (user.WorkFromDate == resetDate)
+            {
+                user.WorkFromDate = null;
+            }
 
-        //Update contacts
-        await UpdateContactsAsync(inDto.Contacts, user);
-        await UpdateDepartmentsAsync(inDto.Department, user);
+            //Update contacts
+            await UpdateContactsAsync(inDto.Contacts, user);
+            await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
-        {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
-        }
+            if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            {
+                await UpdatePhotoUrlAsync(inDto.Files, user);
+            }
 
             changed = true;
         }
-        
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var owner = user.IsOwner(tenant);
         var statusChanged = false;
-        
+
         if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
@@ -1285,17 +1285,17 @@ public class UserController(ICache cache,
 
 
         // change user type
-        var canBeGuestFlag = !owner && 
-                             !await _userManager.IsDocSpaceAdminAsync(user) && 
-                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
+        var canBeGuestFlag = !owner &&
+                             !await _userManager.IsDocSpaceAdminAsync(user) &&
+                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 &&
                              !self;
 
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            
-                if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
-                {
+
+            if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+            {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
                     await activeUsersChecker.CheckAppend();
@@ -1305,7 +1305,7 @@ public class UserController(ICache cache,
                 }
             }
             else if (!self && !isUser && await _userManager.IsUserAsync(user))
-                {
+            {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
                     await countPaidUserChecker.CheckAppend();
@@ -1313,21 +1313,21 @@ public class UserController(ICache cache,
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-        }
             }
+        }
 
         if (changed)
         {
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
             await messageService.SendAsync(MessageAction.UserUpdated, messageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
 
             if (statusChanged && inDto.Disable.HasValue && inDto.Disable.Value)
-        {
+            {
                 await cookiesManager.ResetUserCookieAsync(user.Id);
                 await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
-        }
+            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -1368,33 +1368,33 @@ public class UserController(ICache cache,
                     if (user.Status == EmployeeStatus.Terminated)
                     {
                         IDistributedLockHandle lockHandle = null;
-                        
+
                         try
                         {
-                        if (!await _userManager.IsUserAsync(user))
-                        {
+                            if (!await _userManager.IsUserAsync(user))
+                            {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                                
+
                                 await countPaidUserChecker.CheckAppend();
-                        }
-                        else
-                        {
+                            }
+                            else
+                            {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
-                                
+
                                 await activeUsersChecker.CheckAppend();
+                            }
+
+                            user.Status = EmployeeStatus.Active;
+
+                            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
-
-                        user.Status = EmployeeStatus.Active;
-
-                        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-                    }
                         finally
                         {
                             if (lockHandle != null)
                             {
                                 await lockHandle.ReleaseAsync();
+                            }
                         }
-                    }
                     }
                     break;
                 case EmployeeStatus.Terminated:
@@ -1443,17 +1443,17 @@ public class UserController(ICache cache,
         foreach (var user in users)
         {
             await userManagerWrapper.UpdateUserTypeAsync(user, type);
-            }
-        
+        }
+
         await messageService.SendAsync(MessageAction.UsersUpdatedType, messageTarget.Create(users.Select(x => x.Id)),
         users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
-        
+
         foreach (var user in users)
         {
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
-    
+
     ///<summary>
     /// Starts the process of recalculating quota.
     /// </summary>
@@ -1522,7 +1522,7 @@ public class UserController(ICache cache,
         }
 
         foreach (var user in users)
-        {
+            {
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
@@ -1532,8 +1532,8 @@ public class UserController(ICache cache,
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace.ToString(), inDto.Quota.ToString(), new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
-        }
-    }
+                }
+            }
 
     /// <summary>
     /// Reset a user quota limit with the ID specified in the request from the portal.
@@ -1588,7 +1588,7 @@ public class UserController(ICache cache,
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfoId in groups.Select(r=> r.ID))
+        foreach (var groupInfoId in groups.Select(r => r.ID))
         {
             await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
             var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
@@ -1615,7 +1615,7 @@ public class UserController(ICache cache,
     private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         foreach (var userId in userIds)
         {
             var reassignStatus = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
@@ -1658,7 +1658,7 @@ public class UserController(ICache cache,
             FilterByUserType(employeeType.Value, includeGroups, excludeGroups);
         }
         else if (employeeTypes != null && employeeTypes.Any())
-            {
+        {
             foreach (var et in employeeTypes)
             {
                 var combinedIncludeGroups = new List<List<Guid>>();
@@ -1701,7 +1701,7 @@ public class UserController(ICache cache,
 
         var counter = 0;
 
-        await foreach(var user in users)
+        await foreach (var user in users)
         {
             counter++;
 
@@ -1728,7 +1728,7 @@ public class UserController(ICache cache,
                 case EmployeeType.User:
                     iGroups.Add([Constants.GroupUser.ID]);
                     break;
-    }
+            }
         }
     }
 
@@ -1802,23 +1802,23 @@ public class UserController(ICache cache,
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
+        IDaoFactory daoFactory)
     : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-        
+
 public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
+        IDaoFactory daoFactory)
     : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-        
+
 public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
         IDaoFactory daoFactory)
     : ApiControllerBase
-    {
+{
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {
@@ -1830,11 +1830,11 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
 
         var counter = 0;
 
-        await foreach (var u in fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
+        await foreach (var u in fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset,
                            count))
         {
             counter++;
-            
+
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }
 

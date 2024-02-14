@@ -58,17 +58,17 @@ public class SettingsController(MessageService messageService,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
-        TenantDomainValidator tenantDomainValidator, 
+        TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        UserFormatter userFormatter, 
+        UserFormatter userFormatter,
         IDistributedLockProvider distributedLockProvider,
         UsersQuotaSyncOperation usersQuotaSyncOperation,
         CustomQuota customQuota,
         QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
+{
 
 
     /// <summary>
@@ -225,7 +225,7 @@ public class SettingsController(MessageService messageService,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         if (inDto.Type == TenantTrustedDomainsType.Custom)
         {
             tenant.TrustedDomainsRaw = "";
@@ -652,7 +652,7 @@ public class SettingsController(MessageService messageService,
 
                 await settingsManager.SaveAsync(settings);
             }
-            }
+        }
 
         if (inDto.Selected.HasValue && settings.Themes.Exists(r => r.Id == inDto.Selected.Value))
         {
@@ -741,8 +741,8 @@ public class SettingsController(MessageService messageService,
         if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
             tenant.Language = culture.Name;
-                changelng = true;
-            }
+            changelng = true;
+        }
 
         var oldTimeZone = tenant.TimeZone;
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
@@ -962,7 +962,7 @@ public class SettingsController(MessageService messageService,
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         return consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
@@ -1087,8 +1087,8 @@ public class SettingsController(MessageService messageService,
             return url;
         }
 
-            return currentLink;
-        }
+        return currentLink;
+    }
 
     /// <summary>
     /// Checks if the user has connected to TelegramBot.

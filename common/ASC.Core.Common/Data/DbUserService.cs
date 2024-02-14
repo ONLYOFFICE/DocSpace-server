@@ -279,10 +279,10 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             if (sortBy == "type")
             {
                 var q1 = (from user in q
-                        join userGroup in userDbContext.UserGroups.Where(g =>
+                    join userGroup in userDbContext.UserGroups.Where(g =>
                         !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
                                        g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                        from @group in joinedGroup.DefaultIfEmpty()
+                    from @group in joinedGroup.DefaultIfEmpty()
                     select new UserWithGroup { User = user, Group = @group });
 
                 Expression<Func<UserWithGroup, int>> orderByUserType = u => 
@@ -435,17 +435,17 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             await using var tr = await dbContext.Database.BeginTransactionAsync();
-        if (immediate)
-        {
-                await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
-        }
-        else
-        {
-                await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
-        }
+            if (immediate)
+            {
+                    await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
+            }
+            else
+            {
+                    await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
+            }
 
             var user = await Queries.UserAsync(dbContext, tenant, userId);
-        user.LastModified = DateTime.UtcNow;
+            user.LastModified = DateTime.UtcNow;
             dbContext.Update(user);
 
             await dbContext.SaveChangesAsync();

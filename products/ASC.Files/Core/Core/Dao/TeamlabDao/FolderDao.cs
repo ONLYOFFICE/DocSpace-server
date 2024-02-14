@@ -12,7 +12,7 @@
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
 // 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
 // 
@@ -1633,36 +1633,6 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
-
-    public async Task<(int FolderId, FolderType FolderType)> GetParentFolderInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry)
-    {
-        var rootFolderType = fileEntry.RootFolderType;
-        var rootFolderId = Convert.ToInt32(fileEntry.RootId);
-        var entryId = Convert.ToInt32(fileEntry.Id);
-
-        if(rootFolderId == entryId && fileEntry.FileEntryType == FileEntryType.Folder)
-        {
-            return (entryId, rootFolderType);
-        }
-        else if(rootFolderId == entryId)
-        {
-            return (-1, FolderType.DEFAULT);
-        }
-
-        var folderId = Convert.ToInt32(fileEntry.ParentId);
-
-        if (rootFolderId == folderId)
-        {
-            return (folderId, fileEntry.RootFolderType);
-        }
-
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
-
-        return (parentFolders[0].ParentId, parentFolders[0].FolderType);
-    }
-
 
     public async Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
     {

@@ -48,7 +48,7 @@ public class Startup
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-    }
+        }
     }
 
     public async Task ConfigureServices(IServiceCollection services)
@@ -110,8 +110,8 @@ public class Startup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
                                             .AllowAnyMethod();
 
                                       if (_corsOrigin != "*")

@@ -649,10 +649,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     {
         throw new NotImplementedException();
     }
-    public Task<(int FolderId, FolderType FolderType)> GetParentFolderInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry)
-    {
-        throw new NotImplementedException();
-    }
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
