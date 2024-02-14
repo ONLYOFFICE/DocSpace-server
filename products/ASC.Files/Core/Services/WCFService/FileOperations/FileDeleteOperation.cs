@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal record FileDeleteOperationData<T>(
+record FileDeleteOperationData<T>(
     IEnumerable<T> Folders,
     IEnumerable<T> Files,
     int TenantId,

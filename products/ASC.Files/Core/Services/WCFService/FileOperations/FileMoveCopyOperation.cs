@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal record FileMoveCopyOperationData<T>(
+record FileMoveCopyOperationData<T>(
     IEnumerable<T> Folders,
     IEnumerable<T> Files,
     int TenantId,
@@ -40,16 +40,15 @@ internal record FileMoveCopyOperationData<T>(
 [Transient]
 class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
 {
-    private FileOperationType _fileOperationType = FileOperationType.Copy;
-    protected override FileOperationType FileOperationType { get => _fileOperationType; }
+    protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
     public override void Init<T>(T data)
     {
         base.Init(data);
         
-        if (data is FileMoveCopyOperationData<JsonElement> fileOperationData)
+        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            _fileOperationType = (fileOperationData.Copy ? FileOperationType.Copy : FileOperationType.Move);
+            this[OpType] = FileOperationType.Move;
         }
     }
 
@@ -57,9 +56,9 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
     {
         var data  = base.Init<T>(jsonData, taskId);
         
-        if (data is FileMoveCopyOperationData<JsonElement> fileOperationData)
+        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            _fileOperationType = (fileOperationData.Copy ? FileOperationType.Copy : FileOperationType.Move);
+            this[OpType] = FileOperationType.Move;
         }
 
         return data;

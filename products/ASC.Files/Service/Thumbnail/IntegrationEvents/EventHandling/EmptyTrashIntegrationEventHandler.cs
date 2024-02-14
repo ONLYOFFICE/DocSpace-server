@@ -29,24 +29,24 @@ using ASC.Web.Files.Services.WCFService.FileOperations;
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
-public record EmptyTrashIntegrationEventHandler (
-    ILogger<DeleteIntegrationEventHandler> Logger,
-    FileOperationsManager FileOperationsManager,
-    TenantManager TenantManager,
-    SecurityContext SecurityContext,
-    AuthManager AuthManager) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
+public class EmptyTrashIntegrationEventHandler(
+    ILogger<DeleteIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
     
     public async Task Handle(EmptyTrashIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (Logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            Logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await TenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await SecurityContext.AuthenticateMeWithoutCookieAsync(await AuthManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            FileOperationsManager.EnqueueDelete(@event.TaskId);
+            fileOperationsManager.EnqueueDelete(@event.TaskId);
         }
     }
 }

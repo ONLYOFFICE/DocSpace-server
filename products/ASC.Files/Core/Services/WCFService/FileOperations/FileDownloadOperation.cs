@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal record FileDownloadOperationData<T>(
+record FileDownloadOperationData<T>(
     IEnumerable<T> Folders,
     IEnumerable<FilesDownloadOperationItem<T>> FilesDownload,
     int TenantId,
