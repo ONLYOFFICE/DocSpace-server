@@ -277,6 +277,8 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
+        await backupAjaxHandler.DemandPermissionsRestoreAsync();
+
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
