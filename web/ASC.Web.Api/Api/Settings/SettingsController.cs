@@ -309,9 +309,9 @@ public class SettingsController(MessageService messageService,
     }
 
     [HttpGet("userquotasettings")]
-    public object GetUserQuotaSettings()
+    public async Task<object> GetUserQuotaSettings()
     {
-        return settingsManager.Load<TenantUserQuotaSettings>();
+        return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
     }
 
     /// <summary>

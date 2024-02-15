@@ -120,9 +120,9 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
 
             quotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
 
-            var tenantQuotaSettings = settingsManager.Load<TenantQuotaSettings>();
+            var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
             tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
-            settingsManager.Save(tenantQuotaSettings);
+            await settingsManager.SaveAsync(tenantQuotaSettings);
 
             var users = await userManager.GetUsersAsync();
 
@@ -144,15 +144,15 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
 
             }
 
-            var userQuotaSettings = settingsManager.Load<TenantUserQuotaSettings>();
+            var userQuotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
-            settingsManager.Save(userQuotaSettings);
+            await settingsManager.SaveAsync(userQuotaSettings);
 
             await filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
 
-            var roomQuotaSettings = settingsManager.Load<TenantRoomQuotaSettings>();
+            var roomQuotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
-            settingsManager.Save(roomQuotaSettings);
+            await settingsManager.SaveAsync(roomQuotaSettings);
 
         }
         catch (Exception ex)
