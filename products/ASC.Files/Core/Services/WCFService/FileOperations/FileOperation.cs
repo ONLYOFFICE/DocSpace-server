@@ -28,6 +28,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 public abstract class FileOperation : DistributedTaskProgress
 {
+    protected readonly IServiceProvider _serviceProvider;
     public const string SplitChar = ":";
     public const string Owner = "Owner";
     public const string OpType = "OperationType";
@@ -38,14 +39,17 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
+    public const string Data = "Data";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
 
     protected int _processed;
     public int Total { get; set; }
+
     protected FileOperation(IServiceProvider serviceProvider)
     {
+        _serviceProvider = serviceProvider;
         _principal = serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.User ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal;
         _culture = CultureInfo.CurrentCulture.Name;
 
@@ -77,22 +81,29 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(IServiceScope serviceScope);
 }
 
-internal class ComposeFileOperation<T1, T2> : FileOperation
+internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
-    protected FileOperation<T1, string> ThirdPartyOperation { get; }
-    protected FileOperation<T2, int> DaoOperation { get; }
+    protected abstract FileOperationType FileOperationType { get; }
+    protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
+    protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    protected ComposeFileOperation(
-        IServiceProvider serviceProvider,
-        FileOperation<T1, string> thirdPartyOperation,
-        FileOperation<T2, int> daoOperation)
-        : base(serviceProvider)
+    public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
     {
-        ThirdPartyOperation = thirdPartyOperation;
-        DaoOperation = daoOperation;
-        this[Hold] = ThirdPartyOperation[Hold] || DaoOperation[Hold];
+        this[OpType] = (int)FileOperationType;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
+    }
+
+    public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
+    {
+        var data = JsonSerializer.Deserialize<T>(jsonData);
+        this[OpType] = (int)FileOperationType;
+        this[Data] = jsonData;
+        this[Hold] = data.HoldResult;
+        Id = taskId;
+        return data;
     }
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
@@ -102,13 +113,13 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
 
         DaoOperation[Finish] = !daoOperation;
         ThirdPartyOperation[Finish] = !thirdPartyOperation;
-        
+
         if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
             await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
-        
+
         if (thirdPartyOperation)
         {
             ThirdPartyOperation.Publication = PublishChanges;
@@ -182,18 +193,11 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     }
 }
 
-abstract class FileOperationData<T>(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, IDictionary<string, StringValues> headers, bool holdResult = true)
-{
-    public List<T> Folders { get; private set; } = folders?.ToList() ?? new List<T>();
-    public List<T> Files { get; private set; } = files?.ToList() ?? new List<T>();
-    public Tenant Tenant { get; } = tenant;
-    public bool HoldResult { get; set; } = holdResult;
-    public IDictionary<string, StringValues> Headers = headers;
-}
+abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, bool HoldResult = true);
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
-    protected Tenant CurrentTenant { get; private set; }
+    protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }
     protected IFolderDao<TId> FolderDao { get; private set; }
     protected IFileDao<TId> FileDao { get; private set; }
@@ -201,28 +205,25 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected ILinkDao LinkDao { get; private set; }
     protected IProviderDao ProviderDao { get; private set; }
     protected ILogger Logger { get; private set; }
-    protected internal List<TId> Folders { get; private set; }
-    protected internal List<TId> Files { get; private set; }
-    protected IDictionary<string, StringValues> Headers { get; private set; }
-
-    protected readonly IServiceProvider _serviceProvider;
+    protected internal List<TId> Folders { get; }
+    protected internal List<TId> Files { get; }
+    protected IDictionary<string, StringValues> Headers { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {
-        _serviceProvider = serviceProvider;
-        Files = fileOperationData.Files;
-        Folders = fileOperationData.Folders;
+        Files = fileOperationData.Files?.ToList() ?? new List<TId>();
+        Folders = fileOperationData.Folders?.ToList() ?? new List<TId>();
         this[Hold] = fileOperationData.HoldResult;
-        CurrentTenant = fileOperationData.Tenant;
-        Headers = fileOperationData.Headers;
+        CurrentTenantId = fileOperationData.TenantId;
+        Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(CurrentTenant);
+        tenantManager.SetCurrentTenantAsync(CurrentTenantId).Wait();
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(fileOperationData.Headers);
-        
+        externalShare.Init(fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
+
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
 
@@ -239,7 +240,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             await using var scope = _serviceProvider.CreateAsyncScope();
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
-            tenantManager.SetCurrentTenant(CurrentTenant);
+            await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
             externalShare.Init(Headers);
@@ -279,15 +280,18 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
                 this[Finish] = true;
                 PublishTaskInfo();
             }
-            catch { /* ignore */ }
+            catch
+            {
+                /* ignore */
+            }
         }
     }
 
-    public AsyncServiceScope CreateScopeAsync()
+    public async Task<AsyncServiceScope> CreateScopeAsync()
     {
         var scope = _serviceProvider.CreateAsyncScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(CurrentTenant);
+        await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Init(Headers);
 
@@ -347,7 +351,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
 
 [Scope]
 public record FileOperationScope(
-    TenantManager TenantManager, 
-    IDaoFactory DaoFactory, 
+    TenantManager TenantManager,
+    IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);
