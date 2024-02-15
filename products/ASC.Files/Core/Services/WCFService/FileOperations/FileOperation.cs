@@ -53,7 +53,7 @@ public abstract class FileOperation : DistributedTaskProgress
         _principal = serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.User ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal;
         _culture = CultureInfo.CurrentCulture.Name;
 
-        if ((_principal ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal)?.Identity is IAccount account)
+        if (_principal is { Identity: IAccount { IsAuthenticated: true } account })
         {
             this[Owner] = account.ID.ToString();
         }

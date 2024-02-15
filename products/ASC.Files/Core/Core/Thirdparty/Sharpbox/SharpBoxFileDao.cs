@@ -304,7 +304,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(fileToDownload.Length);
     }
     
-    public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
     }

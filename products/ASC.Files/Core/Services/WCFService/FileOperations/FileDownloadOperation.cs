@@ -89,24 +89,24 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
             if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
-                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
-                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
+                fileName = $@"{(thirdPartyFolderOnly ?
+                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
+                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title)}{archiveExtension}";
             }
             else
             {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
+                fileName = $@"{(await tenantManager.GetCurrentTenantAsync()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
             string path;
             string sessionKey = null;
 
-            var isAuthenticated = _principal.Identity is IAccount;
+            var isAuthenticated = _principal?.Identity is IAccount { IsAuthenticated: true };
 
             if (isAuthenticated)
             {
-                path = string.Format(@"{0}\{1}", ((IAccount)_principal.Identity).ID, fileName);
+                path = $@"{((IAccount)_principal.Identity).ID}\{fileName}";
             }
             else
             {
