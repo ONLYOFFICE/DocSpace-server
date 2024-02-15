@@ -72,9 +72,15 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
 
         if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
-            result.UsersQuota = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            result.RoomsQuota = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            result.TenantCustomQuota = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
+
+            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
+
+            result.UsersQuota = await tenantUserQuotaSettingsTask;
+            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
+            result.TenantCustomQuota = await tenantQuotaSettingsTask;
         }
 
         return result;
