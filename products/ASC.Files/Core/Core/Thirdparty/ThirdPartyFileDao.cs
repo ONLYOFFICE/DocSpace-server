@@ -691,7 +691,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
         throw new NotImplementedException();
     }
 
-    public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotImplementedException();
     }

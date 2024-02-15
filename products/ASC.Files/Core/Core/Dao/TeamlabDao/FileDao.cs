@@ -306,19 +306,19 @@ internal class FileDao(
         return await (await globalStore.GetStoreAsync()).GetFileSizeAsync(string.Empty, GetUniqFilePath(file));
     }
     
-    public async Task<Uri> GetPreSignedUriAsync(File<int> file, TimeSpan expires)
+    public async Task<string> GetPreSignedUriAsync(File<int> file, TimeSpan expires, string shareKey = null)
     {
         var storage = await globalStore.GetStoreAsync();
 
         if (storage.IsSupportCdnUri && !fileUtility.CanWebEdit(file.Title)
             && (fileUtility.CanMediaView(file.Title) || fileUtility.CanImageView(file.Title)))
         {
-            return await storage.GetCdnPreSignedUriAsync(string.Empty, GetUniqFilePath(file), expires,
-                                                 new List<string>
-                                                     {
-                                                             $"Content-Disposition:{ContentDispositionUtil.GetHeaderValue(file.Title, withoutBase: true)}",
-                                                             $"Custom-Cache-Key:{file.ModifiedOn.Ticks}"
-                                                     });
+            return (await storage.GetCdnPreSignedUriAsync(string.Empty, GetUniqFilePath(file), expires,
+                new List<string>
+                {
+                    $"Content-Disposition:{ContentDispositionUtil.GetHeaderValue(file.Title, withoutBase: true)}",
+                    $"Custom-Cache-Key:{file.ModifiedOn.Ticks}"
+                })).ToString();
         }
 
         var path = GetUniqFilePath(file);
@@ -332,7 +332,14 @@ internal class FileDao(
             headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
         }
 
-        return await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers);
+        var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();
+
+        if (!string.IsNullOrEmpty(shareKey))
+        {
+            url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, shareKey);
+        }
+
+        return url;
     }
 
     public async Task<bool> IsSupportedPreSignedUriAsync(File<int> file)
