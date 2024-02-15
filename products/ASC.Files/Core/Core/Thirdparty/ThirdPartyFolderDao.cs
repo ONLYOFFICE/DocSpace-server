@@ -678,10 +678,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     {
         return Task.CompletedTask;
     }
-    public Task<string> ChangeFolderSizeAsync(Folder<string> folder, long size)
-    {
-        throw new NotImplementedException();
-    }
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();

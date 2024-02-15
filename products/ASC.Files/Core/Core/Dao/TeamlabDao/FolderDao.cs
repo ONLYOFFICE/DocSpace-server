@@ -909,23 +909,6 @@ internal class FolderDao(
         await Queries.UpdateTreeFolderCounterAsync(filesDbContext, tenantId, folderId, size);
         return folderId;
     }
-    public async Task<int> ChangeFolderSizeAsync(Folder<int> folder, long size)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
-
-        toUpdate.Counter = size;
-
-        toUpdate.ModifiedOn = DateTime.UtcNow;
-        toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
-
-        await filesDbContext.SaveChangesAsync();
-
-        _ = factoryIndexer.IndexAsync(toUpdate);
-
-        return folder.Id;
-    }
     public async Task<int> ChangeFolderQuotaAsync(Folder<int> folder, long quota)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();

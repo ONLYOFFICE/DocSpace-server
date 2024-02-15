@@ -291,10 +291,6 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-    public Task<string> ChangeFolderSizeAsync(Folder<string> folder, long size)
-    {
-        throw new NotImplementedException();
-    }
     public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
     {
         throw new NotImplementedException();
