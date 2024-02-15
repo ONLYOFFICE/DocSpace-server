@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Web.Studio;
 
 public class Startup : BaseStartup
@@ -82,7 +83,10 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<RoomLogoValidator>();
         DIHelper.TryAdd<FileValidator>();
         DIHelper.TryAdd<MigrationIntegrationEventHandler>();
-        
+
+        MigrationCore.Register(DIHelper); 
+        services.RegisterQuotaFeature();
+
         services.AddHttpClient();
 
         DIHelper.TryAdd<DbWorker>();
