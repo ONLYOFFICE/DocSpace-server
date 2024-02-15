@@ -1513,8 +1513,8 @@ public class UserController(ICache cache,
             .ToListAsync();
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (maxTotalSize < inDto.Quota)
         {

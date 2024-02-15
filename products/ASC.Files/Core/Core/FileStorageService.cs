@@ -565,8 +565,8 @@ public class FileStorageService //: IFileStorageService
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (maxTotalSize < quota)
         {
@@ -609,8 +609,8 @@ public class FileStorageService //: IFileStorageService
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (maxTotalSize < quota)
         {
@@ -660,8 +660,8 @@ public class FileStorageService //: IFileStorageService
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (updateData.Quota != null && maxTotalSize < updateData.Quota)
         {
