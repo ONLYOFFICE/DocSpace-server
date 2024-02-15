@@ -32,7 +32,6 @@ public class CountRoomChecker(ITenantQuotaFeatureStat<CountRoomFeature, int> ten
         TenantManager tenantManager, ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_room_exception;
     public override string GetExceptionMessage(long count)
     {
         return string.Format(Resource.TariffsFeature_room_exception, count);

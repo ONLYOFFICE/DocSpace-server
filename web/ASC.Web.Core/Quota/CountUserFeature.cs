@@ -32,7 +32,6 @@ public class CountUserChecker(ITenantQuotaFeatureStat<CountUserFeature, int> ten
         TenantManager tenantManager, ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_users_exception;
 
     public override string GetExceptionMessage(long count)
     {

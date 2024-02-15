@@ -30,7 +30,6 @@ public class MaxFileSizeChecker(ITenantQuotaFeatureStat<MaxFileSizeFeature, long
         TenantManager tenantManager)
     : TenantQuotaFeatureChecker<MaxFileSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_file_size_exception;
 
     public override string GetExceptionMessage(long size)
     {

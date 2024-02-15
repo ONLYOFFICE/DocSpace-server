@@ -30,7 +30,6 @@ public interface ITenantQuotaFeatureChecker
     public Task CheckUsed(TenantQuota value);
 
     public string GetExceptionMessage(long size);
-    string Exception { get; }
 }
 
 
@@ -43,7 +42,6 @@ public abstract class TenantQuotaFeatureChecker<T, T1>(ITenantQuotaFeatureStat<T
     protected readonly ITenantQuotaFeatureStat<T, T1> _tenantQuotaFeatureStatistic = tenantQuotaFeatureStatistic;
 
     public abstract string GetExceptionMessage(long size);
-    public abstract string Exception { get; }
 
     public async Task CheckUsed(TenantQuota quota)
     {
