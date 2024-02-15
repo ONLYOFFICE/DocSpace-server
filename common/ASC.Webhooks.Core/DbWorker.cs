@@ -47,20 +47,14 @@ public class DbWorker(
         "PUT",
         "DELETE"
     };
-
-    private int Tenant
-    {
-        get
-        {
-            return tenantManager.GetCurrentTenant().Id;
-        }
-    }
+    
 
     public async Task<WebhooksConfig> AddWebhookConfig(string uri, string name, string secretKey, bool? enabled, bool? ssl)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var objForCreate = await Queries.WebhooksConfigByUriAsync(webhooksDbContext, Tenant, uri, name);
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var objForCreate = await Queries.WebhooksConfigByUriAsync(webhooksDbContext, tenantId, uri, name);
 
         if (objForCreate != null)
         {
@@ -78,7 +72,7 @@ public class DbWorker(
         
         var toAdd = new WebhooksConfig
         {
-            TenantId = Tenant,
+            TenantId = tenantId,
             Uri = uri,
             SecretKey = secretKey,
             Name = name,
@@ -94,9 +88,11 @@ public class DbWorker(
 
     public async IAsyncEnumerable<WebhooksConfigWithStatus> GetTenantWebhooksWithStatus()
     {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var q = Queries.WebhooksConfigWithStatusAsync(webhooksDbContext, Tenant);
+        
+        var q = Queries.WebhooksConfigWithStatusAsync(webhooksDbContext, tenantId);
 
         await foreach (var webhook in q)
         {
@@ -105,10 +101,12 @@ public class DbWorker(
     }
 
     public async IAsyncEnumerable<WebhooksConfig> GetWebhookConfigs()
-    {
+    {        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var q = Queries.WebhooksConfigsAsync(webhooksDbContext, Tenant);
+        var q = Queries.WebhooksConfigsAsync(webhooksDbContext, tenantId);
 
         await foreach (var webhook in q)
         {
@@ -117,10 +115,12 @@ public class DbWorker(
     }
 
     public async Task<WebhooksConfig> UpdateWebhookConfig(int id, string name, string uri, string key, bool? enabled, bool? ssl)
-    {
+    {        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var updateObj = await Queries.WebhooksConfigAsync(webhooksDbContext, Tenant, id);
+        var updateObj = await Queries.WebhooksConfigAsync(webhooksDbContext, tenantId, id);
 
         if (updateObj != null)
         {
@@ -157,10 +157,12 @@ public class DbWorker(
     }
 
     public async Task<WebhooksConfig> RemoveWebhookConfigAsync(int id)
-    {
+    {        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var removeObj = await Queries.WebhooksConfigAsync(webhooksDbContext, Tenant, id);
+        var removeObj = await Queries.WebhooksConfigAsync(webhooksDbContext, tenantId, id);
 
         if (removeObj != null)
         {
@@ -171,10 +173,10 @@ public class DbWorker(
         return removeObj;
     }
 
-    public IAsyncEnumerable<DbWebhooks> ReadJournal(int startIndex, int limit, DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
+    public async IAsyncEnumerable<DbWebhooks> ReadJournal(int startIndex, int limit, DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
     {
-        using var webhooksDbContext = dbContextFactory.CreateDbContext();
-        var q = GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus);
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus);
 
         if (startIndex != 0)
         {
@@ -186,12 +188,15 @@ public class DbWorker(
             q = q.Take(limit);
         }
 
-        return q.AsAsyncEnumerable();
+        foreach (var r in q)
+        {
+            yield return r;
+        }
     }
 
     public async Task<int> GetTotalByQuery(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
     {
-        return await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus).CountAsync();
+        return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus)).CountAsync();
     }
 
     public async Task<WebhooksLog> ReadJournal(int id)
@@ -287,14 +292,16 @@ public class DbWorker(
         return mapper.Map<DbWebhook, Webhook>(webHook);
     }
 
-    private IQueryable<DbWebhooks> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
+    private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
     {
-        var webhooksDbContext = dbContextFactory.CreateDbContext();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksLogs
             
             .OrderByDescending(t => t.Id)
-            .Where(r => r.TenantId == Tenant)
+            .Where(r => r.TenantId == tenantId)
             .Join(webhooksDbContext.WebhooksConfigs, r => r.ConfigId, r => r.Id, (log, config) => new DbWebhooks { Log = log, Config = config });
 
         if (deliveryFrom.HasValue)

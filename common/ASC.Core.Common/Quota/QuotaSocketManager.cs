@@ -36,21 +36,21 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
     public async Task ChangeQuotaFeatureValue(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
-    private string GetQuotaRoom()
+    private async Task<string> GetQuotaRoom()
     {
-        var tenantId = tenantManager.GetCurrentTenant().Id;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }

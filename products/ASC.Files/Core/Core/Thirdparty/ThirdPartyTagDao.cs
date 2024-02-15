@@ -36,7 +36,6 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
     where TFolder : class, TItem
     where TItem : class
 {
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
     private string PathPrefix { get; set; }
 
     public void Init(string pathPrefix)
@@ -47,7 +46,8 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = daoSelector.ConvertId(parentFolder.Id);
-
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
@@ -56,7 +56,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

@@ -46,10 +46,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
         IDistributedLockProvider distributedLockProvider)
-    {
-    
-    private Tenant Tenant => tenantManager.GetCurrentTenant();
-
+{
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
         if (string.IsNullOrEmpty(uniqueName))
@@ -226,10 +223,11 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
     public async Task<bool> UpdateUserTypeAsync(UserInfo user, EmployeeType type)
     {
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var changed = false;
 
-        if (user.IsOwner(Tenant) || user.IsMe(currentUser.Id))
+        if (user.IsOwner(tenant) || user.IsMe(currentUser.Id))
         {
             return await Task.FromResult(false);
         }
@@ -239,64 +237,64 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         try
         {
-            if (type is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(Tenant))
+            if (type is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
             {
                 if (currentType is EmployeeType.RoomAdmin)
                 {
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID, notifyWebSocket: false);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Collaborator)
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
             }
             else if (type is EmployeeType.RoomAdmin)
             {
-                if (currentType is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(Tenant))
+                if (currentType is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Collaborator)
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    webItemSecurityCache.ClearCache(Tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
             }
             else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
             {
-                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
+                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                 
                 await countPaidUserChecker.CheckAppend();
                 await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                 await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                webItemSecurityCache.ClearCache(Tenant.Id);
+                webItemSecurityCache.ClearCache(tenant.Id);
                 changed = true;
             }
         }
@@ -326,7 +324,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         }
     }
 
-    public string GetPasswordRegex(PasswordSettings passwordSettings)
+    private string GetPasswordRegex(PasswordSettings passwordSettings)
     {
         var pwdBuilder = new StringBuilder("^");
 
@@ -405,7 +403,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         return sb.ToString();
     }
 
-    public static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
+    private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
     {
         var text = new StringBuilder();
 

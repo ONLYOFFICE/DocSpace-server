@@ -43,9 +43,8 @@ public class BackupController(
         CommonLinkUtility commonLinkUtility,
         CoreSettings coreSettings)
     : ControllerBase
-    {
+{
     private readonly Guid _currentUserId = securityContext.CurrentAccount.ID;
-    private readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
 
     /// <summary>
     /// Returns the backup schedule of the current portal.
@@ -171,9 +170,10 @@ public class BackupController(
             : default;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
         eventBus.Publish(new BackupRequestIntegrationEvent(
-             tenantId: _tenantId,
+             tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
              createBy: _currentUserId,
@@ -284,9 +284,11 @@ public class BackupController(
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
             : default;
-
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
-                             tenantId: _tenantId,
+                             tenantId: tenantId,
                              createBy: _currentUserId,
                              storageParams: storageParams,
                              storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),

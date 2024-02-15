@@ -47,6 +47,8 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
         fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
+    private readonly TenantManager _tenantManager = tenantManager;
+
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharpBoxProviderInfo.InvalidateStorageAsync();
@@ -381,7 +383,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         }
 
         var id = MakeId(file);
-
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -389,10 +391,10 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(dbContext, TenantId, id);
+                await Queries.DeleteTagLinksAsync(dbContext, tenantId, id);
                 await Queries.DeleteTagsAsync(dbContext);
-                await Queries.DeleteSecuritiesAsync(dbContext, TenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, TenantId, id);
+                await Queries.DeleteSecuritiesAsync(dbContext, tenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, tenantId, id);
                 await tx.CommitAsync();
         });
 

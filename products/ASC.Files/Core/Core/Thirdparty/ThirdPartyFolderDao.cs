@@ -42,9 +42,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
-    {
+{
     private IProviderInfo<TFile, TFolder, TItem> _providerInfo;
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
     {
@@ -59,10 +58,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
             return folder;
-    }
+        }
 
-        await using var filesDbContext = dbContextFactory.CreateDbContext();
-        folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
         return folder;
     }
@@ -244,6 +244,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
 
     public async Task DeleteFolderAsync(string folderId)
     {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var folder = await dao.GetFolderAsync(folderId);
         var id = dao.MakeId(folder);
 
@@ -254,10 +255,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(context, TenantId, id);
+            await Queries.DeleteTagLinksAsync(context, tenantId, id);
             await Queries.DeleteDbFilesTag(context);
-            await Queries.DeleteSecuritiesAsync(context, TenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(context, TenantId, id);
+            await Queries.DeleteSecuritiesAsync(context, tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(context, tenantId, id);
 
             await tx.CommitAsync();
         });
