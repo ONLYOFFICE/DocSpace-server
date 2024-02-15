@@ -132,12 +132,12 @@ public class FileOperationsManager(
 {
     public List<FileOperationResult> GetOperationResults()
     {
-        return fileOperationsManagerHolder.GetOperationResults(ProcessUserId());
+        return fileOperationsManagerHolder.GetOperationResults(GetUserId());
     }
 
     public List<FileOperationResult> CancelOperations(string id = null)
     {
-        return fileOperationsManagerHolder.CancelOperations(ProcessUserId(), id);
+        return fileOperationsManagerHolder.CancelOperations(GetUserId(), id);
     }
 
     #region MarkAsRead
@@ -192,7 +192,7 @@ public class FileOperationsManager(
     
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
-        fileOperationsManagerHolder.CheckRunning(authContext.CurrentAccount.ID, FileOperationType.Download);
+        fileOperationsManagerHolder.CheckRunning(GetUserId(), FileOperationType.Download);
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
             return;
@@ -205,7 +205,7 @@ public class FileOperationsManager(
         
         var taskId = fileOperationsManagerHolder.Publish(op);
         
-        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
             TaskId = taskId
         });
@@ -428,14 +428,9 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    private Guid ProcessUserId()
+    private Guid GetUserId()
     {
-        if (authContext.IsAuthenticated)
-        {
-            return authContext.CurrentAccount.ID;
-        }
-
-        return externalShare.GetSessionId();
+        return authContext.IsAuthenticated ? authContext.CurrentAccount.ID : externalShare.GetSessionId();
     }
     
     private IDictionary<string, string> GetHttpHeaders()
