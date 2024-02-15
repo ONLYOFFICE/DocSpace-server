@@ -988,8 +988,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace == null)
         {
             if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
-                 _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
-                _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
+                 _cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, userId), out var value)) ||
+                _cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
@@ -1033,7 +1033,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
-                    _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                    _cachedRecords.TryAdd(await GetCacheKey(e.ParentId, id), ace);
                 }
             }
         }
@@ -2042,7 +2042,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return entry.CreateBy == userId;
         }
 
-        if (_cachedRoomOwner.TryGetValue(GetCacheKey(entry.ParentId), out var roomOwner))
+        if (_cachedRoomOwner.TryGetValue(await GetCacheKey(entry.ParentId), out var roomOwner))
         {
             return roomOwner == userId;
         }
@@ -2056,7 +2056,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        _cachedRoomOwner.TryAdd(GetCacheKey(entry.ParentId), room.CreateBy);
+        _cachedRoomOwner.TryAdd(await GetCacheKey(entry.ParentId), room.CreateBy);
 
         return room.CreateBy == userId;
     }
@@ -2075,14 +2075,16 @@ public class FileSecurity(IDaoFactory daoFactory,
         return false;
     }
 
-    private string GetCacheKey<T>(T parentId, Guid userId)
+    private async Task<string> GetCacheKey<T>(T parentId, Guid userId)
     {
-        return $"{tenantManager.GetCurrentTenant().Id}-{userId}-{parentId}";
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        return $"{tenantId}-{userId}-{parentId}";
     }
 
-    private string GetCacheKey<T>(T parentId)
-    {
-        return $"{tenantManager.GetCurrentTenant().Id}-{parentId}";
+    private async Task<string> GetCacheKey<T>(T parentId)
+    {        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        return $"{tenantId}-{parentId}";
     }
 
     private sealed class SubjectComparer(List<Guid> subjects) : IComparer<FileShareRecord>

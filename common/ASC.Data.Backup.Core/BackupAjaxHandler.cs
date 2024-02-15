@@ -302,7 +302,7 @@ public class BackupAjaxHandler(BackupService backupService,
         return await backupService.GetRestoreProgress(tenant.Id);
     }
 
-    private async Task DemandPermissionsRestoreAsync()
+    public async Task DemandPermissionsRestoreAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

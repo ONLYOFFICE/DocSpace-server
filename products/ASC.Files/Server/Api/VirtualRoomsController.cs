@@ -31,6 +31,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileOperationDtoHelper fileOperationDtoHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
+        FileOperationsManager fileOperationsManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
@@ -40,9 +41,9 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
     fileOperationDtoHelper,
-    
     customTagsService,
     roomLogoManager,
+    fileOperationsManager,
     fileStorageService,
     folderDtoHelper,
     fileDtoHelper,
@@ -73,6 +74,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileOperationDtoHelper fileOperationDtoHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
+        FileOperationsManager fileOperationsManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
@@ -82,9 +84,9 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
     fileOperationDtoHelper,
-    
     customTagsService,
     roomLogoManager,
+    fileOperationsManager,
     fileStorageService,
     folderDtoHelper,
     fileDtoHelper,
@@ -113,17 +115,19 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 }
 
 [DefaultRoute("rooms")]
-public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderHelper,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        CustomTagsService customTagsService,
-        RoomLogoManager roomLogoManager,
-        FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper,
-        IMapper mapper,
-        SocketManager socketManager,
-        ApiContext apiContext)
+public abstract class VirtualRoomsController<T>(
+    GlobalFolderHelper globalFolderHelper,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    CustomTagsService customTagsService,
+    RoomLogoManager roomLogoManager,
+    FileOperationsManager fileOperationsManager,
+    FileStorageService fileStorageService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper,
+    IMapper mapper,
+    SocketManager socketManager,
+    ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -223,9 +227,9 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(T id, DeleteRoomRequestDto inDto)
     {
-        var tasks = await _fileStorageService.DeleteFolderAsync(id, false, inDto.DeleteAfter, true);
-
-        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
+        await fileOperationsManager.PublishDelete(new List<T> { id }, new List<T>(), false, !inDto.DeleteAfter, true);
+        
+        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
     }
 
     /// <summary>
@@ -243,10 +247,10 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
-
-        var tasks = await _fileStorageService.MoveOrCopyItemsAsync([movableRoom], [], destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
-
-        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
+        
+        await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
+        
+        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
     }
 
     /// <summary>
@@ -264,10 +268,9 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
-
-        var tasks = await _fileStorageService.MoveOrCopyItemsAsync([movableRoom], [], destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
-
-        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
+        
+        await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
+        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
     }
 
     /// <summary>

@@ -24,56 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Services.WCFService.FileOperations;
+
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
-public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
+public class MoveOrCopyIntegrationEventHandler(
+    ILogger<MoveOrCopyIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager)
+    : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
 {
-    private readonly ILogger _logger;
-    private readonly FileStorageService _fileStorageService;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthManager _authManager;
-    private MoveOrCopyIntegrationEventHandler() : base()
-    {
-
-    }
-
-    public MoveOrCopyIntegrationEventHandler(
-        ILogger<MoveOrCopyIntegrationEventHandler> logger,
-        FileStorageService fileStorageService,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        AuthManager authManager)
-    {
-        _logger = logger;
-        _authManager = authManager;
-        _fileStorageService = fileStorageService;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
-        _authManager = authManager;
-    }
-
-
     public async Task Handle(MoveOrCopyIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            static JsonElement ToJsonElement(string value)
-            {
-                using var doc = JsonDocument.Parse(value);
-                return doc.RootElement.Clone();
-            }
-
-            var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-
-            await _fileStorageService.MoveOrCopyItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, ToJsonElement(@event.DestFolderId), @event.ConflictResolveType, @event.Copy, @event.DeleteAfter, @event.Content, headers, @event.TaskId);
+            fileOperationsManager.EnqueueMoveOrCopy(@event.TaskId);
         }
     }
 }

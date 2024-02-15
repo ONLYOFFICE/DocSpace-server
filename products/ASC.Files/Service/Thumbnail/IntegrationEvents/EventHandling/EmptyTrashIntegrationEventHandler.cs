@@ -24,52 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Services.WCFService.FileOperations;
+
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
-public class EmptyTrashIntegrationEventHandler : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
+public class EmptyTrashIntegrationEventHandler(
+    ILogger<DeleteIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
-    private readonly ILogger _logger;
-    private readonly FileStorageService _fileStorageService;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthManager _authManager;
-    private EmptyTrashIntegrationEventHandler() : base()
-    {
-
-    }
-
-    public EmptyTrashIntegrationEventHandler(
-        ILogger<EmptyTrashIntegrationEventHandler> logger,
-        FileStorageService fileStorageService,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        AuthManager authManager)
-    {
-        _logger = logger;
-        _authManager = authManager;
-        _fileStorageService = fileStorageService;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
-        _authManager = authManager;
-    }
-
-
+    
     public async Task Handle(EmptyTrashIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            var headers = @event.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-
-            await _fileStorageService.EmptyTrashAsync(headers, @event.TaskId);
+            fileOperationsManager.EnqueueDelete(@event.TaskId);
         }
-
     }
 }
 
