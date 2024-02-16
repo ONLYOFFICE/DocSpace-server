@@ -445,4 +445,9 @@ public class TenantManager
     {
         return (await QuotaService.FindTenantQuotaRowsAsync(tenantId)).ToList();
     }
+
+    public void ValidateTenantName(string name)
+    {
+        TenantService.ValidateTenantName(name);
+    }
 }

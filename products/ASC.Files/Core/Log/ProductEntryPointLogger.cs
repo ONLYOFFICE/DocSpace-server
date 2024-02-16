@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,52 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AuditTrail.Repositories;
-using ASC.Web.Core.Notify;
-
-namespace ASC.Files;
-
-[Scope]
-public class ApiProductEntryPoint : ProductEntryPoint
+namespace ASC.Files.Core.Log;
+internal static partial class ProductEntryPointLogger
 {
-    public override string ApiURL
-    {
-        get => "api/2.0/files/info.json";
-    }
-
-    public ApiProductEntryPoint(
-       FilesSpaceUsageStatManager filesSpaceUsageStatManager,
-       CoreBaseSettings coreBaseSettings,
-       AuthContext authContext,
-       UserManager userManager,
-       NotifyConfiguration notifyConfiguration,
-       AuditEventsRepository auditEventsRepository,
-       IDaoFactory daoFactory,
-       TenantManager tenantManager,
-       RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-       PathProvider pathProvider,
-       FilesLinkUtility filesLinkUtility,
-       FileSecurity fileSecurity,
-       GlobalFolder globalFolder,
-       CommonLinkUtility commonLinkUtility,
-       ILogger<ProductEntryPoint> logger
-       //SubscriptionManager subscriptionManager
-       ) : base(filesSpaceUsageStatManager,
-           coreBaseSettings,
-           authContext, 
-           userManager,
-           notifyConfiguration, 
-           auditEventsRepository, 
-           daoFactory, 
-           tenantManager, 
-           roomsNotificationSettingsHelper,
-           pathProvider,
-           filesLinkUtility,
-           fileSecurity,
-           globalFolder,
-           commonLinkUtility,
-           logger)
-    {
-
-    }
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error while deserializing audit event: {eventId}")]
+    public static partial void ErrorDeserializingAuditEvent(this ILogger<ProductEntryPoint> logger, int eventId, Exception exception);
 }
