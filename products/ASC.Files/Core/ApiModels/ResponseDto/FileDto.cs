@@ -115,6 +115,7 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
+    public ApiDateTime LastOpened { get; set; }
     
     public static FileDto<int> GetSample()
     {
@@ -223,6 +224,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.DenyDownload = file.DenyDownload;
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
+        result.LastOpened = apiDateTimeHelper.Get(file.LastOpened);
 
         if (file.Order != 0)
         {
