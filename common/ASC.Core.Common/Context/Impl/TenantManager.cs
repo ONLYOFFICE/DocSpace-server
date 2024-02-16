@@ -252,7 +252,22 @@ public class TenantManager
         return tenant;
     }
 
-    private Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
+    public Task<Tenant> GetCurrentTenantAsync()
+    {
+        return GetCurrentTenantAsync(true);
+    }
+
+    public async Task<int> GetCurrentTenantIdAsync()
+    {
+        return (await GetCurrentTenantAsync(true)).Id;
+    }
+
+    public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
+    {
+        return GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
+    }
+    
+    public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         if (_currentTenant != null)
         {
@@ -261,6 +276,8 @@ public class TenantManager
 
         Tenant tenant = null;
 
+        var context = HttpContextAccessor?.HttpContext;
+        
         if (context != null)
         {
             tenant = context.Items[CurrentTenant] as Tenant;
@@ -292,26 +309,6 @@ public class TenantManager
         _currentTenant = tenant;
 
         return tenant;
-    }
-
-    public Task<Tenant> GetCurrentTenantAsync()
-    {
-        return GetCurrentTenantAsync(true);
-    }
-
-    public async Task<int> GetCurrentTenantIdAsync()
-    {
-        return (await GetCurrentTenantAsync(true)).Id;
-    }
-
-    public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
-    {
-        return GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
-    }
-    
-    public Tenant GetCurrentTenant(bool throwIfNotFound = true)
-    {
-        return GetCurrentTenant(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
 
     public void SetCurrentTenant(Tenant tenant)
@@ -441,5 +438,10 @@ public class TenantManager
     public async Task<List<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenantId)
     {
         return (await QuotaService.FindTenantQuotaRowsAsync(tenantId)).ToList();
+    }
+
+    public void ValidateTenantName(string name)
+    {
+        TenantService.ValidateTenantName(name);
     }
 }

@@ -37,7 +37,7 @@ public partial class MigrationContextMigrate : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         //migrationBuilder.DeleteData("tenants_quota", "tenant", "INT(10)", new[] { -1, -2, -3 });
-        migrationBuilder.Sql("delete from tenants_quota", true);
+        migrationBuilder.Sql("delete from tenants_quota where tenant != -1000", true);
 
         migrationBuilder.InsertData(
             table: "tenants_quota",

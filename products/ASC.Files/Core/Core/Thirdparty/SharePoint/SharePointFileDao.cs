@@ -296,7 +296,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
     }
     
-    public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
     }

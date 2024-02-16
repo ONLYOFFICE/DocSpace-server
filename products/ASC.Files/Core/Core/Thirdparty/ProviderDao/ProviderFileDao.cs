@@ -234,7 +234,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         return isSupported;
     }
 
-    public async Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    public async Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -243,7 +243,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         file.Id = selector.ConvertId(fileId);
 
         var fileDao = selector.GetFileDao(fileId);
-        var streamUri = await fileDao.GetPreSignedUriAsync(file, expires);
+        var streamUri = await fileDao.GetPreSignedUriAsync(file, expires, shareKey);
         file.Id = fileId; //Restore id
 
         return streamUri;

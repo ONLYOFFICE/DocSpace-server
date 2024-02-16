@@ -231,7 +231,8 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
     {
         return task =>
         {
-            var queueTasks = GetAllTasks().ToList().FindAll(x => x.Id != task.Id);
+            var allTasks = GetAllTasks().ToList();
+            var queueTasks = allTasks.FindAll(x => x.Id != task.Id);
 
             task.LastModifiedOn = DateTime.UtcNow;
 

@@ -387,7 +387,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             {
                                 if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
-                                    var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                                    var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
                                     
                                     context.Response.Redirect(url, false);
 
@@ -415,7 +415,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     {
                         if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
                         {
-                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1))).ToString();
+                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
                             
                             context.Response.Redirect(url, true);
 
