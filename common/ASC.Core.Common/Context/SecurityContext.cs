@@ -196,11 +196,19 @@ public class SecurityContext(UserManager userManager,
         return cookie;
     }
 
-    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
+    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null, Guid session = default)
     {
         if (account == null || account.Equals(Constants.Guest))
         {
-            throw new InvalidCredentialException("account");
+            if (session == default || session == Constants.Guest.ID)
+            {
+                throw new InvalidCredentialException(nameof(account));
+            }
+
+            var anonymousSession = new AnonymousSession(Constants.Guest.ID, Constants.Guest.Name, session);
+            authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(anonymousSession, []), anonymousSession);
+                
+            return;
         }
 
         var roles = new List<string> { Role.Everyone };

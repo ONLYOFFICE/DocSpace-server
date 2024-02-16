@@ -129,16 +129,16 @@ public class CookiesManager
         _httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
     }
 
-    public string GetCookies(IReadOnlyDictionary<string, StringValues> headers, CookiesType type, string itemId)
+    public string GetCookies(IReadOnlyDictionary<string, string> cookies, CookiesType type, string itemId)
     {
-        if (headers == null)
+        if (cookies == null)
         {
             return string.Empty;
         }
 
         var name = GetFullCookiesName(type, itemId);
 
-        return headers.TryGetValue(name, out var value) ? value : string.Empty;
+        return cookies.TryGetValue(name, out var value) ? value : string.Empty;
     }
 
     public string GetCookies(CookiesType type)

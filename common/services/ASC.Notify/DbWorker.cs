@@ -37,13 +37,14 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyS
 
         var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
+        await using var context = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
-        var strategy = dbContext.Database.CreateExecutionStrategy();
+        var strategy = context.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var tx = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
             var notifyQueue = mapper.Map<NotifyMessage, NotifyQueue>(m);
             notifyQueue.Attachments = JsonConvert.SerializeObject(m.Attachments);
 

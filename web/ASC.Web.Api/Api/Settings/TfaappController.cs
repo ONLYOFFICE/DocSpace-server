@@ -397,7 +397,8 @@ public class TfaappController(MessageService messageService,
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        if (!isMe && tenantManager.GetCurrentTenant().OwnerId != authContext.CurrentAccount.ID)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (!isMe && tenant.OwnerId != authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
