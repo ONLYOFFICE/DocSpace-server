@@ -62,7 +62,7 @@ public class DbTenantService : ITenantService
 
     public void ValidateTenantName(string name)
     {
-        tenantDomainValidator.ValidateTenantName(name);
+        _tenantDomainValidator.ValidateTenantName(name);
     }
 
     public IEnumerable<Tenant> GetTenantsWithCsp()
