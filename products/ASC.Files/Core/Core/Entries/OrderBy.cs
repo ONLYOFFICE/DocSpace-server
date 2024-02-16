@@ -40,6 +40,7 @@ public enum SortedByType
     Tags,
     Room,
     CustomOrder,
+    LastOpened,
     UsedSpace
 }
 

@@ -203,4 +203,5 @@ public class File<T> : FileEntry<T>
 
     [JsonIgnore]
     public object NativeAccessor { get; set; }
+    public DateTime? LastOpened { get; set; }
 }

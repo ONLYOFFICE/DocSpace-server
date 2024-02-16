@@ -2491,7 +2491,7 @@ public class FileStorageService //: IFileStorageService
                 .FirstOrDefaultAsync();
             if (parentLink == null)
             {
-                return null;
+                throw new ItemNotFoundException();
             }
 
             var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id);

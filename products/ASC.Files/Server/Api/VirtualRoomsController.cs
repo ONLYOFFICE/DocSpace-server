@@ -358,7 +358,7 @@ public abstract class VirtualRoomsController<T>(
             _ => throw new InvalidOperationException()
         };
 
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     /// <summary>
@@ -409,7 +409,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
 
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     /// <summary>
