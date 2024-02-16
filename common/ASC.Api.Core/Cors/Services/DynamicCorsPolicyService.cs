@@ -11,10 +11,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
     public DynamicCorsPolicyService(IOptions<CorsOptions> options,
         IDynamicCorsPolicyResolver dynamicCorsPolicyResolver)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         _options = options.Value;
         _dynamicCorsPolicyResolver = dynamicCorsPolicyResolver;
@@ -22,10 +19,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
 
     public async Task<CorsResult> EvaluatePolicy(HttpContext context, string policyName)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         var policy = _options.GetPolicy(policyName);
         return await EvaluatePolicy(context, policy);
@@ -33,15 +27,8 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
 
     public async Task<CorsResult> EvaluatePolicy(HttpContext context, CorsPolicy policy)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
-
-        if (policy == null)
-        {
-            throw new ArgumentNullException(nameof(policy));
-        }
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(policy);
 
         var origin = context.Request.Headers[CorsConstants.Origin];
         var requestHeaders = context.Request.Headers;

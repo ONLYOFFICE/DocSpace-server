@@ -24,21 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using ASC.Api.Core.Cors;
 
 namespace ASC.Api.Core.Log;
 
 internal static partial class DynamicCorsPolicyResolverLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Check cors for origin: {origin}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Check cors for origin: {origin}")]
     public static partial void DebugCheckOrigin(this ILogger<DynamicCorsPolicyResolver> logger, string origin);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Get origins from OAuth 2.0 app with client id: {clienId}, origins: {origins}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Get origins from OAuth 2.0 app with client id: {clienId}, origins: {origins}")]
     public static partial void DebugGetOriginsFromOAuth2App(this ILogger<DynamicCorsPolicyResolver> logger, Guid clienId, IEnumerable<string> origins);
 }

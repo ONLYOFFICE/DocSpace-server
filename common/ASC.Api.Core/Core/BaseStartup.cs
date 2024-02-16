@@ -31,13 +31,11 @@ using ASC.Api.Core.Cors.Middlewares;
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
 
 public abstract class BaseStartup
 {
-    private const string CustomCorsPolicyName = "Basic";
     private const string BasicAuthScheme = "Basic";
     private const string MultiAuthSchemes = "MultiAuthSchemes";
 
@@ -324,14 +322,23 @@ public abstract class BaseStartup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
                                             .AllowAnyMethod();
 
                                       if (_corsOrigin != "*")
                                       {
                                           policy.AllowCredentials();
                                       }
+                                  });
+
+                options.AddPolicy(name: CorsPoliciesEnums.AllowAllCorsPolicyName,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("*")
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
                                   });
             });
         }
@@ -442,8 +449,7 @@ public abstract class BaseStartup
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            app.UseDynamicCorsMiddleware();
-            //            app.UseCors(CustomCorsPolicyName);
+            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
         }
 
         // TODO: if some client requests very slow, this line will need to remove
