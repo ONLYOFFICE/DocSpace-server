@@ -307,8 +307,7 @@ public class EmployeeFullDtoHelper(
         if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || userInfo.Id == _authContext.CurrentAccount.ID))
         {
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-
+            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             if (quotaSettings.EnableQuota)
             {
                 var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
