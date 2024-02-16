@@ -1012,7 +1012,7 @@ public class UserController(ICache cache,
 
         if (existentUser.Id != Constants.LostUser.Id)
         {
-            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (!viewerIsAdmin)

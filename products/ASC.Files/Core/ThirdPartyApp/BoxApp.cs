@@ -368,8 +368,8 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
                 userHelpTourSettings.IsNewUser = true;
                 await _settingsManager.SaveForCurrentUserAsync(userHelpTourSettings);
 
-                _personalSettingsHelper.IsNewUser = true;
-                _personalSettingsHelper.IsNotActivated = true;
+                await _personalSettingsHelper.SetIsNewUser(true);
+                await _personalSettingsHelper.SetIsNotActivated(true);
             }
 
             if (!string.IsNullOrEmpty(boxUserId) && !(await CurrentUserAsync(boxUserId)))

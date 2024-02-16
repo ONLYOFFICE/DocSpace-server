@@ -377,8 +377,8 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
                 userHelpTourSettings.IsNewUser = true;
                 await _settingsManager.SaveForCurrentUserAsync(userHelpTourSettings);
 
-                _personalSettingsHelper.IsNewUser = true;
-                _personalSettingsHelper.IsNotActivated = true;
+                await _personalSettingsHelper.SetIsNewUser(true);
+                await _personalSettingsHelper.SetIsNotActivated(true);
             }
 
             if (!string.IsNullOrEmpty(googleUserId) && !(await CurrentUserAsync(googleUserId)))

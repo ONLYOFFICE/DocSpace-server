@@ -198,7 +198,7 @@ public class MessageSettingsController(MessageService messageService,
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();

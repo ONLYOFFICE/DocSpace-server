@@ -148,7 +148,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
             }
 
-            result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             
             if (folder.CreateBy == authContext.CurrentAccount.ID ||
                 !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))

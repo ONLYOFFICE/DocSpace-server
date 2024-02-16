@@ -153,7 +153,7 @@ public class ProductEntryPoint : Product
 
         var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
 
-        var disabledRooms = _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
+        var disabledRooms = await _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
 
         var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 

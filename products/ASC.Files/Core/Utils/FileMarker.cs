@@ -853,7 +853,7 @@ public class FileMarker(TenantManager tenantManager,
 
         if (parent.FolderType == FolderType.VirtualRooms)
         {
-            var disabledRooms = roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
+            var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
             totalTags = totalTags.Where(e => !disabledRooms.Contains(e.EntryId.ToString())).ToList();
         }
 

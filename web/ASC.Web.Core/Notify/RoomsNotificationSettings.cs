@@ -56,22 +56,21 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
         return disabledRooms;
     }
 
-    public IEnumerable<string> GetDisabledRoomsForCurrentUser()
+    public async Task<IEnumerable<string>> GetDisabledRoomsForCurrentUser()
     {
-        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
         return disabledRooms.Select(r => r.ToString());
     }
 
-    public RoomsNotificationSettings GetSettingsForCurrentUser()
+    public async Task<RoomsNotificationSettings> GetSettingsForCurrentUser()
     {
-        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
-        return settings;
+        return await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
     }
 
-    public bool CheckMuteForRoom(string roomsId)
+    public async Task<bool> CheckMuteForRoom(string roomsId)
     {
-        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms.Select(r => r.ToString());
 
         if (disabledRooms.Contains(roomsId))
@@ -82,9 +81,9 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
         return false;
     }
 
-    public RoomsNotificationSettings SetForCurrentUser(int roomsId, bool mute)
+    public async Task<RoomsNotificationSettings> SetForCurrentUser(int roomsId, bool mute)
     {
-        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
 
         if (disabledRooms.Contains(roomsId))
@@ -102,7 +101,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
             }
         }
 
-        settingsManager.SaveForCurrentUser(settings);
+        await settingsManager.SaveForCurrentUserAsync(settings);
 
         return settings;
     }

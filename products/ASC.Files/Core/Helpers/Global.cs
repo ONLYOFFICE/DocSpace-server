@@ -217,13 +217,13 @@ public class Global
         var userInfo = await _userManager.GetUsersAsync(userId);
         if (userInfo.Equals(Constants.LostUser))
         {
-            return alive ? FilesCommonResource.Guest : _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
+            return alive ? FilesCommonResource.Guest : await _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
         }
 
         return userInfo.DisplayUserName(false, _displayUserSettingsHelper);
     }
 
-    public string GetUserName(Guid userId, bool alive = false)
+    public async Task<string> GetUserName(Guid userId, bool alive = false)
     {
         if (userId.Equals(_authContext.CurrentAccount.ID))
         {
@@ -235,10 +235,10 @@ public class Global
             return FilesCommonResource.Guest;
         }
 
-        var userInfo = _userManager.GetUsers(userId);
+        var userInfo = await _userManager.GetUsersAsync(userId);
         if (userInfo.Equals(Constants.LostUser))
         {
-            return alive ? FilesCommonResource.Guest : _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
+            return alive ? FilesCommonResource.Guest : await _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
         }
 
         return userInfo.DisplayUserName(false, _displayUserSettingsHelper);
