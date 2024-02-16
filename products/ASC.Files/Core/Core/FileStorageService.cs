@@ -68,9 +68,7 @@ public class FileStorageService //: IFileStorageService
     FileTrackerHelper fileTracker,
     IEventBus eventBus,
     EntryStatusManager entryStatusManager,
-    CompressToArchive compressToArchive,
     OFormRequestManager oFormRequestManager,
-    MessageService messageService,
     ThirdPartySelector thirdPartySelector,
     ThumbnailSettings thumbnailSettings,
     FileShareParamsHelper fileShareParamsHelper,
@@ -210,11 +208,11 @@ public class FileStorageService //: IFileStorageService
 
         if (orderBy != null)
         {
-            filesSettingsHelper.DefaultOrder = orderBy;
+            await filesSettingsHelper.SetDefaultOrder(orderBy);
         }
         else
         {
-            orderBy = filesSettingsHelper.DefaultOrder;
+            orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
 
         if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
@@ -1429,7 +1427,7 @@ public class FileStorageService //: IFileStorageService
 
             var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
 
-            result = [..entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
+            result = [..await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
 
             if (result.Count == 0)
             {        
@@ -1517,7 +1515,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
-        if (!filesSettingsHelper.EnableThirdParty)
+        if (!await  filesSettingsHelper.GetEnableThirdParty())
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1530,7 +1528,7 @@ public class FileStorageService //: IFileStorageService
         MessageAction messageAction;
         if (string.IsNullOrEmpty(thirdPartyParams.ProviderId))
         {
-            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !filesSettingsHelper.EnableThirdParty)
+            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !await filesSettingsHelper.GetEnableThirdParty())
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
@@ -1611,7 +1609,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        if (!filesSettingsHelper.EnableThirdParty)
+        if (!await filesSettingsHelper.GetEnableThirdParty())
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1625,7 +1623,7 @@ public class FileStorageService //: IFileStorageService
         var thirdparty = await GetBackupThirdPartyAsync();
         if (thirdparty == null)
         {
-            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !filesSettingsHelper.EnableThirdParty)
+            if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !await filesSettingsHelper.GetEnableThirdParty())
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
@@ -1695,22 +1693,9 @@ public class FileStorageService //: IFileStorageService
         return folder.Id;
     }
 
-    public async Task<bool> ChangeAccessToThirdpartyAsync(bool enable)
-    {
-        if (!await global.IsDocSpaceAdministratorAsync)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.EnableThirdParty = enable;
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsThirdPartySettingsUpdated);
-
-        return filesSettingsHelper.EnableThirdParty;
-    }
-
     public async Task<bool> SaveDocuSignAsync(string code)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !filesSettingsHelper.EnableThirdParty || !thirdpartyConfiguration.SupportDocuSignInclusion)
+        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1731,7 +1716,7 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            if (await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !filesSettingsHelper.EnableThirdParty || !thirdpartyConfiguration.SupportDocuSignInclusion)
+            if (await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
@@ -2800,39 +2785,6 @@ public class FileStorageService //: IFileStorageService
         return [..fileKeyPair];
     }
 
-    public async Task<bool> ChangeExternalShareSettingsAsync(bool enable)
-    {
-        if (!await global.IsDocSpaceAdministratorAsync)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.ExternalShare = enable;
-
-        if (!enable)
-        {
-            filesSettingsHelper.ExternalShareSocialMedia = false;
-        }
-
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
-
-        return filesSettingsHelper.ExternalShare;
-    }
-
-    public async Task<bool> ChangeExternalShareSocialMediaSettingsAsync(bool enable)
-    {
-        if (!await global.IsDocSpaceAdministratorAsync)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.ExternalShareSocialMedia = filesSettingsHelper.ExternalShare && enable;
-
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
-
-        return filesSettingsHelper.ExternalShareSocialMedia;
-    }
-
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
@@ -2978,130 +2930,7 @@ public class FileStorageService //: IFileStorageService
             yield return newFile;
         }
     }
-
-    public async Task<bool> StoreOriginalAsync(bool set)
-    {
-        filesSettingsHelper.StoreOriginalFiles = set;
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
-
-        return filesSettingsHelper.StoreOriginalFiles;
-    }
-
-    public async Task<bool> KeepNewFileNameAsync(bool set)
-    {
-        var current = filesSettingsHelper.KeepNewFileName;
-        if (current != set)
-        {
-            filesSettingsHelper.KeepNewFileName = set;
-            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
-        }
-
-        return set;
-    }
-
-    public bool HideConfirmConvert(bool isForSave)
-    {
-        if (isForSave)
-        {
-            filesSettingsHelper.HideConfirmConvertSave = true;
-        }
-        else
-        {
-            filesSettingsHelper.HideConfirmConvertOpen = true;
-        }
-
-        return true;
-    }
-
-    // public async Task<bool> ForcesaveAsync(bool set)
-    // {
-    //     filesSettingsHelper.Forcesave = set;
-    //     await messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
-    //
-    //     return filesSettingsHelper.Forcesave;
-    // }
-    //
-    // public async Task<bool> StoreForcesaveAsync(bool set)
-    // {
-    //     if (!await global.IsDocSpaceAdministratorAsync)
-    //     {
-    //         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-    //     }
-    //
-    //     filesSettingsHelper.StoreForcesave = set;
-    //     await messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
-    //
-    //     return filesSettingsHelper.StoreForcesave;
-    // }
-
-    public bool DisplayRecent(bool set)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.RecentSection = set;
-
-        return filesSettingsHelper.RecentSection;
-    }
-
-    public bool DisplayFavorite(bool set)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.FavoritesSection = set;
-
-        return filesSettingsHelper.FavoritesSection;
-    }
-
-    public bool DisplayTemplates(bool set)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        filesSettingsHelper.TemplatesSection = set;
-
-        return filesSettingsHelper.TemplatesSection;
-    }
-
-    public ICompress ChangeDownloadTarGz(bool set)
-    {
-        filesSettingsHelper.DownloadTarGz = set;
-
-        return compressToArchive;
-    }
-
-    public bool ChangeDeleteConfirm(bool set)
-    {
-        filesSettingsHelper.ConfirmDelete = set;
-
-        return filesSettingsHelper.ConfirmDelete;
-    }
-
-    public AutoCleanUpData ChangeAutomaticallyCleanUp(bool set, DateToAutoCleanUp gap)
-    {
-        filesSettingsHelper.AutomaticallyCleanUp = new AutoCleanUpData { IsAutoCleanUp = set, Gap = gap };
-
-        return filesSettingsHelper.AutomaticallyCleanUp;
-    }
-
-    public AutoCleanUpData GetSettingsAutomaticallyCleanUp()
-    {
-        return filesSettingsHelper.AutomaticallyCleanUp;
-    }
-
-    public List<FileShare> ChangeDefaultAccessRights(List<FileShare> value)
-    {
-        filesSettingsHelper.DefaultSharingAccessRights = value;
-
-        return filesSettingsHelper.DefaultSharingAccessRights;
-    }
+    
 
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(List<JsonElement> fileIds)
     {

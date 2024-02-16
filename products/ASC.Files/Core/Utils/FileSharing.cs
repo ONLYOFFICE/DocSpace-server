@@ -255,7 +255,7 @@ public class FileSharingAceHelper(
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
-                share = w.Access == FileShare.Restrict || !filesSettingsHelper.ExternalShare
+                share = w.Access == FileShare.Restrict || !await filesSettingsHelper.GetExternalShare()
                     ? FileShare.None
                     : w.Access;
             }
@@ -695,7 +695,7 @@ public class FileSharing(
             var w = new AceWrapper
             {
                 Id = FileConstant.ShareLinkId,
-                Link = filesSettingsHelper.ExternalShare ? await fileShareLink.GetLinkAsync((File<T>)entry) : string.Empty,
+                Link = await filesSettingsHelper.GetExternalShare() ? await fileShareLink.GetLinkAsync((File<T>)entry) : string.Empty,
                 SubjectGroup = true,
                 Access = linkAccess,
                 Owner = false

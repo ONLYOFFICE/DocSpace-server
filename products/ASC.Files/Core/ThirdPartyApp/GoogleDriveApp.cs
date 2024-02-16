@@ -421,7 +421,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
                     || GoogleLoginProvider.GoogleDriveExt.Contains(ext))
                 {
                     _logger.DebugGoogleDriveAppFileMustBeConverted();
-                    if (_filesSettingsHelper.ConvertNotify)
+                    if (await _filesSettingsHelper.GetConvertNotify())
                     {
                         context.Response.Redirect(
                             _baseCommonLinkUtility.ToAbsolute(_thirdPartyAppHandlerService.HandlerPath)

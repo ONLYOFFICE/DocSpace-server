@@ -525,7 +525,7 @@ public class FileConverter(FileUtility fileUtility,
         var isNewFile = false;
         var newFileTitle = FileUtility.ReplaceFileExtension(file.Title, convertedFileType);
 
-        if (!filesSettingsHelper.StoreOriginalFiles && await fileSecurity.CanEditAsync(file))
+        if (!await filesSettingsHelper.GetStoreOriginalFiles() && await fileSecurity.CanEditAsync(file))
         {
             newFile = (File<T>)file.Clone();
             newFile.Version++;

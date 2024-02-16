@@ -186,13 +186,6 @@ public class SettingsManager(IServiceProvider serviceProvider,
         return await SaveAsync(settings);
     }
 
-    public bool ManageForCurrentUser<T>(Action<T> action) where T : class, ISettings<T>
-    {
-        var settings = LoadForCurrentUser<T>();
-        action(settings);
-        return SaveForCurrentUser(settings);
-    }
-
     internal Task<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();

@@ -154,10 +154,10 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
     {
         if (uploadModel.StoreOriginalFileFlag.HasValue)
         {
-            _filesSettingsHelper.StoreOriginalFiles = uploadModel.StoreOriginalFileFlag.Value;
+            await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
 
-        IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext.Request.Form.Files;
+        IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext?.Request.Form.Files;
         if (!files.Any())
         {
             files = uploadModel.Files;

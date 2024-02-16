@@ -193,9 +193,9 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
     private async Task<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
-        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync) && filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
+        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync) && (await filesSettingsHelper.GetAutomaticallyCleanUp()).IsAutoCleanUp)
         {
-            return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, filesSettingsHelper.AutomaticallyCleanUp.Gap);
+            return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, (await filesSettingsHelper.GetAutomaticallyCleanUp()).Gap);
         }
 
         return default;

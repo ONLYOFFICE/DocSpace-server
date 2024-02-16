@@ -102,9 +102,9 @@ public class FileMarker(TenantManager tenantManager,
     FilesSettingsHelper filesSettingsHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
-        IDistributedLockProvider distributedLockProvider,
+    IDistributedLockProvider distributedLockProvider,
     FileMarkerHelper fileMarkerHelper)
-    {
+{
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
@@ -810,12 +810,12 @@ public class FileMarker(TenantManager tenantManager,
             var entry = tag.EntryType == FileEntryType.File
                             ? await fileDao.GetFileAsync((T)tag.EntryId)
                             : (FileEntry<T>)await folderDao.GetFolderAsync((T)tag.EntryId);
-            if (entry != null && (!entry.ProviderEntry || filesSettingsHelper.EnableThirdParty))
+            if (entry != null && (!entry.ProviderEntry || await filesSettingsHelper.GetEnableThirdParty()))
             {
                 entryTags.Add(entry, tag);
             }
                 //todo: RemoveMarkAsNew(tag);
-            }
+        }
 
         return entryTags;
     }
