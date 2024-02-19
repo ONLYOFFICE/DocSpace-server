@@ -250,17 +250,19 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
 {    
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
-        return await storageFactory.GetStorageAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1, FileConstant.StorageModule);
+        return await GetStoreAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1);
     }
     
-    private readonly IDictionary<int, IDataStore> _currentTenantStore = new ConcurrentDictionary<int, IDataStore>();
-    public async Task<IDataStore> GetStoreAsync(int tenantId)
+    private readonly ConcurrentDictionary<int, IDataStore> _currentTenantStore = new();
+    internal async Task<IDataStore> GetStoreAsync(int tenantId)
     {
-        if (!_currentTenantStore.TryGetValue(tenantId, out var result))
+        if (_currentTenantStore.TryGetValue(tenantId, out var result))
         {
-            result = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
-            _currentTenantStore.TryAdd(tenantId, result);
+            return result;
         }
+
+        result = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
+        _currentTenantStore.TryAdd(tenantId, result);
 
         return result;
     }
