@@ -124,8 +124,6 @@ public abstract class FileEntryDto<T> : FileEntryDto
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
-    
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
     public bool CanShare { get; set; }
