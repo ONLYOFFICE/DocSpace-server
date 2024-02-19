@@ -62,7 +62,8 @@ public class FileMarkerCache
 }
 
 [Singleton]
-public class FileMarkerHelper(IServiceProvider serviceProvider,
+public class FileMarkerHelper(
+    IServiceProvider serviceProvider,
     ILogger<FileMarkerHelper> logger,
     IDistributedTaskQueueFactory queueFactory)
 {
@@ -92,7 +93,8 @@ public class FileMarkerHelper(IServiceProvider serviceProvider,
 }
 
 [Scope]
-public class FileMarker(TenantManager tenantManager,
+public class FileMarker(
+    TenantManager tenantManager,
     UserManager userManager,
     IDaoFactory daoFactory,
     GlobalFolder globalFolder,
@@ -102,20 +104,19 @@ public class FileMarker(TenantManager tenantManager,
     FilesSettingsHelper filesSettingsHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
-        IDistributedLockProvider distributedLockProvider,
+    IDistributedLockProvider distributedLockProvider,
     FileMarkerHelper fileMarkerHelper)
-    {
+{
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
+
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
 
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var parentFolderId = obj.FileEntry.FileEntryType == FileEntryType.File ? 
-            ((File<T>)obj.FileEntry).ParentId : 
-            ((Folder<T>)obj.FileEntry).Id;
+        var parentFolderId = obj.FileEntry.FileEntryType == FileEntryType.File ? ((File<T>)obj.FileEntry).ParentId : ((Folder<T>)obj.FileEntry).Id;
 
         var parentFolders = await folderDao.GetParentFoldersAsync(parentFolderId).Reverse().ToListAsync();
 
@@ -224,151 +225,159 @@ public class FileMarker(TenantManager tenantManager,
                         var folderDaoInt = daoFactory.GetFolderDao<int>();
                         var folderShare = await folderDaoInt.GetFolderAsync(await globalFolder.GetFolderShareAsync(daoFactory));
 
-                    foreach (var userID in userIDs)
-                    {
-                        var userFolderId = await folderDaoInt.GetFolderIDUserAsync(false, userID);
-                        if (Equals(userFolderId, 0))
+                        foreach (var id in userIDs)
                         {
-                            continue;
+                            var userFolderId = await folderDaoInt.GetFolderIDUserAsync(false, id);
+                            if (Equals(userFolderId, 0))
+                            {
+                                continue;
+                            }
+
+                            Folder<int> rootFolder = null;
+                            if (obj.FileEntry.ProviderEntry)
+                            {
+                                rootFolder = obj.FileEntry.RootCreateBy == id
+                                    ? await folderDaoInt.GetFolderAsync(userFolderId)
+                                    : folderShare;
+                            }
+                            else if (!Equals(obj.FileEntry.RootId, userFolderId))
+                            {
+                                rootFolder = folderShare;
+                            }
+                            else
+                            {
+                                RemoveFromCache(userFolderId, id);
+                            }
+
+                            if (rootFolder == null)
+                            {
+                                continue;
+                            }
+
+                            if (userEntriesData.TryGetValue(id, out var value))
+                            {
+                                value.Add(rootFolder);
+                            }
+                            else
+                            {
+                                userEntriesData.Add(id, [rootFolder]);
+                            }
+
+                            RemoveFromCache(rootFolder.Id, id);
                         }
 
-                        Folder<int> rootFolder = null;
+                        break;
+                    }
+                case FolderType.COMMON:
+                    {
+                        var commonFolderId = await globalFolder.GetFolderCommonAsync(daoFactory);
+                        userIDs.ForEach(id => RemoveFromCache(commonFolderId, id));
+
                         if (obj.FileEntry.ProviderEntry)
                         {
-                            rootFolder = obj.FileEntry.RootCreateBy == userID
-                                ? await folderDaoInt.GetFolderAsync(userFolderId)
-                                : folderShare;
-                        }
-                        else if (!Equals(obj.FileEntry.RootId, userFolderId))
-                        {
-                            rootFolder = folderShare;
-                        }
-                        else
-                        {
-                                    RemoveFromCache(userFolderId, userID);
-                        }
-
-                        if (rootFolder == null)
-                        {
-                            continue;
-                        }
-
-                        if (userEntriesData.TryGetValue(userID, out var value))
-                        {
-                            value.Add(rootFolder);
-                        }
-                        else
-                        {
-                                userEntriesData.Add(userID, [rootFolder]);
-                        }
-
-                                RemoveFromCache(rootFolder.Id, userID);
-                    }
-
-                            break;
-                }
-                    case FolderType.COMMON:
-                {
-                            var commonFolderId = await globalFolder.GetFolderCommonAsync(daoFactory);
-                            userIDs.ForEach(userID => RemoveFromCache(commonFolderId, userID));
-
-                    if (obj.FileEntry.ProviderEntry)
-                    {
-                                var commonFolder = await folderDao.GetFolderAsync(await globalFolder.GetFolderCommonAsync<T>(daoFactory));
-                        userIDs.ForEach(userID =>
-                        {
-                            if (userEntriesData.TryGetValue(userID, out var value))
+                            var commonFolder = await folderDao.GetFolderAsync(await globalFolder.GetFolderCommonAsync<T>(daoFactory));
+                            userIDs.ForEach(id =>
                             {
-                                value.Add(commonFolder);
+                                if (userEntriesData.TryGetValue(id, out var value))
+                                {
+                                    value.Add(commonFolder);
+                                }
+                                else
+                                {
+                                    userEntriesData.Add(id, [commonFolder]);
+                                }
+
+                                RemoveFromCache(commonFolderId, id);
+                            });
+                        }
+
+                        break;
+                    }
+                case FolderType.VirtualRooms:
+                    {
+                        var virtualRoomsFolderId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+                        userIDs.ForEach(id => RemoveFromCache(virtualRoomsFolderId, id));
+
+                        var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+                        if (room.CreateBy != obj.CurrentAccountId)
+                        {
+                            var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat(new[] { obj.FileEntry }).ToList();
+
+                            if (userEntriesData.TryGetValue(room.CreateBy, out var entries) && !entries.Contains(obj.FileEntry))
+                            {
+                                entries.Add(obj.FileEntry);
                             }
                             else
                             {
-                                    userEntriesData.Add(userID, [commonFolder]);
+                                userEntriesData.Add(room.CreateBy, roomOwnerEntries);
                             }
 
-                                    RemoveFromCache(commonFolderId, userID);
-                        });
-                    }
+                            RemoveFromCache(virtualRoomsFolderId, room.CreateBy);
+                        }
 
-                            break;
-                }
-                    case FolderType.VirtualRooms:
-                {
-                            var virtualRoomsFolderId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
-                            userIDs.ForEach(userID => RemoveFromCache(virtualRoomsFolderId, userID));
-
-                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
-
-                    if (room.CreateBy != obj.CurrentAccountId)
-                    {
-                        var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat(new[] { obj.FileEntry }).ToList();
-                        userEntriesData.Add(room.CreateBy, roomOwnerEntries);
-
-                                RemoveFromCache(virtualRoomsFolderId, room.CreateBy);
-                    }
-
-                    if (obj.FileEntry.ProviderEntry)
-                    {
-                                var virtualRoomsFolder = await daoFactory.GetFolderDao<int>().GetFolderAsync(virtualRoomsFolderId);
-
-                        userIDs.ForEach(userID =>
+                        if (obj.FileEntry.ProviderEntry)
                         {
-                            if (userEntriesData.TryGetValue(userID, out var value))
+                            var virtualRoomsFolder = await daoFactory.GetFolderDao<int>().GetFolderAsync(virtualRoomsFolderId);
+
+                            userIDs.ForEach(id =>
                             {
-                                value.Add(virtualRoomsFolder);
+                                if (userEntriesData.TryGetValue(id, out var value))
+                                {
+                                    value.Add(virtualRoomsFolder);
+                                }
+                                else
+                                {
+                                    userEntriesData.Add(id, [virtualRoomsFolder]);
+                                }
+
+                                RemoveFromCache(virtualRoomsFolderId, id);
+                            });
+                        }
+
+                        break;
+                    }
+                case FolderType.Privacy:
+                    {
+                        foreach (var id in userIDs)
+                        {
+                            var privacyFolderId = await folderDao.GetFolderIDPrivacyAsync(false, id);
+                            if (Equals(privacyFolderId, 0))
+                            {
+                                continue;
+                            }
+
+                            var rootFolder = await folderDao.GetFolderAsync(privacyFolderId);
+                            if (rootFolder == null)
+                            {
+                                continue;
+                            }
+
+                            if (userEntriesData.TryGetValue(id, out var value))
+                            {
+                                value.Add(rootFolder);
                             }
                             else
                             {
-                                    userEntriesData.Add(userID, [virtualRoomsFolder]);
+                                userEntriesData.Add(id, [rootFolder]);
                             }
 
-                                    RemoveFromCache(virtualRoomsFolderId, userID);
-                        });
+                            RemoveFromCache(rootFolder.Id, id);
+                        }
+
+                        break;
                     }
-
-                            break;
-                }
-                    case FolderType.Privacy:
-                {
-                    foreach (var userID in userIDs)
-                    {
-                        var privacyFolderId = await folderDao.GetFolderIDPrivacyAsync(false, userID);
-                        if (Equals(privacyFolderId, 0))
-                        {
-                            continue;
-                        }
-
-                        var rootFolder = await folderDao.GetFolderAsync(privacyFolderId);
-                        if (rootFolder == null)
-                        {
-                            continue;
-                        }
-
-                        if (userEntriesData.TryGetValue(userID, out var value))
-                        {
-                            value.Add(rootFolder);
-                        }
-                        else
-                        {
-                                userEntriesData.Add(userID, [rootFolder]);
-                        }
-
-                                RemoveFromCache(rootFolder.Id, userID);
-                    }
-
-                            break;
-                }
             }
 
-            userIDs.ForEach(userID =>
+            userIDs.ForEach(id =>
             {
-                if (userEntriesData.TryGetValue(userID, out var value))
+                if (userEntriesData.TryGetValue(id, out var value))
                 {
                     value.Add(obj.FileEntry);
                 }
                 else
                 {
-                    userEntriesData.Add(userID, [obj.FileEntry]);
+                    userEntriesData.Add(id, [obj.FileEntry]);
                 }
             });
         }
@@ -406,7 +415,9 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         await SendChangeNoticeAsync(updateTags.Concat(newTags).ToList(), socketManager);
-        
+
+        return;
+
         async Task GetNewTagsAsync<T1>(Guid userId, List<FileEntry<T1>> entries)
         {
             var tagDao1 = daoFactory.GetTagDao<T1>();
@@ -447,8 +458,8 @@ public class FileMarker(TenantManager tenantManager,
             var folderDao = daoFactory.GetFolderDao<T>();
             var path = await folderDao.GetBunchObjectIDAsync(fileEntry.RootId);
 
-            var projectID = path.Split('/').Last();
-            if (string.IsNullOrEmpty(projectID))
+            var projectId = path.Split('/').Last();
+            if (string.IsNullOrEmpty(projectId))
             {
                 return;
             }
@@ -467,28 +478,28 @@ public class FileMarker(TenantManager tenantManager,
         fileMarkerHelper.Add(taskData);
     }
 
-    public async ValueTask RemoveMarkAsNewAsync<T>(FileEntry<T> fileEntry, Guid userID = default)
+    public async ValueTask RemoveMarkAsNewAsync<T>(FileEntry<T> fileEntry, Guid userId = default)
     {
         if (fileEntry == null)
         {
             return;
         }
 
-        userID = userID.Equals(Guid.Empty) ? authContext.CurrentAccount.ID : userID;
+        userId = userId.Equals(Guid.Empty) ? authContext.CurrentAccount.ID : userId;
 
         var tagDao = daoFactory.GetTagDao<T>();
         var internalFolderDao = daoFactory.GetFolderDao<int>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        if (!await tagDao.GetNewTagsAsync(userID, fileEntry).AnyAsync())
+        if (!await tagDao.GetNewTagsAsync(userId, fileEntry).AnyAsync())
         {
             return;
         }
 
         T folderId;
         var valueNew = 0;
-        var userFolderId = await internalFolderDao.GetFolderIDUserAsync(false, userID);
-        var privacyFolderId = await internalFolderDao.GetFolderIDPrivacyAsync(false, userID);
+        var userFolderId = await internalFolderDao.GetFolderIDUserAsync(false, userId);
+        var privacyFolderId = await internalFolderDao.GetFolderIDPrivacyAsync(false, userId);
 
         var removeTags = new List<Tag>();
 
@@ -496,21 +507,22 @@ public class FileMarker(TenantManager tenantManager,
         {
             folderId = ((File<T>)fileEntry).ParentId;
 
-            removeTags.Add(Tag.New(userID, fileEntry));
+            removeTags.Add(Tag.New(userId, fileEntry));
             valueNew = 1;
         }
         else
         {
             folderId = fileEntry.Id;
 
-            var listTags = await tagDao.GetNewTagsAsync(userID, (Folder<T>)fileEntry, true).ToListAsync();
-            var fileTag  = listTags.Find(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(fileEntry.Id));
+            var listTags = await tagDao.GetNewTagsAsync(userId, (Folder<T>)fileEntry, true).ToListAsync();
+            var fileTag = listTags.Find(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(fileEntry.Id));
             if (fileTag != null)
             {
                 valueNew = fileTag.Count;
             }
 
-            if (Equals(fileEntry.Id, userFolderId) || Equals(fileEntry.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) || Equals(fileEntry.Id, await globalFolder.GetFolderShareAsync(daoFactory)))
+            if (Equals(fileEntry.Id, userFolderId) || Equals(fileEntry.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
+                Equals(fileEntry.Id, await globalFolder.GetFolderShareAsync(daoFactory)))
             {
                 var folderTags = listTags.Where(tag => tag.EntryType == FileEntryType.Folder);
 
@@ -520,7 +532,7 @@ public class FileMarker(TenantManager tenantManager,
                     if (folderEntry is { ProviderEntry: true })
                     {
                         listTags.Remove(tag);
-                        listTags.AddRange(await tagDao.GetNewTagsAsync(userID, folderEntry, true).ToListAsync());
+                        listTags.AddRange(await tagDao.GetNewTagsAsync(userId, folderEntry, true).ToListAsync());
                     }
                 }
             }
@@ -549,15 +561,15 @@ public class FileMarker(TenantManager tenantManager,
                 case FolderType.COMMON:
                     cacheFolderId = await globalFolder.GetFolderCommonAsync(daoFactory);
                     break;
-                case FolderType.USER when rootFolder.ProviderEntry && rootFolder.RootCreateBy == userID:
+                case FolderType.USER when rootFolder.ProviderEntry && rootFolder.RootCreateBy == userId:
                     cacheFolderId = rootFolderId = userFolderId;
                     break;
-                case FolderType.USER when !rootFolder.ProviderEntry && !Equals(rootFolder.RootId, userFolderId)
-                                          || rootFolder.ProviderEntry && rootFolder.RootCreateBy != userID:
+                case FolderType.USER when (!rootFolder.ProviderEntry && !Equals(rootFolder.RootId, userFolderId))
+                                          || (rootFolder.ProviderEntry && rootFolder.RootCreateBy != userId):
                     cacheFolderId = rootFolderId = await globalFolder.GetFolderShareAsync(daoFactory);
                     break;
                 case FolderType.USER:
-                cacheFolderId = userFolderId;
+                    cacheFolderId = userFolderId;
                     break;
                 case FolderType.Privacy:
                     {
@@ -566,7 +578,7 @@ public class FileMarker(TenantManager tenantManager,
                             cacheFolderId = rootFolderId = privacyFolderId;
                         }
 
-                                    break;
+                        break;
                     }
                 case FolderType.SHARE:
                     cacheFolderId = await globalFolder.GetFolderShareAsync(daoFactory);
@@ -579,14 +591,14 @@ public class FileMarker(TenantManager tenantManager,
         if (!rootFolderId.Equals(default))
         {
             var internalRootFolder = await internalFolderDao.GetFolderAsync(rootFolderId);
-            await UpdateRemoveTags(internalRootFolder, userID, valueNew, updateTags, removeTags);
+            await UpdateRemoveTags(internalRootFolder, userId, valueNew, updateTags, removeTags);
         }
 
-        RemoveFromCache(cacheFolderId, userID);
+        RemoveFromCache(cacheFolderId, userId);
 
         foreach (var parentFolder in parentFolders)
         {
-            await UpdateRemoveTags(parentFolder, userID, valueNew, updateTags, removeTags);
+            await UpdateRemoveTags(parentFolder, userId, valueNew, updateTags, removeTags);
         }
 
         if (updateTags.Count > 0)
@@ -601,35 +613,31 @@ public class FileMarker(TenantManager tenantManager,
 
         var socketManager = serviceProvider.GetRequiredService<SocketManager>();
 
-        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner, 0)
-        {
-            EntryId = r.EntryId,
-            EntryType = r.EntryType
-        });
+        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner, 0) { EntryId = r.EntryId, EntryType = r.EntryType });
 
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
     }
 
-    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, ICollection<Tag> updateTags,  ICollection<Tag> removeTags)
-        {
+    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, ICollection<Tag> updateTags, ICollection<Tag> removeTags)
+    {
         var tagDao = daoFactory.GetTagDao<TFolder>();
         var newTags = tagDao.GetNewTagsAsync(userId, folder);
-            var parentTag = await newTags.FirstOrDefaultAsync();
+        var parentTag = await newTags.FirstOrDefaultAsync();
 
-            if (parentTag != null)
+        if (parentTag != null)
+        {
+            parentTag.Count -= valueNew;
+
+            if (parentTag.Count > 0)
             {
-                parentTag.Count -= valueNew;
-
-                if (parentTag.Count > 0)
-                {
-                    updateTags.Add(parentTag);
-                }
-                else
-                {
-                    removeTags.Add(parentTag);
-                }
+                updateTags.Add(parentTag);
+            }
+            else
+            {
+                removeTags.Add(parentTag);
             }
         }
+    }
 
     public async Task RemoveMarkAsNewForAllAsync<T>(FileEntry<T> fileEntry)
     {
@@ -637,9 +645,9 @@ public class FileMarker(TenantManager tenantManager,
         var tags = tagDao.GetTagsAsync(fileEntry.Id, fileEntry.FileEntryType == FileEntryType.File ? FileEntryType.File : FileEntryType.Folder, TagType.New);
         var userIDs = tags.Select(tag => tag.Owner).Distinct();
 
-        await foreach (var userID in userIDs)
+        await foreach (var userId in userIDs)
         {
-            await RemoveMarkAsNewAsync(fileEntry, userID);
+            await RemoveMarkAsNewAsync(fileEntry, userId);
         }
     }
 
@@ -704,7 +712,7 @@ public class FileMarker(TenantManager tenantManager,
             Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
         {
-            var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && (tag.EntryId is string));
+            var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
 
             var providerFolderTags = new List<KeyValuePair<Tag, Folder<string>>>();
 
@@ -726,9 +734,9 @@ public class FileMarker(TenantManager tenantManager,
         }
 
         tags = tags
-            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id) ||  r.EntryType == FileEntryType.File)
-                .Distinct()
-                .ToList();
+            .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
+            .Distinct()
+            .ToList();
 
         //TODO: refactoring
         var entryTagsProvider = await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string).ToAsyncEnumerable());
@@ -750,7 +758,7 @@ public class FileMarker(TenantManager tenantManager,
             if (int.TryParse(entryTag.Key.ParentId, out var fId))
             {
                 var parentEntryInt = entryTagsInternal.Keys
-                        .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, fId));
+                    .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, fId));
 
                 if (parentEntryInt != null)
                 {
@@ -808,14 +816,14 @@ public class FileMarker(TenantManager tenantManager,
         await foreach (var tag in tags)
         {
             var entry = tag.EntryType == FileEntryType.File
-                            ? await fileDao.GetFileAsync((T)tag.EntryId)
-                            : (FileEntry<T>)await folderDao.GetFolderAsync((T)tag.EntryId);
+                ? await fileDao.GetFileAsync((T)tag.EntryId)
+                : (FileEntry<T>)await folderDao.GetFolderAsync((T)tag.EntryId);
             if (entry != null && (!entry.ProviderEntry || filesSettingsHelper.EnableThirdParty))
             {
                 entryTags.Add(entry, tag);
             }
-                //todo: RemoveMarkAsNew(tag);
-            }
+            //todo: RemoveMarkAsNew(tag);
+        }
 
         return entryTags;
     }
@@ -833,8 +841,8 @@ public class FileMarker(TenantManager tenantManager,
 
         var shareFolder = await globalFolder.GetFolderShareAsync<T>(daoFactory);
         var parentFolderTag = Equals(shareFolder, parent.Id)
-                                    ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
-                                    : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
+            ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
+            : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
         totalTags = totalTags.Where(e => !Equals(e, parentFolderTag)).ToList();
 
@@ -893,7 +901,7 @@ public class FileMarker(TenantManager tenantManager,
                 }
 
                 RemoveFromCache(parent.Id);
-                }
+            }
             else if (countSubNew > 0)
             {
                 var diff = parentFolderTag.Count - countSubNew;
@@ -917,6 +925,7 @@ public class FileMarker(TenantManager tenantManager,
                     var rootFolder = parentsList.Last();
                     T rootFolderId = default;
                     cacheFolderId = rootFolder.Id;
+                    
                     if (rootFolder.RootFolderType == FolderType.BUNCH)
                     {
                         cacheFolderId = rootFolderId = await globalFolder.GetFolderProjectsAsync<T>(daoFactory);
@@ -962,20 +971,24 @@ public class FileMarker(TenantManager tenantManager,
             }
         }
 
+        return;
+
         void SetTagNewForEntry<TEntry>(FileEntry<TEntry> entry)
         {
             var curTag = totalTags.Find(tag => tag.EntryType == entry.FileEntryType && tag.EntryId.Equals(entry.Id));
 
-            if (curTag != null)
+            if (curTag == null)
             {
-                if (entry.FileEntryType == FileEntryType.Folder)
-                {
-                    ((IFolder)entry).NewForMe = curTag.Count;
-                }
-                else
-                {
-                    entry.IsNew = true;
-                }
+                return;
+            }
+
+            if (entry.FileEntryType == FileEntryType.Folder)
+            {
+                ((IFolder)entry).NewForMe = curTag.Count;
+            }
+            else
+            {
+                entry.IsNew = true;
             }
         }
     }
@@ -1005,6 +1018,7 @@ public class FileMarker(TenantManager tenantManager,
         {
             return;
         }
+
         var key = string.Format(CacheKeyFormat, userId, folderId);
         fileMarkerCache.Remove(key);
     }

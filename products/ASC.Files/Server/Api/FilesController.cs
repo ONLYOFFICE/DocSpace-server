@@ -453,11 +453,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }

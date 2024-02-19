@@ -57,6 +57,7 @@ global using ASC.AuditTrail.Models;
 global using ASC.Collections;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Core.Common.Core;
 global using ASC.Common.Data;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;

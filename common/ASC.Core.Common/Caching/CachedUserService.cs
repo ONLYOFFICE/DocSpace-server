@@ -76,23 +76,32 @@ public class UserServiceCache
     }
     private void InvalidateCache(GroupCacheItem groupCacheItem)
     {
-        if (groupCacheItem != null)
+        if (groupCacheItem == null)
         {
-            var key = GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id));
-            Cache.Remove(key);
+            return;
         }
+
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id)));
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant));
     }
 
     private void UpdateUserGroupRefCache(UserGroupRef r)
     {
         var key = GetRefCacheKey(r.TenantId);
-        var refs = Cache.Get<UserGroupRefStore>(key);
-        if (refs != null)
+        var usersRefs = Cache.Get<UserGroupRefStore>(key);
+        if (usersRefs != null)
         {
-            lock (refs)
+            lock (usersRefs)
             {
-                refs[r.CreateKey()] = r;
+                usersRefs[r.CreateKey()] = r;
             }
+        }
+
+        var groupRef = GetRefCacheKey(r.TenantId, r.GroupId, r.RefType);
+
+        if (groupRef != null && r.Removed)
+        {
+            Cache.Remove(groupRef);
         }
     }
 
@@ -170,9 +179,10 @@ public class CachedUserService : IUserService, ICachedService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        string text,
+        bool withoutGroup)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -185,13 +195,14 @@ public class CachedUserService : IUserService, ICachedService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, ownerId, sortBy, 
+        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup, ownerId, sortBy, 
             sortOrderAsc, limit, offset);
     }
 
@@ -433,6 +444,16 @@ public class CachedUserService : IUserService, ICachedService
         }
 
         return groups;
+    }
+
+    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    {
+        return _service.GetGroupsAsync(tenant, text, userId, manager, sortBy, sortOrderAsc, offset, count);
+    }
+
+    public Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager)
+    {
+        return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
     public void InvalidateCache()

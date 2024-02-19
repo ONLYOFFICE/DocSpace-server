@@ -2342,21 +2342,21 @@ public class FileStorageService //: IFileStorageService
         return await fileSharing.GetSharedInfoAsync(fileIds, folderIds, subjectTypes);
     }
 
-    public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, int offset, int count)
+    public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)
     {
         var entry = await GetEntryAsync(entryId, entryType);
 
-        await foreach (var ace in fileSharing.GetPureSharesAsync(entry, filterType, null, offset, count))
+        await foreach (var ace in fileSharing.GetPureSharesAsync(entry, filterType, null, text, offset, count))
         {
             yield return ace;
         }
     }
 
-    public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType)
+    public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text)
     {
         var entry = await GetEntryAsync(entryId, entryType);
 
-        return await fileSharing.GetPureSharesCountAsync(entry, filterType);
+        return await fileSharing.GetPureSharesCountAsync(entry, filterType, text);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)
@@ -2381,7 +2381,7 @@ public class FileStorageService //: IFileStorageService
         {
             var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
 
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
                 .FirstOrDefaultAsync();
             if (parentLink == null)
             {
@@ -2394,7 +2394,7 @@ public class FileStorageService //: IFileStorageService
             return parentLink;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, 0, 1)
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
             .FirstOrDefaultAsync();
 
         if (link == null)
@@ -3207,7 +3207,7 @@ public class FileStorageService //: IFileStorageService
         {
             var counter = 0;
 
-            await foreach (var ace in fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, offset, packSize + margin))
+            await foreach (var ace in fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, null, offset, packSize + margin))
             {
                 counter++;
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,26 +26,9 @@
 
 namespace ASC.Files.Core.Security;
 
-/// <summary>
-/// </summary>
-[Flags]
-public enum ShareFilterType
+public class GroupMemberSecurityRecord
 {
-    UserOrGroup = 0,
-    InvitationLink = 1,
-    ExternalLink = 2,
-    AdditionalExternalLink = 4,
-    PrimaryExternalLink = 8,
-    Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink,
-    User = 16,
-    Group = 32
-}
-
-public enum SubjectType
-{
-    User = 0,
-    ExternalLink = 1,
-    Group = 2,
-    InvitationLink = 3,
-    PrimaryExternalLink = 4
+    public Guid UserId { get; init; }
+    public FileShare UserShare { get; init; }
+    public FileShare GroupShare { get; init; }
 }
