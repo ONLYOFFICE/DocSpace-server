@@ -200,6 +200,8 @@ public class File<T> : FileEntry<T>
             };
         }
     }
+    
+    public DateTime? LastOpened { get; set; }
 }
 
 

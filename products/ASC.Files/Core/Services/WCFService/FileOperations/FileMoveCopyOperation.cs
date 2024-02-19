@@ -48,7 +48,7 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         
         if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            this[OpType] = FileOperationType.Move;
+            this[OpType] = (int)FileOperationType.Move;
         }
     }
 
@@ -58,7 +58,7 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         
         if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            this[OpType] = FileOperationType.Move;
+            this[OpType] = (int)FileOperationType.Move;
         }
 
         return data;
