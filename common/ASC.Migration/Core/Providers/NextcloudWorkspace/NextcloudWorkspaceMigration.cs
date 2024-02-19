@@ -447,16 +447,4 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         _migrationInfo.SuccessedUsers = usersForImport.Count - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
     }
-
-    public override void Dispose()
-    {
-        if (Directory.Exists(_tmpFolder)) {
-            var folders = Directory.GetDirectories(_tmpFolder);
-            if (folders.Length > 0)
-            {
-                Directory.Delete(folders[0], true);
-            }
-        }
-        base.Dispose();
-    }
 }

@@ -337,14 +337,13 @@ public class WorkspaceMigration(
             await migratingProjectFiles.MigrateAsync();
         }
 
+        if (Directory.Exists(_tmpFolder))
+        {
+            Directory.Delete(_tmpFolder, true);
+        }
+
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersCount - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        _dataReader?.Dispose();
     }
 }
