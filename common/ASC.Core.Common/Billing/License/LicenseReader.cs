@@ -64,7 +64,7 @@ public class LicenseReader
         await _coreSettings.SaveSettingAsync(CustomerIdKey, value);
     }
 
-    private Stream GetLicenseStream(bool temp = false)
+    private FileStream GetLicenseStream(bool temp = false)
     {
         var path = temp ? _licensePathTemp : LicensePath;
         if (!File.Exists(path))

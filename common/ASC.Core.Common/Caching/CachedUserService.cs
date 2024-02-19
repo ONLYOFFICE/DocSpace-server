@@ -143,7 +143,7 @@ public class UserServiceCache
 [Scope]
 public class CachedUserService : IUserService, ICachedService
 {
-    private readonly IUserService _service;
+    private readonly EFUserService _service;
     private readonly ICache _cache;
     private readonly ICacheNotify<UserInfoCacheItem> _cacheUserInfoItem;
     private readonly ICacheNotify<UserPhotoCacheItem> _cacheUserPhotoItem;

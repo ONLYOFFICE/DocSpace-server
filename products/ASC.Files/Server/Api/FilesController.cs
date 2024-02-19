@@ -31,15 +31,17 @@ namespace ASC.Files.Api;
 [ConstraintRoute("int")]
 public class FilesControllerInternal(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
+        FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
+        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
+        FileOperationsManager fileOperationsManager,
         ThirdPartySelector thirdPartySelector,
         DocumentServiceHelper documentServiceHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
@@ -47,7 +49,7 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
         FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
 {
     /// <summary>
     /// Returns the detailed information about a third-party file with the ID specified in the request.
@@ -71,6 +73,7 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
+        FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
@@ -223,9 +226,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(T fileId, [FromBody] DeleteRequestDto inDto)
     {
-        var tasks = await fileStorageService.DeleteFileAsync(fileId, false, inDto.DeleteAfter, inDto.Immediately);
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -424,8 +427,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
-        
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     [HttpPut("{fileId}/order")]
@@ -475,8 +478,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
-        
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 }
 

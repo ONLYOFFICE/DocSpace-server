@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.ObjectModel;
+
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.Files.Core.Security;
 
 [Scope]
@@ -39,7 +43,8 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
-    private IReadOnlyDictionary<string, StringValues> _headers;
+    private ReadOnlyDictionary<string, StringValues> _headers;
+    private IReadOnlyDictionary<string, string> _cookie;
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -65,7 +70,6 @@ public class ExternalShare(Global global,
             Url = commonLinkUtility.GetFullAbsolutePath(url),
             Token = key
         };
-        
     }
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
@@ -100,7 +104,7 @@ public class ExternalShare(Global global,
         
         if (string.IsNullOrEmpty(_passwordKey))
         {
-            _passwordKey = GetFromHeaders(CookiesType.ShareLink, record.Subject.ToString());
+            _passwordKey = GetFromCookie(CookiesType.ShareLink, record.Subject.ToString());
         }
 
         if (_passwordKey == record.Options.Password)
@@ -194,8 +198,13 @@ public class ExternalShare(Global global,
         {
             return _sessionId;
         }
+
+        if (CustomSynchronizationContext.CurrentContext?.CurrentPrincipal?.Identity is AnonymousSession anonymous)
+        {
+            return _sessionId = anonymous.SessionId;
+        }
         
-        var sessionKey = GetFromHeaders(CookiesType.AnonymousSessionKey);
+        var sessionKey = GetFromCookie(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
@@ -263,6 +272,18 @@ public class ExternalShare(Global global,
     public void Init(IDictionary<string, StringValues> headers)
     {
         _headers = headers.AsReadOnly();
+
+        if (!headers.TryGetValue(HeaderNames.Cookie, out var cookie) || string.IsNullOrEmpty(cookie))
+        {
+            return;
+        }
+
+        var split = cookie.FirstOrDefault()?.Split(';');
+
+        if (CookieHeaderValue.TryParseList(split, out var cookieCollection))
+        {
+            _cookie = cookieCollection.ToDictionary(k => k.Name.ToString(), v => v.Value.ToString()).AsReadOnly();
+        }
     }
 
     private async Task<string> GetDbKeyAsync()
@@ -270,10 +291,10 @@ public class ExternalShare(Global global,
         return _dbKey ??= await global.GetDocDbKeyAsync();
     }
     
-    private string GetFromHeaders(CookiesType type, string itemId = null)
+    private string GetFromCookie(CookiesType type, string itemId = null)
     {
-        return _headers is { Count: > 0 } 
-            ? cookiesManager.GetCookies(_headers, type, itemId) 
+        return _cookie is { Count: > 0 } 
+            ? cookiesManager.GetCookies(_cookie, type, itemId) 
             : cookiesManager.GetCookies(type, itemId, true);
     }
 }

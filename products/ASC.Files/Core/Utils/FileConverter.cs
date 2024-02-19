@@ -194,7 +194,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                                DateTime.UtcNow - x.StopDateTime > TimeSpan.FromMinutes(10));
     }
 
-    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private List<FileConverterOperationResult> DeleteOrphanCacheItem(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
     {
         var listTasks = queueTasks.ToList();
 
@@ -230,13 +230,13 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
         return $"{Cache_key_prefix}_{typeof(T).Name}".ToLowerInvariant();
     }
 
-    private IEnumerable<FileConverterOperationResult> LoadFromCache(string cacheKey)
+    private List<FileConverterOperationResult> LoadFromCache(string cacheKey)
     {
         var serializedObject = distributedCache.Get(cacheKey);
 
         if (serializedObject == null)
         {
-            return new List<FileConverterOperationResult>();
+            return [];
         }
 
         using var ms = new MemoryStream(serializedObject);
@@ -329,7 +329,7 @@ public class FileConverter(FileUtility fileUtility,
         return fileUtility.ExtsMustConvert.Contains(ext);
     }
 
-    private IDictionary<string, string> GetHttpHeaders()
+    private Dictionary<string, string> GetHttpHeaders()
     {
         var request = _httpContextAccessor?.HttpContext?.Request;
 

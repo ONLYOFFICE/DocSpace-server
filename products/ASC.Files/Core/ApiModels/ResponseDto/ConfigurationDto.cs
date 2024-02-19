@@ -264,7 +264,7 @@ public class CustomizationConfigConverter<T>(
         {
             About = source.About,
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
-            Feedback = source.Feedback,
+            Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
             Goback = await source.GetGoBack(configuration.EditorType, file),
             Logo = await configConverter.Convert(configuration),
@@ -313,11 +313,11 @@ public class CustomerConfigConverter
 
         var result = new CustomerConfigDto
         {
-            Address = source.Address,
+            Address = await source.GetAddress(),
             Logo = await source.GetLogo(),
-            Mail = source.Mail,
-            Name = source.Name,
-            Www = source.Www
+            Mail = await source.GetMail(),
+            Name = await source.GetName(),
+            Www = await source.GetWww()
         };
 
         return result;

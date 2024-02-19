@@ -223,9 +223,9 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return string.IsNullOrEmpty(mail) ? string.Empty : mail;
     }
 
-    public string GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
-        var settings = settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
         return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
             ? string.Empty
