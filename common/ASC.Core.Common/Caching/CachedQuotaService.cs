@@ -57,7 +57,7 @@ class QuotaServiceCache
 [Scope]
 class CachedQuotaService() : IQuotaService
 {
-    private readonly IQuotaService _service;
+    private readonly DbQuotaService _service;
     private readonly ICache _cache;
     private readonly ICacheNotify<QuotaCacheItem> _cacheNotify;
     private readonly QuotaServiceCache _quotaServiceCache;

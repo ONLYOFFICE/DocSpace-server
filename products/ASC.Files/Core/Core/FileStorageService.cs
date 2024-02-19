@@ -3287,7 +3287,7 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
-    private Exception GenerateException(Exception error, bool warning = false)
+    private InvalidOperationException GenerateException(Exception error, bool warning = false)
     {
         if (warning)
         {

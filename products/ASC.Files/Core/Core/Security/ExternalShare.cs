@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.ObjectModel;
+
 using Microsoft.Net.Http.Headers;
 
 namespace ASC.Files.Core.Security;
@@ -41,7 +43,7 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
-    private IReadOnlyDictionary<string, StringValues> _headers;
+    private ReadOnlyDictionary<string, StringValues> _headers;
     private IReadOnlyDictionary<string, string> _cookie;
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)

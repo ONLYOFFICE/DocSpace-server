@@ -149,7 +149,7 @@ public class LoginProfile
     private const char KeyValueSeparator = '→';
     private const char PairSeparator = '·';
 
-    private IDictionary<string, string> _fields = new Dictionary<string, string>();
+    private Dictionary<string, string> _fields = new();
     
     private string GetField(string name)
     {

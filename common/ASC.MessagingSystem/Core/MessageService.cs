@@ -32,7 +32,7 @@ namespace ASC.MessagingSystem.Core;
 public class MessageService
 {
     private readonly ILogger<MessageService> _logger;
-    private readonly IMessageSender _sender;
+    private readonly DbMessageSender _sender;
     private readonly HttpRequest _request;
     private readonly MessageFactory _messageFactory;
     private readonly MessagePolicy _messagePolicy;

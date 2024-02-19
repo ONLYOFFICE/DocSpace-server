@@ -176,7 +176,7 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
 
 class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
-    private readonly IDictionary<T, string> _files;
+    private readonly Dictionary<T, string> _files;
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
 
@@ -219,9 +219,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         foreach (var file in filesForSend)
         {
             var key = file.Id;
-            if (_files.ContainsKey(key) && !string.IsNullOrEmpty(_files[key]))
+            if (_files.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
             {
-                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, value);
             }
             else
             {
