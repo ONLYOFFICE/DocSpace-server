@@ -51,6 +51,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
 
     public override void Init(string path, CancellationToken cancellationToken)
     {
+        ReportProgress(0, MigrationResource.StartOfDataProcessing);
         _logger.Init();
         _cancellationToken = cancellationToken;
         var files = Directory.GetFiles(path);
