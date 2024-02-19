@@ -433,7 +433,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (filterType is FilterType.None or FilterType.FoldersOnly)
             {
-                var folderList = GetThirPartyFoldersAsync(parent, searchText);
+                var folderList = GetThirdPartyFoldersAsync(parent, searchText);
                 var thirdPartyFolder = FilterEntries(folderList, filterType, subjectGroup, subjectId, searchText, searchInContent);
 
                 var task3 = thirdPartyFolder.ToListAsync();
@@ -572,7 +572,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetThirPartyFoldersAsync<T>(Folder<T> parent, string searchText = null)
+    public async IAsyncEnumerable<Folder<string>> GetThirdPartyFoldersAsync<T>(Folder<T> parent, string searchText = null)
     {
         if ((parent.Id.Equals(await globalFolderHelper.FolderMyAsync) || parent.Id.Equals(await globalFolderHelper.FolderCommonAsync))
             && thirdpartyConfiguration.SupportInclusion(daoFactory)

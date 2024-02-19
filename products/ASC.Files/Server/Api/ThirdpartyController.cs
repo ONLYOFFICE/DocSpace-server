@@ -156,7 +156,7 @@ public class ThirdpartyController(
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync()
     {
         var parent = await fileStorageService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
-        var thirdpartyFolders = entryManager.GetThirPartyFoldersAsync(parent);
+        var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);
 
         await foreach (var r in thirdpartyFolders)
         {
