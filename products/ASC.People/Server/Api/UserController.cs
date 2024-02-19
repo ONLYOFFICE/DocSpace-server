@@ -548,8 +548,9 @@ public class UserController(ICache cache,
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("email")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
-    {   
+    {
         var user = await _userManager.GetUserByEmailAsync(email);
         if (user.Id == Constants.LostUser.Id)
         {
