@@ -41,9 +41,9 @@ public class OwnCloudMigration(
 
     public override void Init(string path, CancellationToken cancellationToken)
     {
-        ReportProgress(0, MigrationResource.StartOfDataProcessing);
         _logger.Init();
         _cancellationToken = cancellationToken;
+        ReportProgress(0, MigrationResource.StartOfDataProcessing);
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
