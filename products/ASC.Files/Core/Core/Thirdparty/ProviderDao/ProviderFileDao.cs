@@ -403,9 +403,19 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
         var selector = _selectorFactory.GetSelector(file.Id);
+        var fileId = file.Id;
+        var parentId = file.ParentId;
+        
         var fileDao = selector.GetFileDao(file.Id);
+        file.Id = ConvertId(file.Id);
+        file.ParentId = ConvertId(file.ParentId);
 
-        return await fileDao.FileRenameAsync(ConvertId(file), newTitle);
+        var newFileId = await fileDao.FileRenameAsync(file, newTitle);
+
+        file.Id = fileId;
+        file.ParentId = parentId;
+        
+        return newFileId;
     }
 
     public async Task<string> UpdateCommentAsync(string fileId, int fileVersion, string comment)

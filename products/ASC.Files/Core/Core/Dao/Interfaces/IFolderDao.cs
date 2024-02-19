@@ -63,10 +63,10 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
     /// <summary>

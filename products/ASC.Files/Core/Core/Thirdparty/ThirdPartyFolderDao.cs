@@ -420,11 +420,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
         else
         {
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
-            {
-                await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
-            }
-
             newTitle = await dao.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
 
             //rename folder
@@ -439,11 +434,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
 
         var newId = dao.MakeId(dao.GetId(renamedThirdFolder));
+        
+        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            await daoSelector.RenameRoomProviderAsync(_providerInfo, newTitle, newId);
+        }
 
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }
@@ -626,13 +626,13 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();

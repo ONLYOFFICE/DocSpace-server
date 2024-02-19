@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Collections;
+global using System.Text.Json;
 
 global using ASC.AuditTrail.Log;
 global using ASC.AuditTrail.Mappers;
@@ -34,6 +35,7 @@ global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Mapping;
 global using ASC.Core;
+global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
