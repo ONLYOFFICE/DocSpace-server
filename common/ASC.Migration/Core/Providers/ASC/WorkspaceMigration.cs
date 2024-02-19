@@ -49,7 +49,6 @@ public class WorkspaceMigration(
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
-        ReportProgress(0, MigrationResource.StartOfDataProcessing);
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".gz") || f.EndsWith(".tar")))
         {
@@ -65,13 +64,13 @@ public class WorkspaceMigration(
     }
     public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
     {
+        if (reportProgress)
+        {
+            ReportProgress(5, MigrationResource.StartOfDataProcessing);
+        }
         try
         {
             _dataReader = DataOperatorFactory.GetReadOperator(_backup, false);
-            if (reportProgress)
-            {
-                ReportProgress(5, MigrationResource.StartOfDataProcessing);
-            }
 
             await using var stream = _dataReader.GetEntry("databases/core/core_user");
             var data = new DataTable();

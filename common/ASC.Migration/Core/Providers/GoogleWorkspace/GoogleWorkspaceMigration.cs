@@ -46,7 +46,6 @@ public class GoogleWorkspaceMigration(
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
-        ReportProgress(0, MigrationResource.StartOfDataProcessing);
         var files = Directory.GetFiles(path);
         _path = path;
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
