@@ -412,7 +412,6 @@ public class UserController : PeopleControllerBase
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid}/password")]
-    [EnableRateLimiting("sensitive_api")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
     {
@@ -1183,6 +1182,7 @@ public class UserController : PeopleControllerBase
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("email")]
+    [EnableRateLimiting("sensitive_api")]
     public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
