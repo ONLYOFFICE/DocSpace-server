@@ -382,11 +382,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!canUseRoomQuota)
             {
-                this[Err] = FileSizeComment.GetPersonalFreeSpaceException(roomQuotaLimit);
+                this[Err] = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
             }
             else if (!canUseUserQuota)
             {
-                this[Err] = FileSizeComment.GetPersonalFreeSpaceException(userQuotaLimit);
+                this[Err] = FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {

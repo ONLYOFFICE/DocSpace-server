@@ -394,7 +394,7 @@ internal class FileDao(
                 {
                     if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                     {
-                        throw FileSizeComment.GetPersonalFreeSpaceException(roomQuotaLimit);
+                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                     }
                 }
             }
@@ -415,7 +415,7 @@ internal class FileDao(
 
                     if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
-                        throw FileSizeComment.GetPersonalFreeSpaceException(userQuotaLimit);
+                        throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                     }
                 }
             }
@@ -839,7 +839,7 @@ internal class FileDao(
                 {
                     if (roomQuotaLimit - toFolder.Counter < fileContentLength)
                     {
-                        throw FileSizeComment.GetPersonalFreeSpaceException(roomQuotaLimit);
+                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                     }
                 }
             }
@@ -856,7 +856,7 @@ internal class FileDao(
                 {
                     if (userQuotaLimit - userUsedSpace < fileContentLength)
                     {
-                        throw FileSizeComment.GetPersonalFreeSpaceException(userQuotaLimit);
+                        throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                     }
                 }
             }

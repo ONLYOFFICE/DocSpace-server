@@ -3196,6 +3196,16 @@ namespace ASC.Web.Core.PublicResources
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Room space quota exceeded.
+        /// </summary>
+        public static string RoomFreeSpaceException {
+            get
+            {
+                return ResourceManager.GetString("RoomFreeSpaceException", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Asia Pacific (Singapore).
         /// </summary>
         public static string SgServerRegion
@@ -3643,6 +3653,16 @@ namespace ASC.Web.Core.PublicResources
             get
             {
                 return ResourceManager.GetString("TfaTooMuchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User space quota exceeded.
+        /// </summary>
+        public static string UserFreeSpaceException {
+            get
+            {
+                return ResourceManager.GetString("UserFreeSpaceException", resourceCulture);
             }
         }
 
