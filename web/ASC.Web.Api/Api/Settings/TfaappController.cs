@@ -205,9 +205,9 @@ public class TfaappController(MessageService messageService,
 
                 action = MessageAction.TwoFactorAuthenticationEnabledBySms;
 
-                if (tfaAppAuthSettingsHelper.Enable)
+                if (await tfaAppAuthSettingsHelper.GetEnable())
                 {
-                    tfaAppAuthSettingsHelper.Enable = false;
+                    await tfaAppAuthSettingsHelper.SetEnable(false);
                 }
 
                 result = true;
@@ -227,9 +227,9 @@ public class TfaappController(MessageService messageService,
 
                 action = MessageAction.TwoFactorAuthenticationEnabledByTfaApp;
 
-                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.GetEnable())
                 {
-                    studioSmsNotificationSettingsHelper.Enable = false;
+                    await studioSmsNotificationSettingsHelper.SetEnable(false);
                 }
 
                 result = true;
@@ -237,14 +237,14 @@ public class TfaappController(MessageService messageService,
                 break;
 
             default:
-                if (tfaAppAuthSettingsHelper.Enable)
+                if (await tfaAppAuthSettingsHelper.GetEnable())
                 {
-                    tfaAppAuthSettingsHelper.Enable = false;
+                    await tfaAppAuthSettingsHelper.SetEnable(false);
                 }
 
-                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.GetEnable())
                 {
-                    studioSmsNotificationSettingsHelper.Enable = false;
+                    await studioSmsNotificationSettingsHelper.SetEnable(false);
                 }
 
                 action = MessageAction.TwoFactorAuthenticationDisabled;

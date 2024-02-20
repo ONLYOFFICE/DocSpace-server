@@ -315,7 +315,7 @@ public class EditorConfiguration<T>(
             yield break;
         }
 
-        if (!filesSettingsHelper.RecentSection)
+        if (!await filesSettingsHelper.GetRecentSection())
         {
             yield break;
         }
@@ -350,7 +350,7 @@ public class EditorConfiguration<T>(
                 return null;
             }
 
-            if (!filesSettingsHelper.TemplatesSection)
+            if (!await filesSettingsHelper.GetTemplatesSection())
             {
                 return null;
             }
@@ -591,7 +591,7 @@ public class CustomizationConfig<T>(
         return fileUtility.CanForcesave
                && !file.ProviderEntry
                && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
-               && filesSettingsHelper.Forcesave;
+               && filesSettingsHelper.GetForcesave();
     }
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)

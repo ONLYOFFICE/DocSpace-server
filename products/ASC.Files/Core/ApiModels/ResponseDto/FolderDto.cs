@@ -153,7 +153,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 };
             }
 
-            result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
             
             if (folder.CreateBy == authContext.CurrentAccount.ID ||
                 !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))

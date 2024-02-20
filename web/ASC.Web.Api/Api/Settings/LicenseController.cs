@@ -195,9 +195,9 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public bool RequestLicense()
+    public async Task<bool> RequestLicense()
     {
-        return firstTimeTenantSettings.RequestLicense;
+        return await firstTimeTenantSettings.GetRequestLicense();
     }
 
 

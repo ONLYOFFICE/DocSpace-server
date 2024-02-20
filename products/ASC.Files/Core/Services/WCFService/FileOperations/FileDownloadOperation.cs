@@ -79,7 +79,7 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
 
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
-                archiveExtension = zip.ArchiveExtension;
+                archiveExtension = await zip.GetArchiveExtension();
             }
 
             stream.Position = 0;
@@ -347,7 +347,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
         using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
-        compressTo.SetStream(stream);
+        await compressTo.SetStream(stream);
 
         foreach (var path in _entriesPathId.AllKeys)
         {
@@ -403,7 +403,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                 if (!Equals(entryId, default(T)))
                 {
-                    compressTo.CreateEntry(newTitle, file.ModifiedOn);
+                    await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
                         await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
@@ -418,7 +418,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                             await Task.Delay(100);
                         }
                         
-                        compressTo.CloseEntry();
+                        await compressTo.CloseEntry();
                     }
                     catch (Exception ex)
                     {
@@ -429,9 +429,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 }
                 else
                 {
-                    compressTo.CreateEntry(newTitle);
-                    compressTo.PutNextEntry();
-                    compressTo.CloseEntry();
+                    await compressTo.CreateEntry(newTitle);
+                    await compressTo.PutNextEntry();
+                    await compressTo.CloseEntry();
                 }
 
                 counter++;

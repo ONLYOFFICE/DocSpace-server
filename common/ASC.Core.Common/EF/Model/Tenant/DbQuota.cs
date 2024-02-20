@@ -133,7 +133,7 @@ public static class DbQuotaExtension
                     TenantId = -8,
                     Name = "zoom",
                     Description = null,
-                    Features = "free,total_size:107374182400,manager:100,room:100",
+                    Features = "free,oauth,total_size:107374182400,manager:100,room:100",
                     Price = 0,
                     ProductId = null,
                     Visible = false

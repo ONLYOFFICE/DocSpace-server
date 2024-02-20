@@ -91,6 +91,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                         ]
                     },
                     {
+                        SubjectType.Group, [
+                            FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                        ]
+                    },
+                    {
                         SubjectType.InvitationLink, [
                             FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
                             FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
@@ -115,6 +120,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group , [FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
@@ -123,6 +129,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group , [FileShare.Editing, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
@@ -134,6 +141,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                             FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
                             FileShare.Read, FileShare.None
                         ]
+                    },
+                    {
+                        SubjectType.Group, [
+                            FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
+                        ]  
                     },
                     {
                         SubjectType.InvitationLink, [
@@ -148,6 +160,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
@@ -156,6 +169,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
@@ -1417,26 +1431,14 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, subjects);
     }
 
-    public IAsyncEnumerable<FileShareRecord> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, int offset = 0, int count = -1)
+    public IAsyncEnumerable<FileShareRecord> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1)
     {
-        return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, offset, count);
+        return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, text, offset, count);
     }
 
-    public Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
+    public Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
     {
-        return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status);
-    }
-
-    public IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync<T>(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, int offset, int count)
-    {
-        return daoFactory.GetSecurityDao<T>().GetUsersWithSharedAsync(entry, text, employeeStatus, activationStatus, excludeShared, offset, count);
-    }
-
-    public async Task<int> GetUsersWithSharedCountAsync<T>(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared)
-    {
-        return await daoFactory.GetSecurityDao<T>().GetUsersWithSharedCountAsync(entry, text, employeeStatus, activationStatus, excludeShared);
+        return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);
     }
 
     public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
@@ -2099,7 +2101,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             var index1 = subjects.IndexOf(x.Subject);
             var index2 = subjects.IndexOf(y.Subject);
             if (index1 == 0 || index2 == 0 // UserId
-                || Constants.BuildinGroups.Any(g => g.ID == x.Subject) || Constants.BuildinGroups.Any(g => g.ID == y.Subject)) // System Groups
+                || Constants.SystemGroups.Any(g => g.ID == x.Subject) || Constants.SystemGroups.Any(g => g.ID == y.Subject)) // System Groups
             {
                 return index1.CompareTo(index2);
             }

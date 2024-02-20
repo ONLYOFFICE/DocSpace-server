@@ -37,16 +37,13 @@ public class TenantExtra(TenantManager tenantManager,
     CountPaidUserStatistic countPaidUserStatistic,
     MaxTotalSizeStatistic maxTotalSizeStatistic)
 {
-    public bool EnableTariffSettings
+    public async Task<bool> GetEnableTariffSettings()
     {
-        get
-        {
-            return
-                SetupInfo.IsVisibleSettings<TariffSettings>()
-                && !settingsManager.Load<TenantAccessSettings>().Anyone
-                && (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
-                && string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
-        }
+        return
+            SetupInfo.IsVisibleSettings<TariffSettings>()
+            && !(await settingsManager.LoadAsync<TenantAccessSettings>()).Anyone
+            && (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
+            && string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
     }
 
     public bool Saas
@@ -96,7 +93,7 @@ public class TenantExtra(TenantManager tenantManager,
 
     public async Task<bool> IsNotPaidAsync(bool withRequestToPaymentSystem = true)
     {
-        if (!EnableTariffSettings)
+        if (!await GetEnableTariffSettings())
         {
             return false;
         }

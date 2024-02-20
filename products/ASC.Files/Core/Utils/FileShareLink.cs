@@ -78,7 +78,7 @@ public class FileShareLink(FileUtility fileUtility,
 
     public async Task<(FileShare FileShare, File<T> File)> CheckAsync<T>(string doc, IFileDao<T> fileDao)
     {
-        if (!filesSettingsHelper.ExternalShare)
+        if (!await filesSettingsHelper.GetExternalShare())
         {
             return (FileShare.Restrict, null);
         }

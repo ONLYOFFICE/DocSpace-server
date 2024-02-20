@@ -93,7 +93,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (tenantExtra.EnableTariffSettings && tenantExtra.Enterprise)
+            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
@@ -141,13 +141,11 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
         }
     }
 
-    public bool RequestLicense
+    public async Task<bool> GetRequestLicense()
     {
-        get
-        {
-            return tenantExtra.EnableTariffSettings && tenantExtra.Enterprise
-                && !File.Exists(licenseReader.LicensePath);
-        }
+        return await tenantExtra.GetEnableTariffSettings() && 
+               tenantExtra.Enterprise &&
+               !File.Exists(licenseReader.LicensePath);
     }
 
     private void TrySetLanguage(Tenant tenant, string lng)

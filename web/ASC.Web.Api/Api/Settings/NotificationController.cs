@@ -27,13 +27,15 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("notification")]
-public class NotificationController(ApiContext apiContext,
-        IMemoryCache memoryCache,
-        WebItemManager webItemManager,
-        NotificationControllerHelper notificationControllerHelper,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class NotificationController(
+    ApiContext apiContext,
+    IMemoryCache memoryCache,
+    WebItemManager webItemManager,
+    NotificationControllerHelper notificationControllerHelper,
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor)
+: BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.
@@ -78,9 +80,9 @@ public class NotificationController(ApiContext apiContext,
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
-    public RoomsNotificayionSettingsDto GetRoomsNotificationSettings()
+    public async Task<RoomsNotificayionSettingsDto> GetRoomsNotificationSettings()
     {
-        var  settings = notificationControllerHelper.GetSettings();
+        var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
         return mapper.Map<RoomsNotificayionSettingsDto>(settings);
     }
 
@@ -94,9 +96,9 @@ public class NotificationController(ApiContext apiContext,
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("rooms")]
-    public RoomsNotificayionSettingsDto SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
+    public async Task<RoomsNotificayionSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
-        var settings = notificationControllerHelper.SetRoomsNotificationStatus(inDto.RoomsId, inDto.Mute);
+        var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
         return mapper.Map<RoomsNotificayionSettingsDto>(settings);
     }
 }

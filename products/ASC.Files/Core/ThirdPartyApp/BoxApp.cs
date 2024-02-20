@@ -53,7 +53,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
     private readonly Global _global;
     private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly SettingsManager _settingsManager;
+    private readonly UserHelpTourHelper _userHelpTourHelper;
     private readonly PersonalSettingsHelper _personalSettingsHelper;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
     private readonly AccountLinker _accountLinker;
@@ -80,7 +80,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         Global global,
         EmailValidationKeyProvider emailValidationKeyProvider,
         FilesLinkUtility filesLinkUtility,
-        SettingsManager settingsManager,
+        UserHelpTourHelper userHelpTourHelper,
         PersonalSettingsHelper personalSettingsHelper,
         BaseCommonLinkUtility baseCommonLinkUtility,
         AccountLinker accountLinker,
@@ -111,7 +111,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         _global = global;
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _filesLinkUtility = filesLinkUtility;
-        _settingsManager = settingsManager;
+        _userHelpTourHelper = userHelpTourHelper;
         _personalSettingsHelper = personalSettingsHelper;
         _baseCommonLinkUtility = baseCommonLinkUtility;
         _accountLinker = accountLinker;
@@ -364,12 +364,9 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             if (isNew)
             {
-                var userHelpTourSettings = await _settingsManager.LoadForCurrentUserAsync<UserHelpTourSettings>();
-                userHelpTourSettings.IsNewUser = true;
-                await _settingsManager.SaveForCurrentUserAsync(userHelpTourSettings);
-
-                _personalSettingsHelper.IsNewUser = true;
-                _personalSettingsHelper.IsNotActivated = true;
+                await _userHelpTourHelper.SetIsNewUser(true);
+                await _personalSettingsHelper.SetIsNewUser(true);
+                await _personalSettingsHelper.SetIsNotActivated(true);
             }
 
             if (!string.IsNullOrEmpty(boxUserId) && !(await CurrentUserAsync(boxUserId)))

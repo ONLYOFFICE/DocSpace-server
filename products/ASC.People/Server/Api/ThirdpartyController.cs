@@ -230,7 +230,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             await studioNotifyService.UserPasswordChangeAsync(user);
         }
 
-        userHelpTourHelper.IsNewUser = true;
+        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {

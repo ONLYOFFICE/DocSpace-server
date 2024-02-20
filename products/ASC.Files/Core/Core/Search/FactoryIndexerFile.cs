@@ -46,8 +46,7 @@ public class BaseIndexerFile(Client client,
 
         if (daoFactory.GetFileDao<int>() is FileDao fileDao)
         {
-            await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-            await fileDao.InitDocumentAsync(data);
+            await fileDao.InitDocumentAsync(data, data.TenantId);
         }
 
         return true;

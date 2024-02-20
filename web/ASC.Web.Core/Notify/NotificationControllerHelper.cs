@@ -26,9 +26,9 @@
 
 namespace ASC.Web.Core.Notify;
 [Scope]
-public class NotificationControllerHelper(StudioNotifyHelper studioNotifyHelper,
+public class NotificationControllerHelper(
+    StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
-    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     BadgesSettingsHelper badgesSettingsHelper)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
@@ -73,17 +73,6 @@ public class NotificationControllerHelper(StudioNotifyHelper studioNotifyHelper,
                 break;
         }
     }
-
-    public RoomsNotificationSettings GetSettings()
-    {
-        return roomsNotificationSettingsHelper.GetSettingsForCurrentUser();
-    }
-
-    public RoomsNotificationSettings SetRoomsNotificationStatus(int roomsId, bool mute)
-    {
-        return roomsNotificationSettingsHelper.SetForCurrentUser(roomsId, mute);
-    }
-
 }
 
 /// <summary>

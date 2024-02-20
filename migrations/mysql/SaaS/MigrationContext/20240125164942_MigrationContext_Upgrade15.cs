@@ -13,7 +13,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "product_id" },
-                values: new object[] { -8, null, "free,total_size:107374182400,manager:100,room:100", "zoom", null });
+                values: new object[] { -8, null, "free,oauth,total_size:107374182400,manager:100,room:100", "zoom", null });
         }
 
         /// <inheritdoc />

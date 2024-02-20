@@ -707,11 +707,11 @@ public class PortalController(ILogger<PortalController> logger,
                 {
                     if (setupInfo.TfaRegistration == "sms")
                     {
-                        studioSmsNotificationSettingsHelper.Enable = true;
+                        await studioSmsNotificationSettingsHelper.SetEnable(true);
                     }
                     else if (setupInfo.TfaRegistration == "code")
                     {
-                        tfaAppAuthSettingsHelper.Enable = true;
+                        await tfaAppAuthSettingsHelper.SetEnable(true);
                     }
                 }
                 break;

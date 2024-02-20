@@ -37,9 +37,13 @@ public interface ISecurityDao<T>
     IAsyncEnumerable<FileShareRecord> GetPureShareRecordsAsync(FileEntry<T> entry);
     Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord> records);
     Task<bool> IsSharedAsync(T entryId, FileEntryType type);
-    Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status);
-    IAsyncEnumerable<FileShareRecord> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, int offset = 0, int count = -1);
+    Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text);
+    IAsyncEnumerable<FileShareRecord> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
     IAsyncEnumerable<FileShareRecord> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
     IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, int offset = 0, int count = -1);
     Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared);
+    IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count);
+    Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared);
+    IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count);
+    Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text);
 }

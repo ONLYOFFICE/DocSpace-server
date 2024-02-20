@@ -64,12 +64,8 @@ public class StudioSmsNotificationSettingsHelper(IHttpContextAccessor httpContex
                     && !quota.Free);
     }
 
-    public override bool Enable
+    public override async Task<bool> GetEnable()
     {
-        get { return base.Enable && smsProviderManager.Enabled(); }
-        set
-        {
-            base.Enable = value;
-        }
+        return await base.GetEnable() && smsProviderManager.Enabled();
     }
 }
