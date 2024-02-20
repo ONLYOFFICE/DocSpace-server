@@ -160,9 +160,9 @@ public class LicenseController(ILoggerProvider option,
             CountUser = curQuota.CountUser,
             MaxFileSize = curQuota.MaxFileSize,
             MaxTotalSize = curQuota.MaxTotalSize,
-            Features = curQuota.Features
+            Features = curQuota.Features,
+            Trial = true
         };
-        quota.Trial = true;
 
         await tenantManager.SaveTenantQuotaAsync(quota);
 

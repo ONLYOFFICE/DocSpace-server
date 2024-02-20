@@ -39,13 +39,10 @@ internal class FileDao(
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
         GlobalStore globalStore,
-        
         GlobalFolder globalFolder,
         Global global,
         IDaoFactory daoFactory,
@@ -66,8 +63,6 @@ internal class FileDao(
               tenantUtil,
               setupInfo,
               maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
               settingsManager,
               authContext,
         serviceProvider), IFileDao<int>
@@ -1432,8 +1427,6 @@ internal class FileDao(
         var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-
-        var test = await q.ToListAsync();
 
         q = orderBy == null
             ? q

@@ -154,10 +154,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                if (userId == null)
-                {
-                    userId = remoteIpAddress.ToInvariantString();
-                }
+                userId ??= remoteIpAddress.ToInvariantString();
 
                 var permitLimit = 1500;
 
@@ -183,10 +180,7 @@ public abstract class BaseStartup
                         return RateLimitPartition.GetNoLimiter("no_limiter");
                     }
 
-                    if (userId == null)
-                    {
-                        userId = remoteIpAddress.ToInvariantString();
-                    }
+                    userId ??= remoteIpAddress.ToInvariantString();
 
                     if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -219,10 +213,7 @@ public abstract class BaseStartup
                            return RateLimitPartition.GetNoLimiter("no_limiter");
                        }
 
-                       if (userId == null)
-                       {
-                           userId = remoteIpAddress.ToInvariantString();
-                       }
+                       userId ??= remoteIpAddress.ToInvariantString();
 
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;

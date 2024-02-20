@@ -200,7 +200,7 @@ public class FileStorageService //: IFileStorageService
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
             var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
-            if (ace != null && ace.Access == FileShare.FillForms)
+            if (ace is { Access: FileShare.FillForms })
             {
                 subjectId = authContext.CurrentAccount.ID;
             }
@@ -1186,7 +1186,7 @@ public class FileStorageService //: IFileStorageService
 
         comment = await fileDao.UpdateCommentAsync(fileId, version, comment);
 
-        await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, new[] { file.Title, version.ToString(CultureInfo.InvariantCulture) });
+        await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, [file.Title, version.ToString(CultureInfo.InvariantCulture)]);
 
         return comment;
     }

@@ -48,7 +48,7 @@ public class RedisPersistentConnection : IDisposable
     private readonly TimeSpan _restartConnectionTimeout = TimeSpan.FromSeconds(15);
     private const int RetryMaxAttempts = 5;
 
-    private readonly SemaphoreSlim _reconnectSemaphore = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+    private readonly SemaphoreSlim _reconnectSemaphore = new(initialCount: 1, maxCount: 1);
     private readonly ConfigurationOptions _configurationOptions;
     private ConnectionMultiplexer _connection;
     private IDatabase _database;

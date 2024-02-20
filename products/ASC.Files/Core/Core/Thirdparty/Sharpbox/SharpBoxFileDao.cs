@@ -513,7 +513,7 @@ internal class SharpBoxFileDao(
         }
         else
         {
-            using var fs = file.GetDataTransferAccessor().GetDownloadStream();
+            await using var fs = file.GetDataTransferAccessor().GetDownloadStream();
 
             var createdFile = SharpBoxProviderInfo.Storage.CreateFile(parentPath + '/' + newFileName);
             createdFile.GetDataTransferAccessor().Transfer(fs, nTransferDirection.nUpload);

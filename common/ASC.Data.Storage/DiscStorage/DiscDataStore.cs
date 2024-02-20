@@ -656,12 +656,7 @@ public class DiscDataStore(TempStream tempStream,
     }
 
 
-    public Stream GetWriteStream(string domain, string path)
-    {
-        return GetWriteStream(domain, path, FileMode.Create);
-    }
-
-    public Stream GetWriteStream(string domain, string path, FileMode fileMode)
+    public Stream GetWriteStream(string domain, string path, FileMode fileMode = FileMode.Create)
     {
         ArgumentNullException.ThrowIfNull(path);
 

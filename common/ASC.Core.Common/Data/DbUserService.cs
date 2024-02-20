@@ -248,7 +248,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
-        await using var userDbContext = dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         
         return await GetUserGroupRefQuery(tenant, groupId, refType, userDbContext).SingleOrDefaultAsync();
     }

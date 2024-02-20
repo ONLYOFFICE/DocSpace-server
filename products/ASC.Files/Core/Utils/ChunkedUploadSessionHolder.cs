@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.ChunkedUploader;
-
 namespace ASC.Web.Files.Utils;
 
 [Scope]
@@ -102,21 +100,9 @@ public class ChunkedUploadSessionHolder(
     {
         if (currentTenant)
         {
-            if (_currentHolder == null)
-            {
-                _currentHolder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
-            }
-
-            return _currentHolder;
+            return _currentHolder ??= new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
         }
-        else
-        {
-            if (_holder == null)
-            {
-                _holder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(false), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
-            }
 
-            return _holder;
-        }
+        return _holder ??= new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(false), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
     }
 }

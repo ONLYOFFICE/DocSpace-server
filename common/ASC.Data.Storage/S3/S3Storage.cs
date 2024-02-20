@@ -726,7 +726,7 @@ public class S3Storage(TempStream tempStream,
             Verb = HttpVerb.GET
         };
 
-        var url = client.GetPreSignedURL(pUrlRequest);
+        var url = await client.GetPreSignedURLAsync(pUrlRequest);
         //TODO: CNAME!
         return url;
     }
@@ -1543,7 +1543,7 @@ public class S3Storage(TempStream tempStream,
         await s3.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
 
         /*******/
-        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);;
+        (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey, token: token).ConfigureAwait(false);
 
         var copyRequest = new CopyPartRequest
         {
