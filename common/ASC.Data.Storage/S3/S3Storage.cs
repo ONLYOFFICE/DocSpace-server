@@ -1736,7 +1736,7 @@ public class S3Storage(TempStream tempStream,
         }
     }
 
-    private IAmazonCloudFront GetCloudFrontClient()
+    private AmazonCloudFrontClient GetCloudFrontClient()
     {
         var cfg = new AmazonCloudFrontConfig { MaxErrorRetry = 3 };
 
@@ -1819,7 +1819,7 @@ public class S3Storage(TempStream tempStream,
         }
     }
 
-    private IAmazonS3 GetEncryptionClient()
+    private AmazonS3EncryptionClientV2 GetEncryptionClient()
     {
         if (!string.IsNullOrEmpty(_encryptionKey))
         {

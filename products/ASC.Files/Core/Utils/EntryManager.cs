@@ -273,7 +273,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new ArgumentNullException(nameof(parent), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (parent.ProviderEntry && !filesSettingsHelper.EnableThirdParty)
+        if (parent.ProviderEntry && !await filesSettingsHelper.GetEnableThirdParty())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
@@ -433,7 +433,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (filterType is FilterType.None or FilterType.FoldersOnly)
             {
-                var folderList = GetThirpartyFoldersAsync(parent, searchText);
+                var folderList = GetThirdPartyFoldersAsync(parent, searchText);
                 var thirdPartyFolder = FilterEntries(folderList, filterType, subjectGroup, subjectId, searchText, searchInContent);
 
                 var task3 = thirdPartyFolder.ToListAsync();
@@ -462,7 +462,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (parent.FolderType != FolderType.Recent)
             {
-                data = SortEntries<T>(data, orderBy);
+                data = await SortEntries<T>(data, orderBy);
             }
 
             if (0 < from)
@@ -483,7 +483,7 @@ public class EntryManager(IDaoFactory daoFactory,
         //sorting after marking
         if (orderBy.SortedBy == SortedByType.New)
         {
-            data = SortEntries<T>(data, orderBy);
+            data = await SortEntries<T>(data, orderBy);
 
             if (0 < from)
             {
@@ -572,11 +572,11 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetThirpartyFoldersAsync<T>(Folder<T> parent, string searchText = null)
+    public async IAsyncEnumerable<Folder<string>> GetThirdPartyFoldersAsync<T>(Folder<T> parent, string searchText = null)
     {
         if ((parent.Id.Equals(await globalFolderHelper.FolderMyAsync) || parent.Id.Equals(await globalFolderHelper.FolderCommonAsync))
             && thirdpartyConfiguration.SupportInclusion(daoFactory)
-            && (filesSettingsHelper.EnableThirdParty))
+            && (await filesSettingsHelper.GetEnableThirdParty()))
         {
             var providerDao = daoFactory.ProviderDao;
             if (providerDao == null)
@@ -809,14 +809,14 @@ public class EntryManager(IDaoFactory daoFactory,
         return entries;
     }
 
-    public IEnumerable<FileEntry> SortEntries<T>(IEnumerable<FileEntry> entries, OrderBy orderBy)
+    public async Task<IEnumerable<FileEntry>> SortEntries<T>(IEnumerable<FileEntry> entries, OrderBy orderBy)
     {
         if (entries == null || !entries.Any())
         {
             return entries;
         }
 
-        orderBy ??= filesSettingsHelper.DefaultOrder;
+        orderBy ??= await filesSettingsHelper.GetDefaultOrder();
 
         var c = orderBy.IsAsc ? 1 : -1;
         Comparison<FileEntry> sorter = orderBy.SortedBy switch
@@ -1247,7 +1247,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var replaceVersion = false;
         if (file.Forcesave != ForcesaveType.None)
         {
-            if (file.Forcesave == ForcesaveType.User && filesSettingsHelper.StoreForcesave || encrypted)
+            if (file.Forcesave == ForcesaveType.User && filesSettingsHelper.GetStoreForcesave() || encrypted)
             {
                 file.Version++;
             }
@@ -1653,10 +1653,9 @@ public class EntryManager(IDaoFactory daoFactory,
         return lastVersionFile;
     }
 
-    public async Task<FileOptions<T>> FileRenameAsync<T>(T fileId, string title)
+    public async Task<FileOptions<T>> FileRenameAsync<T>(File<T> file, string title)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -1700,16 +1699,10 @@ public class EntryManager(IDaoFactory daoFactory,
         var renamed = false;
         if (!string.Equals(file.Title, title))
         {
-            var oldFileId = file.Id;
             var newFileId = await fileDao.FileRenameAsync(file, title);
 
             file = await fileDao.GetFileAsync(newFileId);
             file.Access = fileAccess;
-
-            if (file.MutableId)
-            {
-                file.PreviousId = oldFileId;
-            }
 
             await documentServiceHelper.RenameFileAsync(file, fileDao);
 
@@ -1763,6 +1756,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await tagDao.SaveTagsAsync(tag);
     }
+    
     private async Task<EntryProperties> InitFormFillingProperties<T>(string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();

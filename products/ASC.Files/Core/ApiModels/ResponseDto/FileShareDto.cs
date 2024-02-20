@@ -49,6 +49,7 @@ public class FileShareDto
     /// <summary>Spceifies if this user can edit the access to the specified file or not</summary>
     /// <type>System.Boolean, System</type>
     public bool CanEditAccess { get; set; }
+    public SubjectType SubjectType { get; set; }
 
     public static FileShareDto GetSample()
     {
@@ -96,7 +97,8 @@ public class FileShareDtoHelper(UserManager userManager,
         {
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
-            CanEditAccess = aceWrapper.CanEditAccess
+            CanEditAccess = aceWrapper.CanEditAccess,
+            SubjectType = aceWrapper.SubjectType
         };
 
         if (aceWrapper.SubjectGroup)

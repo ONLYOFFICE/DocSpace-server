@@ -54,6 +54,6 @@ public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuo
             return 0;
         }
 
-        return await securityDao.GetPureSharesCountAsync(folder, ShareFilterType.User, null);
+        return await securityDao.GetPureSharesCountAsync(folder, ShareFilterType.User, null, null);
     }
 }

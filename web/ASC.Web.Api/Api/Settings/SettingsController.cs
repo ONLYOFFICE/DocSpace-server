@@ -88,7 +88,7 @@ public class SettingsController(MessageService messageService,
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var tenantCookieSettings = settingsManager.Load<TenantCookieSettings>();
+        var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var settings = new SettingsDto
@@ -122,7 +122,7 @@ public class SettingsController(MessageService messageService,
             settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
-            settings.NameSchemaId = customNamingPeople.Current.Id;
+            settings.NameSchemaId = (await customNamingPeople.GetCurrent()).Id;
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.BookTrainingEmail = setupInfo.BookTrainingEmail;

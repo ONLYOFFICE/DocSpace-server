@@ -73,7 +73,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
     {
-        ICollection<AccountInfoDto> infos = new List<AccountInfoDto>();
+        var infos = new List<AccountInfoDto>();
         IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
@@ -230,7 +230,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             await studioNotifyService.UserPasswordChangeAsync(user);
         }
 
-        userHelpTourHelper.IsNewUser = true;
+        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {

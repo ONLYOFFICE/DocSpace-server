@@ -433,7 +433,7 @@ public class FileOperationsManager(
         return authContext.IsAuthenticated ? authContext.CurrentAccount.ID : externalShare.GetSessionId();
     }
     
-    private IDictionary<string, string> GetHttpHeaders()
+    private Dictionary<string, string> GetHttpHeaders()
     {
         var request = httpContextAccessor?.HttpContext?.Request;
 

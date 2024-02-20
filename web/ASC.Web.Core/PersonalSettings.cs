@@ -54,25 +54,17 @@ public class PersonalSettings : ISettings<PersonalSettings>
 [Scope]
 public class PersonalSettingsHelper(SettingsManager settingsManager)
 {
-    public bool IsNewUser
+    public async Task SetIsNewUser(bool value)
     {
-        get { return settingsManager.LoadForCurrentUser<PersonalSettings>().IsNewUserSetting; }
-        set
-        {
-            var settings = settingsManager.LoadForCurrentUser<PersonalSettings>();
-            settings.IsNewUserSetting = value;
-            settingsManager.SaveForCurrentUser(settings);
-        }
+        var settings = await settingsManager.LoadForCurrentUserAsync<PersonalSettings>();
+        settings.IsNewUserSetting = value;
+        await settingsManager.SaveForCurrentUserAsync(settings);
     }
-
-    public bool IsNotActivated
+    
+    public async Task SetIsNotActivated(bool value)
     {
-        get { return settingsManager.LoadForCurrentUser<PersonalSettings>().IsNotActivatedSetting; }
-        set
-        {
-            var settings = settingsManager.LoadForCurrentUser<PersonalSettings>();
-            settings.IsNotActivatedSetting = value;
-            settingsManager.SaveForCurrentUser(settings);
-        }
+        var settings = await settingsManager.LoadForCurrentUserAsync<PersonalSettings>();
+        settings.IsNotActivatedSetting = value;
+        await settingsManager.SaveForCurrentUserAsync(settings);
     }
 }

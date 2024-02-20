@@ -40,7 +40,8 @@ public interface IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
-        string text);
+        string text,
+        bool withoutGroup);
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
         bool isDocSpaceAdmin,
@@ -52,8 +53,9 @@ public interface IUserService
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset);
@@ -64,6 +66,8 @@ public interface IUserService
     Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant);
     IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant);
     Task<IEnumerable<Group>> GetGroupsAsync(int tenant);
+    IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1);
+    Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds);
     Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType);
     UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType);

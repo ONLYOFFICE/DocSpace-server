@@ -58,7 +58,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             }
 
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
-            var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
+            var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
             var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             var now = DateTime.UtcNow;
@@ -92,7 +92,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
     {
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
+            var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
             var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 

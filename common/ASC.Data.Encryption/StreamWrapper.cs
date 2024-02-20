@@ -53,26 +53,26 @@ namespace ASC.Data.Encryption;
 
 internal sealed class StreamWrapper : Stream
 {
-    private readonly Stream stream;
-    private readonly CryptoStream cryptoStream;
-    private readonly SymmetricAlgorithm symmetricAlgorithm;
-    private readonly ICryptoTransform cryptoTransform;
-    private readonly long fileSize;
-    private readonly long metadataLength;
+    private readonly Stream _stream;
+    private readonly CryptoStreamWrapper _cryptoStream;
+    private readonly SymmetricAlgorithm _symmetricAlgorithm;
+    private readonly ICryptoTransform _cryptoTransform;
+    private readonly long _fileSize;
+    private readonly long _metadataLength;
 
     public StreamWrapper(Stream fileStream, Metadata metadata)
     {
-        stream = fileStream;
-        symmetricAlgorithm = metadata.GetCryptographyAlgorithm();
-        cryptoTransform = symmetricAlgorithm.CreateDecryptor();
-        cryptoStream = new CryptoStreamWrapper(stream, cryptoTransform, CryptoStreamMode.Read);
-        fileSize = metadata.GetFileSize();
-        metadataLength = metadata.GetMetadataLength();
+        _stream = fileStream;
+        _symmetricAlgorithm = metadata.GetCryptographyAlgorithm();
+        _cryptoTransform = _symmetricAlgorithm.CreateDecryptor();
+        _cryptoStream = new CryptoStreamWrapper(_stream, _cryptoTransform, CryptoStreamMode.Read);
+        _fileSize = metadata.GetFileSize();
+        _metadataLength = metadata.GetMetadataLength();
     }
 
     public override bool CanRead
     {
-        get { return stream.CanRead; }
+        get { return _stream.CanRead; }
     }
 
     public override bool CanSeek
@@ -87,23 +87,23 @@ internal sealed class StreamWrapper : Stream
 
     public override long Length
     {
-        get { return fileSize; }
+        get { return _fileSize; }
     }
 
     public override long Position
     {
         get
         {
-            return stream.Position - metadataLength;
+            return _stream.Position - _metadataLength;
         }
         set
         {
-            if (value < 0 || value > fileSize)
+            if (value < 0 || value > _fileSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(Position));
             }
 
-            stream.Position = value + metadataLength;
+            _stream.Position = value + _metadataLength;
         }
     }
 
@@ -113,7 +113,7 @@ internal sealed class StreamWrapper : Stream
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        return cryptoStream.Read(buffer, offset, count);
+        return _cryptoStream.Read(buffer, offset, count);
     }
 
     public override long Seek(long offset, SeekOrigin origin)
@@ -133,9 +133,9 @@ internal sealed class StreamWrapper : Stream
 
     public override void Close()
     {
-        cryptoStream.Dispose();
-        stream.Dispose();
-        symmetricAlgorithm.Dispose();
-        cryptoTransform.Dispose();
+        _cryptoStream.Dispose();
+        _stream.Dispose();
+        _symmetricAlgorithm.Dispose();
+        _cryptoTransform.Dispose();
     }
 }
