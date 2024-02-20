@@ -56,7 +56,7 @@ public class FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFacto
         }
 
         var results = operations
-            .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
+            .Where(o => (o[FileOperation.Hold] || o[FileOperation.Progress] != 100) && !o[FileOperation.Hidden])
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,

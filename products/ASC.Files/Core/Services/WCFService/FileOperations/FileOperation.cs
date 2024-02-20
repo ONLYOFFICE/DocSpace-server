@@ -39,6 +39,7 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
+    public const string Hidden = "Hidden";
     public const string Data = "Data";
 
     protected readonly IPrincipal _principal;
@@ -94,6 +95,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         this[OpType] = (int)FileOperationType;
         this[Data] = JsonSerializer.Serialize(data);
         this[Hold] = data.HoldResult;
+        this[Hidden] = data.HiddenOperation;
     }
 
     public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
@@ -102,6 +104,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         this[OpType] = (int)FileOperationType;
         this[Data] = jsonData;
         this[Hold] = data.HoldResult;
+        this[Hidden] = data.HiddenOperation;
         Id = taskId;
         return data;
     }
@@ -193,7 +196,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     }
 }
 
-abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, bool HoldResult = true);
+abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, bool HoldResult = true, bool HiddenOperation = false);
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
@@ -214,6 +217,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         Files = fileOperationData.Files?.ToList() ?? new List<TId>();
         Folders = fileOperationData.Folders?.ToList() ?? new List<TId>();
         this[Hold] = fileOperationData.HoldResult;
+        this[Hidden] = fileOperationData.HiddenOperation;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
