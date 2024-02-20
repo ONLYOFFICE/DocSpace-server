@@ -1475,6 +1475,13 @@ internal class FileDao(
         return await q.CountAsync();
     }
 
+    public async Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<int> uploadSession)
+    {
+        var chunks = await chunkedUploadSessionHolder.GetChunksAsync(uploadSession);
+        
+        return chunks.Sum(c => c.Value?.Length ?? 0);
+    }
+
     private string GetThumbnailName(int width, int height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";

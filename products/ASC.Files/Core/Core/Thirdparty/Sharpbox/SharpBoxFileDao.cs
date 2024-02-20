@@ -30,24 +30,28 @@ using ResumableUploadSession = AppLimit.CloudComputing.SharpBox.StorageProvider.
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope]
-internal class SharpBoxFileDao(IServiceProvider serviceProvider,
-        TempStream tempStream,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        ILogger<SharpBoxDaoBase> monitor,
-        FileUtility fileUtility,
-        CrossDao crossDao,
-        SharpBoxDaoSelector sharpBoxDaoSelector,
-        IFileDao<int> fileDao,
-        TempPath tempPath,
-        RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
+internal class SharpBoxFileDao(
+    IServiceProvider serviceProvider,
+    TempStream tempStream,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    SetupInfo setupInfo,
+    ILogger<SharpBoxDaoBase> monitor,
+    FileUtility fileUtility,
+    CrossDao crossDao,
+    SharpBoxDaoSelector sharpBoxDaoSelector,
+    IFileDao<int> fileDao,
+    TempPath tempPath,
+    RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
         fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
     private readonly TenantManager _tenantManager = tenantManager;
+    private const string UploadSessionKey = "SharpboxSession";
+    private const string NewFileKey = "IsNewFile";
+    private const string BytesTransferredKey = "BytesTransferred";
 
     public async Task InvalidateCacheAsync(string fileId)
     {
@@ -85,7 +89,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return fileIds.Select(fileId => ToFile(GetFileById(fileId))).ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         string[] extension, bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
@@ -99,8 +103,8 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         if (subjectID != Guid.Empty)
         {
             files = files.WhereAwait(async x => subjectGroup
-                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
-                                         : x.CreateBy == subjectID);
+                ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
+                : x.CreateBy == subjectID);
         }
 
         switch (filterType)
@@ -140,6 +144,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
                     searchText = searchText.Trim().ToLower();
                     files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
                 }
+
                 break;
         }
 
@@ -168,7 +173,8 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default,
+        bool withShared = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -182,8 +188,8 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         if (subjectID != Guid.Empty)
         {
             files = files.WhereAwait(async x => subjectGroup
-                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
-                                         : x.CreateBy == subjectID);
+                ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
+                : x.CreateBy == subjectID);
         }
 
         switch (filterType)
@@ -223,6 +229,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
                     searchText = searchText.Trim().ToLower();
                     files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
                 }
+
                 break;
         }
 
@@ -305,7 +312,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         var fileToDownload = GetFileById(file.Id);
         return Task.FromResult(fileToDownload.Length);
     }
-    
+
     public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
@@ -356,6 +363,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
+
                 throw;
             }
         }
@@ -391,11 +399,11 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(dbContext, tenantId, id);
-                await Queries.DeleteTagsAsync(dbContext);
-                await Queries.DeleteSecuritiesAsync(dbContext, tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, tenantId, id);
-                await tx.CommitAsync();
+            await Queries.DeleteTagLinksAsync(dbContext, tenantId, id);
+            await Queries.DeleteTagsAsync(dbContext);
+            await Queries.DeleteSecuritiesAsync(dbContext, tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, tenantId, id);
+            await tx.CommitAsync();
         });
 
         if (file is not ErrorEntry)
@@ -411,7 +419,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         return await IsExistAsync(title, folder);
     }
 
-    public Task<bool> IsExistAsync(string title, ICloudDirectoryEntry folder)
+    private Task<bool> IsExistAsync(string title, ICloudDirectoryEntry folder)
     {
         try
         {
@@ -446,9 +454,9 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, sharpBoxDaoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            true)
+                fileId, this, sharpBoxDaoSelector.ConvertId,
+                toFolderId, fileDao, r => r,
+                true)
             ;
 
         return moved.Id;
@@ -519,8 +527,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharpBoxDaoSelector.ConvertId,
             toFolderId, fileDao, r => r,
-            false)
-            ;
+            false);
 
         return moved;
     }
@@ -586,27 +593,28 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         var isNewFile = false;
 
-        ICloudFileSystemEntry sharpboxFile;
+        ICloudFileSystemEntry sharpBoxFile;
+
         if (file.Id != null)
         {
-            sharpboxFile = GetFileById(file.Id);
+            sharpBoxFile = GetFileById(file.Id);
         }
         else
         {
             var folder = GetFolderById(file.ParentId);
-            sharpboxFile = SharpBoxProviderInfo.Storage.CreateFile(folder, await GetAvailableTitleAsync(file.Title, folder, IsExistAsync));
+            sharpBoxFile = SharpBoxProviderInfo.Storage.CreateFile(folder, await GetAvailableTitleAsync(file.Title, folder, IsExistAsync));
             isNewFile = true;
         }
 
-        var sharpboxSession = sharpboxFile.GetDataTransferAccessor().CreateResumableSession(contentLength);
-        if (sharpboxSession != null)
+        var sharpBoxSession = sharpBoxFile.GetDataTransferAccessor().CreateResumableSession(contentLength);
+        if (sharpBoxSession != null)
         {
-            uploadSession.Items["SharpboxSession"] = sharpboxSession;
-            uploadSession.Items["IsNewFile"] = isNewFile;
+            uploadSession.Items[UploadSessionKey] = sharpBoxSession;
+            uploadSession.Items[NewFileKey] = isNewFile;
         }
         else
         {
-            uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+            uploadSession.TempPath = _tempPath.GetTempFileName();
         }
 
         uploadSession.File = MakeId(uploadSession.File);
@@ -625,27 +633,36 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
 
+            uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
+
             return uploadSession.File;
         }
 
-        if (uploadSession.Items.ContainsKey("SharpboxSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var sharpboxSession =
-                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
+            var sharpBoxSession =
+                uploadSession.GetItemOrDefault<ResumableUploadSession>(UploadSessionKey);
 
-            var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
-            var sharpboxFile =
-                isNewFile
-                    ? SharpBoxProviderInfo.Storage.CreateFile(GetFolderById(sharpboxSession.ParentId), sharpboxSession.FileName)
-                    : GetFileById(sharpboxSession.FileId);
+            var isNewFile = uploadSession.Items.ContainsKey(NewFileKey) && uploadSession.GetItemOrDefault<bool>(NewFileKey);
+            var sharpBoxFile = isNewFile
+                ? SharpBoxProviderInfo.Storage.CreateFile(GetFolderById(sharpBoxSession.ParentId), sharpBoxSession.FileName)
+                : GetFileById(sharpBoxSession.FileId);
 
-            sharpboxFile.GetDataTransferAccessor().Transfer(sharpboxSession, stream, chunkLength);
+            sharpBoxFile.GetDataTransferAccessor().Transfer(sharpBoxSession, stream, chunkLength);
         }
         else
         {
-            var tempPath = uploadSession.GetItemOrDefault<string>("TempPath");
+            var tempPath = uploadSession.TempPath;
             await using var fs = new FileStream(tempPath, FileMode.Append);
             await stream.CopyToAsync(fs);
+
+            if (!uploadSession.Items.TryAdd(BytesTransferredKey, chunkLength.ToString()))
+            {
+                if (long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
+                {
+                    uploadSession.Items[BytesTransferredKey] = (transferred + chunkLength).ToString();
+                }
+            }
         }
 
         uploadSession.File = MakeId(uploadSession.File);
@@ -655,46 +672,72 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
     public async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("SharpboxSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var sharpboxSession =
-                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
+            var sharpBoxSession =
+                uploadSession.GetItemOrDefault<ResumableUploadSession>(UploadSessionKey);
 
-            return ToFile(GetFileById(sharpboxSession.FileId));
+            return ToFile(GetFileById(sharpBoxSession.FileId));
         }
 
-        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"), FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        await using var fs = new FileStream(uploadSession.TempPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
 
         return await SaveFileAsync(uploadSession.File, fs);
     }
 
     public Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("SharpboxSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var sharpboxSession =
-                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
+            var sharpBoxSession =
+                uploadSession.GetItemOrDefault<ResumableUploadSession>(UploadSessionKey);
 
-            var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
-            var sharpboxFile =
-                isNewFile
-                    ? SharpBoxProviderInfo.Storage.CreateFile(GetFolderById(sharpboxSession.ParentId), sharpboxSession.FileName)
-                    : GetFileById(sharpboxSession.FileId);
-            sharpboxFile.GetDataTransferAccessor().AbortResumableSession(sharpboxSession);
+            var isNewFile = uploadSession.Items.ContainsKey(NewFileKey) && uploadSession.GetItemOrDefault<bool>(NewFileKey);
+            var sharpBoxFile = isNewFile
+                ? SharpBoxProviderInfo.Storage.CreateFile(GetFolderById(sharpBoxSession.ParentId), sharpBoxSession.FileName)
+                : GetFileById(sharpBoxSession.FileId);
 
-            return Task.FromResult(0);
+            sharpBoxFile.GetDataTransferAccessor().AbortResumableSession(sharpBoxSession);
+
+            return Task.CompletedTask;
         }
 
-        if (uploadSession.Items.ContainsKey("TempPath"))
-        {
-            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+        var path = uploadSession.TempPath;
 
-            return Task.FromResult(0);
+        if (!string.IsNullOrEmpty(path))
+        {
+            File.Delete(path);
         }
 
-        return Task.FromResult(0);
+        return Task.CompletedTask;
     }
 
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        uploadSession.File = MakeId(uploadSession.File);
+
+        if (!uploadSession.Items.ContainsKey(UploadSessionKey))
+        {
+            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
+                ? Task.FromResult(transferred) 
+                : default;
+        }
+        
+        var sharpBoxSession = uploadSession.GetItemOrDefault<ResumableUploadSession>(UploadSessionKey);
+
+        return Task.FromResult(sharpBoxSession.BytesTransfered);
+    }
+    
     private File<string> MakeId(File<string> file)
     {
         if (file.Id != null)
@@ -709,19 +752,9 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         return file;
     }
-
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
-    {
-        return Task.CompletedTask;
-    }
-
-    #endregion
 }
+
+#endregion
 
 static file class Queries
 {

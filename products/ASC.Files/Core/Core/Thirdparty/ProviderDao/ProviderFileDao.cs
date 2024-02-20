@@ -534,5 +534,12 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         await fileDao.InitCustomOrder(fileIds, parentFolderId);
     }
 
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        var fileDao = GetFileDao(uploadSession.File);
+        uploadSession.File = ConvertId(uploadSession.File);
+        return fileDao.GetTransferredBytesCountAsync(uploadSession);
+    }
+
     #endregion
 }

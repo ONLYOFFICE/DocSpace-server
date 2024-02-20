@@ -45,6 +45,8 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
+    private const string BytesTransferredKey = "BytesTransferred";
+    
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharePointProviderInfo.InvalidateStorageAsync();
@@ -465,19 +467,21 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
 
     public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
-        if (!uploadSession.UseChunks)
+        if (uploadSession.UseChunks)
         {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-
-            return uploadSession.File;
+            throw new NotImplementedException();
         }
 
-        throw new NotImplementedException();
+        if (uploadSession.BytesTotal == 0)
+        {
+            uploadSession.BytesTotal = chunkLength;
+        }
+
+        uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
+            
+        uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
+
+        return uploadSession.File;
     }
 
     public Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
@@ -514,5 +518,17 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
     {
         return Task.CompletedTask;
+    }
+
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
+        {
+            transferred = 0;
+        }
+
+        uploadSession.File = FixId(uploadSession.File);
+        
+        return Task.FromResult(transferred);
     }
 }
