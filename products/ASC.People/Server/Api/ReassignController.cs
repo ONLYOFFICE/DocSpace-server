@@ -27,12 +27,14 @@
 namespace ASC.People.Api;
 
 [DefaultRoute("reassign")]
-public class ReassignController(PermissionContext permissionContext,
-        QueueWorkerReassign queueWorkerReassign,
-        UserManager userManager,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        SecurityContext securityContext)
+public class ReassignController(
+    PermissionContext permissionContext,
+    QueueWorkerReassign queueWorkerReassign,
+    UserManager userManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    WebItemSecurity webItemSecurity)
     : ApiControllerBase
     {
     /// <summary>
@@ -71,9 +73,9 @@ public class ReassignController(PermissionContext permissionContext,
 
         var toUser = await userManager.GetUsersAsync(inDto.ToUserId);
 
-        if (userManager.IsSystemUser(toUser.Id)
-            || await userManager.IsUserAsync(toUser)
-            || toUser.Status == EmployeeStatus.Terminated)
+        if (userManager.IsSystemUser(toUser.Id) ||
+            await userManager.IsUserAsync(toUser) || 
+            toUser.Status == EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not reassign data to user with id = " + toUser.Id);
         }
@@ -81,11 +83,12 @@ public class ReassignController(PermissionContext permissionContext,
         var fromUser = await userManager.GetUsersAsync(inDto.FromUserId);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         
-        if (userManager.IsSystemUser(fromUser.Id)
-            || fromUser.IsOwner(tenant)
-            || fromUser.IsMe(authContext)
-            || await userManager.IsUserAsync(toUser)
-            || fromUser.Status != EmployeeStatus.Terminated)
+        if (userManager.IsSystemUser(fromUser.Id) || 
+            fromUser.IsOwner(tenant) || 
+            fromUser.IsMe(authContext) || 
+            await userManager.IsUserAsync(toUser) || 
+            fromUser.Status != EmployeeStatus.Terminated || 
+            ((await userManager.IsDocSpaceAdminAsync(inDto.FromUserId) || await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, inDto.FromUserId)) && tenant.OwnerId != authContext.CurrentAccount.ID))
         {
             throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
         }

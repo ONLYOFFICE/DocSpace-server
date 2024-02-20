@@ -43,7 +43,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     internal IDaoBase<TFile, TFolder, TItem> Dao { get; } = dao;
     internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
 
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
+    protected virtual string UploadSessionKey => "UploadSession";
+    private const string BytesTransferredKey = "BytesTransferred";
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
     {
@@ -610,7 +611,46 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
     public abstract Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength);
 
-    public abstract Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null);
+    public virtual async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
+    {
+        if (!uploadSession.UseChunks)
+        {
+            if (uploadSession.BytesTotal == 0)
+            {
+                uploadSession.BytesTotal = chunkLength;
+            }
+
+            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
+            uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
+
+            return uploadSession.File;
+        }
+
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
+        {
+            await NativeUploadChunkAsync(uploadSession, stream, chunkLength);
+        }
+        else
+        {
+            var path = uploadSession.TempPath;
+            await using var fs = new FileStream(path, FileMode.Append);
+            await stream.CopyToAsync(fs);
+            
+            if (!uploadSession.Items.TryAdd(BytesTransferredKey, chunkLength.ToString()))
+            {
+                if (long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
+                {
+                    uploadSession.Items[BytesTransferredKey] = (transferred + chunkLength).ToString();
+                }
+            }
+        }
+
+        uploadSession.File = RestoreIds(uploadSession.File);
+
+        return uploadSession.File;
+    }
+
+    protected abstract Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength);
 
     public abstract Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession);
 
@@ -730,6 +770,22 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
         return default;
+    }
+
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        uploadSession.File = RestoreIds(uploadSession.File);
+
+        if (!uploadSession.Items.ContainsKey(UploadSessionKey))
+        {
+            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
+                ? Task.FromResult(transferred) 
+                : default;
+        }
+        
+        var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);
+
+        return Task.FromResult(nativeSession.BytesTransferred);
     }
 }
 

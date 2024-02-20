@@ -102,12 +102,7 @@ public class LdapController(ApiContext apiContext,
     {
         await CheckLdapPermissionsAsync();
 
-        var settings = await settingsManager.LoadAsync<LdapCronSettings>();
-
-        if (settings == null)
-        {
-            settings = new LdapCronSettings().GetDefault();
-        }
+        var settings = await settingsManager.LoadAsync<LdapCronSettings>() ?? new LdapCronSettings().GetDefault();
 
         if (string.IsNullOrEmpty(settings.Cron))
         {

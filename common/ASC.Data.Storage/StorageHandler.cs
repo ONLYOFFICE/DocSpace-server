@@ -164,10 +164,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         if (context.Request.Headers["Range"] == StringValues.Empty)
         {

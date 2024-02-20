@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,37 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.EF;
-public static class PredicateBuilder
+namespace ASC.Files.Core.Core.Thirdparty;
+
+internal class ThirdPartyUploadSessionBase
 {
-    public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> a, Expression<Func<T, bool>> b)
-    {
-
-        var p = a.Parameters[0];
-
-        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
-
-        Expression body = Expression.AndAlso(a.Body, visitor.Visit(b.Body));
-        return Expression.Lambda<Func<T, bool>>(body, p);
-    }
-
-    public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> a, Expression<Func<T, bool>> b)
-    {
-        var p = a.Parameters[0];
-
-        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
-
-        Expression body = Expression.OrElse(a.Body, visitor.Visit(b.Body));
-        return Expression.Lambda<Func<T, bool>>(body, p);
-    }
+    public long BytesTransferred { get; set; }
 }
 
-internal class SubstExpressionVisitor : ExpressionVisitor
+internal class RenewableUploadShortSession(string id) : ThirdPartyUploadSessionBase
 {
-    internal readonly Dictionary<Expression, Expression> Subst = new();
+    public string Id { get; set; } = id;
+}
 
-    protected override Expression VisitParameter(ParameterExpression node)
-    {
-        return Subst.GetValueOrDefault(node, node);
-    }
+internal class RenewableUploadSession(string fileId, string folderId, long bytesToTransfer) : ThirdPartyUploadSessionBase
+{
+    public long BytesToTransfer { get; set; } = bytesToTransfer;
+    public string FileId { get; set; } = fileId;
+    public string FolderId { get; set; } = folderId;
+    public RenewableUploadSessionStatus Status { get; set; } = RenewableUploadSessionStatus.None;
+    public string Location { get; set; }
+}
+
+public enum RenewableUploadSessionStatus
+{
+    None,
+    Started,
+    Completed,
+    Aborted
 }

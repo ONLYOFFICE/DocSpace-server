@@ -35,8 +35,6 @@ internal class FolderDao(
     TenantUtil tenantUtil,
     SetupInfo setupInfo,
     MaxTotalSizeStatistic maxTotalSizeStatistic,
-    CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
@@ -54,8 +52,6 @@ internal class FolderDao(
         tenantUtil,
         setupInfo,
         maxTotalSizeStatistic,
-        coreBaseSettings,
-        coreConfiguration,
         settingsManager,
         authContext,
         serviceProvider), IFolderDao<int>
@@ -124,7 +120,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, FolderType type)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 

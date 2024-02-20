@@ -83,10 +83,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
         try
         {
-            if (ldapUserInfo == null)
-            {
-                throw new ArgumentNullException(nameof(ldapUserInfo));
-            }
+            ArgumentNullException.ThrowIfNull(ldapUserInfo);
 
             logger.DebugTryAddLdapUser(ldapUserInfo.Sid, ldapUserInfo.Email, ldapUserInfo.UserName);
 
