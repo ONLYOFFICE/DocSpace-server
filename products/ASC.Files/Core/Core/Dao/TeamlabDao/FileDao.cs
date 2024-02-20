@@ -351,7 +351,16 @@ internal class FileDao(
     {
         return await GetFileStreamAsync(file, 0);
     }
-
+    
+    private async Task<Stream> GetFileStreamForTenantAsync(File<int> file, int? tenantId)
+    {
+        if (!tenantId.HasValue)
+        {
+            return await GetFileStreamAsync(file);
+        }
+        
+        return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
+    }
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
     {
         return await SaveFileAsync(file, fileStream, true);
@@ -1284,7 +1293,7 @@ internal class FileDao(
     {
         return await (await globalStore.GetStoreAsync()).IsFileAsync(string.Empty, GetUniqFilePath(file));
     }
-
+    
     private const string DiffTitle = "diff.zip";
 
     public async Task SaveEditHistoryAsync(File<int> file, string changes, Stream differenceStream)
@@ -1700,13 +1709,15 @@ internal class FileDao(
                     (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
             });
     }
-
-    protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile)
+    
+    private readonly IDictionary<int, bool> _currentTenantStore = new ConcurrentDictionary<int, bool>();
+    
+    protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile, int? tenantId = null)
     {
-            dbFile.Document = new Document
-            {
-                Data = Convert.ToBase64String(Encoding.UTF8.GetBytes(""))
-            };
+        dbFile.Document = new Document
+        {
+            Data = Convert.ToBase64String(Encoding.UTF8.GetBytes(""))
+        };
 
         if (!await factoryIndexer.CanIndexByContentAsync(dbFile))
         {
@@ -1719,28 +1730,50 @@ internal class FileDao(
         file.Version = dbFile.Version;
         file.ContentLength = dbFile.ContentLength;
 
-        if (!await IsExistOnStorageAsync(file) || file.ContentLength > settings.MaxFileSize)
+        
+        if (file.ContentLength > settings.MaxFileSize)
         {
             return dbFile;
         }
 
-        byte[] buffer;
-        await using(var stream = await GetFileStreamAsync(file))
+
+        if (tenantId.HasValue)
         {
-        if (stream == null)
-        {
-            return dbFile;
+            if (!_currentTenantStore.TryGetValue(tenantId.Value, out var result))
+            {
+                result = await (await globalStore.GetStoreAsync(tenantId.Value)).IsDirectoryAsync(string.Empty, String.Empty);
+                _currentTenantStore.TryAdd(tenantId.Value, result);
+            }
+
+            if (!result)
+            {            
+                return dbFile;
+            }
         }
 
-        using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            buffer = ms.GetBuffer();
-        }
+        try
+        {
+            byte[] buffer;
+            await using(var stream = await GetFileStreamForTenantAsync(file, tenantId))
+            {
+                if (stream == null)
+                {
+                    return dbFile;
+                }
+
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                buffer = ms.GetBuffer();
+            }
         
             dbFile.Document = new Document
             {
-            Data = Convert.ToBase64String(buffer)
+                Data = Convert.ToBase64String(buffer)
             };
+        }
+        catch (FileNotFoundException )
+        {
+        }
 
         return dbFile;
     }

@@ -32,10 +32,13 @@ namespace ASC.MessagingSystem.Core;
 public class MessageService
 {
     private readonly ILogger<MessageService> _logger;
-    private readonly IMessageSender _sender;
+    private readonly DbMessageSender _sender;
     private readonly HttpRequest _request;
     private readonly MessageFactory _messageFactory;
     private readonly MessagePolicy _messagePolicy;
+
+    private static readonly JsonSerializerOptions _serializerOptions = 
+        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public MessageService(
         IConfiguration configuration,
@@ -265,49 +268,41 @@ public class MessageService
         return await _sender.SendAsync(message);
     }
 
-    private bool TryAddNotificationParam(MessageAction action, Guid userId, out string parametr)
+    private static bool TryAddNotificationParam(MessageAction action, Guid userId, out string parameter)
     {
-        return TryAddNotificationParam(action, [userId], out parametr);
+        return TryAddNotificationParam(action, [userId], out parameter);
     }
 
-    private bool TryAddNotificationParam(MessageAction action, List<Guid> userIds, out string parametr, EmployeeType userType = 0)
+    private static bool TryAddNotificationParam(MessageAction action, List<Guid> userIds, out string parameter, EmployeeType userType = 0)
     {
-        parametr = "";
+        parameter = "";
 
-        if (action == MessageAction.UsersUpdatedType)
+        switch (action)
         {
-            parametr = JsonSerializer.Serialize(new AdditionalNotificationInfo
-            {
-                UserIds = userIds,
-                UserRole = (int)userType
-            }, new JsonSerializerOptions
-            {
-                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            });
-        }
-        else if (action is MessageAction.UserCreated or MessageAction.UserUpdated)
-        {
-            parametr = JsonSerializer.Serialize(new AdditionalNotificationInfo
-            {
-                UserIds = userIds
-            }, new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            });
-        }
-        else
-        {
-            return false;
+            case MessageAction.UsersUpdatedType:
+                parameter = JsonSerializer.Serialize(new AdditionalNotificationInfo<int>
+                {
+                    UserIds = userIds,
+                    UserRole = (int)userType
+                }, _serializerOptions);
+                break;
+            case MessageAction.UserCreated or MessageAction.UserUpdated:
+                parameter = JsonSerializer.Serialize(new AdditionalNotificationInfo<int>
+                {
+                    UserIds = userIds
+                }, _serializerOptions);
+                break;
+            default:
+                return false;
         }
 
         return true;
     }
 }
 
-public class AdditionalNotificationInfo
+public class AdditionalNotificationInfo<T>
 {
-    public int RoomId { get; set; }
-    public string RoomIdString { get; set; }
+    public T RoomId { get; set; }
     public string RoomTitle { get; set; }
     public string RoomOldTitle { get; set; }
     public string RootFolderTitle { get; set; }

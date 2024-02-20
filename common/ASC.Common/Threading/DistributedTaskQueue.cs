@@ -139,7 +139,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         if (instanceId.HasValue)
         {
-            queueTasks = queueTasks.Where(x => x.InstanceId == instanceId.Value);
+            queueTasks = queueTasks.Where(x => x.InstanceId == instanceId.Value).ToList();
         }
 
         foreach (var task in queueTasks)
@@ -265,7 +265,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     }
 
-    private IEnumerable<DistributedTask> LoadFromCache()
+    private List<DistributedTask> LoadFromCache()
     {
         var serializedObject = distributedCache.Get(_name);
 
@@ -279,7 +279,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return Serializer.Deserialize<List<DistributedTask>>(ms);
     }
 
-    private IEnumerable<DistributedTask> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
+    private List<DistributedTask> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
     {
         var listTasks = queueTasks.ToList();
 

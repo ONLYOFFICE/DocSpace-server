@@ -31,12 +31,14 @@ namespace ASC.Files.Core.Security;
 [Flags]
 public enum ShareFilterType
 {
-    User = 0,
+    UserOrGroup = 0,
     InvitationLink = 1,
     ExternalLink = 2,
     AdditionalExternalLink = 4,
     PrimaryExternalLink = 8,
-    Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink
+    Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink,
+    User = 16,
+    Group = 32
 }
 
 public enum SubjectType

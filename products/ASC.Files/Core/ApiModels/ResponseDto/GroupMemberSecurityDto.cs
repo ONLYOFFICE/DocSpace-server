@@ -24,25 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Thirdparty;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-internal interface IDaoSelector : IDisposable
+public class GroupMemberSecurityDto
 {
-    bool IsMatch(string id);
-    IFileDao<string> GetFileDao(string id);
-    IFolderDao<string> GetFolderDao(string id);
-    IThirdPartyTagDao GetTagDao(string id);
-    string ConvertId(string id);
-    string GetIdCode(string id);
+    public EmployeeFullDto User { get; init; }
+    public FileShare GroupAccess { get; init; }
+    public FileShare? UserAccess { get; init; }
+    public bool Overridden { get; init; }
+    public bool CanEditAccess { get; init; }
 }
-
-[Scope]
-internal interface IDaoSelector<TFile, TFolder, TItem> : IDaoSelector
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
-{
-    Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle);
-    Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId);
-}
-

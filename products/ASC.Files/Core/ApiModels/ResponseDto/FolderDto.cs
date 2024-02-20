@@ -143,12 +143,17 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
             result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
 
-            if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
+            if (folder.ProviderEntry)
             {
-                result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
+                result.ParentId = folder.RootFolderType switch
+                {
+                    FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
+                    FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
+                    _ => result.ParentId
+                };
             }
 
-            result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
             
             if (folder.CreateBy == authContext.CurrentAccount.ID ||
                 !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))

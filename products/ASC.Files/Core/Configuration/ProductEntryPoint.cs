@@ -153,7 +153,7 @@ public class ProductEntryPoint : Product
 
         var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
 
-        var disabledRooms = _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
+        var disabledRooms = await _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
 
         var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 
@@ -181,11 +181,11 @@ public class ProductEntryPoint : Product
                     break;
             }
 
-            AdditionalNotificationInfo additionalInfo;
+            AdditionalNotificationInfo<JsonElement> additionalInfo;
 
             try
             {
-                additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(e.Description.LastOrDefault());
+                additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(e.Description.LastOrDefault()!);
             }
             catch (Exception ex)
             {
@@ -217,7 +217,12 @@ public class ProductEntryPoint : Product
                     }
             }
 
-            var roomId = additionalInfo.RoomId;
+            var roomId = additionalInfo.RoomId.ValueKind switch
+            {
+                JsonValueKind.String when int.TryParse(additionalInfo.RoomId.GetString(), out var id) => id,
+                JsonValueKind.Number => additionalInfo.RoomId.GetInt32(),
+                _ => 0
+            };
 
             if (e.Action != (int)MessageAction.RoomCreated)
             {
@@ -248,6 +253,7 @@ public class ProductEntryPoint : Product
 
             result.Add(activityInfo);
         }
+        
         return result;
     }
 
