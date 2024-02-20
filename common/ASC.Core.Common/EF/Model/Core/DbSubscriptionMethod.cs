@@ -29,9 +29,17 @@ namespace ASC.Core.Common.EF;
 public class DbSubscriptionMethod : BaseEntity
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(38)]
     public string Source { get; set; }
+    
+    [MaxLength(128)]
     public string Action { get; set; }
+    
+    [MaxLength(38)]
     public string Recipient { get; set; }
+    
+    [MaxLength(1024)]
     public string Sender { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -105,26 +113,30 @@ public static class SubscriptionMethodExtension
                 .HasColumnName("source")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.Sender)
                 .IsRequired()
                 .HasColumnName("sender")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(1024);
         });
     }
     public static void PgSqlAddSubscriptionMethod(this ModelBuilder modelBuilder)

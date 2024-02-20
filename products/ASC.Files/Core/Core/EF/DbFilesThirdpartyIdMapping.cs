@@ -29,6 +29,8 @@ namespace ASC.Files.Core.EF;
 public class DbFilesThirdpartyIdMapping : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(32)]
     public string HashId { get; set; }
     public string Id { get; set; }
 
@@ -70,7 +72,8 @@ public static class DbFilesThirdpartyIdMappingExtension
                 .HasColumnName("hash_id")
                 .HasColumnType("char(32)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(32);
 
             entity.Property(e => e.Id)
                 .IsRequired()

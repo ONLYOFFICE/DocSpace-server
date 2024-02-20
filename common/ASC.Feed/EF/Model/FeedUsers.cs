@@ -28,6 +28,7 @@ namespace ASC.Feed.Model;
 
 public class FeedUsers : BaseEntity
 {
+    [MaxLength(88)]
     public string FeedId { get; set; }
     public Guid UserId { get; set; }
 
@@ -68,7 +69,8 @@ public static class FeedUsersExtension
                 .HasColumnName("feed_id")
                 .HasColumnType("varchar(88)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(88);
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")

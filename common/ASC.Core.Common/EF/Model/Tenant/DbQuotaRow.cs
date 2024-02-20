@@ -29,8 +29,12 @@ namespace ASC.Core.Common.EF;
 public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(255)]
     public string Path { get; set; }
     public long Counter { get; set; }
+    
+    [MaxLength(1024)]
     public string Tag { get; set; }
     public DateTime LastModified { get; set; }
     public Guid UserId { get; set; }
@@ -75,7 +79,8 @@ public static class DbQuotaRowExtension
                 .HasColumnName("path")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
@@ -89,7 +94,8 @@ public static class DbQuotaRowExtension
                 .HasColumnName("tag")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(1024);
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")

@@ -30,6 +30,8 @@ public class UserSecurity : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
+    
+    [MaxLength(512)]
     public string PwdHash { get; set; }
     public DateTime? LastModified { get; set; }
 
@@ -92,7 +94,8 @@ public static class UserSecurityExtension
                 .HasColumnName("pwdhash")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(512);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

@@ -31,7 +31,11 @@ public class DbTariff : BaseEntity
     public int Id { get; set; }
     public int TenantId { get; set; }
     public DateTime Stamp { get; set; }
+    
+    [MaxLength(255)]
     public string CustomerId { get; set; }
+    
+    [MaxLength(255)]
     public string Comment { get; set; }
     public DateTime CreateOn { get; set; }
 
@@ -71,7 +75,8 @@ public static class DbTariffExtension
                 .HasColumnName("comment")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
@@ -86,7 +91,8 @@ public static class DbTariffExtension
                 .HasColumnName("customer_id")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

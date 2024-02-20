@@ -28,14 +28,21 @@ namespace ASC.Feed.Model;
 
 public class FeedAggregate : BaseEntity, IMapFrom<FeedRow>
 {
+    [MaxLength(88)]
     public string Id { get; set; }
     public int TenantId { get; set; }
+    
+    [MaxLength(50)]
     public string Product { get; set; }
+    
+    [MaxLength(50)]
     public string Module { get; set; }
     public Guid Author { get; set; }
     public Guid ModifiedBy { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime ModifiedDate { get; set; }
+    
+    [MaxLength(70)]
     public string GroupId { get; set; }
     public DateTime AggregateDate { get; set; }
     public string Json { get; set; }
@@ -80,7 +87,8 @@ public static class FeedAggregateExtension
                 .HasColumnName("id")
                 .HasColumnType("varchar(88)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(88);
 
             entity.Property(e => e.AggregateDate)
                 .HasColumnName("aggregated_date")
@@ -101,7 +109,8 @@ public static class FeedAggregateExtension
                 .HasColumnName("group_id")
                 .HasColumnType("varchar(70)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(70);
 
             entity.Property(e => e.Json)
                 .IsRequired()
@@ -132,14 +141,16 @@ public static class FeedAggregateExtension
                 .HasColumnName("module")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.Product)
                 .IsRequired()
                 .HasColumnName("product")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 

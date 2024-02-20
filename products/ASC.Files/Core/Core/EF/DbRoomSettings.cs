@@ -28,15 +28,17 @@ namespace ASC.Files.Core.EF;
 
 public class DbRoomSettings
 {
-    public int RoomId { get; set; }
-    public int TenantId { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
-    public bool Indexing { get; set; }
+    public int RoomId { get; init; }
+    public int TenantId { get; init; }
+    public bool Private { get; init; }
+    public bool HasLogo { get; init; }
+    
+    [MaxLength(6)]
+    public string Color { get; init; }
+    public bool Indexing { get; init; }
 
-    public DbTenant Tenant { get; set; }
-    public DbFolder Room { get; set; }
+    public DbTenant Tenant { get; init; }
+    public DbFolder Room { get; init; }
 }
 
 public static class DbRoomSettingsExtension
@@ -77,7 +79,8 @@ public static class DbRoomSettingsExtension
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(6);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });

@@ -28,6 +28,7 @@ namespace ASC.Feed.Model;
 
 public class FeedLast : BaseEntity
 {
+    [MaxLength(128)]
     public string LastKey { get; set; }
     public DateTime LastDate { get; set; }
 
@@ -59,7 +60,8 @@ public static class FeedLastExtension
                 .HasColumnName("last_key")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.LastDate)
                 .HasColumnName("last_date")

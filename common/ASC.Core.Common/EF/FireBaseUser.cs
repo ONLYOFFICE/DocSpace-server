@@ -44,10 +44,12 @@ public class FireBaseUser : BaseEntity
 
     /// <summary>Firebase device token</summary>
     /// <type>System.String, System</type>
+    [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>Application</summary>
     /// <type>System.String, System</type>
+    [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>Specifies if the user is subscribed to the push notifications or not</summary>
@@ -101,13 +103,15 @@ public static class FireBaseUserExtension
                 .HasColumnName("firebase_device_token")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
                 .HasColumnType("varchar(20)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(20);
 
         });
     }

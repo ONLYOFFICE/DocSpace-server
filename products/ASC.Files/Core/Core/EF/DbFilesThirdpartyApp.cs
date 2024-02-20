@@ -29,6 +29,8 @@ namespace ASC.Files.Core.EF;
 public class DbFilesThirdpartyApp : BaseEntity, IDbFile
 {
     public Guid UserId { get; set; }
+    
+    [MaxLength(50)]
     public string App { get; set; }
     public string Token { get; set; }
     public int TenantId { get; set; }
@@ -75,7 +77,8 @@ public static class DbFilesThirdpartyAppExtension
                 .HasColumnName("app")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")

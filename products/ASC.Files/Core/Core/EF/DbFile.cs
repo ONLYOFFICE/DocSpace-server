@@ -45,6 +45,7 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     public bool CurrentVersion { get; set; }
     public int ParentId { get; set; }
 
+    [MaxLength(400)]
     [Text(Analyzer = "whitespacecustom")]
     public string Title { get; set; }
     public long ContentLength { get; set; }
@@ -55,7 +56,11 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     public Guid ModifiedBy { get; set; }
     public DateTime ModifiedOn { get; set; }
     public int TenantId { get; set; }
+    
+    [MaxLength(10)]
     public string ConvertedType { get; set; }
+    
+    [MaxLength(255)]
     public string Comment { get; set; }
     public string Changes { get; set; }
     public bool Encrypted { get; set; }
@@ -153,7 +158,8 @@ public static class DbFileExtension
                 .HasColumnName("comment")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.ContentLength)
                 .HasColumnName("content_length")
@@ -163,7 +169,8 @@ public static class DbFileExtension
                 .HasColumnName("converted_type")
                 .HasColumnType("varchar(10)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(10);
 
             entity.Property(e => e.CreateBy)
                 .IsRequired()
@@ -218,7 +225,8 @@ public static class DbFileExtension
                 .HasColumnName("title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(400);
 
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")

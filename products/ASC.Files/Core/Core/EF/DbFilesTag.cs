@@ -30,6 +30,8 @@ public class DbFilesTag : IDbFile, IMapFrom<TagInfo>
 {
     public int TenantId { get; set; }
     public int Id { get; set; }
+    
+    [MaxLength(255)]
     public string Name { get; set; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
@@ -70,7 +72,8 @@ public static class DbFilesTagExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.Owner)
                 .IsRequired()

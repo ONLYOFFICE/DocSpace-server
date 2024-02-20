@@ -30,6 +30,7 @@ namespace ASC.MessagingSystem.EF.Model;
 
 public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
 {
+    [MaxLength(200)]
     public string Initiator { get; set; }
     public string Target { get; set; }
 

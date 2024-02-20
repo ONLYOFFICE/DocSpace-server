@@ -29,6 +29,8 @@ namespace ASC.Files.Core.EF;
 public class DbFilesSecurity : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(50)]
     public string EntryId { get; set; }
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
@@ -81,7 +83,8 @@ public static class DbFilesSecurityExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 

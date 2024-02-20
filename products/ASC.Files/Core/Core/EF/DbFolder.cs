@@ -33,6 +33,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int Id { get; set; }
     public int ParentId { get; set; }
 
+    [MaxLength(400)]
     [Text(Analyzer = "whitespacecustom")]
     public string Title { get; set; }
     public FolderType FolderType { get; set; }
@@ -136,7 +137,8 @@ public static class DbFolderExtension
                 .HasColumnName("title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(400);
         });
     }
     public static void PgSqlAddDbFolder(this ModelBuilder modelBuilder)

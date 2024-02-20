@@ -28,8 +28,11 @@ namespace ASC.Core.Common.Hosting;
 
 public class InstanceRegistration
 {
+    [MaxLength(255)]
     public string InstanceRegistrationId { get; set; }
     public DateTime? LastUpdated { get; set; }
+    
+    [MaxLength(255)]
     public string WorkerTypeName { get; set; }
     public bool IsActive { get; set; }
 }

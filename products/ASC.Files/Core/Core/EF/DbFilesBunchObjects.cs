@@ -29,7 +29,11 @@ namespace ASC.Files.Core.EF;
 public class DbFilesBunchObjects : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(255)]
     public string RightNode { get; set; }
+    
+    [MaxLength(255)]
     public string LeftNode { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -71,14 +75,16 @@ public static class DbFilesBunchObjectsExtension
                 .HasColumnName("right_node")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.LeftNode)
                 .IsRequired()
                 .HasColumnName("left_node")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
         });
     }
     public static void PgSqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)

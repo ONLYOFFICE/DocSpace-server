@@ -28,7 +28,10 @@ namespace ASC.Core.Common.EF.Model;
 
 public class FilesConverts
 {
+    [MaxLength(50)]
     public string Input { get; set; }
+    
+    [MaxLength(50)]
     public string Output { get; set; }
 }
 

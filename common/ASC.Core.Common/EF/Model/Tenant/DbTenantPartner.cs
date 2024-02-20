@@ -29,8 +29,14 @@ namespace ASC.Core.Common.EF.Model;
 public class DbTenantPartner : BaseEntity
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(36)]
     public string PartnerId { get; set; }
+    
+    [MaxLength(50)]
     public string AffiliateId { get; set; }
+    
+    [MaxLength(50)]
     public string Campaign { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -72,19 +78,22 @@ public static class DbTenantPartnerExtension
                 .HasColumnName("affiliate_id")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
                 .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(36);
         });
 
     }

@@ -31,6 +31,8 @@ public class DbFilesTagLink : BaseEntity, IDbFile
     public int TenantId { get; set; }
     public int TagId { get; set; }
     public FileEntryType EntryType { get; set; }
+    
+    [MaxLength(32)]
     public string EntryId { get; set; }
     public Guid? CreateBy { get; set; }
     public DateTime? CreateOn { get; set; }
@@ -81,7 +83,8 @@ public static class DbFilesTagLinkExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("varchar(32)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(32);
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 

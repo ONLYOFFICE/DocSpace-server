@@ -30,6 +30,8 @@ public class FeedReaded : BaseEntity
 {
     public Guid UserId { get; set; }
     public DateTime TimeStamp { get; set; }
+    
+    [MaxLength(50)]
     public string Module { get; set; }
     public int TenantId { get; set; }
 
@@ -74,7 +76,8 @@ public static class FeedReadedExtension
                 .HasColumnName("module")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("timestamp")

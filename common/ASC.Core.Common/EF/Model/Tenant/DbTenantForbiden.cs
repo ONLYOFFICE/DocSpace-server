@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantForbiden
 {
+    [MaxLength(50)]
     public string Address { get; set; }
 }
 
@@ -60,7 +61,8 @@ public static class DbTenantForbidenExtension
                 .HasColumnName("address")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
         });
     }
     public static void PgSqlAddDbTenantForbiden(this ModelBuilder modelBuilder)

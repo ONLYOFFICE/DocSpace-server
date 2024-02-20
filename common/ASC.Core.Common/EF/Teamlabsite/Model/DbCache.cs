@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Core.Common.EF.Teamlabsite.Model;
 public class DbCache
 {
+    [MaxLength(100)]
     public string TenantAlias { get; set; }
 }
 
@@ -56,7 +58,8 @@ public static class DbCacheExtension
                 .HasColumnName("tenant_alias")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(100);
 
         });
     }

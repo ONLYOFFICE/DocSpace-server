@@ -31,6 +31,8 @@ public class Acl : BaseEntity, IMapFrom<AzRecord>
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
     public Guid Action { get; set; }
+    
+    [MaxLength(255)]
     public string Object { get; set; }
     public AceType AceType { get; set; }
 
@@ -152,7 +154,8 @@ public static class AclExtension
                 .HasColumnType("varchar(255)")
                 .HasDefaultValueSql("''")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });

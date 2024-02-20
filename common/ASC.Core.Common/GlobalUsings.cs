@@ -26,6 +26,7 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.ComponentModel.DataAnnotations;
 global using System.Configuration;
 global using System.Data.Common;
 global using System.Diagnostics;

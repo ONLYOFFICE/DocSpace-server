@@ -29,9 +29,17 @@ namespace ASC.Core.Common.EF;
 public class Subscription : BaseEntity
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(38)]
     public string Source { get; set; }
+    
+    [MaxLength(128)]
     public string Action { get; set; }
+    
+    [MaxLength(38)]
     public string Recipient { get; set; }
+    
+    [MaxLength(128)]
     public string Object { get; set; }
     public bool Unsubscribed { get; set; }
 
@@ -95,25 +103,29 @@ public static class SubscriptionExtension
                 .HasColumnName("source")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Unsubscribed)
                 .HasColumnName("unsubscribed")

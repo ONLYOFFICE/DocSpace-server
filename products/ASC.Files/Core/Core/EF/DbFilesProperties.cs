@@ -28,7 +28,10 @@ namespace ASC.Files.Core.EF;
 public class DbFilesProperties : BaseEntity
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(32)]
     public string EntryId { get; set; }
+    
     public string Data { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -68,7 +71,8 @@ public static class DbFilesPropertiesExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("varchar(32)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(32);
 
             entity.Property(e => e.Data)
                 .HasColumnName("data")

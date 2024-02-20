@@ -29,9 +29,17 @@ namespace ASC.Files.Core.EF;
 public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
 {
     public int Id { get; set; }
+    
+    [MaxLength(50)]
     public string Provider { get; set; }
+    
+    [MaxLength(400)]
     public string Title { get; set; }
+    
+    [MaxLength(100)]
     public string UserName { get; set; }
+    
+    [MaxLength(512)]
     public string Password { get; set; }
     public string Token { get; set; }
     public Guid UserId { get; set; }
@@ -43,6 +51,8 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    
+    [MaxLength(6)]
     public string Color { get; set; }
     public DateTime ModifiedOn { get; set; }
 
@@ -87,7 +97,8 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("customer_title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(400);
 
             entity.Property(e => e.FolderType)
                 .HasColumnName("folder_type")
@@ -99,7 +110,8 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("password")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(512);
 
             entity.Property(e => e.Provider)
                 .IsRequired()
@@ -107,7 +119,8 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnType("varchar(50)")
                 .HasDefaultValueSql("'0'")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
@@ -128,14 +141,16 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("user_id")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasColumnName("user_name")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(100);
 
             entity.Property(e => e.FolderId)
                 .HasColumnName("folder_id")
@@ -151,7 +166,8 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(6);
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")

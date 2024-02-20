@@ -28,8 +28,13 @@ namespace ASC.Core.Common.EF.Model;
 
 public class AccountLinks : BaseEntity
 {
+    [MaxLength(200)]
     public string Id { get; set; }
+    
+    [MaxLength(100)]
     public string UId { get; set; }
+    
+    [MaxLength(60)]
     public string Provider { get; set; }
     public string Profile { get; set; }
     public DateTime Linked { get; set; }
@@ -68,13 +73,15 @@ public static class AccountLinksExtension
                 .HasColumnName("id")
                 .HasColumnType("varchar(200)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(200);
 
             entity.Property(e => e.UId)
                 .HasColumnName("uid")
                 .HasColumnType("varchar(200)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(200);
 
             entity.Property(e => e.Linked)
                 .HasColumnName("linked")
@@ -91,7 +98,8 @@ public static class AccountLinksExtension
                 .HasColumnName("provider")
                 .HasColumnType("char(60)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(60);
         });
     }
     public static void PgSqlAddAccountLinks(this ModelBuilder modelBuilder)

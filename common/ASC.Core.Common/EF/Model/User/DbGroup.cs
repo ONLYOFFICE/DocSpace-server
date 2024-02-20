@@ -30,9 +30,13 @@ public class DbGroup : BaseEntity, IMapFrom<Group>
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
+    
+    [MaxLength(128)]
     public string Name { get; set; }
     public Guid? CategoryId { get; set; }
     public Guid? ParentId { get; set; }
+    
+    [MaxLength(512)]
     public string Sid { get; set; }
     public bool Removed { get; set; }
     public DateTime LastModified { get; set; }
@@ -92,7 +96,8 @@ public static class DbGroupExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
@@ -109,7 +114,8 @@ public static class DbGroupExtension
                 .HasColumnName("sid")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(512);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

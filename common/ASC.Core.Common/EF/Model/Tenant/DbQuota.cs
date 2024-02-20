@@ -31,10 +31,16 @@ namespace ASC.Core.Common.EF;
 public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 {
     public int TenantId { get; set; }
+    
+    [MaxLength(128)]
     public string Name { get; set; }
+    
+    [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+    
+    [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
 
@@ -160,13 +166,15 @@ public static class DbQuotaExtension
                 .HasColumnName("product_id")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Features)
                 .HasColumnName("features")
@@ -176,7 +184,8 @@ public static class DbQuotaExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(128);
 
             entity.Property(e => e.Price)
                 .HasColumnName("price")

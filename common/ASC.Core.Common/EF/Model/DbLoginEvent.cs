@@ -30,6 +30,7 @@ namespace ASC.MessagingSystem.EF.Model;
 
 public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
 {
+    [MaxLength(200)]
     public string Login { get; set; }
     public bool Active { get; set; }
 

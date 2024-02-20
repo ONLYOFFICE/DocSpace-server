@@ -31,8 +31,14 @@ namespace ASC.Core.Common.EF.Model;
 public class DbTenant : IMapFrom<Tenant>
 {
     public int Id { get; set; }
+    
+    [MaxLength(255)]
     public string Name { get; set; }
+    
+    [MaxLength(100)]
     public string Alias { get; set; }
+    
+    [MaxLength(100)]
     public string MappedDomain { get; set; }
     public int Version { get; set; }
     public DateTime? Version_Changed { get; set; }
@@ -41,8 +47,14 @@ public class DbTenant : IMapFrom<Tenant>
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
+    
+    [MaxLength(10)]
     public string Language { get; set; }
+    
+    [MaxLength(50)]
     public string TimeZone { get; set; }
+    
+    [MaxLength(1024)]
     public string TrustedDomainsRaw { get; set; }
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
     public TenantStatus Status { get; set; }
@@ -56,6 +68,8 @@ public class DbTenant : IMapFrom<Tenant>
     }
     public DateTime CreationDateTime { get; set; }
     public Guid? OwnerId { get; set; }
+    
+    [MaxLength(38)]
     public string PaymentId { get; set; }
     public TenantIndustry Industry { get; set; }
     public DateTime LastModified { get; set; }
@@ -152,7 +166,8 @@ public static class DbTenantExtension
                 .HasColumnName("alias")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(100);
 
             entity.Property(e => e.Calls)
                 .HasColumnName("calls")
@@ -174,7 +189,8 @@ public static class DbTenantExtension
                 .HasColumnType("char(10)")
                 .HasDefaultValueSql("'en-US'")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(10);
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
@@ -184,14 +200,16 @@ public static class DbTenantExtension
                 .HasColumnName("mappeddomain")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(100);
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(255);
 
             entity.Property(e => e.OwnerId)
                 .HasColumnName("owner_id")
@@ -204,7 +222,8 @@ public static class DbTenantExtension
                 .HasColumnName("payment_id")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(38);
 
             entity.Property(e => e.Spam)
                 .HasColumnName("spam")
@@ -224,13 +243,15 @@ public static class DbTenantExtension
                 .HasColumnName("timezone")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(50);
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .UseCollation("utf8_general_ci")
+                .HasMaxLength(1024);
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")
