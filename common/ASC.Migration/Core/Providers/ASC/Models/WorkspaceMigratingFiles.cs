@@ -230,7 +230,14 @@ public class WorkspaceMigratingFiles(
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
                 newFile = await fileDao.SaveFileAsync(newFile, fs);
-                matchingIds.Add(file.Id, newFile.Id);
+                try
+                {
+                    matchingIds.Add(file.Id, newFile.Id);
+                }
+                catch
+                {
+
+                }
             }
             catch(Exception ex)
             {
@@ -245,12 +252,14 @@ public class WorkspaceMigratingFiles(
         
         foreach (var security in _securities)
         {
-            var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
-            if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+            try
             {
-                continue;
-            }
-            var list = new List<AceWrapper>
+                var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
+                if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+                {
+                    continue;
+                }
+                var list = new List<AceWrapper>
             {
                 new AceWrapper
                 {
@@ -260,15 +269,20 @@ public class WorkspaceMigratingFiles(
                 }
             };
 
-            var aceCollection = new AceCollection<int>
+                var aceCollection = new AceCollection<int>
+                {
+                    Files = entryIsFile ? new List<int> { matchingIds[security.EntryId] } : [],
+                    Folders = entryIsFile ? [] : new List<int> { matchingIds[security.EntryId] },
+                    Aces = list,
+                    Message = null
+                };
+
+                await fileStorageService.SetAceObjectAsync(aceCollection, false);
+            }
+            catch(Exception ex)
             {
-                Files = entryIsFile ? new List<int> { matchingIds[security.EntryId] } : [],
-                Folders = entryIsFile ? [] : new List<int> { matchingIds[security.EntryId] },
-                Aces = list,
-                Message = null
-            };
-            
-            await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                Log($"Couldn't share entry {security.EntryId}", ex);
+            }
         }
     }
 }
