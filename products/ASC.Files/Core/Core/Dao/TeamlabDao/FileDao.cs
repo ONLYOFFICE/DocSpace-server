@@ -1535,6 +1535,15 @@ internal class FileDao(
         await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
     }
 
+    public async Task MarkFileAsRemovedAsync(File<int> file)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, file.Id);
+    }
+
     #endregion
 
     private Func<Selector<DbFile>, Selector<DbFile>> GetFuncForSearch(int? parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
@@ -2535,4 +2544,12 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
             .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> MarkDbFilesAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id == fileId)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
 }

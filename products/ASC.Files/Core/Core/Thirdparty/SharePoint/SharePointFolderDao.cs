@@ -453,6 +453,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     {
         return Task.CompletedTask;
     }
+
+    public Task MarkFolderAsRemovedAsync(Folder<string> folder)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

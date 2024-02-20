@@ -1253,6 +1253,15 @@ internal class FolderDao(
         }
     }
 
+    public async Task MarkFolderAsRemovedAsync(Folder<int> folder)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, folder.Id);
+    }
+
     #endregion
 
     private async Task<IQueryable<DbFolder>> GetFolderQuery(FilesDbContext filesDbContext, Expression<Func<DbFolder, bool>> where = null)
@@ -2283,4 +2292,12 @@ static file class Queries
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> MarkFoldersAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id == folderId)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
 }

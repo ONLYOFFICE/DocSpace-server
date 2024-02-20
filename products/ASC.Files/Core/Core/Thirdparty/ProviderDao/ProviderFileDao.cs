@@ -545,4 +545,11 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     }
 
     #endregion
+
+    public async Task MarkFileAsRemovedAsync(File<string> file)
+    {
+        var selector = _selectorFactory.GetSelector(file.Id);
+        var fileDao = selector.GetFileDao(file.Id);
+        await fileDao.MarkFileAsRemovedAsync(file);
+    }
 }

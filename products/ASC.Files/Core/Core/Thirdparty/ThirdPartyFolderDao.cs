@@ -674,6 +674,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     {
         return Task.CompletedTask;
     }
+
+    public Task MarkFolderAsRemovedAsync(Folder<string> folder)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 internal abstract class BaseFolderDao

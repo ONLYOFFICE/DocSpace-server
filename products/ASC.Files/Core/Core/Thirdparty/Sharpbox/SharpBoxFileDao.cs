@@ -721,6 +721,11 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
     }
 
     #endregion
+
+    public Task MarkFileAsRemovedAsync(File<string> file)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

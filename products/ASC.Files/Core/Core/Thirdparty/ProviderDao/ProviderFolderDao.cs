@@ -649,7 +649,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    
+
+    public async Task MarkFolderAsRemovedAsync(Folder<string> folder)
+    {
+        var selector = _selectorFactory.GetSelector(folder.Id);
+        var folderDao = selector.GetFolderDao(folder.Id);
+        await folderDao.MarkFolderAsRemovedAsync(folder);
+    }
+
     private class RoomProviderQuery
     {
         public DbFilesThirdpartyAccount Account { get; init; }
