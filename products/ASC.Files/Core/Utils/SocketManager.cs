@@ -114,7 +114,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.ParentId);
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
         var whoCanRead = users ?? await GetWhoCanRead(entry);
 
         if (action != null)
@@ -185,12 +185,13 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             return _admins;
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
-            .Select(r=> r.Id)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, false, null, true, 0, 0)
+            .Select(r => r.Id)
             .ToListAsync();
         
         _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-}
+    }
     }

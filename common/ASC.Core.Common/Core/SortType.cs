@@ -24,25 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Thirdparty;
+namespace ASC.Core.Common.Core;
 
-internal interface IDaoSelector : IDisposable
+[EnumExtensions]
+public enum GroupSortType
 {
-    bool IsMatch(string id);
-    IFileDao<string> GetFileDao(string id);
-    IFolderDao<string> GetFolderDao(string id);
-    IThirdPartyTagDao GetTagDao(string id);
-    string ConvertId(string id);
-    string GetIdCode(string id);
+    Title,
+    Manager
 }
 
-[Scope]
-internal interface IDaoSelector<TFile, TFolder, TItem> : IDaoSelector
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
+[EnumExtensions]
+public enum UserSortType
 {
-    Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle);
-    Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId);
+    FirstName,
+    Type,
+    Email,
+    Department
 }
-

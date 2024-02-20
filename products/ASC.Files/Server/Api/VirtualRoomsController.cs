@@ -108,7 +108,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -277,15 +277,16 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("{id}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(T id, ShareFilterType filterType = ShareFilterType.User)
+    public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(T id, ShareFilterType filterType = ShareFilterType.UserOrGroup)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
+        var text = apiContext.FilterValue;
 
-        var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(id, FileEntryType.Folder, filterType);
+        var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(id, FileEntryType.Folder, filterType, text);
         apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
 
-        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, offset, count))
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, text, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -312,7 +313,7 @@ public abstract class VirtualRoomsController<T>(
             _ => throw new InvalidOperationException()
         };
 
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     /// <summary>
@@ -339,7 +340,7 @@ public abstract class VirtualRoomsController<T>(
 
         var counter = 0;
 
-        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, 0, 100))
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, null, 0, 100))
         {
             counter++;
 
@@ -363,7 +364,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
 
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     /// <summary>

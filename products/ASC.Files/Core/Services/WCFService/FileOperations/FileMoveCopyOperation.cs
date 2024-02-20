@@ -48,7 +48,7 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         
         if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            this[OpType] = FileOperationType.Move;
+            this[OpType] = (int)FileOperationType.Move;
         }
     }
 
@@ -58,7 +58,7 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         
         if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
         {
-            this[OpType] = FileOperationType.Move;
+            this[OpType] = (int)FileOperationType.Move;
         }
 
         return data;
@@ -475,6 +475,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     Id = folder.ProviderId,
                                     RootFolderType = toFolder.FolderType
                                 });
+
+                                await socketManager.DeleteFolder(folder);
+
+                                folder.FolderIdDisplay = IdConverter.Convert<T>(toFolderId.ToString());
+                                folder.RootFolderType = toFolder.FolderType;
+                                
+                                await socketManager.CreateFolderAsync(folder);
                             }
                             else
                             {
@@ -504,10 +511,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         else if (toFolder.FolderType == FolderType.Archive)
                                         {
 
-                                        await socketManager.DeleteFolder(folder, action: async () =>
-                                        {
-                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        });
+                                            await socketManager.DeleteFolder(folder, action: async () =>
+                                            {
+                                                newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                            });
                                         
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);

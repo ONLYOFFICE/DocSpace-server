@@ -27,10 +27,15 @@
 namespace ASC.Files.Core.Mapping;
 
 [Scope]
-public class TenantDateTimeConverter(TenantUtil tenantUtil) : IValueConverter<DateTime, DateTime>
+public class TenantDateTimeConverter(TenantUtil tenantUtil) : IValueConverter<DateTime, DateTime>, IValueConverter<DateTime?, DateTime?>
 {
     public DateTime Convert(DateTime sourceMember, ResolutionContext context)
     {
         return tenantUtil.DateTimeFromUtc(sourceMember);
+    }
+    
+    public DateTime? Convert(DateTime? sourceMember, ResolutionContext context)
+    {
+        return sourceMember.HasValue ? tenantUtil.DateTimeFromUtc(sourceMember.Value) : null;
     }
 }

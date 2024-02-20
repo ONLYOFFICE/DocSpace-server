@@ -427,8 +427,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
-        
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     [HttpPut("{fileId}/order")]
@@ -453,11 +453,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -477,9 +477,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
-            primary: inDto.Primary, expirationDate: inDto.ExpirationDate ?? default);
-        
-        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
+            primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 }
 
