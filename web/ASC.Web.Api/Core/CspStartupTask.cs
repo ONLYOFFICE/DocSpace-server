@@ -49,7 +49,7 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
             foreach (var t in tenantService.GetTenantsWithCsp())
             {
                 tenantManager.SetCurrentTenant(t);
-                var current = settingsManager.Load<CspSettings>();
+                var current = await settingsManager.LoadAsync<CspSettings>();
                 await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
             }
 

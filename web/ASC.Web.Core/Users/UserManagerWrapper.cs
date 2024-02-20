@@ -86,7 +86,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         if ((await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
-            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         var user = new UserInfo
@@ -137,7 +137,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         if (!updateExising && !await CheckUniqueEmailAsync(userInfo.Id, userInfo.Email))
         {
-            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (makeUniqueName && !updateExising)
