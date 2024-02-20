@@ -275,8 +275,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var countRoomChecker = scope.ServiceProvider.GetRequiredService<CountRoomChecker>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var userManager = scope.ServiceProvider.GetService<UserManager>();
         var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
         var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
+        var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
 
         var toFolderId = toFolder.Id;
@@ -295,6 +299,44 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             var canMoveOrCopy = (copy && await FilesSecurity.CanCopyAsync(folder)) || (!copy && await FilesSecurity.CanMoveAsync(folder));
             checkPermissions = isRoom ? !canMoveOrCopy : checkPermissions;
+
+            var canUseRoomQuota = true;
+            var canUseUserQuota = true;
+            long roomQuotaLimit = 0;
+            long userQuotaLimit = 0;
+            if (!isRoom && DocSpaceHelper.IsRoom(toFolder.FolderType))
+            {
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaRoomSettings.EnableQuota)
+                {
+                    roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (roomQuotaLimit - toFolder.Counter < folder.Counter)
+                        {
+                            canUseRoomQuota = false;
+                        }
+                    }
+                }
+            }else if (!isRoom && (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
+            {
+                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
+                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+                    userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (userQuotaLimit - userUsedSpace < folder.Counter)
+                        {
+                            canUseUserQuota = false;
+                        }
+                    }
+                }
+            }
 
             if (folder == null)
             {
@@ -337,6 +379,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+            }
+            else if (!canUseRoomQuota)
+            {
+                this[Err] = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+            }
+            else if (!canUseUserQuota)
+            {
+                this[Err] = FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {

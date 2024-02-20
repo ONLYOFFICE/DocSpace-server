@@ -62,13 +62,15 @@ public class UserController(ICache cache,
         CountPaidUserChecker countPaidUserChecker,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
-        IQuotaService quotaService,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon, 
-        IDistributedLockProvider distributedLockProvider)
+        FileSecurityCommon fileSecurityCommon,
+        IDistributedLockProvider distributedLockProvider,
+        QuotaSocketManager quotaSocketManager,
+        IQuotaService quotaService,
+        CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
-    
+{
+
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
@@ -122,9 +124,9 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex =  false;
+            user.Sex = false;
         }
-        
+
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -225,9 +227,9 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex =  false;
+            user.Sex = false;
         }
-        
+
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -382,7 +384,7 @@ public class UserController(ICache cache,
             await cookiesManager.ResetUserCookieAsync(userid);
             await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-        
+
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
@@ -420,7 +422,7 @@ public class UserController(ICache cache,
         {
             throw new SecurityException();
         }
-        
+
         await CheckReassignProcessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -461,7 +463,7 @@ public class UserController(ICache cache,
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
-        
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
@@ -478,10 +480,10 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+        //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
+        //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
-        }
+    }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
@@ -549,7 +551,7 @@ public class UserController(ICache cache,
     [AllowNotPayment]
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
-    {   
+    {
         var user = await _userManager.GetUserByEmailAsync(email);
         if (user.Id == Constants.LostUser.Id)
         {
@@ -628,7 +630,7 @@ public class UserController(ICache cache,
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null, null, false, false);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null, null, false, false);
     }
 
     /// <summary>
@@ -646,6 +648,7 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
@@ -661,10 +664,11 @@ public class UserController(ICache cache,
         bool? isAdministrator,
         Payments? payments,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         bool? withoutGroup,
         bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup, excludeGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -748,6 +752,7 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
@@ -763,10 +768,11 @@ public class UserController(ICache cache,
         bool? isAdministrator,
         Payments? payments,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         bool? withoutGroup,
         bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, withoutGroup, excludeGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -798,7 +804,7 @@ public class UserController(ICache cache,
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         foreach (var user in users)
         {
             if (user.Status != EmployeeStatus.Terminated)
@@ -1220,7 +1226,7 @@ public class UserController(ICache cache,
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
         var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
-        
+
         //Update it
         if (self)
         {
@@ -1287,11 +1293,11 @@ public class UserController(ICache cache,
 
             changed = true;
         }
-        
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var owner = user.IsOwner(tenant);
         var statusChanged = false;
-        
+
         if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
@@ -1302,15 +1308,15 @@ public class UserController(ICache cache,
 
 
         // change user type
-        var canBeGuestFlag = !owner && 
-                             !await _userManager.IsDocSpaceAdminAsync(user) && 
-                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
+        var canBeGuestFlag = !owner &&
+                             !await _userManager.IsDocSpaceAdminAsync(user) &&
+                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 &&
                              !self;
 
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            
+
             if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
@@ -1385,19 +1391,19 @@ public class UserController(ICache cache,
                     if (user.Status == EmployeeStatus.Terminated)
                     {
                         IDistributedLockHandle lockHandle = null;
-                        
+
                         try
                         {
                             if (!await _userManager.IsUserAsync(user))
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                                
+
                                 await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
-                                
+
                                 await activeUsersChecker.CheckAppend();
                             }
 
@@ -1516,42 +1522,79 @@ public class UserController(ICache cache,
     /// <category>Quota</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
-    /// <path>api/2.0/people/quota</path>
+    /// <path>api/2.0/people/userquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
-    [HttpPut("quota")]
+    [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        var users = inDto.UserIds.ToAsyncEnumerable()
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
-            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId));
+            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .ToListAsync();
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
-        await foreach (var user in users)
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+
+        if (maxTotalSize < inDto.Quota)
         {
-            if (inDto.Quota != -1)
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
+        foreach (var user in users)
             {
-                var usedSpace = Math.Max(0,
-                    (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
-                    .Where(r => !string.IsNullOrEmpty(r.Tag))
-                    .Sum(r => r.Counter));
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
-                var tenantSpaceQuota = (await quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
 
-                if (tenantSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
-                {
-                    continue;
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
                 }
             }
 
-            await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+    /// <summary>
+    /// Reset a user quota limit with the ID specified in the request from the portal.
+    /// </summary>
+    /// <short>
+    /// Reset a user quota limit
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">User detailed information</returns>
+    /// <path>api/2.0/people/resetquota</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("resetquota")]
+    public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
+    {
+        var users = await inDto.UserIds.ToAsyncEnumerable()
+            .Where(userId => !_userManager.IsSystemUser(userId))
+            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .ToListAsync();
 
-            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        foreach (var user in users)
+        {
+            if (_userManager.IsSystemUser(user.Id))
+            {
+                throw new SecurityException();
+            }
+            var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
+            await settingsManager.SaveAsync(defaulSettings, user);
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
+
     }
 
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)
@@ -1568,7 +1611,7 @@ public class UserController(ICache cache,
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfoId in groups.Select(r=> r.ID))
+        foreach (var groupInfoId in groups.Select(r => r.ID))
         {
             await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
             var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
@@ -1595,7 +1638,7 @@ public class UserController(ICache cache,
     private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         foreach (var userId in userIds)
         {
             var reassignStatus = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
@@ -1618,12 +1661,13 @@ public class UserController(ICache cache,
         IEnumerable<EmployeeType> employeeTypes,
         bool? isDocSpaceAdministrator,
         Payments? payments,
-        AccountLoginType? accountLoginType, 
+        AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         bool? withoutGroup,
         bool? excludeGroup)
     {
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
-                              await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
+                      await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
         var excludeGroups = new List<Guid>();
         var includeGroups = new List<List<Guid>>();
@@ -1637,8 +1681,8 @@ public class UserController(ICache cache,
             }
             else
             {
-                includeGroups.Add([groupId.Value]);
-            }
+            includeGroups.Add([groupId.Value]);
+        }
         }
 
         if (employeeType.HasValue)
@@ -1673,7 +1717,7 @@ public class UserController(ICache cache,
         {
             var adminGroups = new List<Guid>
             {
-                Constants.GroupAdmin.ID
+                    Constants.GroupAdmin.ID
             };
             var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
             adminGroups.AddRange(products.Select(r => r.ID));
@@ -1681,10 +1725,10 @@ public class UserController(ICache cache,
             includeGroups.Add(adminGroups);
         }
 
-        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
             _apiContext.FilterValue, withoutGroup ?? false);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
             _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
@@ -1697,7 +1741,7 @@ public class UserController(ICache cache,
         }
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
-        
+
         yield break;
 
         void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
@@ -1792,20 +1836,20 @@ public class UserController(ICache cache,
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
+        IDaoFactory daoFactory)
     : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-        
+
 public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
+        IDaoFactory daoFactory)
     : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-        
+
 public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
+        FileSecurity fileSecurity,
+        ApiContext apiContext,
         IDaoFactory daoFactory) : ApiControllerBase
 {
     [HttpGet("room/{id}")]
@@ -1822,7 +1866,7 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         var count = Convert.ToInt32(apiContext.Count);
 
         var securityDao = daoFactory.GetSecurityDao<T>();
-        
+
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);

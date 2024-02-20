@@ -242,8 +242,10 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-    
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
+    public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        throw new NotImplementedException();
+    }    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -268,7 +270,7 @@ internal abstract class ThirdPartyProviderDao
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
@@ -284,6 +286,14 @@ internal abstract class ThirdPartyProviderDao
         IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
+    }
+    public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
+    {
+        throw new NotImplementedException();
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterRoomsAsync(IAsyncEnumerable<Folder<string>> rooms, ProviderFilter provider, FilterType filterType, Guid subjectId,
@@ -376,7 +386,7 @@ internal abstract class ThirdPartyProviderDao
 
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
     }
-    
+
     internal static string[] GetProviderTypes(ProviderFilter providerFilter)
     {
         var filter = providerFilter switch
@@ -566,7 +576,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             FilterType.ArchiveOnly or
             FilterType.MediaOnly;
     }
-    
+
     public async Task UpdateIdAsync(string oldValue, string newValue)
     {
         if (oldValue.Equals(newValue))
