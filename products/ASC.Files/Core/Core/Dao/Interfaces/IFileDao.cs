@@ -255,6 +255,8 @@ public interface IFileDao<T>
     Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null);
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
+    Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
+    
     #endregion
 
     #region Only in TMFileDao
