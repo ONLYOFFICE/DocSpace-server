@@ -80,9 +80,9 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
-    public RoomsNotificayionSettingsDto GetRoomsNotificationSettings()
+    public async Task<RoomsNotificayionSettingsDto> GetRoomsNotificationSettings()
     {
-        var  settings = roomsNotificationSettingsHelper.GetSettingsForCurrentUser();
+        var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
         return mapper.Map<RoomsNotificayionSettingsDto>(settings);
     }
 
@@ -98,7 +98,7 @@ public class NotificationController(
     [HttpPost("rooms")]
     public async Task<RoomsNotificayionSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
-        var settings = await roomsNotificationSettingsHelper.SetForCurrentUser(inDto.RoomsId, inDto.Mute);
+        var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
         return mapper.Map<RoomsNotificayionSettingsDto>(settings);
     }
 }

@@ -51,7 +51,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
     private readonly GlobalStore _globalStore;
     private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly SettingsManager _settingsManager;
+    private readonly UserHelpTourHelper _userHelpTourHelper;
     private readonly PersonalSettingsHelper _personalSettingsHelper;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
     private readonly FileUtility _fileUtility;
@@ -83,7 +83,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         GlobalStore globalStore,
         EmailValidationKeyProvider emailValidationKeyProvider,
         FilesLinkUtility filesLinkUtility,
-        SettingsManager settingsManager,
+        UserHelpTourHelper userHelpTourHelper,
         PersonalSettingsHelper personalSettingsHelper,
         BaseCommonLinkUtility baseCommonLinkUtility,
         ILogger<GoogleDriveApp> logger,
@@ -121,7 +121,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         _globalStore = globalStore;
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _filesLinkUtility = filesLinkUtility;
-        _settingsManager = settingsManager;
+        _userHelpTourHelper = userHelpTourHelper;
         _personalSettingsHelper = personalSettingsHelper;
         _baseCommonLinkUtility = baseCommonLinkUtility;
         _fileUtility = fileUtility;
@@ -373,10 +373,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             if (isNew)
             {
-                var userHelpTourSettings = await _settingsManager.LoadForCurrentUserAsync<UserHelpTourSettings>();
-                userHelpTourSettings.IsNewUser = true;
-                await _settingsManager.SaveForCurrentUserAsync(userHelpTourSettings);
-
+                await _userHelpTourHelper.SetIsNewUser(true);
                 await _personalSettingsHelper.SetIsNewUser(true);
                 await _personalSettingsHelper.SetIsNotActivated(true);
             }

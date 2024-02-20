@@ -50,7 +50,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string CreateByString
     {
-        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserName(CreateBy).Result : _createByString;
+        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(CreateBy).Result : _createByString;
         set => _createByString = value;
     }
 
@@ -59,7 +59,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string ModifiedByString
     {
-        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserName(ModifiedBy).Result : _modifiedByString;
+        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(ModifiedBy).Result : _modifiedByString;
         set => _modifiedByString = value;
     }
 
