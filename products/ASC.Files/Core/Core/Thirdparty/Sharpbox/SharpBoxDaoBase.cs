@@ -315,7 +315,6 @@ internal abstract class SharpBoxDaoBase(
         file.CreateOn = fsEntry.Modified.Kind == DateTimeKind.Utc ? _tenantUtil.DateTimeFromUtc(fsEntry.Modified) : fsEntry.Modified;
         file.ParentId = MakeId(fsEntry.Parent);
         file.ModifiedOn = fsEntry.Modified.Kind == DateTimeKind.Utc ? _tenantUtil.DateTimeFromUtc(fsEntry.Modified) : fsEntry.Modified;
-        file.NativeAccessor = fsEntry;
         file.Title = MakeTitle(fsEntry);
         file.RootId = RootFolderMakeId();
         file.Encrypted = ProviderInfo.Private;

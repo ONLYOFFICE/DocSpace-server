@@ -83,9 +83,9 @@ public class SubscriptionServiceCache
         }, CacheNotifyAction.Any);
     }
 
-    private SubsciptionsStore GetSubsciptionsStore(int tenant, string sourceId, string actionId)
+    private SubscriptionsStore GetSubsciptionsStore(int tenant, string sourceId, string actionId)
     {
-        return Cache.Get<SubsciptionsStore>(GetKey(tenant, sourceId, actionId));
+        return Cache.Get<SubscriptionsStore>(GetKey(tenant, sourceId, actionId));
     }
 
     public static string GetKey(int tenant, string sourceId, string actionId)
@@ -98,7 +98,7 @@ public class SubscriptionServiceCache
 public class CachedSubscriptionService(DbSubscriptionService service, SubscriptionServiceCache subscriptionServiceCache)
     : ISubscriptionService
 {
-    private readonly ISubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly DbSubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
     private readonly ICache _cache = subscriptionServiceCache.Cache;
     private readonly ICacheNotify<SubscriptionRecord> _notifyRecord = subscriptionServiceCache.NotifyRecord;
     private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod = subscriptionServiceCache.NotifyMethod;
@@ -176,15 +176,15 @@ public class CachedSubscriptionService(DbSubscriptionService service, Subscripti
     }
 
 
-    private async Task<SubsciptionsStore> GetSubsciptionsStoreAsync(int tenant, string sourceId, string actionId)
+    private async Task<SubscriptionsStore> GetSubsciptionsStoreAsync(int tenant, string sourceId, string actionId)
     {
         var key = SubscriptionServiceCache.GetKey(tenant, sourceId, actionId);
-        var store = _cache.Get<SubsciptionsStore>(key);
+        var store = _cache.Get<SubscriptionsStore>(key);
         if (store == null)
         {
             var records = await _service.GetSubscriptionsAsync(tenant, sourceId, actionId);
             var methods = await _service.GetSubscriptionMethodsAsync(tenant, sourceId, actionId, null);
-            store = new SubsciptionsStore(records, methods);
+            store = new SubscriptionsStore(records, methods);
             _cache.Insert(key, store, DateTime.UtcNow.Add(_cacheExpiration));
         }
 
@@ -196,16 +196,16 @@ public class CachedSubscriptionService(DbSubscriptionService service, Subscripti
     }
 }
 
-internal class SubsciptionsStore
+internal class SubscriptionsStore
 {
     private readonly List<SubscriptionRecord> _records;
-    private IDictionary<string, List<SubscriptionRecord>> _recordsByRec;
-    private IDictionary<string, List<SubscriptionRecord>> _recordsByObj;
+    private Dictionary<string, List<SubscriptionRecord>> _recordsByRec;
+    private Dictionary<string, List<SubscriptionRecord>> _recordsByObj;
 
     private readonly List<SubscriptionMethod> _methods;
-    private IDictionary<string, List<SubscriptionMethod>> _methodsByRec;
+    private Dictionary<string, List<SubscriptionMethod>> _methodsByRec;
 
-    public SubsciptionsStore(IEnumerable<SubscriptionRecord> records, IEnumerable<SubscriptionMethod> methods)
+    public SubscriptionsStore(IEnumerable<SubscriptionRecord> records, IEnumerable<SubscriptionMethod> methods)
     {
         _records = records.ToList();
         _methods = methods.ToList();

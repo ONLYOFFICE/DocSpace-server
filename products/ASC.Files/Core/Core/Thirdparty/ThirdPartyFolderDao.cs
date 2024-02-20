@@ -42,9 +42,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
-    {
+{
     private IProviderInfo<TFile, TFolder, TItem> _providerInfo;
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
     {
@@ -59,10 +58,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
             return folder;
-    }
+        }
 
-        await using var filesDbContext = dbContextFactory.CreateDbContext();
-        folder.Shared = await Queries.SharedAsync(filesDbContext, TenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
         return folder;
     }
@@ -244,6 +244,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
 
     public async Task DeleteFolderAsync(string folderId)
     {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var folder = await dao.GetFolderAsync(folderId);
         var id = dao.MakeId(folder);
 
@@ -254,10 +255,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(context, TenantId, id);
+            await Queries.DeleteTagLinksAsync(context, tenantId, id);
             await Queries.DeleteDbFilesTag(context);
-            await Queries.DeleteSecuritiesAsync(context, TenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(context, TenantId, id);
+            await Queries.DeleteSecuritiesAsync(context, tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(context, tenantId, id);
 
             await tx.CommitAsync();
         });
@@ -419,11 +420,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
         else
         {
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
-            {
-                await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
-            }
-
             newTitle = await dao.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
 
             //rename folder
@@ -438,11 +434,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
 
         var newId = dao.MakeId(dao.GetId(renamedThirdFolder));
+        
+        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            await daoSelector.RenameRoomProviderAsync(_providerInfo, newTitle, newId);
+        }
 
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }
@@ -625,13 +626,13 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();

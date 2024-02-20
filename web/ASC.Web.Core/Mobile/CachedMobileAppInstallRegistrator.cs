@@ -30,7 +30,7 @@ public class CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator regis
         TenantManager tenantManager, ICache cache)
     : IMobileAppInstallRegistrator
 {
-    private readonly IMobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
+    private readonly MobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
 
     public CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TenantManager tenantManager, ICache cache)
         : this(registrator, TimeSpan.FromMinutes(30), tenantManager, cache)

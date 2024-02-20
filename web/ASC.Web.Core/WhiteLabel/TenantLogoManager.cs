@@ -29,12 +29,7 @@ namespace ASC.Web.Core.WhiteLabel;
 [Scope]
 public class TenantLogoManager
 {
-    private string CacheKey
-    {
-        get { return "letterlogodata" + _tenantManager.GetCurrentTenant().Id; }
-    }
-
-    public bool WhiteLabelEnabled { get; private set; }
+    public bool WhiteLabelEnabled { get; }
 
     private readonly IDistributedCache _distributedCache;
 
@@ -205,23 +200,29 @@ public class TenantLogoManager
 
     public async Task RemoveMailLogoDataFromCacheAsync()
     {
-        await _distributedCache.RemoveAsync(CacheKey);
+        await _distributedCache.RemoveAsync(await GetCacheKey());
     }
 
 
     private async Task<byte[]> GetMailLogoDataFromCacheAsync()
     {
-        return await _distributedCache.GetAsync(CacheKey);
+        return await _distributedCache.GetAsync(await GetCacheKey());
     }
 
     private async Task InsertMailLogoDataToCacheAsync(byte[] data)
     {
-        await _distributedCache.SetAsync(CacheKey, data, new DistributedCacheEntryOptions
+        await _distributedCache.SetAsync(await GetCacheKey(), data, new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
         });
     }
 
+    private async Task<string> GetCacheKey()
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return $"letterlogodata{tenantId}";
+    }
+    
     private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream inputStream)
     {
         if (inputStream == null)

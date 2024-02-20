@@ -27,16 +27,15 @@
 namespace ASC.Files.Api;
 
 [DefaultRoute("fileops")]
-public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService,
-        IEventBus eventBus,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        CommonLinkUtility commonLinkUtility)
+public class OperationController(
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager, 
+    CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Starts the download process of files and folders with the IDs specified in the request.
     /// </summary>
@@ -51,38 +50,21 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
     {
-        var folders = new Dictionary<JsonElement, string>();
-        var files = new Dictionary<JsonElement, string>();
+        var files = new List<FilesDownloadOperationItem<JsonElement>>();
 
-        foreach (var fileId in inDto.FileConvertIds.Where(fileId => !files.ContainsKey(fileId.Key)))
+        foreach (var fileId in inDto.FileConvertIds)
         {
-            files.Add(fileId.Key, fileId.Value);
+            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId.Key, fileId.Value));
         }
 
-        foreach (var fileId in inDto.FileIds.Where(fileId => !files.ContainsKey(fileId)))
+        foreach (var fileId in inDto.FileIds)
         {
-            files.Add(fileId, string.Empty);
+            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId, string.Empty));
         }
+        
+        await fileOperationsManager.PublishDownload(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
-        foreach (var folderId in inDto.FolderIds.Where(folderId => !folders.ContainsKey(folderId)))
-        {
-            folders.Add(folderId, string.Empty);
-        }
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishBulkDownloadAsync(folders, files);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            FileStringIds = files.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString()),
-            BaseUri = commonLinkUtility.ServerRootPath
-        });
-
-        foreach (var e in tasks)
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -101,29 +83,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            DeleteAfter = inDto.DeleteAfter,
-            Copy = true,
-            FileStringIds = fileStringIds,
-            FolderStringIds = folderStringIds,
-            FileIntIds = fileIntIds,
-            FolderIntIds = folderIntIds,
-            Content = inDto.Content,
-            ConflictResolveType = inDto.ConflictResolveType,
-            DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -142,26 +104,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishDeleteItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            DeleteAfter = inDto.DeleteAfter,
-            Immediately = inDto.Immediately,
-            FolderStringIds = folderStringIds,
-            FileStringIds = fileStringIds,
-            FolderIntIds = folderIntIds,
-            FileIntIds = fileIntIds,
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -179,17 +124,11 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishEmptyTrashAsync();
+        var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
+        
+        await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
-
-        foreach (var e in tasks)
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -208,7 +147,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
-        foreach (var e in fileStorageService.GetTasksStatuses())
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -227,24 +166,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            FolderStringIds = folderStringIds,
-            FileStringIds = fileStringIds,
-            FolderIntIds = folderIntIds,
-            FileIntIds = fileIntIds,
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishMarkAsRead(inDto.FolderIds, inDto.FileIds);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -263,29 +187,9 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var (tasks, currentTaskId, headers) = await fileStorageService.PublishMoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content);
-
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            DeleteAfter = inDto.DeleteAfter,
-            Copy = false,
-            FileStringIds = fileStringIds,
-            FolderStringIds = folderStringIds,
-            FileIntIds = fileIntIds, 
-            FolderIntIds = folderIntIds,
-            Content = inDto.Content,
-            ConflictResolveType = inDto.ConflictResolveType,
-            DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
-            TaskId = currentTaskId,
-            Headers = headers?.ToDictionary(x => x.Key, x => x.Value.ToString())
-        });
-
-        foreach (var e in tasks)
+        await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
+        
+        foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -338,7 +242,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
     {
-        var tasks = fileStorageService.TerminateTasks(id);
+        var tasks = fileOperationsManager.CancelOperations(id);
 
         foreach (var e in tasks)
         {

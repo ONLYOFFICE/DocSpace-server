@@ -115,6 +115,7 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
+    public ApiDateTime LastOpened { get; set; }
     
     public static FileDto<int> GetSample()
     {
@@ -158,6 +159,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
+    private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
+
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
@@ -223,6 +226,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.DenyDownload = file.DenyDownload;
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
+        result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
 
         if (file.Order != 0)
         {

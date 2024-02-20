@@ -622,12 +622,7 @@ public static class DocumentService
             }
             var errorMessage = code switch
             {
-                ErrorCode.VkeyUserCountExceed => "user count exceed",
-                ErrorCode.VkeyKeyExpire => "signature expire",
-                ErrorCode.VkeyEncrypt => "encrypt signature",
-                ErrorCode.UploadCountFiles => "count files",
-                ErrorCode.UploadExtension => "extension",
-                ErrorCode.UploadContentLength => "upload length",
+                ErrorCode.OutputType => "output format not defined",
                 ErrorCode.Vkey => "document signature",
                 ErrorCode.TaskQueue => "database",
                 ErrorCode.ConvertPassword => "password",
@@ -643,12 +638,7 @@ public static class DocumentService
         [EnumExtensions]
         public enum ErrorCode
         {
-            VkeyUserCountExceed = -22,
-            VkeyKeyExpire = -21,
-            VkeyEncrypt = -20,
-            UploadCountFiles = -11,
-            UploadExtension = -10,
-            UploadContentLength = -9,
+            OutputType = -9,
             Vkey = -8,
             TaskQueue = -6,
             ConvertPassword = -5,

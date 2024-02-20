@@ -1107,10 +1107,9 @@ public class UserController(ICache cache,
             u.ActivationStatus = activationstatus;
             await _userManager.UpdateUserInfoAsync(u);
 
-            if (activationstatus == EmployeeActivationStatus.Activated
-                && u.IsOwner(await tenantManager.GetCurrentTenantAsync()))
+            if (activationstatus == EmployeeActivationStatus.Activated && u.IsOwner(await tenantManager.GetCurrentTenantAsync()))
             {
-                var settings = settingsManager.Load<FirstEmailConfirmSettings>();
+                var settings = await settingsManager.LoadAsync<FirstEmailConfirmSettings>();
 
                 if (settings.IsFirst)
                 {

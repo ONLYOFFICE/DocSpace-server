@@ -31,7 +31,7 @@ namespace ASC.Core;
 [Scope]
 public class SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
 {
-    private readonly ISubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly CachedSubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
     private static readonly SemaphoreSlim _semaphore = new(1);
     public static readonly List<Guid> Groups = Groups =
     [

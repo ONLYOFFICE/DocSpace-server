@@ -142,14 +142,15 @@ public interface IFileDao<T>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
     Task<long> GetFileSizeAsync(File<T> file);
-    
+
     /// <summary>
     /// Get presigned uri
     /// </summary>
     /// <param name="file"></param>
     /// <param name="expires"></param>
+    /// <param name="shareKey"></param>
     /// <returns>Stream uri</returns>
-    Task<Uri> GetPreSignedUriAsync(File<T> file, TimeSpan expires);
+    Task<string> GetPreSignedUriAsync(File<T> file, TimeSpan expires, string shareKey = null);
 
     /// <summary>
     ///  Check is supported PreSignedUri

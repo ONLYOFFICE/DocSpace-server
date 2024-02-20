@@ -40,7 +40,7 @@ public class NotifyEngine(Context context,
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
     internal readonly List<SendMethodWrapper> SendMethods = [];
     private readonly Dictionary<string, IPatternStyler> _stylers = new();
-    private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
+    private readonly ReplacePatternFormatter _sysTagFormatter = new(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions = new List<Type>();
 
     public void AddAction<T>() where T : INotifyEngineAction

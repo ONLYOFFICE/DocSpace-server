@@ -219,13 +219,13 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             file = await _fileStorageService.FileRenameAsync(fileId, title);
         }
 
-        if (lastVersion > 0)
+        if (lastVersion <= 0)
         {
-            var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
-            file = result.Key;
+            return await GetFileInfoAsync(file!.Id);
         }
 
-        await _socketManager.UpdateFileAsync(file);
+        var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
+        file = result.Key;
 
         return await GetFileInfoAsync(file.Id);
     }

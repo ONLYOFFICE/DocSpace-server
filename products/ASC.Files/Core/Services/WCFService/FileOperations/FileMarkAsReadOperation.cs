@@ -26,21 +26,29 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T>(
-    IEnumerable<T> folders,
-    IEnumerable<T> files,
-    Tenant tenant,
-    IDictionary<string, StringValues> headers,
-    bool holdResult = true)
-    : FileOperationData<T>(folders, files, tenant, headers, holdResult);
+record FileMarkAsReadOperationData<T>(
+    IEnumerable<T> Folders,
+    IEnumerable<T> Files,
+    int TenantId,
+    IDictionary<string, string> Headers,
+    bool HoldResult = true)
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
 
 [Transient]
-class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
+class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
+    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
 {
-    public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileOperation<FileMarkAsReadOperationData<string>, string> f1, FileOperation<FileMarkAsReadOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
+    protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
+    
+    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        this[OpType] = (int)FileOperationType.MarkAsRead;
+        var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)this[Data]);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.HoldResult));
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.HoldResult));
+
+        return base.RunJob(distributedTask, cancellationToken);
     }
 }
 
@@ -51,7 +59,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
-        _headers = fileOperationData.Headers;
+        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 

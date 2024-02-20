@@ -50,10 +50,7 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(services);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 10;
-        });
+        services.RegisterQueue();
 
         DIHelper.TryAdd<FileHandlerService>();
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();

@@ -29,7 +29,7 @@ namespace ASC.Common.Web;
 public static class MimeMapping
 {
     private static readonly Hashtable _extensionToMimeMappingTable = new(200, StringComparer.CurrentCultureIgnoreCase);
-    private static readonly IDictionary<string, IList<string>> _mimeSynonyms = new Dictionary<string, IList<string>>();
+    private static readonly Dictionary<string, IList<string>> _mimeSynonyms = new();
 
     static MimeMapping()
     {

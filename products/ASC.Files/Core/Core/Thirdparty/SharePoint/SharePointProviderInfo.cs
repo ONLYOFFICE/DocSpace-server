@@ -310,7 +310,6 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.ParentId = MakeId(GetParentFolderId(file.ServerRelativeUrl));
         result.ModifiedBy = Owner;
         result.ModifiedOn = file.TimeLastModified.Kind == DateTimeKind.Utc ? tenantUtil.DateTimeFromUtc(file.TimeLastModified) : file.TimeLastModified;
-        result.NativeAccessor = file;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.Title = MakeTitle(file.Name);

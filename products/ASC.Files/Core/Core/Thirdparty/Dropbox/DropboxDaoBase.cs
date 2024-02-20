@@ -231,7 +231,6 @@ internal class DropboxDaoBase(
         file.CreateOn = _tenantUtil.DateTimeFromUtc(dropboxFile.ServerModified);
         file.ParentId = MakeId(GetParentFolderId(dropboxFile));
         file.ModifiedOn = _tenantUtil.DateTimeFromUtc(dropboxFile.ServerModified);
-        file.NativeAccessor = dropboxFile;
         file.Title = MakeFileTitle(dropboxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;

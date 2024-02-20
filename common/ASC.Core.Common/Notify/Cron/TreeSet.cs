@@ -85,7 +85,7 @@ public class TreeSet : ArrayList, ISortedSet
 
     public ISortedSet TailSet(object limit)
     {
-        ISortedSet newList = new TreeSet();
+        var newList = new TreeSet();
         var i = 0;
         while ((i < Count) && (Comparator.Compare(this[i], limit) < 0))
         {

@@ -31,7 +31,7 @@ public class StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFac
 {
     private static DateTime _lastSave = DateTime.UtcNow;
     private static readonly TimeSpan _cacheTime = TimeSpan.FromMinutes(2);
-    private static readonly IDictionary<string, UserVisit> _cache = new Dictionary<string, UserVisit>();
+    private static readonly Dictionary<string, UserVisit> _cache = new();
 
     public async ValueTask SaveUserVisitAsync(int tenantId, Guid userId, Guid productId)
     {

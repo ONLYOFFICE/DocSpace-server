@@ -33,14 +33,6 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
         ISecurityDao<string> securityDao)
     : ThirdPartyProviderDao
 {
-    private int TenantID
-    {
-        get
-        {
-            return _tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly TenantManager _tenantManager = tenantManager;
     protected readonly ISecurityDao<string> _securityDao = securityDao;
@@ -90,8 +82,6 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        await tenantManager.SetCurrentTenantAsync(TenantID);
 
         return await _crossDao.PerformCrossDaoFileCopyAsync(
             fromFileId, fromSelector.GetFileDao(fromFileId), fromSelector.ConvertId,

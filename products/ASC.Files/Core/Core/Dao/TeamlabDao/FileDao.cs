@@ -306,19 +306,19 @@ internal class FileDao(
         return await (await globalStore.GetStoreAsync()).GetFileSizeAsync(string.Empty, GetUniqFilePath(file));
     }
     
-    public async Task<Uri> GetPreSignedUriAsync(File<int> file, TimeSpan expires)
+    public async Task<string> GetPreSignedUriAsync(File<int> file, TimeSpan expires, string shareKey = null)
     {
         var storage = await globalStore.GetStoreAsync();
 
         if (storage.IsSupportCdnUri && !fileUtility.CanWebEdit(file.Title)
             && (fileUtility.CanMediaView(file.Title) || fileUtility.CanImageView(file.Title)))
         {
-            return await storage.GetCdnPreSignedUriAsync(string.Empty, GetUniqFilePath(file), expires,
-                                                 new List<string>
-                                                     {
-                                                             $"Content-Disposition:{ContentDispositionUtil.GetHeaderValue(file.Title, withoutBase: true)}",
-                                                             $"Custom-Cache-Key:{file.ModifiedOn.Ticks}"
-                                                     });
+            return (await storage.GetCdnPreSignedUriAsync(string.Empty, GetUniqFilePath(file), expires,
+                new List<string>
+                {
+                    $"Content-Disposition:{ContentDispositionUtil.GetHeaderValue(file.Title, withoutBase: true)}",
+                    $"Custom-Cache-Key:{file.ModifiedOn.Ticks}"
+                })).ToString();
         }
 
         var path = GetUniqFilePath(file);
@@ -332,7 +332,14 @@ internal class FileDao(
             headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
         }
 
-        return await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers);
+        var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();
+
+        if (!string.IsNullOrEmpty(shareKey))
+        {
+            url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, shareKey);
+        }
+
+        return url;
     }
 
     public async Task<bool> IsSupportedPreSignedUriAsync(File<int> file)
@@ -1377,7 +1384,7 @@ internal class FileDao(
 
     public string GetUniqThumbnailPath(File<int> file, int width, int height)
     {
-        var thumbnailName = GetThumnailName(width, height);
+        var thumbnailName = GetThumbnailName(width, height);
 
         return GetUniqFilePath(file, thumbnailName);
     }
@@ -1390,7 +1397,7 @@ internal class FileDao(
 
     public async Task<Stream> GetThumbnailAsync(File<int> file, int width, int height)
     {
-        var thumnailName = GetThumnailName(width, height);
+        var thumnailName = GetThumbnailName(width, height);
         var path = GetUniqFilePath(file, thumnailName);
         var storage = await globalStore.GetStoreAsync();
         var isFile = await storage.IsFileAsync(string.Empty, path);
@@ -1411,11 +1418,29 @@ internal class FileDao(
             yield break;
         }
         
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
         var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
 
-        q = await GetFilesQueryWithFilters(q, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+        q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+
+        var test = await q.ToListAsync();
+
+        q = orderBy == null
+            ? q
+            : orderBy.SortedBy switch
+            {
+                SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
+                SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
+                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Entry.Title) : q.OrderByDescending(r => r.Entry.Title),
+                SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ModifiedOn) : q.OrderByDescending(r => r.Entry.ModifiedOn),
+                SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateOn) : q.OrderByDescending(r => r.Entry.CreateOn),
+                SortedByType.Type => orderBy.IsAsc
+                    ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1))
+                    : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1)),
+                SortedByType.LastOpened => orderBy.IsAsc ? q.OrderBy(r => r.TagLink.CreateOn) : q.OrderByDescending(r => r.TagLink.CreateOn),
+                _ => q.OrderBy(r => r.Entry.Title)
+            };
         
         if (offset > 0)
         {
@@ -1441,16 +1466,16 @@ internal class FileDao(
             return 0;
         }
         
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
         var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
         
-        q = await GetFilesQueryWithFilters(q, null, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+        q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
         return await q.CountAsync();
     }
 
-    private string GetThumnailName(int width, int height)
+    private string GetThumbnailName(int width, int height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }
@@ -1642,7 +1667,8 @@ internal class FileDao(
                         where f.TenantId == r.Entry.TenantId
                         select f
                     ).FirstOrDefault(),
-                SharedRecord = r.Security
+                SharedRecord = r.Security,
+                LastOpened = r.TagLink.CreateOn
             });
     }
     
@@ -1848,7 +1874,7 @@ internal class FileDao(
         return q;
     }
     
-    private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, 
+    private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, 
         string[] extension, bool searchInContent, bool excludeSubject) 
         where T: IQueryResult<DbFile>
     {
@@ -1857,7 +1883,7 @@ internal class FileDao(
         
         if (extension.IsNullOrEmpty())
         {
-            extension = new[] { "" };
+            extension = [string.Empty];
         }
         
         if (searchByText || searchByExtension)
@@ -1895,21 +1921,6 @@ internal class FileDao(
                 }
             }
         }
-        
-        q = orderBy == null
-            ? q
-            : orderBy.SortedBy switch
-            {
-                SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
-                SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Entry.Title) : q.OrderByDescending(r => r.Entry.Title),
-                SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ModifiedOn) : q.OrderByDescending(r => r.Entry.ModifiedOn),
-                SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateOn) : q.OrderByDescending(r => r.Entry.CreateOn),
-                SortedByType.Type => orderBy.IsAsc
-                    ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1))
-                    : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1)),
-                _ => q.OrderBy(r => r.Entry.Title)
-            };
 
         if (subjectId != Guid.Empty)
         {
@@ -1952,11 +1963,10 @@ internal class FileDao(
         IQueryable<FileByTagQuery> query;
         
         var initQuery = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
-            .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId,
-                (file, tagLink) => new { file, tagLink.EntryType, tagLink.TagId })
-            .Where(r => r.EntryType == FileEntryType.File)
-            .Join(filesDbContext.Tag, r => r.TagId, t => t.Id,
-                (fileWithTagLink, tag) => new { fileWithTagLink.file, tag })
+            .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId, (file, tagLink) => new { file, tagLink })
+            .Where(r => r.tagLink.EntryType == FileEntryType.File)
+            .Join(filesDbContext.Tag, r => r.tagLink.TagId, t => t.Id,
+                (fileWithTagLink, tag) => new { fileWithTagLink.file, fileWithTagLink.tagLink, tag })
             .Where(r => r.tag.Type == tagType);
 
         if (tagType == TagType.RecentByLink)
@@ -1965,11 +1975,11 @@ internal class FileDao(
                     (fileWithTag, security) => new { fileWithTag, security, 
                         expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate").Trim('"')})
                 .Where(r => r.security.Share != FileShare.Restrict && (r.expirationDate == DateTime.MinValue || r.expirationDate > DateTime.UtcNow))
-                .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, Security = r.security});
+                .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, TagLink = r.fileWithTag.tagLink, Security = r.security}); 
         }
         else
         {
-            query = initQuery.Select(r => new FileByTagQuery { Entry = r.file, Tag = r.tag });
+            query = initQuery.Select(r => new FileByTagQuery { Entry = r.file, Tag = r.tag, TagLink = r.tagLink});
         }
 
         if (tagOwner.HasValue)
@@ -1988,12 +1998,14 @@ public class DbFileQuery
     public bool Shared { get; set; }
     public int Order { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
+    public DateTime? LastOpened { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>
 {
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
+    public DbFilesTagLink TagLink { get; set; }
     public DbFilesSecurity Security { get; set; }
 }
 

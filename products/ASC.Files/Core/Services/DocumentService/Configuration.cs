@@ -531,15 +531,15 @@ public class CustomerConfig(
     BaseCommonLinkUtility baseCommonLinkUtility,
     TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
 {
-    public string Address => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
+    public async Task<string> GetAddress() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Address;
 
     public async Task<string> GetLogo() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false));
 
-    public string Mail => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Email;
+    public async Task<string> GetMail() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Email;
 
-    public string Name => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().CompanyName;
+    public async Task<string> GetName() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).CompanyName;
 
-    public string Www => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Site;
+    public async Task<string> GetWww() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Site;
 }
 
 [Transient]
@@ -566,27 +566,24 @@ public class CustomizationConfig<T>(
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
-    public FeedbackConfig Feedback
+    public async Task<FeedbackConfig> GetFeedback()
     {
-        get
+        if (coreBaseSettings.Standalone)
         {
-            if (coreBaseSettings.Standalone)
-            {
-                return null;
-            }
-
-            var link = commonLinkUtility.GetFeedbackAndSupportLink(settingsManager);
-
-            if (string.IsNullOrEmpty(link))
-            {
-                return null;
-            }
-
-            return new FeedbackConfig
-            {
-                Url = link
-            };
+            return null;
         }
+
+        var link = await commonLinkUtility.GetFeedbackAndSupportLink(settingsManager);
+
+        if (string.IsNullOrEmpty(link))
+        {
+            return null;
+        }
+
+        return new FeedbackConfig
+        {
+            Url = link
+        };
     }
 
     public bool? GetForceSave(File<T> file)

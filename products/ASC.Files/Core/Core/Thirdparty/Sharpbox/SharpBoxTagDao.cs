@@ -40,10 +40,12 @@ internal class SharpBoxTagDao(IServiceProvider serviceProvider,
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
         fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {
+    private readonly TenantManager _tenantManager = tenantManager;
+
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
-
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
@@ -52,7 +54,7 @@ internal class SharpBoxTagDao(IServiceProvider serviceProvider,
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

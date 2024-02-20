@@ -69,7 +69,7 @@ class AzServiceCache
 [Scope]
 class CachedAzService(DbAzService service, AzServiceCache azServiceCache) : IAzService
 {
-    private readonly IAzService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly DbAzService _service = service ?? throw new ArgumentNullException(nameof(service));
     private readonly ICacheNotify<AzRecordCache> _cacheNotify = azServiceCache.CacheNotify;
     private readonly ICache _cache = azServiceCache.Cache;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);

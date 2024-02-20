@@ -96,15 +96,12 @@ public class Login(
             try
             {
                 var desktop = _params.ContainsKey("desktop") && _params["desktop"] == "true";
-                IDictionary<string, string> additionalStateArgs = null;
+                Dictionary<string, string> additionalStateArgs = null;
 
                 if (desktop)
                 {
                     additionalStateArgs = context.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
-                    if (!additionalStateArgs.ContainsKey("desktop"))
-                    {
-                        additionalStateArgs.Add("desktop", "true");
-                    }
+                    additionalStateArgs.TryAdd("desktop", "true");
                 }
 
                 var profile = providerManager.Process(Auth, context, null, additionalStateArgs);

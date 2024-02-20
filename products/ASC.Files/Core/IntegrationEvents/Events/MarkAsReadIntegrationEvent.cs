@@ -35,22 +35,7 @@ public record MarkAsReadIntegrationEvent : IntegrationEvent
     {
 
     }
-
+    
     [ProtoMember(1)]
-    public List<string> FolderStringIds { get; set; }
-
-    [ProtoMember(2)] 
-    public List<string> FileStringIds { get; set; }
-
-    [ProtoMember(3)]
-    public List<int> FolderIntIds { get; set; }
-
-    [ProtoMember(4)]
-    public List<int> FileIntIds { get; set; }
-
-    [ProtoMember(5)]
     public string TaskId { get; set; }
-
-    [ProtoMember(6)]
-    public IDictionary<string, string> Headers { get; set; }
 }

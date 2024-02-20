@@ -32,7 +32,7 @@ public class MessagesRepository : IDisposable
     private DateTime _lastSave = DateTime.UtcNow;
     private bool _timerStarted;
     private readonly TimeSpan _cacheTime;
-    private readonly IDictionary<string, EventMessage> _cache;
+    private readonly Dictionary<string, EventMessage> _cache;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagesRepository> _logger;

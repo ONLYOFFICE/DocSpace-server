@@ -37,6 +37,7 @@ public class FilesMappingProfile : Profile
         CreateMap<DbFileQuery, File<int>>()
                 .ForMember(r => r.CreateOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.CreateOn))
                 .ForMember(r => r.ModifiedOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.ModifiedOn))
+                .ForMember(r => r.LastOpened, r => r.ConvertUsing<TenantDateTimeConverter, DateTime?>(s => s.LastOpened))
                 .ForMember(r => r.ShareRecord, r => r.MapFrom(f => f.SharedRecord))
                 .IncludeMembers(r => r.File)
                 .ConstructUsingServiceLocator();

@@ -273,13 +273,13 @@ internal abstract class ThirdPartyProviderDao
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds)
     {
@@ -426,7 +426,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
     where TFolder : class, TItem
     where TItem : class
 {
-    protected int TenantId => tenantManager.GetCurrentTenant().Id;
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly UserManager _userManager = userManager;
     protected readonly TenantUtil _tenantUtil = tenantUtil;
@@ -446,7 +445,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         {
             return null;
         }
-
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         string result;
@@ -464,7 +464,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             {
                 Id = id,
                 HashId = result,
-                TenantId = TenantId
+                TenantId = tenantId
             };
 
             await filesDbContext.ThirdpartyIdMapping.AddAsync(newMapping);
@@ -574,6 +574,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             return;
         }
 
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -581,7 +583,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-            var oldIds = Queries.IdsAsync(dbContext, TenantId, oldValue);
+            var oldIds = Queries.IdsAsync(dbContext, tenantId, oldValue);
 
             await foreach (var oldId in oldIds)
             {
@@ -589,7 +591,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
                 {
@@ -601,7 +603,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(mappingForDelete);
                 await dbContext.AddRangeAsync(mappingForInsert);
 
-                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
                 {
@@ -619,7 +621,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(securityForDelete);
                 await dbContext.AddRangeAsync(securityForInsert);
 
-                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
                 {
@@ -636,7 +638,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 await dbContext.AddRangeAsync(linkForInsert);
 
 
-                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var filesSourceForInsert = filesSourceForDelete.Select(l => new DbFilesLink
                 {
@@ -649,7 +651,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(filesSourceForDelete);
                 await dbContext.AddRangeAsync(filesSourceForInsert);
 
-                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var filesLinkedForInsert = filesLinkedForDelete.Select(l => new DbFilesLink
                 {

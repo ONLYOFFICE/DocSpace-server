@@ -221,11 +221,17 @@ public class MigrationCreator
             {
                 foreach (var table in tablesToProcess)
                 {
-                    if (table.Name == "files_thirdparty_account" || table.Name == "files_thirdparty_id_mapping" || table.Name == "core_subscription" || table.Name == "files_security")
+                    try
                     {
-                        continue;
+                        await ArhiveTable(table, writer, module, connection, id);
                     }
-                    await ArhiveTable(table, writer, module, connection, id);
+                    catch
+                    {
+                        if (table.Name != "files_thirdparty_account" && table.Name != "files_thirdparty_id_mapping" && table.Name != "core_subscription" || table.Name == "files_security")
+                        {
+                            throw;
+                        }
+                    }
                 }
             }
         }

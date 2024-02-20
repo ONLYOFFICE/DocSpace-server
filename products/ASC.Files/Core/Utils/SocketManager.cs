@@ -114,7 +114,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.ParentId);
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
         var whoCanRead = users ?? await GetWhoCanRead(entry);
 
         if (action != null)

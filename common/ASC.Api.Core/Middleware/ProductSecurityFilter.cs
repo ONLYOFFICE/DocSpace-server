@@ -34,7 +34,7 @@ public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
         AuthContext authContext)
     : IAsyncResourceFilter
 {
-    private static readonly IDictionary<string, Guid> _products;
+    private static readonly Dictionary<string, Guid> _products;
 
     static ProductSecurityFilter()
     {

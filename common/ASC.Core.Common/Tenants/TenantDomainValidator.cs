@@ -38,7 +38,7 @@ public class TenantDomainValidator
 
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
-        MaxLength = 100;
+        MaxLength = 63;
 
         if (int.TryParse(configuration["web:alias:max"], out var defaultMaxLength))
         {

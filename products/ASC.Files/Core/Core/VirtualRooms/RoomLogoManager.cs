@@ -54,11 +54,16 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private IDataStore _dataStore;
 
     public bool EnableAudit { get; set; } = true;
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
 
     private async ValueTask<IDataStore> GetDataStoreAsync()
     {
-        return _dataStore ??= await storageFactory.GetStorageAsync(TenantId, ModuleName);
+        if (_dataStore == null)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            _dataStore = await storageFactory.GetStorageAsync(tenantId, ModuleName);
+        }
+
+        return _dataStore;
     }
 
     public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, int width, int height)

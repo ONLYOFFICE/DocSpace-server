@@ -124,9 +124,6 @@ public abstract class FileEntryDto<T> : FileEntryDto
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
-    
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public T PreviousId { get; set; }
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
     public bool CanShare { get; set; }
@@ -187,7 +184,6 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = entry.OriginRoomTitle,
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null,
-            PreviousId = entry.PreviousId
         };
     }
 
