@@ -124,7 +124,7 @@ public class SecurityController(TenantManager tenantManager,
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
-        var EnabledModules = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.Normal)
+        var EnabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
                                     .Where(item => !item.IsSubItem() && item.Visible)
             .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 

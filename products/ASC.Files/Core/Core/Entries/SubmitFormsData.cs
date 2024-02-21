@@ -34,6 +34,6 @@ public class FormsItemData
 {
     public string Key { get; set; }
     public string Tag { get; set; }
-    public string Value { get; set; }
+    public object Value { get; set; }
     public string Type { get; set; }
 }

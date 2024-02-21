@@ -39,13 +39,10 @@ internal class FileDao(
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
         GlobalStore globalStore,
-        
         GlobalFolder globalFolder,
         Global global,
         IDaoFactory daoFactory,
@@ -66,8 +63,6 @@ internal class FileDao(
               tenantUtil,
               setupInfo,
               maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
               settingsManager,
               authContext,
         serviceProvider), IFileDao<int>
@@ -295,7 +290,7 @@ internal class FileDao(
     {
         return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset);
     }
-    
+
     public async Task<Stream> GetFileStreamAsync(File<int> file, long offset, long length)
     {
         return await (await globalStore.GetStoreAsync()).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), offset, length);
@@ -377,25 +372,50 @@ internal class FileDao(
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
-        if (quotaSettings.EnableUserQuota)
+        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+        Folder<int> currentRoom = null;
+        if (roomId != -1)
         {
-            var user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
-            var userQuotaSettings = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
-            var quotaLimit = userQuotaSettings.UserQuota;
-
-            if (quotaLimit != -1)
+            currentRoom = await folderDao.GetFolderAsync(roomId);
+            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaRoomSettings.EnableQuota)
             {
-                var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-
-                if (quotaLimit - userUsedSpace < file.ContentLength)
+                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    throw FileSizeComment.GetPersonalFreeSpaceException(quotaLimit);
+                    if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                    {
+                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                    }
                 }
             }
         }
+        else
+        {
+            var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            if (quotaUserSettings.EnableQuota)
+            {
+                var user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
 
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota ;
+
+                if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                {
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+
+                    if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                    {
+                        throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
+        }
+       
         var isNew = false;
         DbFile toInsert = null;
 
@@ -464,6 +484,8 @@ internal class FileDao(
             });
 
             file.PureTitle = file.Title;
+            file.RootCreateBy = currentFolder.RootCreateBy;
+            file.RootFolderType = currentFolder.RootFolderType;
 
             var parentFolders = await Queries.DbFolderTreesAsync(filesDbContext, file.ParentId).ToListAsync();
 
@@ -496,7 +518,7 @@ internal class FileDao(
                     if (isNew)
                     {
                         var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                        await DeleteFileAsync(file.Id, stored);
+                        await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
                     }
                     else if (!await IsExistOnStorageAsync(file))
                     {
@@ -514,7 +536,9 @@ internal class FileDao(
         {
             if (uploadSession != null)
             {
-                await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file));
+                await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
+
+                await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
             }
         }
 
@@ -678,15 +702,26 @@ internal class FileDao(
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream)
     {
-        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), stream, file.Title);
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title);
+
+        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+
+        await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
     }
 
     public async Task DeleteFileAsync(int fileId)
     {
-        await DeleteFileAsync(fileId, true);
+        await DeleteFileAsync(fileId, Guid.Empty);
     }
 
-    private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder)
+    public async Task DeleteFileAsync(int fileId, Guid ownerId)
+    {
+        await DeleteFileAsync(fileId, true, ownerId);
+    }
+
+    private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
     {
         if (fileId == default)
         {
@@ -734,7 +769,7 @@ internal class FileDao(
             {
                 tenantQuotaController.Init(tenantId, ThumbnailTitle);
                 var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
-                await store.DeleteDirectoryAsync(GetUniqFileDirectory(fileId));
+                await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
             }
 
             if (toDeleteFile != null)
@@ -783,9 +818,48 @@ internal class FileDao(
             return default;
         }
 
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var toFolder = await folderDao.GetFolderAsync(toFolderId);
+        var file = await GetFileAsync(fileId);
+        var fileContentLength = file.ContentLength;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        if (DocSpaceHelper.IsRoom(toFolder.FolderType))
+        {
+            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaRoomSettings.EnableQuota)
+            {
+                var roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                {
+                    if (roomQuotaLimit - toFolder.Counter < fileContentLength)
+                    {
+                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                    }
+                }
+            }
+        }else if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+        {
+            var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            if (quotaUserSettings.EnableQuota)
+            {
+                var user = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                {
+                    if (userQuotaLimit - userUsedSpace < fileContentLength)
+                    {
+                        throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
+        }
+
         var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -801,7 +875,7 @@ internal class FileDao(
             {
                 var trashId = await trashIdTask;
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
-                
+
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -817,15 +891,54 @@ internal class FileDao(
                 }
 
                 var tagDao = daoFactory.GetTagDao<int>();
+                var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
+                var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                var archiveId = await folderDao.GetFolderIDArchive(false);
 
                 if (toFolderId == trashId && oldParentId.HasValue)
                 {
+                    var tagList = new List<Tag>();
+
+                    if(roomId != -1)
+                    {
+                        tagList.Add(Tag.FromRoom(fileId, FileEntryType.File, _authContext.CurrentAccount.ID));
+                    }
+
                     var origin = Tag.Origin(fileId, FileEntryType.File, oldParentId.Value, _authContext.CurrentAccount.ID);
-                    await tagDao.SaveTagsAsync(origin);
+                    tagList.Add(origin);
+                    await tagDao.SaveTagsAsync(tagList);
                 }
-                else if (oldParentId == trashId)
+                else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {
-                    await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
+                    var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                    var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+
+                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) && 
+                        toFolderRoomId == -1 && 
+                        ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
+                    {
+                        file.RootCreateBy = toFolder.RootCreateBy;
+                        file.RootFolderType = toFolder.FolderType;
+                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id,
+                            FileConstant.ModuleId, "",
+                            WebItemManager.DocumentsProductID.ToString(), 
+                            file.ContentLength, file.GetFileQuotaOwner());
+                    }
+                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) && 
+                        toFolderRoomId != -1 && 
+                        ((oldParentId == trashId && fromRoomTag == null) || roomId == -1))
+                    {
+                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id,
+                            FileConstant.ModuleId, "",
+                            WebItemManager.DocumentsProductID.ToString(), 
+                            file.ContentLength, file.GetFileQuotaOwner());
+                    }
+                    if (oldParentId == trashId)
+                    {
+                        await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
+                    }
                 }
 
                 if (deleteLinks)
@@ -841,6 +954,17 @@ internal class FileDao(
                     await RecalculateFilesCountAsync(f);
                 }
                 
+
+                if (oldParentId.HasValue)
+                {
+                    await UpdateUsedFileSpace(
+                        folderDao,
+                        oldFolder,
+                        toFolder,
+                        file,
+                        fileContentLength,
+                        trashId);
+                }
                 await RecalculateFilesCountAsync(toFolderId);
             }
 
@@ -1035,6 +1159,31 @@ internal class FileDao(
                    : null;
     }
 
+    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size, int trashId)
+    {
+        var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+        var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+       
+        await folderDao.ChangeTreeFolderSizeAsync(toFolder.Id, file.ContentLength);
+        await folderDao.ChangeTreeFolderSizeAsync(fromFolder.Id, (-1) * file.ContentLength);
+
+        if (toFolderRoomId != -1 || oldFolderRoomId != -1)
+        {
+            var tenantId = _tenantManager.GetCurrentTenant().Id;
+
+            if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+            {
+                file.RootCreateBy = toFolder.RootCreateBy;
+                file.RootFolderType = toFolder.FolderType;
+                await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
+            }
+            if (fromFolder.FolderType == FolderType.USER || fromFolder.FolderType == FolderType.DEFAULT)
+            {
+                await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
+            }
+        }
+
+    }
     public static bool TryGetFileId(string path, out int fileId)
     {
         fileId = 0;
@@ -1066,7 +1215,7 @@ internal class FileDao(
             {
                 uploadSession.BytesTotal = chunkLength;
             }
-    
+
             if (uploadSession.BytesTotal >= chunkLength)
             {
                 uploadSession.File = await SaveFileAsync(await GetFileForCommitAsync(uploadSession), stream);
@@ -1433,8 +1582,6 @@ internal class FileDao(
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
-        var test = await q.ToListAsync();
-
         q = orderBy == null
             ? q
             : orderBy.SortedBy switch
@@ -1482,6 +1629,13 @@ internal class FileDao(
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
         return await q.CountAsync();
+    }
+
+    public async Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<int> uploadSession)
+    {
+        var chunks = await chunkedUploadSessionHolder.GetChunksAsync(uploadSession);
+        
+        return chunks.Sum(c => c.Value?.Length ?? 0);
     }
 
     private string GetThumbnailName(int width, int height)
@@ -1918,7 +2072,7 @@ internal class FileDao(
         {
             extension = [string.Empty];
         }
-        
+
         if (searchByText || searchByExtension)
         {
             var searchIds = new List<int>();
@@ -2534,5 +2688,5 @@ static file class Queries
                 ctx.FilesProperties
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
-            .ExecuteDelete());
+                    .ExecuteDelete());
 }

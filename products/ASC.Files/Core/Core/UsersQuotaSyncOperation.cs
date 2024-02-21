@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.WebZones;
-
 namespace ASC.Web.Files;
 
 [Singleton(Additional = typeof(UsersQuotaOperationExtension))]
@@ -84,7 +82,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     }
 }
 
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager, QuotaSyncOperation quotaSyncOperation) : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -109,9 +107,10 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
     {
         try
         {
-           await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -119,8 +118,13 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
 
             await tenantManager.SetCurrentTenantAsync(TenantId);
 
+            quotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
+
+            var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(tenantQuotaSettings);
+
             var users = await userManager.GetUsersAsync();
-            var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {
@@ -136,19 +140,20 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
                 var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
                 await securityContext.AuthenticateMeAsync(account);
 
-                foreach (var item in webItems)
-                {
-                    if (item.ID == WebItemManager.DocumentsProductID)
-                    {
-                        if (item.Context.SpaceUsageStatManager is not IUserSpaceUsage manager)
-                        {
-                            continue;
-                        }
-                        await manager.RecalculateUserQuota(TenantId, user.Id);
-                    }
-                }
+                await filesSpaceUsageStatManager.RecalculateUserQuota(TenantId, user.Id);
 
             }
+
+            var userQuotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(userQuotaSettings);
+
+            await filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
+
+            var roomQuotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(roomQuotaSettings);
+
         }
         catch (Exception ex)
         {

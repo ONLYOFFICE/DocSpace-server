@@ -14,7 +14,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
-namespace ASC.Files.Core.Resources {
+namespace ASC.Files.Core.Resources
+{
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -25,1274 +26,1556 @@ namespace ASC.Files.Core.Resources {
     [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [DebuggerNonUserCode()]
     [CompilerGenerated()]
-    public class FilesCommonResource {
-        
+    public class FilesCommonResource
+    {
+
         private static ResourceManager resourceMan;
-        
+
         private static CultureInfo resourceCulture;
-        
+
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal FilesCommonResource() {
+        internal FilesCommonResource()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
-            get {
-                if (ReferenceEquals(resourceMan, null)) {
+        public static ResourceManager ResourceManager
+        {
+            get
+            {
+                if (ReferenceEquals(resourceMan, null))
+                {
                     ResourceManager temp = new ResourceManager("ASC.Files.Core.Resources.FilesCommonResource", typeof(FilesCommonResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
-            get {
+        public static CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Outside portal.
         /// </summary>
-        public static string AceShareLink {
-            get {
+        public static string AceShareLink
+        {
+            get
+            {
                 return ResourceManager.GetString("AceShareLink", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Collaborator.
         /// </summary>
-        public static string AceStatusEnum_Collaborator {
-            get {
+        public static string AceStatusEnum_Collaborator
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Collaborator", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Comment.
         /// </summary>
-        public static string AceStatusEnum_Comment {
-            get {
+        public static string AceStatusEnum_Comment
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Comment", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Custom Filter.
         /// </summary>
-        public static string AceStatusEnum_CustomFilter {
-            get {
+        public static string AceStatusEnum_CustomFilter
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_CustomFilter", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Editor.
         /// </summary>
-        public static string AceStatusEnum_Editing {
-            get {
+        public static string AceStatusEnum_Editing
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Editing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Form Filling.
         /// </summary>
-        public static string AceStatusEnum_FillForms {
-            get {
+        public static string AceStatusEnum_FillForms
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_FillForms", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Read Only.
         /// </summary>
-        public static string AceStatusEnum_Read {
-            get {
+        public static string AceStatusEnum_Read
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Read", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Full Access.
         /// </summary>
-        public static string AceStatusEnum_ReadWrite {
-            get {
+        public static string AceStatusEnum_ReadWrite
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_ReadWrite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Deny Access.
         /// </summary>
-        public static string AceStatusEnum_Restrict {
-            get {
+        public static string AceStatusEnum_Restrict
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Restrict", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Review.
         /// </summary>
-        public static string AceStatusEnum_Review {
-            get {
+        public static string AceStatusEnum_Review
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_Review", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Room Administrator.
         /// </summary>
-        public static string AceStatusEnum_RoomAdmin {
-            get {
+        public static string AceStatusEnum_RoomAdmin
+        {
+            get
+            {
                 return ResourceManager.GetString("AceStatusEnum_RoomAdmin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Admin.
         /// </summary>
-        public static string Admin {
-            get {
+        public static string Admin
+        {
+            get
+            {
                 return ResourceManager.GetString("Admin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to To work with the file you must grant access to it.
         /// </summary>
-        public static string AppAccessDenied {
-            get {
+        public static string AppAccessDenied
+        {
+            get
+            {
                 return ResourceManager.GetString("AppAccessDenied", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Me.
         /// </summary>
-        public static string Author_Me {
-            get {
+        public static string Author_Me
+        {
+            get
+            {
                 return ResourceManager.GetString("Author_Me", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Autosaved.
         /// </summary>
-        public static string CommentAutosave {
-            get {
+        public static string CommentAutosave
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentAutosave", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Changed owner.
         /// </summary>
-        public static string CommentChangeOwner {
-            get {
+        public static string CommentChangeOwner
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentChangeOwner", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Converted from {0}.
         /// </summary>
-        public static string CommentConvert {
-            get {
+        public static string CommentConvert
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentConvert", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Copied.
         /// </summary>
-        public static string CommentCopy {
-            get {
+        public static string CommentCopy
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentCopy", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Created.
         /// </summary>
-        public static string CommentCreate {
-            get {
+        public static string CommentCreate
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentCreate", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Created by DocuSign.
         /// </summary>
-        public static string CommentCreateByDocuSign {
-            get {
+        public static string CommentCreateByDocuSign
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentCreateByDocuSign", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Created to fill in the form.
         /// </summary>
-        public static string CommentCreateFillFormDraft {
-            get {
+        public static string CommentCreateFillFormDraft
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentCreateFillFormDraft", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edited.
         /// </summary>
-        public static string CommentEdit {
-            get {
+        public static string CommentEdit
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentEdit", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edited with encrypt.
         /// </summary>
-        public static string CommentEditEncrypt {
-            get {
+        public static string CommentEditEncrypt
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentEditEncrypt", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Encrypted.
         /// </summary>
-        public static string CommentEncrypted {
-            get {
+        public static string CommentEncrypted
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentEncrypted", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Saved.
         /// </summary>
-        public static string CommentForcesave {
-            get {
+        public static string CommentForcesave
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentForcesave", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Overwritten.
         /// </summary>
-        public static string CommentOverwrite {
-            get {
+        public static string CommentOverwrite
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentOverwrite", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Restored from the revision of {0}.
         /// </summary>
-        public static string CommentRevert {
-            get {
+        public static string CommentRevert
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentRevert", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Restored from the document change of {0}.
         /// </summary>
-        public static string CommentRevertChanges {
-            get {
+        public static string CommentRevertChanges
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentRevertChanges", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Submitted form.
         /// </summary>
-        public static string CommentSubmitFillForm {
-            get {
+        public static string CommentSubmitFillForm
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentSubmitFillForm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Uploaded.
         /// </summary>
-        public static string CommentUpload {
-            get {
+        public static string CommentUpload
+        {
+            get
+            {
                 return ResourceManager.GetString("CommentUpload", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Shared link.
         /// </summary>
-        public static string DefaultExternalLinkTitle {
-            get {
+        public static string DefaultExternalLinkTitle
+        {
+            get
+            {
                 return ResourceManager.GetString("DefaultExternalLinkTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Invitation link.
         /// </summary>
-        public static string DefaultInvitationLinkTitle {
-            get {
+        public static string DefaultInvitationLinkTitle
+        {
+            get
+            {
                 return ResourceManager.GetString("DefaultInvitationLinkTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Declined.
         /// </summary>
-        public static string DocuSignStatusDeclined {
-            get {
+        public static string DocuSignStatusDeclined
+        {
+            get
+            {
                 return ResourceManager.GetString("DocuSignStatusDeclined", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to There was an error during the send operation.
         /// </summary>
-        public static string DocuSignStatusError {
-            get {
+        public static string DocuSignStatusError
+        {
+            get
+            {
                 return ResourceManager.GetString("DocuSignStatusError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Sending the document via DocuSign has been canceled.
         /// </summary>
-        public static string DocuSignStatusNotSended {
-            get {
+        public static string DocuSignStatusNotSended
+        {
+            get
+            {
                 return ResourceManager.GetString("DocuSignStatusNotSended", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Document was sent to sign via DocuSign.
         /// </summary>
-        public static string DocuSignStatusSended {
-            get {
+        public static string DocuSignStatusSended
+        {
+            get
+            {
                 return ResourceManager.GetString("DocuSignStatusSended", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Voided.
         /// </summary>
-        public static string DocuSignStatusVoided {
-            get {
+        public static string DocuSignStatusVoided
+        {
+            get
+            {
                 return ResourceManager.GetString("DocuSignStatusVoided", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
-        public static string ErrorMessage_BadRequest {
-            get {
+        public static string ErrorMessage_BadRequest
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_BadRequest", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You cannot select this user.
         /// </summary>
-        public static string ErrorMessage_ChangeOwner {
-            get {
+        public static string ErrorMessage_ChangeOwner
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_ChangeOwner", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Conversion takes too much time..
         /// </summary>
-        public static string ErrorMessage_ConvertTimeout {
-            get {
+        public static string ErrorMessage_ConvertTimeout
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_ConvertTimeout", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Error occurred in the Documents Service.
         /// </summary>
-        public static string ErrorMessage_DocServiceException {
-            get {
+        public static string ErrorMessage_DocServiceException
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_DocServiceException", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file is opened for editing by {0}. Currently, the co-editing feature is not supported for this file format..
         /// </summary>
-        public static string ErrorMessage_EditingCoauth {
-            get {
+        public static string ErrorMessage_EditingCoauth
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_EditingCoauth", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file is open for editing in a mobile application by {0}.
         /// </summary>
-        public static string ErrorMessage_EditingMobile {
-            get {
+        public static string ErrorMessage_EditingMobile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_EditingMobile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Empty file.
         /// </summary>
-        public static string ErrorMessage_EmptyFile {
-            get {
+        public static string ErrorMessage_EmptyFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_EmptyFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The required file was not found.
         /// </summary>
-        public static string ErrorMessage_FileNotFound {
-            get {
+        public static string ErrorMessage_FileNotFound
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileNotFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be converted.
         /// </summary>
-        public static string ErrorMessage_FileSizeConvert {
-            get {
+        public static string ErrorMessage_FileSizeConvert
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileSizeConvert", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be copied.
         /// </summary>
-        public static string ErrorMessage_FileSizeCopy {
-            get {
+        public static string ErrorMessage_FileSizeCopy
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileSizeCopy", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be edited.
         /// </summary>
-        public static string ErrorMessage_FileSizeEdit {
-            get {
+        public static string ErrorMessage_FileSizeEdit
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileSizeEdit", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be moved.
         /// </summary>
-        public static string ErrorMessage_FileSizeMove {
-            get {
+        public static string ErrorMessage_FileSizeMove
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileSizeMove", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The new version cannot be the same as the current one.
         /// </summary>
-        public static string ErrorMessage_FileUpdateToVersion {
-            get {
+        public static string ErrorMessage_FileUpdateToVersion
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FileUpdateToVersion", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You cannot copy the folder to its subfolder.
         /// </summary>
-        public static string ErrorMessage_FolderCopyError {
-            get {
+        public static string ErrorMessage_FolderCopyError
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FolderCopyError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The required folder was not found.
         /// </summary>
-        public static string ErrorMessage_FolderNotFound {
-            get {
+        public static string ErrorMessage_FolderNotFound
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_FolderNotFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Incorrect title.
         /// </summary>
-        public static string ErrorMessage_InvalidTitle {
-            get {
+        public static string ErrorMessage_InvalidTitle
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_InvalidTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file is currently locked by another user.
         /// </summary>
-        public static string ErrorMessage_LockedFile {
-            get {
+        public static string ErrorMessage_LockedFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_LockedFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to At least {0} mail messages could not be sent. Please visit the Mail module to see what the reason for the failure could be..
         /// </summary>
-        public static string ErrorMessage_MailMergeCount {
-            get {
+        public static string ErrorMessage_MailMergeCount
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_MailMergeCount", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Too many downloads..
         /// </summary>
-        public static string ErrorMessage_ManyDownloads {
-            get {
+        public static string ErrorMessage_ManyDownloads
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_ManyDownloads", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Sorry, this file format isn&apos;t supported.
         /// </summary>
-        public static string ErrorMessage_NotSupportedFormat {
-            get {
+        public static string ErrorMessage_NotSupportedFormat
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_NotSupportedFormat", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Author of the save is unknown.
         /// </summary>
-        public static string ErrorMessage_SaveAnonymous {
-            get {
+        public static string ErrorMessage_SaveAnonymous
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SaveAnonymous", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file was corrupted when you tried to save it.
         /// </summary>
-        public static string ErrorMessage_SaveCorrupted {
-            get {
+        public static string ErrorMessage_SaveCorrupted
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SaveCorrupted", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Failed to get the file to be saved.
         /// </summary>
-        public static string ErrorMessage_SaveUrlLost {
-            get {
+        public static string ErrorMessage_SaveUrlLost
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SaveUrlLost", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to perform the operation.
         /// </summary>
-        public static string ErrorMessage_SecurityException {
-            get {
+        public static string ErrorMessage_SecurityException
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Can&apos;t authorize at {0} provider with given credentials..
         /// </summary>
-        public static string ErrorMessage_SecurityException_Auth {
-            get {
+        public static string ErrorMessage_SecurityException_Auth
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_Auth", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to copy the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_CopyFile {
-            get {
+        public static string ErrorMessage_SecurityException_CopyFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_CopyFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to copy the folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_CopyFolder {
-            get {
+        public static string ErrorMessage_SecurityException_CopyFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_CopyFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to create.
         /// </summary>
-        public static string ErrorMessage_SecurityException_Create {
-            get {
+        public static string ErrorMessage_SecurityException_Create
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_Create", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the file because it is opened for editing.
         /// </summary>
-        public static string ErrorMessage_SecurityException_DeleteEditingFile {
-            get {
+        public static string ErrorMessage_SecurityException_DeleteEditingFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteEditingFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot delete the folder because one of the files is opened for editing.
         /// </summary>
-        public static string ErrorMessage_SecurityException_DeleteEditingFolder {
-            get {
+        public static string ErrorMessage_SecurityException_DeleteEditingFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteEditingFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to delete the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_DeleteFile {
-            get {
+        public static string ErrorMessage_SecurityException_DeleteFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to delete the folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_DeleteFolder {
-            get {
+        public static string ErrorMessage_SecurityException_DeleteFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_DeleteFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You do not have enough permissions to edit the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_EditFile {
-            get {
+        public static string ErrorMessage_SecurityException_EditFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_EditFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to This document is being edited by you in another tab.
         /// </summary>
-        public static string ErrorMessage_SecurityException_EditFileTwice {
-            get {
+        public static string ErrorMessage_SecurityException_EditFileTwice
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_EditFileTwice", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to move the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_MoveFile {
-            get {
+        public static string ErrorMessage_SecurityException_MoveFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_MoveFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to move the folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_MoveFolder {
-            get {
+        public static string ErrorMessage_SecurityException_MoveFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_MoveFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_ReadFile {
-            get {
+        public static string ErrorMessage_SecurityException_ReadFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_ReadFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the folder content.
         /// </summary>
-        public static string ErrorMessage_SecurityException_ReadFolder {
-            get {
+        public static string ErrorMessage_SecurityException_ReadFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_ReadFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to rename the file.
         /// </summary>
-        public static string ErrorMessage_SecurityException_RenameFile {
-            get {
+        public static string ErrorMessage_SecurityException_RenameFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_RenameFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to rename the folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_RenameFolder {
-            get {
+        public static string ErrorMessage_SecurityException_RenameFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_RenameFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot update the file because it&apos;s opened for editing.
         /// </summary>
-        public static string ErrorMessage_SecurityException_UpdateEditingFile {
-            get {
+        public static string ErrorMessage_SecurityException_UpdateEditingFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_UpdateEditingFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to view the folder content.
         /// </summary>
-        public static string ErrorMessage_SecurityException_ViewFolder {
-            get {
+        public static string ErrorMessage_SecurityException_ViewFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_ViewFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The content of third party folder are not available. Try to reconnect the account..
         /// </summary>
-        public static string ErrorMessage_SharpBoxException {
-            get {
+        public static string ErrorMessage_SharpBoxException
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SharpBoxException", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File editing start error.
         /// </summary>
-        public static string ErrorMessage_StartEditing {
-            get {
+        public static string ErrorMessage_StartEditing
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_StartEditing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You cannot update a file which is opened for editing.
         /// </summary>
-        public static string ErrorMessage_UpdateEditingFile {
-            get {
+        public static string ErrorMessage_UpdateEditingFile
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_UpdateEditingFile", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User could not be found.
         /// </summary>
-        public static string ErrorMessage_UserNotFound {
-            get {
+        public static string ErrorMessage_UserNotFound
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_UserNotFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You are not allowed to preview the elements in the Trash.
         /// </summary>
-        public static string ErrorMessage_ViewTrashItem {
-            get {
+        public static string ErrorMessage_ViewTrashItem
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_ViewTrashItem", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Invalid provider.
         /// </summary>
-        public static string ErrorMessage_InvalidProvider {
-            get {
+        public static string ErrorMessage_InvalidProvider
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_InvalidProvider", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to It is not possible to use this folder to store the room.
         /// </summary>
-        public static string ErrorMessage_InvalidThirdPartyFolder {
-            get {
+        public static string ErrorMessage_InvalidThirdPartyFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The invitation link is invalid or its validity has expired.
         /// </summary>
-        public static string ErrorMessage_InvintationLink {
-            get {
+        public static string ErrorMessage_InvintationLink
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_InvintationLink", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The maximum number of links may not exceed {0}.
         /// </summary>
-        public static string ErrorMessage_MaxLinksCount {
-            get {
+        public static string ErrorMessage_MaxLinksCount
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to This provider is already connected to the room.
         /// </summary>
-        public static string ErrorMessage_ProviderAlreadyConnect {
-            get {
+        public static string ErrorMessage_ProviderAlreadyConnect
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_ProviderAlreadyConnect", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The role is not available for this user type.
         /// </summary>
-        public static string ErrorMessage_RoleNotAvailable {
-            get {
+        public static string ErrorMessage_RoleNotAvailable
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_RoleNotAvailable", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to archive the room.
         /// </summary>
-        public static string ErrorMessage_SecurityException_ArchiveRoom {
-            get {
+        public static string ErrorMessage_SecurityException_ArchiveRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_ArchiveRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to copy to this folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_CopyToFolder {
-            get {
+        public static string ErrorMessage_SecurityException_CopyToFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_CopyToFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to edit the room.
         /// </summary>
-        public static string ErrorMessage_SecurityException_EditRoom {
-            get {
+        public static string ErrorMessage_SecurityException_EditRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_EditRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to move to this folder.
         /// </summary>
-        public static string ErrorMessage_SecurityException_MoveToFolder {
-            get {
+        public static string ErrorMessage_SecurityException_MoveToFolder
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_MoveToFolder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to unarchive the room.
         /// </summary>
-        public static string ErrorMessage_SecurityException_UnarchiveRoom {
-            get {
+        public static string ErrorMessage_SecurityException_UnarchiveRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_UnarchiveRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You have tried too many times to enter your password. Please try again later.
         /// </summary>
-        public static string ErrorMessage_SharePasswordManyAttempts {
-            get {
+        public static string ErrorMessage_SharePasswordManyAttempts
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_SharePasswordManyAttempts", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You cannot edit archived rooms.
         /// </summary>
-        public static string ErrorMessage_UpdateArchivedRoom {
-            get {
+        public static string ErrorMessage_UpdateArchivedRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorMessage_UpdateArchivedRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to You can&apos;t pin a room.
         /// </summary>
-        public static string ErrorrMessage_PinRoom {
-            get {
+        public static string ErrorrMessage_PinRoom
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorrMessage_PinRoom", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Everyone.
         /// </summary>
-        public static string Everyone {
-            get {
+        public static string Everyone
+        {
+            get
+            {
                 return ResourceManager.GetString("Everyone", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Anonymous.
         /// </summary>
-        public static string Guest {
-            get {
+        public static string Guest
+        {
+            get
+            {
                 return ResourceManager.GetString("Guest", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Search in documents content.
         /// </summary>
-        public static string IndexTitle {
-            get {
+        public static string IndexTitle
+        {
+            get
+            {
                 return ResourceManager.GetString("IndexTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to File created in folder &quot;{0}&quot;.
         /// </summary>
-        public static string MessageFileCreated {
-            get {
+        public static string MessageFileCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("MessageFileCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The fillable PDF document is ready. It is saved in the {0}.
         /// </summary>
-        public static string MessageFileCreatedForm {
-            get {
+        public static string MessageFileCreatedForm
+        {
+            get
+            {
                 return ResourceManager.GetString("MessageFileCreatedForm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The PDF copy is created in the {0} folder. Please fill out the form and download the result as a PDF or DOCX file..
         /// </summary>
-        public static string MessageFillFormDraftCreated {
-            get {
+        public static string MessageFillFormDraftCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("MessageFillFormDraftCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file is no longer a draft to fill in the form..
         /// </summary>
-        public static string MessageFillFormDraftDiscard {
-            get {
+        public static string MessageFillFormDraftDiscard
+        {
+            get
+            {
                 return ResourceManager.GetString("MessageFillFormDraftDiscard", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Do the same as a user|Link Dropbox, Box and other accounts in the &apos;Common&apos; section|Set up access rights to the documents and folders in the &apos;Common&apos; section.
         /// </summary>
-        public static string ProductAdminOpportunities {
-            get {
+        public static string ProductAdminOpportunities
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductAdminOpportunities", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Create, edit, and share office documents. Collaborate on them in real-time. Highest compatibility with docx, xlsx, pptx guaranteed..
         /// </summary>
-        public static string ProductDescription {
-            get {
+        public static string ProductDescription
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductDescription", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit, share and collaborate on office documents in real-time. Create and manage common docs for the whole team to access. 
         ///Highest compatibility with docx, xlsx, pptx..
         /// </summary>
-        public static string ProductDescriptionEx {
-            get {
+        public static string ProductDescriptionEx
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductDescriptionEx", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to View and download shared documents. Upload files to shared folders. Highest compatibility with docx, xlsx, pptx guaranteed..
         /// </summary>
-        public static string ProductDescriptionShort {
-            get {
+        public static string ProductDescriptionShort
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductDescriptionShort", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Documents.
         /// </summary>
-        public static string ProductName {
-            get {
+        public static string ProductName
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the &apos;My documents&apos; section.
         /// </summary>
-        public static string ProductUserOpportunities {
-            get {
+        public static string ProductUserOpportunities
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductUserOpportunities", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Collaborator.
         /// </summary>
-        public static string RoleEnum_Collaborator {
-            get {
+        public static string RoleEnum_Collaborator
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_Collaborator", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Сommenter.
         /// </summary>
-        public static string RoleEnum_Comment {
-            get {
+        public static string RoleEnum_Comment
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_Comment", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to DocSpace Administrator.
         /// </summary>
-        public static string RoleEnum_DocSpaceAdmin {
-            get {
+        public static string RoleEnum_DocSpaceAdmin
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_DocSpaceAdmin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Editor.
         /// </summary>
-        public static string RoleEnum_Editing {
-            get {
+        public static string RoleEnum_Editing
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_Editing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Form filler.
         /// </summary>
-        public static string RoleEnum_FillForms {
-            get {
+        public static string RoleEnum_FillForms
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_FillForms", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Viewer.
         /// </summary>
-        public static string RoleEnum_Read {
-            get {
+        public static string RoleEnum_Read
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_Read", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Reviewer.
         /// </summary>
-        public static string RoleEnum_Review {
-            get {
+        public static string RoleEnum_Review
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_Review", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Room Administrator.
         /// </summary>
-        public static string RoleEnum_RoomAdmin {
-            get {
+        public static string RoleEnum_RoomAdmin
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_RoomAdmin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User.
         /// </summary>
-        public static string RoleEnum_User {
-            get {
+        public static string RoleEnum_User
+        {
+            get
+            {
                 return ResourceManager.GetString("RoleEnum_User", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Author.
         /// </summary>
-        public static string RoomIndex_Author {
-            get {
+        public static string RoomIndex_Author
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Author", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Company.
         /// </summary>
-        public static string RoomIndex_Company {
-            get {
+        public static string RoomIndex_Company
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Company", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Created.
         /// </summary>
-        public static string RoomIndex_Created {
-            get {
+        public static string RoomIndex_Created
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Created", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Date Generated.
         /// </summary>
-        public static string RoomIndex_DateGenerated {
-            get {
+        public static string RoomIndex_DateGenerated
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_DateGenerated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Export Author.
         /// </summary>
-        public static string RoomIndex_ExportAuthor {
-            get {
+        public static string RoomIndex_ExportAuthor
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_ExportAuthor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Folder.
         /// </summary>
-        public static string RoomIndex_Folder {
-            get {
+        public static string RoomIndex_Folder
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Folder", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Index.
         /// </summary>
-        public static string RoomIndex_Index {
-            get {
+        public static string RoomIndex_Index
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Index", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Modified.
         /// </summary>
-        public static string RoomIndex_Modified {
-            get {
+        public static string RoomIndex_Modified
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Modified", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
-        public static string RoomIndex_Name {
-            get {
+        public static string RoomIndex_Name
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Name", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Room.
         /// </summary>
-        public static string RoomIndex_Room {
-            get {
+        public static string RoomIndex_Room
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Room", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Room index.
         /// </summary>
-        public static string RoomIndex_SheetName {
-            get {
+        public static string RoomIndex_SheetName
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_SheetName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Size (MB).
         /// </summary>
-        public static string RoomIndex_Size {
-            get {
+        public static string RoomIndex_Size
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Size", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Total.
         /// </summary>
-        public static string RoomIndex_Total {
-            get {
+        public static string RoomIndex_Total
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Total", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
-        public static string RoomIndex_Type {
-            get {
+        public static string RoomIndex_Type
+        {
+            get
+            {
                 return ResourceManager.GetString("RoomIndex_Type", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to First Name.
         /// </summary>
-        public static string UnknownFirstName {
-            get {
+        public static string UnknownFirstName
+        {
+            get
+            {
                 return ResourceManager.GetString("UnknownFirstName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Last Name.
         /// </summary>
-        public static string UnknownLastName {
-            get {
+        public static string UnknownLastName
+        {
+            get
+            {
                 return ResourceManager.GetString("UnknownLastName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The file is unlocked.
         /// </summary>
-        public static string UnlockComment {
-            get {
+        public static string UnlockComment
+        {
+            get
+            {
                 return ResourceManager.GetString("UnlockComment", resourceCulture);
             }
         }

@@ -83,10 +83,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
         try
         {
-            if (ldapUserInfo == null)
-            {
-                throw new ArgumentNullException(nameof(ldapUserInfo));
-            }
+            ArgumentNullException.ThrowIfNull(ldapUserInfo);
 
             logger.DebugTryAddLdapUser(ldapUserInfo.Sid, ldapUserInfo.Email, ldapUserInfo.UserName);
 
@@ -117,7 +114,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
             portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo);
 
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            if (quotaSettings.EnableUserQuota)
+            if (quotaSettings.EnableQuota)
             {
                 await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = ldapUserInfo.LdapQouta }, ldapUserInfo.Id);
             }

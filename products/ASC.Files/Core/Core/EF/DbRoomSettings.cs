@@ -32,7 +32,7 @@ public class DbRoomSettings
     public int TenantId { get; init; }
     public bool Private { get; init; }
     public bool HasLogo { get; init; }
-    
+    public long Quota { get; set; }
     [MaxLength(6)]
     public string Color { get; init; }
     public bool Indexing { get; init; }
@@ -83,6 +83,10 @@ public static class DbRoomSettingsExtension
                 .HasMaxLength(6);
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+            entity.Property(e => e.Quota)
+                .HasColumnName("quota")
+                .HasDefaultValueSql("'-2'");
         });
     }
 

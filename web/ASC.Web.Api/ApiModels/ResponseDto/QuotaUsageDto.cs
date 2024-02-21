@@ -27,42 +27,17 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 [Scope]
-public class QuotaUsageManager
+public class QuotaUsageManager(
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings,
+    CountPaidUserStatistic countPaidUserStatistic,
+    CountUserStatistic activeUsersStatistic)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CoreConfiguration _configuration;
-    private readonly AuthContext _authContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly WebItemManager _webItemManager;
-    private readonly CountPaidUserStatistic _countPaidUserStatistic;
-    private readonly CountUserStatistic _activeUsersStatistic;
-
-    public QuotaUsageManager(
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration configuration,
-        AuthContext authContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CountPaidUserStatistic countPaidUserStatistic,
-        CountUserStatistic activeUsersStatistic)
-    {
-        _tenantManager = tenantManager;
-        _coreBaseSettings = coreBaseSettings;
-        _configuration = configuration;
-        _authContext = authContext;
-        _settingsManager = settingsManager;
-        _webItemManager = webItemManager;
-        _countPaidUserStatistic = countPaidUserStatistic;
-        _activeUsersStatistic = activeUsersStatistic;
-    }
-
     public async Task<QuotaUsageDto> Get()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
-        var quotaRows = (await _tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        var quotaRows = (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
             .ToList();
 
@@ -71,9 +46,9 @@ public class QuotaUsageManager
             StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
             UsedSize = (ulong)Math.Max(0, quotaRows.Sum(r => r.Counter)),
             MaxRoomAdminsCount = quota.CountRoomAdmin,
-            RoomAdminCount = await _countPaidUserStatistic.GetValueAsync(),
-            MaxUsers = _coreBaseSettings.Standalone ? -1 : quota.CountUser,
-            UsersCount = await _activeUsersStatistic.GetValueAsync(),
+            RoomAdminCount = await countPaidUserStatistic.GetValueAsync(),
+            MaxUsers = coreBaseSettings.Standalone ? -1 : quota.CountUser,
+            UsersCount = await activeUsersStatistic.GetValueAsync(),
 
             StorageUsage = quotaRows
                 .Select(x => new QuotaUsage { Path = x.Path.TrimStart('/').TrimEnd('/'), Size = x.Counter })

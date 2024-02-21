@@ -297,20 +297,24 @@ public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider
         return _storages.TryGetValue(providerId, out storage);
     }
 
-    private async ValueTask CheckTokenAsync<T>(OAuth20Token token, int id) where T : Consumer, IOAuthProvider, new()
+    private async ValueTask<OAuth20Token> CheckTokenAsync<T>(OAuth20Token token, int id) where T : Consumer, IOAuthProvider, new()
     {
         if (token == null)
         {
             throw new UnauthorizedAccessException("Cannot create third party session with given token");
         }
 
-        if (token.IsExpired)
+        if (!token.IsExpired)
         {
-            token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
-
-            var dbDao = serviceProvider.GetService<ProviderAccountDao>();
-            await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));
+            return token;
         }
+
+        token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
+
+        var dbDao = serviceProvider.GetService<ProviderAccountDao>();
+        await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));
+
+        return token;
     }
 
     private async Task<T> InternalCreateStorageAsync<T, T1>(OAuth20Token token, int id)
@@ -318,7 +322,7 @@ public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider
         where T1 : Consumer, IOAuthProvider, new()
     {
         var storage = serviceProvider.GetService<T>();
-        await CheckTokenAsync<T1>(token, id);
+        token = await CheckTokenAsync<T1>(token, id);
 
         storage.Open(token);
 

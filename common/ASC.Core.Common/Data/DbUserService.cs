@@ -248,7 +248,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
-        await using var userDbContext = dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         
         return await GetUserGroupRefQuery(tenant, groupId, refType, userDbContext).SingleOrDefaultAsync();
     }
@@ -328,6 +328,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
         bool withoutGroup)
     {
@@ -335,7 +336,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
 
         return await q.CountAsync();
     }
@@ -349,6 +350,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
         bool withoutGroup,
         Guid ownerId,
@@ -366,26 +368,51 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
 
         switch (sortBy)
         {
             case UserSortType.Type:
                 {
                     var q1 = (from user in q
-                        join userGroup in userDbContext.UserGroups.Where(g =>
-                            !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
-                                           g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                        from @group in joinedGroup.DefaultIfEmpty()
-                        select new UserWithGroup { User = user, Group = @group });
+                              join userGroup in userDbContext.UserGroups.Where(g =>
+                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
+                                                 g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                              from @group in joinedGroup.DefaultIfEmpty()
+                              select new UserWithGroup { User = user, Group = @group });
 
-                    Expression<Func<UserWithGroup, int>> orderByUserType = u => 
+                    Expression<Func<UserWithGroup, int>> orderByUserType = u =>
                         u.User.Id == ownerId ? 0 :
-                        u.Group == null ? 2 : 
-                        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+                        u.Group == null ? 2 :
+                        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
                         u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
-                
+
                     q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
+                    break;
+                }
+            case UserSortType.UsedSpace:
+                {
+                    var q2 = from user in q
+                             join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString())
+                                on user.Id equals quota.UserId into quotaRow
+                             from @quota in quotaRow.DefaultIfEmpty()
+
+                             select new { user, @quota };
+
+                    var q3 = q2.GroupBy(q => q.user, q => q.quota.Counter, (user, g) => new
+                    {
+                        user,
+                        sum_counter = g.ToList().Sum()
+                    });
+
+                    if (sortOrderAsc)
+                    {
+                        q = q3.OrderBy(r => r.sum_counter).Select(r => r.user);
+                    }
+                    else
+                    {
+                        q = q3.OrderByDescending(r => r.sum_counter).Select(r => r.user);
+                    }
                     break;
                 }
             case UserSortType.Department:
@@ -394,12 +421,12 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                     {
                         user = u,
                         groupsCount = userDbContext.UserGroups.Count(g =>
-                            g.TenantId == tenant && g.Userid == u.Id && !g.Removed && g.RefType == UserGroupRefType.Contains && 
+                            g.TenantId == tenant && g.Userid == u.Id && !g.Removed && g.RefType == UserGroupRefType.Contains &&
                             !Constants.SystemGroups.Select(sg => sg.ID).Contains(g.UserGroupId))
                     });
 
-                    q = (sortOrderAsc 
-                            ? q1.OrderBy(r => r.groupsCount).ThenBy(r => r.user.FirstName) 
+                    q = (sortOrderAsc
+                            ? q1.OrderBy(r => r.groupsCount).ThenBy(r => r.user.FirstName)
                             : q1.OrderByDescending(r => r.groupsCount)).ThenByDescending(r => r.user.FirstName)
                         .Select(r => r.user);
                     break;
@@ -409,8 +436,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 break;
             case UserSortType.FirstName:
             default:
-                q = sortOrderAsc 
-                    ? q.OrderBy(r => r.ActivationStatus).ThenBy(u => u.FirstName) 
+                q = sortOrderAsc
+                    ? q.OrderBy(r => r.ActivationStatus).ThenBy(u => u.FirstName)
                     : q.OrderBy(r => r.ActivationStatus).ThenByDescending(u => u.FirstName);
                 break;
         }
@@ -520,11 +547,11 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             await using var tr = await dbContext.Database.BeginTransactionAsync();
             if (immediate)
             {
-                await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
+                    await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
             else
             {
-                await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
+                    await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
 
             var user = await Queries.UserAsync(dbContext, tenant, userId);
@@ -722,6 +749,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
         bool withoutGroup)
     {
@@ -773,6 +801,18 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             }
 
             q = q.Where(a);
+        }
+
+        if(quotaFilter != null && isDocSpaceAdmin)
+        {
+            if (quotaFilter == QuotaFilter.Custom)
+            {
+                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+            }
+            else if (quotaFilter == QuotaFilter.Default)
+            {
+                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+            }
         }
 
         if (withoutGroup)
@@ -885,7 +925,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         if (string.IsNullOrEmpty(text))
         {
             return q;
-        }
+}
 
         text = text.ToLower().Trim();
             
