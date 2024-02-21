@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core;
-public class SubmitFormsData
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+public class ActiveConnectionsDto
 {
-    public IEnumerable<FormsItemData> FormsData { get; set; }
+    public int LoginEvent { get; set; }
+    public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
-public class FormsItemData
+public class ActiveConnectionsItemDto
 {
-    public string Key { get; set; }
-    public string Tag { get; set; }
-    public object Value { get; set; }
-    public string Type { get; set; }
+    public int Id { get; set; }
+    public int TenantId { get; set; }
+    public Guid UserId { get; set; }
+    public bool Mobile {  get; set; }
+    public string Ip { get; set; }
+    public string Country { get; set; }
+    public string City { get; set; }
+    public string Browser { get; set; }
+    public string Platform { get; set; }
+    public ApiDateTime Date { get; set; }
+    public string Page { get; set; }
 }
