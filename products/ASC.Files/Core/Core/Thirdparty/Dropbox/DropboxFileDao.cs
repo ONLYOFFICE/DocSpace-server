@@ -40,6 +40,8 @@ internal class DropboxFileDao(UserManager userManager,
         TenantManager tenantManager)
     : ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
 {
+    protected override string UploadSessionKey => "DropboxSession";
+
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
         if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
@@ -53,11 +55,11 @@ internal class DropboxFileDao(UserManager userManager,
         var dropboxSession = await storage.CreateRenewableSessionAsync();
         if (dropboxSession != null)
         {
-            uploadSession.Items["DropboxSession"] = dropboxSession;
+            uploadSession.Items[UploadSessionKey] = dropboxSession;
         }
         else
         {
-            uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
+            uploadSession.TempPath = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);
@@ -65,61 +67,26 @@ internal class DropboxFileDao(UserManager userManager,
         return uploadSession;
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
-    {
-        long.TryParse(uploadSession.GetItemOrDefault<string>("BytesUploaded"), out var uploaded);
-        if (!uploadSession.UseChunks)
-        {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.Items["BytesUploaded"] = uploaded + chunkLength.ToString();
-
-            return uploadSession.File;
-        }
-
-        if (uploadSession.Items.ContainsKey("DropboxSession"))
-        {
-            var dropboxSession = uploadSession.GetItemOrDefault<string>("DropboxSession");
-            var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(dropboxSession, uploaded, stream);
-        }
-        else
-        {
-            var path = uploadSession.GetItemOrDefault<string>("TempPath");
-            await using var fs = new FileStream(path, FileMode.Append);
-            await stream.CopyToAsync(fs);
-        }
-
-        uploadSession.File = RestoreIds(uploadSession.File);
-        uploadSession.Items["BytesUploaded"] = uploaded + chunkLength.ToString();
-
-        return uploadSession.File;
-    }
-
     public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
         var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
-        if (uploadSession.Items.ContainsKey("DropboxSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var dropboxSession = uploadSession.GetItemOrDefault<string>("DropboxSession");
+            var dropboxSession = uploadSession.GetItemOrDefault<RenewableUploadShortSession>(UploadSessionKey);
 
             Metadata dropboxFile;
             var file = uploadSession.File;
-            long.TryParse(uploadSession.GetItemOrDefault<string>("BytesUploaded"), out var uploaded);
+            
             if (file.Id != null)
             {
                 var dropboxFilePath = Dao.MakeThirdId(file.Id);
-                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, uploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath);
             }
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
                 var title = await Dao.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
-                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title, uploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title);
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));
@@ -128,19 +95,27 @@ internal class DropboxFileDao(UserManager userManager,
             return Dao.ToFile(dropboxFile.AsFile);
         }
 
-        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
-                                       FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        await using var fs = new FileStream(uploadSession.TempPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
 
         return await SaveFileAsync(uploadSession.File, fs);
     }
 
     public override Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("TempPath"))
+        var path = uploadSession.TempPath;
+
+        if (!string.IsNullOrEmpty(path))
         {
-            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(path);
         }
 
         return Task.CompletedTask;
+    }
+
+    protected override async Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    {
+        var dropboxSession = uploadSession.GetItemOrDefault<RenewableUploadShortSession>(UploadSessionKey);
+        var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
+        await storage.TransferAsync(dropboxSession, stream, chunkLength);
     }
 }

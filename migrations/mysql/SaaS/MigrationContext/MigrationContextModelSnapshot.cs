@@ -707,7 +707,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1",
+                            Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
                             Visible = false
@@ -715,7 +715,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -2,
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1",
+                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -750,7 +750,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024",
+                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -759,7 +759,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                             Name = "nonprofit",
                             Price = 0m,
                             Visible = false
@@ -6321,6 +6321,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    b.Property<long>("Counter")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("counter")
+                        .HasDefaultValueSql("'0'");
+
                     b.Property<string>("CreateBy")
                         .IsRequired()
                         .HasColumnType("char(38)")
@@ -6455,6 +6461,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("private")
                         .HasDefaultValueSql("'0'");
+
+                    b.Property<long>("Quota")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("quota")
+                        .HasDefaultValueSql("'-2'");
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");

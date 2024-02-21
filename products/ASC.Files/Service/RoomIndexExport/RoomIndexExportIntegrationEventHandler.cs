@@ -91,7 +91,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
                 task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
 
-                _documentBuilderTaskManager.StartTask(task, true);
+                _documentBuilderTaskManager.StartTask(task);
             }
             catch (Exception ex)
             {

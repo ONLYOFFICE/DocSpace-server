@@ -274,9 +274,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
     {
-        var boxRepresentation = new BoxRepresentationRequest();
-        boxRepresentation.FileId = fileId;
-        boxRepresentation.XRepHints = "[jpg?dimensions=320x320]";
+        var boxRepresentation = new BoxRepresentationRequest { FileId = fileId, XRepHints = "[jpg?dimensions=320x320]" };
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
     }
 }

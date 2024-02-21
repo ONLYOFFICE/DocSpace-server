@@ -41,7 +41,6 @@ public class StudioNotifyHelper
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly TenantManager _tenantManager;
     private readonly TenantExtra _tenantExtra;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly WebImageSupplier _webImageSupplier;
     private readonly IConfiguration _configuration;
     private readonly ILogger<StudioNotifyHelper> _logger;
@@ -66,7 +65,6 @@ public class StudioNotifyHelper
         _commonLinkUtility = commonLinkUtility;
         _tenantManager = tenantManager;
         _tenantExtra = tenantExtra;
-        _coreBaseSettings = coreBaseSettings;
         _webImageSupplier = webImageSupplier;
         _configuration = configuration;
         _subscriptionProvider = NotifySource.GetSubscriptionProvider();//TODO: remove from constructor

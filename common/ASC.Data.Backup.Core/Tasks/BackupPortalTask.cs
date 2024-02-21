@@ -437,8 +437,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     for (var i = 0; i < obj.Length; i++)
                     {
-                        var byteArray = obj[i] as byte[];
-                        if (byteArray != null && byteArray.Length != 0)
+                        if (obj[i] is byte[] byteArray && byteArray.Length != 0)
                         {
                             sw.Write("0x");
                             foreach (var b in byteArray)
@@ -557,10 +556,8 @@ public class BackupPortalTask(DbFactory dbFactory,
                 f = @"\\?\" + f;
             }
 
-            await using (var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
-            {
-                await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, task => SetStepCompleted());
-            }
+            await using var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose);
+            await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, task => SetStepCompleted());
         }
 
         logger.DebugArchiveDirEnd(subDir);
@@ -590,55 +587,53 @@ public class BackupPortalTask(DbFactory dbFactory,
             foreach (var table in tablesToProcess)
             {
                 logger.DebugBeginLoadTable(table.Name);
-                using (var data = new DataTable(table.Name))
-                {
-                    ActionInvoker.Try(
-                        state =>
-                        {
-                            data.Clear();
-                            int counts;
-                            var offset = 0;
-                            do
-                            {
-                                var t = (TableInfo)state;
-                                var dataAdapter = DbFactory.CreateDataAdapter();
-                                dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
-                                counts = ((DbDataAdapter)dataAdapter).Fill(data);
-                                offset += Limit;
-                            } while (counts == Limit);
-
-                        },
-                        table,
-                        maxAttempts: 5,
-                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
-                        onAttemptFailure: logger.WarningBackupAttemptFailure);
-
-                    foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                using var data = new DataTable(table.Name);
+                ActionInvoker.Try(
+                    state =>
                     {
-                        col.DateTimeMode = DataSetDateTime.Unspecified;
-                    }
-
-                    module.PrepareData(data);
-
-                    logger.DebugEndLoadTable(table.Name);
-
-                    logger.DebugBeginSavingTable(table.Name);
-
-                    await using (var file = tempStream.Create())
-                    {
-                        data.WriteXml(file, XmlWriteMode.WriteSchema);
                         data.Clear();
+                        int counts;
+                        var offset = 0;
+                        do
+                        {
+                            var t = (TableInfo)state;
+                            var dataAdapter = DbFactory.CreateDataAdapter();
+                            dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
+                            counts = ((DbDataAdapter)dataAdapter).Fill(data);
+                            offset += Limit;
+                        } while (counts == Limit);
 
-                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
-                    }
+                    },
+                    table,
+                    maxAttempts: 5,
+                    onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                    onAttemptFailure: logger.WarningBackupAttemptFailure);
 
-                    void SetProgress(Task task)
-                    {
-                        SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
-                    }
-
-                    logger.DebugEndSavingTable(table.Name);
+                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                {
+                    col.DateTimeMode = DataSetDateTime.Unspecified;
                 }
+
+                module.PrepareData(data);
+
+                logger.DebugEndLoadTable(table.Name);
+
+                logger.DebugBeginSavingTable(table.Name);
+
+                await using (var file = tempStream.Create())
+                {
+                    data.WriteXml(file, XmlWriteMode.WriteSchema);
+                    data.Clear();
+
+                    await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
+                }
+
+                void SetProgress(Task task)
+                {
+                    SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
+                }
+
+                logger.DebugEndSavingTable(table.Name);
             }
         }
 

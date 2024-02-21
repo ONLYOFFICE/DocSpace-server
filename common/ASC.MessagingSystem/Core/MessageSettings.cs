@@ -55,7 +55,7 @@ public class MessageSettings
 
         var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
 
-        if (!headers.TryGetValue(XRealIPHeader, out var header))
+        if (!headers.TryGetValue(XRealIPHeader, out _))
         {
             var remoteIpAddress = GetIP(request);
 

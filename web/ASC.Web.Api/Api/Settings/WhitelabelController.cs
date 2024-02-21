@@ -62,7 +62,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync();
 
@@ -143,7 +143,7 @@ public class WhitelabelController(ApiContext apiContext,
             throw new InvalidOperationException("No input files");
         }
 
-        if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync();
 
@@ -223,7 +223,7 @@ public class WhitelabelController(ApiContext apiContext,
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
-        var isDefault = inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value;
+        var isDefault = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value;
 
         var tenantWhiteLabelSettings = isDefault ? null : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
@@ -240,7 +240,7 @@ public class WhitelabelController(ApiContext apiContext,
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
 
-            if (inQueryDto != null && inQueryDto.IsDark.HasValue)
+            if (inQueryDto is { IsDark: not null })
             {
                 var path = commonLinkUtility.GetFullAbsolutePath(isDefault
                     ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, inQueryDto.IsDark.Value)
@@ -265,7 +265,7 @@ public class WhitelabelController(ApiContext apiContext,
             {
                 var lightPath = commonLinkUtility.GetFullAbsolutePath(isDefault
                     ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, false)
-                    : await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, false));
+                    : await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType));
 
                 var darkPath = commonLinkUtility.GetFullAbsolutePath(isDefault
                     ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, true)
@@ -338,7 +338,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value
+        var settings = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value
             ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
             : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
@@ -363,7 +363,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync();
 

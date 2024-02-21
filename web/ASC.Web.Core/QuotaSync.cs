@@ -106,14 +106,14 @@ public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distribute
             var _storageFactory = scope.ServiceProvider.GetRequiredService<StorageFactory>();
 
             await _tenantManager.SetCurrentTenantAsync(TenantId);
-            var storageModules = _storageFactoryConfig.GetModuleList(string.Empty);
+            var storageModules = _storageFactoryConfig.GetModuleList();
 
             foreach (var module in storageModules)
             {
                 var storage = await _storageFactory.GetStorageAsync(TenantId, module);
                 await storage.ResetQuotaAsync("");
 
-                var domains = _storageFactoryConfig.GetDomainList(string.Empty, module);
+                var domains = _storageFactoryConfig.GetDomainList(module);
                 foreach (var domain in domains)
                 {
                     await storage.ResetQuotaAsync(domain);

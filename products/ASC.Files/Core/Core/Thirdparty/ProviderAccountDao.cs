@@ -209,7 +209,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
         if (data.Private.HasValue)
         {
-            forUpdate.Private = data.Private.HasValue;
+            forUpdate.Private = data.Private.Value;
         }
 
         if (data.HasLogo.HasValue)

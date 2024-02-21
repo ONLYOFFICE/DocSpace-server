@@ -39,6 +39,7 @@ public interface IUserService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
         bool withoutGroup);
     IAsyncEnumerable<UserInfo> GetUsers(
@@ -50,6 +51,7 @@ public interface IUserService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
         bool withoutGroup,
         Guid ownerId,

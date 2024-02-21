@@ -227,6 +227,20 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     {
         return await foldersControllerHelper.RenameFolderAsync(folderId, inDto.Title);
     }
+
+    /// <summary>
+    /// Returns the used space in root folders.
+    /// </summary>
+    /// <short>Returns the used space in root foldersю</short>
+    /// <category>Folders</category>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space in root folders</returns>
+    /// <path>api/2.0/files/filesusedspace</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("filesusedspace")]
+    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        return await fileStorageService.GetFilesUsedSpace();
+    }
 }
 
 public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,

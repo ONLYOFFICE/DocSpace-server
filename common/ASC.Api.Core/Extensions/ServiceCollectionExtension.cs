@@ -39,9 +39,7 @@ public static class ServiceCollectionExtension
 
         if (redisConfiguration != null)
         {
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => {
-                return new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() };
-            });
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }

@@ -554,7 +554,7 @@ public class CustomizationConfig<T>(
     GlobalFolderHelper globalFolderHelper,
     PathProvider pathProvider,
     CustomerConfig customerConfig,
-    LogoConfig<T> logoConfig,
+    LogoConfig logoConfig,
     FileSharing fileSharing,
     CommonLinkUtility commonLinkUtility,
     ThirdPartySelector thirdPartySelector)
@@ -651,7 +651,7 @@ public class CustomizationConfig<T>(
         
     }
 
-    public LogoConfig<T> Logo { get; set; } = logoConfig;
+    public LogoConfig Logo { get; set; } = logoConfig;
 
     public async Task<bool> GetMentionShare(File<T> file)
     {
@@ -723,7 +723,7 @@ public class GobackConfig
 }
 
 [Transient]
-public class LogoConfig<T>(
+public class LogoConfig(
     CommonLinkUtility commonLinkUtility,
     TenantLogoHelper tenantLogoHelper)
 {
@@ -841,7 +841,7 @@ public static class ConfigurationFilesExtension
         services.TryAdd<CustomerConfig>();
         services.TryAdd<CustomerConfig>();
 
-        services.TryAdd<LogoConfig<string>>();
-        services.TryAdd<LogoConfig<int>>();
+        services.TryAdd<LogoConfig>();
+        services.TryAdd<LogoConfig>();
     }
 }

@@ -44,6 +44,8 @@ public class CommonMethods(
 {
     public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
+        var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
+        var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
         return new
         {
             created = t.CreationDateTime,
@@ -59,6 +61,9 @@ public class CommonMethods(
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
+            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
+                    tenantQuotaSettings.Quota :
+                    tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
             owner
         };
     }

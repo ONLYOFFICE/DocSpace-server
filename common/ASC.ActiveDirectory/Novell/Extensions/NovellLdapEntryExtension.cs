@@ -126,10 +126,7 @@ public class NovellLdapEntryExtension(ILogger logger)
     /// <returns>LDAPObject</returns>
     public LdapObject ToLdapObject(LdapEntry ldapEntry, string ldapUniqueIdAttribute = null)
     {
-        if (ldapEntry == null)
-        {
-            throw new ArgumentNullException(nameof(ldapEntry));
-        }
+        ArgumentNullException.ThrowIfNull(ldapEntry);
 
         var novellLdapObject = new NovellLdapObject(logger, this);
         novellLdapObject.Init(ldapEntry, ldapUniqueIdAttribute);
