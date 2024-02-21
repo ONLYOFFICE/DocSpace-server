@@ -68,10 +68,10 @@ public class Startup : BaseWorkerStartup
             //services.AddHostedService<FeedCleanerService>();
             //DIHelper.TryAdd<FeedCleanerService>();
 
-            services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper);
+            services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
             DIHelper.TryAdd<FileConverterService<int>>();
 
-            services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper);
+            services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
             DIHelper.TryAdd<FileConverterService<string>>();
 
             services.AddHostedService<ThumbnailBuilderService>();

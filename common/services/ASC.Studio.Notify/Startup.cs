@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Engine;
 using ASC.Web.Core;
 using ASC.Web.Files.Configuration;
 using ASC.Web.Studio.IntegrationEvents;
@@ -54,5 +55,7 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
         DIHelper.TryAdd<ProductEntryPoint>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
+        
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration);
     }
 }
