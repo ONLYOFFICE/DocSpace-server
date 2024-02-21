@@ -33,7 +33,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     IDisposable
 {
     public bool IsOpened { get; private set; }
-    private readonly long _maxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
+    private const long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
 
     private DropboxClient _dropboxClient;
 
@@ -202,7 +202,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FolderMetadata> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFolderName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFolderName);
         var result = await _dropboxClient.Files.MoveV2Async(folderId, pathTo, autorename: true);
 
         return (FolderMetadata)result.Metadata;
@@ -219,7 +219,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FileMetadata> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFileName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFileName);
         var result = await _dropboxClient.Files.MoveV2Async(fileId, pathTo, autorename: true);
 
         return (FileMetadata)result.Metadata;
@@ -236,7 +236,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FolderMetadata> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFolderName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFolderName);
         var result = await _dropboxClient.Files.CopyV2Async(folderId, pathTo, autorename: true);
 
         return (FolderMetadata)result.Metadata;
@@ -244,7 +244,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FileMetadata> CopyFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFileName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFileName);
         var result = await _dropboxClient.Files.CopyV2Async(fileId, pathTo, autorename: true);
 
         return (FileMetadata)result.Metadata;
@@ -317,7 +317,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public Task<long> GetMaxUploadSizeAsync()
     {
-        return Task.FromResult(_maxChunkedUploadFileSize);
+        return Task.FromResult(MaxChunkedUploadFileSize);
     }
 
     public void Dispose()
