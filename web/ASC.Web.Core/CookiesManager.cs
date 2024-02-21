@@ -51,7 +51,7 @@ public class CookiesManager(
     IPSecurity.IPSecurity ipSecurity,
     IConfiguration configuration)
 {
-    private const string AuthCookiesName = "asc_auth_key";
+    public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
     private const string ShareLinkCookiesName = "sharelink";
     private const string AnonymousSessionKeyCookiesName = "anonymous_session_key";
