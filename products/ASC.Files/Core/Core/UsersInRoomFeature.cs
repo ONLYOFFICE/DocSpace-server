@@ -30,7 +30,10 @@ public class UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int>
         TenantManager tenantManager)
     : TenantQuotaFeatureCheckerCount<UsersInRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_usersInRoom_exception;
+    public override string GetExceptionMessage(long count)
+    {
+        return string.Format(Resource.TariffsFeature_usersInRoom_exception, count);
+    }
 }
 
 public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<UsersInRoomFeature, int>

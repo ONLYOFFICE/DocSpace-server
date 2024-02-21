@@ -187,6 +187,12 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
     /// <summary>
+    ///   Deletes a file including all previous versions
+    /// </summary>
+    /// <param name="fileId">file id</param>
+    /// <param name="ownerId">file owner id</param>
+    Task DeleteFileAsync(T fileId, Guid ownerId);
+    /// <summary>
     ///     Checks whether or not file
     /// </summary>
     /// <param name="title">file name</param>

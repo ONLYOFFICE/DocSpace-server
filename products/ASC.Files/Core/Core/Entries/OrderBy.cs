@@ -40,7 +40,8 @@ public enum SortedByType
     Tags,
     Room,
     CustomOrder,
-    LastOpened
+    LastOpened,
+    UsedSpace
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]

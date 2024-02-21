@@ -381,7 +381,10 @@ internal class SharpBoxFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-
+    public async Task DeleteFileAsync(string fileId, Guid ownerId)
+    {
+        await DeleteFileAsync(fileId);
+    }
     public async Task DeleteFileAsync(string fileId)
     {
         var file = GetFileById(fileId);
@@ -773,9 +776,9 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
                  {
-                    ftl.TenantId,
+                     ftl.TenantId,
                      Id = ftl.TagId
                  }
                  where ftl == null
