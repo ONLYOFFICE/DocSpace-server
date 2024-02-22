@@ -868,8 +868,8 @@ public class EntryManager(IDaoFactory daoFactory,
             SortedByType.UsedSpace => (x, y) =>
             {
                 var cmp = 0;
-                if (x is IFolder x1 && DocSpaceHelper.IsRoom(x1.FolderType)
-                     && y is IFolder x2 && DocSpaceHelper.IsRoom(x2.FolderType))
+                if (x is Folder<T> x1 && DocSpaceHelper.IsRoom(x1.FolderType) && !x1.ProviderEntry
+                     && y is Folder<T> x2 && DocSpaceHelper.IsRoom(x2.FolderType) && !x2.ProviderEntry)
                 {
                     cmp = c * ((Folder<T>)x).Counter.CompareTo(((Folder<T>)y).Counter);
                 }

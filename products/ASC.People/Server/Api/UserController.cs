@@ -1528,7 +1528,7 @@ public class UserController(ICache cache,
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
@@ -1545,7 +1545,7 @@ public class UserController(ICache cache,
         }
 
         foreach (var user in users)
-            {
+        {
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
@@ -1555,8 +1555,8 @@ public class UserController(ICache cache,
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
-                }
-            }
+        }
+    }
 
     /// <summary>
     /// Reset a user quota limit with the ID specified in the request from the portal.

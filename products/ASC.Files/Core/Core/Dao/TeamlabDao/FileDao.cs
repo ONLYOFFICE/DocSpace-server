@@ -826,7 +826,7 @@ internal class FileDao(
 
         if (DocSpaceHelper.IsRoom(toFolder.FolderType))
         {
-            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
                 var roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
@@ -840,11 +840,11 @@ internal class FileDao(
             }
         }else if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
         {
-            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaUserSettings.EnableQuota)
             {
-                var user = await userManager.GetUsersAsync(toFolder.RootCreateBy);
-                var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+                var user = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
                 var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
                 var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
                 if (userQuotaLimit != TenantEntityQuotaSettings.NoQuota)

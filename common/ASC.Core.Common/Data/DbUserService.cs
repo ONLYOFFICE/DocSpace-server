@@ -393,7 +393,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             case UserSortType.UsedSpace:
                 {
                     var q2 = from user in q
-                             join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty)
+                             join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString())
                                 on user.Id equals quota.UserId into quotaRow
                              from @quota in quotaRow.DefaultIfEmpty()
 

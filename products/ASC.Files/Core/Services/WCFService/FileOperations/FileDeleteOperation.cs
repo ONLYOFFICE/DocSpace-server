@@ -322,15 +322,15 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         file.ThumbnailStatus = Thumbnail.NotRequired;
                         await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
                     }
-
-
                 }
                 else
                 {
                     try
                     {
-                        await FileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
+                        
                         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
+                        
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
@@ -344,7 +344,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         {
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
-                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id));
+                        
                         if (_headers != null)
                         {
                             if (isNeedSendActions)
