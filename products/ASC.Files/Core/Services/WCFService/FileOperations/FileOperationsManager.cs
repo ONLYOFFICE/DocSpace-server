@@ -29,8 +29,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [Singleton]
 public class FileOperationsManagerHolder(
     IDistributedTaskQueueFactory queueFactory, 
-    IServiceProvider serviceProvider, 
-    IDistributedCache distributedCache)
+    IServiceProvider serviceProvider)
 {
     internal const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
