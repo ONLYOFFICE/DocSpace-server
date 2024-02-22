@@ -340,7 +340,7 @@ public class FileOperationsManager(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), holdResult, ignoreException, immediately, isEmptyTrash));
+        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders() ?? [], holdResult, ignoreException, immediately, isEmptyTrash));
         
         var taskId = fileOperationsManagerHolder.Publish(op);
 
@@ -437,7 +437,7 @@ public class FileOperationsManager(
     {
         var request = httpContextAccessor?.HttpContext?.Request;
 
-        return MessageSettings.GetHttpHeaders(request).ToDictionary(x => x.Key, x => x.Value.ToString());
+        return MessageSettings.GetHttpHeaders(request)?.ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 }
 
