@@ -41,9 +41,9 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
 
     private IDaoSelector GetSelectorInternal(string selector)
     {
-        if (selector == Selectors.SharpBox.Id)
+        if (selector == Selectors.WebDav.Id)
         {
-            return serviceProvider.GetService<IDaoSelector<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>>();
+            return serviceProvider.GetService<IDaoSelector<WebDavResource, WebDavResource, WebDavResource>>();
         }
 
         if (selector == Selectors.SharePoint.Id)
@@ -98,11 +98,11 @@ public static class SelectorFactoryExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<SharpBoxDaoSelector>();
         services.TryAdd<SharePointDaoSelector>();
         OneDriveDaoSelectorExtension.Register(services);
         GoogleDriveDaoSelectorExtension.Register(services);
         DropboxDaoSelectorExtension.Register(services);
         BoxDaoSelectorExtension.Register(services);
+        WebDavDaoSelectorExtension.Register(services);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Log;
-internal static partial class SharpBoxDaoBaseLogger
+namespace ASC.Files.Core.Core.Thirdparty.WebDav;
+
+public static class WebDavDaoSelectorExtension
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Sharpbox makeId error")]
-    public static partial void ErrorSharpboxMakeId(this ILogger<SharpBoxDaoBase> logger, Exception exception);
+    public static void Register(DIHelper services)
+    {
+        services.TryAdd<ThirdPartyFileDao<WebDavResource, WebDavResource, WebDavResource>, WebDavFileDao>();
+        services.TryAdd<ThirdPartyFolderDao<WebDavResource, WebDavResource, WebDavResource>>();
+        services.TryAdd<ThirdPartyTagDao<WebDavResource, WebDavResource, WebDavResource>>();
+        services.TryAdd<IDaoBase<WebDavResource, WebDavResource, WebDavResource>, WebDavDaoBase>();
+        services.TryAdd<IProviderInfo<WebDavResource, WebDavResource, WebDavResource>, WebDavProviderInfo>();
+        services.TryAdd<IDaoSelector<WebDavResource, WebDavResource, WebDavResource>, RegexDaoSelectorBase<WebDavResource, WebDavResource, WebDavResource>>();
+    }
 }

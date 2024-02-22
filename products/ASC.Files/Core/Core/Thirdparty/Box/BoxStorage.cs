@@ -36,15 +36,18 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     private readonly List<string> _boxFields = ["created_at", "modified_at", "name", "parent", "size"];
 
     public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
 
     private const long MaxChunkedUploadFileSize = 250L * 1024L * 1024L;
 
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
+
+        var token = authData.Token;
 
         var config = new BoxConfig(token.ClientID, token.ClientSecret, new Uri(token.RedirectUri));
         var session = new OAuthSession(token.AccessToken, token.RefreshToken, (int)token.ExpiresIn, "bearer");

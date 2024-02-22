@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-public static class Selectors
-{
-    public static Regex Pattern => new(@"^(?'selector'.*)-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
-    
-    public static readonly Selector WebDav = new() { Name = "WebDav", Id = "sbox" };
-    public static readonly Selector SharePoint = new() { Name = "sharepoint", Id = "spoint" };
-    public static readonly Selector GoogleDrive = new() { Name = "GoogleDrive", Id = "drive" };
-    public static readonly Selector Box = new() { Name = "Box", Id = "box" };
-    public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
-    public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
+namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-    public static readonly List<Selector> All = [WebDav, SharePoint, GoogleDrive, Box, Dropbox, OneDrive];
-    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive, WebDav];
-}
-
-public class Selector
+[Transient]
+[DebuggerDisplay("{CustomerTitle}")]
+internal class WebDavProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper) 
+    : AbstractProviderInfo<WebDavResource, WebDavResource, WebDavResource, MockLoginProvider>(wrapper, providerInfoHelper)
 {
-    public string Name { get; init; }
-    public string Id { get; init; }
+    public override Selector Selector => Selectors.WebDav;
+    public override ProviderFilter ProviderFilter => ProviderFilter.WebDav;
+    public override bool MutableEntityId => true;
 }

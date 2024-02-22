@@ -728,7 +728,7 @@ internal class TagDao(UserManager userManager,
         {
             var folderIds = await Queries.ThirdpartyAccountAsync(filesDbContext, tenantId, parentFolder.FolderType, subject).ToListAsync();
 
-            var thirdpartyFolderIds = folderIds.ConvertAll(r => $"{Selectors.SharpBox.Id}-" + r)
+            var thirdpartyFolderIds = folderIds.ConvertAll(r => $"{Selectors.WebDav.Id}-" + r)
                                                 .Concat(folderIds.ConvertAll(r => $"{Selectors.Box.Id}-{r}"))
                                                 .Concat(folderIds.ConvertAll(r => $"{Selectors.Dropbox.Id}-{r}"))
                                                 .Concat(folderIds.ConvertAll(r => $"{Selectors.SharePoint.Id}-{r}"))
