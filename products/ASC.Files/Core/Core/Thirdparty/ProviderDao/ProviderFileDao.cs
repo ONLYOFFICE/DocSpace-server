@@ -143,11 +143,11 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId));
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), includeRemoved);
 
         await foreach (var f in files.Where(r => r != null))
         {

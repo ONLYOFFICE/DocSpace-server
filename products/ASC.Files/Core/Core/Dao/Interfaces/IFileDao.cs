@@ -97,8 +97,9 @@ public interface IFileDao<T>
     /// 
     /// </summary>
     /// <param name="parentId"></param>
+    /// <param name="includeRemoved"></param>
     /// <returns></returns>
-    IAsyncEnumerable<T> GetFilesAsync(T parentId);
+    IAsyncEnumerable<T> GetFilesAsync(T parentId, bool includeRemoved = false);
 
     /// <summary>
     ///     Get files in folder

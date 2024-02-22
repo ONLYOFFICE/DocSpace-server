@@ -73,7 +73,8 @@ public interface IFolderDao<T>
     ///     Get a list of folders in current folder.
     /// </summary>
     /// <param name="parentId"></param>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId);
+    /// <param name="includeRemoved"></param>
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, bool includeRemoved = false);
 
     /// <summary>
     ///     Get a list of folders in current folder.

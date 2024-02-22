@@ -179,7 +179,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return files;
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var items = await Dao.GetItemsAsync(parentId, false);
 

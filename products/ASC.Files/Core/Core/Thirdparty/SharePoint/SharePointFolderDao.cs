@@ -112,7 +112,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     {
         return GetFoldersAsync(parentId);
     }
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
 

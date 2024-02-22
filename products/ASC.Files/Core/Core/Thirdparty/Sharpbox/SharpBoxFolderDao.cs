@@ -109,7 +109,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
     {
         return GetFoldersAsync(parentId);
     }
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var parentFolder = SharpBoxProviderInfo.Storage.GetFolder(MakePath(parentId));
 

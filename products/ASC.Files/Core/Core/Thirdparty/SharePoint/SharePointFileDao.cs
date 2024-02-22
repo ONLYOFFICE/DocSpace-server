@@ -165,7 +165,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return files;
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(parentId);
 
