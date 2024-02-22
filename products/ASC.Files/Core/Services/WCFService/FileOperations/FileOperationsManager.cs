@@ -27,27 +27,21 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton]
-public class FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, IServiceProvider serviceProvider)
+public class FileOperationsManagerHolder(
+    IDistributedTaskQueueFactory queueFactory, 
+    IServiceProvider serviceProvider, 
+    IDistributedCache distributedCache)
 {
     internal const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public List<FileOperationResult> GetOperationResults(Guid userId)
     {
-        var operations = _tasks.GetAllTasks();
-        var processlist = Process.GetProcesses();
-
-        //TODO: replace with distributed cache
-        if (processlist.Length > 0)
-        {
-            foreach (var o in operations.Where(o => processlist.All(p => p.Id != o.InstanceId)))
-            {
-                o[FileOperation.Progress] = 100;
-                _tasks.DequeueTask(o.Id);
-            }
-        }
-
-        operations = operations.Where(t => new Guid(t[FileOperation.Owner]) == userId).ToList();
+        var operations = _tasks
+            .GetAllTasks()
+            .Where(t => new Guid(t[FileOperation.Owner]) == userId)
+            .ToList();
+        
         foreach (var o in operations.Where(o => o.Status > DistributedTaskStatus.Running))
         {
             o[FileOperation.Progress] = 100;
