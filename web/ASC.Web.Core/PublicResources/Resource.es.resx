@@ -158,7 +158,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Conectar la aplicación para manejar los archivos y carpetas de Dropbox.</value>
+    <value>Conecte la aplicación para manejar los archivos y carpetas de Dropbox.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para conectar su cuenta de Dropbox con el módulo Documentos. Podrá administrar, editar y compartir archivos de Dropbox con los usuarios de ONLYOFFICE. {0}Inicie sesión en su cuenta en la página web de desarrolladores de Dropbox y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
@@ -191,7 +191,7 @@
     <value>Clave de Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Conectar la aplicación para acceder al portal usando la cuenta Facebook.</value>
+    <value>Conecte la aplicación para acceder al portal usando la cuenta Facebook.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando Facebook y vincular las cuentas de Facebook de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Facebook y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
@@ -233,7 +233,7 @@
     <value>Conecte el servicio Google Cloud Storage para crear copia de seguridad y almacenar datos de su portal.</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Conectar el proyecto para acceder al portal usando la cuenta de Google y manejar los archivos y carpetas de Google Drive.</value>
+    <value>Conecte el proyecto para acceder al portal usando la cuenta de Google y manejar los archivos y carpetas de Google Drive.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para conectar su cuenta de Google Drive al módulo Documentos. Podrá administrar, editar y compartir archivos de Google Drive con los usuarios de ONLYOFFICE. {0}Vaya a la consola de las APIs de Google y cree un nuevo proyecto para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
@@ -242,7 +242,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Conectar la aplicación para acceder al portal usando la cuenta LinkedIn.</value>
+    <value>Conecte la aplicación para acceder al portal usando la cuenta LinkedIn.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando sus cuentas de LinkedIn. {0}Vaya al sitio web de LinkedIn Developers y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
@@ -320,7 +320,7 @@
     <value>Secreto del cliente</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Conectar la aplicación para manejar los archivos y carpetas de OneDrive.</value>
+    <value>Conecte la aplicación para manejar los archivos y carpetas de OneDrive.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para conectar su cuenta de OneDrive al módulo Documentos. Podrá administrar, editar y compartir archivos de OneDrive con los usuarios de ONLYOFFICE. {0}Acceda a su cuenta de Microsoft Azure y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
@@ -368,7 +368,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conectar la aplicación para acceder al portal usando la cuenta Twitter.</value>
+    <value>Conecte la aplicación para acceder al portal usando la cuenta Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando su Twitter y vincular las cuentas de Twitter de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Twitter y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
