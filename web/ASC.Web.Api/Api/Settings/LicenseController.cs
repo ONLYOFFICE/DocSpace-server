@@ -160,9 +160,9 @@ public class LicenseController(ILoggerProvider option,
             CountUser = curQuota.CountUser,
             MaxFileSize = curQuota.MaxFileSize,
             MaxTotalSize = curQuota.MaxTotalSize,
-            Features = curQuota.Features
+            Features = curQuota.Features,
+            Trial = true
         };
-        quota.Trial = true;
 
         await tenantManager.SaveTenantQuotaAsync(quota);
 
@@ -195,9 +195,9 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public bool RequestLicense()
+    public async Task<bool> RequestLicense()
     {
-        return firstTimeTenantSettings.RequestLicense;
+        return await firstTimeTenantSettings.GetRequestLicense();
     }
 
 

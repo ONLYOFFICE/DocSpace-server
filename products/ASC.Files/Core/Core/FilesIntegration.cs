@@ -29,7 +29,7 @@ namespace ASC.Web.Files.Api;
 [Scope]
 public class FilesIntegration(IDaoFactory daoFactory)
 {
-    private static readonly IDictionary<string, IFileSecurityProvider> _providers = new Dictionary<string, IFileSecurityProvider>();
+    private static readonly Dictionary<string, IFileSecurityProvider> _providers = new();
 
     public async Task<T> RegisterBunchAsync<T>(string module, string bunch, string data)
     {

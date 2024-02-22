@@ -32,7 +32,7 @@ public class ThirdpartyController(
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
         SecurityContext securityContext,
-        ThirdpartyConfiguration thirdpartyConfiguration,
+        ThirdpartyConfiguration thirdPartyConfiguration,
         UserManager userManager,
         WordpressHelper wordpressHelper,
         WordpressToken wordpressToken,
@@ -57,12 +57,12 @@ public class ThirdpartyController(
     {
         var result = new List<List<string>>();
 
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID) || !filesSettingsHelper.EnableThirdParty)
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty())
         {
             return result;
         }
 
-        return thirdpartyConfiguration.GetProviders();
+        return thirdPartyConfiguration.GetProviders();
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class ThirdpartyController(
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync()
     {
         var parent = await fileStorageService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
-        var thirdpartyFolders = entryManager.GetThirpartyFoldersAsync(parent);
+        var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);
 
         await foreach (var r in thirdpartyFolders)
         {

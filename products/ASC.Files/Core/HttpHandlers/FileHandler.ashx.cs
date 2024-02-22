@@ -155,7 +155,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (String.IsNullOrEmpty(filename))
         {
-            var ext = compressToArchive.GetExt(context.Request.Query["ext"]);
+            var ext = await compressToArchive.GetExt(context.Request.Query["ext"]);
             filename = FileConstant.DownloadTitle + ext;
         }
         else

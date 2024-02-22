@@ -62,11 +62,14 @@ public class SettingsController(MessageService messageService,
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        UserFormatter userFormatter, 
-        IDistributedLockProvider distributedLockProvider)
+        UserFormatter userFormatter,
+        IDistributedLockProvider distributedLockProvider,
+        UsersQuotaSyncOperation usersQuotaSyncOperation,
+        CustomQuota customQuota,
+        QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-    
+{
+
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -85,9 +88,9 @@ public class SettingsController(MessageService messageService,
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var tenantCookieSettings = settingsManager.Load<TenantCookieSettings>();
+        var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         var settings = new SettingsDto
         {
             Culture = tenant.GetCulture().ToString(),
@@ -119,7 +122,7 @@ public class SettingsController(MessageService messageService,
             settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
-            settings.NameSchemaId = customNamingPeople.Current.Id;
+            settings.NameSchemaId = (await customNamingPeople.GetCurrent()).Id;
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
@@ -223,7 +226,7 @@ public class SettingsController(MessageService messageService,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         if (inDto.Type == TenantTrustedDomainsType.Custom)
         {
             tenant.TrustedDomainsRaw = "";
@@ -285,13 +288,108 @@ public class SettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
     [HttpPost("userquotasettings")]
-    public async Task<object> SaveUserQuotaSettingsAsync(UserQuotaSettingsRequestsDto inDto)
+    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+
+        if (maxTotalSize < inDto.DefaultQuota)
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
+        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        quotaSettings.EnableQuota = inDto.EnableQuota;
+        quotaSettings.DefaultQuota = inDto.DefaultQuota;
+
+        await settingsManager.SaveAsync(quotaSettings);
+
+        return quotaSettings;
+    }
+
+    [HttpGet("userquotasettings")]
+    public async Task<object> GetUserQuotaSettings()
+    {
+        return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+    }
+
+    /// <summary>
+    /// Saves the room quota settings specified in the request to the current portal.
+    /// </summary>
+    /// <short>
+    /// Save the room quota settings
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
+    /// <returns type="System.Object, System">Message about the result of saving the room quota settings</returns>
+    /// <path>api/2.0/settings/roomquotasettings</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("roomquotasettings")]
+    public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+
+        if (maxTotalSize < inDto.DefaultQuota)
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
+        var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+        quotaSettings.EnableQuota = inDto.EnableQuota;
+        quotaSettings.DefaultQuota = inDto.DefaultQuota;
+
+        await settingsManager.SaveAsync(quotaSettings);
+
+        return quotaSettings;
+    }
+
+    /// <summary>
+    /// Saves the tenant quota settings.
+    /// </summary>
+    /// <short>
+    /// Save the tenant quota settings
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
+    /// <returns type="System.Object, System">Message about the result of saving the tenant quota settings</returns>
+    /// <path>api/2.0/settings/tenantquotasettings</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("tenantquotasettings")]
+    public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await settingsManager.SaveAsync(new TenantUserQuotaSettings { EnableUserQuota = inDto.EnableUserQuota, DefaultUserQuota = inDto.DefaultUserQuota });
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || !coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Not available.");
+        }
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
 
-        return Resource.SuccessfullySaveSettingsMessage;
+        if (inDto.Quota >= 0)
+        {
+            tenantQuotaSetting.EnableQuota = true;
+            tenantQuotaSetting.Quota = inDto.Quota;
+        }
+        else
+        {
+            tenantQuotaSetting.EnableQuota = false;
+            tenantQuotaSetting.Quota = -1;
+        }
+        await settingsManager.SaveAsync(tenantQuotaSetting, inDto.TenantId);
+
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(inDto.TenantId))
+           .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+           .Sum(r => r.Counter);
+        var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
+
+        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
+
+        return tenantQuotaSetting;
     }
 
     /// <summary>
@@ -394,7 +492,7 @@ public class SettingsController(MessageService messageService,
     public async Task RecalculateQuotaAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        quotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -639,7 +737,7 @@ public class SettingsController(MessageService messageService,
 
         var culture = CultureInfo.GetCultureInfo(inDto.Lng);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         var changelng = false;
         if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
@@ -865,7 +963,7 @@ public class SettingsController(MessageService messageService,
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         return consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)

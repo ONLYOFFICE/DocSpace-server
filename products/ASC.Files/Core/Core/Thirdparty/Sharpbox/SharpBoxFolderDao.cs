@@ -379,7 +379,10 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
-
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    {
+        return await RenameFolderAsync(folder, newTitle);
+    }
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var entry = GetFolderById(folder.Id);

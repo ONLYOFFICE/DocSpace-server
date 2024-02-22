@@ -65,8 +65,6 @@ internal class FileConverterService<T>(
 
     private async Task ExecuteCheckFileConverterStatusAsync(IServiceScope scope)
     {
-        var logger = scope.ServiceProvider.GetService<ILogger<FileConverterQueue>>();
-
         try
         {
             var fileConverterQueue = scope.ServiceProvider.GetService<FileConverterQueue>();

@@ -98,22 +98,24 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         get { return SetupInfo.IsVisibleSettings<T>(); }
     }
 
-    public virtual bool Enable
+    public virtual async Task<bool> GetEnable()
     {
-        get { return settingsManager.Load<T>().EnableSetting; }
-        set
+        return (await settingsManager.LoadAsync<T>()).EnableSetting;
+    }
+
+    public async Task SetEnable(bool value)
+    {
+        T settings;
+        if (value)
         {
-            T settings;
-            if (value)
-            {
-                settings = settingsManager.Load<T>();
-                settings.EnableSetting = true;
-            }
-            else
-            {
-                settings = new T();
-            }
-            settingsManager.Save(settings);
+            settings = await settingsManager.LoadAsync<T>();
+            settings.EnableSetting = true;
         }
+        else
+        {
+            settings = new T();
+        }
+
+        await settingsManager.SaveAsync(settings);
     }
 }

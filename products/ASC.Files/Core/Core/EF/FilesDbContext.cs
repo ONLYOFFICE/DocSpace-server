@@ -47,6 +47,8 @@ public class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) :
     public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public DbSet<DbGroup> Groups { get; set; }
+    public DbSet<UserGroup> UserGroup { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +71,8 @@ public class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) :
             .AddDbFileOrder()
             .AddUser()
             .AddDbRoomSettings()
+            .AddDbGroup()
+            .AddUserGroup()
             .AddDbFunctions();
     }
 }

@@ -134,7 +134,7 @@ public class WebPath(WebPathSettings webPathSettings,
     ILoggerProvider options,
     IHttpClientFactory clientFactory)
 {
-    private static readonly IDictionary<string, bool> _existing = new ConcurrentDictionary<string, bool>();
+    private static readonly ConcurrentDictionary<string, bool> _existing = new();
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public WebPath(

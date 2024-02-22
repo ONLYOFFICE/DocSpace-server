@@ -164,7 +164,7 @@ class TenantServiceCache
 [Scope]
 class CachedTenantService() : ITenantService
 {
-    private readonly ITenantService _service;
+    private readonly DbTenantService _service;
     private readonly ICacheNotify<TenantSetting> _cacheNotifySettings;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;

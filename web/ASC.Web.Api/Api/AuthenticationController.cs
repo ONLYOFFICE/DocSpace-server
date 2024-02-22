@@ -298,7 +298,7 @@ public class AuthenticationController(UserManager userManager,
 
         if (!string.IsNullOrEmpty(user.SsoNameId))
         {
-            var settings = settingsManager.Load<SsoSettingsV2>();
+            var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
 
             if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
             {
@@ -543,8 +543,8 @@ public class AuthenticationController(UserManager userManager,
                 //}
 
                 await studioNotifyService.UserHasJoinAsync();
-                userHelpTourHelper.IsNewUser = true;
-                personalSettingsHelper.IsNewUser = true;
+                await userHelpTourHelper.SetIsNewUser(true);
+                await personalSettingsHelper.SetIsNewUser(true);
             }
 
             return userInfo;

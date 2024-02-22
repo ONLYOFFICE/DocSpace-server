@@ -40,7 +40,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     public override string ClientSecret { get { return this["twitterSecret"]; } }
     public override string CodeUrl { get { return "https://api.twitter.com/oauth/request_token"; } }
 
-    private static readonly IAuthenticationRequestStore _myAuthRequestStore = new LocalAuthenticationRequestStore();
+    private static readonly LocalAuthenticationRequestStore _myAuthRequestStore = new();
 
     public override bool IsEnabled
     {

@@ -28,7 +28,6 @@ namespace ASC.EventBus.ActiveMQ;
 
 public class EventBusActiveMQ : IEventBus, IDisposable
 {
-    const string EXCHANGE_NAME = "asc_event_bus";
     const string AUTOFAC_SCOPE_NAME = "asc_event_bus";
 
     private readonly ILogger<EventBusActiveMQ> _logger;

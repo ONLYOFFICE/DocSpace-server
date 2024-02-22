@@ -55,7 +55,7 @@ public class File<T> : FileEntry<T>
 
     public File(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Version = 1;
         VersionGroup = 1;
@@ -200,10 +200,6 @@ public class File<T> : FileEntry<T>
             };
         }
     }
-
-    [JsonIgnore]
-    public object NativeAccessor { get; set; }
+    
     public DateTime? LastOpened { get; set; }
 }
-
-

@@ -186,9 +186,19 @@ public class HostedSolution(ITenantService tenantService,
         return await tariffService.GetTariffAsync(tenant, withRequestToPaymentSystem);
     }
 
+    public async Task<TenantQuotaSettings> GetTenantQuotaSettings(int tenantId)
+    {
+        return await settingsManager.LoadAsync<TenantQuotaSettings>(tenantId, Guid.Empty);
+    }
+
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
     {
         return await clientTenantManager.GetTenantQuotaAsync(tenant);
+    }
+
+    public async Task<List<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenant)
+    {
+        return await clientTenantManager.FindTenantQuotaRowsAsync(tenant);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
