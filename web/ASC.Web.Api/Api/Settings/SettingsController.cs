@@ -125,6 +125,7 @@ public class SettingsController(MessageService messageService,
             settings.NameSchemaId = (await customNamingPeople.GetCurrent()).Id;
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
+            settings.TagManagerId = setupInfo.TagManagerId;
             settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
             settings.DocumentationEmail = setupInfo.DocumentationEmail;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
