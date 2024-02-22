@@ -75,9 +75,9 @@ public static class OpenApiExtension
 
         app.UseSwagger(c =>
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.json";
+            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.yaml";
         });
-
+        
         return app;
     }
 
