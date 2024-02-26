@@ -166,8 +166,8 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         {
             entry.RootId = entry.RootFolderType switch
             {
-                FolderType.VirtualRooms => IdConverter.Convert<TId>(await globalFolderHelper.GetFolderVirtualRooms()),
-                FolderType.Archive => IdConverter.Convert<TId>(await globalFolderHelper.GetFolderArchive()),
+                FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
+                FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
                 _ => entry.RootId
             };
         }
