@@ -59,8 +59,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
     public void Close()
     {
-        _client?.Dispose();
-        _client = null;
+        Dispose();
     }
 
     public Task<long> GetMaxUploadSizeAsync()
@@ -76,7 +75,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
     public Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
     {
-        throw new NotSupportedException();
+        return Task.FromResult<Stream>(null);
     }
 
     public async Task<WebDavResource> GetFileAsync(string fileId)
@@ -263,6 +262,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     public void Dispose()
     {
         _client?.Dispose();
+        _client = null;
     }
 
     private async Task<bool> MoveEntryAsync(string fromPath, string toPath)
