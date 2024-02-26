@@ -24,12 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Webhooks.Core.EF.Model;
 
 public class WebhooksConfig : BaseEntity
 {
     public int Id { get; set; }
+    
+    [MaxLength(50)]
     public string Name { get; set; }
+    
+    [MaxLength(50)]
     public string SecretKey { get; set; }
     public int TenantId { get; set; }
     public string Uri { get; set; }
