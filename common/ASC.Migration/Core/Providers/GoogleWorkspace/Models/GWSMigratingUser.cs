@@ -99,7 +99,7 @@ public class GwsMigratingUser(
             return;
         }
         var saved = await userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved.Equals(ASC.Core.Users.Constants.LostUser))
+        if (saved.Equals(ASC.Core.Users.Constants.LostUser) || saved.Removed)
         {
             if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {

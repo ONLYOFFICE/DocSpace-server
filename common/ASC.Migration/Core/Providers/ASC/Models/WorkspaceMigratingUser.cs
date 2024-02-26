@@ -88,7 +88,7 @@ public class WorkspaceMigratingUser(
             return;
         }
         var saved = await userManager.GetUserByEmailAsync(_user.Info.Email);
-        if (saved.Equals(Constants.LostUser))
+        if (saved.Equals(Constants.LostUser) || saved.Removed)
         {
             saved = await userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch
