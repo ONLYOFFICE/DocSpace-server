@@ -97,8 +97,7 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("customer_title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(400);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.FolderType)
                 .HasColumnName("folder_type")
@@ -110,8 +109,7 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("password")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Provider)
                 .IsRequired()
@@ -119,8 +117,7 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnType("varchar(50)")
                 .HasDefaultValueSql("'0'")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
@@ -141,16 +138,14 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnName("user_id")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(38);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasColumnName("user_name")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(100);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.FolderId)
                 .HasColumnName("folder_id")
@@ -161,13 +156,12 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Private).HasColumnName("private");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
-            
+
             entity.Property(e => e.Color)
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(6);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")

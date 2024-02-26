@@ -72,8 +72,7 @@ public static class DbFilesThirdpartyIdMappingExtension
                 .HasColumnName("hash_id")
                 .HasColumnType("char(32)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(32);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Id)
                 .IsRequired()

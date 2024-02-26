@@ -158,8 +158,7 @@ public static class DbFileExtension
                 .HasColumnName("comment")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ContentLength)
                 .HasColumnName("content_length")
@@ -169,8 +168,7 @@ public static class DbFileExtension
                 .HasColumnName("converted_type")
                 .HasColumnType("varchar(10)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(10);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreateBy)
                 .IsRequired()
@@ -225,8 +223,7 @@ public static class DbFileExtension
                 .HasColumnName("title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(400);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")

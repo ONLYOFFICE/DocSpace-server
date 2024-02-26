@@ -162,8 +162,7 @@ public static class DbUserExtension
                 .HasColumnName("contacts")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(1024);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreateDate)
                 .HasColumnName("create_on")
@@ -173,23 +172,20 @@ public static class DbUserExtension
                 .HasColumnName("culture")
                 .HasColumnType("varchar(20)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(20);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Email)
                 .HasColumnName("email")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.FirstName)
                 .IsRequired()
                 .HasColumnName("firstname")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
@@ -200,29 +196,25 @@ public static class DbUserExtension
                 .HasColumnName("lastname")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Location)
                 .HasColumnName("location")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Notes)
                 .HasColumnName("notes")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.MobilePhone)
                 .HasColumnName("phone")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.MobilePhoneActivation)
                 .HasColumnName("phone_activation")
@@ -241,22 +233,19 @@ public static class DbUserExtension
                 .HasColumnName("sid")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SsoNameId)
                 .HasColumnName("sso_name_id")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SsoSessionId)
                 .HasColumnName("sso_session_id")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Status)
                 .HasColumnName("status")
@@ -272,16 +261,14 @@ public static class DbUserExtension
                 .HasColumnName("title")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasColumnName("username")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.WorkFromDate)
                 .HasColumnName("workfromdate")

@@ -138,8 +138,7 @@ public static class DbFolderExtension
                 .HasColumnName("title")
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(400);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")

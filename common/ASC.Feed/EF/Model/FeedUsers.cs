@@ -69,8 +69,7 @@ public static class FeedUsersExtension
                 .HasColumnName("feed_id")
                 .HasColumnType("varchar(88)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(88);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")

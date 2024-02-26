@@ -76,8 +76,7 @@ public static class FeedReadedExtension
                 .HasColumnName("module")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("timestamp")

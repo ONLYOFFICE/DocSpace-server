@@ -72,8 +72,7 @@ public static class DbFilesTagExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Owner)
                 .IsRequired()

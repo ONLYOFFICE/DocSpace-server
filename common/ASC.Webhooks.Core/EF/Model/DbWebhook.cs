@@ -57,12 +57,10 @@ public static class DbWebhookExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.Route)
-                .HasMaxLength(200)
                 .HasColumnName("route")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Method)
-                .HasMaxLength(10)
                 .HasColumnName("method")
                 .HasDefaultValueSql("''");
         });

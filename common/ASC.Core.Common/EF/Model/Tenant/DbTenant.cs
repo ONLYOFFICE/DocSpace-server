@@ -166,8 +166,7 @@ public static class DbTenantExtension
                 .HasColumnName("alias")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(100);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Calls)
                 .HasColumnName("calls")
@@ -189,8 +188,7 @@ public static class DbTenantExtension
                 .HasColumnType("char(10)")
                 .HasDefaultValueSql("'en-US'")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(10);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
@@ -200,16 +198,14 @@ public static class DbTenantExtension
                 .HasColumnName("mappeddomain")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(100);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.OwnerId)
                 .HasColumnName("owner_id")
@@ -222,8 +218,7 @@ public static class DbTenantExtension
                 .HasColumnName("payment_id")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(38);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Spam)
                 .HasColumnName("spam")
@@ -243,15 +238,13 @@ public static class DbTenantExtension
                 .HasColumnName("timezone")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(1024);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")

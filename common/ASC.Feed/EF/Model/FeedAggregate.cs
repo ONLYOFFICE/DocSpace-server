@@ -87,8 +87,7 @@ public static class FeedAggregateExtension
                 .HasColumnName("id")
                 .HasColumnType("varchar(88)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(88);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.AggregateDate)
                 .HasColumnName("aggregated_date")
@@ -109,8 +108,7 @@ public static class FeedAggregateExtension
                 .HasColumnName("group_id")
                 .HasColumnType("varchar(70)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(70);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Json)
                 .IsRequired()
@@ -141,16 +139,14 @@ public static class FeedAggregateExtension
                 .HasColumnName("module")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Product)
                 .IsRequired()
                 .HasColumnName("product")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 

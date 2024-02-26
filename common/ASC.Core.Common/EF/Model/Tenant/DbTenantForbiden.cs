@@ -61,8 +61,7 @@ public static class DbTenantForbidenExtension
                 .HasColumnName("address")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddDbTenantForbiden(this ModelBuilder modelBuilder)

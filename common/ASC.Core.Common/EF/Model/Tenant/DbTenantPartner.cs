@@ -78,22 +78,19 @@ public static class DbTenantPartnerExtension
                 .HasColumnName("affiliate_id")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
                 .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(36);
+                .UseCollation("utf8_general_ci");
         });
 
     }

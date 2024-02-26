@@ -83,8 +83,7 @@ public static class DbFilesSecurityExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 

@@ -91,8 +91,7 @@ public static class NotifyQueueExtension
                 .HasColumnName("auto_submitted")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Content)
                 .HasColumnName("content")
@@ -104,8 +103,7 @@ public static class NotifyQueueExtension
                 .HasColumnName("content_type")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreationDate)
                 .HasColumnName("creation_date")
@@ -118,36 +116,31 @@ public static class NotifyQueueExtension
                 .HasColumnName("reciever")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ReplyTo)
                 .HasColumnName("reply_to")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(1024);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Sender)
                 .HasColumnName("sender")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SenderType)
                 .HasColumnName("sender_type")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(1024);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });

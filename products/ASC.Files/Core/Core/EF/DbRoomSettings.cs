@@ -79,8 +79,7 @@ public static class DbRoomSettingsExtension
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(6);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 

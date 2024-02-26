@@ -83,12 +83,10 @@ public static class WebhooksConfigExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SecretKey)
-                .HasMaxLength(50)
                 .HasColumnName("secret_key")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
                 .HasColumnName("name")
                 .IsRequired();
 

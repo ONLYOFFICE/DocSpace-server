@@ -62,8 +62,7 @@ public static class DbWebstudioIndexExtension
                 .HasColumnName("index_name")
                 .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(50);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
@@ -80,8 +79,7 @@ public static class DbWebstudioIndexExtension
             entity.ToTable("webstudio_index", "onlyoffice");
 
             entity.Property(e => e.IndexName)
-                .HasColumnName("index_name")
-                .HasMaxLength(50);
+                .HasColumnName("index_name");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")

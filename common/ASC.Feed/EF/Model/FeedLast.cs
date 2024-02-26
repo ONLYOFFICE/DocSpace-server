@@ -60,8 +60,7 @@ public static class FeedLastExtension
                 .HasColumnName("last_key")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastDate)
                 .HasColumnName("last_date")

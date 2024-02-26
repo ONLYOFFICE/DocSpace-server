@@ -80,8 +80,7 @@ public static class CoreSettingsExtension
                 .HasColumnName("id")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
@@ -105,8 +104,7 @@ public static class CoreSettingsExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(128);
+                .HasColumnName("id");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")

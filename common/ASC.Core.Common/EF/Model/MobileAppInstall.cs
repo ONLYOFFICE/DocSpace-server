@@ -60,8 +60,7 @@ public static class MobileAppInstallExtension
                 .HasColumnName("user_email")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.AppType)
                 .HasColumnName("app_type");

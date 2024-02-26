@@ -75,8 +75,7 @@ public static class DbTariffExtension
                 .HasColumnName("comment")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
@@ -91,8 +90,7 @@ public static class DbTariffExtension
                 .HasColumnName("customer_id")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

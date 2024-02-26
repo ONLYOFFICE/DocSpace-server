@@ -103,29 +103,25 @@ public static class SubscriptionExtension
                 .HasColumnName("source")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(38);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
                 .HasColumnType("varchar(38)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(38);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Unsubscribed)
                 .HasColumnName("unsubscribed")
@@ -146,20 +142,16 @@ public static class SubscriptionExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasMaxLength(38);
+                .HasColumnName("source");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasMaxLength(128);
+                .HasColumnName("action");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasMaxLength(38);
+                .HasColumnName("recipient");
 
             entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasMaxLength(128);
+                .HasColumnName("object");
 
             entity.Property(e => e.Unsubscribed).HasColumnName("unsubscribed");
         });

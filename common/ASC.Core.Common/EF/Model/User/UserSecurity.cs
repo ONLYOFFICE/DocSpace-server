@@ -94,8 +94,7 @@ public static class UserSecurityExtension
                 .HasColumnName("pwdhash")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

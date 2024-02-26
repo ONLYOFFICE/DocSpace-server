@@ -70,16 +70,14 @@ public static class DbTenantVersionExtension
                 .HasColumnName("url")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Version)
                 .IsRequired()
                 .HasColumnName("version")
                 .HasColumnType("varchar(64)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(64);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")

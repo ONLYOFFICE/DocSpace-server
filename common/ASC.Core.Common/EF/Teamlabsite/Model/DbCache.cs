@@ -58,8 +58,7 @@ public static class DbCacheExtension
                 .HasColumnName("tenant_alias")
                 .HasColumnType("varchar(100)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(100);
+                .UseCollation("utf8_general_ci");
 
         });
     }

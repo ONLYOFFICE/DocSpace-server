@@ -79,8 +79,7 @@ public static class DbQuotaRowExtension
                 .HasColumnName("path")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
@@ -94,8 +93,7 @@ public static class DbQuotaRowExtension
                 .HasColumnName("tag")
                 .HasColumnType("varchar(1024)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(1024);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")

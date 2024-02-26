@@ -96,8 +96,7 @@ public static class DbGroupExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
@@ -114,8 +113,7 @@ public static class DbGroupExtension
                 .HasColumnName("sid")
                 .HasColumnType("varchar(512)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(512);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });

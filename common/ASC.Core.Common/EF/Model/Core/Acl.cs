@@ -154,8 +154,7 @@ public static class AclExtension
                 .HasColumnType("varchar(255)")
                 .HasDefaultValueSql("''")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
@@ -172,16 +171,13 @@ public static class AclExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasMaxLength(38);
+                .HasColumnName("subject");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasMaxLength(38);
+                .HasColumnName("action");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");

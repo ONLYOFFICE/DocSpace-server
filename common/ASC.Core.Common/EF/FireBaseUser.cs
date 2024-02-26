@@ -103,15 +103,13 @@ public static class FireBaseUserExtension
                 .HasColumnName("firebase_device_token")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(255);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
                 .HasColumnType("varchar(20)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(20);
+                .UseCollation("utf8_general_ci");
 
         });
     }
@@ -133,16 +131,13 @@ public static class FireBaseUserExtension
             entity.Property(e => e.IsSubscribed).HasColumnName("is_subscribed");
 
             entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasMaxLength(36);
+                .HasColumnName("user_id");
 
             entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasMaxLength(255);
+                .HasColumnName("firebase_device_token");
 
             entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasMaxLength(20);
+                .HasColumnName("application");
         });
     }
 

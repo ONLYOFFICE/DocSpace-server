@@ -74,8 +74,7 @@ public static class ShortLinksExtension
                 .HasColumnType("char(15)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
-                .IsRequired(false)
-                .HasMaxLength(15);
+                .IsRequired(false);
 
             entity.Property(e => e.TenantId)
                 .IsRequired()

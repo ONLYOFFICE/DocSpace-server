@@ -52,8 +52,7 @@ public static class InstanceRegistrationExtension
                   .HasColumnType("varchar(255)")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
-                  .IsRequired()
-                  .HasMaxLength(255);
+                  .IsRequired();
 
             entity.Property(e => e.IsActive)
                   .HasColumnName("is_active")
@@ -65,8 +64,7 @@ public static class InstanceRegistrationExtension
                   .HasColumnType("varchar(255)")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
-                  .IsRequired()
-                  .HasMaxLength(255);
+                  .IsRequired();
 
             entity.Property(e => e.LastUpdated)
                   .HasColumnName("last_updated")

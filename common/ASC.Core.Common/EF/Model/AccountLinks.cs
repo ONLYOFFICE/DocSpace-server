@@ -31,7 +31,7 @@ public class AccountLinks : BaseEntity
     [MaxLength(200)]
     public string Id { get; set; }
     
-    [MaxLength(100)]
+    [MaxLength(200)]
     public string UId { get; set; }
     
     [MaxLength(60)]
@@ -73,15 +73,13 @@ public static class AccountLinksExtension
                 .HasColumnName("id")
                 .HasColumnType("varchar(200)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(200);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UId)
                 .HasColumnName("uid")
                 .HasColumnType("varchar(200)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(200);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Linked)
                 .HasColumnName("linked")
@@ -98,8 +96,7 @@ public static class AccountLinksExtension
                 .HasColumnName("provider")
                 .HasColumnType("char(60)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(60);
+                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddAccountLinks(this ModelBuilder modelBuilder)
@@ -115,12 +112,10 @@ public static class AccountLinksExtension
                 .HasDatabaseName("uid");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(200);
+                .HasColumnName("id");
 
             entity.Property(e => e.UId)
-                .HasColumnName("uid")
-                .HasMaxLength(200);
+                .HasColumnName("uid");
 
             entity.Property(e => e.Linked).HasColumnName("linked");
 
@@ -130,7 +125,6 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .HasMaxLength(60)
                 .IsFixedLength()
                 .HasDefaultValueSql("NULL");
         });

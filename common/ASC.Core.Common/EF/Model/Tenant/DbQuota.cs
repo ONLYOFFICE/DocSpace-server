@@ -166,15 +166,13 @@ public static class DbQuotaExtension
                 .HasColumnName("product_id")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Features)
                 .HasColumnName("features")
@@ -184,8 +182,7 @@ public static class DbQuotaExtension
                 .HasColumnName("name")
                 .HasColumnType("varchar(128)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasMaxLength(128);
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Price)
                 .HasColumnName("price")
