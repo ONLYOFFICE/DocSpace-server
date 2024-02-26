@@ -223,26 +223,23 @@ public class GoogleWorkspaceMigration(
 
             var smallStep = progressStep / 4;
 
-            if (user.UserType != EmployeeType.User)
+            try
             {
-                try
-                {
-                    var currentUser = securityContext.CurrentAccount;
-                    await securityContext.AuthenticateMeAsync(user.Guid);
-                    user.MigratingFiles.Init(_path, user, Log);
-                    user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
-                    user.MigratingFiles.SetGroupsDict(groupsForImport);
-                    await user.MigratingFiles.MigrateAsync();
-                    await securityContext.AuthenticateMeAsync(currentUser.ID);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
-                }
-                finally
-                {
-                    ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
-                }
+                var currentUser = securityContext.CurrentAccount;
+                await securityContext.AuthenticateMeAsync(user.Guid);
+                user.MigratingFiles.Init(_path, user, Log);
+                user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
+                user.MigratingFiles.SetGroupsDict(groupsForImport);
+                await user.MigratingFiles.MigrateAsync();
+                await securityContext.AuthenticateMeAsync(currentUser.ID);
+            }
+            catch (Exception ex)
+            {
+                Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
+            }
+            finally
+            {
+                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }

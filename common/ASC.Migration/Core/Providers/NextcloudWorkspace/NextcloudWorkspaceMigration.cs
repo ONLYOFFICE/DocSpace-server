@@ -415,25 +415,22 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
 
             var smallStep = progressStep / 3;
 
-            if (user.UserType != EmployeeType.User)
+            try
             {
-                try
-                {
-                    var currentUser = _securityContext.CurrentAccount;
-                    await _securityContext.AuthenticateMeAsync(user.Guid);
-                    user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
-                    user.MigratingFiles.SetGroupsDict(groupsForImport);
-                    await user.MigratingFiles.MigrateAsync();
-                    await _securityContext.AuthenticateMeAsync(currentUser.ID);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
-                }
-                finally
-                {
-                    ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
-                }
+                var currentUser = _securityContext.CurrentAccount;
+                await _securityContext.AuthenticateMeAsync(user.Guid);
+                user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
+                user.MigratingFiles.SetGroupsDict(groupsForImport);
+                await user.MigratingFiles.MigrateAsync();
+                await _securityContext.AuthenticateMeAsync(currentUser.ID);
+            }
+            catch (Exception ex)
+            {
+                Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
+            }
+            finally
+            {
+                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }

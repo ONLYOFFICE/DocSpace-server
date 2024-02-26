@@ -317,10 +317,7 @@ public class WorkspaceMigration(
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
             try
             {
-                if (user.UserType != EmployeeType.User)
-                {
-                    await user.MigratingFiles.MigrateAsync();
-                }
+                await user.MigratingFiles.MigrateAsync();
             }
             catch (Exception ex)
             {
