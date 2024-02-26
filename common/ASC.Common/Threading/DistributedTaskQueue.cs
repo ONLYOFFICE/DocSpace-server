@@ -150,9 +150,9 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return queueTasks;
     }
 
-    public IEnumerable<T> GetAllTasks<T>() where T : DistributedTask
+    public IEnumerable<T> GetAllTasks<T>(int? instanceId = null) where T : DistributedTask
     {
-        return GetAllTasks().Select(x => Map(x, serviceProvider.GetService<T>()));
+        return GetAllTasks(instanceId).Select(x => Map(x, serviceProvider.GetService<T>()));
     }
 
     public T PeekTask<T>(string id) where T : DistributedTask
@@ -165,6 +165,18 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         }
 
         return Map(taskById, serviceProvider.GetService<T>());
+    }
+
+    public void CancelTask(string id)
+    {
+        var queueTasks = GetAllTasks().ToList();
+
+        if (!queueTasks.Exists(x => x.Id == id))
+        {
+            return;
+        }
+
+        cancelTaskNotify.Publish(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
     }
 
     public void DequeueTask(string id)

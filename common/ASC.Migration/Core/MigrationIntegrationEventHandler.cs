@@ -32,7 +32,8 @@ namespace ASC.Migration.Core.Core;
 public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<MigrationIntegrationEventHandler> logger)
     :
         IIntegrationEventHandler<MigrationParseIntegrationEvent>,
-        IIntegrationEventHandler<MigrationIntegrationEvent>
+        IIntegrationEventHandler<MigrationIntegrationEvent>,
+        IIntegrationEventHandler<MigrationCancelIntegrationEvent>
 {
     public Task Handle(MigrationParseIntegrationEvent @event)
     {
@@ -53,6 +54,18 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
             worker.StartMigrate(@event.TenantId, @event.CreateBy, @event.ApiInfo);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    public Task Handle(MigrationCancelIntegrationEvent @event)
+    {
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
+
+            worker.Stop(@event.TenantId);
 
             return Task.CompletedTask;
         }

@@ -73,11 +73,11 @@ public class MigrationWorker(
 
     public void Stop(int tenantId)
     {
-        var tasks = _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = _queue.GetAllTasks<MigrationOperation>(DistributedTaskQueue.INSTANCE_ID);
 
-        foreach (var t in tasks.OfType<MigrationOperation>().Where(r => r.TenantId == tenantId))
+        foreach (var t in tasks.Where(r => r.TenantId == tenantId))
         {
-            _queue.DequeueTask(t.Id);
+            _queue.CancelTask(t.Id);
         }
     }
 

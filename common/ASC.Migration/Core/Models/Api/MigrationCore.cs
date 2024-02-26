@@ -59,7 +59,7 @@ public class MigrationCore(
 
     public async Task Stop()
     {
-        migrationWorker.Stop(await tenantManager.GetCurrentTenantIdAsync());
+        eventBus.Publish(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
     }
 
     public async Task<MigrationOperation> GetStatus()
