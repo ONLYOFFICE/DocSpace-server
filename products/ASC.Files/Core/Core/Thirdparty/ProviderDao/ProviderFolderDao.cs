@@ -515,9 +515,9 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         if (provider != ProviderFilter.None)
         {
-            var providers = GetProviderTypes(provider);
+            var providers = GetProviderType(provider);
 
-            q = q.Where(a => providers.Contains(a.Provider));
+            q = q.Where(a => providers == a.Provider);
         }
 
         if (filterType is not (FilterType.None or FilterType.FoldersOnly))

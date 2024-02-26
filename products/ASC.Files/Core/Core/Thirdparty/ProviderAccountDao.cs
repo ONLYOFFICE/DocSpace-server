@@ -31,13 +31,11 @@ public enum ProviderTypes
 {
     Box,
     BoxNet,
-    DropBox,
     DropboxV2,
     Google,
     GoogleDrive,
     OneDrive,
     SharePoint,
-    SkyDrive,
     WebDav,
     kDrive,
     Yandex
@@ -50,7 +48,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         InstanceCrypto instanceCrypto,
         SecurityContext securityContext,
         ConsumerFactory consumerFactory,
-        ThirdpartyConfiguration thirdpartyConfiguration,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         OAuth20TokenHelper oAuth20TokenHelper,
         ILoggerProvider options)
@@ -637,20 +634,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 return new AuthData(token: token.ToJson());
 
-            case ProviderTypes.DropBox:
-
-                var dropBoxRequestToken = DropBoxRequestToken.Parse(authData.RawToken);
-
-                var config = CloudStorage.GetCloudConfigurationEasy(nSupportedCloudConfigurations.DropBox);
-                var accessToken = DropBoxStorageProviderTools.ExchangeDropBoxRequestTokenIntoAccessToken(config as DropBoxConfiguration,
-                                                                                                         thirdpartyConfiguration.DropboxAppKey,
-                                                                                                         thirdpartyConfiguration.DropboxAppSecret,
-                                                                                                         dropBoxRequestToken);
-
-                var base64Token = new CloudStorage().SerializeSecurityTokenToBase64Ex(accessToken, config.GetType(), new Dictionary<string, string>());
-
-                return new AuthData(token: base64Token);
-
             case ProviderTypes.OneDrive:
                 code = authData.RawToken;
                 token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
@@ -661,31 +644,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
                 }
 
                 return new AuthData(token: token.ToJson());
-
-            case ProviderTypes.SkyDrive:
-
-                code = authData.RawToken;
-
-                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
-
-                if (token == null)
-                {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
-                }
-
-                accessToken = AppLimit.CloudComputing.SharpBox.Common.Net.oAuth20.OAuth20Token.FromJson(token.ToJson());
-
-                if (accessToken == null)
-                {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
-                }
-
-                config = CloudStorage.GetCloudConfigurationEasy(nSupportedCloudConfigurations.SkyDrive);
-                var storage = new CloudStorage();
-                base64Token = storage.SerializeSecurityTokenToBase64Ex(accessToken, config.GetType(), new Dictionary<string, string>());
-
-                return new AuthData(token: base64Token);
-
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
                 break;
