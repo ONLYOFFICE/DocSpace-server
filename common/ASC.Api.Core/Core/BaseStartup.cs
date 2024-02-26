@@ -44,7 +44,9 @@ public abstract class BaseStartup
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool WebhooksEnabled { get; init; }
-
+    
+    protected bool OpenApiEnabled { get; init; }
+    
     protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
@@ -53,6 +55,7 @@ public abstract class BaseStartup
         _corsOrigin = _configuration["core:cors"];
 
         DIHelper = new DIHelper();
+        OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
     }
 
     public virtual async Task ConfigureServices(IServiceCollection services)
@@ -335,7 +338,7 @@ public abstract class BaseStartup
 
         services.AddOptions();
 
-        services.AddMvcCore(config =>
+        var mvcBuilder = services.AddMvcCore(config =>
         {
             config.Conventions.Add(new ControllerNameAttributeConvention());
 
@@ -350,7 +353,13 @@ public abstract class BaseStartup
             config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
-
+        
+        if (OpenApiEnabled)
+        {
+            mvcBuilder.AddApiExplorer();
+            services.AddOpenApi();
+        }
+        
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
@@ -431,10 +440,8 @@ public abstract class BaseStartup
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
-
-
+        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, _configuration);
+        
         if (!_hostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>()
@@ -481,6 +488,12 @@ public abstract class BaseStartup
 
         app.UseLoggerMiddleware();
 
+
+        if (OpenApiEnabled)
+        {
+            app.UseOpenApi();
+        }
+        
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();

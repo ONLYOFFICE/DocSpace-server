@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Core;
+using ASC.Core.Common.Notify.Engine;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -65,6 +66,9 @@ public class Startup : BaseStartup
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
+        
+        
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
