@@ -14,7 +14,6 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
     <PackageReference Include="Box.V2.Core" Version="5.2.2" />
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />

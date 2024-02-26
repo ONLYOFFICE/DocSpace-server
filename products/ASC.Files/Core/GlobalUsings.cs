@@ -50,11 +50,6 @@ global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
 
-global using AppLimit.CloudComputing.SharpBox;
-global using AppLimit.CloudComputing.SharpBox.Exceptions;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider.DropBox;
-
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Model;
