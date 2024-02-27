@@ -73,7 +73,7 @@ public class MigrationWorker(
 
     public void Stop(int tenantId)
     {
-        var tasks = _queue.GetAllTasks<MigrationOperation>();
+        var tasks = _queue.GetAllTasks<MigrationOperation>().Where(t => t.MigrationApiInfo.Operation == "parse");
 
         foreach (var t in tasks.Where(r => r.TenantId == tenantId))
         {
