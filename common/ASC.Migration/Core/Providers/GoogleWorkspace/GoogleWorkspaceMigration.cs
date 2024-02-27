@@ -162,8 +162,6 @@ public class GoogleWorkspaceMigration(
         var i = 1;
         foreach (var u in usersForImport)
         {
-            if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
-
             var user = serviceProvider.GetService<GwsMigratingUser>();
             user.Init(u);
 
@@ -195,7 +193,6 @@ public class GoogleWorkspaceMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
@@ -212,10 +209,6 @@ public class GoogleWorkspaceMigration(
         i = 1;
         foreach (var user in usersForImport)
         {
-            if (_cancellationToken.IsCancellationRequested) 
-            { 
-                ReportProgress(100, MigrationResource.MigrationCanceled); return; 
-            }
             if (failedUsers.Contains(user))
             {
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));

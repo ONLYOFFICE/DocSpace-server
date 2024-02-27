@@ -255,11 +255,6 @@ public class WorkspaceMigration(
 
         foreach (var user in usersForImport)
         {
-            if (_cancellationToken.IsCancellationRequested)
-            {
-                ReportProgress(100, MigrationResource.MigrationCanceled);
-                return;
-            }
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
@@ -289,11 +284,6 @@ public class WorkspaceMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                if (_cancellationToken.IsCancellationRequested)
-                {
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
-                    return;
-                }
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
