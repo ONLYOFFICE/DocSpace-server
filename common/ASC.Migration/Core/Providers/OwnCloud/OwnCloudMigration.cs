@@ -39,7 +39,7 @@ public class OwnCloudMigration(
     private readonly MigratorMeta _meta = new("Owncloud", 6, false);
     public override MigratorMeta Meta => _meta;
 
-    public override void Init(string path, CancellationToken cancellationToken)
+    public override void Init(string path, CancellationToken cancellationToken, string operation)
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
@@ -53,6 +53,7 @@ public class OwnCloudMigration(
 
         _migrationInfo = new OсMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
         _tmpFolder = path;
     }
 

@@ -49,7 +49,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         _userManager = userManager;
     }
 
-    public override void Init(string path, CancellationToken cancellationToken)
+    public override void Init(string path, CancellationToken cancellationToken, string operation)
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
@@ -67,7 +67,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             }
         }
 
-        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name };
+        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name, Operation = operation };
         _tmpFolder = path;
     }
 

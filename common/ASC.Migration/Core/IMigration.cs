@@ -35,7 +35,7 @@ public interface IMigration : IDisposable
     string GetProgressStatus();
     MigrationApiInfo ApiInfo { get; }
 
-    void Init(string path, CancellationToken token);
+    void Init(string path, CancellationToken token, string operation);
 
     Task<MigrationApiInfo> Parse(bool reportProgress);
 

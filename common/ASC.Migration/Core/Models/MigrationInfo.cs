@@ -36,6 +36,7 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
     public Dictionary<string, TUser> ExistUsers = new Dictionary<string, TUser>();
     public string Path { get; set; }
     public string MigratorName { get; set; }
+    public string Operation { get; set; }
     public List<string> FailedArchives = new List<string>();
     public List<TGroup> Groups = new List<TGroup>();
 
@@ -53,7 +54,8 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             FailedArchives = FailedArchives,
             SuccessedUsers = SuccessedUsers,
             FailedUsers = FailedUsers,
-            Groups = Groups.Select(g => g.ToApiInfo()).ToList()
+            Groups = Groups.Select(g => g.ToApiInfo()).ToList(),
+            Operation = Operation,
         };
     }
 

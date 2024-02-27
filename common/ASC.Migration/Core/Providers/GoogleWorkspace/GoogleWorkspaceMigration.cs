@@ -42,7 +42,7 @@ public class GoogleWorkspaceMigration(
     private string _path;
     public override MigratorMeta Meta => _meta;
 
-    public override void Init(string path, CancellationToken cancellationToken)
+    public override void Init(string path, CancellationToken cancellationToken, string operation)
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
@@ -57,6 +57,7 @@ public class GoogleWorkspaceMigration(
 
         _migrationInfo = new GwsMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
         _migrationInfo.Path = path;
     }
 
