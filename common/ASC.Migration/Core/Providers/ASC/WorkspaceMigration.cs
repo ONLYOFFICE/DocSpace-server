@@ -64,7 +64,7 @@ public class WorkspaceMigration(
         _tmpFolder = path;
         _mappedGuids = new();
     }
-    public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
+    public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
     {
         if (reportProgress)
         {
@@ -82,8 +82,6 @@ public class WorkspaceMigration(
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    _migrationInfo.Operation = "cancel";
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
 
@@ -127,8 +125,6 @@ public class WorkspaceMigration(
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    _migrationInfo.Operation = "cancel";
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 progress += 20 / groups.Count;
@@ -233,7 +229,7 @@ public class WorkspaceMigration(
         }
     }
 
-    public override async Task Migrate(MigrationApiInfo migrationInfo)
+    public override async Task MigrateAsync(MigrationApiInfo migrationInfo)
     {
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();

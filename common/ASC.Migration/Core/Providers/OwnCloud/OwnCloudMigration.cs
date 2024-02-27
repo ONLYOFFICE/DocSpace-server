@@ -58,7 +58,7 @@ public class OwnCloudMigration(
         _tmpFolder = path;
     }
 
-    public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
+    public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
     {
         if (reportProgress)
         {
@@ -68,7 +68,24 @@ public class OwnCloudMigration(
         {
             try
             {
-                ZipFile.ExtractToDirectory(_takeout, _tmpFolder);
+                using (var archive = ZipFile.OpenRead(_takeout))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (string.IsNullOrEmpty(entry.Name))
+                        {
+                            Directory.CreateDirectory(Path.Combine(_tmpFolder, entry.FullName));
+                        }
+                        else
+                        {
+                            entry.ExtractToFile(Path.Combine(_tmpFolder, entry.FullName));
+                        }
+                        if (_cancellationToken.IsCancellationRequested && reportProgress)
+                        {
+                            return null;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -77,8 +94,6 @@ public class OwnCloudMigration(
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
-                _migrationInfo.Operation = "cancel";
-                ReportProgress(100, MigrationResource.MigrationCanceled);
                 return null;
             }
 
@@ -110,8 +125,6 @@ public class OwnCloudMigration(
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    _migrationInfo.Operation = "cancel";
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 if (reportProgress)
@@ -330,7 +343,7 @@ public class OwnCloudMigration(
             .Select(m => m.Groups[1].Value.Trim(new[] { '(', ')' }));
     }
 
-    public override async Task Migrate(MigrationApiInfo migrationApiInfo)
+    public override async Task MigrateAsync(MigrationApiInfo migrationApiInfo)
     {
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();

@@ -71,7 +71,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         _tmpFolder = path;
     }
 
-    public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
+    public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
     {
         if (reportProgress)
         {
@@ -81,7 +81,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         {
             try
             {
-                using (var archive = await Task.Run(() => ZipFile.OpenRead(_takeout)))
+                using (var archive = ZipFile.OpenRead(_takeout))
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -95,8 +95,6 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
                         {
-                            _migrationInfo.Operation = "cancel";
-                            ReportProgress(100, MigrationResource.MigrationCanceled);
                             return null;
                         }
                     }
@@ -125,8 +123,6 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    _migrationInfo.Operation = "cancel";
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 if (reportProgress)
@@ -342,7 +338,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             .Select(m => m.Groups[1].Value.Trim(new[] { '(', ')' }));
     }
 
-    public override async Task Migrate(MigrationApiInfo migrationApiInfo)
+    public override async Task MigrateAsync(MigrationApiInfo migrationApiInfo)
     {
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();

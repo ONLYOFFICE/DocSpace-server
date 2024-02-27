@@ -64,7 +64,7 @@ public class GoogleWorkspaceMigration(
         _migrationInfo.Path = path;
     }
 
-    public override async Task<MigrationApiInfo> Parse(bool reportProgress = true)
+    public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
     {
         if (reportProgress)
         {
@@ -77,8 +77,6 @@ public class GoogleWorkspaceMigration(
         {
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
-                _migrationInfo.Operation = "cancel";
-                ReportProgress(100, MigrationResource.MigrationCanceled);
                 return null;
             }
 
@@ -91,7 +89,24 @@ public class GoogleWorkspaceMigration(
             var key = Path.GetFileName(takeout);
             try
             {
-                ZipFile.ExtractToDirectory(takeout, tmpFolder);
+                using (var archive = ZipFile.OpenRead(takeout))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (string.IsNullOrEmpty(entry.Name))
+                        {
+                            Directory.CreateDirectory(Path.Combine(tmpFolder, entry.FullName));
+                        }
+                        else
+                        {
+                            entry.ExtractToFile(Path.Combine(tmpFolder, entry.FullName));
+                        }
+                        if (_cancellationToken.IsCancellationRequested && reportProgress)
+                        {
+                            return null;
+                        }
+                    }
+                }
                 var rootFolder = Path.Combine(tmpFolder, "Takeout");
 
                 if (!Directory.Exists(rootFolder))
@@ -146,7 +161,7 @@ public class GoogleWorkspaceMigration(
         return _migrationInfo.ToApiInfo();
     }
 
-    public override async Task Migrate(MigrationApiInfo migrationApiInfo)
+    public override async Task MigrateAsync(MigrationApiInfo migrationApiInfo)
     {
         ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();

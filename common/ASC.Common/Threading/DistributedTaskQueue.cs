@@ -167,18 +167,6 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return Map(taskById, serviceProvider.GetService<T>());
     }
 
-    public void CancelTask(string id)
-    {
-        var queueTasks = GetAllTasks().ToList();
-
-        if (!queueTasks.Exists(x => x.Id == id))
-        {
-            return;
-        }
-
-        cancelTaskNotify.Publish(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
-    }
-
     public void DequeueTask(string id)
     {
         var queueTasks = GetAllTasks().ToList();

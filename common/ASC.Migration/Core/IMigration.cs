@@ -37,9 +37,9 @@ public interface IMigration : IDisposable
 
     void Init(string path, CancellationToken token, string operation);
 
-    Task<MigrationApiInfo> Parse(bool reportProgress);
+    Task<MigrationApiInfo> ParseAsync(bool reportProgress);
 
-    Task Migrate(MigrationApiInfo migrationInfo);
+    Task MigrateAsync(MigrationApiInfo migrationInfo);
 
     string GetLogName();
 

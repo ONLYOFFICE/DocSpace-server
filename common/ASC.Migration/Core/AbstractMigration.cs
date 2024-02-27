@@ -56,9 +56,9 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup>(M
 
     public abstract void Init(string path, CancellationToken cancellationToken, string operation);
 
-    public abstract Task<MigrationApiInfo> Parse(bool reportProgress = true);
+    public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
-    public abstract Task Migrate(MigrationApiInfo migrationInfo);
+    public abstract Task MigrateAsync(MigrationApiInfo migrationInfo);
 
     public void Log(string msg, Exception exception = null)
     {

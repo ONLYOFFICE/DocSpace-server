@@ -77,7 +77,7 @@ public class MigrationWorker(
 
         foreach (var t in tasks.Where(r => r.TenantId == tenantId))
         {
-            _queue.CancelTask(t.Id);
+            _queue.DequeueTask(t.Id);
         }
     }
 

@@ -127,10 +127,10 @@ public class MigrationOperation(
             var folder = discStore.GetPhysicalPath("", "");
             migrator.Init(folder, CancellationToken, onlyParse ? "parse" : "migration");
 
-            await migrator.Parse(onlyParse);
+            var result = await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
             {
-                await migrator.Migrate(copyInfo);
+                await migrator.MigrateAsync(copyInfo);
             }
         }
         catch (Exception e)
