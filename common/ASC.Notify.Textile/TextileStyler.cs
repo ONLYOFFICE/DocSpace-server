@@ -200,6 +200,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         {
             footerTop = NotifyTemplateResource.TopGif
                 .Replace("%LOGO%", (string)topGif.Value)
+                .Replace("%LOGOTEXT%", logoText)
                 .Replace("%SITEURL%", siteUrl);
         }
         else
