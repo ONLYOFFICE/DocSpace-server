@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 [Transient]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class WebDavProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper) 
-    : AbstractProviderInfo<WebDavResource, WebDavResource, WebDavResource, MockLoginProvider>(wrapper, providerInfoHelper)
+    : AbstractProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry, MockLoginProvider>(wrapper, providerInfoHelper)
 {
     public override Selector Selector => Selectors.WebDav;
     public override ProviderFilter ProviderFilter => ProviderFilter.WebDav;

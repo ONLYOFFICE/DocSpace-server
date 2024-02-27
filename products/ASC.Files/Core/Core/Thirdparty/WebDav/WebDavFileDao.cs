@@ -31,13 +31,13 @@ namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 [Scope]
 internal class WebDavFileDao(UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    RegexDaoSelectorBase<WebDavResource, WebDavResource, WebDavResource> daoSelector,
+    RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> daoSelector,
     CrossDao crossDao,
     IFileDao<int> fileDao,
-    IDaoBase<WebDavResource, WebDavResource, WebDavResource> dao,
+    IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry> dao,
     TempPath tempPath,
     SetupInfo setupInfo,
-    TenantManager tenantManager) : ThirdPartyFileDao<WebDavResource, WebDavResource, WebDavResource>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+    TenantManager tenantManager) : ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
 {
     protected override string UploadSessionKey => "WebDavSession";
     

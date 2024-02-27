@@ -345,6 +345,6 @@ public static class DisposableWrapperExtension
         services.TryAdd<IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, DropboxStorage>();
         services.TryAdd<IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, GoogleDriveStorage>();
         services.TryAdd<IThirdPartyStorage<Item, Item, Item>, OneDriveStorage>();
-        services.TryAdd<IThirdPartyStorage<WebDavResource, WebDavResource, WebDavResource>, WebDavStorage>();
+        services.TryAdd<IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavStorage>();
     }
 }

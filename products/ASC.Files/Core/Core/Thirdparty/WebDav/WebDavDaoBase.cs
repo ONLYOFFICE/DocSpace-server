@@ -35,44 +35,38 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
     SetupInfo setupInfo,
     FileUtility fileUtility,
     TempPath tempPath,
-    RegexDaoSelectorBase<WebDavResource, WebDavResource, WebDavResource> regexDaoSelectorBase) 
-    : ThirdPartyProviderDao<WebDavResource, WebDavResource, WebDavResource>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
-        IDaoBase<WebDavResource, WebDavResource, WebDavResource>
+    RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase) 
+    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+        IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>
 {
 
-    private AbstractProviderInfo<WebDavResource, WebDavResource, WebDavResource, MockLoginProvider> _providerInfo;
-    private const string ErrorETag = "02b7fe8f9a0548d7b863cd0f9aeb062a";
+    private WebDavProviderInfo _providerInfo;
     
-    public void Init(string pathPrefix, IProviderInfo<WebDavResource, WebDavResource, WebDavResource> providerInfo)
+    public void Init(string pathPrefix, IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry> providerInfo)
     {
         PathPrefix = pathPrefix;
         ProviderInfo = providerInfo;
-        _providerInfo = providerInfo as AbstractProviderInfo<WebDavResource, WebDavResource, WebDavResource, MockLoginProvider>;
+        _providerInfo = providerInfo as WebDavProviderInfo;
     }
 
-    public string GetName(WebDavResource item)
+    public string GetName(WebDavEntry item)
     {
-        if (item == null)
-        {
-            return null;
-        }
-        
-        return item.DisplayName ?? GetId(item)?.Split('/').Last();
+        return item.DisplayName;
     }
 
-    public string GetId(WebDavResource item)
+    public string GetId(WebDavEntry item)
     {
-        if (item?.Uri == null)
-        {
-            return null;
-        }
-
-        return IsRoot(item) ? item.Uri : HttpUtility.UrlDecode(item.Uri.TrimEnd('/'));
+        return item.Id;
     }
 
-    public bool IsRoot(WebDavResource folder)
+    public bool IsRoot(WebDavEntry folder)
     {
-        return folder is { Uri: "/" };
+        return IsRoot(folder.Id);
+    }
+    
+    private static bool IsRoot(string folderId)
+    {
+        return folderId == "/";
     }
 
     public string MakeThirdId(object entryId)
@@ -86,43 +80,43 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
 
         try
         {
-            return Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(id));
+            return $"/{Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(id)).Trim('/')}";
         }
         catch
         {
             return id;
         }
     }
-
-    public string GetParentFolderId(WebDavResource item)
+    
+    public string GetParentFolderId(WebDavEntry item)
     {
         if (item == null || IsRoot(item))
         {
             return null;
         }
-
+        
         var id = GetId(item);
-        var pathLength = id.Length - GetName(item).Length;
-
-        return id[..(pathLength > 1 ? pathLength - 1 : 0)];
+        var index = id.LastIndexOf('/');
+    
+        return index == -1 ? null : id[..index];
     }
 
-    public string MakeId(WebDavResource item)
+    public string MakeId(WebDavEntry item)
     {
         return MakeId(GetId(item));
     }
 
     public override string MakeId(string path = null)
     {
-        if (string.IsNullOrEmpty(path) || path == "/")
+        if (string.IsNullOrEmpty(path) || IsRoot(path))
         {
             return PathPrefix;
         }
 
-        return path.StartsWith('/') ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" : $"{PathPrefix}-{path}";
+        return $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}";
     }
 
-    public string MakeFolderTitle(WebDavResource folder)
+    public string MakeFolderTitle(WebDavEntry folder)
     {
         if (folder == null || IsRoot(folder))
         {
@@ -132,23 +126,21 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return Global.ReplaceInvalidCharsAndTruncate(GetName(folder));
     }
 
-    public string MakeFileTitle(WebDavResource file)
+    public string MakeFileTitle(WebDavEntry file)
     {
         var name = GetName(file);
         
         return string.IsNullOrEmpty(name) ? ProviderInfo.ProviderKey : Global.ReplaceInvalidCharsAndTruncate(name);
     }
 
-    public Folder<string> ToFolder(WebDavResource webDavFolder)
+    public Folder<string> ToFolder(WebDavEntry webDavFolder)
     {
-        if (webDavFolder == null)
+        switch (webDavFolder)
         {
-            return null;
-        }
-        
-        if (webDavFolder.ETag == ErrorETag && !string.IsNullOrEmpty(webDavFolder.DisplayName))
-        {
-            return ToErrorFolder(webDavFolder);
+            case null:
+                return null;
+            case ErrorWebDavEntry errorEntry:
+                return ToErrorFolder(errorEntry);
         }
 
         var isRoot = IsRoot(webDavFolder);
@@ -169,18 +161,16 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return folder;
     }
 
-    public File<string> ToFile(WebDavResource webDavFile)
+    public File<string> ToFile(WebDavEntry webDavFile)
     {
-        if (webDavFile == null)
+        switch (webDavFile)
         {
-            return null;
+            case null:
+                return null;
+            case ErrorWebDavEntry errorEntry:
+                return ToErrorFile(errorEntry);
         }
 
-        if (webDavFile.ETag == ErrorETag && !string.IsNullOrEmpty(webDavFile.DisplayName))
-        { 
-            return ToErrorFile(webDavFile);
-        }
-        
         var file = GetFile();
 
         file.Id = MakeId(webDavFile);
@@ -194,18 +184,15 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return file;
     }
 
-    private void SetDateTime(WebDavResource webDavFile, FileEntry file)
+    private void SetDateTime(WebDavEntry webDavEntry, FileEntry fileEntry)
     {
-        var creationDate = webDavFile.CreationDate?.ToUniversalTime();
-        var lastModifiedDate = webDavFile.LastModifiedDate?.ToUniversalTime();
-        
-        if (creationDate.HasValue && creationDate.Value != DateTime.MinValue)
+        if (webDavEntry.CreationDate != DateTime.MinValue)
         {
-            file.CreateOn = _tenantUtil.DateTimeFromUtc(creationDate.Value);
+            fileEntry.CreateOn = _tenantUtil.DateTimeFromUtc(webDavEntry.CreationDate);
         }
-        if (lastModifiedDate.HasValue && lastModifiedDate.Value != DateTime.MinValue)
+        if (webDavEntry.LastModifiedDate != DateTime.MinValue)
         {
-            file.ModifiedOn = _tenantUtil.DateTimeFromUtc(lastModifiedDate.Value);
+            fileEntry.ModifiedOn = _tenantUtil.DateTimeFromUtc(webDavEntry.LastModifiedDate);
         }
     }
 
@@ -214,44 +201,34 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return ToFolder(await GetFolderAsync(string.Empty));
     }
 
-    public Task<WebDavResource> GetFolderAsync(string folderId)
+    public async Task<WebDavEntry> GetFolderAsync(string folderId)
     {
         var id = MakeThirdId(folderId);
         
         try
         {
-            return _providerInfo.GetFolderAsync(id);
+            return await _providerInfo.GetFolderAsync(id);
         }
         catch (Exception e)
         {
-            return Task.FromResult(MakeErrorResource(id, e));
+            return new ErrorWebDavEntry(e.Message, folderId);
         }
     }
 
-    public Task<WebDavResource> GetFileAsync(string fileId)
+    public async Task<WebDavEntry> GetFileAsync(string fileId)
     {
         var id = MakeThirdId(fileId);
 
         try
         {
-            return _providerInfo.GetFileAsync(id);
+            return await _providerInfo.GetFileAsync(id);
         }
         catch (Exception e)
         {
-            return Task.FromResult(MakeErrorResource(id, e));
+            return new ErrorWebDavEntry(e.Message, fileId);
         }
     }
-
-    private static WebDavResource MakeErrorResource(string id, Exception e)
-    {
-        var builder = new WebDavResource.Builder();
-        builder.WithUri(id);
-        builder.WithETag(ErrorETag);
-        builder.WithDisplayName(e.Message);
-
-        return builder.Build();
-    }
-
+    
     public override async Task<IEnumerable<string>> GetChildrenAsync(string folderId)
     {
         var items = await GetItemsAsync(folderId);
@@ -259,7 +236,7 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return items.Select(MakeId);
     }
 
-    public async Task<List<WebDavResource>> GetItemsAsync(string parentId, bool? folder = null)
+    public async Task<List<WebDavEntry>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var id = MakeThirdId(parentId);
         var items = await _providerInfo.GetItemsAsync(id);
@@ -303,29 +280,30 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return requestTitle;
     }
     
-    private Folder<string> ToErrorFolder(WebDavResource webDavResource)
+    private File<string> ToErrorFile(ErrorWebDavEntry errorEntry)
     {
-        var folder = GetFolder();
-        BuildErrorEntry(webDavResource, folder);
+        if (errorEntry == null)
+        {
+            return null;
+        }
 
-        return folder;
-    }
+        var file = GetErrorFile(new ErrorEntry(errorEntry.Error, errorEntry.ErrorId));
+        file.Title = MakeFileTitle(errorEntry);
 
-    private File<string> ToErrorFile(WebDavResource webDavResource)
-    {
-        var file = GetFile();
-        BuildErrorEntry(webDavResource, file);
-        
         return file;
     }
-
-    private void BuildErrorEntry(WebDavResource webDavResource, FileEntry<string> file)
+    
+    private Folder<string> ToErrorFolder(ErrorWebDavEntry errorEntry)
     {
-        file.Id = MakeId(webDavResource.Uri);
-        file.ParentId = null;
-        file.CreateOn = _tenantUtil.DateTimeNow();
-        file.ModifiedOn = _tenantUtil.DateTimeNow();
-        file.Error = webDavResource.DisplayName;
+        if (errorEntry == null)
+        {
+            return null;
+        }
+
+        var folder = GetErrorFolder(new ErrorEntry(errorEntry.Error, errorEntry.ErrorId));
+        folder.Title = MakeFolderTitle(errorEntry);
+
+        return folder;
     }
 
     private static string MatchEvaluator(Match match)
@@ -334,5 +312,11 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         var staticText = match.Value[$" ({index})".Length..];
 
         return $" ({index + 1}){staticText}";
+    }
+
+    private class ErrorWebDavEntry(string errorMessage, string id) : WebDavEntry, IErrorItem
+    {
+        public string Error { get; } = errorMessage;
+        public string ErrorId { get; } = id;
     }
 }

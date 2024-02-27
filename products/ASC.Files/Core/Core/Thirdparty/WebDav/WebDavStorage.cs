@@ -28,13 +28,15 @@ namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Transient]
 public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo) 
-    : IThirdPartyStorage<WebDavResource, WebDavResource, WebDavResource>, IDisposable
+    : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
     public bool IsOpened => _client != null;
     public AuthScheme AuthScheme => AuthScheme.Basic;
     
     private const string DepthHeader = "Depth";
     private WebDavClient _client;
+    private Uri _baseUri;
+    private string _absolutePath;
 
     public void Open(AuthData authData)
     {
@@ -42,15 +44,15 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         {
             return;
         }
-
-        if (authData.Provider == ProviderTypes.kDrive.ToStringFast())
-        {
-            authData.Url = "https://connect.drive.infomaniak.com";
-        }
+        
+        ArgumentException.ThrowIfNullOrEmpty(authData.Url);
+        
+        var uri = new Uri(authData.Url);
+        _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
+        _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
 
         var httpClient = httpClientFactory.CreateClient();
         
-        httpClient.BaseAddress = new Uri(authData.Url);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", 
             Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
         
@@ -70,7 +72,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     public async Task<bool> CheckAccessAsync()
     {
         var root = await GetFolderAsync("/");
-        return root != null;
+        return root is { IsCollection: true };
     }
 
     public Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
@@ -78,30 +80,31 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         return Task.FromResult<Stream>(null);
     }
 
-    public async Task<WebDavResource> GetFileAsync(string fileId)
+    public Task<WebDavEntry> GetFileAsync(string fileId)
     {
-        var response = await _client.Propfind(fileId);
-
-        return !response.IsSuccessful ? null : response.Resources.FirstOrDefault();
+        var resourceUrl = BuildResourceUrl(fileId);
+        return GetEntryAsync(resourceUrl);
     }
 
-    public async Task<WebDavResource> CreateFileAsync(Stream fileStream, string title, string parentId)
+    public async Task<WebDavEntry> CreateFileAsync(Stream fileStream, string title, string parentId)
     {
-        var path = MakePath(parentId, title);
+        var path = CombinePath(parentId, title);
+        var resourceUrl = BuildResourceUrl(path);
         
-        var response = await _client.PutFile(path, fileStream);
+        var response = await _client.PutFile(resourceUrl, fileStream);
         if (!response.IsSuccessful)
         {
             return null;
         }
 
-        return await GetFileAsync(path);
+        return await GetEntryAsync(resourceUrl);
     }
 
-    public async Task<Stream> DownloadStreamAsync(WebDavResource file, int offset = 0)
+    public async Task<Stream> DownloadStreamAsync(WebDavEntry file, int offset = 0)
     {
-        var response = await _client.GetProcessedFile(file.Uri);
-
+        var resourceUrl = BuildResourceUrl(file.Id);
+        
+        var response = await _client.GetProcessedFile(resourceUrl);
         if (!response.IsSuccessful)
         {
             return null;
@@ -133,136 +136,150 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         return response.Stream;
     }
 
-    public async Task<WebDavResource> MoveFileAsync(string fileId, string newFileName, string toFolderId)
+    public async Task<WebDavEntry> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var newPath = MakePath(toFolderId, newFileName);
+        var newPath = CombinePath(toFolderId, newFileName);
+        var toResourceUrl = BuildResourceUrl(newPath);
         
-        if (!await MoveEntryAsync(fileId, newPath))
+        if (!await MoveEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
         
-        return await GetFileAsync(newPath);
+        return await GetEntryAsync(toResourceUrl);
     }
 
-    public async Task<WebDavResource> CopyFileAsync(string fileId, string newFileName, string toFolderId)
+    public async Task<WebDavEntry> CopyFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var path = MakePath(toFolderId, newFileName);
+        var path = CombinePath(toFolderId, newFileName);
+        var toResourceUrl = BuildResourceUrl(path);
         
-        if (!await CopyEntryAsync(fileId, path))
+        if (!await CopyEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
         
-        return await GetFileAsync(path);
+        return await GetEntryAsync(toResourceUrl);
     }
 
-    public async Task<WebDavResource> RenameFileAsync(string fileId, string newName)
+    public async Task<WebDavEntry> RenameFileAsync(string fileId, string newName)
     {
         var parentPath = GetParentPath(fileId);
-        var newPath = MakePath(parentPath, newName);
+        var newPath = CombinePath(parentPath, newName);
+        var toResourceUrl = BuildResourceUrl(newPath);
         
-        if (!await MoveEntryAsync(fileId, newPath))
+        if (!await MoveEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
         
-        return await GetFileAsync(newPath);
+        return await GetEntryAsync(toResourceUrl);
     }
 
-    public async Task<WebDavResource> SaveStreamAsync(string fileId, Stream fileStream)
+    public async Task<WebDavEntry> SaveStreamAsync(string fileId, Stream fileStream)
     {
-        var response = await _client.PutFile(fileId, fileStream);
+        var resourceUrl = BuildResourceUrl(fileId);
         
-        return !response.IsSuccessful ? null : await GetFileAsync(fileId);
+        var response = await _client.PutFile(resourceUrl, fileStream);
+        return !response.IsSuccessful ? null : await GetEntryAsync(resourceUrl);
     }
 
-    public long GetFileSize(WebDavResource file)
+    public long GetFileSize(WebDavEntry file)
     {
         return file.ContentLength ?? 0;
     }
 
-    public async Task<WebDavResource> GetFolderAsync(string folderId)
+    public Task<WebDavEntry> GetFolderAsync(string folderId)
     {
-        var response = await _client.Propfind(folderId, new PropfindParameters
-        {
-            Headers = new [] { new KeyValuePair<string, string>(DepthHeader, "0") }
-        });
-
-        return !response.IsSuccessful ? null : response.Resources.FirstOrDefault();
+        var resourceUrl = BuildResourceUrl(folderId);
+        return GetEntryAsync(resourceUrl);
     }
 
-    public async Task<WebDavResource> CreateFolderAsync(string title, string parentId)
+    public async Task<WebDavEntry> CreateFolderAsync(string title, string parentId)
     {
-        var path = MakePath(parentId, title);
+        var path = CombinePath(parentId, title);
+        var resourceUrl = BuildResourceUrl(path);
         
-        var response = await _client.Mkcol(path);
+        var response = await _client.Mkcol(resourceUrl);
         if (!response.IsSuccessful)
         {
             return null;
         }
 
-        return await GetFolderAsync(path);
+        return await GetEntryAsync(resourceUrl);
     }
 
-    public async Task<WebDavResource> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
+    public async Task<WebDavEntry> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
-        var newPath = MakePath(toFolderId, newFolderName);
+        var newPath = CombinePath(toFolderId, newFolderName);
+        var toResourceUrl = BuildResourceUrl(newPath);
         
-        if (!await MoveEntryAsync(folderId, newPath))
+        if (!await MoveEntryAsync(BuildResourceUrl(folderId), toResourceUrl))
+        {
+            return null;
+        }
+
+        return await GetEntryAsync(toResourceUrl);
+    }
+
+    public async Task<WebDavEntry> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
+    {
+        var newPath = CombinePath(toFolderId, newFolderName);
+        var toResourceUrl = BuildResourceUrl(newPath);
+        
+        if (!await CopyEntryAsync(BuildResourceUrl(folderId), toResourceUrl))
         {
             return null;
         }
         
-        return await GetFolderAsync(newPath);
+        return await GetEntryAsync(toResourceUrl);
     }
 
-    public async Task<WebDavResource> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
-    {
-        var newPath = MakePath(toFolderId, newFolderName);
-        
-        if (!await CopyEntryAsync(folderId, newPath))
-        {
-            return null;
-        }
-        
-        return await GetFolderAsync(newPath);
-    }
-
-    public async Task<WebDavResource> RenameFolderAsync(string folderId, string newName)
+    public async Task<WebDavEntry> RenameFolderAsync(string folderId, string newName)
     {
         var parentPath = GetParentPath(folderId);
-        var newPath = MakePath(parentPath, newName);
+        var newPath = CombinePath(parentPath, newName);
+        var toResourceUrl = BuildResourceUrl(newPath);
 
-        if (!await MoveEntryAsync(folderId, newPath))
+        if (!await MoveEntryAsync(BuildResourceUrl(folderId), toResourceUrl))
         {
             return null;
         }
 
-        return await GetFolderAsync(newPath);
+        return await GetEntryAsync(toResourceUrl);
     }
 
-    public async Task<List<WebDavResource>> GetItemsAsync(string folderId)
+    public async Task<List<WebDavEntry>> GetItemsAsync(string folderId)
     {
-        var response = await _client.Propfind(folderId, new PropfindParameters
+        var response = await _client.Propfind(BuildResourceUrl(folderId), new PropfindParameters
         {
             Headers = new[] { new KeyValuePair<string, string>(DepthHeader, "1") }
         });
 
-        return !response.IsSuccessful 
-            ? null 
-            : response.Resources.Skip(1).ToList(); // Skip the folder itself
+        return !response.IsSuccessful
+            ? null
+            : response.Resources.Skip(1).Select(ToEntry).ToList(); // Skip the folder itself
     }
-
-    public async Task DeleteItemAsync(WebDavResource item)
+    
+    public Task DeleteItemAsync(WebDavEntry item)
     {
-        await _client.Delete(item.Uri);
+        return _client.Delete(BuildResourceUrl(item.Id));
     }
 
     public void Dispose()
     {
         _client?.Dispose();
         _client = null;
+    }
+    
+    private async Task<WebDavEntry> GetEntryAsync(string url)
+    {
+        var response = await _client.Propfind(url, new PropfindParameters
+        {
+            Headers = new [] { new KeyValuePair<string, string>(DepthHeader, "0") }
+        });
+
+        return !response.IsSuccessful ? null : ToEntry(response.Resources.FirstOrDefault());
     }
 
     private async Task<bool> MoveEntryAsync(string fromPath, string toPath)
@@ -278,15 +295,50 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         
         return response.IsSuccessful;
     }
-
-    private static string MakePath(string parentPath, string name)
+    
+    private string BuildResourceUrl(string path)
     {
-        return (parentPath ?? string.Empty) + "/" + (name ?? string.Empty);
+        return _baseUri + HttpUtility.UrlPathEncode(CombinePath(_absolutePath, path)).TrimStart('/');
+    }
+    
+    private WebDavEntry ToEntry(WebDavResource resource)
+    {
+        var entry = new WebDavEntry();
+
+        var uri = HttpUtility.UrlDecode(resource.Uri.Trim('/'));
+        
+        if (!string.IsNullOrEmpty(_absolutePath))
+        { 
+            var index = uri.IndexOf(_absolutePath, StringComparison.Ordinal);
+            var id = index == -1 ? uri : uri.Remove(index, _absolutePath.Length);
+
+            entry.Id = string.IsNullOrEmpty(id) ? "/" : id;
+        }
+        else
+        {
+            entry.Id = "/" + uri;
+        }
+
+        entry.DisplayName = !string.IsNullOrEmpty(resource.DisplayName) ? resource.DisplayName : uri.Split('/').LastOrDefault();
+        entry.CreationDate = resource.CreationDate?.ToUniversalTime() ?? DateTime.MinValue;
+        entry.LastModifiedDate = resource.LastModifiedDate?.ToUniversalTime() ?? DateTime.MinValue;
+        entry.ContentLength = resource.ContentLength ?? 0;
+        entry.IsCollection = resource.IsCollection;
+
+        return entry;
+    }
+
+    private static string CombinePath(string left, string right)
+    {
+        left = left.Trim('/');
+        right = right.Trim('/');
+
+        return right.Length == 0 ? left : left + '/' + right;
     }
     
     private static string GetParentPath(string path)
     {
         var index = path.LastIndexOf('/');
-        return index == -1 ? path : path[..index];
+        return index <= 0 ? string.Empty : path[..index];
     }
 }

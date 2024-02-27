@@ -436,6 +436,11 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         var hasLogo = input.HasLogo;
         var color = input.Color;
 
+        if (key == ProviderTypes.kDrive)
+        {
+            authData.Url = "https://connect.drive.infomaniak.com";
+        }
+
         if (key == ProviderTypes.Box)
         {
             if (string.IsNullOrEmpty(token))

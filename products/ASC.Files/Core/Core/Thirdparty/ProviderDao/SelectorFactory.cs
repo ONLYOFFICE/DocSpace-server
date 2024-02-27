@@ -43,7 +43,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     {
         if (selector == Selectors.WebDav.Id)
         {
-            return serviceProvider.GetService<IDaoSelector<WebDavResource, WebDavResource, WebDavResource>>();
+            return serviceProvider.GetService<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>>();
         }
 
         if (selector == Selectors.SharePoint.Id)

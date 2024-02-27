@@ -26,15 +26,14 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-public static class WebDavDaoSelectorExtension
+public class WebDavEntry
 {
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavFileDao>();
-        services.TryAdd<ThirdPartyFolderDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
-        services.TryAdd<ThirdPartyTagDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
-        services.TryAdd<IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavDaoBase>();
-        services.TryAdd<IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavProviderInfo>();
-        services.TryAdd<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>, RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
-    }
+    public string Id { get; set; }
+    public string DisplayName { get; set; }
+    public long? ContentLength { get; set; }
+    public DateTime CreationDate { get; set; }
+    public DateTime LastModifiedDate { get; set; }
+    public bool IsCollection { get; set; }
+    
+    public WebDavEntry() { }
 }
