@@ -54,6 +54,7 @@ public class OwnCloudMigration(
         _migrationInfo = new OсMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
         _migrationInfo.Operation = operation;
+        _migrationInfo.Files = new List<string> { Path.GetFileName(_takeout) };
         _tmpFolder = path;
     }
 
@@ -73,14 +74,14 @@ public class OwnCloudMigration(
             {
                 Log($"Couldn't to unzip {_takeout}", ex);
             }
-            if (_cancellationToken.IsCancellationRequested) 
+
+            if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
-                if (reportProgress) 
-                {
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
-                }
+                _migrationInfo.Operation = "cancel";
+                ReportProgress(100, MigrationResource.MigrationCanceled);
                 return null;
             }
+
             if (reportProgress)
             {
                 ReportProgress(30, MigrationResource.UnzippingFinished);
@@ -107,12 +108,10 @@ public class OwnCloudMigration(
             var progress = 40;
             foreach (var u in users)
             {
-                if (_cancellationToken.IsCancellationRequested) 
+                if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    if (reportProgress)
-                    {
-                        ReportProgress(100, MigrationResource.MigrationCanceled);
-                    }
+                    _migrationInfo.Operation = "cancel";
+                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 if (reportProgress)

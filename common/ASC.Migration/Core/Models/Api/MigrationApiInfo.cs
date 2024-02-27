@@ -71,4 +71,6 @@ public class MigrationApiInfo
     public int SuccessedUsers { get; set; }
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
+    [ProtoMember(16)]
+    public List<string> Files { get; set; }
 }

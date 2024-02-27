@@ -67,7 +67,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             }
         }
 
-        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name, Operation = operation };
+        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name, Operation = operation, Files = new List<string> { Path.GetFileName(_takeout) } };
         _tmpFolder = path;
     }
 
@@ -87,12 +87,10 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             {
                 Log($"Couldn't to unzip {_takeout}", ex);
             }
-            if (_cancellationToken.IsCancellationRequested)
+            if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
-                if (reportProgress)
-                {
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
-                }
+                _migrationInfo.Operation = "cancel";
+                ReportProgress(100, MigrationResource.MigrationCanceled);
                 return null;
             }
             if (reportProgress)
@@ -112,12 +110,10 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
             var progress = 40;
             foreach (var u in users)
             {
-                if (_cancellationToken.IsCancellationRequested) 
+                if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    if (reportProgress)
-                    {
-                        ReportProgress(100, MigrationResource.MigrationCanceled);
-                    }
+                    _migrationInfo.Operation = "cancel";
+                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 if (reportProgress)

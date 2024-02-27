@@ -26,6 +26,8 @@
 
 
 
+using net.openstack.Providers.Rackspace.Objects.Databases;
+
 namespace ASC.Migration.GoogleWorkspace;
 
 [Scope]
@@ -58,6 +60,7 @@ public class GoogleWorkspaceMigration(
         _migrationInfo = new GwsMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
         _migrationInfo.Operation = operation;
+        _migrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
         _migrationInfo.Path = path;
     }
 
@@ -72,12 +75,10 @@ public class GoogleWorkspaceMigration(
         var i = 1;
         foreach (var takeout in _takeouts)
         {
-            if (_cancellationToken.IsCancellationRequested)
+            if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
-                if (reportProgress)
-                {
-                    ReportProgress(100, MigrationResource.MigrationCanceled);
-                }
+                _migrationInfo.Operation = "cancel";
+                ReportProgress(100, MigrationResource.MigrationCanceled);
                 return null;
             }
 

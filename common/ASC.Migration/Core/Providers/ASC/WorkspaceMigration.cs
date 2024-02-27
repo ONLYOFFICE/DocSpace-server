@@ -60,6 +60,7 @@ public class WorkspaceMigration(
         _migrationInfo = new WorkspaceMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
         _migrationInfo.Operation = operation;
+        _migrationInfo.Files = new List<string> { Path.GetFileName(_backup) };
         _tmpFolder = path;
         _mappedGuids = new();
     }
@@ -79,12 +80,10 @@ public class WorkspaceMigration(
             var progressStep = 50 / data.Rows.Count;
             foreach (var row in data.Rows.Cast<DataRow>())
             {
-                if (_cancellationToken.IsCancellationRequested)
+                if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    if (reportProgress)
-                    {
-                        ReportProgress(100, MigrationResource.MigrationCanceled);
-                    }
+                    _migrationInfo.Operation = "cancel";
+                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
 
@@ -126,12 +125,10 @@ public class WorkspaceMigration(
             var progress = 60;
             foreach (var item in groups)
             {
-                if (_cancellationToken.IsCancellationRequested)
+                if (_cancellationToken.IsCancellationRequested && reportProgress)
                 {
-                    if (reportProgress)
-                    {
-                        ReportProgress(100, MigrationResource.MigrationCanceled);
-                    }
+                    _migrationInfo.Operation = "cancel";
+                    ReportProgress(100, MigrationResource.MigrationCanceled);
                     return null;
                 }
                 progress += 20 / groups.Count;
