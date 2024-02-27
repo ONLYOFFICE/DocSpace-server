@@ -361,6 +361,8 @@ public abstract class BaseStorage(TempStream tempStream,
     {
         if (QuotaController != null)
         {
+            ownerId = ownerId == Guid.Empty && Modulename != "files" ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
+
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
             var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
