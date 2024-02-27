@@ -81,17 +81,30 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         {
             try
             {
-                ZipFile.ExtractToDirectory(_takeout, _tmpFolder);
+                using (var archive = await Task.Run(() => ZipFile.OpenRead(_takeout)))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (string.IsNullOrEmpty(entry.Name))
+                        {
+                            Directory.CreateDirectory(Path.Combine(_tmpFolder, entry.FullName));
+                        }
+                        else
+                        {
+                            entry.ExtractToFile(Path.Combine(_tmpFolder, entry.FullName));
+                        }
+                        if (_cancellationToken.IsCancellationRequested && reportProgress)
+                        {
+                            _migrationInfo.Operation = "cancel";
+                            ReportProgress(100, MigrationResource.MigrationCanceled);
+                            return null;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Log($"Couldn't to unzip {_takeout}", ex);
-            }
-            if (_cancellationToken.IsCancellationRequested && reportProgress)
-            {
-                _migrationInfo.Operation = "cancel";
-                ReportProgress(100, MigrationResource.MigrationCanceled);
-                return null;
             }
             if (reportProgress)
             {
