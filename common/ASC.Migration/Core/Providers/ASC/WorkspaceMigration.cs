@@ -72,7 +72,7 @@ public class WorkspaceMigration(
         }
         try
         {
-            _dataReader = DataOperatorFactory.GetReadOperator(_backup, false);
+            _dataReader = DataOperatorFactory.GetReadOperator(_backup, reportProgress ? _cancellationToken : CancellationToken.None, false);
 
             await using var stream = _dataReader.GetEntry("databases/core/core_user");
             var data = new DataTable();

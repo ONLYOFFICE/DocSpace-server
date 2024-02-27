@@ -137,18 +137,23 @@ public class MigrationOperation(
         {
             Exception = e;
             logger.ErrorWithException(e);
+            
+            IsCompleted = true;
         }
         finally
         {
-            IsCompleted = true;
-            if (migrator != null)
+            if (!CancellationToken.IsCancellationRequested) 
             {
-                migrator.OnProgressUpdate -= Migrator_OnProgressUpdate;
-                ImportedUsers = migrator.GetGuidImportedUsers();
-                LogName = migrator.GetLogName();
-            }
+                IsCompleted = true;
+                if (migrator != null)
+                {
+                    migrator.OnProgressUpdate -= Migrator_OnProgressUpdate;
+                    ImportedUsers = migrator.GetGuidImportedUsers();
+                    LogName = migrator.GetLogName();
+                }
 
-            PublishChanges();
+                PublishChanges();
+            }
             migrator.Dispose();
         }
 

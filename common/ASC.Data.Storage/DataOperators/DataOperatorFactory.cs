@@ -51,5 +51,17 @@ public static class DataOperatorFactory
             return new TarReadOperator(targetFile, removeTarget);
         }
     }
+
+    public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
+    {
+        if (targetFile.EndsWith("tar.gz"))
+        {
+            return new ZipReadOperator(targetFile, token, removeTarget);
+        }
+        else
+        {
+            return new TarReadOperator(targetFile, token, removeTarget);
+        }
+    }
 }
  
