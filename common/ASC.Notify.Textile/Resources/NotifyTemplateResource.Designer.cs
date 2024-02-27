@@ -90,9 +90,10 @@ namespace ASC.Notify.Textile.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;body style=&quot;background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;&quot;&gt;
-        ///&lt;div style=&quot;background-color: #fff; width: 600px; margin: 0 auto; text-align: center;&quot;&gt;
-        ///    &lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border:  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;body background=&quot;#ffffff&quot; style=&quot;background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; font-family: Helvetica, Arial, Tahoma, sans-serif; margin: 0; padding: 0; text-align: center; width: 100%;&quot;&gt;   
+        ///&lt;center style=&quot;table-layout:fixed; width:100%; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;&quot; &gt;
+        ///        &lt;div style=&quot;margin-bottom:0; margin-left:auto; margin-right:auto; margin-top:0; max-width:600px;&quot; &gt;
+        ///            &lt;table background=&quot;#ffffff&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; s [rest of string was truncated]&quot;;.
         /// </summary>
         public static string HtmlMaster {
             get {
@@ -101,13 +102,11 @@ namespace ASC.Notify.Textile.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
-        ///          &lt;td style=&quot;width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 208px;&quot;&gt;
-        ///              &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;width: 24px; height: 24px; display: block; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
-        ///                  &lt;img src=&quot;%IMAGEPATH%/social-facebook-24.png&quot; alt=&quot;Facebook&quot; style=&quot;width: 24px; height: 24px;&quot; /&gt;
-        ///              &lt;/a&gt;
-        ///          &lt;/td&gt;
-        ///          &lt;td style=&quot;width: 24px; ver [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;table style=&quot;border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///    &lt;tbody&gt;
+        ///        &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///            &lt;td style=&quot;margin: 0; padding: 0; vertical-align: bottom;&quot;&gt;
+        ///                &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;border: 0; display: block; height: auto; margin: 0 auto; padd [rest of string was truncated]&quot;;.
         /// </summary>
         public static string SocialNetworksFooter {
             get {
@@ -116,7 +115,12 @@ namespace ASC.Notify.Textile.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:sales@onlyoffice.com&quot;&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; In case of technical problems please contact our &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;https://www.onlyoffice.com/support-contact-form.aspx&quot;&gt;support team&lt;/a&gt;.&lt;br /&gt; &lt;a href=&quot;{1}&quot; style=&quot;color: #FF6F3D; text-decoration: underline; white-space: nowrap;&quot; target=&quot;_blank&quot;&gt;Click here to unsubscribe&lt;/ [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///    &lt;td class=&quot;fol&quot; style=&quot;color: #666666; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding: 40px 110px 10px; vertical-align: top;&quot;&gt;
+        ///        For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:sales@onlyoffice.com&quot;&gt;sales@onlyoffice.com&lt;/a&gt;.
+        ///    &lt;/td&gt;
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///    &lt;td class=&quot;fol [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TextForFooterUnsubsribeDocSpace {
             get {
@@ -126,11 +130,9 @@ namespace ASC.Notify.Textile.Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
-        ///          &lt;td colspan=&quot;3&quot; style=&quot;margin: 0; padding: 0; background-color: #fff; &quot;&gt;
-        ///            &lt;div style=&quot;text-align: left; width: 600px; margin: 0; padding: 0;&quot;&gt;
-        ///                &lt;a href=&quot;%SITEURL%&quot; style=&quot;text-decoration: none; display: inline-block; width: 600px; height: 360px; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
-        ///                    &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0px none; width: 600px; margin: 0; padding: 0;&quot; alt=&quot;ONLYOFFICE&quot; /&gt;
-        ///                [rest of string was truncated]&quot;;.
+        ///    &lt;td style=&quot;margin: 0; text-align: center; vertical-align: top; width: 600px;&quot;&gt;
+        ///        &lt;a href=&quot;%SITEURL%&quot; style=&quot;color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; padding-top: 22px; text-decoration: none;&quot; target=&quot;_blank&quot;&gt;
+        ///            &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0 none; height: 360px; width: 600px; color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 40px; font-weight: 700; [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TopGif {
             get {
