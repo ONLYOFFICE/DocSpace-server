@@ -53,6 +53,12 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
+
+
+        _migrationInfo = new NcMigrationInfo();
+        _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
+
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
@@ -66,8 +72,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
                 break;
             }
         }
-
-        _migrationInfo = new NcMigrationInfo { MigratorName = _meta.Name, Operation = operation, Files = new List<string> { Path.GetFileName(_takeout) } };
+        _migrationInfo.Files = new List<string> { Path.GetFileName(_takeout) };
         _tmpFolder = path;
     }
 

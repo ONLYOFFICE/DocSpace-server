@@ -48,6 +48,11 @@ public class GoogleWorkspaceMigration(
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
+        
+        _migrationInfo = new GwsMigrationInfo();
+        _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
+
         var files = Directory.GetFiles(path);
         _path = path;
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
@@ -56,10 +61,6 @@ public class GoogleWorkspaceMigration(
         }
 
         _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
-
-        _migrationInfo = new GwsMigrationInfo();
-        _migrationInfo.MigratorName = _meta.Name;
-        _migrationInfo.Operation = operation;
         _migrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
         _migrationInfo.Path = path;
     }

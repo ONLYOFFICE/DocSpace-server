@@ -49,6 +49,14 @@ public class WorkspaceMigration(
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
+        
+
+        _migrationInfo = new WorkspaceMigrationInfo();
+        _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
+        _tmpFolder = path;
+        _mappedGuids = new();
+
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".gz") || f.EndsWith(".tar")))
         {
@@ -56,13 +64,7 @@ public class WorkspaceMigration(
         }
 
         _backup = files.First(f => f.EndsWith(".gz") || f.EndsWith(".tar"));
-
-        _migrationInfo = new WorkspaceMigrationInfo();
-        _migrationInfo.MigratorName = _meta.Name;
-        _migrationInfo.Operation = operation;
         _migrationInfo.Files = new List<string> { Path.GetFileName(_backup) };
-        _tmpFolder = path;
-        _mappedGuids = new();
     }
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
     {

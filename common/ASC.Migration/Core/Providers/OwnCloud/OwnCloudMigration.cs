@@ -43,6 +43,12 @@ public class OwnCloudMigration(
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
+        
+
+        _migrationInfo = new OсMigrationInfo();
+        _migrationInfo.MigratorName = _meta.Name;
+        _migrationInfo.Operation = operation;
+
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
@@ -50,10 +56,6 @@ public class OwnCloudMigration(
         }
 
         _takeout = files.First(f => f.EndsWith(".zip"));
-
-        _migrationInfo = new OсMigrationInfo();
-        _migrationInfo.MigratorName = _meta.Name;
-        _migrationInfo.Operation = operation;
         _migrationInfo.Files = new List<string> { Path.GetFileName(_takeout) };
         _tmpFolder = path;
     }
