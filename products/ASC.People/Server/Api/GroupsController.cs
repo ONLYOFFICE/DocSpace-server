@@ -360,7 +360,7 @@ public class GroupController(UserManager userManager,
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        if (!await userManager.UserExistsAsync(userId) && userId != Guid.Empty)
+        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
         {
             return;
         }
@@ -375,7 +375,7 @@ public class GroupController(UserManager userManager,
 
     private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
     {
-        if (!await userManager.UserExistsAsync(userId))
+        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
         {
             return;
         }
