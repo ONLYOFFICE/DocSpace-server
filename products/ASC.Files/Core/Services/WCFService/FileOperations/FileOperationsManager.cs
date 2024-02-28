@@ -299,6 +299,101 @@ public class FileOperationsManager(
 
     #region Delete
 
+    public async Task DemandDeleteAsync<T>(IServiceProvider serviceProvider, IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
+    {
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+
+        await DemandDeleteAsync(serviceProvider, folderIntIds, fileIntIds);
+
+        await DemandDeleteAsync(serviceProvider, folderStringIds, fileStringIds);
+    }
+
+    public async Task DemandDeleteAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> folderIds, IEnumerable<T> fileIds)
+    {
+        var folderDao = serviceProvider.GetService<IFolderDao<T>>();
+        var fileDao = serviceProvider.GetService<IFileDao<T>>();
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+        var entryManager = serviceProvider.GetService<EntryManager>();
+        var fileTracker = serviceProvider.GetService<FileTrackerHelper>();
+
+        await DemandDeleteFilesAsync(fileIds, false);
+
+        foreach (var folderId in folderIds)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            await DemandDeleteFolderAsync(folder);
+        }
+
+
+        async Task DemandDeleteFilesAsync(IEnumerable<T> fileIds, bool isFolderCheck)
+        {
+            if (!fileIds.Any())
+            {
+                return;
+            }
+
+            var files = fileDao.GetFilesAsync(fileIds);
+
+            await foreach (var file in files)
+            {
+                if (file == null)
+                {
+                    throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+                }
+
+                if (!await fileSecurity.CanDeleteAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFile);
+                }
+
+                if (await entryManager.FileLockedForMeAsync(file.Id))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_LockedFile);
+                }
+
+                if (fileTracker.IsEditing(file.Id))
+                {
+                    throw new SecurityException(isFolderCheck
+                        ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder
+                        : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile);
+                }
+            }
+        }
+
+        async Task DemandDeleteFolderAsync(Folder<T> folder)
+        {
+            if (folder == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            if (folder.FolderType != FolderType.DEFAULT &&
+                folder.FolderType != FolderType.BUNCH &&
+                !DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            if (!await fileSecurity.CanDeleteAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            var fileIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+
+            await DemandDeleteFilesAsync(fileIds, true);
+
+            var subfolders = folderDao.GetFoldersAsync(folder.Id);
+
+            await foreach (var subfolder in subfolders)
+            {
+                await DemandDeleteFolderAsync(subfolder);
+            }
+        }
+    }
+
     public void EnqueueDelete(string taskId)
     {
         var op = fileOperationsManagerHolder.FindById(taskId);
