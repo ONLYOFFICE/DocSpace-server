@@ -70,7 +70,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.StartParse(migratorName);
+        await _migrationCore.StartParseAsync(migratorName);
     }
 
     [HttpGet("status")]
@@ -78,7 +78,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        var status = await _migrationCore.GetStatus();
+        var status = await _migrationCore.GetStatusAsync();
 
         if (status != null)
         {
@@ -100,7 +100,15 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.Stop();
+        await _migrationCore.StopAsync();
+    }
+
+    [HttpPost("clear")]
+    public async Task ClearAsync()
+    {
+        await DemandPermission();
+
+        await _migrationCore.ClearAsync();
     }
 
     [HttpPost("migrate")]
@@ -108,7 +116,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.Start(info);
+        await _migrationCore.StartAsync(info);
     }
 
     [HttpGet("logs")]
@@ -116,7 +124,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        var status = await _migrationCore.GetStatus();
+        var status = await _migrationCore.GetStatusAsync();
         if (status == null)
         {
             throw new Exception(MigrationResource.MigrationProgressException);
@@ -134,7 +142,7 @@ public class MigrationController : ControllerBase
 
         if (inDto.IsSendWelcomeEmail)
         {
-            var status = await _migrationCore.GetStatus();
+            var status = await _migrationCore.GetStatusAsync();
             if (status == null)
             {
                 throw new Exception(MigrationResource.MigrationProgressException);

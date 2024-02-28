@@ -34,6 +34,7 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
         IIntegrationEventHandler<MigrationParseIntegrationEvent>,
         IIntegrationEventHandler<MigrationIntegrationEvent>,
         IIntegrationEventHandler<MigrationCancelIntegrationEvent>
+        IIntegrationEventHandler<MigrationClearIntegrationEvent>
 {
     public Task Handle(MigrationParseIntegrationEvent @event)
     {
@@ -66,6 +67,18 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
             worker.Stop(@event.TenantId);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    public Task Handle(MigrationClearIntegrationEvent @event)
+    {
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
+
+            worker.Clear(@event.TenantId);
 
             return Task.CompletedTask;
         }

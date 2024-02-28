@@ -73,6 +73,7 @@ try
     eventBus.Subscribe<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
     eventBus.Subscribe<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
     eventBus.Subscribe<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

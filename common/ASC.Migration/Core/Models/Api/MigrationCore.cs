@@ -41,7 +41,7 @@ public class MigrationCore(
         return serviceProvider.GetService<IEnumerable<IMigration>>().FirstOrDefault(r => r.Meta.Name.Equals(migrator, StringComparison.OrdinalIgnoreCase));
     }
 
-    public async Task StartParse(string migrationName)
+    public async Task StartParseAsync(string migrationName)
     {
         eventBus.Publish(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
         {
@@ -49,7 +49,7 @@ public class MigrationCore(
         });
     }
 
-    public async Task Start(MigrationApiInfo info)
+    public async Task StartAsync(MigrationApiInfo info)
     {
         eventBus.Publish(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
         {
@@ -57,12 +57,17 @@ public class MigrationCore(
         });
     }
 
-    public async Task Stop()
+    public async Task StopAsync()
     {
         eventBus.Publish(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
     }
 
-    public async Task<MigrationOperation> GetStatus()
+     public async Task ClearAsync()
+     {
+        eventBus.Publish(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
+     }
+
+    public async Task<MigrationOperation> GetStatusAsync()
     {
         return migrationWorker.GetStatus(await tenantManager.GetCurrentTenantIdAsync());
     }
