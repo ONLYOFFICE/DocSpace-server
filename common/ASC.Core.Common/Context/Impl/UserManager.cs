@@ -326,7 +326,7 @@ public class UserManager(
         return findUsers.ToArray();
     }
 
-    public async Task<UserInfo> UpdateUserInfoAsync(UserInfo u, bool afterInvite = false)
+    public async Task<UserInfo> UpdateUserInfoAsync(UserInfo u, bool afterInvite = false, bool notifyWebSocket = true)
     {
         if (IsSystemUser(u.Id))
         {
@@ -358,7 +358,7 @@ public class UserManager(
         var (name, value) = ("", -1);
 
         if (!await IsUserInGroupAsync(oldUserData.Id, Constants.GroupUser.ID) &&
-            oldUserData.Status != u.Status)
+            oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             value = oldUserData.Status > u.Status ? ++value : --value;//crutch: data race
@@ -366,7 +366,7 @@ public class UserManager(
 
         var newUserData = await userService.SaveUserAsync(tenant.Id, u);
 
-        if (value > 0)
+        if (value > 0 && notifyWebSocket)
         {
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
@@ -715,9 +715,8 @@ public class UserManager(
         {
             return;
         }
-
-        if (isUser && groupId != Constants.GroupUser.ID ||
-            !isUser && !isPaidUser && groupId != Constants.GroupUser.ID)
+        
+        if ((groupId != Constants.GroupUser.ID && Constants.SystemGroups.Any(b => b.ID == groupId)) && (isUser || !isPaidUser))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);

@@ -370,7 +370,7 @@ public class GroupController(UserManager userManager,
             await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
         
-        await userManager.AddUserIntoGroupAsync(userId, group.ID);
+        await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
     }
 
     private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
@@ -382,7 +382,7 @@ public class GroupController(UserManager userManager,
 
         var user = await userManager.GetUsersAsync(userId);
         await userManager.RemoveUserFromGroupAsync(user.Id, group.ID);
-        await userManager.UpdateUserInfoAsync(user);
+        await userManager.UpdateUserInfoAsync(user, notifyWebSocket: false);
     }
 }
 
