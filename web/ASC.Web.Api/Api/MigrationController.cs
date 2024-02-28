@@ -80,18 +80,24 @@ public class MigrationController : ControllerBase
 
         var status = await _migrationCore.GetStatusAsync();
 
-        if (status != null)
+        try
         {
-            var result = new MigrationStatusDto
+            if (status != null)
             {
-                Progress = status.Percentage,
-                Error = status.Exception != null ? status.Exception.Message : "",
-                IsCompleted = status.IsCompleted,
-                ParseResult = status.MigrationApiInfo
-            };
-            return result;
+                var result = new MigrationStatusDto
+                {
+                    Progress = status.Percentage,
+                    Error = status.Exception != null ? status.Exception.Message : "",
+                    IsCompleted = status.IsCompleted,
+                    ParseResult = status.MigrationApiInfo
+                };
+                return result;
+            }
         }
+        catch
+        {
 
+        }
         return null;
     }
 
