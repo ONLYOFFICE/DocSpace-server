@@ -33,7 +33,8 @@ public class OperationController(
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     FileOperationsManager fileOperationsManager, 
-    CommonLinkUtility commonLinkUtility)
+    CommonLinkUtility commonLinkUtility,
+    IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -104,6 +105,8 @@ public class OperationController(
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
+        await fileOperationsManager.DemandDeleteAsync(serviceProvider, inDto.FolderIds, inDto.FileIds);
+
         await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
         
         foreach (var e in fileOperationsManager.GetOperationResults())
@@ -125,7 +128,9 @@ public class OperationController(
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
         var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
-        
+
+        await fileOperationsManager.DemandDeleteAsync(serviceProvider, foldersId, filesId);
+
         await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
         foreach (var e in fileOperationsManager.GetOperationResults())

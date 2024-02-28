@@ -35,9 +35,10 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-    ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
+        ApiContext apiContext,
+        FileShareDtoHelper fileShareDtoHelper,
+        IServiceProvider serviceProvider)
+        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper, serviceProvider);
 
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -47,9 +48,10 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-    ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
+        ApiContext apiContext,
+        FileShareDtoHelper fileShareDtoHelper,
+        IServiceProvider serviceProvider)
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper, serviceProvider)
 {
     /// <summary>
     /// Returns the detailed information about a third-party file with the ID specified in the request.
@@ -78,7 +80,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
+        FileShareDtoHelper fileShareDtoHelper,
+        IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -226,7 +229,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(T fileId, [FromBody] DeleteRequestDto inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
+        var folderIds = new List<T>();
+        var fileIds = new List<T> { fileId };
+
+        await fileOperationsManager.DemandDeleteAsync(serviceProvider, folderIds, fileIds);
+
+        await fileOperationsManager.PublishDelete(folderIds, fileIds, false, !inDto.DeleteAfter, inDto.Immediately);
         
         foreach (var e in fileOperationsManager.GetOperationResults())
         {

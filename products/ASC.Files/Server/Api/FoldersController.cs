@@ -33,8 +33,9 @@ public class FoldersControllerInternal(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        IServiceProvider serviceProvider)
+    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, serviceProvider);
 
 public class FoldersControllerThirdparty(EntryManager entryManager,
         FoldersControllerHelper foldersControllerHelper,
@@ -42,8 +43,9 @@ public class FoldersControllerThirdparty(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        IServiceProvider serviceProvider)
+    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, serviceProvider);
 
 public abstract class FoldersController<T>(EntryManager entryManager,
         FoldersControllerHelper foldersControllerHelper,
@@ -51,7 +53,8 @@ public abstract class FoldersController<T>(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -86,8 +89,13 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { folderId }, new List<T>(), false, !inDto.DeleteAfter, inDto.Immediately);
-        
+        var folderIds = new List<T> { folderId };
+        var fileIds = new List<T>();
+
+        await fileOperationsManager.DemandDeleteAsync(serviceProvider, folderIds, fileIds);
+
+        await fileOperationsManager.PublishDelete(folderIds, fileIds, false, !inDto.DeleteAfter, inDto.Immediately);
+
         foreach (var e in fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);

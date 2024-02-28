@@ -38,7 +38,8 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
-        ApiContext apiContext)
+        ApiContext apiContext,
+        IServiceProvider serviceProvider)
     : VirtualRoomsController<int>(globalFolderHelper,
     fileOperationDtoHelper,
     customTagsService,
@@ -50,7 +51,8 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     fileShareDtoHelper,
     mapper,
     socketManager,
-    apiContext)
+    apiContext,
+    serviceProvider)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section.
@@ -81,7 +83,8 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
-        ApiContext apiContext)
+        ApiContext apiContext,
+        IServiceProvider serviceProvider)
     : VirtualRoomsController<string>(globalFolderHelper,
     fileOperationDtoHelper,
     customTagsService,
@@ -93,7 +96,8 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     fileShareDtoHelper,
     mapper,
     socketManager,
-    apiContext)
+    apiContext,
+    serviceProvider)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -127,7 +131,8 @@ public abstract class VirtualRoomsController<T>(
     FileShareDtoHelper fileShareDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -227,8 +232,13 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(T id, DeleteRoomRequestDto inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { id }, new List<T>(), false, !inDto.DeleteAfter, true);
-        
+        var folderIds = new List<T> { id };
+        var fileIds = new List<T>();
+
+        await fileOperationsManager.DemandDeleteAsync(serviceProvider, folderIds, fileIds);
+
+        await fileOperationsManager.PublishDelete(folderIds, fileIds, false, !inDto.DeleteAfter, true);
+
         return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
     }
 
