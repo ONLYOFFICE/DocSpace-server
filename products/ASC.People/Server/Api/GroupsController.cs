@@ -161,7 +161,7 @@ public class GroupController(UserManager userManager,
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id:guid}")]
-    public async Task<GroupDto> UpdateGroupAsync(Guid id, GroupRequestDto inDto)
+    public async Task<GroupDto> UpdateGroupAsync(Guid id, UpdateGroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
@@ -170,15 +170,21 @@ public class GroupController(UserManager userManager,
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
 
-        await RemoveMembersFromAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
-
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
-        if (inDto.Members != null)
+        if (inDto.MembersToAdd != null)
         {
-            foreach (var member in inDto.Members)
+            foreach (var memberToAdd in inDto.MembersToAdd)
             {
-                await TransferUserToDepartmentAsync(member, group, false);
+                await TransferUserToDepartmentAsync(memberToAdd, group, false);
+            }
+        }
+        
+        if (inDto.MembersToRemove != null)
+        {
+            foreach (var memberToRemove in inDto.MembersToRemove)
+            {
+                await RemoveUserFromDepartmentAsync(memberToRemove, group);
             }
         }
 
