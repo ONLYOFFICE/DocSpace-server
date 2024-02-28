@@ -73,7 +73,7 @@ public static class UserExtensions
     public static async Task<bool> IsSystemGroup(this UserManager userManager, Guid groupId)
     {
         var group = await userManager.GetGroupInfoAsync(groupId);
-        return group.ID != Constants.LostGroupInfo.ID && group.CategoryID != Constants.SysGroupCategoryId;
+        return group.ID == Constants.LostGroupInfo.ID && group.CategoryID == Constants.SysGroupCategoryId;
     }
 
     public static bool IsUser(this UserManager userManager, Guid id)

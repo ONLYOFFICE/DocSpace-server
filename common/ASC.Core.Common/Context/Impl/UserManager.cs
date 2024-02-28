@@ -716,7 +716,7 @@ public class UserManager(
             return;
         }
 
-        if (!await this.IsSystemGroup(groupId) &&
+        if (await this.IsSystemGroup(groupId) &&
             (isUser && groupId != Constants.GroupUser.ID ||
             !isUser && !isPaidUser && groupId != Constants.GroupUser.ID))
         {
