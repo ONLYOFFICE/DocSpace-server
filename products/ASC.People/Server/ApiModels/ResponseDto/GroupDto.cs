@@ -68,9 +68,14 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             Category = group.CategoryID,
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
             Shared = shared
         };
+        
+        var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
+        if (manager != null && !manager.Equals(Constants.LostUser))
+        {
+            result.Manager = await employeeFullDtoHelper.GetFullAsync(manager);
+        }
 
         if (!includeMembers)
         {
