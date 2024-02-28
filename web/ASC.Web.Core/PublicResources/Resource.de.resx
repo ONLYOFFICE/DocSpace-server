@@ -980,7 +980,7 @@
     <value>Cloud-Speicherplatz für Ihre Office-Dokumente</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
+    <value>Business-</value>
   </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
