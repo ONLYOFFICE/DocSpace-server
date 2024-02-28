@@ -142,19 +142,18 @@ public class MigrationOperation(
         }
         finally
         {
+            if (migrator != null)
+            {
+                migrator.OnProgressUpdate -= Migrator_OnProgressUpdate;
+                ImportedUsers = migrator.GetGuidImportedUsers();
+                LogName = migrator.GetLogName();
+                migrator.Dispose();
+            }
             if (!CancellationToken.IsCancellationRequested) 
             {
                 IsCompleted = true;
-                if (migrator != null)
-                {
-                    migrator.OnProgressUpdate -= Migrator_OnProgressUpdate;
-                    ImportedUsers = migrator.GetGuidImportedUsers();
-                    LogName = migrator.GetLogName();
-                }
-
                 PublishChanges();
             }
-            migrator.Dispose();
         }
 
         void Migrator_OnProgressUpdate(double arg1, string arg2)

@@ -78,6 +78,11 @@ public class OwnCloudMigration(
                         }
                         else
                         {
+                            var dir = Path.GetDirectoryName(Path.Combine(_tmpFolder, entry.FullName));
+                            if (!Directory.Exists(dir))
+                            {
+                                Directory.CreateDirectory(dir);
+                            }
                             entry.ExtractToFile(Path.Combine(_tmpFolder, entry.FullName));
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
