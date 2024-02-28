@@ -109,7 +109,6 @@ public class WorkspaceMigratingUser(
                 _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             }
 
-            _user.Info = saved;
             if (_hasPhoto)
             {
                 using var ms = new MemoryStream();
@@ -120,5 +119,6 @@ public class WorkspaceMigratingUser(
                 await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
+        _user.Info = saved;
     }
 }

@@ -109,6 +109,7 @@ public class GwsMigratingUser(
             {
                 _userInfo.LastName = FilesCommonResource.UnknownLastName;
             }
+            _userInfo.Id = Guid.Empty;
             saved = await userManager.SaveUserInfo(_userInfo, UserType);
 
             var groupId = UserType switch
@@ -141,6 +142,7 @@ public class GwsMigratingUser(
                 await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
+        _userInfo = saved;
     }
 
     private void ParseRootHtml()

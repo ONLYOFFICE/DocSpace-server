@@ -124,6 +124,7 @@ public class OсMigratingUser(
             {
                 _userInfo.LastName = FilesCommonResource.UnknownLastName;
             }
+            _userInfo.Id = Guid.Empty;
             saved = await userManager.SaveUserInfo(_userInfo, UserType);
             var groupId = UserType switch
             {
@@ -153,5 +154,6 @@ public class OсMigratingUser(
                 await userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
+        _userInfo = saved;
     }
 }

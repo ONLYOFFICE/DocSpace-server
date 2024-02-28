@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DotNetOpenAuth.Messaging;
+
 namespace ASC.Migration.Core.Models;
 
 public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
@@ -63,6 +65,8 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
 
     public virtual void Merge(MigrationApiInfo apiInfo)
     {
+        Users.AddRange(ExistUsers);
+        Users.AddRange(WithoutEmailUsers);
         foreach (var apiUser in apiInfo.Users)
         {
             if (!Users.ContainsKey(apiUser.Key))
