@@ -33,7 +33,7 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
     :
         IIntegrationEventHandler<MigrationParseIntegrationEvent>,
         IIntegrationEventHandler<MigrationIntegrationEvent>,
-        IIntegrationEventHandler<MigrationCancelIntegrationEvent>
+        IIntegrationEventHandler<MigrationCancelIntegrationEvent>,
         IIntegrationEventHandler<MigrationClearIntegrationEvent>
 {
     public Task Handle(MigrationParseIntegrationEvent @event)
