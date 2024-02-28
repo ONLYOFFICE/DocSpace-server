@@ -114,9 +114,9 @@ public class GwsMigratingUser(
 
             var groupId = UserType switch
             {
-                EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
-                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
                 EmployeeType.Collaborator => ASC.Core.Users.Constants.GroupCollaborator.ID,
+                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
+                EmployeeType.RoomAdmin => ASC.Core.Users.Constants.GroupManager.ID,
                 _ => Guid.Empty,
             };
 

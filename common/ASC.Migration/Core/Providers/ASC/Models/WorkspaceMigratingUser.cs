@@ -93,9 +93,9 @@ public class WorkspaceMigratingUser(
             saved = await userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch
             {
-                EmployeeType.User => Constants.GroupUser.ID,
-                EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                EmployeeType.Collaborator => ASC.Core.Users.Constants.GroupCollaborator.ID,
+                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
+                EmployeeType.RoomAdmin => ASC.Core.Users.Constants.GroupManager.ID,
                 _ => Guid.Empty,
             };
 
