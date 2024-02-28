@@ -30,7 +30,6 @@ namespace ASC.Core.Common;
 public class BaseCommonLinkUtility
 {
     private const string LocalHost = "localhost";
-    private const int LocalPort = 8092;
 
     private UriBuilder _serverRoot;
     private string _vpath;
@@ -128,15 +127,6 @@ public class BaseCommonLinkUtility
                 // take values from db if localhost or no http context thread
                 var tenant = _tenantManager.GetCurrentTenant();
                 result.Host = tenant.GetTenantDomain(_coreSettings);
-
-#if DEBUG
-                // for Visual Studio debug
-                if (tenant.Alias == LocalHost)
-                {
-                    result.Host = LocalHost;
-                    result.Port = LocalPort;
-                }
-#endif
 
                 if (!string.IsNullOrEmpty(tenant.MappedDomain))
                 {

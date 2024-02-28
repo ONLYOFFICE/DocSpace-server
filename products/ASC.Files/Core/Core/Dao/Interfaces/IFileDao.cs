@@ -187,6 +187,12 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
     /// <summary>
+    ///   Deletes a file including all previous versions
+    /// </summary>
+    /// <param name="fileId">file id</param>
+    /// <param name="ownerId">file owner id</param>
+    Task DeleteFileAsync(T fileId, Guid ownerId);
+    /// <summary>
     ///     Checks whether or not file
     /// </summary>
     /// <param name="title">file name</param>
@@ -255,6 +261,8 @@ public interface IFileDao<T>
     Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null);
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
+    Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
+    
     #endregion
 
     #region Only in TMFileDao

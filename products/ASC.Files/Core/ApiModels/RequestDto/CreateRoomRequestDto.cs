@@ -66,6 +66,10 @@ public class CreateRoomRequestDto
     /// <summary>Message to send when notifying about the shared room</summary>
     /// <type>System.String, System</type>
     public string SharingMessage { get; set; }
+
+    /// <summary>Room quota</summary>
+    /// <type>System.Int64, System</type>
+    public long Quota { get; set; }
     
     public bool Indexing { get; set; }
 }

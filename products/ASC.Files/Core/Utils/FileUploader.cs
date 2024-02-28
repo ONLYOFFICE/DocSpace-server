@@ -298,6 +298,13 @@ public class FileUploader(
     {
         await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
     }
+    
+    public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
+    {
+        var dao = daoFactory.GetFileDao<T>();
+
+        return dao.GetTransferredBytesCountAsync(uploadSession);
+    }
 
     private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
     {

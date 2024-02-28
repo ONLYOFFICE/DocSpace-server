@@ -114,7 +114,7 @@ public class UserManager(
 
         return await users.ToArrayAsync();
     }
-    
+
     public async Task<UserInfo> GetUsersAsync(Guid id)
     {
         if (IsSystemUser(id))
@@ -147,9 +147,11 @@ public class UserManager(
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        QuotaFilter? quotaFilter,
+        string text,
+        bool withoutGroup)
     {
-        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -160,13 +162,20 @@ public class UserManager(
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
+        bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, Tenant.OwnerId, sortBy, sortOrderAsc, limit, offset);
+        if (!UserSortTypeExtensions.TryParse(sortBy, true, out var sortType))
+        {
+            sortType = UserSortType.FirstName;
+        }
+
+        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)
@@ -707,8 +716,9 @@ public class UserManager(
             return;
         }
 
-        if (isUser && groupId != Constants.GroupUser.ID ||
-            !isUser && !isPaidUser && groupId != Constants.GroupUser.ID)
+        if (await this.IsSystemGroup(groupId) &&
+            (isUser && groupId != Constants.GroupUser.ID ||
+            !isUser && !isPaidUser && groupId != Constants.GroupUser.ID))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
@@ -818,6 +828,22 @@ public class UserManager(
 
     #region Groups
 
+    public IAsyncEnumerable<GroupInfo> GetGroupsAsync(string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    {
+        return userService.GetGroupsAsync(Tenant.Id, text, userId, manager, sortBy, sortOrderAsc, offset, count)
+            .Select(group => new GroupInfo(group.CategoryId)
+            {
+                ID = group.Id,
+                Name = group.Name,
+                Sid = group.Sid
+            });
+    }
+
+    public Task<int> GetGroupsCountAsync(string text, Guid userId, bool manager)
+    {
+        return userService.GetGroupsCountAsync(Tenant.Id, text, userId, manager);
+    }
+    
     public async Task<GroupInfo[]> GetGroupsAsync()
     {
         return await GetGroupsAsync(Guid.Empty);
@@ -833,7 +859,7 @@ public class UserManager(
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
         var group = await userService.GetGroupAsync(Tenant.Id, groupID) ?? 
-                    ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
+                    ToGroup(Constants.SystemGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)
         {
@@ -862,9 +888,9 @@ public class UserManager(
             return Constants.LostGroupInfo;
         }
 
-        if (Constants.BuildinGroups.Any(b => b.ID == g.ID))
+        if (Constants.SystemGroups.Any(b => b.ID == g.ID))
         {
-            return Constants.BuildinGroups.Single(b => b.ID == g.ID);
+            return Constants.SystemGroups.Single(b => b.ID == g.ID);
         }
 
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups);
@@ -881,7 +907,7 @@ public class UserManager(
             return;
         }
 
-        if (Constants.BuildinGroups.Any(b => b.ID == id))
+        if (Constants.SystemGroups.Any(b => b.ID == id))
         {
             return;
         }
@@ -928,7 +954,7 @@ public class UserManager(
         return (await userService.GetGroupsAsync(Tenant.Id))
             .Where(g => !g.Removed)
             .Select(g => new GroupInfo(g.CategoryId) { ID = g.Id, Name = g.Name, Sid = g.Sid })
-            .Concat(Constants.BuildinGroups)
+            .Concat(Constants.SystemGroups)
             .ToList();
     }
 

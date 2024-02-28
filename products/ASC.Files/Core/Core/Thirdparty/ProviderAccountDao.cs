@@ -31,13 +31,11 @@ public enum ProviderTypes
 {
     Box,
     BoxNet,
-    DropBox,
     DropboxV2,
     Google,
     GoogleDrive,
     OneDrive,
     SharePoint,
-    SkyDrive,
     WebDav,
     kDrive,
     Yandex
@@ -50,7 +48,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         InstanceCrypto instanceCrypto,
         SecurityContext securityContext,
         ConsumerFactory consumerFactory,
-        ThirdpartyConfiguration thirdpartyConfiguration,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         OAuth20TokenHelper oAuth20TokenHelper,
         ILoggerProvider options)
@@ -101,9 +98,9 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         try
         {
             var filesDbContext = dbContextFactory.CreateDbContext();
-            var thirdpartyAccounts = Queries.ThirdpartyAccountsAsync(filesDbContext, TenantID, userId);
+            var thirdPartyAccounts = Queries.ThirdPartyAccountsAsync(filesDbContext, TenantID, userId);
 
-            return thirdpartyAccounts.Select(ToProviderInfo);
+            return thirdPartyAccounts.Select(ToProviderInfo);
         }
         catch (Exception e)
         {
@@ -118,7 +115,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         try
         {
             var filesDbContext = dbContextFactory.CreateDbContext();
-            return Queries.ThirdpartyAccountsByFilterAsync(filesDbContext, TenantID, linkId, folderType, securityContext.CurrentAccount.ID, GetSearchText(searchText))
+            return Queries.ThirdPartyAccountsByFilterAsync(filesDbContext, TenantID, linkId, folderType, securityContext.CurrentAccount.ID, GetSearchText(searchText))
                 .Select(ToProviderInfo);
         }
         catch (Exception e)
@@ -140,7 +137,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             throw new ArgumentException("Unrecognize ProviderType");
         }
 
-        authData = GetEncodedAccesToken(authData, prKey);
+        authData = GetEncodedAccessToken(authData, prKey);
 
         if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
         {
@@ -161,7 +158,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             CreateOn = now,
             ModifiedOn = now,
             UserId = securityContext.CurrentAccount.ID,
-            Token = EncryptPassword(authData.Token ?? ""),
+            Token = EncryptPassword(authData.RawToken ?? ""),
             Url = authData.Url ?? ""
         };
 
@@ -180,7 +177,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)
     {
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, data.Id);
+        var forUpdate = await Queries.ThirdPartyAccountAsync(filesDbContext, TenantID, data.Id);
 
         if (forUpdate == null)
         {
@@ -209,7 +206,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
         if (data.Private.HasValue)
         {
-            forUpdate.Private = data.Private.HasValue;
+            forUpdate.Private = data.Private.Value;
         }
 
         if (data.HasLogo.HasValue)
@@ -236,10 +233,10 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         var tenantId = TenantID;
         var login = authData.Login ?? "";
         var password = EncryptPassword(authData.Password);
-        var token = EncryptPassword(authData.Token ?? "");
+        var token = EncryptPassword(authData.RawToken ?? "");
         var url = authData.Url ?? "";
 
-        var forUpdateCount = await Queries.UpdateThirdpartyAccountsAsync(filesDbContext, tenantId, linkId, login, password, token, url);
+        var forUpdateCount = await Queries.UpdateThirdPartyAccountsAsync(filesDbContext, tenantId, linkId, login, password, token, url);
 
         return forUpdateCount == 1 ? linkId : default;
     }
@@ -254,7 +251,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             DbFilesThirdpartyAccount input;
             try
             {
-                input = await Queries.ThirdpartyAccountByLinkIdAsync(filesDbContext, TenantID, linkId);
+                input = await Queries.ThirdPartyAccountByLinkIdAsync(filesDbContext, TenantID, linkId);
             }
             catch (Exception e)
             {
@@ -271,11 +268,11 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
                 !string.IsNullOrEmpty(newAuthData.Url) ? newAuthData.Url : input.Url,
                 input.UserName,
                 !string.IsNullOrEmpty(newAuthData.Password) ? newAuthData.Password : DecryptPassword(input.Password, linkId),
-                newAuthData.Token);
+                newAuthData.RawToken);
 
-            if (!string.IsNullOrEmpty(newAuthData.Token))
+            if (!string.IsNullOrEmpty(newAuthData.RawToken))
             {
-                authData = GetEncodedAccesToken(authData, key);
+                authData = GetEncodedAccessToken(authData, key);
             }
 
             if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
@@ -284,7 +281,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             }
         }
 
-        var toUpdate = Queries.ThirdpartyAccountsByLinkIdAsync(filesDbContext, TenantID, linkId);
+        var toUpdate = Queries.ThirdPartyAccountsByLinkIdAsync(filesDbContext, TenantID, linkId);
         var toUpdateCount = 0;
 
         await foreach (var t in toUpdate)
@@ -308,7 +305,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             {
                 t.UserName = authData.Login ?? "";
                 t.Password = EncryptPassword(authData.Password);
-                t.Token = EncryptPassword(authData.Token ?? "");
+                t.Token = EncryptPassword(authData.RawToken ?? "");
                 t.Url = authData.Url ?? "";
             }
             
@@ -326,10 +323,10 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
     {
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        DbFilesThirdpartyAccount thirdparty;
+        DbFilesThirdpartyAccount thirdParty;
         try
         {
-            thirdparty = await Queries.ThirdpartyBackupAccountAsync(filesDbContext, TenantID);
+            thirdParty = await Queries.ThirdPartyBackupAccountAsync(filesDbContext, TenantID);
         }
         catch (Exception e)
         {
@@ -344,9 +341,9 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
         if (newAuthData != null && !newAuthData.IsEmpty())
         {
-            if (!string.IsNullOrEmpty(newAuthData.Token))
+            if (!string.IsNullOrEmpty(newAuthData.RawToken))
             {
-                newAuthData = GetEncodedAccesToken(newAuthData, key);
+                newAuthData = GetEncodedAccessToken(newAuthData, key);
             }
 
             if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, newAuthData, securityContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
@@ -357,26 +354,26 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
         if (!string.IsNullOrEmpty(customerTitle))
         {
-            thirdparty.Title = customerTitle;
+            thirdParty.Title = customerTitle;
         }
 
-        thirdparty.UserId = securityContext.CurrentAccount.ID;
-        thirdparty.Provider = providerKey;
+        thirdParty.UserId = securityContext.CurrentAccount.ID;
+        thirdParty.Provider = providerKey;
 
-        if (!newAuthData.IsEmpty())
+        if (newAuthData != null && !newAuthData.IsEmpty())
         {
-            thirdparty.UserName = newAuthData.Login ?? "";
-            thirdparty.Password = EncryptPassword(newAuthData.Password);
-            thirdparty.Token = EncryptPassword(newAuthData.Token ?? "");
-            thirdparty.Url = newAuthData.Url ?? "";
+            thirdParty.UserName = newAuthData.Login ?? "";
+            thirdParty.Password = EncryptPassword(newAuthData.Password);
+            thirdParty.Token = EncryptPassword(newAuthData.RawToken ?? "");
+            thirdParty.Url = newAuthData.Url ?? "";
         }
         
-        thirdparty.ModifiedOn = DateTime.UtcNow;
+        thirdParty.ModifiedOn = DateTime.UtcNow;
         
-        filesDbContext.Update(thirdparty);
+        filesDbContext.Update(thirdParty);
         await filesDbContext.SaveChangesAsync();
 
-        return thirdparty.Id;
+        return thirdParty.Id;
     }
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
@@ -393,7 +390,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             await Queries.DeleteDbFilesSecuritiesAsync(dbContext, TenantID, entryIDs);
             await Queries.DeleteDbFilesTagLinksAsync(dbContext, TenantID, entryIDs);
-            await Queries.DeleteThirdpartyAccountsByLinkIdAsync(dbContext, TenantID, linkId);
+            await Queries.DeleteThirdPartyAccountsByLinkIdAsync(dbContext, TenantID, linkId);
 
             await tr.CommitAsync();
         });
@@ -401,11 +398,11 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
     private IProviderInfo ToProviderInfo(int id, ProviderTypes providerKey, string customerTitle, AuthData authData, Guid owner, FolderType type, DateTime createOn)
     {
-        var dbFilesThirdpartyAccount = new DbFilesThirdpartyAccount
+        var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
         {
             Id = id,
             Title = customerTitle,
-            Token = EncryptPassword(authData.Token),
+            Token = EncryptPassword(authData.RawToken),
             Url = authData.Url,
             UserName = authData.Login,
             Password = EncryptPassword(authData.Password),
@@ -415,7 +412,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             Provider = providerKey.ToString()
         };
 
-        return ToProviderInfo(dbFilesThirdpartyAccount);
+        return ToProviderInfo(dbFilesThirdPartyAccount);
     }
 
     public IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input)
@@ -435,9 +432,14 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         var folderId = input.FolderId;
         var createOn = tenantUtil.DateTimeFromUtc(input.CreateOn);
         var modifiedOn = tenantUtil.DateTimeFromUtc(input.ModifiedOn);
-        var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token);
+        var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token, input.Provider);
         var hasLogo = input.HasLogo;
         var color = input.Color;
+
+        if (key == ProviderTypes.kDrive)
+        {
+            authData.Url = "https://connect.drive.infomaniak.com";
+        }
 
         if (key == ProviderTypes.Box)
         {
@@ -454,7 +456,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             box.RootFolderType = rootFolderType;
             box.CreateOn = createOn;
             box.ModifiedOn = modifiedOn;
-            box.Token = OAuth20Token.FromJson(token);
+            box.AuthData = authData;
             box.FolderType = folderType;
             box.FolderId = folderId;
             box.Private = privateRoom;
@@ -479,7 +481,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             drop.RootFolderType = rootFolderType;
             drop.CreateOn = createOn;
             drop.ModifiedOn = modifiedOn;
-            drop.Token = OAuth20Token.FromJson(token);
+            drop.AuthData = authData;
             drop.FolderType = folderType;
             drop.FolderId = folderId;
             drop.Private = privateRoom;
@@ -529,7 +531,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             gd.RootFolderType = rootFolderType;
             gd.CreateOn = createOn;
             gd.ModifiedOn = modifiedOn;
-            gd.Token = OAuth20Token.FromJson(token);
+            gd.AuthData = authData;
             gd.FolderType = folderType;
             gd.FolderId = folderId;
             gd.Private = privateRoom;
@@ -554,7 +556,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             od.RootFolderType = rootFolderType;
             od.CreateOn = createOn;
             od.ModifiedOn = modifiedOn;
-            od.Token = OAuth20Token.FromJson(token);
+            od.AuthData = authData;
             od.FolderType = folderType;
             od.FolderId = folderId;
             od.Private = privateRoom;
@@ -569,35 +571,35 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             throw new ArgumentNullException("providerKey");
         }
 
-        if (string.IsNullOrEmpty(authData.Token) && string.IsNullOrEmpty(authData.Password))
+        if (string.IsNullOrEmpty(authData.RawToken) && string.IsNullOrEmpty(authData.Password))
         {
             throw new ArgumentNullException("token", "Both token and password can't be null");
         }
 
-        if (!string.IsNullOrEmpty(authData.Login) && string.IsNullOrEmpty(authData.Password) && string.IsNullOrEmpty(authData.Token))
+        if (!string.IsNullOrEmpty(authData.Login) && string.IsNullOrEmpty(authData.Password) && string.IsNullOrEmpty(authData.RawToken))
         {
             throw new ArgumentNullException("password", "Password can't be null");
         }
 
-        var sharpBoxProviderInfo = serviceProvider.GetService<SharpBoxProviderInfo>();
-        sharpBoxProviderInfo.ProviderId = id;
-        sharpBoxProviderInfo.CustomerTitle = providerTitle;
-        sharpBoxProviderInfo.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
-        sharpBoxProviderInfo.ProviderKey = input.Provider;
-        sharpBoxProviderInfo.RootFolderType = rootFolderType;
-        sharpBoxProviderInfo.CreateOn = createOn;
-        sharpBoxProviderInfo.ModifiedOn = modifiedOn;
-        sharpBoxProviderInfo.AuthData = authData;
-        sharpBoxProviderInfo.FolderType = folderType;
-        sharpBoxProviderInfo.FolderId = folderId;
-        sharpBoxProviderInfo.Private = privateRoom;
-        sharpBoxProviderInfo.HasLogo = hasLogo;
-        sharpBoxProviderInfo.Color = color;
+        var webDavProviderInfo = serviceProvider.GetService<WebDavProviderInfo>();
+        webDavProviderInfo.ProviderId = id;
+        webDavProviderInfo.CustomerTitle = providerTitle;
+        webDavProviderInfo.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+        webDavProviderInfo.ProviderKey = input.Provider;
+        webDavProviderInfo.RootFolderType = rootFolderType;
+        webDavProviderInfo.CreateOn = createOn;
+        webDavProviderInfo.ModifiedOn = modifiedOn;
+        webDavProviderInfo.AuthData = authData;
+        webDavProviderInfo.FolderType = folderType;
+        webDavProviderInfo.FolderId = folderId;
+        webDavProviderInfo.Private = privateRoom;
+        webDavProviderInfo.HasLogo = hasLogo;
+        webDavProviderInfo.Color = color;
 
-        return sharpBoxProviderInfo;
+        return webDavProviderInfo;
     }
 
-    private AuthData GetEncodedAccesToken(AuthData authData, ProviderTypes provider)
+    private AuthData GetEncodedAccessToken(AuthData authData, ProviderTypes provider)
     {
         string code;
         OAuth20Token token;
@@ -605,7 +607,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         switch (provider)
         {
             case ProviderTypes.GoogleDrive:
-                code = authData.Token;
+                code = authData.RawToken;
                 token = oAuth20TokenHelper.GetAccessToken<GoogleLoginProvider>(consumerFactory, code);
 
                 if (token == null)
@@ -616,7 +618,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
                 return new AuthData(token: token.ToJson());
 
             case ProviderTypes.Box:
-                code = authData.Token;
+                code = authData.RawToken;
                 token = oAuth20TokenHelper.GetAccessToken<BoxLoginProvider>(consumerFactory, code);
 
                 if (token == null)
@@ -627,7 +629,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
                 return new AuthData(token: token.ToJson());
 
             case ProviderTypes.DropboxV2:
-                code = authData.Token;
+                code = authData.RawToken;
                 token = oAuth20TokenHelper.GetAccessToken<DropboxLoginProvider>(consumerFactory, code);
 
                 if (token == null)
@@ -637,22 +639,8 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
                 return new AuthData(token: token.ToJson());
 
-            case ProviderTypes.DropBox:
-
-                var dropBoxRequestToken = DropBoxRequestToken.Parse(authData.Token);
-
-                var config = CloudStorage.GetCloudConfigurationEasy(nSupportedCloudConfigurations.DropBox);
-                var accessToken = DropBoxStorageProviderTools.ExchangeDropBoxRequestTokenIntoAccessToken(config as DropBoxConfiguration,
-                                                                                                         thirdpartyConfiguration.DropboxAppKey,
-                                                                                                         thirdpartyConfiguration.DropboxAppSecret,
-                                                                                                         dropBoxRequestToken);
-
-                var base64Token = new CloudStorage().SerializeSecurityTokenToBase64Ex(accessToken, config.GetType(), new Dictionary<string, string>());
-
-                return new AuthData(token: base64Token);
-
             case ProviderTypes.OneDrive:
-                code = authData.Token;
+                code = authData.RawToken;
                 token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
 
                 if (token == null)
@@ -661,31 +649,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
                 }
 
                 return new AuthData(token: token.ToJson());
-
-            case ProviderTypes.SkyDrive:
-
-                code = authData.Token;
-
-                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
-
-                if (token == null)
-                {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
-                }
-
-                accessToken = AppLimit.CloudComputing.SharpBox.Common.Net.oAuth20.OAuth20Token.FromJson(token.ToJson());
-
-                if (accessToken == null)
-                {
-                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
-                }
-
-                config = CloudStorage.GetCloudConfigurationEasy(nSupportedCloudConfigurations.SkyDrive);
-                var storage = new CloudStorage();
-                base64Token = storage.SerializeSecurityTokenToBase64Ex(accessToken, config.GetType(), new Dictionary<string, string>());
-
-                return new AuthData(token: base64Token);
-
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
                 break;
@@ -739,7 +702,7 @@ public static class ProviderAccountDaoExtension
         services.TryAdd<SharePointProviderInfo>();
         services.TryAdd<GoogleDriveProviderInfo>();
         services.TryAdd<OneDriveProviderInfo>();
-        services.TryAdd<SharpBoxProviderInfo>();
+        services.TryAdd<WebDavProviderInfo>();
     }
 }
 
@@ -758,7 +721,7 @@ public class ProviderData
 static file class Queries
 {
     public static readonly Func<FilesDbContext, int, Guid, IAsyncEnumerable<DbFilesThirdpartyAccount>>
-        ThirdpartyAccountsAsync = EF.CompileAsyncQuery(
+        ThirdPartyAccountsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId) =>
                 ctx.ThirdpartyAccount
                     .Where(r => r.TenantId == tenantId)
@@ -766,7 +729,7 @@ static file class Queries
 
     public static readonly
         Func<FilesDbContext, int, int, FolderType, Guid, string, IAsyncEnumerable<DbFilesThirdpartyAccount>>
-        ThirdpartyAccountsByFilterAsync = EF.CompileAsyncQuery(
+        ThirdPartyAccountsByFilterAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId, FolderType folderType, Guid userId, string searchText) =>
                 ctx.ThirdpartyAccount
                     
@@ -778,14 +741,14 @@ static file class Queries
                         !(r.FolderType == FolderType.ThirdpartyBackup && linkId == -1) || r.FolderType == folderType)
                     .Where(r => searchText == "" || r.Title.ToLower().Contains(searchText)));
 
-    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdpartyAccountAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdPartyAccountAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .FirstOrDefault(r =>  r.Id == linkId && r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>>
-        UpdateThirdpartyAccountsAsync = EF.CompileAsyncQuery(
+        UpdateThirdPartyAccountsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId, string login, string password, string token, string url) =>
                 ctx.ThirdpartyAccount
                     .Where(r => r.Id == linkId)
@@ -798,13 +761,13 @@ static file class Queries
                         .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)));
 
     public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>>
-        ThirdpartyAccountByLinkIdAsync = EF.CompileAsyncQuery(
+        ThirdPartyAccountByLinkIdAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .Single(r => r.TenantId == tenantId &&r.Id == linkId));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>>
-        ThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
+        ThirdPartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .AsTracking()
@@ -812,7 +775,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>>
-        DeleteThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
+        DeleteThirdPartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .AsTracking()
@@ -820,7 +783,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, Task<DbFilesThirdpartyAccount>> ThirdpartyBackupAccountAsync =
+    public static readonly Func<FilesDbContext, int, Task<DbFilesThirdpartyAccount>> ThirdPartyBackupAccountAsync =
         EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
                 ctx.ThirdpartyAccount.Single(r => r.TenantId == tenantId && r.FolderType == FolderType.ThirdpartyBackup));
 

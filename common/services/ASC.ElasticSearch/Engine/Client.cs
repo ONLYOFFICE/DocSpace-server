@@ -81,7 +81,7 @@ public class Client(ILoggerProvider option, Settings settings)
                         //    Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
                         //}
 
-                        if (r.HttpStatusCode != null && r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
+                        if (r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {
                             _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                         }

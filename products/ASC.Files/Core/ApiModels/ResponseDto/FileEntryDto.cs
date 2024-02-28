@@ -161,6 +161,16 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         CorrectSecurityByLockedStatus(entry);
 
         var permanentlyDeletedOn = await GetDeletedPermanentlyOn(entry);
+
+        if (entry.ProviderEntry)
+        {
+            entry.RootId = entry.RootFolderType switch
+            {
+                FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
+                FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
+                _ => entry.RootId
+            };
+        }
         
         return new T
         {
@@ -189,9 +199,13 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
     private async Task<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
-        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync) && filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
+        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
-            return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, filesSettingsHelper.AutomaticallyCleanUp.Gap);
+            var settings = await filesSettingsHelper.GetAutomaticallyCleanUp();
+            if (settings.IsAutoCleanUp)
+            {
+                return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, settings.Gap);
+            }
         }
 
         return default;

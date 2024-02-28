@@ -62,10 +62,12 @@ public class UserController(ICache cache,
         CountPaidUserChecker countPaidUserChecker,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
-        IQuotaService quotaService,
         IUrlShortener urlShortener,
         FileSecurityCommon fileSecurityCommon, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        QuotaSocketManager quotaSocketManager,
+        IQuotaService quotaService,
+        CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
     
@@ -576,7 +578,7 @@ public class UserController(ICache cache,
     [HttpGet("{username}", Order = 1)]
     public async Task<EmployeeFullDto> GetById(string username)
     {
-        var isInvite = _httpContextAccessor.HttpContext.User.Claims
+        var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
         await _apiContext.AuthByClaimAsync();
@@ -629,7 +631,7 @@ public class UserController(ICache cache,
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null, null);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null, null, false, false);
     }
 
     /// <summary>
@@ -647,14 +649,27 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus,
+        Guid? groupId,
+        EmployeeActivationStatus? activationStatus,
+        EmployeeType? employeeType,
+        [FromQuery] EmployeeType[] employeeTypes,
+        bool? isAdministrator,
+        Payments? payments,
+        AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -738,14 +753,27 @@ public class UserController(ICache cache,
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
+    /// /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("simple/filter")]
-    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus,
+        Guid? groupId,
+        EmployeeActivationStatus? activationStatus,
+        EmployeeType? employeeType,
+        [FromQuery] EmployeeType[] employeeTypes,
+        bool? isAdministrator,
+        Payments? payments,
+        AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
 
         await foreach (var user in users)
         {
@@ -1013,7 +1041,7 @@ public class UserController(ICache cache,
 
         if (existentUser.Id != Constants.LostUser.Id)
         {
-            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (!viewerIsAdmin)
@@ -1495,44 +1523,80 @@ public class UserController(ICache cache,
     /// <category>Quota</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
-    /// <path>api/2.0/people/quota</path>
+    /// <path>api/2.0/people/userquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
-    [HttpPut("quota")]
+    [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        var users = inDto.UserIds.ToAsyncEnumerable()
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
-            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId));
+            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .ToListAsync();
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
         
-        await foreach (var user in users)
+        if (maxTotalSize < inDto.Quota)
         {
-            if (inDto.Quota != -1)
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
+        foreach (var user in users)
             {
-                var usedSpace = Math.Max(0,
-                    (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
-                    .Where(r => !string.IsNullOrEmpty(r.Tag))
-                    .Sum(r => r.Counter));
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
-                var tenantSpaceQuota = (await quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
 
-                if (tenantSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
-                {
-                    continue;
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
                 }
             }
 
-            await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+    /// <summary>
+    /// Reset a user quota limit with the ID specified in the request from the portal.
+    /// </summary>
+    /// <short>
+    /// Reset a user quota limit
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">User detailed information</returns>
+    /// <path>api/2.0/people/resetquota</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("resetquota")]
+    public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
+    {
+        var users = await inDto.UserIds.ToAsyncEnumerable()
+            .Where(userId => !_userManager.IsSystemUser(userId))
+            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .ToListAsync();
 
-            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        foreach (var user in users)
+        {
+            if (_userManager.IsSystemUser(user.Id))
+            {
+                throw new SecurityException();
+            }
+            var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
+            await settingsManager.SaveAsync(defaulSettings, user);
+            var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
-    }
 
+    }
 
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)
     {
@@ -1598,7 +1662,10 @@ public class UserController(ICache cache,
         IEnumerable<EmployeeType> employeeTypes,
         bool? isDocSpaceAdministrator,
         Payments? payments,
-        AccountLoginType? accountLoginType)
+        AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
+        bool? withoutGroup,
+        bool? excludeGroup)
     {
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
@@ -1607,9 +1674,16 @@ public class UserController(ICache cache,
         var includeGroups = new List<List<Guid>>();
         var combinedGroups = new List<Tuple<List<List<Guid>>, List<Guid>>>();
 
-        if (groupId.HasValue)
+        if (groupId.HasValue && (!withoutGroup.HasValue || !withoutGroup.Value))
         {
+            if (excludeGroup.HasValue && excludeGroup.Value)
+            {
+                excludeGroups.Add(groupId.Value);
+            }
+            else
+            {
             includeGroups.Add([groupId.Value]);
+        }
         }
 
         if (employeeType.HasValue)
@@ -1623,7 +1697,7 @@ public class UserController(ICache cache,
                 var combinedIncludeGroups = new List<List<Guid>>();
                 var combinedExcludeGroups = new List<Guid>();
                 FilterByUserType(et, combinedIncludeGroups, combinedExcludeGroups);
-                combinedGroups.Add(new(combinedIncludeGroups, combinedExcludeGroups));
+                combinedGroups.Add(new Tuple<List<List<Guid>>, List<Guid>>(combinedIncludeGroups, combinedExcludeGroups));
             }
         }
 
@@ -1652,11 +1726,11 @@ public class UserController(ICache cache,
             includeGroups.Add(adminGroups);
         }
 
-        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
-            _apiContext.FilterValue);
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
+            _apiContext.FilterValue, withoutGroup ?? false);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
-            _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
+            _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
@@ -1668,6 +1742,8 @@ public class UserController(ICache cache,
         }
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+
+        yield break;
 
         void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
         {
@@ -1775,28 +1851,31 @@ public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFu
 public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
         FileSecurity fileSecurity, 
         ApiContext apiContext, 
-        IDaoFactory daoFactory)
-    : ApiControllerBase
+        IDaoFactory daoFactory) : ApiControllerBase
     {
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+
+        if (!await fileSecurity.CanEditAccessAsync(room))
+        {
+            throw new SecurityException();
+        }
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
-        var totalCountTask = fileSecurity.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+        var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var counter = 0;
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
 
-        await foreach (var u in fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
+        apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
+
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
                            count))
         {
-            counter++;
-            
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }
-
-        apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 }

@@ -61,5 +61,10 @@
     res.end();
   });
 
+  router.post("/change-user-quota-used-value", (req, res) => {
+    files.changeUserQuotaFeatureValue(req.body);
+    res.end();
+  });
+
   return router;
 };

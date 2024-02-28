@@ -33,18 +33,19 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     IDisposable
 {
     public bool IsOpened { get; private set; }
-    private readonly long _maxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
-
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
+    
+    private const long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
     private DropboxClient _dropboxClient;
 
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
 
-        _dropboxClient = new DropboxClient(token.AccessToken);
+        _dropboxClient = new DropboxClient(authData.Token.AccessToken);
 
         IsOpened = true;
     }
@@ -73,7 +74,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
             return false;
         }
     }
-
 
     public async Task<FolderMetadata> GetFolderAsync(string folderId)
     {
@@ -123,7 +123,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
         var data = await _dropboxClient.Files.ListFolderAsync(folderId);
@@ -147,7 +146,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-    private ThumbnailSize Convert(int width)
+    private static ThumbnailSize Convert(int width)
     {
         if (width > 368)
         {
@@ -163,14 +162,18 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
+        
         var tempBuffer = tempStream.Create();
+        
         await using var str = await response.GetContentAsStreamAsync();
-        if (str != null)
+        if (str == null)
         {
-            await str.CopyToAsync(tempBuffer);
-            await tempBuffer.FlushAsync();
-            tempBuffer.Seek(offset, SeekOrigin.Begin);
+            return tempBuffer;
         }
+
+        await str.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(offset, SeekOrigin.Begin);
 
         return tempBuffer;
     }
@@ -202,7 +205,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FolderMetadata> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFolderName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFolderName);
         var result = await _dropboxClient.Files.MoveV2Async(folderId, pathTo, autorename: true);
 
         return (FolderMetadata)result.Metadata;
@@ -219,7 +222,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FileMetadata> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFileName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFileName);
         var result = await _dropboxClient.Files.MoveV2Async(fileId, pathTo, autorename: true);
 
         return (FileMetadata)result.Metadata;
@@ -236,7 +239,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FolderMetadata> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFolderName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFolderName);
         var result = await _dropboxClient.Files.CopyV2Async(folderId, pathTo, autorename: true);
 
         return (FolderMetadata)result.Metadata;
@@ -244,7 +247,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public async Task<FileMetadata> CopyFileAsync(string fileId, string newFileName, string toFolderId)
     {
-        var pathTo = MakeDropboxPath(newFileName, toFolderId);
+        var pathTo = MakeDropboxPath(toFolderId, newFileName);
         var result = await _dropboxClient.Files.CopyV2Async(fileId, pathTo, autorename: true);
 
         return (FileMetadata)result.Metadata;
@@ -257,34 +260,36 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         return metadata.AsFile;
     }
 
-    public async Task<string> CreateRenewableSessionAsync()
+    public async Task<RenewableUploadShortSession> CreateRenewableSessionAsync()
     {
         var session = await _dropboxClient.Files.UploadSessionStartAsync(body: new MemoryStream());
 
-        return session.SessionId;
+        return new RenewableUploadShortSession(session.SessionId);
     }
 
-    public async Task TransferAsync(string dropboxSession, long offset, Stream stream)
+    public async Task TransferAsync(RenewableUploadShortSession dropboxShortSession, Stream stream, long chunkLength)
     {
-        await _dropboxClient.Files.UploadSessionAppendV2Async(new UploadSessionCursor(dropboxSession, (ulong)offset), body: stream);
+        await _dropboxClient.Files.UploadSessionAppendV2Async(new UploadSessionCursor(dropboxShortSession.Id, (ulong)dropboxShortSession.BytesTransferred), body: stream);
+
+        dropboxShortSession.BytesTransferred += chunkLength;
     }
 
-    public async Task<Metadata> FinishRenewableSessionAsync(string dropboxSession, string dropboxFolderPath, string fileName, long offset)
+    public async Task<Metadata> FinishRenewableSessionAsync(RenewableUploadShortSession shortSession, string dropboxFolderPath, string fileName)
     {
         var dropboxFilePath = MakeDropboxPath(dropboxFolderPath, fileName);
-        return await FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, offset);
+        return await FinishRenewableSessionAsync(shortSession, dropboxFilePath);
     }
 
-    public async Task<Metadata> FinishRenewableSessionAsync(string dropboxSession, string dropboxFilePath, long offset)
+    public async Task<Metadata> FinishRenewableSessionAsync(RenewableUploadShortSession shortSession, string dropboxFilePath)
     {
         using var tempBody = new MemoryStream();
         return await _dropboxClient.Files.UploadSessionFinishAsync(
-            new UploadSessionCursor(dropboxSession, (ulong)offset),
+            new UploadSessionCursor(shortSession.Id, (ulong)shortSession.BytesTransferred),
             new CommitInfo(dropboxFilePath, WriteMode.Overwrite.Instance),
             body: tempBody);
     }
 
-    private string MakeId(Metadata dropboxItem)
+    private static string MakeId(Metadata dropboxItem)
     {
         string path = null;
         if (dropboxItem != null)
@@ -295,7 +300,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         return path;
     }
 
-    private string GetParentFolderId(Metadata dropboxItem)
+    private static string GetParentFolderId(Metadata dropboxItem)
     {
         if (dropboxItem == null || IsRoot(dropboxItem.AsFolder))
         {
@@ -307,7 +312,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         return dropboxItem.PathDisplay[..(pathLength > 1 ? pathLength - 1 : 0)];
     }
 
-    private bool IsRoot(FolderMetadata dropboxFolder)
+    private static bool IsRoot(FolderMetadata dropboxFolder)
     {
         return dropboxFolder is { Id: "/" };
     }
@@ -315,7 +320,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public Task<long> GetMaxUploadSizeAsync()
     {
-        return Task.FromResult(_maxChunkedUploadFileSize);
+        return Task.FromResult(MaxChunkedUploadFileSize);
     }
 
     public void Dispose()

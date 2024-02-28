@@ -43,9 +43,10 @@ var app = builder.Build();
 
 var providersInfo = app.Configuration.GetSection("options").Get<Options>();
 var configurationInfo = !string.IsNullOrEmpty(app.Configuration["standalone"]) ? ConfigurationInfo.Standalone : ConfigurationInfo.SaaS;
+var targetMigration = app.Configuration["targetMigration"];
 
 foreach (var providerInfo in providersInfo.Providers)
 {
     var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(AppContext.BaseDirectory, providerInfo, providersInfo.TeamlabsiteProviders.SingleOrDefault(q => q.Provider == providerInfo.Provider), configurationInfo);
+    migrationCreator.RunApplyMigrations(AppContext.BaseDirectory, providerInfo, providersInfo.TeamlabsiteProviders.SingleOrDefault(q => q.Provider == providerInfo.Provider), configurationInfo, targetMigration);
 }

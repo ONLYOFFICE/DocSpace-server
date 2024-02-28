@@ -45,12 +45,12 @@ public class Startup : BaseWorkerStartup
         await base.ConfigureServices(services);
         services.AddHttpClient();
 
-        if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
+        if (!Enum.TryParse<ElasticLaunchType>(Configuration["elastic:mode"], true, out var elasticLaunchType))
         {
-            disableElastic = false;
+            elasticLaunchType = ElasticLaunchType.Inclusive;
         }
 
-        if (!disableElastic)
+        if (elasticLaunchType != ElasticLaunchType.Disabled)
         {
             services.AddHostedService<ElasticSearchIndexService>();
             DIHelper.TryAdd<FactoryIndexer>();
@@ -60,34 +60,37 @@ public class Startup : BaseWorkerStartup
             DIHelper.TryAdd<FactoryIndexerFolder>();
         }
 
-        services.AddHostedService<FeedAggregatorService>();
-        DIHelper.TryAdd<FeedAggregatorService>();
+        if (elasticLaunchType != ElasticLaunchType.Exclusive)
+        {
+            services.AddHostedService<FeedAggregatorService>();
+            DIHelper.TryAdd<FeedAggregatorService>();
 
-        //services.AddHostedService<FeedCleanerService>();
-        //DIHelper.TryAdd<FeedCleanerService>();
+            //services.AddHostedService<FeedCleanerService>();
+            //DIHelper.TryAdd<FeedCleanerService>();
 
-        services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper);
-        DIHelper.TryAdd<FileConverterService<int>>();
+            services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
+            DIHelper.TryAdd<FileConverterService<int>>();
 
-        services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper);
-        DIHelper.TryAdd<FileConverterService<string>>();
+            services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
+            DIHelper.TryAdd<FileConverterService<string>>();
 
-        services.AddHostedService<ThumbnailBuilderService>();
-        DIHelper.TryAdd<ThumbnailBuilderService>();
+            services.AddHostedService<ThumbnailBuilderService>();
+            DIHelper.TryAdd<ThumbnailBuilderService>();
 
-        DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
-        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
-        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
-        DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
-        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
-        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
+            DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+            DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+            DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+            DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+            DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+            DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+            DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
-        services.AddHostedService<Launcher>();
-        DIHelper.TryAdd<Launcher>();
+            services.AddHostedService<Launcher>();
+            DIHelper.TryAdd<Launcher>();
 
-        services.AddHostedService<DeleteExpiredService>();
-        DIHelper.TryAdd<DeleteExpiredService>();
+            services.AddHostedService<DeleteExpiredService>();
+            DIHelper.TryAdd<DeleteExpiredService>();
+        }
 
         DIHelper.TryAdd<AuthManager>();
         DIHelper.TryAdd<BaseCommonLinkUtility>();
