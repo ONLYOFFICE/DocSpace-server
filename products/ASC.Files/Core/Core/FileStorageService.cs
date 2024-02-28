@@ -424,7 +424,10 @@ public class FileStorageService //: IFileStorageService
     {
         var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, privacy, indexing, quota, action);
 
-        _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        if (room != null)
+        {
+            await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        }
 
         return room;
     }
@@ -462,27 +465,27 @@ public class FileStorageService //: IFileStorageService
         }
 
         return room;
-        
+
         Func<Folder<T>, Task> UpdateProviderAction(FolderType folderType)
         {
             return Action;
 
             async Task Action(Folder<T> folder)
             {
-        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
-        {
-            Id = providerInfo.ProviderId,
-            Title = title,
+                await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+                {
+                    Id = providerInfo.ProviderId,
+                    Title = title,
                     FolderId = folder.Id.ToString(),
-            FolderType = folderType,
+                    FolderType = folderType,
                     Private = privacy
-        });
+                });
 
                 folder.FolderType = folderType;
                 folder.Shared = folderType == FolderType.PublicRoom;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
-    }
+            }
         }
     }
 

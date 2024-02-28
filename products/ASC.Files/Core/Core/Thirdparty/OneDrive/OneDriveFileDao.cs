@@ -63,7 +63,7 @@ internal class OneDriveFileDao(UserManager userManager,
         }
 
         var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
-        var onedriveSession = await storage.CreateResumableSessionAsync(onedriveFile, contentLength);
+        var onedriveSession = await storage.CreateRenewableSessionAsync(onedriveFile, contentLength);
         if (onedriveSession != null)
         {
             uploadSession.Items[UploadSessionKey] = onedriveSession;

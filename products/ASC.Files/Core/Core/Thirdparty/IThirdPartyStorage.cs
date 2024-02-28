@@ -28,8 +28,9 @@ namespace ASC.Files.Core.Core.Thirdparty;
 public interface IThirdPartyStorage
 {
     bool IsOpened { get; }
+    AuthScheme AuthScheme { get; }
 
-    public void Open(OAuth20Token token);
+    public void Open(AuthData authData);
     public void Close();
     public Task<long> GetMaxUploadSizeAsync();
     public Task<bool> CheckAccessAsync();

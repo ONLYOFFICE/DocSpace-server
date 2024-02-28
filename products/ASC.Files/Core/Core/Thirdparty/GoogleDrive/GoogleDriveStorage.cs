@@ -37,8 +37,8 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         IHttpClientFactory clientFactory)
     : IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, IGoogleDriveItemStorage<DriveFile>, IDisposable
 {
-    private OAuth20Token _token;
-
+    public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
     private string AccessToken
     {
         get
@@ -57,21 +57,19 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         }
     }
 
+    private const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
     private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
-    public bool IsOpened { get; private set; }
-
     private DriveService _driveService;
+    private OAuth20Token _token;
 
-    public const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
 
-        _token = token ?? throw new UnauthorizedAccessException("Cannot create GoogleDrive session with given token");
+        _token = authData.Token ?? throw new UnauthorizedAccessException("Cannot create GoogleDrive session with given token");
 
         var tokenResponse = new TokenResponse
         {
