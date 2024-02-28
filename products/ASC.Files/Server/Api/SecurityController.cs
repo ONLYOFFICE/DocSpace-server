@@ -217,7 +217,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
         var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, groupId, apiContext.FilterValue);
 
-        apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
         await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, groupId, apiContext.FilterValue, offset, count))
         {
@@ -226,8 +226,8 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
                 User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
                 GroupAccess = memberSecurity.GroupShare,
                 CanEditAccess = memberSecurity.CanEditAccess,
-                UserAccess = memberSecurity.UserShare != FileShare.None ? memberSecurity.UserShare : null,
-                Overridden = memberSecurity.UserShare != FileShare.None
+                UserAccess = memberSecurity.UserShare,
+                Overridden = memberSecurity.UserShare.HasValue
             };
         }
     }

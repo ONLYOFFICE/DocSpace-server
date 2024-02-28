@@ -30,6 +30,6 @@ public class GroupMemberSecurity
 {
     public UserInfo User { get; init; }
     public FileShare GroupShare { get; init; }
-    public FileShare UserShare { get; init; }
+    public FileShare? UserShare { get; init; }
     public bool CanEditAccess { get; init; }
 }
