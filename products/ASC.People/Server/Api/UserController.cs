@@ -238,7 +238,7 @@ public class UserController(ICache cache,
         cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
-            inDto.FromInviteLink && linkData.ConfirmType != ConfirmType.EmpInvite, true, true, byEmail);
+            inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
