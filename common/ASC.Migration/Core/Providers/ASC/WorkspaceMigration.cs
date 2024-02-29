@@ -34,7 +34,8 @@ public class WorkspaceMigration(
     IServiceProvider serviceProvider,
     UserManager userManager,
     WorkspaceMigratingFiles migratingCommonFiles,
-    WorkspaceMigratingFiles migratingProjectFiles)
+    WorkspaceMigratingFiles migratingProjectFiles,
+    SecurityContext securityContext)
     : AbstractMigration<WorkspaceMigrationInfo, WorkspaceMigratingUser, WorkspaceMigratingFiles,
         WorkspaceMigrationGroups>(migrationLogger)
 {
@@ -237,6 +238,7 @@ public class WorkspaceMigration(
     public override async Task MigrateAsync(MigrationApiInfo migrationInfo)
     {
         ReportProgress(0, MigrationResource.PreparingForMigration);
+        var currentUser = securityContext.CurrentAccount;
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationInfo);
         migratingCommonFiles.ShouldImport = migrationInfo.ImportCommonFiles;
@@ -277,7 +279,7 @@ public class WorkspaceMigration(
         var groupsCount = groupsForImport.Count;
         if (groupsCount != 0)
         {
-            progressStep = 25 / groupsCount;
+            progressStep = groupsCount == 0 ? 25 : 25 / groupsCount;
             
             i = 1;
             foreach (var group in groupsForImport)
@@ -301,6 +303,7 @@ public class WorkspaceMigration(
         }
 
         i = 1;
+        progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         foreach (var user in usersForImport)
         {
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
@@ -315,6 +318,7 @@ public class WorkspaceMigration(
             }
         }
 
+        await securityContext.AuthenticateMeAsync(currentUser);
         ReportProgress(70, string.Format(MigrationResource.MigrationCommonFiles));
         await migratingCommonFiles.MigrateAsync();
         if (migratingProjectFiles != null)
