@@ -190,7 +190,7 @@ public class WorkspaceMigratingFiles(
 
     public override async Task MigrateAsync()
     {
-        if (!ShouldImport || _storage.Folders.Count + _storage.Files.Count == 0)
+        if (!ShouldImport || _storage.Files.Count == 0)
         {
             return;
         }
@@ -204,7 +204,7 @@ public class WorkspaceMigratingFiles(
             ? await fileStorageService.CreateNewFolderAsync(await globalFolderHelper.FolderMyAsync,
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
-                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "", TenantEntityQuotaSettings.DefaultQuotaValue);
+                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "", 0);
         
         var matchingIds = new Dictionary<int, int> { { int.Parse(_folder), newFolder.Id } };
 
