@@ -44,6 +44,15 @@ public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
         return $"{Resource.PersonalFreeSpaceException} ({FilesSizeToString(size)}).";
     }
 
+    public static string GetRoomFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
+    public static string GetUserFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.UserFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
+
     /// <summary>
     /// The maximum file size is exceeded (1 MB).
     /// </summary>
@@ -60,6 +69,16 @@ public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
     public static Exception GetPersonalFreeSpaceException(long size)
     {
         return new TenantQuotaException(GetPersonalFreeSpaceExceptionString(size));
+    }
+
+    public static Exception GetRoomFreeSpaceException(long size)
+    {
+        return new TenantQuotaException(GetRoomFreeSpaceExceptionString(size));
+    }
+
+    public static Exception GetUserFreeSpaceException(long size)
+    {
+        return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
     }
 
     /// <summary>

@@ -115,14 +115,16 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
-
+    private readonly SecurityContext _securityContext;
 
     protected FileEntry() { }
 
     protected FileEntry(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global)
     {
+        _securityContext = securityContext;
     }
 
     public T FolderIdDisplay
@@ -158,5 +160,20 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public override string ToString()
     {
         return Title;
+    }
+
+    public Guid GetFileQuotaOwner()
+    {
+        return
+            DocSpaceHelper.IsRoom(RootFolderType) ?
+                ASC.Core.Configuration.Constants.CoreSystem.ID :
+
+                RootFolderType == FolderType.USER || RootFolderType == FolderType.DEFAULT || RootFolderType == FolderType.TRASH ?
+                    RootCreateBy :
+
+                    RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?
+                        CreateBy :
+                        ASC.Core.Configuration.Constants.CoreSystem.ID;
+
     }
 }

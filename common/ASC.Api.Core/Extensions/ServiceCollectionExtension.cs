@@ -39,9 +39,7 @@ public static class ServiceCollectionExtension
 
         if (redisConfiguration != null)
         {
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => {
-                return new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() };
-            });
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
@@ -292,12 +290,13 @@ public static class ServiceCollectionExtension
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper) where T : class, IHostedService
+    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, IConfiguration configuration) where T : class, IHostedService
     {
         diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
         diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
 
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
+        services.Configure<HostingSettings>(configuration.GetSection("core:hosting"));
 
         diHelper.TryAdd<T>();
         services.AddHostedService<T>();

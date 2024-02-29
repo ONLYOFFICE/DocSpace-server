@@ -47,7 +47,6 @@ public class ApiSystemHelper
     private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly DynamoDbSettings _dynamoDbSettings;
     private const string TenantRegionKey = "tenant_region";
@@ -66,7 +65,6 @@ public class ApiSystemHelper
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
         _clientFactory = clientFactory;
-        _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
         _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
         _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
@@ -113,7 +111,7 @@ public class ApiSystemHelper
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-           throw new ArgumentNullException("tenantRegion");
+           throw new ArgumentNullException(nameof(tenantRegion));
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();

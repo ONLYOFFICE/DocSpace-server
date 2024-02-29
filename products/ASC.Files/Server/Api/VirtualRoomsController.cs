@@ -64,7 +64,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage, inDto.Quota);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -163,10 +163,56 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoomAsync(T id, UpdateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.FolderRenameAsync(id, inDto.Title);
+        var room = await _fileStorageService.UpdateRoomAsync(id, inDto);
 
         return await _folderDtoHelper.GetAsync(room);
     }
+
+    /// <summary>
+    /// Changes a quota limit for the rooms with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Change a room quota limit
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomsQuotaRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating room</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of rooms with the detailed information</returns>
+    /// <path>api/2.0/files/rooms/roomquota</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
+    [HttpPut("roomquota")]
+    public async IAsyncEnumerable<FolderDto<T>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    {
+        foreach (var roomId in inDto.RoomIds)
+        {
+            var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
+
+            yield return await _folderDtoHelper.GetAsync(room);
+        }
+
+    }
+
+    /// <summary>
+    /// Reset a room quota limit with the ID specified in the request.
+    /// </summary>
+    /// <short>
+    /// Reset a room quota limit
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomsQuotaRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating room</param>
+    /// <path>api/2.0/files/rooms/resetquota</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("resetquota")]
+    public async IAsyncEnumerable<FolderDto<T>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    {
+        foreach (var roomId in inDto.RoomIds)
+        {
+            var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
+
+            yield return await _folderDtoHelper.GetAsync(room);
+        }
+    }
+    
 
     /// <summary>
     /// Removes a room with the ID specified in the request.
@@ -542,12 +588,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
     /// <param type="System.Nullable{ASC.Files.Core.ProviderFilter}, System" name="provider">Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex)</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.SubjectFilter}, System" name="subjectFilter">Filter by subject (Owner - 1, Member - 1)</param>
+    /// <param type="System.Nullable{ASC.Files.Core.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Rooms contents</returns>
     /// <path>api/2.0/files/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync(RoomType? type, string subjectId, bool? searchInContent, bool? withSubfolders, SearchArea? searchArea, bool? withoutTags, string tags, bool? excludeSubject,
-        ProviderFilter? provider, SubjectFilter? subjectFilter)
+        ProviderFilter? provider, SubjectFilter? subjectFilter, QuotaFilter? quotaFilter)
     {
         var parentId = searchArea != SearchArea.Archive ? await globalFolderHelper.GetFolderVirtualRooms()
             : await globalFolderHelper.GetFolderArchive();
@@ -579,7 +626,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
             [],
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
-            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
+            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner, quotaFilter: quotaFilter ?? QuotaFilter.All);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

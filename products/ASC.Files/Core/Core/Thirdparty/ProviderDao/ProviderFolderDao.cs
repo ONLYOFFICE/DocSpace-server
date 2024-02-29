@@ -373,7 +373,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
-
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    {
+        return await RenameFolderAsync(folder, newTitle);
+    }
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var folderId = folder.Id;
@@ -512,9 +515,9 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         if (provider != ProviderFilter.None)
         {
-            var providers = GetProviderTypes(provider);
+            var providers = GetProviderType(provider);
 
-            q = q.Where(a => providers.Contains(a.Provider));
+            q = q.Where(a => providers == a.Provider);
         }
 
         if (filterType is not (FilterType.None or FilterType.FoldersOnly))

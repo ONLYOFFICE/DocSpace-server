@@ -49,6 +49,7 @@ global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
+global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;

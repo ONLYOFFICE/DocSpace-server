@@ -55,6 +55,7 @@ public class NotifySchedulerService(NotifyEngine notifyEngine,
                     {
                         notifyEngine.SendMethods.Remove(w);
                     }
+                    continue;
                 }
 
                 if (w.ScheduleDate.Value <= now)

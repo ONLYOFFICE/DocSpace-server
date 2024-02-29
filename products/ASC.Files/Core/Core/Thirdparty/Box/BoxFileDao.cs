@@ -40,6 +40,8 @@ internal class BoxFileDao(UserManager userManager,
         TenantManager tenantManager)
     : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
 {
+    protected override string UploadSessionKey => "BoxSession";
+    
     public override Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
         if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
@@ -47,45 +49,19 @@ internal class BoxFileDao(UserManager userManager,
             return Task.FromResult(new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false });
         }
 
-        var uploadSession = new ChunkedUploadSession<string>(file, contentLength);
-
-        uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
+        var uploadSession = new ChunkedUploadSession<string>(file, contentLength) { TempPath = tempPath.GetTempFileName() };
 
         uploadSession.File = RestoreIds(uploadSession.File);
 
         return Task.FromResult(uploadSession);
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
-    {
-        if (!uploadSession.UseChunks)
-        {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-
-            return uploadSession.File;
-        }
-
-        var path = uploadSession.GetItemOrDefault<string>("TempPath");
-        await using (var fs = new FileStream(path, FileMode.Append))
-        {
-            await stream.CopyToAsync(fs);
-        }
-
-        uploadSession.File = RestoreIds(uploadSession.File);
-
-        return uploadSession.File;
-    }
-
     public override Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("TempPath"))
+        var path = uploadSession.TempPath;
+        if (!string.IsNullOrEmpty(path))
         {
-            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(path);
         }
 
         return Task.CompletedTask;
@@ -93,10 +69,16 @@ internal class BoxFileDao(UserManager userManager,
 
     public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
+        await using var fs = new FileStream(uploadSession.TempPath,
             FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        
         uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
 
         return uploadSession.File;
+    }
+
+    protected override Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    {
+        throw new NotSupportedException();
     }
 }

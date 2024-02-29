@@ -46,7 +46,8 @@ public class ConnectionsController(UserManager userManager,
         MessageTarget messageTarget,
         CookiesManager cookiesManager,
         CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper)
+        GeolocationHelper geolocationHelper,
+        ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -60,7 +61,7 @@ public class ConnectionsController(UserManager userManager,
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("")]
-    public async Task<object> GetAllActiveConnections()
+    public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
@@ -100,12 +101,25 @@ public class ConnectionsController(UserManager userManager,
             }
         }
 
-        var result = new
+        return new ActiveConnectionsDto
         {
-            Items = listLoginEvents,
-            LoginEvent = loginEventId
+            LoginEvent = loginEventId,
+            Items = listLoginEvents.Select(q => new ActiveConnectionsItemDto
+            {
+                Id = q.Id,
+                Browser = q.Browser,
+                City = q.City,
+                Country = q.Country,
+                Date = apiDateTimeHelper.Get(q.Date),
+                Ip = q.IP,
+                Mobile = q.Mobile,
+                Page = q.Page,
+                TenantId = q.TenantId,
+                Platform = q.Platform,
+                UserId = q.UserId,
+                
+            }).ToList()
         };
-        return result;
     }
 
     /// <summary>

@@ -146,6 +146,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string ZendeskKey { get; set; }
 
+    /// <summary>Tag manager id</summary>
+    /// <type>System.String, System</type>
+    public string TagManagerId { get; set; }
+
     /// <summary>Email for training booking</summary>
     /// <type>System.String, System</type>
     public string BookTrainingEmail { get; set; }

@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using File = System.IO.File;
-using ResumableUploadSession = ASC.Files.Thirdparty.OneDrive.ResumableUploadSession;
-using ResumableUploadSessionStatus = ASC.Files.Thirdparty.OneDrive.ResumableUploadSessionStatus;
 
 namespace ASC.Files.Core.Core.Thirdparty.OneDrive;
 
@@ -42,6 +40,8 @@ internal class OneDriveFileDao(UserManager userManager,
         TenantManager tenantManager)
     : ThirdPartyFileDao<Item, Item, Item>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
 {
+    protected override string UploadSessionKey => "OneDriveSession";
+
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
         if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
@@ -63,14 +63,14 @@ internal class OneDriveFileDao(UserManager userManager,
         }
 
         var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
-        var onedriveSession = await storage.CreateResumableSessionAsync(onedriveFile, contentLength);
+        var onedriveSession = await storage.CreateRenewableSessionAsync(onedriveFile, contentLength);
         if (onedriveSession != null)
         {
-            uploadSession.Items["OneDriveSession"] = onedriveSession;
+            uploadSession.Items[UploadSessionKey] = onedriveSession;
         }
         else
         {
-            uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
+            uploadSession.TempPath = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);
@@ -78,43 +78,11 @@ internal class OneDriveFileDao(UserManager userManager,
         return uploadSession;
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
-    {
-        if (!uploadSession.UseChunks)
-        {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-
-            return uploadSession.File;
-        }
-
-        if (uploadSession.Items.ContainsKey("OneDriveSession"))
-        {
-            var oneDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("OneDriveSession");
-            var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(oneDriveSession, stream, chunkLength);
-        }
-        else
-        {
-            var path = uploadSession.GetItemOrDefault<string>("TempPath");
-            await using var fs = new FileStream(path, FileMode.Append);
-            await stream.CopyToAsync(fs);
-        }
-
-        uploadSession.File = RestoreIds(uploadSession.File);
-
-        return uploadSession.File;
-    }
-
     public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("OneDriveSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var oneDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("OneDriveSession");
+            var oneDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
 
             await ProviderInfo.CacheResetAsync(oneDriveSession.FileId);
             var parentDriveId = oneDriveSession.FolderId;
@@ -126,28 +94,41 @@ internal class OneDriveFileDao(UserManager userManager,
             return Dao.ToFile(await Dao.GetFileAsync(oneDriveSession.FileId));
         }
 
-        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"), FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        await using var fs = new FileStream(uploadSession.TempPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
 
         return await SaveFileAsync(uploadSession.File, fs);
     }
 
     public override async Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("OneDriveSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var oneDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("OneDriveSession");
+            var oneDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
 
-            if (oneDriveSession.Status != ResumableUploadSessionStatus.Completed)
+            if (oneDriveSession.Status == RenewableUploadSessionStatus.Completed)
             {
-                var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
-                await storage.CancelTransferAsync(oneDriveSession);
-
-                oneDriveSession.Status = ResumableUploadSessionStatus.Aborted;
+                return;
             }
+
+            var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
+            await storage.CancelTransferAsync(oneDriveSession);
+
+            oneDriveSession.Status = RenewableUploadSessionStatus.Aborted;
+
+            return;
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
+
+        var path = uploadSession.TempPath;
+        if (!string.IsNullOrEmpty(path))
         {
-            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(path);
         }
+    }
+
+    protected override async Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    {
+        var oneDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
+        var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
+        await storage.TransferAsync(oneDriveSession, stream, chunkLength);
     }
 }

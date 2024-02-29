@@ -38,6 +38,7 @@ public class SetupInfo
     public string DemoOrder { get; private set; }
     public string RequestTraining { get; private set; }
     public string ZendeskKey { get; private set; }
+    public string TagManagerId { get; private set; }
     public string BookTrainingEmail { get; private set; }
     public string DocumentationEmail { get; private set; }
     public string UserVoiceURL { get; private set; }
@@ -120,6 +121,7 @@ public class SetupInfo
         UserVoiceURL = GetAppSettings("web.uservoice", string.Empty);
         DemoOrder = GetAppSettings("web.demo-order", string.Empty);
         ZendeskKey = GetAppSettings("web:zendesk-key", string.Empty);
+        TagManagerId = GetAppSettings("web:tagmanager-id", string.Empty);
         BookTrainingEmail = GetAppSettings("web:book-training-email", string.Empty);
         DocumentationEmail = GetAppSettings("web:documentation-email", string.Empty);
         RequestTraining = GetAppSettings("web.request-training", string.Empty);

@@ -161,6 +161,16 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         CorrectSecurityByLockedStatus(entry);
 
         var permanentlyDeletedOn = await GetDeletedPermanentlyOn(entry);
+
+        if (entry.ProviderEntry)
+        {
+            entry.RootId = entry.RootFolderType switch
+            {
+                FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
+                FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
+                _ => entry.RootId
+            };
+        }
         
         return new T
         {

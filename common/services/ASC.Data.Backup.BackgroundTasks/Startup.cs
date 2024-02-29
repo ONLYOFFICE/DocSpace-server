@@ -69,8 +69,8 @@ public class Startup : BaseStartup
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper);
+        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper, _configuration);
+        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper, _configuration);
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();

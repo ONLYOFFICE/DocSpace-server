@@ -149,7 +149,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 await _store.DeleteAsync(_domain, _key + i);
             }
             var task = _tasks.First(t => t.Exception != null);
-            _cts.Cancel();
+            await _cts.CancelAsync();
             throw task.Exception;
         }
 

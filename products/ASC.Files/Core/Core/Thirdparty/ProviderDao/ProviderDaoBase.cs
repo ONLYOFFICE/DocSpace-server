@@ -81,11 +81,10 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
     protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile)
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);
-        await using var scope = _serviceProvider.CreateAsyncScope();
 
         return await _crossDao.PerformCrossDaoFileCopyAsync(
             fromFileId, fromSelector.GetFileDao(fromFileId), fromSelector.ConvertId,
-            toFolderId, scope.ServiceProvider.GetService<IFileDao<int>>(), r => r,
+            toFolderId, _serviceProvider.GetService<IFileDao<int>>(), r => r,
             deleteSourceFile);
     }
 

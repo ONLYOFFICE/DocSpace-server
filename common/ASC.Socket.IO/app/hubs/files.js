@@ -255,8 +255,29 @@
   }
 
   function changeQuotaFeatureValue({ featureId, value, room } = {}) {
-    logger.info(`changeQuotaFeatureValue in room ${room}`, { featureId, value });
-    filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
+     logger.info(`changeQuotaFeatureValue in room ${room}`, { featureId, value });
+     filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
+  }
+
+  function changeUserQuotaFeatureValue({ customQuotaFeature,enableQuota, usedSpace, quotaLimit, userIds, room } = {}) {
+
+    logger.info(`changeUserQuotaFeatureValue feature ${customQuotaFeature}, room ${room}`, { customQuotaFeature, enableQuota, usedSpace, quotaLimit });
+
+    if (userIds) {
+      userIds.forEach(userId => changeCustomQuota(`${room}-${userId}`, customQuotaFeature, enableQuota, usedSpace, quotaLimit));
+    }
+    else {
+      changeCustomQuota(room, customQuotaFeature,enableQuota, usedSpace, quotaLimit);
+    }
+  }
+
+  function changeCustomQuota(room, customQuotaFeature, enableQuota, usedSpace, quotaLimit) {
+      
+      if (customQuotaFeature == "tenant_custom_quota") {
+          filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, enableQuota, quota: quotaLimit });
+      } else {
+          filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, usedSpace, quotaLimit });
+      }
   }
 
   return {
@@ -270,6 +291,7 @@
     updateFolder,
     changeQuotaUsedValue,
     changeQuotaFeatureValue,
+    changeUserQuotaFeatureValue,
     markAsNewFiles,
     markAsNewFolders
   };

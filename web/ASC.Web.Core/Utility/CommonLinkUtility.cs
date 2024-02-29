@@ -98,12 +98,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return ToAbsolute("~/profile/notifications");
     }
 
-    public string GetEmployees()
-    {
-        return GetEmployees(EmployeeStatus.Active);
-    }
-
-    public string GetEmployees(EmployeeStatus empStatus)
+    public string GetEmployees(EmployeeStatus empStatus = EmployeeStatus.Active)
     {
         return ToAbsolute("~/products/people/") +
                (empStatus == EmployeeStatus.Terminated ? "#type=disabled" : string.Empty);

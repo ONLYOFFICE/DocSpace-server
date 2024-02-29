@@ -131,7 +131,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     }
 
-    public IEnumerable<DistributedTask> GetAllTasks(int? instanceId = null)
+    public List<DistributedTask> GetAllTasks(int? instanceId = null)
     {
         var queueTasks = LoadFromCache();
 

@@ -26,24 +26,16 @@
 
 namespace ASC.Core.Tenants;
 
-public class TenantUserQuotaSettings : ISettings<TenantUserQuotaSettings>
+public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantUserQuotaSettings>
 {
-    public bool EnableUserQuota { get; init; }
-
-    public long DefaultUserQuota { get; init; }
-
-    public TenantUserQuotaSettings GetDefault()
-    {
-        return new TenantUserQuotaSettings
-        {
-            EnableUserQuota = false,
-            DefaultUserQuota = -1
-        };
-    }
 
     [JsonIgnore]
     public Guid ID
     {
         get { return new Guid("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}"); }
+    }
+    public TenantUserQuotaSettings GetDefault()
+    {
+        return new TenantUserQuotaSettings();
     }
 }

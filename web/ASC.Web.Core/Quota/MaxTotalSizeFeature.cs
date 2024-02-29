@@ -30,7 +30,10 @@ public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, lo
         TenantManager tenantManager)
     : TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_total_size_exception;
+    public override string GetExceptionMessage(long size)
+    {
+        return string.Format(Resource.TariffsFeature_total_size_exception, FileSizeComment.FilesSizeToString(size));
+    }
 }
 
 public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>

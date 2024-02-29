@@ -383,7 +383,7 @@ public class SecurityController(PermissionContext permissionContext,
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
                 }
 
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _))
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || (Encoding.UTF8.GetByteCount(domain) != domain.Length))
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }

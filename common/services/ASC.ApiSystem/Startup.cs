@@ -100,7 +100,7 @@ public class Startup
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
-        _diHelper.TryAdd<FileStorageService>();
+        _diHelper.TryAdd<FilesSpaceUsageStatManager>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {

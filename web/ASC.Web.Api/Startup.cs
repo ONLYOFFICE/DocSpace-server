@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Core;
 using ASC.Migration.Core.Core;
+using ASC.Core.Common.Notify.Engine;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -63,6 +64,9 @@ public class Startup : BaseStartup
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
+        
+        
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

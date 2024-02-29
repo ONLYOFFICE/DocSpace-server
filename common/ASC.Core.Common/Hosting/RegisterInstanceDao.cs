@@ -27,26 +27,24 @@
 namespace ASC.Core.Common.Hosting;
 
 [Scope]
-public class RegisterInstanceDao<T>(ILogger<RegisterInstanceDao<T>> logger,
-        IDbContextFactory<InstanceRegistrationContext> dbContextFactory)
-    : IRegisterInstanceDao<T>
-    where T : IHostedService
+public class RegisterInstanceDao<T>(
+    ILogger<RegisterInstanceDao<T>> logger,
+    IDbContextFactory<InstanceRegistrationContext> dbContextFactory) : IRegisterInstanceDao<T> where T : IHostedService
 {
-    private readonly ILogger _logger = logger;
-
+    private readonly InstanceRegistrationContext _instanceRegistrationContext = dbContextFactory.CreateDbContext();
+    
     public async Task AddOrUpdateAsync(InstanceRegistration obj)
     {
-        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
-        var inst = await instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
+        var inst = await _instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
 
         if (inst == null)
         {
-            await instanceRegistrationContext.AddAsync(obj);
+            await _instanceRegistrationContext.AddAsync(obj);
         }
         else
         {
-            instanceRegistrationContext.Entry(inst).CurrentValues.SetValues(obj);
-            instanceRegistrationContext.Entry(inst).State = EntityState.Modified;
+            _instanceRegistrationContext.Entry(inst).CurrentValues.SetValues(obj);
+            _instanceRegistrationContext.Entry(inst).State = EntityState.Modified;
         }
 
         bool saveFailed;
@@ -57,11 +55,11 @@ public class RegisterInstanceDao<T>(ILogger<RegisterInstanceDao<T>> logger,
 
             try
             {
-                await instanceRegistrationContext.SaveChangesAsync();
+                await _instanceRegistrationContext.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.TraceDbUpdateConcurrencyException(obj.InstanceRegistrationId, DateTimeOffset.Now);
+                logger.TraceDbUpdateConcurrencyException(obj.InstanceRegistrationId, DateTimeOffset.Now);
 
                 saveFailed = true;
 
@@ -76,27 +74,25 @@ public class RegisterInstanceDao<T>(ILogger<RegisterInstanceDao<T>> logger,
         while (saveFailed);
     }
 
-    public async Task<IEnumerable<InstanceRegistration>> GetAllAsync()
+    public async Task<List<InstanceRegistration>> GetAllAsync()
     {
-        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.InstanceRegistrationsAsync(instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
+        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)
     {
-        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
-        var item = await instanceRegistrationContext.InstanceRegistrations.FindAsync(instanceId);
+        var item = await _instanceRegistrationContext.InstanceRegistrations.FindAsync(instanceId);
 
         if (item == null)
         {
             return;
         }
 
-        instanceRegistrationContext.InstanceRegistrations.Remove(item);
+        _instanceRegistrationContext.InstanceRegistrations.Remove(item);
 
         try
         {
-            await instanceRegistrationContext.SaveChangesAsync();
+            await _instanceRegistrationContext.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -116,6 +112,5 @@ public class RegisterInstanceDao<T>(ILogger<RegisterInstanceDao<T>> logger,
      public static readonly Func<InstanceRegistrationContext, string, IAsyncEnumerable<InstanceRegistration>>
          InstanceRegistrationsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
              (InstanceRegistrationContext ctx, string workerTypeName) =>
-                 ctx.InstanceRegistrations
-                     .Where(x => x.WorkerTypeName == workerTypeName));
+                 ctx.InstanceRegistrations.Where(x => x.WorkerTypeName == workerTypeName));
  }

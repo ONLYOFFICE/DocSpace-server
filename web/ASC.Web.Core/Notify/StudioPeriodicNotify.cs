@@ -391,10 +391,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDate = actualEndDate.Date;
-
-                var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
-                var delayDueDate = tariff.DelayDueDate.Date;
+                // var dueDate = actualEndDate.Date;
+                //
+                // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
+                // var delayDueDate = tariff.DelayDueDate.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;

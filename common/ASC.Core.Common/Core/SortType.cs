@@ -39,5 +39,6 @@ public enum UserSortType
     FirstName,
     Type,
     Email,
-    Department
+    Department,
+    UsedSpace
 }
