@@ -33,7 +33,7 @@ public abstract class MigratingUser<TFiles> : ImportableEntity
 
     public abstract string Email { get; }
     public abstract string DisplayName { get; }
-    public EmployeeType UserType { get; set; } = EmployeeType.User;
+    public EmployeeType UserType { get; set; } = EmployeeType.Collaborator;
     public TFiles MigratingFiles { get; set; }
 
     public virtual MigratingApiUser ToApiInfo()

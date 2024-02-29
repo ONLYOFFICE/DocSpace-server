@@ -114,7 +114,7 @@ public class NcMigratingUser(
             }
             _userInfo.UserName = _userInfo.Email.Split('@').First();
         }
-        _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
+        _userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
         MigratingFiles = serviceProvider.GetService<NcMigratingFiles>();

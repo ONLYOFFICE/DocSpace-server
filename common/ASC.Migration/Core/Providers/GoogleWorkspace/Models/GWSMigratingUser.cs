@@ -81,7 +81,7 @@ public class GwsMigratingUser(
         {
             _userInfo.FirstName = _userInfo.Email.Split('@').First();
         }
-        _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
+        _userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
     }
 
     public void DataСhange()

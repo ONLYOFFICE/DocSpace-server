@@ -102,7 +102,7 @@ public class WorkspaceMigration(
                         UserName = row["email"].ToString().Split('@').First(),
                         FirstName = row["firstname"].ToString(),
                         LastName = row["lastname"].ToString(),
-                        ActivationStatus = EmployeeActivationStatus.Pending,
+                        ActivationStatus = EmployeeActivationStatus.Activated,
                         Email = row["email"].ToString(),
                     }
                 };
