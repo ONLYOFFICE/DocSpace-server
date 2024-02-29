@@ -221,6 +221,7 @@ internal abstract class SecurityBaseDao<T>(
         var q = users
             .GroupJoin(filesDbContext.Security, user => user.Id, dbFilesSecurity => dbFilesSecurity.Subject,
                 (user, securities) => new { user, securities })
+            .OrderBy(r => r.user.FirstName)
             .SelectMany(r => r.securities
                 .Where(s => s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType)
                 .DefaultIfEmpty(), (u, s) => new GroupMemberSecurityRecord
