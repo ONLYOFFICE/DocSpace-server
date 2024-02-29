@@ -32,4 +32,5 @@ public class GroupMemberSecurity
     public FileShare GroupShare { get; init; }
     public FileShare? UserShare { get; init; }
     public bool CanEditAccess { get; init; }
+    public bool Owner { get; init; }
 }

@@ -210,9 +210,9 @@ internal abstract class SecurityBaseDao<T>(
 
         var users = filesDbContext.Users
             .Join(filesDbContext.UserGroup, user => user.Id, ug => ug.Userid, (user, ug) => new { user, ug })
-            .Where(r => r.ug.TenantId == tenantId && r.ug.UserGroupId == groupId && !r.ug.Removed && r.ug.RefType == UserGroupRefType.Contains && r.ug.Userid != entry.CreateBy)
+            .Where(r => r.ug.TenantId == tenantId && r.ug.UserGroupId == groupId && !r.ug.Removed && r.ug.RefType == UserGroupRefType.Contains)
             .Select(r => r.user);
-
+        
         if (!string.IsNullOrEmpty(text))
         {
             users = users.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
@@ -258,7 +258,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = filesDbContext.UserGroup.Where(g =>
-            g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy);
+            g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains);
 
         if (string.IsNullOrEmpty(text))
         {

@@ -921,12 +921,15 @@ public class FileSharing(
 
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
+            var isOwner = entry.CreateBy == member.UserId;
+            
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
                 UserShare = member.UserShare,
-                CanEditAccess = canEditAccess
+                CanEditAccess = canEditAccess && !isOwner,
+                Owner = isOwner
             };
         }
     }

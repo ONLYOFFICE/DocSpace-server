@@ -227,7 +227,8 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
                 GroupAccess = memberSecurity.GroupShare,
                 CanEditAccess = memberSecurity.CanEditAccess,
                 UserAccess = memberSecurity.UserShare,
-                Overridden = memberSecurity.UserShare.HasValue
+                Overridden = memberSecurity.UserShare.HasValue,
+                Owner = memberSecurity.Owner
             };
         }
     }
