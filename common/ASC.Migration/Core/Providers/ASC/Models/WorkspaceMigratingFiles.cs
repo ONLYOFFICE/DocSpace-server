@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Tenants;
+
 using FileShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Core.Providers.Models;
@@ -202,7 +204,7 @@ public class WorkspaceMigratingFiles(
             ? await fileStorageService.CreateNewFolderAsync(await globalFolderHelper.FolderMyAsync,
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
-                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "");
+                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "", TenantEntityQuotaSettings.DefaultQuotaValue);
         
         var matchingIds = new Dictionary<int, int> { { int.Parse(_folder), newFolder.Id } };
 
