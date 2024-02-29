@@ -218,6 +218,13 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         {
             forUpdate.Color = data.Color;
         }
+        
+        if (data.AuthData != null && !data.AuthData.IsEmpty())
+        {
+            forUpdate.UserName = data.AuthData.Login ?? "";
+            forUpdate.Password = EncryptPassword(data.AuthData.Password);
+            forUpdate.Token = EncryptPassword(data.AuthData.RawToken ?? "");
+        }
 
         forUpdate.ModifiedOn = DateTime.UtcNow;
         
@@ -716,6 +723,7 @@ public class ProviderData
     public bool? Private { get; init; }
     public bool? HasLogo { get; init; }
     public string Color { get; init; }
+    public AuthData AuthData { get; init; }
 }
 
 static file class Queries
