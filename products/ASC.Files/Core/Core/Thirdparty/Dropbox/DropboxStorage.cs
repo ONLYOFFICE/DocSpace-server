@@ -33,18 +33,19 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     IDisposable
 {
     public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
+    
     private const long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
-
     private DropboxClient _dropboxClient;
 
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
 
-        _dropboxClient = new DropboxClient(token.AccessToken);
+        _dropboxClient = new DropboxClient(authData.Token.AccessToken);
 
         IsOpened = true;
     }
@@ -73,7 +74,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
             return false;
         }
     }
-
 
     public async Task<FolderMetadata> GetFolderAsync(string folderId)
     {
@@ -123,7 +123,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
         var data = await _dropboxClient.Files.ListFolderAsync(folderId);
@@ -147,7 +146,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-    private ThumbnailSize Convert(int width)
+    private static ThumbnailSize Convert(int width)
     {
         if (width > 368)
         {
@@ -163,14 +162,18 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
+        
         var tempBuffer = tempStream.Create();
+        
         await using var str = await response.GetContentAsStreamAsync();
-        if (str != null)
+        if (str == null)
         {
-            await str.CopyToAsync(tempBuffer);
-            await tempBuffer.FlushAsync();
-            tempBuffer.Seek(offset, SeekOrigin.Begin);
+            return tempBuffer;
         }
+
+        await str.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(offset, SeekOrigin.Begin);
 
         return tempBuffer;
     }

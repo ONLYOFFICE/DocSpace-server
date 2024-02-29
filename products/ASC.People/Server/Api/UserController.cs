@@ -63,14 +63,14 @@ public class UserController(ICache cache,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon,
+        FileSecurityCommon fileSecurityCommon, 
         IDistributedLockProvider distributedLockProvider,
         QuotaSocketManager quotaSocketManager,
         IQuotaService quotaService,
         CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-{
-
+    {
+    
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
@@ -124,9 +124,9 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex = false;
+            user.Sex =  false;
         }
-
+        
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -227,9 +227,9 @@ public class UserController(ICache cache,
         }
         else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
         {
-            user.Sex = false;
+            user.Sex =  false;
         }
-
+        
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -384,7 +384,7 @@ public class UserController(ICache cache,
             await cookiesManager.ResetUserCookieAsync(userid);
             await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-
+        
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
@@ -422,7 +422,7 @@ public class UserController(ICache cache,
         {
             throw new SecurityException();
         }
-
+        
         await CheckReassignProcessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -463,7 +463,7 @@ public class UserController(ICache cache,
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
-
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
@@ -480,10 +480,10 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-        //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-        //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
+            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
-    }
+        }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
@@ -550,6 +550,7 @@ public class UserController(ICache cache,
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("email")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
         var user = await _userManager.GetUserByEmailAsync(email);
@@ -804,7 +805,7 @@ public class UserController(ICache cache,
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
-
+        
         foreach (var user in users)
         {
             if (user.Status != EmployeeStatus.Terminated)
@@ -1226,7 +1227,7 @@ public class UserController(ICache cache,
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
         var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
-
+        
         //Update it
         if (self)
         {
@@ -1293,11 +1294,11 @@ public class UserController(ICache cache,
 
             changed = true;
         }
-
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var owner = user.IsOwner(tenant);
         var statusChanged = false;
-
+        
         if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
@@ -1308,15 +1309,15 @@ public class UserController(ICache cache,
 
 
         // change user type
-        var canBeGuestFlag = !owner &&
-                             !await _userManager.IsDocSpaceAdminAsync(user) &&
-                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 &&
+        var canBeGuestFlag = !owner && 
+                             !await _userManager.IsDocSpaceAdminAsync(user) && 
+                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
                              !self;
 
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-
+            
             if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
@@ -1391,19 +1392,19 @@ public class UserController(ICache cache,
                     if (user.Status == EmployeeStatus.Terminated)
                     {
                         IDistributedLockHandle lockHandle = null;
-
+                        
                         try
                         {
                             if (!await _userManager.IsUserAsync(user))
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-
+                                
                                 await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
-
+                                
                                 await activeUsersChecker.CheckAppend();
                             }
 
@@ -1538,14 +1539,14 @@ public class UserController(ICache cache,
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
-
+        
         if (maxTotalSize < inDto.Quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
 
         foreach (var user in users)
-        {
+            {
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
@@ -1555,8 +1556,8 @@ public class UserController(ICache cache,
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
-        }
-    }
+                }
+            }
 
     /// <summary>
     /// Reset a user quota limit with the ID specified in the request from the portal.
@@ -1611,7 +1612,7 @@ public class UserController(ICache cache,
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfoId in groups.Select(r => r.ID))
+        foreach (var groupInfoId in groups.Select(r=> r.ID))
         {
             await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
             var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
@@ -1638,7 +1639,7 @@ public class UserController(ICache cache,
     private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-
+        
         foreach (var userId in userIds)
         {
             var reassignStatus = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
@@ -1836,22 +1837,22 @@ public class UserController(ICache cache,
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity,
-        ApiContext apiContext,
-        IDaoFactory daoFactory)
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
+        IDaoFactory daoFactory) 
     : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-
+        
 public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity,
-        ApiContext apiContext,
-        IDaoFactory daoFactory)
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
+        IDaoFactory daoFactory) 
     : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
-
+        
 public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity,
-        ApiContext apiContext,
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
         IDaoFactory daoFactory) : ApiControllerBase
-{
+    {
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {

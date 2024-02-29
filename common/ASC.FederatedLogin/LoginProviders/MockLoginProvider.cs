@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-public static class Selectors
-{
-    public static Regex Pattern => new(@"^(?'selector'.*)-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
-    
-    public static readonly Selector WebDav = new() { Name = "WebDav", Id = "sbox" };
-    public static readonly Selector SharePoint = new() { Name = "sharepoint", Id = "spoint" };
-    public static readonly Selector GoogleDrive = new() { Name = "GoogleDrive", Id = "drive" };
-    public static readonly Selector Box = new() { Name = "Box", Id = "box" };
-    public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
-    public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
+namespace ASC.FederatedLogin.LoginProviders;
 
-    public static readonly List<Selector> All = [WebDav, SharePoint, GoogleDrive, Box, Dropbox, OneDrive];
-    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive, WebDav];
-}
-
-public class Selector
+[Singleton]
+public class MockLoginProvider : BaseLoginProvider<MockLoginProvider>
 {
-    public string Name { get; init; }
-    public string Id { get; init; }
+    public override string CodeUrl => string.Empty;
+    public override string AccessTokenUrl => string.Empty;
+    public override string RedirectUri => string.Empty;
+    public override string ClientID => string.Empty;
+    public override string ClientSecret => string.Empty;
+
+    public override LoginProfile GetLoginProfile(string accessToken)
+    {
+        return new LoginProfile();
+    }
 }

@@ -14,7 +14,6 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
     <PackageReference Include="Box.V2.Core" Version="5.2.2" />
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
@@ -23,6 +22,7 @@
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <PackageReference Include="WebDav.Client" Version="2.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />

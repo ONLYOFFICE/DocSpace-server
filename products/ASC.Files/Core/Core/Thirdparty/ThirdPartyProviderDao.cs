@@ -339,9 +339,9 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filter = GetProviderTypes(providerFilter);
+        var providerType = GetProviderType(providerFilter);
 
-        return rooms.Where(f => filter.Contains(f.ProviderKey));
+        return rooms.Where(f => f.ProviderKey == providerType);
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
@@ -387,21 +387,22 @@ internal abstract class ThirdPartyProviderDao
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
     }
 
-    internal static string[] GetProviderTypes(ProviderFilter providerFilter)
+    internal static string GetProviderType(ProviderFilter providerFilter)
     {
         var filter = providerFilter switch
         {
-            ProviderFilter.WebDav => [ProviderTypes.WebDav.ToStringFast()],
-            ProviderFilter.GoogleDrive => [ProviderTypes.GoogleDrive.ToStringFast()],
-            ProviderFilter.OneDrive => [ProviderTypes.OneDrive.ToStringFast()],
-            ProviderFilter.DropBox => [ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast()],
-            ProviderFilter.kDrive => [ProviderTypes.kDrive.ToStringFast()],
-            ProviderFilter.Yandex => [ProviderTypes.Yandex.ToStringFast()],
-            ProviderFilter.SharePoint => [ProviderTypes.SharePoint.ToStringFast()],
-            ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
+            ProviderFilter.WebDav => ProviderTypes.WebDav,
+            ProviderFilter.GoogleDrive => ProviderTypes.GoogleDrive,
+            ProviderFilter.OneDrive => ProviderTypes.OneDrive,
+            ProviderFilter.DropBox => ProviderTypes.DropboxV2,
+            ProviderFilter.kDrive => ProviderTypes.kDrive,
+            ProviderFilter.Yandex => ProviderTypes.Yandex,
+            ProviderFilter.SharePoint => ProviderTypes.SharePoint,
+            ProviderFilter.Box => ProviderTypes.Box,
             _ => throw new NotImplementedException()
         };
-        return filter;
+        
+        return filter.ToStringFast();
     }
     
     internal static FolderType GetRoomFolderType(FilterType filterType)

@@ -715,8 +715,10 @@ public class UserManager(
         {
             return;
         }
-        
-        if ((groupId != Constants.GroupUser.ID && Constants.SystemGroups.Any(b => b.ID == groupId)) && (isUser || !isPaidUser))
+
+        if (await this.IsSystemGroup(groupId) &&
+            (isUser && groupId != Constants.GroupUser.ID ||
+            !isUser && !isPaidUser && groupId != Constants.GroupUser.ID))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
