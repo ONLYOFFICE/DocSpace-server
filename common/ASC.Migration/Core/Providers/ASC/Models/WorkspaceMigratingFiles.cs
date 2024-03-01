@@ -250,7 +250,7 @@ public class WorkspaceMigratingFiles(
             }
         }
 
-        if (_type != FolderType.USER)
+        if (_type != FolderType.USER || !ShouldImportSharedFiles && !ShouldImportSharedFolders)
         {
             return;
         }
@@ -260,7 +260,7 @@ public class WorkspaceMigratingFiles(
             try
             {
                 var entryIsFile = matchingIds[security.EntryId] is File<int>;
-                if (entryIsFile && true)
+                if (entryIsFile && ShouldImportSharedFiles)
                 {
                     await securityContext.AuthenticateMeAsync(_user.Guid);
                     var ace = await fileStorageService.SetExternalLinkAsync(matchingIds[security.EntryId].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
@@ -272,7 +272,7 @@ public class WorkspaceMigratingFiles(
                         var users = userManager.GetUsers(false, EmployeeStatus.Active,
                             new List<List<Guid>> { new List<Guid> { Guid.Parse(_mappedGuids[security.Subject]) } },
                             new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
-                            true, 10000, 0).Where(u => u.Id != _user.Guid);
+                            true, 100000, 0).Where(u => u.Id != _user.Guid);
                         await foreach (var u in users) 
                         {
                             await securityContext.AuthenticateMeAsync(u.Id);
@@ -283,6 +283,24 @@ public class WorkspaceMigratingFiles(
                     {
                         await securityContext.AuthenticateMeAsync(user.Id);
                         await entryManager.MarkAsRecentByLink(matchingIds[security.EntryId] as File<int>, ace.Id);
+                    }
+                }
+                else
+                {
+                    await securityContext.AuthenticateMeAsync(_user.Guid);
+                    var room = await fileStorageService.CreateRoomAsync($"{matchingIds[security.EntryId].Title}",
+                        RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
+
+                    orderedFolders = _storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
+                    var matchingRoomIds = new Dictionary<int, FileEntry<int>> { { security.EntryId, room } };
+                    foreach (var folder in orderedFolders)
+                    {
+                        newFolder = await fileStorageService.CreateNewFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
+                        matchingRoomIds.Add(folder.Id, newFolder);
+                    }
+                    foreach (var file in _storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))
+                    {
+                        await fileDao.CopyFileAsync(matchingIds[file.Id].Id, matchingRoomIds[security.EntryId].Id);
                     }
                 }
             }
