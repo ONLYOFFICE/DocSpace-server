@@ -61,7 +61,7 @@ public class BaseCommonLinkUtility
 
             if (_httpContextAccessor?.HttpContext?.Request != null)
             {
-                var u = _httpContextAccessor?.HttpContext.Request.Url();
+                var u = GetUri(_httpContextAccessor?.HttpContext.Request);
 
                 ArgumentNullException.ThrowIfNull(u);
 
@@ -105,7 +105,7 @@ public class BaseCommonLinkUtility
             // first, take from current request
             if (_httpContextAccessor?.HttpContext?.Request != null && !serverUriForce)
             {
-                var u = _httpContextAccessor?.HttpContext?.Request.Url();
+                var u = GetUri(_httpContextAccessor?.HttpContext?.Request);
 
                 ArgumentNullException.ThrowIfNull(u);
 
@@ -227,5 +227,12 @@ public class BaseCommonLinkUtility
         var uri = new Uri(serverUri.Replace('*', 'x').Replace('+', 'x'));
         _serverRoot = new UriBuilder(uri.Scheme, localhost ? LocalHost : uri.Host, uri.Port);
         _vpath = "/" + uri.AbsolutePath.Trim('/');
+    }
+
+    private Uri GetUri(HttpRequest httpRequest)
+    {
+        var origin = httpRequest.Headers[HeaderNames.Origin].FirstOrDefault();
+
+        return string.IsNullOrEmpty(origin) ? httpRequest.Url() : new Uri(origin);
     }
 }
