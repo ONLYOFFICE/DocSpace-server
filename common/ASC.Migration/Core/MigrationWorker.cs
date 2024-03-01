@@ -102,6 +102,5 @@ public static class MigrationWorkerExtension
     public static void Register(DIHelper services)
     {
         services.TryAdd<MigrationOperation>();
-        services.TryAdd<MigrationOperation>();
     }
 }
