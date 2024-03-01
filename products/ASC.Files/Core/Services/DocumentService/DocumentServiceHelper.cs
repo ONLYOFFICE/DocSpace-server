@@ -344,18 +344,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
     {
-        var sharedLink =
-            await fileSecurity.CanEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCustomFilterEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanReviewAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanFillFormsAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCommentAsync(file, FileConstant.ShareLinkId);
-
         var usersDrop = new List<string>();
 
         foreach (var uid in fileTracker.GetEditingBy(file.Id))
         {
-            if (!await userManager.UserExistsAsync(uid) && !sharedLink)
+            if (!await userManager.UserExistsAsync(uid))
             {
                 usersDrop.Add(uid.ToString());
                 continue;
