@@ -104,6 +104,7 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
+        DIHelper.TryAdd<NotifyConfiguration>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();
