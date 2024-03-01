@@ -578,7 +578,6 @@ public class FileSharing(
             //throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var linkAccess = FileShare.Restrict;
         var result = new List<AceWrapper>();
         var shares = await fileSecurity.GetSharesAsync(entry);
         var isRoom = entry is Folder<T> { SettingsPrivate: false } room && DocSpaceHelper.IsRoom(room.FolderType);
