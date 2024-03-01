@@ -285,7 +285,7 @@ public class WorkspaceMigratingFiles(
                         await entryManager.MarkAsRecentByLink(matchingIds[security.EntryId] as File<int>, ace.Id);
                     }
                 }
-                else
+                else if(ShouldImportSharedFolders)
                 {
                     await securityContext.AuthenticateMeAsync(_user.Guid);
                     var room = await fileStorageService.CreateRoomAsync($"{matchingIds[security.EntryId].Title}",
