@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Tenants;
+using ASC.Web.Files.Utils;
 
+using Constants = ASC.Core.Users.Constants;
 using FileShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Core.Providers.Models;
@@ -36,7 +37,9 @@ public class WorkspaceMigratingFiles(
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    EntryManager entryManager,
+    UserManager userManager)
     : MigratingFiles
 {
     public override int FoldersCount => _storage.Folders.Count;
@@ -206,13 +209,13 @@ public class WorkspaceMigratingFiles(
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
                 RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "", 0);
         
-        var matchingIds = new Dictionary<int, int> { { int.Parse(_folder), newFolder.Id } };
+        var matchingIds = new Dictionary<int, FileEntry<int>> { { int.Parse(_folder), newFolder } };
 
         var orderedFolders = _storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
-            newFolder = await fileStorageService.CreateNewFolderAsync(matchingIds[folder.ParentId], folder.Title);
-            matchingIds.Add(folder.Id, newFolder.Id);
+            newFolder = await fileStorageService.CreateNewFolderAsync(matchingIds[folder.ParentId].Id, folder.Title);
+            matchingIds.Add(folder.Id, newFolder);
         }
 
         var fileDao = daoFactory.GetFileDao<int>();
@@ -225,7 +228,7 @@ public class WorkspaceMigratingFiles(
                 await using var fs = _dataReader.GetEntry(path);
 
                 var newFile = serviceProvider.GetService<File<int>>();
-                newFile.ParentId = matchingIds[file.Folder];
+                newFile.ParentId = matchingIds[file.Folder].Id;
                 newFile.Comment = FilesCommonResource.CommentCreate;
                 newFile.Title = Path.GetFileName(file.Title);
                 newFile.ContentLength = fs.Length;
@@ -234,7 +237,7 @@ public class WorkspaceMigratingFiles(
                 newFile = await fileDao.SaveFileAsync(newFile, fs);
                 try
                 {
-                    matchingIds.Add(file.Id, newFile.Id);
+                    matchingIds.Add(file.Id, newFile);
                 }
                 catch
                 {
@@ -247,7 +250,7 @@ public class WorkspaceMigratingFiles(
             }
         }
 
-        if (_type != FolderType.USER || (!ShouldImportSharedFiles && !ShouldImportSharedFolders))
+        if (_type != FolderType.USER)
         {
             return;
         }
@@ -256,30 +259,32 @@ public class WorkspaceMigratingFiles(
         {
             try
             {
-                var entryIsFile = _storage.Files.Exists(el => el.Id == security.EntryId);
-                if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+                var entryIsFile = matchingIds[security.EntryId] is File<int>;
+                if (entryIsFile && true)
                 {
-                    continue;
-                }
-                var list = new List<AceWrapper>
-            {
-                new AceWrapper
-                {
-                    Access = (FileShare)security.Security,
-                    Id = Guid.Parse(_mappedGuids[security.Subject]),
-                    SubjectGroup = security.EntryType == 2
-                }
-            };
+                    await securityContext.AuthenticateMeAsync(_user.Guid);
+                    var ace = await fileStorageService.SetExternalLinkAsync(matchingIds[security.EntryId].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
+                    primary: false);
 
-                var aceCollection = new AceCollection<int>
-                {
-                    Files = entryIsFile ? new List<int> { matchingIds[security.EntryId] } : [],
-                    Folders = entryIsFile ? [] : new List<int> { matchingIds[security.EntryId] },
-                    Aces = list,
-                    Message = null
-                };
-
-                await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                    var user = await userManager.GetUsersAsync(Guid.Parse(_mappedGuids[security.Subject]));
+                    if (user.Id == Constants.LostUser.Id)
+                    {
+                        var users = userManager.GetUsers(false, EmployeeStatus.Active,
+                            new List<List<Guid>> { new List<Guid> { Guid.Parse(_mappedGuids[security.Subject]) } },
+                            new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
+                            true, 10000, 0).Where(u => u.Id != _user.Guid);
+                        await foreach (var u in users) 
+                        {
+                            await securityContext.AuthenticateMeAsync(u.Id);
+                            await entryManager.MarkAsRecentByLink(matchingIds[security.EntryId] as File<int>, ace.Id);
+                        }
+                    }
+                    else
+                    {
+                        await securityContext.AuthenticateMeAsync(user.Id);
+                        await entryManager.MarkAsRecentByLink(matchingIds[security.EntryId] as File<int>, ace.Id);
+                    }
+                }
             }
             catch(Exception ex)
             {

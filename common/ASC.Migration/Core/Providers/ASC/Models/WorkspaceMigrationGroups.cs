@@ -100,7 +100,6 @@ public class WorkspaceMigrationGroups(UserManager userManager) : MigratingGroup
             }
             catch (Exception ex)
             {
-                //Think about the text of the error
                 Log($"Couldn't to add user {userGuid} to group {_groupName} ", ex);
             }
         }
