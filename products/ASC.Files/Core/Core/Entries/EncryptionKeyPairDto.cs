@@ -122,9 +122,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
 
         var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup
-                                        && !share.Id.Equals(FileConstant.ShareLinkId)
-                                        && share.Access == FileShare.ReadWrite).ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
 
         var tasks = fileShares.Select(async share =>
         {
