@@ -2697,30 +2697,6 @@ public class FileStorageService //: IFileStorageService
         return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
     }
 
-    public async Task<bool> SetAceLinkAsync<T>(T fileId, FileShare share)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        FileEntry<T> file = await fileDao.GetFileAsync(fileId);
-        var aces = new List<AceWrapper> { new() { Access = share, Id = FileConstant.ShareLinkId, SubjectGroup = true } };
-
-        try
-        {
-            var result = await fileSharingAceHelper.SetAceObjectAsync(aces, file, false, null, null);
-            if (result.Changed)
-            {
-                await filesMessageService.SendAsync(MessageAction.FileExternalLinkAccessUpdated, file, file.Title, FileShareExtensions.GetAccessString(share));
-            }
-        }
-        catch (Exception e)
-        {
-            throw GenerateException(e);
-        }
-
-        var securityDao = daoFactory.GetSecurityDao<T>();
-
-        return await securityDao.IsSharedAsync(file.Id, FileEntryType.File);
-    }
-
     public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
     {
         if (!authContext.IsAuthenticated)
@@ -3269,7 +3245,7 @@ public class FileStorageService //: IFileStorageService
         var usersInfo = new List<UserInfo>();
         foreach (var ace in acesForObject)
         {
-            if (ace.Access == FileShare.Restrict || ace.Id.Equals(FileConstant.ShareLinkId))
+            if (ace.Access == FileShare.Restrict)
             {
                 continue;
             }
