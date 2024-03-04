@@ -184,6 +184,23 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             return null;
         }
 
+        if (data.AuthData != null && !data.AuthData.IsEmpty())
+        {
+            ProviderTypesExtensions.TryParse(forUpdate.Provider, true, out var key);
+            var checkedData = GetEncodedAccessToken(data.AuthData, key);
+            checkedData.Url = forUpdate.Url;
+            
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, checkedData, securityContext.CurrentAccount.ID, forUpdate.FolderType, 
+                    tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+            {
+                throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
+            }
+            
+            forUpdate.UserName = data.AuthData.Login ?? "";
+            forUpdate.Password = EncryptPassword(data.AuthData.Password);
+            forUpdate.Token = EncryptPassword(data.AuthData.RawToken ?? "");
+        }
+
         if (!string.IsNullOrEmpty(data.Title))
         {
             forUpdate.Title = data.Title;
@@ -217,13 +234,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         if (!string.IsNullOrEmpty(data.Color))
         {
             forUpdate.Color = data.Color;
-        }
-        
-        if (data.AuthData != null && !data.AuthData.IsEmpty())
-        {
-            forUpdate.UserName = data.AuthData.Login ?? "";
-            forUpdate.Password = EncryptPassword(data.AuthData.Password);
-            forUpdate.Token = EncryptPassword(data.AuthData.RawToken ?? "");
         }
 
         forUpdate.ModifiedOn = DateTime.UtcNow;
