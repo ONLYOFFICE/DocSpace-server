@@ -57,6 +57,7 @@ public class GwsMigratingUser(
     {
         Key = user.Key;
         _userInfo = user._userInfo;
+        ShouldImport = user.ShouldImport;
     }
 
     public override void Parse()
