@@ -1058,7 +1058,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var defaultShare =
-            userId == FileConstant.ShareLinkId ? FileShare.Restrict :
             e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
             e.RootFolderType == FolderType.USER ? DefaultMyShare :
             e.RootFolderType == FolderType.Privacy ? DefaultPrivacyShare :
@@ -1997,11 +1996,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (linkId != Guid.Empty)
         {
             result.Add(linkId);
-        }
-        
-        if (userId == FileConstant.ShareLinkId)
-        {
-            return result;
         }
 
         if (entry is { RootFolderType: FolderType.USER } and not IFolder { FolderType: FolderType.USER } &&

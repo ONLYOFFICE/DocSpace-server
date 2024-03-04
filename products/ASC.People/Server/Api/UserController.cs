@@ -991,6 +991,7 @@ public class UserController(ICache cache,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("email")]
+    [EnableRateLimiting("sensitive_api")]
     public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
