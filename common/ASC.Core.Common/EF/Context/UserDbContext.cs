@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class UserDbContext : DbContext
+public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : DbContext(dbContextOptions)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<UserSecurity> UserSecurity { get; set; }
@@ -37,11 +37,9 @@ public class UserDbContext : DbContext
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DbSubscriptionMethod> SubscriptionMethods { get; set; }
     public DbSet<UserDav> UsersDav { get; set; }
-
-    public UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : base(dbContextOptions)
-    {
-
-    }
+    public DbSet<AccountLinks> AccountLinks { get; set; }
+    public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
+    public DbSet<DbQuotaRow> QuotaRow { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +54,9 @@ public class UserDbContext : DbContext
         .AddUserGroup()
         .AddSubscription()
         .AddUserDav()
-        .AddDbTenant();
+        .AddDbTenant()
+        .AddAccountLinks()
+        .AddWebstudioSettings()
+        .AddDbQuotaRow();
     }
 }

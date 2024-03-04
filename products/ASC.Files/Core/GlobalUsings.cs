@@ -24,8 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Data;
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.Diagnostics;
 global using System.Extensions;
@@ -36,7 +38,6 @@ global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Net.Mime;
 global using System.Net.Sockets;
-global using System.Reflection;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Cryptography;
@@ -48,11 +49,6 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
-
-global using AppLimit.CloudComputing.SharpBox;
-global using AppLimit.CloudComputing.SharpBox.Exceptions;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider.DropBox;
 
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
@@ -69,6 +65,7 @@ global using ASC.Common.Mapping;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -86,6 +83,7 @@ global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
+global using ASC.Data.Storage.ChunkedUploader;
 global using ASC.Data.Storage.DataOperators;
 global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
@@ -117,6 +115,7 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Thirdparty;
+global using ASC.Files.Core.Core.Thirdparty.WebDav;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
@@ -125,8 +124,8 @@ global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
 global using ASC.Files.Thirdparty.ProviderDao;
 global using ASC.Files.Thirdparty.SharePoint;
-global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
+global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Model;
@@ -141,6 +140,7 @@ global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
+global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Core.Utility.Skins;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Files;
@@ -161,6 +161,7 @@ global using ASC.Web.Files.ThirdPartyApp;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
+global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Utility;
 
 global using AutoMapper;
@@ -219,6 +220,8 @@ global using Newtonsoft.Json.Linq;
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;
+
+global using WebDav;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;

@@ -37,5 +37,5 @@ public interface IFileSecurity
     Task<bool> CanCreateAsync<T>(FileEntry<T> entry, Guid userId);
     Task<bool> CanEditAsync<T>(FileEntry<T> entry, Guid userId);
     Task<bool> CanDeleteAsync<T>(FileEntry<T> entry, Guid userId);
-    Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry);
+    Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false);
 }

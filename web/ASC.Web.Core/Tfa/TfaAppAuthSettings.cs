@@ -41,13 +41,7 @@ public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>
 }
 
 [Scope]
-public class TfaAppAuthSettingsHelper : TfaSettingsHelperBase<TfaAppAuthSettings>
-{
-    public TfaAppAuthSettingsHelper(
-        IHttpContextAccessor httpContextAccessor,
+public class TfaAppAuthSettingsHelper(IHttpContextAccessor httpContextAccessor,
         UserManager userManager,
         SettingsManager settingsManager)
-        : base(settingsManager, httpContextAccessor, userManager)
-    {
-    }
-}
+    : TfaSettingsHelperBase<TfaAppAuthSettings>(settingsManager, httpContextAccessor, userManager);

@@ -27,18 +27,11 @@
 namespace ASC.ElasticSearch;
 
 [Singleton]
-public class Client
+public class Client(ILoggerProvider option, Settings settings)
 {
-    private ElasticClient _client;
+    private volatile ElasticClient _client;
     private static readonly object _locker = new();
-    private readonly ILogger _logger;
-    private readonly Settings _settings;
-
-    public Client(ILoggerProvider option, Settings settings)
-    {
-        _logger = option.CreateLogger("ASC.Indexer");
-        _settings = settings;
-    }
+    private readonly ILogger _logger = option.CreateLogger("ASC.Indexer");
 
     public ElasticClient Instance
     {
@@ -56,30 +49,30 @@ public class Client
                     return _client;
                 }
 
-                if (string.IsNullOrEmpty(_settings.Scheme) || string.IsNullOrEmpty(_settings.Host) || !_settings.Port.HasValue)
+                if (string.IsNullOrEmpty(settings.Scheme) || string.IsNullOrEmpty(settings.Host) || !settings.Port.HasValue)
                 {
                     return null;
                 }
 
-                var uri = new Uri(string.Format("{0}://{1}:{2}", _settings.Scheme, _settings.Host, _settings.Port));
-                var settings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
+                var uri = new Uri(string.Format("{0}://{1}:{2}", settings.Scheme, settings.Host, settings.Port));
+                var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
                     .ThrowExceptions();
 
-                if (_settings.Authentication != null)
+                if (settings.Authentication != null)
                 {
-                    settings.BasicAuthentication(_settings.Authentication.Username, _settings.Authentication.Password);
+                    connectionSettings.BasicAuthentication(settings.Authentication.Username, settings.Authentication.Password);
                 }
 
-                if (_settings.ApiKey != null)
+                if (settings.ApiKey != null)
                 {
-                    settings.ApiKeyAuthentication(_settings.ApiKey.Id, _settings.ApiKey.Value);
+                    connectionSettings.ApiKeyAuthentication(settings.ApiKey.Id, settings.ApiKey.Value);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Trace))
                 {
-                    settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
+                    connectionSettings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
                         //Log.Trace(r.DebugInformation);
 
@@ -88,7 +81,7 @@ public class Client
                         //    Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
                         //}
 
-                        if (r.HttpStatusCode != null && r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
+                        if (r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {
                             _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                         }
@@ -97,7 +90,7 @@ public class Client
 
                 try
                 {
-                    var client = new ElasticClient(settings);
+                    var client = new ElasticClient(connectionSettings);
                     if (Ping(client))
                     {
                         _client = client;

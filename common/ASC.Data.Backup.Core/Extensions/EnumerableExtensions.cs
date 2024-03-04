@@ -26,16 +26,11 @@
 
 namespace ASC.Data.Backup.Extensions;
 
-public class TreeNode<TEntry>
+public class TreeNode<TEntry>()
 {
     public TEntry Entry { get; set; }
     public TreeNode<TEntry> Parent { get; set; }
-    public List<TreeNode<TEntry>> Children { get; private set; }
-
-    public TreeNode()
-    {
-        Children = new List<TreeNode<TEntry>>();
-    }
+    public List<TreeNode<TEntry>> Children { get; private set; } = new();
 
     public TreeNode(TEntry entry)
         : this()

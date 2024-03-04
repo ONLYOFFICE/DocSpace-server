@@ -41,23 +41,22 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 10;
-        });
+        services.RegisterQueue();
 
         DIHelper.TryAdd<FileHandlerService>();
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();
         DIHelper.TryAdd<DocuSignHandlerService>();
         DIHelper.TryAdd<ThirdPartyAppHandlerService>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         NotifyConfigurationExtension.Register(DIHelper);
 
@@ -73,6 +72,8 @@ public class Startup : BaseStartup
 
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
+        services.AddDocumentServiceHttpClient();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

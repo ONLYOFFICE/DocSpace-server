@@ -37,28 +37,19 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
     {
         return new DisplayUserSettings
         {
-            IsDisableGettingStarted = false,
+            IsDisableGettingStarted = false
         };
     }
 }
 
 [Scope]
-public class DisplayUserSettingsHelper
+public class DisplayUserSettingsHelper(UserManager userManager, UserFormatter userFormatter, IConfiguration configuration)
 {
-    private readonly string _removedProfileName;
-    public DisplayUserSettingsHelper(UserManager userManager, UserFormatter userFormatter, IConfiguration configuration)
-    {
-        _userManager = userManager;
-        _userFormatter = userFormatter;
-        _removedProfileName = configuration["web:removed-profile-name"] ?? "profile removed";
-    }
-
-    private readonly UserManager _userManager;
-    private readonly UserFormatter _userFormatter;
+    private readonly string _removedProfileName = configuration["web:removed-profile-name"] ?? "profile removed";
 
     public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true)
     {
-        return GetFullUserName(await _userManager.GetUsersAsync(userID), withHtmlEncode);
+        return GetFullUserName(await userManager.GetUsersAsync(userID), withHtmlEncode);
     }
 
     public string GetFullUserName(UserInfo userInfo, bool withHtmlEncode = true)
@@ -72,7 +63,7 @@ public class DisplayUserSettingsHelper
         {
             return string.Empty;
         }
-        if (!userInfo.Id.Equals(Guid.Empty) && !_userManager.UserExists(userInfo))
+        if (!userInfo.Id.Equals(Guid.Empty) && !userManager.UserExists(userInfo))
         {
             try
             {
@@ -93,7 +84,7 @@ public class DisplayUserSettingsHelper
                 return _removedProfileName;
             }
         }
-        var result = _userFormatter.GetUserName(userInfo, format);
+        var result = userFormatter.GetUserName(userInfo, format);
 
         if (string.IsNullOrWhiteSpace(result))
         {

@@ -29,19 +29,11 @@ using static ASC.Notify.Engine.NotifyEngine;
 namespace ASC.Core.Common.Notify.Engine;
 
 [Singleton]
-public class NotifySchedulerService : BackgroundService
-{
-    private readonly NotifyEngine _notifyEngine;
-    private readonly ILogger<NotifySenderService> _logger;
-    private readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
-
-    public NotifySchedulerService(
-        NotifyEngine notifyEngine,
+public class NotifySchedulerService(NotifyEngine notifyEngine,
         ILogger<NotifySenderService> logger)
-    {
-        _notifyEngine = notifyEngine;
-        _logger = logger;
-    }
+    : BackgroundService
+{
+    private readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -50,19 +42,20 @@ public class NotifySchedulerService : BackgroundService
             var min = DateTime.MaxValue;
             var now = DateTime.UtcNow;
             List<SendMethodWrapper> copy;
-            lock (_notifyEngine.SendMethods)
+            lock (notifyEngine.SendMethods)
             {
-                copy = _notifyEngine.SendMethods.ToList();
+                copy = notifyEngine.SendMethods.ToList();
             }
 
             foreach (var w in copy)
             {
                 if (!w.ScheduleDate.HasValue)
                 {
-                    lock (_notifyEngine.SendMethods)
+                    lock (notifyEngine.SendMethods)
                     {
-                        _notifyEngine.SendMethods.Remove(w);
+                        notifyEngine.SendMethods.Remove(w);
                     }
+                    continue;
                 }
 
                 if (w.ScheduleDate.Value <= now)
@@ -73,7 +66,7 @@ public class NotifySchedulerService : BackgroundService
                     }
                     catch (Exception error)
                     {
-                        _logger.ErrorInvokeSendMethod(error);
+                        logger.ErrorInvokeSendMethod(error);
                     }
                     w.UpdateScheduleDate(now);
                 }

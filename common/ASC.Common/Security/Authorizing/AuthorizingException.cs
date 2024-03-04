@@ -28,58 +28,15 @@ namespace ASC.Common.Security.Authorizing;
 
 public class AuthorizingException : Exception
 {
-    public ISubject Subject { get; internal set; }
-    public IAction[] Actions { get; internal set; }
-    public override string Message => _message;
-
-    private readonly string _message;
-
-    public AuthorizingException(string message)
-        : base(message) { }
-
-    public AuthorizingException(ISubject subject, IAction[] actions)
-    {
-        if (actions == null || actions.Length == 0)
-        {
-            throw new ArgumentNullException(nameof(actions));
-        }
-
-        ArgumentNullException.ThrowIfNull(subject);
-
-        Subject = subject;
-        Actions = actions;
-        var sactions = "";
-
-        Array.ForEach(actions, action => { sactions += action + ", "; });
-
-        _message = string.Format(
-            "\"{0}\" access denied \"{1}\"",
-            subject,
-            sactions
-            );
-    }
-
+    public override string Message { get; }
+    
     public AuthorizingException(ISubject subject, IAction[] actions, ISubject[] denySubjects, IAction[] denyActions) =>
-        _message = FormatErrorMessage(subject, actions, denySubjects, denyActions);
+        Message = FormatErrorMessage(subject, actions, denySubjects, denyActions);
+    
+    public AuthorizingException(ISubject subject, IAction action, ISubject denySubject, IAction denyAction) =>
+        Message = FormatErrorMessage(subject, action, denySubject, denyAction);
 
-    protected AuthorizingException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-        _message = info.GetValue("_Message", typeof(string)) as string;
-        Subject = info.GetValue("Subject", typeof(ISubject)) as ISubject;
-        Actions = info.GetValue("Actions", typeof(IAction[])) as IAction[];
-    }
-
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("Subject", Subject, typeof(ISubject));
-        info.AddValue("_Message", _message, typeof(string));
-        info.AddValue("Actions", Actions, typeof(IAction[]));
-        base.GetObjectData(info, context);
-    }
-
-    internal static string FormatErrorMessage(ISubject subject, IAction[] actions, ISubject[] denySubjects,
-                                              IAction[] denyActions)
+    private static string FormatErrorMessage(ISubject subject, IAction[] actions, ISubject[] denySubjects, IAction[] denyActions)
     {
         ArgumentNullException.ThrowIfNull(subject);
 
@@ -124,10 +81,27 @@ public class AuthorizingException : Exception
             sb.Append(reason);
         }
         var reasons = sb.ToString();
-        var sactions = "";
-        Array.ForEach(actions, action => { sactions += action + ", "; });
+        var sections = new StringBuilder(actions.Length);
+        Array.ForEach(actions, action => { sections.Append(action + ", "); });
 
-        var message = $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{sactions}\". Cause: {reasons}.";
-        return message;
+        return $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{sections}\". Cause: {reasons}.";
+    }
+    
+    private static string FormatErrorMessage(ISubject subject, IAction action, ISubject denySubject, IAction denyAction)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(action);
+        
+        string reason;
+        if (denySubject != null && denyAction != null)
+        {
+            reason = $"{action.Name}:{(denySubject is IRole ? "role:" : "") + denySubject.Name} access denied {denyAction.Name}.";
+        }
+        else
+        {
+            reason = $"{action.Name}: access denied.";
+        }
+        
+        return $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{action}\". Cause: {reason}.";
     }
 }

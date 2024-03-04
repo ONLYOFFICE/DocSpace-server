@@ -28,15 +28,10 @@ namespace Textile.States;
 
 [FormatterState(@"^\s*(" + Globals.AlignPattern + Globals.BlockModifiersPattern + @"\.\s?)?" +
                                 @"\|(?<content>.*)\|\s*$")]
-public class TableRowFormatterState : FormatterState
+public class TableRowFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private string _attsInfo;
     private string _alignInfo;
-
-    public TableRowFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

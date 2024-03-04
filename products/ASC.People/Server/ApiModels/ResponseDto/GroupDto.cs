@@ -30,10 +30,6 @@ namespace ASC.People.ApiModels.ResponseDto;
 /// </summary>
 public class GroupDto
 {
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
-    public string Description { get; set; }
-
     /// <summary>Name</summary>
     /// <type>System.String, System</type>
     public string Name { get; set; }
@@ -52,57 +48,39 @@ public class GroupDto
 
     /// <summary>Manager</summary>
     /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
-    public EmployeeDto Manager { get; set; }
+    public EmployeeFullDto Manager { get; set; }
 
     /// <summary>List of members</summary>
     /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
-    public List<EmployeeDto> Members { get; set; }
-
-    public static GroupDto GetSample()
-    {
-        return new GroupDto
-        {
-            Id = Guid.NewGuid(),
-            Manager = EmployeeDto.GetSample(),
-            Category = Guid.NewGuid(),
-            Name = "Sample group",
-            Parent = Guid.NewGuid(),
-            Members = new List<EmployeeDto> { EmployeeDto.GetSample() }
-        };
-    }
+    public List<EmployeeFullDto> Members { get; set; }
+    
+    public bool? Shared { get; set; }
 }
 
 [Scope]
-public class GroupFullDtoHelper
+public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper employeeFullDtoHelper)
 {
-    private readonly UserManager _userManager;
-    private readonly EmployeeDtoHelper _employeeWraperHelper;
-
-    public GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
-    {
-        _userManager = userManager;
-        _employeeWraperHelper = employeeWraperHelper;
-    }
-
-    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers)
+    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers, bool? shared = null)
     {
         var result = new GroupDto
         {
             Id = group.ID,
             Category = group.CategoryID,
-            Parent = group.Parent != null ? group.Parent.ID : Guid.Empty,
+            Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await _employeeWraperHelper.GetAsync(await _userManager.GetUsersAsync(await _userManager.GetDepartmentManagerAsync(group.ID)))
+            Manager = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
+            Shared = shared
         };
 
-        if (includeMembers)
+        if (!includeMembers)
         {
-            result.Members = new List<EmployeeDto>();
+            return result;
+        }
 
-            foreach (var m in await _userManager.GetUsersByGroupAsync(group.ID))
-            {
-                result.Members.Add(await _employeeWraperHelper.GetAsync(m));
-            }
+        result.Members = [];
+        foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
+        { 
+            result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }
 
         return result;

@@ -31,16 +31,8 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Core.Core.Thirdparty.ProviderDao;
 
 [Scope(Additional = typeof(SelectorFactoryExtension))]
-internal class SelectorFactory
+internal class SelectorFactory(IServiceProvider serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public SelectorFactory(
-        IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public IDaoSelector GetSelector(string id)
     {
         var selector = Match(id);
@@ -49,20 +41,37 @@ internal class SelectorFactory
 
     private IDaoSelector GetSelectorInternal(string selector)
     {
-        if (selector == Selectors.SharpBox.Id)
-            return _serviceProvider.GetService<IDaoSelector<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>>();
-        else if (selector == Selectors.SharePoint.Id)
-            return _serviceProvider.GetService<IDaoSelector<File, Folder, ClientObject>>();
-        else if (selector == Selectors.GoogleDrive.Id)
-            return _serviceProvider.GetService<IDaoSelector<DriveFile, DriveFile, DriveFile>>();
-        else if (selector == Selectors.Box.Id)
-            return _serviceProvider.GetService<IDaoSelector<BoxFile, BoxFolder, BoxItem>>();
-        else if (selector == Selectors.Dropbox.Id)
-            return _serviceProvider.GetService<IDaoSelector<FileMetadata, FolderMetadata, Metadata>>();
-        else if (selector == Selectors.OneDrive.Id)
-            return _serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
-        else
-            return null;
+        if (selector == Selectors.WebDav.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>>();
+        }
+
+        if (selector == Selectors.SharePoint.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<File, Folder, ClientObject>>();
+        }
+
+        if (selector == Selectors.GoogleDrive.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<DriveFile, DriveFile, DriveFile>>();
+        }
+
+        if (selector == Selectors.Box.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<BoxFile, BoxFolder, BoxItem>>();
+        }
+
+        if (selector == Selectors.Dropbox.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<FileMetadata, FolderMetadata, Metadata>>();
+        }
+
+        if (selector == Selectors.OneDrive.Id)
+        {
+            return serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
+        }
+
+        return null;
     }
 
     public Dictionary<IDaoSelector, List<string>> GetSelectors(IEnumerable<string> ids)
@@ -89,11 +98,11 @@ public static class SelectorFactoryExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<SharpBoxDaoSelector>();
         services.TryAdd<SharePointDaoSelector>();
         OneDriveDaoSelectorExtension.Register(services);
         GoogleDriveDaoSelectorExtension.Register(services);
         DropboxDaoSelectorExtension.Register(services);
         BoxDaoSelectorExtension.Register(services);
+        WebDavDaoSelectorExtension.Register(services);
     }
 }

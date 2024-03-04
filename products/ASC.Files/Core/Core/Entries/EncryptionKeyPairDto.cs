@@ -44,35 +44,19 @@ public class EncryptionKeyPairDto
 }
 
 [Scope]
-public class EncryptionKeyPairDtoHelper
+public class EncryptionKeyPairDtoHelper(UserManager userManager,
+    AuthContext authContext,
+    EncryptionLoginProvider encryptionLoginProvider,
+    FileSecurity fileSecurity,
+    IDaoFactory daoFactory)
 {
-    private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly EncryptionLoginProvider _encryptionLoginProvider;
-    private readonly FileSecurity _fileSecurity;
-    private readonly IDaoFactory _daoFactory;
-
-    public EncryptionKeyPairDtoHelper(
-        UserManager userManager,
-        AuthContext authContext,
-        EncryptionLoginProvider encryptionLoginProvider,
-        FileSecurity fileSecurity,
-        IDaoFactory daoFactory)
-    {
-        _userManager = userManager;
-        _authContext = authContext;
-        _encryptionLoginProvider = encryptionLoginProvider;
-        _fileSecurity = fileSecurity;
-        _daoFactory = daoFactory;
-    }
-
     public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
     {
         ArgumentException.ThrowIfNullOrEmpty(publicKey);
         ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
-        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
-        if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(user))
+        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(user))
         {
             throw new SecurityException();
         }
@@ -81,16 +65,16 @@ public class EncryptionKeyPairDtoHelper
         {
             PrivateKeyEnc = privateKeyEnc,
             PublicKey = publicKey,
-            UserId = user.Id,
+            UserId = user.Id
         };
 
         var keyPairString = JsonSerializer.Serialize(keyPair);
-        await _encryptionLoginProvider.SetKeysAsync(user.Id, keyPairString);
+        await encryptionLoginProvider.SetKeysAsync(user.Id, keyPairString);
     }
 
     public async Task<EncryptionKeyPairDto> GetKeyPairAsync()
     {
-        var currentAddressString = await _encryptionLoginProvider.GetKeysAsync();
+        var currentAddressString = await encryptionLoginProvider.GetKeysAsync();
         if (string.IsNullOrEmpty(currentAddressString))
         {
             return null;
@@ -102,7 +86,7 @@ public class EncryptionKeyPairDtoHelper
             PropertyNameCaseInsensitive = true
         };
         var keyPair = JsonSerializer.Deserialize<EncryptionKeyPairDto>(currentAddressString, options);
-        if (keyPair.UserId != _authContext.CurrentAccount.ID)
+        if (keyPair.UserId != authContext.CurrentAccount.ID)
         {
             return null;
         }
@@ -112,20 +96,20 @@ public class EncryptionKeyPairDtoHelper
 
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId, FileStorageService FileStorageService)
     {
-        var fileDao = _daoFactory.GetFileDao<T>();
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         await fileDao.InvalidateCacheAsync(fileId);
 
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await _fileSecurity.CanEditAsync(file))
+        if (!await fileSecurity.CanEditAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var locatedInPrivateRoom = file.RootFolderType == FolderType.VirtualRooms
@@ -138,13 +122,11 @@ public class EncryptionKeyPairDtoHelper
 
         var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup
-                                        && !share.Id.Equals(FileConstant.ShareLinkId)
-                                        && share.Access == FileShare.ReadWrite).ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
 
         var tasks = fileShares.Select(async share =>
         {
-            var fileKeyPairString = await _encryptionLoginProvider.GetKeysAsync(share.Id);
+            var fileKeyPairString = await encryptionLoginProvider.GetKeysAsync(share.Id);
             if (string.IsNullOrEmpty(fileKeyPairString))
             {
                 return null;

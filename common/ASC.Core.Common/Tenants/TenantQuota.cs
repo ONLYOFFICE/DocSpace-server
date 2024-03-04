@@ -82,14 +82,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         }
         set
         {
-            if (value != null)
-            {
-                _featuresList = value.Split(' ', ',', ';').ToList();
-            }
-            else
-            {
-                _featuresList = new List<string>();
-            }
+            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : new List<string>();
         }
     }
 
@@ -233,6 +226,16 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _ssoFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _statisticFeature;
+
+    /// <summary>Specifies if the statistic settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Statistic
+    {
+        get => _statisticFeature.Value;
+        set => _statisticFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
 
     /// <summary>Specifies if the white label settings are available or not</summary>
@@ -328,6 +331,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9 };
+        _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -351,7 +355,8 @@ public class TenantQuota : IMapFrom<DbQuota>
             _autoBackupRestoreFeature,
             _oauthFeature,
             _contentSearchFeature,
-            _thirdPartyFeature
+            _thirdPartyFeature,
+            _statisticFeature
         };
     }
 
@@ -509,14 +514,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
         if (!EqualityComparer<T>.Default.Equals(value, default) && !EqualityComparer<T>.Default.Equals(value, defaultValue))
         {
-            if (value is bool)
-            {
-                _featuresList.Add($"{name}");
-            }
-            else
-            {
-                _featuresList.Add($"{name}:{value}");
-            }
+            _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
     }
 }

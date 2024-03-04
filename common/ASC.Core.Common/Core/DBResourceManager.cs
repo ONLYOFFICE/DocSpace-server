@@ -27,18 +27,11 @@
 namespace TMResourceData;
 
 [Singleton]
-public class WhiteLabelHelper
+public class WhiteLabelHelper(ILoggerProvider option)
 {
-    private readonly ILogger _logger;
-    private readonly ConcurrentDictionary<int, string> _whiteLabelDictionary;
-    public string DefaultLogoText { get; set; }
-
-    public WhiteLabelHelper(ILoggerProvider option)
-    {
-        _logger = option.CreateLogger("ASC.Resources");
-        _whiteLabelDictionary = new ConcurrentDictionary<int, string>();
-        DefaultLogoText = string.Empty;
-    }
+    private readonly ILogger _logger = option.CreateLogger("ASC.Resources");
+    private readonly ConcurrentDictionary<int, string> _whiteLabelDictionary = new();
+    public string DefaultLogoText { get; set; } = string.Empty;
 
     public void SetNewText(int tenantId, string newText)
     {

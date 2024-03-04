@@ -24,13 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
+
 namespace ASC.Data.Storage.RackspaceCloud;
 
 [Scope]
-public class RackspaceCloudStorage : BaseStorage
+public class RackspaceCloudStorage(TempPath tempPath,
+        TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger<RackspaceCloudStorage> logger,
+        IHttpClientFactory httpClient,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager,
+        SettingsManager settingsManager,
+        IQuotaService quotaService,
+        UserManager userManager,
+        CustomQuota customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
-    public TempPath TempPath { get; }
+    public TempPath TempPath { get; } = tempPath;
 
     private string _region;
     private string _private_container;
@@ -44,25 +61,6 @@ public class RackspaceCloudStorage : BaseStorage
     private Uri _cname;
     private Uri _cnameSSL;
     private readonly List<string> _domains = new();
-    private readonly ILogger<RackspaceCloudStorage> _logger;
-
-    public RackspaceCloudStorage(
-        TempPath tempPath,
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<RackspaceCloudStorage> logger,
-        IHttpClientFactory httpClient,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _logger = logger;
-        TempPath = tempPath;
-    }
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -140,8 +138,7 @@ public class RackspaceCloudStorage : BaseStorage
         var client = GetClient();
 
         var accounMetaData = client.GetAccountMetaData(_region);
-        string secretKey;
-        if (accounMetaData.TryGetValue("Temp-Url-Key", out secretKey))
+        if (accounMetaData.TryGetValue("Temp-Url-Key", out var secretKey))
         {
 
         }
@@ -153,7 +150,7 @@ public class RackspaceCloudStorage : BaseStorage
         }
 
         return Task.FromResult(client.CreateTemporaryPublicUri(
-                                                JSIStudios.SimpleRESTServices.Client.HttpMethod.GET,
+                                                HttpMethod.GET,
                                                 _private_container,
                                                 MakePath(domain, path),
                                                 secretKey,
@@ -168,12 +165,21 @@ public class RackspaceCloudStorage : BaseStorage
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
+        return null;
+    }
+
+    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
         return GetReadStreamAsync(domain, path, offset);
     }
 
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    {
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
+    }
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, Guid.Empty,stream, string.Empty, string.Empty);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
@@ -181,6 +187,10 @@ public class RackspaceCloudStorage : BaseStorage
         return SaveAsync(domain, path, stream, null, null, acl);
     }
 
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    {
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
+    }
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto);
@@ -197,14 +207,21 @@ public class RackspaceCloudStorage : BaseStorage
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
+                     string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
+     DateTime? deleteAt = null, long? deleteAfter = null)
+    {
+        return await SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays, deleteAt, deleteAfter);
+    }
+
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
     DateTime? deleteAt = null, long? deleteAfter = null)
     {
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
 
         if (EnableQuotaCheck(domain))
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length);
+            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
         }
 
         var client = GetClient();
@@ -270,7 +287,7 @@ public class RackspaceCloudStorage : BaseStorage
             }
             catch (Exception exp)
             {
-                _logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
             }
         }
 
@@ -285,7 +302,7 @@ public class RackspaceCloudStorage : BaseStorage
                             _region
                            );
 
-        await QuotaUsedAddAsync(domain, buffered.Length);
+        await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
 
         return await GetUriAsync(domain, path);
 
@@ -305,6 +322,10 @@ public class RackspaceCloudStorage : BaseStorage
 
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive)
     {
+        await DeleteFilesAsync(domain, folderPath, pattern, recursive, Guid.Empty);
+    }
+    public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
+    {
         var client = GetClient();
 
         var files = client.ListObjects(_private_container, null, null, null, MakePath(domain, folderPath), _region)
@@ -322,7 +343,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         if (QuotaController != null)
         {
-            await QuotaUsedDeleteAsync(domain, files.Select(x => x.Bytes).Sum());
+            await QuotaUsedDeleteAsync(domain, files.Select(x => x.Bytes).Sum(), ownerId);
         }
     }
 
@@ -413,6 +434,10 @@ public class RackspaceCloudStorage : BaseStorage
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
+        return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
+    }
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
+    {
         var srcKey = MakePath(srcDomain, srcPath);
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcPath);
@@ -424,7 +449,7 @@ public class RackspaceCloudStorage : BaseStorage
         await DeleteAsync(srcDomain, srcPath);
 
         await QuotaUsedDeleteAsync(srcDomain, size);
-        await QuotaUsedAddAsync(newDomain, size, quotaCheckFileSize);
+        await QuotaUsedAddAsync(newDomain, size, ownerId, quotaCheckFileSize);
 
         return await GetUriAsync(newDomain, newPath);
     }
@@ -441,7 +466,7 @@ public class RackspaceCloudStorage : BaseStorage
         var client = GetClient();
 
         return client.ListObjects(_private_container, null, null, null, MakePath(domain, path), _region)
-                  .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length)).ToAsyncEnumerable();
+                  .Select(x => x.Name[MakePath(domain, path + "/").Length..]).ToAsyncEnumerable();
     }
 
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
@@ -452,7 +477,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         return paths
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x)))
-                .Select(x => x.Substring(MakePath(domain, path + "/").Length).TrimStart('/')).ToAsyncEnumerable();
+                .Select(x => x[MakePath(domain, path + "/").Length..].TrimStart('/')).ToAsyncEnumerable();
     }
 
     public override Task<bool> IsFileAsync(string domain, string path)
@@ -471,6 +496,10 @@ public class RackspaceCloudStorage : BaseStorage
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
     {
+        await DeleteDirectoryAsync(domain, path, Guid.Empty);
+    }
+    public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
+    {
         var client = GetClient();
 
         var objToDel = client.ListObjects(_private_container, null, null, null, MakePath(domain, path), _region);
@@ -484,7 +513,7 @@ public class RackspaceCloudStorage : BaseStorage
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(obj.Name).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDeleteAsync(domain, obj.Bytes);
+                    await QuotaUsedDeleteAsync(domain, obj.Bytes, ownerId);
                 }
             }
         }
@@ -681,13 +710,17 @@ public class RackspaceCloudStorage : BaseStorage
 
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
     {
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+    }
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
         {
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
 
-        return SaveAsync(domain, path, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
     }
 
     private string MakePath(string domain, string path)
@@ -723,7 +756,7 @@ public class RackspaceCloudStorage : BaseStorage
 
     private CloudFilesProvider GetClient()
     {
-        var cloudIdentity = new CloudIdentity()
+        var cloudIdentity = new CloudIdentity
         {
             Username = _username,
             APIKey = _apiKey
@@ -745,11 +778,7 @@ public class RackspaceCloudStorage : BaseStorage
             return ACL.Auto;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override Task<string> GetFileEtagAsync(string domain, string path)

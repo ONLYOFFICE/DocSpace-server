@@ -27,18 +27,9 @@
 namespace ASC.Web.Core.Utility.Skins;
 
 [Scope]
-public class WebImageSupplier
+public class WebImageSupplier(WebItemManager webItemManager, WebPath webPath, IConfiguration configuration)
 {
-    private readonly string _folderName;
-    private readonly WebItemManager _webItemManager;
-    private readonly WebPath _webPath;
-
-    public WebImageSupplier(WebItemManager webItemManager, WebPath webPath, IConfiguration configuration)
-    {
-        _webItemManager = webItemManager;
-        _webPath = webPath;
-        _folderName = configuration["web:images"];
-    }
+    private readonly string _folderName = configuration["web:images"];
 
     public string GetAbsoluteWebPath(string imgFileName)
     {
@@ -58,7 +49,7 @@ public class WebImageSupplier
             return string.Empty;
         }
         var filepath = GetPartImageFolderRel(partID) + "/" + fileName;
-        return _webPath.GetPathAsync(filepath).Result;
+        return webPath.GetPathAsync(filepath).Result;
     }
 
     private string GetPartImageFolderRel(Guid partID)
@@ -67,7 +58,7 @@ public class WebImageSupplier
         string itemFolder = null;
         if (!Guid.Empty.Equals(partID))
         {
-            var product = _webItemManager[partID];
+            var product = webItemManager[partID];
             if (product is { Context: not null })
             {
                 itemFolder = GetAppThemeVirtualPath(product) + "/default/images";
@@ -86,7 +77,7 @@ public class WebImageSupplier
         }
 
         var dir = webitem.StartURL.Contains('.') ?
-                      webitem.StartURL.Substring(0, webitem.StartURL.LastIndexOf('/')) :
+                      webitem.StartURL[..webitem.StartURL.LastIndexOf('/')] :
                       webitem.StartURL.TrimEnd('/');
         return dir + "/App_Themes";
     }

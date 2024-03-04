@@ -56,7 +56,7 @@ public class AzRecord : IMapFrom<Acl>
 
     public static implicit operator AzRecord(AzRecordCache cache)
     {
-        var result = new AzRecord()
+        var result = new AzRecord
         {
             TenantId = cache.Tenant
         };

@@ -27,12 +27,7 @@
 namespace ASC.Web.Files.Core.Search;
 
 [Scope]
-public class BaseIndexerFile : BaseIndexer<DbFile>
-{
-    private readonly IDaoFactory _daoFactory;
-
-    public BaseIndexerFile(
-        Client client,
+public class BaseIndexerFile(Client client,
         ILogger<BaseIndexerFile> log,
         IDbContextFactory<WebstudioDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -40,11 +35,8 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
         Settings settings,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory)
-        : base(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider)
-    {
-        _daoFactory = daoFactory;
-    }
-
+    : BaseIndexer<DbFile>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider)
+{
     protected override async Task<bool> BeforeIndexAsync(DbFile data)
     {
         if (!(await base.BeforeIndexAsync(data)))
@@ -52,10 +44,9 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
             return false;
         }
 
-        if (_daoFactory.GetFileDao<int>() is FileDao fileDao)
+        if (daoFactory.GetFileDao<int>() is FileDao fileDao)
         {
-            await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-            await fileDao.InitDocumentAsync(data);
+            await fileDao.InitDocumentAsync(data, data.TenantId);
         }
 
         return true;
@@ -64,14 +55,7 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
 
 
 [Scope(Additional = typeof(FactoryIndexerFileExtension))]
-public class FactoryIndexerFile : FactoryIndexer<DbFile>
-{
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly Settings _settings;
-    private readonly FileUtility _fileUtility;
-
-    public FactoryIndexerFile(
-        ILoggerProvider options,
+public class FactoryIndexerFile(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -81,13 +65,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
         ICache cache,
         Settings settings,
         FileUtility fileUtility)
-        : base(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
-    {
-        _dbContextFactory = dbContextFactory;
-        _settings = settings;
-        _fileUtility = fileUtility;
-    }
-
+    : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+{
     public override async Task IndexAllAsync()
     {
         try
@@ -98,7 +77,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             
             await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
-                if (_settings.Threads == 1)
+                if (settings.Threads == 1)
                 {
                     await Index(data);
                 }
@@ -106,7 +85,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
                 {
                     tasks.Add(Index(data));
                     j++;
-                    if (j >= _settings.Threads)
+                    if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
                         tasks = new List<Task>();
@@ -135,7 +114,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             var start = 0;
             var result = new List<int>();
 
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             while (true)
             {
@@ -156,7 +135,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
         List<DbFile> GetData(long start, long stop, DateTime lastIndexed)
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
             return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop)
                 .Select(r =>
                 {
@@ -170,7 +149,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
         (int, int, int) GetCount(DateTime lastIndexed)
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             var minId = Queries.FileMinId(filesDbContext, lastIndexed);
 
@@ -186,8 +165,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
     public override async Task<bool> CanIndexByContentAsync(DbFile t)
     {
-        return await base.CanIndexByContentAsync(t) && _fileUtility.CanIndex(t.Title);
-    }
+        return await base.CanIndexByContentAsync(t) && fileUtility.CanIndex(t.Title);
+}
 }
 
 public class FileTenant

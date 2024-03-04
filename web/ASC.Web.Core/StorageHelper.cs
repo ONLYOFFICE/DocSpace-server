@@ -25,23 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 [Scope]
-public class StorageHelper
+public class StorageHelper(UserPhotoManager userPhotoManager, StorageFactory storageFactory, TenantManager tenantManager, ILogger<StorageHelper> logger)
 {
     private const string StorageName = "customnavigation";
     private const string Base64Start = "data:image/png;base64,";
-
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
-    private readonly ILogger<StorageHelper> _logger;
-
-    public StorageHelper(UserPhotoManager userPhotoManager, StorageFactory storageFactory, TenantManager tenantManager, ILogger<StorageHelper> logger)
-    {
-        _userPhotoManager = userPhotoManager;
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-        _logger = logger;
-    }
 
     public async Task<string> SaveTmpLogo(string tmpLogoPath)
     {
@@ -56,22 +43,22 @@ public class StorageHelper
 
             if (tmpLogoPath.StartsWith(Base64Start))
             {
-                data = Convert.FromBase64String(tmpLogoPath.Substring(Base64Start.Length));
+                data = Convert.FromBase64String(tmpLogoPath[Base64Start.Length..]);
 
                 return await SaveLogoAsync(Guid.NewGuid() + ".png", data);
             }
 
             var fileName = Path.GetFileName(tmpLogoPath);
 
-            data = await _userPhotoManager.GetTempPhotoData(fileName);
+            data = await userPhotoManager.GetTempPhotoData(fileName);
 
-            await _userPhotoManager.RemoveTempPhotoAsync(fileName);
+            await userPhotoManager.RemoveTempPhotoAsync(fileName);
 
             return await SaveLogoAsync(fileName, data);
         }
         catch (Exception ex)
         {
-            _logger.ErrorSaveTmpLogo(ex);
+            logger.ErrorSaveTmpLogo(ex);
             return null;
         }
     }
@@ -85,7 +72,7 @@ public class StorageHelper
 
         try
         {
-            var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), StorageName);
+            var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), StorageName);
 
             var fileName = Path.GetFileName(logoPath);
 
@@ -96,13 +83,13 @@ public class StorageHelper
         }
         catch (Exception e)
         {
-            _logger.ErrorDeleteLogo(e);
+            logger.ErrorDeleteLogo(e);
         }
     }
 
     private async Task<string> SaveLogoAsync(string fileName, byte[] data)
     {
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), StorageName);
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), StorageName);
 
         using var stream = new MemoryStream(data);
         stream.Seek(0, SeekOrigin.Begin);

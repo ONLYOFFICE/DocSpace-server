@@ -32,7 +32,7 @@ public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
 
     public HttpRequestDictionary(HttpContext httpContext, string baseKey)
     {
-        Condition = (_) => true;
+        Condition = _ => true;
         BaseKey = baseKey;
         _httpContext = httpContext;
     }

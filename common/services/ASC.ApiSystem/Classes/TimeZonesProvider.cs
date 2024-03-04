@@ -24,22 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Classes;
 
 [Singleton]
-public class TimeZonesProvider
+public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstants commonConstants)
 {
-    private readonly ILogger<TimeZonesProvider> _log;
-
-    private readonly CommonConstants _commonConstants;
-
-    public TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstants commonConstants)
-    {
-        _log = logger;
-
-        _commonConstants = commonConstants;
-    }
-
     #region Private
 
     private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new()
@@ -113,7 +103,7 @@ public class TimeZonesProvider
         }
         catch (Exception e)
         {
-            _log.LogError(e, "GetCurrentTimeZoneInfo");
+            logger.LogError(e, "GetCurrentTimeZoneInfo");
 
             return TimeZoneInfo.Utc;
         }
@@ -123,12 +113,12 @@ public class TimeZonesProvider
     {
         if (string.IsNullOrEmpty(languageKey))
         {
-            return _commonConstants.DefaultCulture;
+            return commonConstants.DefaultCulture;
         }
 
-        var culture = _cultureUiMap.TryGetValue(languageKey, out var value) ? value : null;
+        var culture = _cultureUiMap.GetValueOrDefault(languageKey);
 
-        return culture ?? _commonConstants.DefaultCulture;
+        return culture ?? commonConstants.DefaultCulture;
     }
 
     #endregion

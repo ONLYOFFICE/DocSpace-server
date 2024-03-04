@@ -27,25 +27,16 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class FilesMessageService
+public class FilesMessageService(ILoggerProvider options,
+    MessageTarget messageTarget,
+    MessageService messageService,
+    IDaoFactory daoFactory)
 {
-    private readonly ILogger _logger;
-    private readonly MessageTarget _messageTarget;
-    private readonly MessageService _messageService;
+    private readonly ILogger _logger = options.CreateLogger("ASC.Messaging");
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IDaoFactory _daoFactory;
 
-    public FilesMessageService(
-        ILoggerProvider options,
-        MessageTarget messageTarget,
-        MessageService messageService,
-        IDaoFactory daoFactory)
-    {
-        _logger = options.CreateLogger("ASC.Messaging");
-        _messageTarget = messageTarget;
-        _messageService = messageService;
-        _daoFactory = daoFactory;
-    }
+    private static readonly JsonSerializerOptions _serializerOptions = 
+        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public FilesMessageService(
         ILoggerProvider options,
@@ -60,7 +51,7 @@ public class FilesMessageService
 
     public async Task SendAsync(MessageAction action, params string[] description)
     {
-        await _messageService.SendHeadersMessageAsync(action, description);
+        await messageService.SendHeadersMessageAsync(action, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, params string[] description)
@@ -89,7 +80,7 @@ public class FilesMessageService
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
-    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default(Guid), FileShare userRole = FileShare.None, params string[] description)
+    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
     {
         if (entry == null)
         {
@@ -110,10 +101,10 @@ public class FilesMessageService
             return;
         }
 
-        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create(entry.Id), headers, description);
+        await messageService.SendHeadersMessageAsync(action, messageTarget.Create(entry.Id), headers, description);
     }
 
-    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default(Guid), FileShare userRole = FileShare.None, params string[] description)
+    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
     {
         if (entry == null)
         {
@@ -127,7 +118,7 @@ public class FilesMessageService
             description = description.Append(additionalParam).ToArray();
         }
 
-        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create(entry.Id), null, description);
+        await messageService.SendHeadersMessageAsync(action, messageTarget.Create(entry.Id), null, description);
     }
 
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)
@@ -151,7 +142,7 @@ public class FilesMessageService
             return;
         }
 
-        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
+        await messageService.SendHeadersMessageAsync(action, messageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -172,11 +163,11 @@ public class FilesMessageService
 
         if (additionalParam != "")
         {
-            await _messageService.SendAsync(action, _messageTarget.Create(entry.Id), description, additionalParam);
+            await messageService.SendAsync(action, messageTarget.Create(entry.Id), description, additionalParam);
         }
         else
         {
-            await _messageService.SendAsync(action, _messageTarget.Create(entry.Id), description);
+            await messageService.SendAsync(action, messageTarget.Create(entry.Id), description);
         }
     }
 
@@ -193,7 +184,7 @@ public class FilesMessageService
             return;
         }
 
-        await _messageService.SendAsync(action, _messageTarget.Create(entry.Id), d1, d2);
+        await messageService.SendAsync(action, messageTarget.Create(entry.Id), d1, d2);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -210,37 +201,32 @@ public class FilesMessageService
             description = description.Append(additionalParam).ToArray();
         }
 
-        await _messageService.SendAsync(initiator, action, _messageTarget.Create(entry.Id), description);
+        await messageService.SendAsync(initiator, action, messageTarget.Create(entry.Id), description);
     }
 
-    private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default(Guid), FileShare userRole = FileShare.None)
+    private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)
     {
-        var folderDao = _daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
-        var info = new AdditionalNotificationInfo
+        var info = new AdditionalNotificationInfo<T>
         {
-            RoomId = roomInfo.RoomId,
-            RoomTitle = roomInfo.RoomTitle
+            RoomTitle = roomInfo.RoomTitle, 
+            RoomId = roomInfo.RoomId
         };
 
-        if (action == MessageAction.RoomRenamed && !string.IsNullOrEmpty(oldTitle))
+        switch (action)
         {
-            info.RoomOldTitle = oldTitle;
-        }
-
-        if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
-            && userid != Guid.Empty)
-        {
-            info.UserIds = new List<Guid> { userid };
-        }
-
-        if (action == MessageAction.RoomUpdateAccessForUser
-            && (userRole != FileShare.None)
-            && userid != Guid.Empty)
-        {
-            info.UserIds = new List<Guid> { userid };
-            info.UserRole = (int)userRole;
+            case MessageAction.RoomRenamed when !string.IsNullOrEmpty(oldTitle):
+                info.RoomOldTitle = oldTitle;
+                break;
+            case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:
+                info.UserIds = [userid];
+                break;
+            case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:
+                info.UserIds = [userid];
+                info.UserRole = (int)userRole;
+                break;
         }
 
         info.RootFolderTitle = entry.RootFolderType switch
@@ -250,7 +236,7 @@ public class FilesMessageService
             _ => string.Empty
         };
 
-        var serializedParam = JsonSerializer.Serialize(info, new JsonSerializerOptions{ DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+        var serializedParam = JsonSerializer.Serialize(info, _serializerOptions);
 
         return serializedParam;
     }

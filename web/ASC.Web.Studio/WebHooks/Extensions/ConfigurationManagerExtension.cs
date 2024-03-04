@@ -31,7 +31,7 @@ public static class ConfigurationManagerExtension
     public static ConfigurationManager AddWebStudioConfiguration(
     this ConfigurationManager config)
     {
-        config.AddJsonFile($"appsettings.services.json", optional: false, reloadOnChange: true);
+        config.AddJsonFile("appsettings.services.json", optional: false, reloadOnChange: true);
 
         return config;
     }

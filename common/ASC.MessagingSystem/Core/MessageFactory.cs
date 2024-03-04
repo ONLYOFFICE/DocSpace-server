@@ -27,24 +27,11 @@
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
-public class MessageFactory
-{
-    private readonly ILogger<MessageFactory> _logger;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public MessageFactory(AuthContext authContext,
+public class MessageFactory(AuthContext authContext,
         TenantManager tenantManager,
         ILogger<MessageFactory> logger,
         IHttpContextAccessor httpContextAccessor)
     {
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
     public async Task<EventMessage> CreateAsync(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target, params string[] description)
     {
         try
@@ -53,9 +40,9 @@ public class MessageFactory
             {
                 Ip = MessageSettings.GetIP(request),
                 Initiator = initiator,
-                Date = dateTime.HasValue ? dateTime.Value : DateTime.UtcNow,
-                TenantId = await _tenantManager.GetCurrentTenantIdAsync(),
-                UserId = _authContext.CurrentAccount.ID,
+                Date = dateTime ?? DateTime.UtcNow,
+                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                UserId = authContext.CurrentAccount.ID,
                 Page = MessageSettings.GetReferer(request),
                 Action = action,
                 Description = description,
@@ -65,7 +52,7 @@ public class MessageFactory
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileParseHttpRequest(action, ex);
+            logger.ErrorWhileParseHttpRequest(action, ex);
 
             return null;
         }
@@ -78,8 +65,8 @@ public class MessageFactory
             var message = new EventMessage
             {
                 Date = DateTime.UtcNow,
-                TenantId = await _tenantManager.GetCurrentTenantIdAsync(),
-                UserId = _authContext.CurrentAccount.ID,
+                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                UserId = authContext.CurrentAccount.ID,
                 Action = action,
                 Description = description,
                 Target = target
@@ -90,10 +77,9 @@ public class MessageFactory
                 var userAgent = MessageSettings.GetUAHeader(headers);
                 var referer = MessageSettings.GetReferer(headers);
 
-                if (_httpContextAccessor.HttpContext != null)
-                {
-                    message.Ip = MessageSettings.GetIP(_httpContextAccessor.HttpContext.Request);
-                }
+                message.Ip = httpContextAccessor?.HttpContext != null
+                    ? MessageSettings.GetIP(httpContextAccessor.HttpContext.Request)
+                    : MessageSettings.GetIP(headers);
 
                 message.UAHeader = userAgent;
                 message.Page = referer;
@@ -103,7 +89,7 @@ public class MessageFactory
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileParseHttpMessage(action, ex);
+            logger.ErrorWhileParseHttpMessage(action, ex);
 
             return null;
         }
@@ -117,7 +103,7 @@ public class MessageFactory
             {
                 Initiator = initiator,
                 Date = DateTime.UtcNow,
-                TenantId = await _tenantManager.GetCurrentTenantIdAsync(),
+                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 Action = action,
                 Description = description,
                 Target = target
@@ -125,7 +111,7 @@ public class MessageFactory
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileParseInitiatorMessage(action, ex);
+            logger.ErrorWhileParseInitiatorMessage(action, ex);
 
             return null;
         }
@@ -138,8 +124,8 @@ public class MessageFactory
             var message = new EventMessage
             {
                 Date = DateTime.UtcNow,
-                TenantId = userData == null ? await _tenantManager.GetCurrentTenantIdAsync() : userData.TenantId,
-                UserId = userData == null ? _authContext.CurrentAccount.ID : userData.UserId,
+                TenantId = userData?.TenantId ?? await tenantManager.GetCurrentTenantIdAsync(),
+                UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
                 Action = action,
                 Active = true
             };
@@ -159,7 +145,7 @@ public class MessageFactory
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileParseInitiatorMessage(action, ex);
+            logger.ErrorWhileParseInitiatorMessage(action, ex);
             return null;
         }
     }

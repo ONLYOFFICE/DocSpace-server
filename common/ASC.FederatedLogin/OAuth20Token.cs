@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
-
 namespace ASC.FederatedLogin;
 
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
@@ -53,7 +51,7 @@ public class OAuth20Token
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public string OriginJson { get; set; }
 
     public bool IsExpired

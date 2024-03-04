@@ -38,7 +38,7 @@ public class Acl : BaseEntity, IMapFrom<AzRecord>
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Subject, Action, Object };
+        return [TenantId, Subject, Action, Object];
     }
 }
 

@@ -27,17 +27,11 @@
 namespace ASC.Web.Studio.Core.Statistic;
 
 [Scope]
-public class StatisticManager
+public class StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFactory)
 {
     private static DateTime _lastSave = DateTime.UtcNow;
     private static readonly TimeSpan _cacheTime = TimeSpan.FromMinutes(2);
-    private static readonly IDictionary<string, UserVisit> _cache = new Dictionary<string, UserVisit>();
-    private readonly IDbContextFactory<WebstudioDbContext> _dbContextFactory;
-
-    public StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
+    private static readonly Dictionary<string, UserVisit> _cache = new();
 
     public async ValueTask SaveUserVisitAsync(int tenantId, Guid userId, Guid productId)
     {
@@ -69,13 +63,13 @@ public class StatisticManager
 
     public async Task<List<UserVisit>> GetHitsByPeriodAsync(int tenantID, DateTime startPeriod, DateTime endPeriod)
     {
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.UserVisitsAsync(webstudioDbContext, tenantID, startPeriod, endPeriod).ToListAsync();
     }
 
     public async Task<List<UserVisit>> GetHostsByPeriodAsync(int tenantID, DateTime startPeriod, DateTime endPeriod)
     {
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.UserVisitsGroupByUserIdAsync(webstudioDbContext, tenantID, startPeriod, endPeriod).ToListAsync();
     }
 
@@ -89,12 +83,12 @@ public class StatisticManager
         List<UserVisit> visits;
         lock (_cache)
         {
-            visits = new List<UserVisit>(_cache.Values);
+            visits = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
         }
 
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
 
         foreach (var v in visits)
         {

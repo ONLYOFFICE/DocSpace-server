@@ -48,7 +48,6 @@ public class FileTrackerHelper
         _callbackAction = EvictionCallback();
     }
 
-
     public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false)
     {
         var checkRight = true;
@@ -64,13 +63,13 @@ public class FileTrackerHelper
             {
                 tracker.EditingBy.Add(tabId,
                     new TrackInfo
-                    {
-                        UserId = userId,
-                        NewScheme = tabId == userId,
-                        EditingAlone = editingAlone,
-                        TenantId = tenantId,
-                        BaseUri = baseUri
-                    });
+                {
+                    UserId = userId,
+                    NewScheme = tabId == userId,
+                    EditingAlone = editingAlone,
+                    TenantId = tenantId,
+                    BaseUri = baseUri
+                });
             }
         }
         else
@@ -196,10 +195,10 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            _cache.Insert(Tracker + fileId, tracker with { }, _cacheTimeout, _callbackAction);
+            _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
         }
     }
-
+    
     private void RemoveTracker<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
@@ -219,8 +218,8 @@ public class FileTrackerHelper
 
             ConfiguredTaskAwaitable t;
             var fId = cacheFileId.ToString()?.Substring(Tracker.Length);
-
-            if (int.TryParse(fId, out var internalFileId))
+            
+            if(int.TryParse(fId, out var internalFileId))
             {
                 t = Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false);
             }
@@ -249,7 +248,7 @@ public class FileTrackerHelper
 
                 var commonLinkUtility = scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>();
                 commonLinkUtility.ServerUri = editedBy.Value.BaseUri;
-
+                
                 var helper = scope.ServiceProvider.GetRequiredService<DocumentServiceHelper>();
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
@@ -260,11 +259,11 @@ public class FileTrackerHelper
                            new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}")
                        }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
-                    {
-                        _cache.Insert(Tracker + fileId, fileTracker with { }, _cacheTimeout, _callbackAction);
-                    }
+                if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
+                {
+                    _cache.Insert(Tracker + fileId, fileTracker with {}, _cacheTimeout, _callbackAction);
                 }
+            }
             }
             catch (Exception e)
             {
@@ -281,8 +280,8 @@ public record FileTracker
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
         EditingBy = new()
-        {
-            {
+        { 
+                {
                 tabId,
                 new TrackInfo
                 {
@@ -292,7 +291,7 @@ public record FileTracker
                     TenantId = tenantId,
                     BaseUri = baseUri
                 }
-            }
+            } 
         };
     }
 
@@ -303,9 +302,9 @@ public record FileTracker
         public DateTime TrackTime { get; set; } = DateTime.UtcNow;
         public required Guid UserId { get; init; }
         public required int TenantId { get; init; }
-
+        
         public required string BaseUri { get; init; }
-        public required bool NewScheme { get; init; }
-        public required bool EditingAlone { get; init; }
+        public required bool NewScheme { get;  init; }
+        public required bool EditingAlone { get;  init; }
     }
 }

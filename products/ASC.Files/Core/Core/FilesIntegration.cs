@@ -27,19 +27,13 @@
 namespace ASC.Web.Files.Api;
 
 [Scope]
-public class FilesIntegration
+public class FilesIntegration(IDaoFactory daoFactory)
 {
-    private static readonly IDictionary<string, IFileSecurityProvider> _providers = new Dictionary<string, IFileSecurityProvider>();
-    private readonly IDaoFactory _daoFactory;
-
-    public FilesIntegration(IDaoFactory daoFactory)
-    {
-        _daoFactory = daoFactory;
-    }
+    private static readonly Dictionary<string, IFileSecurityProvider> _providers = new();
 
     public async Task<T> RegisterBunchAsync<T>(string module, string bunch, string data)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         return await folderDao.GetFolderIDAsync(module, bunch, data, true);
     }
@@ -54,7 +48,7 @@ public class FilesIntegration
             return AsyncEnumerable.Empty<T>();
         }
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         return folderDao.GetFolderIDsAsync(module, bunch, data, true);
     }
 

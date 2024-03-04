@@ -30,7 +30,7 @@ public class DefaultMappingProfile : Profile
 {
     public DefaultMappingProfile()
     {
-        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), a => ApplyMappingsFromAssembly(a));
+        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), ApplyMappingsFromAssembly);
         ApplyPrimitiveMappers();
     }
 
@@ -64,7 +64,7 @@ public class DefaultMappingProfile : Profile
 
             if (methodInfo != null)
             {
-                methodInfo.Invoke(instance, new object[] { this });
+                methodInfo.Invoke(instance, [this]);
             }
             else
             {
@@ -76,7 +76,7 @@ public class DefaultMappingProfile : Profile
                     {
                         var interfaceMethodInfo = @interface.GetMethod(mappingMethodName, argumentTypes);
 
-                        interfaceMethodInfo?.Invoke(instance, new object[] { this });
+                        interfaceMethodInfo?.Invoke(instance, [this]);
                     }
                 }
             }

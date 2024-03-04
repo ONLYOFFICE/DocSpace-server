@@ -39,10 +39,10 @@ public class FileShareRecord
     public int Level { get; set; }
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
-    public class ShareComparer : IComparer<FileShare>
+    public class ShareComparer(FolderType rootFolderType) : IComparer<FileShare>
     {
-        private static readonly int[] _shareOrder =
-        {
+        private static readonly int[] _roomShareOrder =
+        [
             (int)FileShare.None,
             (int)FileShare.RoomAdmin,
             (int)FileShare.Collaborator,
@@ -58,7 +58,29 @@ public class FileShareRecord
             (int)FileShare.CustomFilter,
             (int)FileShare.Varies,
             (int)FileShare.Restrict
-        };
+        ];
+        
+        private static readonly int[] _filesShareOrder =
+        [
+            (int)FileShare.None,
+            (int)FileShare.Editing,
+            (int)FileShare.CustomFilter,
+            (int)FileShare.Review,
+            (int)FileShare.FillForms,
+            (int)FileShare.Comment,
+            (int)FileShare.Read,
+            (int)FileShare.Restrict,
+            
+            // Not used
+            (int)FileShare.ReadWrite,
+            (int)FileShare.RoomAdmin,
+            (int)FileShare.Collaborator,
+            (int)FileShare.Varies
+        ];
+        
+        private readonly int[] _shareOrder = rootFolderType is FolderType.VirtualRooms or FolderType.Archive
+            ? _roomShareOrder
+            : _filesShareOrder;
 
         public int Compare(FileShare x, FileShare y)
         {
@@ -82,10 +104,9 @@ public static class ShareCompareHelper
 {
     private static readonly ConcurrentDictionary<string, Expression> _predicates = new();
     
-    public static Expression<Func<TType, int>> GetCompareExpression<TType>(Expression<Func<TType, FileShare>> memberExpression)
+    public static Expression<Func<TType, int>> GetCompareExpression<TType>(Expression<Func<TType, FileShare>> memberExpression, FolderType rootFolderType)
     {
-        var type = typeof(TType);
-        var key = type.ToString();
+        var key = $"{typeof(TType)}-{rootFolderType}";
         
         if (_predicates.TryGetValue(key, out var value))
         {
@@ -93,7 +114,7 @@ public static class ShareCompareHelper
         }
 
         var shares = Enum.GetValues<FileShare>()
-            .Order(new FileShareRecord.ShareComparer())
+            .Order(new FileShareRecord.ShareComparer(rootFolderType))
             .ToList();
 
         ConditionalExpression expression = null;

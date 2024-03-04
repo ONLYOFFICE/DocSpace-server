@@ -28,7 +28,7 @@ using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.EF;
 
-public class FilesDbContext : DbContext
+public class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : DbContext(dbContextOptions)
 {
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
@@ -45,8 +45,10 @@ public class FilesDbContext : DbContext
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<User> Users { get; set; }
-
-    public FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : base(dbContextOptions) { }
+    public DbSet<DbFileOrder> FileOrder { get; set; }
+    public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public DbSet<DbGroup> Groups { get; set; }
+    public DbSet<UserGroup> UserGroup { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,7 +68,11 @@ public class FilesDbContext : DbContext
             .AddDbFilesProperties()
             .AddDbTenant()
             .AddFilesConverts()
+            .AddDbFileOrder()
             .AddUser()
+            .AddDbRoomSettings()
+            .AddDbGroup()
+            .AddUserGroup()
             .AddDbFunctions();
     }
 }

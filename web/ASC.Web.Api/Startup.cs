@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Core;
+using ASC.Core.Common.Notify.Engine;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,8 +33,6 @@ namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
 {
-    protected override bool ConfirmAddScheme { get => true; }
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
@@ -44,9 +43,9 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
@@ -67,6 +66,9 @@ public class Startup : BaseStartup
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
+        
+        
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

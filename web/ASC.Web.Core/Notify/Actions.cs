@@ -54,7 +54,6 @@ public static class Actions
     public static readonly INotifyAction RemoveUserDataCompleted = new NotifyAction("remove_user_data_completed", "remove_user_data_completed");
     public static readonly INotifyAction RemoveUserDataCompletedCustomMode = new NotifyAction("remove_user_data_completed_custom_mode");
     public static readonly INotifyAction RemoveUserDataFailed = new NotifyAction("remove_user_data_failed", "remove_user_data_failed");
-    public static readonly INotifyAction DnsChange = new NotifyAction("dns_change", "dns_change");
 
     public static readonly INotifyAction ConfirmOwnerChange = new NotifyAction("owner_confirm_change", "owner_confirm_change");
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
@@ -81,21 +80,6 @@ public static class Actions
     public static readonly INotifyAction EnterpriseGuestWelcomeV1 = new NotifyAction("enterprise_guest_welcome_v1");
     public static readonly INotifyAction EnterpriseWhitelabelGuestWelcomeV1 = new NotifyAction("enterprise_whitelabel_guest_welcome_v1");
     public static readonly INotifyAction OpensourceGuestWelcomeV1 = new NotifyAction("opensource_guest_welcome_v1");
-
-    public static readonly INotifyAction PersonalActivate = new NotifyAction("personal_activate");
-    public static readonly INotifyAction PersonalAfterRegistration1 = new NotifyAction("personal_after_registration1");
-    public static readonly INotifyAction PersonalConfirmation = new NotifyAction("personal_confirmation");
-    public static readonly INotifyAction PersonalEmailChangeV115 = new NotifyAction("personal_change_email_v115");
-    public static readonly INotifyAction PersonalPasswordChangeV115 = new NotifyAction("personal_change_password_v115");
-    public static readonly INotifyAction PersonalProfileDelete = new NotifyAction("personal_profile_delete");
-    public static readonly INotifyAction PersonalAlreadyExist = new NotifyAction("personal_already_exist");
-
-    public static readonly INotifyAction PersonalCustomModeAfterRegistration1 = new NotifyAction("personal_custom_mode_after_registration1");
-    public static readonly INotifyAction PersonalCustomModeConfirmation = new NotifyAction("personal_custom_mode_confirmation");
-    public static readonly INotifyAction PersonalCustomModeEmailChangeV115 = new NotifyAction("personal_custom_mode_change_email_v115");
-    public static readonly INotifyAction PersonalCustomModePasswordChangeV115 = new NotifyAction("personal_custom_mode_change_password_v115");
-    public static readonly INotifyAction PersonalCustomModeProfileDelete = new NotifyAction("personal_custom_mode_profile_delete");
-    public static readonly INotifyAction PersonalCustomModeAlreadyExist = new NotifyAction("personal_custom_mode_already_exist");
 
     public static readonly INotifyAction SaasCustomModeRegData = new NotifyAction("saas_custom_mode_reg_data");
 
@@ -138,8 +122,6 @@ public static class Actions
     public static readonly INotifyAction EnterpriseUserActivationV1 = new NotifyAction("enterprise_user_activation_v1");
     public static readonly INotifyAction EnterpriseWhitelabelUserActivationV1 = new NotifyAction("enterprise_whitelabel_user_activation_v1");
     public static readonly INotifyAction OpensourceUserActivationV1 = new NotifyAction("opensource_user_activation_v1");
-
-    public static readonly INotifyAction PersonalAfterRegistration14V1 = new NotifyAction("personal_after_registration14_v1");
 
     public static readonly INotifyAction SaasAdminModulesV1 = new NotifyAction("saas_admin_modules_v1");
 

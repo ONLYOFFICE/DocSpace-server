@@ -27,14 +27,9 @@
 namespace ASC.Common.Logging;
 
 [Singleton]
-public class EFLoggerFactory : ILoggerFactory
+public class EFLoggerFactory(ILoggerProvider loggerProvider) : ILoggerFactory
 {
-    private readonly ILogger _logger;
-
-    public EFLoggerFactory(ILoggerProvider loggerProvider)
-    {
-        _logger = new EFLogger(loggerProvider.CreateLogger("ASC.SQL"));
-    }
+    private readonly ILogger _logger = new EFLogger(loggerProvider.CreateLogger("ASC.SQL"));
 
     public void AddProvider(ILoggerProvider provider)
     {
@@ -48,22 +43,16 @@ public class EFLoggerFactory : ILoggerFactory
     public void Dispose() { }
 }
 
-public class EFLogger : ILogger
+public class EFLogger(ILogger logger) : ILogger
 {
-    private readonly ILogger _logger;
-    public EFLogger(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public IDisposable BeginScope<TState>(TState state)
     {
-        return _logger.BeginScope(state);
+        return logger.BeginScope(state);
     }
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _logger.IsEnabled(logLevel);
+        return logger.IsEnabled(logLevel);
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -79,8 +68,8 @@ public class EFLogger : ILogger
                     ev.WithProperty(kv.Key, kv.Value);
                 }
 
-                _logger.Log(LogLevel.Debug,
-                        default(EventId),
+                logger.Log(LogLevel.Debug,
+                        default,
                         ev,
                         exception,
                         EFLogEvent.Formatter);
@@ -88,16 +77,11 @@ public class EFLogger : ILogger
         }
     }
 
-    class EFLogEvent : IEnumerable<KeyValuePair<string, object>>
+    class EFLogEvent(string message) : IEnumerable<KeyValuePair<string, object>>
     {
         readonly List<KeyValuePair<string, object>> _properties = new();
 
-        public string Message { get; }
-
-        public EFLogEvent(string message)
-        {
-            Message = message;
-        }
+        public string Message { get; } = message;
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {

@@ -33,10 +33,10 @@ namespace ASC.Common.Threading;
 public class DistributedTask
 {
     [ProtoMember(10)]
-    protected string _exeption;
+    protected string _exeption = String.Empty;
 
     [ProtoMember(11)]
-    protected readonly Dictionary<string, string> _props;
+    protected readonly Dictionary<string, string> _props = new();
 
     public Action<DistributedTask> Publication { get; set; }
 
@@ -48,7 +48,7 @@ public class DistributedTask
     /// <summary>ID</summary>
     /// <type>System.String, System</type>
     [ProtoMember(2)]
-    public string Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>Status</summary>
     /// <type>ASC.Common.Threading.DistributedTaskStatus, ASC.Common</type>
@@ -68,14 +68,6 @@ public class DistributedTask
         set => _exeption = value?.Message ?? "";
     }
 
-
-    public DistributedTask()
-    {
-        Id = Guid.NewGuid().ToString();
-
-        _exeption = String.Empty;
-        _props = new Dictionary<string, string>();
-    }
 
     public void PublishChanges()
     {

@@ -26,35 +26,18 @@
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
-internal class ProviderDaoBase : ThirdPartyProviderDao
-{
-    private int TenantID
-    {
-        get
-        {
-            return _tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
-    public ProviderDaoBase(
-        IServiceProvider serviceProvider,
+internal class ProviderDaoBase(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,
         SelectorFactory selectorFactory,
         ISecurityDao<string> securityDao)
-    {
-        _serviceProvider = serviceProvider;
-        _tenantManager = tenantManager;
-        _securityDao = securityDao;
-        _selectorFactory = selectorFactory;
-        _crossDao = crossDao;
-    }
-
-    protected readonly IServiceProvider _serviceProvider;
-    protected readonly TenantManager _tenantManager;
-    protected readonly ISecurityDao<string> _securityDao;
-    protected readonly SelectorFactory _selectorFactory;
-    protected readonly CrossDao _crossDao;
+    : ThirdPartyProviderDao
+{
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
+    protected readonly TenantManager _tenantManager = tenantManager;
+    protected readonly ISecurityDao<string> _securityDao = securityDao;
+    protected readonly SelectorFactory _selectorFactory = selectorFactory;
+    protected readonly CrossDao _crossDao = crossDao;
 
     protected bool IsCrossDao(string id1, string id2)
     {
@@ -98,13 +81,10 @@ internal class ProviderDaoBase : ThirdPartyProviderDao
     protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile)
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        await tenantManager.SetCurrentTenantAsync(TenantID);
 
         return await _crossDao.PerformCrossDaoFileCopyAsync(
             fromFileId, fromSelector.GetFileDao(fromFileId), fromSelector.ConvertId,
-            toFolderId, scope.ServiceProvider.GetService<IFileDao<int>>(), r => r,
+            toFolderId, _serviceProvider.GetService<IFileDao<int>>(), r => r,
             deleteSourceFile);
     }
 

@@ -91,30 +91,21 @@ public class LdapCertificateConfirmRequest
 
             if (sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch))
             {
-                if (log != null)
-                {
-                    log.WarnGetLdapCertProblems(Enum.GetName(typeof(SslPolicyErrors), LdapCertificateProblem.CertCnNoMatch));
-                }
+                log?.WarnGetLdapCertProblems(Enum.GetName(typeof(SslPolicyErrors), LdapCertificateProblem.CertCnNoMatch));
 
                 certificateErrors.Add((int)LdapCertificateProblem.CertCnNoMatch);
             }
 
             if (sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
             {
-                if (log != null)
-                {
-                    log.WarnGetLdapCertProblems(Enum.GetName(typeof(SslPolicyErrors), LdapCertificateProblem.CertCnNoMatch));
-                }
+                log?.WarnGetLdapCertProblems(Enum.GetName(typeof(SslPolicyErrors), LdapCertificateProblem.CertCnNoMatch));
 
                 certificateErrors.Add((int)LdapCertificateProblem.CertUntrustedCa);
             }
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorGetLdapCertProblems(ex);
-            }
+            log?.ErrorGetLdapCertProblems(ex);
 
             certificateErrors.Add((int)LdapCertificateProblem.CertUnrecognizedError);
         }
@@ -156,10 +147,7 @@ public class LdapCertificateConfirmRequest
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorLdapCertificateConfirmRequest(ex);
-            }
+            log?.ErrorLdapCertificateConfirmRequest(ex);
 
             return null;
         }

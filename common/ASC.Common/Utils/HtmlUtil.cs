@@ -77,7 +77,7 @@ public static class HtmlUtil
 
                     unformatedText = lastSpaceIndex > 0 && lastSpaceIndex < unformatedText.Length
                                          ? unformatedText.Remove(lastSpaceIndex)
-                                         : unformatedText.Substring(0, maxLength);
+                                         : unformatedText[..maxLength];
 
                     if (!string.IsNullOrEmpty(endBlockTemplate))
                     {

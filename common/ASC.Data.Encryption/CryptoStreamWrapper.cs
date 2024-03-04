@@ -57,8 +57,7 @@ internal sealed class CryptoStreamWrapper : CryptoStream
 {
     private readonly Stream _underlyingStream;
 
-    public CryptoStreamWrapper(Stream stream, ICryptoTransform transform, CryptoStreamMode mode)
-        : base(stream, transform, mode)
+    public CryptoStreamWrapper(Stream stream, ICryptoTransform transform, CryptoStreamMode mode) : base(stream, transform, mode)
     {
         _underlyingStream = stream;
     }

@@ -119,12 +119,14 @@ public interface IDataStore
     ///<returns></returns>
     Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
+    Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
+    
     ///<summary>
     /// Saves the contents of the stream in the repository.
     ///</summary>
-    /// <param Name="domain"> </param>
-    /// <param Name="path"> </param>
-    /// <param Name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
+    /// <param name="domain"> </param>
+    /// <param name="path"> </param>
+    /// <param name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
     /// <returns> </returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream);
 
@@ -147,6 +149,17 @@ public interface IDataStore
     /// <param name="attachmentFileName"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName);
+
+    /// <summary>
+    /// Saves the contents of the stream in the repository.
+    /// </summary>
+    /// <param name="domain"></param>
+    /// <param name="path"></param>
+    /// <param name="ownerId"></param>
+    /// <param name="stream"></param>
+    /// <param name="attachmentFileName"></param>
+    /// <returns></returns>
+    Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -235,10 +248,21 @@ public interface IDataStore
     Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
 
     ///<summary>
+    /// Moves file
+    ///</summary>
+    ///<param name="srcdomain"></param>
+    ///<param name="srcpath"></param>
+    ///<param name="newdomain"></param>
+    ///<param name="newpath"></param>
+    ///<param name="ownerId"></param>
+    ///<param name="quotaCheckFileSize"></param>
+    ///<returns></returns>
+    Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
+
+    ///<summary>
     /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
     ///</summary>
     ///<param name="domain"></param>
-    ///<param name="assignedPath"></param>
     ///<param name="stream"></param>
     ///<returns></returns>
     Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
@@ -317,6 +341,7 @@ public interface IDataStore
     Task<bool> IsFileAsync(string path);
     Task<bool> IsDirectoryAsync(string path);
     Task DeleteDirectoryAsync(string path);
+    Task DeleteDirectoryAsync(Guid ownerId, string path);
     Task<long> GetFileSizeAsync(string path);
     Task<long> GetDirectorySizeAsync(string path);
     Task<Uri> CopyAsync(string path, string newDomain, string newPath);

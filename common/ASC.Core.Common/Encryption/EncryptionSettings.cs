@@ -62,39 +62,28 @@ public class EncryptionSettings
 }
 
 [Scope]
-public class EncryptionSettingsHelper
+public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCacheNotify ascCacheNotify, InstanceCrypto instanceCrypto)
 {
     private const string Key = "EncryptionSettings";
-
-    private readonly CoreConfiguration _coreConfiguration;
-    private readonly AscCacheNotify _ascCacheNotify;
-    private readonly InstanceCrypto _instanceCrypto;
-
-    public EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCacheNotify ascCacheNotify, InstanceCrypto instanceCrypto)
-    {
-        _coreConfiguration = coreConfiguration;
-        _ascCacheNotify = ascCacheNotify;
-        _instanceCrypto = instanceCrypto;
-    }
 
     public async Task SaveAsync(EncryptionSettings encryptionSettings)
     {
         var settings = Serialize(encryptionSettings);
-        await _coreConfiguration.SaveSettingAsync(Key, settings);
+        await coreConfiguration.SaveSettingAsync(Key, settings);
 
-        _ascCacheNotify.ClearCache();
+        ascCacheNotify.ClearCache();
     }
 
     public async Task<EncryptionSettings> LoadAsync()
     {
-        var settings = await _coreConfiguration.GetSettingAsync(Key);
+        var settings = await coreConfiguration.GetSettingAsync(Key);
 
         return Deserialize(settings);
     }
 
     public EncryptionSettings Load()
     {
-        var settings = _coreConfiguration.GetSetting(Key);
+        var settings = coreConfiguration.GetSetting(Key);
 
         return Deserialize(settings);
     }
@@ -102,7 +91,7 @@ public class EncryptionSettingsHelper
     public string Serialize(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",
-            string.IsNullOrEmpty(encryptionSettings.Pass) ? string.Empty : _instanceCrypto.Encrypt(encryptionSettings.Pass),
+            string.IsNullOrEmpty(encryptionSettings.Pass) ? string.Empty : instanceCrypto.Encrypt(encryptionSettings.Pass),
             (int)encryptionSettings.Status,
             encryptionSettings.NotifyUsers
         );
@@ -117,7 +106,7 @@ public class EncryptionSettingsHelper
 
         var parts = value.Split(new[] { '#' }, StringSplitOptions.None);
 
-        var password = string.IsNullOrEmpty(parts[0]) ? string.Empty : _instanceCrypto.Decrypt(parts[0]);
+        var password = string.IsNullOrEmpty(parts[0]) ? string.Empty : instanceCrypto.Decrypt(parts[0]);
         var status = int.Parse(parts[1]);
         var notifyUsers = bool.Parse(parts[2]);
 

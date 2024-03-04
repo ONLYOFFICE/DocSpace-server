@@ -57,6 +57,16 @@ public class QuotaDto
     /// <summary>List of quota features</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.ApiModels.ResponseDto.TenantQuotaFeatureDto}, ASC.Web.Api</type>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
+
+    /// <summary>Users quota</summary>
+    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    public TenantEntityQuotaSettings UsersQuota {  get; set; }
+    /// <summary>Rooms quota</summary>
+    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    public TenantEntityQuotaSettings RoomsQuota {  get; set; }
+    /// <summary>Rooms quota</summary>
+    /// <type>ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common</type>
+    public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 /// <summary>

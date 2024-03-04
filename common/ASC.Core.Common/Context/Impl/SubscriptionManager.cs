@@ -29,33 +29,24 @@ using Constants = ASC.Common.Security.Authorizing.Constants;
 namespace ASC.Core;
 
 [Scope]
-public class SubscriptionManager
+public class SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
 {
-    private readonly ISubscriptionService _service;
-    private readonly TenantManager _tenantManager;
-    private readonly ICache _cache;
+    private readonly CachedSubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
     private static readonly SemaphoreSlim _semaphore = new(1);
-    public static readonly List<Guid> Groups = Groups = new List<Guid>
-    {
+    public static readonly List<Guid> Groups = Groups =
+    [
         Constants.DocSpaceAdmin.ID,
         Constants.Everyone.ID,
         Constants.RoomAdmin.ID,
-        Constants.Collaborator.ID,
-    };
-
-    public SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
-    {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _tenantManager = tenantManager;
-        _cache = cache;
-    }
+        Constants.Collaborator.ID
+    ];
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
     {
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = true,
+            Subscribed = true
         };
 
         if (sourceID != null)
@@ -86,7 +77,7 @@ public class SubscriptionManager
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = false,
+            Subscribed = false
         };
 
         if (sourceID != null)
@@ -135,13 +126,8 @@ public class SubscriptionManager
             methods = await _service.GetSubscriptionMethodsAsync(await GetTenantAsync(), sourceID, actionID, recipientID);
         }
 
-        var m = methods
-            .FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase));
-
-        if (m == null)
-        {
-            m = methods.FirstOrDefault();
-        }
+        var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
+                methods.FirstOrDefault();
 
         return m != null ? m.Methods : Array.Empty<string>();
     }
@@ -203,11 +189,11 @@ public class SubscriptionManager
         {
             await _semaphore.WaitAsync();
             var key = $"subs|-1{sourceID}{actionID}{recepient}";
-            var result = _cache.Get<IEnumerable<SubscriptionMethod>>(key);
+            var result = cache.Get<IEnumerable<SubscriptionMethod>>(key);
             if (result == null)
             {
                 result = await _service.GetSubscriptionMethodsAsync(-1, sourceID, actionID, recepient);
-                _cache.Insert(key, result, DateTime.UtcNow.AddDays(1));
+                cache.Insert(key, result, DateTime.UtcNow.AddDays(1));
             }
 
             return result;
@@ -220,6 +206,6 @@ public class SubscriptionManager
 
     private async Task<int> GetTenantAsync()
     {
-        return await _tenantManager.GetCurrentTenantIdAsync();
+        return await tenantManager.GetCurrentTenantIdAsync();
     }
 }

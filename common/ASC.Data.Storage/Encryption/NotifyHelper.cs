@@ -27,19 +27,11 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Scope]
-public class NotifyHelper
+public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient notifyServiceClient)
 {
     private const string NotifyService = "ASC.Web.Studio.Core.Notify.StudioNotifyService, ASC.Web.Core";
 
     private string _serverRootPath;
-    private readonly NotifyServiceClient _notifyServiceClient;
-    private readonly ILogger<NotifyHelper> _logger;
-
-    public NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient notifyServiceClient)
-    {
-        _notifyServiceClient = notifyServiceClient;
-        _logger = logger;
-    }
 
     public void Init(string serverRootPath)
     {
@@ -78,24 +70,21 @@ public class NotifyHelper
 
     private void SendStorageEncryptionNotification(string method, int tenantId)
     {
-        var notifyInvoke = new NotifyInvoke()
+        var notifyInvoke = new NotifyInvoke
         {
             Service = NotifyService,
             Method = method,
-            Tenant = tenantId
-        };
-        notifyInvoke.Parameters = new List<string>
-        {
-            _serverRootPath
+            Tenant = tenantId,
+            Parameters = [_serverRootPath]
         };
 
         try
         {
-            _notifyServiceClient.InvokeSendMethod(notifyInvoke);
+            notifyServiceClient.InvokeSendMethod(notifyInvoke);
         }
         catch (Exception error)
         {
-            _logger.WarningErrorWhileSending(error);
+            logger.WarningErrorWhileSending(error);
         }
     }
 }

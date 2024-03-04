@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Net.Sockets;
+
 namespace ASC.Geolocation;
 
 // hack for EF Core
@@ -36,25 +38,11 @@ public static class EntityFrameworkHelper
 }
 
 [Scope]
-public class GeolocationHelper
+public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFactory,
+    ILogger<GeolocationHelper> logger,
+    IHttpContextAccessor httpContextAccessor,
+    ICache cache)
 {
-    private readonly IDbContextFactory<CustomDbContext> _dbContextFactory;
-    private readonly ILogger<GeolocationHelper> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICache _cache;
-
-    public GeolocationHelper(
-        IDbContextFactory<CustomDbContext> dbContextFactory,
-        ILogger<GeolocationHelper> logger,
-        IHttpContextAccessor httpContextAccessor,
-        ICache cache)
-    {
-        _dbContextFactory = dbContextFactory;
-        _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-        _cache = cache;
-    }
-
     public async Task<BaseEvent> AddGeolocationAsync(BaseEvent baseEvent)
     {
         var location = await GetGeolocationAsync(baseEvent.IP);
@@ -69,20 +57,20 @@ public class GeolocationHelper
         {
             if (!IPAddress.TryParse(ip, out var address))
             {
-                return new[] { string.Empty, string.Empty };
+                return [string.Empty, string.Empty];
             }
             var location = await GetIPGeolocationAsync(address);
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
-                return new[] { string.Empty, string.Empty };
+                return [string.Empty, string.Empty];
             }
             var regionInfo = new RegionInfo(location.Key).EnglishName;
-            return new[] { regionInfo, location.City };
+            return [regionInfo, location.City];
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
-            return new[] { string.Empty, string.Empty };
+            logger.ErrorWithException(ex);
+            return [string.Empty, string.Empty];
         }
     }
 
@@ -91,26 +79,29 @@ public class GeolocationHelper
         try
         {
             var cacheKey = $"ip_geolocation_info_${address}";
-            var fromCache = _cache.Get<IPGeolocationInfo>(cacheKey);
+            var fromCache = cache.Get<IPGeolocationInfo>(cacheKey);
 
-            if (fromCache != null) return fromCache;
+            if (fromCache != null)
+            {
+                return fromCache;
+            }
 
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-            var addrType = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "ipv4" : "ipv6";
+            var addrType = address.AddressFamily == AddressFamily.InterNetwork ? "ipv4" : "ipv6";
 
             var result = await Queries.IpGeolocationInfoAsync(dbContext, addrType, address.GetAddressBytes());
 
             if (result != null)
             {
-                _cache.Insert(cacheKey, result, TimeSpan.FromSeconds(15));
+                cache.Insert(cacheKey, result, TimeSpan.FromSeconds(15));
             }
 
             return result ?? IPGeolocationInfo.Default;
         }
         catch (Exception error)
         {
-            _logger.ErrorGetIPGeolocation(error);
+            logger.ErrorGetIPGeolocation(error);
         }
 
         return IPGeolocationInfo.Default;
@@ -118,13 +109,13 @@ public class GeolocationHelper
 
     public async Task<IPGeolocationInfo> GetIPGeolocationFromHttpContextAsync()
     {
-        if (_httpContextAccessor.HttpContext?.Request != null)
+        if (httpContextAccessor.HttpContext?.Request != null)
         {
-            var ip = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
+            var ip = httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
 
             if (!ip.Equals(IPAddress.Loopback))
             {
-                _logger.TraceRemoteIpAddress(ip.ToString());
+                logger.TraceRemoteIpAddress(ip.ToString());
 
                 return await GetIPGeolocationAsync(ip);
             }

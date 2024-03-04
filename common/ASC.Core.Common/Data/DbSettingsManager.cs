@@ -36,7 +36,7 @@ public class DbSettingsManagerCache
     {
         Cache = cache;
         _notify = notify;
-        _notify.Subscribe((i) => Cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => Cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public void Remove(string key)
@@ -46,176 +46,100 @@ public class DbSettingsManagerCache
 }
 
 [Scope]
-public class SettingsManager
+public class SettingsManager(IServiceProvider serviceProvider,
+    DbSettingsManagerCache dbSettingsManagerCache,
+    ILogger<SettingsManager> logger,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IDbContextFactory<WebstudioDbContext> dbContextFactory)
 {
     private readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
-
-    private readonly ILogger<SettingsManager> _logger;
-    private readonly ICache _cache;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly DbSettingsManagerCache _dbSettingsManagerCache;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<WebstudioDbContext> _dbContextFactory;
-
-    public SettingsManager(
-        IServiceProvider serviceProvider,
-        DbSettingsManagerCache dbSettingsManagerCache,
-        ILogger<SettingsManager> logger,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        IDbContextFactory<WebstudioDbContext> dbContextFactory)
+    private readonly ICache _cache = dbSettingsManagerCache.Cache;
+    private readonly JsonSerializerOptions  _options = new()
     {
-        _serviceProvider = serviceProvider;
-        _dbSettingsManagerCache = dbSettingsManagerCache;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _cache = dbSettingsManagerCache.Cache;
-        _logger = logger;
-    }
-
-    private int TenantID
-    {
-        get
-        {
-            return _tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
-    private Guid CurrentUserID
-    {
-        get
-        {
-            return _authContext.CurrentAccount.ID;
-        }
-    }
+        PropertyNameCaseInsensitive = true
+    };
+    
 
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await ClearCacheAsync<T>(tenantId);
-    }
-
-    public async Task ClearCacheAsync<T>(int tenantId) where T : class, ISettings<T>
-    {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
         var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
-        _dbSettingsManagerCache.Remove(key);
+        dbSettingsManagerCache.Remove(key);
     }
 
     public T GetDefault<T>() where T : class, ISettings<T>
     {
-        var settingsInstance = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
+        var settingsInstance = ActivatorUtilities.CreateInstance<T>(serviceProvider);
         return settingsInstance.GetDefault();
     }
-    
-    public T Load<T>() where T : class, ISettings<T>
-    {
-        return Load<T>(TenantID, Guid.Empty);
-    }
 
-    public T Load<T>(Guid userId) where T : class, ISettings<T>
-    {
-        return Load<T>(TenantID, userId);
-    }
-    
-    public T Load<T>(int tenantId) where T : class, ISettings<T>
-    {
-        return Load<T>(tenantId, Guid.Empty);
-    }
-    
     public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, Guid.Empty);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, userId);
     }
 
     public async Task<T> LoadAsync<T>(UserInfo user) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
-    public async Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
+    public Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(tenantId, Guid.Empty);
+        return LoadAsync<T>(tenantId, Guid.Empty);
     }
 
-    public async Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
+    public Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(Tenant.DefaultTenant);
+        return LoadAsync<T>(Tenant.DefaultTenant);
     }
 
-    public T LoadForDefaultTenant<T>() where T : class, ISettings<T>
+    public Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
     {
-        return Load<T>(Tenant.DefaultTenant);
-    }
-
-    public async Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
-    {
-        return await LoadAsync<T>(CurrentUserID);
-    }
-
-    public T LoadForCurrentUser<T>() where T : class, ISettings<T>
-    {
-        return Load<T>(CurrentUserID);
+        return LoadAsync<T>(authContext.CurrentAccount.ID);
     }
 
     public async Task<bool> SaveAsync<T>(T data) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, Guid.Empty);
     }
     
-
     public async Task<bool> SaveAsync<T>(T data, Guid userId) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, userId);
     }
 
     public async Task<bool> SaveAsync<T>(T data, UserInfo user) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, user.Id);
     }
 
-    public async Task<bool> SaveAsync<T>(T data, int tenantId) where T : class, ISettings<T>
+    public Task<bool> SaveAsync<T>(T data, int tenantId) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, tenantId, Guid.Empty);
-    }
-
-    public bool Save<T>(T data) where T : class, ISettings<T>
-    {
-        return Save(data, TenantID, Guid.Empty);
+        return SaveAsync(data, tenantId, Guid.Empty);
     }
     
-    public bool Save<T>(T data, Guid userId) where T : class, ISettings<T>
+    public Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
     {
-        return Save(data, TenantID, userId);
-    }
-    
-    public async Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
-    {
-        return await SaveAsync(data, Tenant.DefaultTenant);
+        return SaveAsync(data, Tenant.DefaultTenant);
     }
 
-    public async Task<bool> SaveForCurrentUserAsync<T>(T data) where T : class, ISettings<T>
+    public Task<bool> SaveForCurrentUserAsync<T>(T data) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, CurrentUserID);
-    }
-
-    public bool SaveForCurrentUser<T>(T data) where T : class, ISettings<T>
-    {
-        return Save(data, CurrentUserID);
+        return SaveAsync(data, authContext.CurrentAccount.ID);
     }
 
     public async Task<bool> ManageAsync<T>(Action<T> action) where T : class, ISettings<T>
@@ -225,14 +149,7 @@ public class SettingsManager
         return await SaveAsync(settings);
     }
 
-    public bool ManageForCurrentUser<T>(Action<T> action) where T : class, ISettings<T>
-    {
-        var settings = LoadForCurrentUser<T>();
-        action(settings);
-        return SaveForCurrentUser(settings);
-    }
-
-    internal async ValueTask<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    internal Task<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
@@ -242,61 +159,36 @@ public class SettingsManager
             var settings = _cache.Get<T>(key);
             if (settings != null)
             {
-                return settings;
+                return Task.FromResult(settings);
             }
 
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
-            var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
-
-            settings = result != null ? Deserialize<T>(result) : def;
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return settings;
+            return LoadАFromDbAsync(tenantId, userId, def, key);
         }
         catch (Exception ex)
         {
-            _logger.ErrorLoadSettingsFor(ex);
+            logger.ErrorLoadSettingsFor(ex);
         }
 
-        return def;
+        return Task.FromResult(def);
     }
 
-    private T Load<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    private async Task<T> LoadАFromDbAsync<T>(int tenantId, Guid userId, T def, string key) where T : class, ISettings<T>
     {
-        var def = GetDefault<T>();
-        var key = def.ID.ToString() + tenantId + userId;
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
 
-        try
-        {
-            var settings = _cache.Get<T>(key);
-            if (settings != null)
-            {
-                return settings;
-            }
+        var settings = result != null ? Deserialize<T>(result) : def;
 
-            using var context = _dbContextFactory.CreateDbContext();
-            var result = Queries.Data(context, tenantId, def.ID, userId);
+        _cache.Insert(key, settings, _expirationTimeout);
 
-            settings = result != null ? Deserialize<T>(result) : def;
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return settings;
-        }
-        catch (Exception ex)
-        {
-            _logger.ErrorLoadSettingsFor(ex);
-        }
-
-        return def;
+        return settings;
     }
 
     private async Task<bool> SaveAsync<T>(T settings, int tenantId, Guid userId) where T : class, ISettings<T>
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
         try
         {
@@ -332,7 +224,7 @@ public class SettingsManager
                 await context.SaveChangesAsync();
             }
 
-            _dbSettingsManagerCache.Remove(key);
+            dbSettingsManagerCache.Remove(key);
 
             _cache.Insert(key, settings, _expirationTimeout);
 
@@ -340,61 +232,7 @@ public class SettingsManager
         }
         catch (Exception ex)
         {
-            _logger.ErrorSaveSettingsFor(ex);
-
-            return false;
-        }
-    }
-
-    private bool Save<T>(T settings, int tenantId, Guid userId) where T : class, ISettings<T>
-    {
-        ArgumentNullException.ThrowIfNull(settings);
-
-        using var context = _dbContextFactory.CreateDbContext();
-
-        try
-        {
-            var key = settings.ID.ToString() + tenantId + userId;
-            var data = Serialize(settings);
-            var def = GetDefault<T>();
-
-            var defaultData = Serialize(def);
-
-            if (data.SequenceEqual(defaultData))
-            {
-                var s = Queries.WebStudioSettings(context, tenantId, settings.ID, userId);
-
-                if (s != null)
-                {
-                    context.WebstudioSettings.Remove(s);
-                }
-
-                context.SaveChanges();
-            }
-            else
-            {
-                var s = new DbWebstudioSettings
-                {
-                    Id = settings.ID,
-                    UserId = userId,
-                    TenantId = tenantId,
-                    Data = data
-                };
-
-                context.AddOrUpdate(context.WebstudioSettings, s);
-
-                context.SaveChanges();
-            }
-
-            _dbSettingsManagerCache.Remove(key);
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.ErrorSaveSettingsFor(ex);
+            logger.ErrorSaveSettingsFor(ex);
 
             return false;
         }
@@ -402,12 +240,7 @@ public class SettingsManager
 
     private T Deserialize<T>(string data)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-
-        return JsonSerializer.Deserialize<T>(data, options);
+        return JsonSerializer.Deserialize<T>(data, _options);
     }
 
     private string Serialize<T>(T settings)

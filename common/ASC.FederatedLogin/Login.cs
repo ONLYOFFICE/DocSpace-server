@@ -27,14 +27,16 @@
 namespace ASC.FederatedLogin;
 
 [Scope]
-public class Login
+public class Login(
+    IWebHostEnvironment webHostEnvironment,
+    InstanceCrypto instanceCrypto,
+    ProviderManager providerManager)
 {
-    public bool IsReusable => false;
-    protected string Callback => _params.Get("callback") ?? "loginCallback";
-    protected string Auth => _params.Get("auth");
-    protected string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
+    private string Callback => _params.Get("callback") ?? "loginCallback";
+    private string Auth => _params.Get("auth");
+    private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
 
-    protected LoginMode Mode
+    private LoginMode Mode
     {
         get
         {
@@ -63,22 +65,6 @@ public class Login
     }
 
     private Dictionary<string, string> _params;
-    private readonly IWebHostEnvironment _webHostEnvironment;
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly ProviderManager _providerManager;
-
-    public Login(
-        IWebHostEnvironment webHostEnvironment,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-        ProviderManager providerManager)
-    {
-        _webHostEnvironment = webHostEnvironment;
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _providerManager = providerManager;
-    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -110,18 +96,15 @@ public class Login
             try
             {
                 var desktop = _params.ContainsKey("desktop") && _params["desktop"] == "true";
-                IDictionary<string, string> additionalStateArgs = null;
+                Dictionary<string, string> additionalStateArgs = null;
 
                 if (desktop)
                 {
                     additionalStateArgs = context.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
-                    if (!additionalStateArgs.ContainsKey("desktop"))
-                    {
-                        additionalStateArgs.Add("desktop", "true");
-                    }
+                    additionalStateArgs.TryAdd("desktop", "true");
                 }
 
-                var profile = _providerManager.Process(Auth, context, null, additionalStateArgs);
+                var profile = providerManager.Process(Auth, context, null, additionalStateArgs);
                 if (profile != null)
                 {
                     await SendJsCallbackAsync(context, profile);
@@ -133,7 +116,7 @@ public class Login
             }
             catch (Exception ex)
             {
-                await SendJsCallbackAsync(context, LoginProfile.FromError(_signature, _instanceCrypto, ex));
+                await SendJsCallbackAsync(context, LoginProfile.FromError(ex));
             }
         }
         else
@@ -147,7 +130,7 @@ public class Login
     private async Task RenderXrdsAsync(HttpContext context)
     {
         var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + ReturnUrl;
-        var xrdsimageuri = new Uri(context.Request.Url(), new Uri(_webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
+        var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
     }
 
@@ -157,7 +140,7 @@ public class Login
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(
             JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{profile.Serialized}\"")
+            .Replace("%PROFILE%", $"\"{profile.Transport(instanceCrypto)}\"")
             .Replace("%CALLBACK%", Callback)
             .Replace("%DESKTOP%", (Mode == LoginMode.Redirect).ToString().ToLowerInvariant())
             );
@@ -166,7 +149,7 @@ public class Login
 
 public class LoginHandler
 {
-    public LoginHandler(RequestDelegate next)
+    public LoginHandler(RequestDelegate _)
     {
     }
 

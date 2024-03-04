@@ -32,8 +32,8 @@ public class OutlookCSVUserImporter : TextFileUserImporter
         : base(stream)
     {
         HasHeader = true;
-        NameMapping = new Dictionary<string, string>()
-                              {
+        NameMapping = new Dictionary<string, string>
+        {
                                   {"First Name", "FirstName"},
                                   {"Last Name", "LastName"},
                                   {"Middle Name", ""},

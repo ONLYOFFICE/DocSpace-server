@@ -24,19 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Files.Core.Mapping;
 
-public class FilesMappingProfile : AutoMapper.Profile
+public class FilesMappingProfile : Profile
 {
     public FilesMappingProfile()
     {
-        CreateMap(typeof(Configuration<>), typeof(ConfigurationDto<>));
-
         CreateMap<DbFile, File<int>>();
 
         CreateMap<DbFileQuery, File<int>>()
                 .ForMember(r => r.CreateOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.CreateOn))
                 .ForMember(r => r.ModifiedOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.ModifiedOn))
+                .ForMember(r => r.LastOpened, r => r.ConvertUsing<TenantDateTimeConverter, DateTime?>(s => s.LastOpened))
+                .ForMember(r => r.ShareRecord, r => r.MapFrom(f => f.SharedRecord))
                 .IncludeMembers(r => r.File)
                 .ConstructUsingServiceLocator();
 

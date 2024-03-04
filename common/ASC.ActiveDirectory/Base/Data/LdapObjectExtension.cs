@@ -31,18 +31,8 @@ namespace ASC.ActiveDirectory.Base.Data;
 /// LDAP object extensions class
 /// </summary>
 [Scope]
-public class LdapObjectExtension
+public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settingsManager, ILogger<LdapObjectExtension> logger)
 {
-    private readonly TenantUtil _tenantUtil;
-    private readonly SettingsManager _settingsManager;
-    private readonly ILogger<LdapObjectExtension> _logger;
-
-    public LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settingsManager, ILogger<LdapObjectExtension> logger)
-    {
-        _tenantUtil = tenantUtil;
-        _settingsManager = settingsManager;
-        _logger = logger;
-    }
     public string GetAttribute(LdapObject ldapObject, string attribute)
     {
         if (string.IsNullOrEmpty(attribute))
@@ -56,7 +46,7 @@ public class LdapObjectExtension
         }
         catch (Exception e)
         {
-            _logger.ErrorCanNotGetAttribute(attribute, ldapObject.DistinguishedName, e);
+            logger.ErrorCanNotGetAttribute(attribute, ldapObject.DistinguishedName, e);
 
             return string.Empty;
         }
@@ -78,7 +68,7 @@ public class LdapObjectExtension
         catch (Exception e)
         {
 
-            _logger.ErrorCanNotGetAttributes(attribute, ldapObject.DistinguishedName, e);
+            logger.ErrorCanNotGetAttributes(attribute, ldapObject.DistinguishedName, e);
 
             return list;
         }
@@ -107,23 +97,21 @@ public class LdapObjectExtension
             }
             return list;
         }
-        else
-        {
-            return GetAttributes(ldapUser, bindings[0]);
-        }
+
+        return GetAttributes(ldapUser, bindings[0]);
     }
 
-    private void PopulateContacts(List<string> Contacts, string type, List<string> values)
+    private void PopulateContacts(ICollection<string> contacts, string type, List<string> values)
     {
-        if (values == null || !values.Any())
+        if (values == null || values.Count == 0)
         {
             return;
         }
 
         foreach (var val in values)
         {
-            Contacts.Add(type);
-            Contacts.Add(val);
+            contacts.Add(type);
+            contacts.Add(val);
         }
     }
 
@@ -148,8 +136,8 @@ public class LdapObjectExtension
         var emails = GetContacts(ldapUser, Mapping.AdditionalMail, settings);
         var skype = GetContacts(ldapUser, Mapping.Skype, settings);
 
-        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultUserQuota;
+        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultQuota;
 
         if (string.IsNullOrEmpty(userName))
         {
@@ -172,7 +160,7 @@ public class LdapObjectExtension
             Status = ldapUser.IsDisabled ? EmployeeStatus.Terminated : EmployeeStatus.Active,
             Title = !string.IsNullOrEmpty(title) ? title : string.Empty,
             Location = !string.IsNullOrEmpty(location) ? location : string.Empty,
-            WorkFromDate = _tenantUtil.DateTimeNow(),
+            WorkFromDate = tenantUtil.DateTimeNow(),
             ContactsList = contacts,
             LdapQouta = quota
         };
@@ -180,7 +168,7 @@ public class LdapObjectExtension
         if (!string.IsNullOrEmpty(firstName))
         {
             user.FirstName = firstName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? firstName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? firstName[..MAX_NUMBER_OF_SYMBOLS]
                 : firstName;
         }
         else
@@ -191,7 +179,7 @@ public class LdapObjectExtension
         if (!string.IsNullOrEmpty(secondName))
         {
             user.LastName = secondName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? secondName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? secondName[..MAX_NUMBER_OF_SYMBOLS]
                 : secondName;
         }
         else
@@ -201,8 +189,7 @@ public class LdapObjectExtension
 
         if (!string.IsNullOrEmpty(birthDay))
         {
-            DateTime date;
-            if (DateTime.TryParse(birthDay, out date))
+            if (DateTime.TryParse(birthDay, out var date))
             {
                 user.BirthDate = date;
             }
@@ -210,8 +197,7 @@ public class LdapObjectExtension
 
         if (!string.IsNullOrEmpty(gender))
         {
-            bool b;
-            if (bool.TryParse(gender, out b))
+            if (bool.TryParse(gender, out var b))
             {
                 user.Sex = b;
             }

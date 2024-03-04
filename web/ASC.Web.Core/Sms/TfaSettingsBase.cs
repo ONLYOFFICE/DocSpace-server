@@ -45,25 +45,14 @@ public abstract class TfaSettingsBase<T> : ISettings<T> where T : ISettings<T>
 }
 
 
-public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new()
+public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
+    IHttpContextAccessor httpContextAccessor,
+    UserManager userManager)
+    where T : TfaSettingsBase<T>, new()
 {
-    private readonly UserManager _userManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    protected TfaSettingsHelperBase(
-        SettingsManager settingsManager,
-        IHttpContextAccessor httpContextAccessor,
-        UserManager userManager)
-    {
-        _settingsManager = settingsManager;
-        _httpContextAccessor = httpContextAccessor;
-        _userManager = userManager;
-    }
-
     public async Task<bool> TfaEnabledForUserAsync(Guid userGuid)
     {
-        var settings = await _settingsManager.LoadAsync<T>();
+        var settings = await settingsManager.LoadAsync<T>();
 
         if (!settings.EnableSetting)
         {
@@ -74,7 +63,7 @@ public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new
         {
             foreach (var mandatory in settings.MandatoryGroups)
             {
-                if (await _userManager.IsUserInGroupAsync(userGuid, mandatory))
+                if (await userManager.IsUserInGroupAsync(userGuid, mandatory))
                 {
                     return true;
                 }
@@ -94,7 +83,7 @@ public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new
 
         if (settings.TrustedIps != null && settings.TrustedIps.Any())
         {
-            var requestIP = MessageSettings.GetIP(_httpContextAccessor.HttpContext.Request);
+            var requestIP = MessageSettings.GetIP(httpContextAccessor.HttpContext.Request);
             if (!string.IsNullOrWhiteSpace(requestIP) && settings.TrustedIps.Any(trustedIp => IPAddressRange.MatchIPs(requestIP, trustedIp)))
             {
                 return false;
@@ -109,22 +98,24 @@ public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new
         get { return SetupInfo.IsVisibleSettings<T>(); }
     }
 
-    public virtual bool Enable
+    public virtual async Task<bool> GetEnable()
     {
-        get { return _settingsManager.Load<T>().EnableSetting; }
-        set
+        return (await settingsManager.LoadAsync<T>()).EnableSetting;
+    }
+
+    public async Task SetEnable(bool value)
+    {
+        T settings;
+        if (value)
         {
-            T settings;
-            if (value)
-            {
-                settings = _settingsManager.Load<T>();
-                settings.EnableSetting = value;
-            }
-            else
-            {
-                settings = new T();
-            }
-            _settingsManager.Save(settings);
+            settings = await settingsManager.LoadAsync<T>();
+            settings.EnableSetting = true;
         }
+        else
+        {
+            settings = new T();
+        }
+
+        await settingsManager.SaveAsync(settings);
     }
 }

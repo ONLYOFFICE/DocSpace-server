@@ -49,7 +49,7 @@ public static class LoginProfileExtension
             Title = string.Empty,
             Location = string.Empty,
             CultureName = coreBaseSettings.CustomMode ? "ru-RU" : CultureInfo.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated,
+            ActivationStatus = EmployeeActivationStatus.Activated
         };
 
         var gender = loginProfile.Gender;

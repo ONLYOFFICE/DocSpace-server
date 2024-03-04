@@ -48,14 +48,9 @@ public class AWSSender : SmtpSender, IDisposable
     public override void Init(IDictionary<string, string> properties)
     {
         base.Init(properties);
-        var region = properties.TryGetValue("region", out var propertyRegion)
-            ? RegionEndpoint.GetBySystemName(propertyRegion)
-            : RegionEndpoint.USEast1;
-        _amazonEmailServiceClient =
-            new AmazonSimpleEmailServiceClient(properties["accessKey"], properties["secretKey"], region);
-        _refreshTimeout = TimeSpan.Parse(properties.TryGetValue("refreshTimeout", out var propertyRefreshTimeout)
-            ? propertyRefreshTimeout
-            : "0:30:0");
+        var region = properties.TryGetValue("region", out var property) ? RegionEndpoint.GetBySystemName(property) : RegionEndpoint.USEast1;
+        _amazonEmailServiceClient = new AmazonSimpleEmailServiceClient(properties["accessKey"], properties["secretKey"], region);
+        _refreshTimeout = TimeSpan.Parse(properties.TryGetValue("refreshTimeout", out var property1) ? property1 : "0:30:0");
         _lastRefresh = DateTime.UtcNow - _refreshTimeout; //set to refresh on first send
     }
 
@@ -158,10 +153,10 @@ public class AWSSender : SmtpSender, IDisposable
         //Check last send and throttle if needed
         if (_sendWindow != TimeSpan.MinValue && DateTime.UtcNow - _lastSend <= _sendWindow)
         {
-            //Possible BUG: at high frequncies maybe bug with to little differences
-            //This means that time passed from last send is less then message per second
-            _logger.DebugSendRate(_sendWindow);
-            Thread.Sleep(_sendWindow);
+                //Possible BUG: at high frequncies maybe bug with to little differences
+                //This means that time passed from last send is less then message per second
+                _logger.DebugSendRate(_sendWindow);
+                Thread.Sleep(_sendWindow);
         }
     }
 
@@ -173,7 +168,7 @@ public class AWSSender : SmtpSender, IDisposable
         }
 
         await _semaphore.WaitAsync();
-        if (IsRefreshNeeded()) //Double check
+        if (IsRefreshNeeded())//Double check
         {
             _logger.DebugRefreshingQuota(_refreshTimeout, _lastRefresh);
 
@@ -202,9 +197,6 @@ public class AWSSender : SmtpSender, IDisposable
 
     public void Dispose()
     {
-        if (_amazonEmailServiceClient != null)
-        {
-            _amazonEmailServiceClient.Dispose();
-        }
+        _amazonEmailServiceClient?.Dispose();
     }
 }

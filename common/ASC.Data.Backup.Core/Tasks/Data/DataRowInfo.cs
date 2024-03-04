@@ -26,9 +26,9 @@
 
 namespace ASC.Data.Backup.Tasks.Data;
 
-public class DataRowInfo
+public class DataRowInfo(string tableName)
 {
-    public string TableName { get; private set; }
+    public string TableName { get; private set; } = tableName;
     public IReadOnlyCollection<string> ColumnNames => _columnNames.AsReadOnly();
 
     public object this[int index] => _values[index];
@@ -36,11 +36,6 @@ public class DataRowInfo
 
     private readonly List<string> _columnNames = new();
     private readonly List<object> _values = new();
-
-    public DataRowInfo(string tableName)
-    {
-        TableName = tableName;
-    }
 
     public void SetValue(string columnName, object item)
     {

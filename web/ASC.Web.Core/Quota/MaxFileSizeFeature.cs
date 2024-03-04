@@ -26,12 +26,14 @@
 
 namespace ASC.Web.Core.Quota;
 
-public class MaxFileSizeChecker : TenantQuotaFeatureChecker<MaxFileSizeFeature, long>
+public class MaxFileSizeChecker(ITenantQuotaFeatureStat<MaxFileSizeFeature, long> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager)
+    : TenantQuotaFeatureChecker<MaxFileSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_file_size_exception;
 
-    public MaxFileSizeChecker(ITenantQuotaFeatureStat<MaxFileSizeFeature, long> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
+    public override string GetExceptionMessage(long size)
     {
+        return string.Format(Resource.TariffsFeature_file_size_exception, FileSizeComment.FilesSizeToString(size));
     }
 }
 

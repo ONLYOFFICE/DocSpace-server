@@ -27,42 +27,30 @@
 namespace ASC.Files.ThumbnailBuilder;
 
 [Singleton]
-public class ThumbnailBuilderService : BackgroundService
-{
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ThumbnailSettings _thumbnailSettings;
-    private readonly ILogger<ThumbnailBuilderService> _logger;
-    private readonly ChannelReader<FileData<int>> _channelReader;
-
-    public ThumbnailBuilderService(
-        IServiceScopeFactory serviceScopeFactory,
+public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
         ILogger<ThumbnailBuilderService> logger,
         ThumbnailSettings settings,
         ChannelReader<FileData<int>> channelReader)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _thumbnailSettings = settings;
-        _logger = logger;
-        _channelReader = channelReader;
-    }
-
+    : BackgroundService
+{
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.InformationThumbnailWorkerRunnig();
+        logger.InformationThumbnailWorkerRunnig();
 
-        stoppingToken.Register(() => _logger.InformationThumbnailWorkerStopping());
+        stoppingToken.Register(logger.InformationThumbnailWorkerStopping);
 
-        _logger.TraceProcedureStart();
+        logger.TraceProcedureStart();
 
-        var readers = new List<ChannelReader<FileData<int>>>() {
-            _channelReader 
+        var readers = new List<ChannelReader<FileData<int>>>
+        {
+            channelReader 
         };
 
-        if (((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3)) > 0)
+        if (((int)(settings.MaxDegreeOfParallelism * 0.3)) > 0)
         {
-            var splitter = _channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
-            var premiumChannels = splitter[0].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.7), null, stoppingToken);
-            var freeChannel = splitter[1].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3), null, stoppingToken);
+            var splitter = channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
+            var premiumChannels = splitter[0].Split((int)(settings.MaxDegreeOfParallelism * 0.7), null, stoppingToken);
+            var freeChannel = splitter[1].Split((int)(settings.MaxDegreeOfParallelism * 0.3), null, stoppingToken);
             readers = premiumChannels.Union(freeChannel).ToList();
         }
 
@@ -76,7 +64,7 @@ public class ThumbnailBuilderService : BackgroundService
             {
                 await foreach (var fileData in reader.ReadAllAsync(stoppingToken))
                 {
-                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                    await using var scope = serviceScopeFactory.CreateAsyncScope();
 
                     var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
                     commonLinkUtility.ServerUri = fileData.BaseUri;

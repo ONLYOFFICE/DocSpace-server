@@ -27,13 +27,8 @@
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
 [Singleton]
-public class NovellLdapEntryExtension
+public class NovellLdapEntryExtension(ILogger logger)
 {
-    private readonly ILogger<NovellLdapEntryExtension> _logger;
-    public NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
-    {
-        _logger = logger;
-    }
     public object GetAttributeValue(LdapEntry ldapEntry, string attributeName, bool getBytes = false)
     {
         try
@@ -76,10 +71,10 @@ public class NovellLdapEntryExtension
     public string[] GetAttributeArrayValue(LdapEntry ldapEntry, string attributeName)
     {
         var attribute = ldapEntry.GetAttribute(attributeName);
-        return attribute == null ? null : attribute.StringValueArray;
+        return attribute?.StringValueArray;
     }
 
-    private string DecodeSid(byte[] sid)
+    private static string DecodeSid(IReadOnlyList<byte> sid)
     {
         var strSid = new StringBuilder("S-");
 
@@ -131,12 +126,9 @@ public class NovellLdapEntryExtension
     /// <returns>LDAPObject</returns>
     public LdapObject ToLdapObject(LdapEntry ldapEntry, string ldapUniqueIdAttribute = null)
     {
-        if (ldapEntry == null)
-        {
-            throw new ArgumentNullException(nameof(ldapEntry));
-        }
+        ArgumentNullException.ThrowIfNull(ldapEntry);
 
-        var novellLdapObject = new NovellLdapObject(_logger, this);
+        var novellLdapObject = new NovellLdapObject(logger, this);
         novellLdapObject.Init(ldapEntry, ldapUniqueIdAttribute);
 
         return novellLdapObject;

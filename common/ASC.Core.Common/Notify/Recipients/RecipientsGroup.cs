@@ -26,19 +26,12 @@
 
 namespace ASC.Notify.Recipients;
 
-public class RecipientsGroup
-    : IRecipientsGroup
+public class RecipientsGroup(string id, string name) : IRecipientsGroup
 {
-    public RecipientsGroup(string id, string name)
-    {
-        ID = id;
-        Name = name;
-    }
-
     #region IRecipientsGroup Members
 
-    public string ID { get; private set; }
-    public string Name { get; private set; }
+    public string ID { get; private set; } = id;
+    public string Name { get; private set; } = name;
 
     #endregion
 

@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using AuthConstants = ASC.Common.Security.Authorizing.Constants;
+using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.Security;
 
@@ -42,17 +43,17 @@ public class UserGroupObject : SecurityObject
 
     protected override IEnumerable<IRole> GetTargetRoles(IRoleProvider roleProvider)
     {
-        if (_groupId == Users.Constants.GroupAdmin.ID)
+        if (_groupId == Constants.GroupAdmin.ID)
         { 
             return new[] { AuthConstants.DocSpaceAdmin };
         }
 
-        if (_groupId == Users.Constants.GroupUser.ID)
+        if (_groupId == Constants.GroupUser.ID)
         {
             return new[] { AuthConstants.User };
         }
 
-        if (_groupId == Users.Constants.GroupCollaborator.ID)
+        if (_groupId == Constants.GroupCollaborator.ID)
         {
             return new[] { AuthConstants.Collaborator };
         }

@@ -26,24 +26,12 @@
 
 namespace ASC.Web.Core.Notify;
 [Scope]
-public class NotificationControllerHelper
+public class NotificationControllerHelper(
+    StudioNotifyHelper studioNotifyHelper,
+    AuthContext authContext,
+    BadgesSettingsHelper badgesSettingsHelper)
 {
-    private readonly StudioNotifyHelper _studioNotifyHelper;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-    private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
-    private readonly Guid _userId;
-
-    public NotificationControllerHelper(
-        StudioNotifyHelper studioNotifyHelper,
-        AuthContext authContext,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        BadgesSettingsHelper badgesSettingsHelper)
-    {
-        _studioNotifyHelper = studioNotifyHelper;
-        _badgesSettingsHelper = badgesSettingsHelper;
-        _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
-        _userId = authContext.CurrentAccount.ID;
-    }
+    private readonly Guid _userId = authContext.CurrentAccount.ID;
 
     public async Task<bool> GetNotificationStatusAsync(NotificationType notificationType)
     {
@@ -52,19 +40,19 @@ public class NotificationControllerHelper
         switch (notificationType)
         {
             case NotificationType.Badges:
-                return await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+                return await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
             case NotificationType.RoomsActivity:
-                isEnabled = await _studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.RoomsActivity);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.RoomsActivity);
                 return isEnabled;
             case NotificationType.DailyFeed:
-                isEnabled = await _studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.SendWhatsNew);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.SendWhatsNew);
                 return isEnabled;
             case NotificationType.UsefullTips:
-                isEnabled = await _studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.PeriodicNotify);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.PeriodicNotify);
                 return isEnabled;
             default:
                 throw new Exception("Incorrect parameters");
-        };
+        }
     }
 
     public async Task SetNotificationStatusAsync(NotificationType notificationType, bool isEnabled)
@@ -72,30 +60,19 @@ public class NotificationControllerHelper
         switch (notificationType)
         {
             case NotificationType.Badges:
-                await _badgesSettingsHelper.SetEnabledForCurrentUserAsync(isEnabled);
+                await badgesSettingsHelper.SetEnabledForCurrentUserAsync(isEnabled);
                 break;
             case NotificationType.RoomsActivity:
-                await _studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.RoomsActivity, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.RoomsActivity, isEnabled);
                 break;
             case NotificationType.DailyFeed:
-                await _studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.SendWhatsNew, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.SendWhatsNew, isEnabled);
                 break;
             case NotificationType.UsefullTips:
-                await _studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.PeriodicNotify, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.PeriodicNotify, isEnabled);
                 break;
         }
     }
-
-    public RoomsNotificationSettings GetSettings()
-    {
-        return _roomsNotificationSettingsHelper.GetSettingsForCurrentUser();
-    }
-
-    public RoomsNotificationSettings SetRoomsNotificationStatus(int roomsId, bool mute)
-    {
-        return _roomsNotificationSettingsHelper.SetForCurrentUser(roomsId, mute);
-    }
-
 }
 
 /// <summary>

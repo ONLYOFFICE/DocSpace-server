@@ -41,10 +41,4 @@ public class TagValue : ITagValue
     }
 }
 
-public class AdditionalSenderTag : TagValue
-{
-    public AdditionalSenderTag(string senderName)
-        : base("__AdditionalSender", senderName)
-    {
-    }
-}
+public class AdditionalSenderTag(string senderName) : TagValue("__AdditionalSender", senderName);

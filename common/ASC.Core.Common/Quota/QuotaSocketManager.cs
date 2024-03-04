@@ -25,39 +25,39 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Quota;
-public class QuotaSocketManager : SocketServiceClient
-{
-    private readonly TenantManager _tenantManager;
-
-    protected override string Hub => "files";
-
-    public QuotaSocketManager(
-        ILogger<SocketServiceClient> logger, 
-        IHttpClientFactory clientFactory, 
+public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
+        IHttpClientFactory clientFactory,
         MachinePseudoKeys machinePseudoKeys,
         TenantManager tenantManager,
-        IConfiguration configuration) : base(logger, clientFactory, machinePseudoKeys, configuration)
-    {
-        _tenantManager = tenantManager;
-    }
+        IConfiguration configuration)
+    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+{
+    protected override string Hub => "files";
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
+    public async Task ChangeCustomQuotaUsedValueAsync(int tenantId, string customQuotaFeature, bool enableQuota, long usedSpace, long quotaLimit, List<Guid> userIds)
+    {
+        var room = $"{tenantId}-QUOTA";
+
+        await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
+    }
+
     public async Task ChangeQuotaFeatureValue(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
-    private string GetQuotaRoom()
+    private async Task<string> GetQuotaRoom()
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }
