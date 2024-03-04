@@ -256,6 +256,7 @@ public class WorkspaceMigratingFiles(
         }
 
         var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
+        var aces = new Dictionary<string, AceWrapper>();
         foreach (var security in _securities)
         {
             try
@@ -264,9 +265,17 @@ public class WorkspaceMigratingFiles(
                 if (entryIsFile && ShouldImportSharedFiles)
                 {
                     await securityContext.AuthenticateMeAsync(_user.Guid);
-                    var ace = await fileStorageService.SetExternalLinkAsync(matchingIds[security.EntryId].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
-                    primary: false);
-
+                    AceWrapper ace = null;
+                    if (!aces.ContainsKey($"{security.Security}{matchingIds[security.EntryId].Id}")) 
+                    {
+                        ace = await fileStorageService.SetExternalLinkAsync(matchingIds[security.EntryId].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
+                            primary: false);
+                        aces.Add($"{security.Security}{matchingIds[security.EntryId].Id}", ace);
+                    }
+                    else
+                    {
+                        ace = aces[$"{security.Security}{matchingIds[security.EntryId].Id}"];
+                    }
                     var user = await userManager.GetUsersAsync(Guid.Parse(_mappedGuids[security.Subject]));
                     if (user.Id == Constants.LostUser.Id)
                     {
