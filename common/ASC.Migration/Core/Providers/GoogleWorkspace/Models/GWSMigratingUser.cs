@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.Migration.GoogleWorkspace.Models;
 
 [Transient]
@@ -170,7 +172,7 @@ public class GwsMigratingUser(
             return;
         }
 
-        var googleProfile = JsonConvert.DeserializeObject<GwsProfile>(File.ReadAllText(profilePath));
+        var googleProfile = JsonSerializer.Deserialize<GwsProfile>(File.ReadAllText(profilePath));
 
         if (googleProfile.Birthday != null)
         {

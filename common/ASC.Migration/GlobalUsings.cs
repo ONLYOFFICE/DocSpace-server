@@ -78,6 +78,4 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
 
-global using Newtonsoft.Json;
-
 global using ProtoBuf;

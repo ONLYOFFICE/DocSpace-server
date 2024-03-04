@@ -138,11 +138,17 @@ public class GoogleWorkspaceMigration(
                     }
                     else if ((await userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
-                        _migrationInfo.ExistUsers.Add(key, user);
+                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email))
+                        {
+                            _migrationInfo.ExistUsers.Add(key, user);
+                        }
                     }
                     else
                     {
-                        _migrationInfo.Users.Add(key, user);
+                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email)) 
+                        {
+                            _migrationInfo.Users.Add(key, user);
+                        }
                     }
                 }
             }
