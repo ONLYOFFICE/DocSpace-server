@@ -236,7 +236,8 @@ public abstract class BaseStartup
             {
                 var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                 var permitLimit = 5;
-                var partitionKey = $"sensitive_api_{userId}";
+                var path = httpContext.Request.Path.ToString();
+                var partitionKey = $"sensitive_api_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
                 if (EnableNoLimiter(remoteIpAddress))
@@ -247,7 +248,7 @@ public abstract class BaseStartup
                 return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
-                    Window = TimeSpan.FromMinutes(1),
+                    Window = TimeSpan.FromMinutes(15),
                     ConnectionMultiplexerFactory = () => connectionMultiplexer
                 });
             });
