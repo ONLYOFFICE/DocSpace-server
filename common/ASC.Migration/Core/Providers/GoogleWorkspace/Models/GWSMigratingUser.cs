@@ -53,13 +53,6 @@ public class GwsMigratingUser(
         Log = log;
     }
 
-    public void Init(GwsMigratingUser user)
-    {
-        Key = user.Key;
-        _userInfo = user._userInfo;
-        ShouldImport = user.ShouldImport;
-    }
-
     public override void Parse()
     {
         _userInfo = new UserInfo()

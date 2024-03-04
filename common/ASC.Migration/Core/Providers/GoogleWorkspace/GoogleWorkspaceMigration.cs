@@ -182,11 +182,8 @@ public class GoogleWorkspaceMigration(
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         // Add all users first
         var i = 1;
-        foreach (var u in usersForImport)
+        foreach (var user in usersForImport)
         {
-            var user = serviceProvider.GetService<GwsMigratingUser>();
-            user.Init(u);
-
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
@@ -210,7 +207,7 @@ public class GoogleWorkspaceMigration(
         var groupsCount = groupsForImport.Count;
         if (groupsCount != 0)
         {
-            progressStep = 25 / groupsCount;
+            progressStep = groupsCount == 0 ? 25 : 25 / groupsCount;
             //Create all groups
             i = 1;
             foreach (var group in groupsForImport)
@@ -227,8 +224,8 @@ public class GoogleWorkspaceMigration(
             }
         }
 
-        // Add files, contacts and other stuff
         i = 1;
+        progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         foreach (var user in usersForImport)
         {
             if (failedUsers.Contains(user))
