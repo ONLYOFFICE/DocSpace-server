@@ -82,6 +82,7 @@ global using ASC.Web.Files.Services.FFmpegService;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
+global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
