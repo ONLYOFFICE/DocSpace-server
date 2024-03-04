@@ -55,6 +55,7 @@ public class GroupDto
     public List<EmployeeFullDto> Members { get; set; }
     
     public bool? Shared { get; set; }
+    public int MembersCount { get; set; }
 }
 
 [Scope]
@@ -77,13 +78,16 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             result.Manager = await employeeFullDtoHelper.GetFullAsync(manager);
         }
 
+        var members = await userManager.GetUsersByGroupAsync(group.ID);
+        result.MembersCount = members.Length;
+
         if (!includeMembers)
         {
             return result;
         }
 
         result.Members = [];
-        foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
+        foreach (var m in members)
         { 
             result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }
