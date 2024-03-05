@@ -47,41 +47,6 @@ public class SecurityControllerHelper(FilesSettingsHelper filesSettingsHelper,
     httpContextAccessor,
     folderDtoHelper)
 {
-    public async Task<string> GenerateSharedLinkAsync<T>(T fileId, FileShare share)
-    {
-        await GetFileInfoAsync(fileId);
-
-        var tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
-        var sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
-
-        if (sharedInfo == null || sharedInfo.Access != share)
-        {
-            var list = new List<AceWrapper>
-            {
-                new()
-                {
-                    Id = FileConstant.ShareLinkId,
-                    SubjectGroup = true,
-                    Access = share
-                }
-            };
-
-            var aceCollection = new AceCollection<T>
-            {
-                Files = new List<T> { fileId },
-                Folders = new List<T>(0),
-                Aces = list
-            };
-
-            await _fileStorageService.SetAceObjectAsync(aceCollection, false);
-
-            tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
-            sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
-        }
-
-        return sharedInfo.Link;
-    }
-
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {
         return GetSecurityInfoAsync(new List<T> { fileId }, new List<T>());

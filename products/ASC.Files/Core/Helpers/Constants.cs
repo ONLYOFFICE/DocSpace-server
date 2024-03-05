@@ -33,10 +33,7 @@ public static class FileConstant
     public static readonly string StorageModule = "files";
     public static readonly string StorageDomainTmp = "files_temp";
     public static readonly string StorageTemplate = "files_template";
-
-    public static readonly string DatabaseId = "files";
-
-    public static readonly Guid ShareLinkId = new("{D77BD6AF-828B-41f5-84ED-7FFE2565B13A}");
+    
     public static readonly Guid DenyDownloadId = new("{EE7A7468-CDA5-4F8B-AFDB-F4E42C318EB6}");
     public static readonly Guid DenySharingId = new("{AAFD9C26-9686-4996-9665-35CA72721C4C}");
 

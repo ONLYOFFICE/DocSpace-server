@@ -33,4 +33,5 @@ public class GroupMemberSecurityDto
     public FileShare? UserAccess { get; init; }
     public bool Overridden { get; init; }
     public bool CanEditAccess { get; init; }
+    public bool Owner { get; init; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
-public class GenerateSharedLinkRequestDto
+public class UpdateGroupRequestDto : GroupRequestDtoBase
 {
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
-    public FileShare Share { get; set; }
+    /// <summary>Users ids to add to the group</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    public IEnumerable<Guid> MembersToAdd { get; set; }
+    
+    /// <summary>Users ids to remove from the group</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    public IEnumerable<Guid> MembersToRemove { get; set; }
 }

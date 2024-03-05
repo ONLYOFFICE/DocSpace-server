@@ -79,10 +79,6 @@ public class AceShortWrapper
     /// <type>System.String, System</type>
     public string Permissions { get; set; }
 
-    /// <summary>Specifies if the external link is available or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? IsLink { get; set; }
-
     public AceShortWrapper(AceWrapper aceWrapper)
     {
         var permission = aceWrapper.Access switch
@@ -98,11 +94,6 @@ public class AceShortWrapper
         };
 
         User = aceWrapper.SubjectName;
-        if (aceWrapper.Id.Equals(FileConstant.ShareLinkId))
-        {
-            IsLink = true;
-            User = FilesCommonResource.AceShareLink;
-        }
 
         Permissions = permission;
     }

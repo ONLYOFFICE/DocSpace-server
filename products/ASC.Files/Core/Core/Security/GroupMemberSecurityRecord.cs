@@ -29,6 +29,6 @@ namespace ASC.Files.Core.Security;
 public class GroupMemberSecurityRecord
 {
     public Guid UserId { get; init; }
-    public FileShare UserShare { get; init; }
+    public FileShare? UserShare { get; init; }
     public FileShare GroupShare { get; init; }
 }

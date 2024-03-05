@@ -27,31 +27,8 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class FileShareLink(FileUtility fileUtility,
-    FilesLinkUtility filesLinkUtility,
-    BaseCommonLinkUtility baseCommonLinkUtility,
-    Global global,
-    FileSecurity fileSecurity,
-    FilesSettingsHelper filesSettingsHelper)
+public class FileShareLink(Global global, FilesSettingsHelper filesSettingsHelper)
 {
-    public async Task<string> GetLinkAsync<T>(File<T> file, bool withHash = true)
-    {
-        var url = file.DownloadUrl;
-
-        if (fileUtility.CanWebView(file.Title))
-        {
-            url = filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id);
-        }
-
-        if (withHash)
-        {
-            var linkParams = await CreateKeyAsync(file.Id);
-            url += "&" + FilesLinkUtility.DocShareKey + "=" + HttpUtility.UrlEncode(linkParams);
-        }
-
-        return baseCommonLinkUtility.GetFullAbsolutePath(url);
-    }
-
     public async Task<string> CreateKeyAsync<T>(T fileId)
     {
         return Signature.Create(fileId, await global.GetDocDbKeyAsync());
@@ -61,6 +38,7 @@ public class FileShareLink(FileUtility fileUtility,
     {
         return Signature.Read<string>(doc ?? string.Empty, await global.GetDocDbKeyAsync());
     }
+    
     public async Task<T> ParseAsync<T>(string doc)
     {
         return Signature.Read<T>(doc ?? string.Empty, await global.GetDocDbKeyAsync());
@@ -101,36 +79,7 @@ public class FileShareLink(FileUtility fileUtility,
         {
             return (FileShare.Restrict, file);
         }
-
-        if (await fileSecurity.CanEditAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.ReadWrite, file);
-        }
-
-        if (await fileSecurity.CanCustomFilterEditAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.CustomFilter, file);
-        }
-
-        if (await fileSecurity.CanReviewAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.Review, file);
-        }
-
-        if (await fileSecurity.CanFillFormsAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.FillForms, file);
-        }
-
-        if (await fileSecurity.CanCommentAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.Comment, file);
-        }
-
-        if (await fileSecurity.CanReadAsync(file, FileConstant.ShareLinkId))
-        {
-            return (FileShare.Read, file);
-        }
+        
 
         return (FileShare.Restrict, file);
     }

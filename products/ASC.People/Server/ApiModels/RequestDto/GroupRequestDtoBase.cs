@@ -24,13 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Services.WCFService;
+namespace ASC.People.ApiModels.RequestDto;
 
-public class GroupMemberSecurity
+public abstract class GroupRequestDtoBase
 {
-    public UserInfo User { get; init; }
-    public FileShare GroupShare { get; init; }
-    public FileShare? UserShare { get; init; }
-    public bool CanEditAccess { get; init; }
-    public bool Owner { get; init; }
+    /// <summary>Group manager ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid GroupManager { get; set; }
+
+    /// <summary>Group name</summary>
+    /// <type>System.String, System</type>
+    public string GroupName { get; set; }
 }
