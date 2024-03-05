@@ -140,14 +140,14 @@ public class GoogleWorkspaceMigration(
                     }
                     else if ((await userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
-                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email))
+                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration")
                         {
                             _migrationInfo.ExistUsers.Add(key, user);
                         }
                     }
                     else
                     {
-                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email)) 
+                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration") 
                         {
                             _migrationInfo.Users.Add(key, user);
                         }
@@ -186,7 +186,7 @@ public class GoogleWorkspaceMigration(
             .Select(u => u.Value).ToList();
 
         var dublicateForImport = _migrationInfo.Users
-            .Where(u => u.Value.ShouldImport)
+            .Where(u => !u.Value.ShouldImport)
             .Where(u => usersForImport.Any(ui => ui.Email == u.Value.Email))
             .Select(u => u.Value).ToList();
 

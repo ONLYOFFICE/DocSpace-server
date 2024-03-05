@@ -77,11 +77,9 @@ public class MigrationController : ControllerBase
     public async Task<MigrationStatusDto> Status()
     {
         await DemandPermission();
-
-        var status = await _migrationCore.GetStatusAsync();
-
         try
         {
+            var status = await _migrationCore.GetStatusAsync();
             if (status != null)
             {
                 var result = new MigrationStatusDto
