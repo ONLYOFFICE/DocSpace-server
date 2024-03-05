@@ -66,9 +66,8 @@ public class Startup : BaseStartup
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
-        
-        
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration);
+                
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration, "WebApiNotifySchedulerService");
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
