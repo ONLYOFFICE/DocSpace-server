@@ -419,7 +419,11 @@ internal class FileDao(
         DbFile toInsert = null;
 
         await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
-        {
+        {                
+            var parentFolders = await Queries.DbFolderTreesAsync(filesDbContext, file.ParentId).ToListAsync();
+
+            var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
+            
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
             {
                 var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -488,10 +492,6 @@ internal class FileDao(
                 file.PureTitle = file.Title;
                 file.RootCreateBy = currentFolder.RootCreateBy;
                 file.RootFolderType = currentFolder.RootFolderType;
-
-                var parentFolders = await Queries.DbFolderTreesAsync(filesDbContext, file.ParentId).ToListAsync();
-
-                var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
 
                 if (parentFoldersIds.Count > 0)
                 {
