@@ -26,6 +26,8 @@
 
 
 
+using System.Linq;
+
 using net.openstack.Providers.Rackspace.Objects.Databases;
 
 namespace ASC.Migration.GoogleWorkspace;
@@ -183,6 +185,11 @@ public class GoogleWorkspaceMigration(
             .Where(u => u.Value.ShouldImport)
             .Select(u => u.Value).ToList();
 
+        var dublicateForImport = _migrationInfo.Users
+            .Where(u => u.Value.ShouldImport)
+            .Where(u => usersForImport.Any(ui => ui.Email == u.Value.Email))
+            .Select(u => u.Value).ToList();
+
         var failedUsers = new List<GwsMigratingUser>();
         var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
@@ -235,6 +242,37 @@ public class GoogleWorkspaceMigration(
         foreach (var user in usersForImport)
         {
             if (failedUsers.Contains(user))
+            {
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
+                continue;
+            }
+
+            var smallStep = progressStep / 4;
+
+            try
+            {
+                var currentUser = securityContext.CurrentAccount;
+                await securityContext.AuthenticateMeAsync(user.Guid);
+                user.MigratingFiles.Init(_path, user, Log);
+                user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
+                user.MigratingFiles.SetGroupsDict(groupsForImport);
+                await user.MigratingFiles.MigrateAsync();
+                await securityContext.AuthenticateMeAsync(currentUser.ID);
+            }
+            catch (Exception ex)
+            {
+                Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
+            }
+            finally
+            {
+                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
+            }
+            i++;
+        }
+
+        foreach (var user in dublicateForImport)
+        {
+            if (failedUsers.Contains(usersForImport.FirstOrDefault(u => u.Email == user.Email)))
             {
                 ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
                 continue;
