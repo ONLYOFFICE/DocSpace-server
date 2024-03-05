@@ -155,7 +155,7 @@ public class MessageSettingsController(MessageService messageService,
 
         CheckCache("sendadmmail");
 
-        await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message);
+        await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
         await messageService.SendAsync(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;

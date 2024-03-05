@@ -48,9 +48,20 @@ public class StudioNotifyService(UserManager userManager,
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
 
-    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message)
+    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {
-        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.Body, message),
+            new TagValue(Tags.UserEmail, email)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
+        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
     }
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)

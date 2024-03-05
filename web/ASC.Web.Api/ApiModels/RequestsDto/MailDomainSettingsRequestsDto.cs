@@ -58,4 +58,8 @@ public class AdminMessageSettingsRequestsDto
     /// <summary>Specifies if the administrator messages are enabled or not</summary>
     /// <type>System.Boolean, System</type>
     public bool TurnOn { get; set; }
+    
+    /// <summary>Culture</summary>
+    /// <type>System.String, System</type>
+    public string Culture { get; set; }
 }
