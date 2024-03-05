@@ -50,7 +50,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
 {
     public async Task<FolderDto<T>> CreateFolderAsync<T>(T folderId, string title)
     {
-        var folder = await _fileStorageService.CreateNewFolderAsync(folderId, title);
+        var folder = await _fileStorageService.CreateFolderAsync(folderId, title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
