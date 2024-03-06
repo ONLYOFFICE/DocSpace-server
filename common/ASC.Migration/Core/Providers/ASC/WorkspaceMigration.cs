@@ -245,26 +245,29 @@ public class WorkspaceMigration(
         migratingCommonFiles.ShouldImport = migrationInfo.ImportCommonFiles;
         migratingProjectFiles.ShouldImport = migrationInfo.ImportProjectFiles;
 
-        var usersForImport = _migrationInfo.Users
-            .Where(u => u.Value.ShouldImport)
-            .Select(u => u.Value).ToList();
+        var usersForImport = _migrationInfo.Users.ToList();
 
         var failedUsers = new List<WorkspaceMigratingUser>();
         var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         var i = 1;
 
-        foreach (var user in usersForImport)
+        foreach (var kv in usersForImport)
         {
+            var key = kv.Key;
+            var user = kv.Value;
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
-                var u = migrationInfo.Users.Find(element => element.Key == user.Key);
-                user.UserType = u.UserType;
-
                 await user.MigrateAsync();
-                _importedUsers.Add(user.Guid);
-                _mappedGuids.Add(u.Key, user.Guid.ToString());
+                if (user.Guid != Constants.LostUser.Id && !user.Removed) 
+                {
+                    _mappedGuids.Add(key, user.Guid.ToString());
+                }
+                if (user.ShouldImport)
+                {
+                    _importedUsers.Add(user.Guid);
+                }
             }
             catch (Exception ex)
             {
@@ -305,8 +308,10 @@ public class WorkspaceMigration(
 
         i = 1;
         progressStep = usersCount == 0 ? 25 : 25 / usersCount;
-        foreach (var user in usersForImport)
+        foreach (var kv in usersForImport)
         {
+            var key = kv.Key;
+            var user = kv.Value;
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
             try
             {

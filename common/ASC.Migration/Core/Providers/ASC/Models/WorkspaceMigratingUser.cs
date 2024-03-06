@@ -41,6 +41,7 @@ public class WorkspaceMigratingUser(
     public override string Email => _user.Info.Email;
     public override string DisplayName => $"{_user.Info.FirstName} {_user.Info.LastName}";
     public Guid Guid => _user.Info.Id;
+    public bool Removed => _user.Info.Removed;
 
     private WorkspaceUser _user;
     private bool _hasPhoto;
@@ -93,12 +94,9 @@ public class WorkspaceMigratingUser(
 
     public override async Task MigrateAsync()
     {
-        if (!ShouldImport)
-        {
-            return;
-        }
         var saved = await userManager.GetUserByEmailAsync(_user.Info.Email);
-        if (saved.Equals(Constants.LostUser) || saved.Removed)
+
+        if (ShouldImport && (saved.Equals(Constants.LostUser) || saved.Removed))
         {
             saved = await userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch

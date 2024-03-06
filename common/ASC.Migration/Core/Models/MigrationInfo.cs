@@ -75,6 +75,7 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             }
             var user = Users[apiUser.Key];
             user.ShouldImport = apiUser.ShouldImport;
+            user.UserType = apiUser.UserType;
             user.MigratingFiles.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
             user.MigratingFiles.ShouldImportSharedFiles = apiInfo.ImportSharedFiles;
             user.MigratingFiles.ShouldImportSharedFolders = apiInfo.ImportSharedFolders;
