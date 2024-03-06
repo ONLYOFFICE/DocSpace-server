@@ -152,14 +152,13 @@ internal class GoogleDriveDaoBase(
 
         folder.Id = MakeId(driveEntry);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(driveEntry));
+        folder.Title = MakeFolderTitle(driveEntry);
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
         folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
-        SetFolderType(folder, isRoot);
-
-        folder.Title = MakeFolderTitle(driveEntry);
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {

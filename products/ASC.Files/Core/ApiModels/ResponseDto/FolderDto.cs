@@ -156,7 +156,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             }
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
-            result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
+            result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
 
             if (folder.ProviderEntry)
             {

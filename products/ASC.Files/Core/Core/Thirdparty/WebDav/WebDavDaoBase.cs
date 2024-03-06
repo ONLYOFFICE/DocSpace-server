@@ -155,7 +155,7 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
-        SetFolderType(folder, isRoot);
+        ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
 
         return folder;
