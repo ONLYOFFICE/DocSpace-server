@@ -210,7 +210,6 @@ public class GwsMigratingFiles(
                                             Id = _user.Guid,
                                             SubjectGroup = false
                                         });
-                                        await securityContext.AuthenticateMeAsync(_user.Guid);
                                     }
 
                                     var aceCollection = new AceCollection<int>
@@ -224,6 +223,7 @@ public class GwsMigratingFiles(
                                     try
                                     {
                                         await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                                        await securityContext.AuthenticateMeAsync(_user.Guid);
                                     }
                                     catch (Exception ex)
                                     {
