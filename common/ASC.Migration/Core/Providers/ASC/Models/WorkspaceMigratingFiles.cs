@@ -259,7 +259,14 @@ public class WorkspaceMigratingFiles(
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                 }
-                matchingIds.Add($"{_fileKey}-{file.Id}", newFile);
+                try
+                {
+                    matchingIds.Add($"{_fileKey}-{file.Id}", newFile);
+                }
+                catch
+                {
+
+                }
             }
             catch(Exception ex)
             {
