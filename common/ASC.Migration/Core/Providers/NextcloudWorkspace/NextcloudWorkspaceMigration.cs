@@ -49,9 +49,9 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NcMigrationInfo, Nc
         _userManager = userManager;
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
     {
-        _logger.Init();
+        await _logger.InitAsync();
         _cancellationToken = cancellationToken;
 
 

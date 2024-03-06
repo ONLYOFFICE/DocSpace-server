@@ -154,7 +154,7 @@ public class NcMigratingFiles : MigratingFiles
                     var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                     try
                     {
-                        var newFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                        var newFolder = await _fileStorageService.CreateFolderAsync(parentId, split[i]);
                         foldersDict.Add(path, newFolder);
                         _matchingFileId.Add(newFolder.Id, folder.FileId);
                     }

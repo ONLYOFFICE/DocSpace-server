@@ -147,7 +147,7 @@ public class GwsMigratingFiles(
             if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
             {
                 var parentId = await globalFolderHelper.FolderMyAsync;
-                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
+                var createdFolder = await fileStorageService.CreateFolderAsync(parentId, _newParentFolder);
                 foldersDict.Add(_newParentFolder, createdFolder);
             }
 
@@ -197,7 +197,7 @@ public class GwsMigratingFiles(
                                 path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
                                 if (list.Count == 0)
                                 {
-                                    var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                                    var createdFolder = await fileStorageService.CreateFolderAsync(parentId, split[i]);
                                     foldersDict.Add(path, createdFolder);
                                 }
                                 else
@@ -242,7 +242,7 @@ public class GwsMigratingFiles(
                             }
                             else
                             {
-                                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                                var createdFolder = await fileStorageService.CreateFolderAsync(parentId, split[i]);
                                 path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
                                 foldersDict.Add(path, createdFolder);
                             }

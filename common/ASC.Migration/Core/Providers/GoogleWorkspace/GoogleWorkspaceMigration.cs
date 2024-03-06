@@ -46,9 +46,9 @@ public class GoogleWorkspaceMigration(
     private string _path;
     public override MigratorMeta Meta => _meta;
 
-    public override void Init(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
     {
-        _logger.Init();
+        await _logger.InitAsync();
         _cancellationToken = cancellationToken;
         
         _migrationInfo = new GwsMigrationInfo();

@@ -37,9 +37,9 @@ public class MigrationLogger(
     private Stream _migration;
     private StreamWriter _migrationLog;
 
-    public void Init(string logName = null)
+    public async Task InitAsync(string logName = null)
     {
-        _migrationLogPath = GetTmpFilePathAsync(logName).Result;
+        _migrationLogPath = await GetTmpFilePathAsync(logName);
         _migration = new FileStream(_migrationLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, System.IO.FileShare.ReadWrite);
         _migrationLog = new StreamWriter(_migration);
     }

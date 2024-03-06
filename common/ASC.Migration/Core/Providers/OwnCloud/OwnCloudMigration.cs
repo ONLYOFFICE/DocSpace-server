@@ -39,9 +39,9 @@ public class OwnCloudMigration(
     private readonly MigratorMeta _meta = new("Owncloud", 6, false);
     public override MigratorMeta Meta => _meta;
 
-    public override void Init(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
     {
-        _logger.Init();
+        await _logger.InitAsync();
         _cancellationToken = cancellationToken;
         
 

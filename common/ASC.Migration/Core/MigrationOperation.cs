@@ -125,7 +125,7 @@ public class MigrationOperation(
 
             var discStore = await storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
             var folder = discStore.GetPhysicalPath("", "");
-            migrator.Init(folder, CancellationToken, onlyParse ? "parse" : "migration");
+            await migrator.InitAsync(folder, CancellationToken, onlyParse ? "parse" : "migration");
 
             var result = await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
@@ -170,7 +170,7 @@ public class MigrationOperation(
     public async Task CopyLogsAsync(Stream stream)
     {
         using var logger = serviceProvider.GetService<MigrationLogger>();
-        logger.Init(LogName);
+        await logger.InitAsync(LogName);
         await logger.GetStream().CopyToAsync(stream);
     }
 }

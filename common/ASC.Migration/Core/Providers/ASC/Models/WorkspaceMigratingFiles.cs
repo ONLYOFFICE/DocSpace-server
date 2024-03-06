@@ -216,10 +216,10 @@ public class WorkspaceMigratingFiles(
         }
 
         var newFolder = _type == FolderType.USER
-            ? await fileStorageService.CreateNewFolderAsync(await globalFolderHelper.FolderMyAsync,
+            ? await fileStorageService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync,
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
-                RoomType.PublicRoom, false, false, new List<FileShareParams>(), false, "", 0);
+                RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
         
         var matchingIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{_folder}", newFolder } };
 
@@ -229,7 +229,7 @@ public class WorkspaceMigratingFiles(
             if (!ShouldImportSharedFolders || !_securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) 
                 || matchingIds[$"{_folderKey}-{folder.ParentId}"].Id != 0) 
             {
-                newFolder = await fileStorageService.CreateNewFolderAsync(matchingIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
+                newFolder = await fileStorageService.CreateFolderAsync(matchingIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
             }
             else
             {
@@ -344,7 +344,7 @@ public class WorkspaceMigratingFiles(
                             await securityContext.AuthenticateMeAsync(_user.Guid);
                         }
                         var room = await fileStorageService.CreateRoomAsync($"{matchingIds[key].Title}",
-                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
+                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0);
 
                         orderedFolders = _storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
@@ -373,7 +373,7 @@ public class WorkspaceMigratingFiles(
 
                         foreach (var folder in orderedFolders)
                         {
-                            newFolder = await fileStorageService.CreateNewFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
+                            newFolder = await fileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
                         }
                         foreach (var file in _storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))

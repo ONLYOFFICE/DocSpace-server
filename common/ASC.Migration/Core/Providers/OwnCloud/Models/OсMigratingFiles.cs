@@ -145,7 +145,7 @@ public class OсMigratingFiles(
                     var parentId = i == 0 ? await globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                     try
                     {
-                        var newFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                        var newFolder = await fileStorageService.CreateFolderAsync(parentId, split[i]);
                         foldersDict.Add(path, newFolder);
                         _matchingFileId.Add(newFolder.Id, folder.FileId);
                     }
