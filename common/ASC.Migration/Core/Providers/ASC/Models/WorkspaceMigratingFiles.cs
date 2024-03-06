@@ -226,7 +226,8 @@ public class WorkspaceMigratingFiles(
         var orderedFolders = _storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
-            if (!ShouldImportSharedFolders || !_securities.Any(s=> s.EntryId == folder.Id && s.EntryType == 1)) 
+            if (!ShouldImportSharedFolders || !_securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) 
+                || matchingIds[$"{_folderKey}-{folder.ParentId}"].Id != 0) 
             {
                 newFolder = await fileStorageService.CreateNewFolderAsync(matchingIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
             }
@@ -254,7 +255,7 @@ public class WorkspaceMigratingFiles(
                 newFile.ContentLength = fs.Length;
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
-                if (!ShouldImportSharedFolders || !_securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1))
+                if (!ShouldImportSharedFolders || !_securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) || newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                 }
@@ -400,7 +401,7 @@ public class WorkspaceMigratingFiles(
             }
             catch(Exception ex)
             {
-                Log($"Couldn't share entry {security.EntryId}", ex);
+                Log($"Couldn't share entry {security.EntryId} to {security.Subject}", ex);
             }
         }
     }

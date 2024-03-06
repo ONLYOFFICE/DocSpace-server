@@ -293,11 +293,15 @@ public class WorkspaceMigration(
                 {
                     var key = group.Guid.ToString();
                     group.UsersGuidList = _migrationInfo.Users
+                        .Where(user => user.Value.Guid != Constants.LostUser.Id && !user.Value.Removed)
                         .Where(user => group.UserGuidList.Exists(u => user.Key == u))
                         .Select(u => u)
                         .ToDictionary(k => k.Key, v => v.Value.Guid);
-                    await group.MigrateAsync();
-                    _mappedGuids.Add(key, group.Guid.ToString());
+                    if (group.UsersGuidList.Count != 0)
+                    {
+                        await group.MigrateAsync();
+                        _mappedGuids.Add(key, group.Guid.ToString());
+                    }
                 }
                 catch (Exception ex)
                 {
