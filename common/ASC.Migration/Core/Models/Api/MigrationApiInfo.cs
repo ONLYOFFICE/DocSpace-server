@@ -26,11 +26,51 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+[ProtoContract]
 public class MigrationApiInfo
 {
-    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+    [ProtoMember(1)]
     public string MigratorName { get; set; }
-    public List<MigrationModules> Modules { get; set; } = new List<MigrationModules>();
+
+    [ProtoMember(2)]
+    public string Operation { get; set; }
+
+    [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = new List<string>();
+
+    [ProtoMember(4)]
+    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+
+    [ProtoMember(5)]
+    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
+
+    [ProtoMember(6)]
+    public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
+    
+    [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
+
+    [ProtoMember(8)]
+    public bool ImportPersonalFiles { get; set; } 
+    [ProtoMember(9)]
+    public bool ImportSharedFiles { get; set; }
+    
+    [ProtoMember(10)]
+    public bool ImportSharedFolders { get; set; } 
+    
+    [ProtoMember(11)]
+    public bool ImportCommonFiles { get; set; }
+    
+    [ProtoMember(12)]
+    public bool ImportProjectFiles { get; set; } 
+    
+    [ProtoMember(13)]
+    public bool ImportGroups { get; set; }
+    
+    [ProtoMember(14)]
+    public int SuccessedUsers { get; set; }
+    [ProtoMember(15)]
+    public int FailedUsers { get; set; }
+    [ProtoMember(16)]
+    public List<string> Files { get; set; }
 }

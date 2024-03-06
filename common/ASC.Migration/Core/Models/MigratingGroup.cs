@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,17 +29,13 @@ namespace ASC.Migration.Core.Models;
 public abstract class MigratingGroup : ImportableEntity
 {
     public abstract string GroupName { get; }
-    public abstract string ModuleName { get; }
-    public abstract List<string> UserUidList { get; }
+    public abstract List<string> UserGuidList { get; }
     public virtual MigratingApiGroup ToApiInfo()
     {
         return new MigratingApiGroup()
         {
             GroupName = GroupName,
-            ModuleName = ModuleName,
-            UserUidList = UserUidList
+            UserUidList = UserGuidList
         };
     }
-
-    protected MigratingGroup(Action<string, Exception> log) : base(log) { }
 }

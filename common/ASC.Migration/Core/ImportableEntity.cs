@@ -28,7 +28,7 @@ namespace ASC.Migration.Core;
 
 public abstract class ImportableEntity
 {
-    public bool ShouldImport { get; set; } = true;
+    public bool ShouldImport { get; set; }
 
     public abstract void Parse();
 

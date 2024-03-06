@@ -26,22 +26,20 @@
 
 namespace ASC.Migration.Core;
 
-public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalendar, TFiles, TMail> : IMigration
+[Scope]
+public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup>(MigrationLogger migrationLogger)
+    : IMigration
     where TMigrationInfo : IMigrationInfo
 {
-    private readonly MigrationLogger _logger;
+    protected readonly MigrationLogger _logger = migrationLogger;
     protected CancellationToken _cancellationToken;
     protected TMigrationInfo _migrationInfo;
     private double _lastProgressUpdate;
     private string _lastStatusUpdate;
     protected List<Guid> _importedUsers;
+    public abstract MigratorMeta Meta { get; }
 
     public event Action<double, string> OnProgressUpdate;
-
-    public AbstractMigration(MigrationLogger migrationLogger)
-    {
-        _logger = migrationLogger;
-    }
 
     protected void ReportProgress(double value, string status)
     {
@@ -54,11 +52,13 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalen
     public double GetProgress() => _lastProgressUpdate;
     public string GetProgressStatus() => _lastStatusUpdate;
 
-    public abstract void Init(string path, CancellationToken cancellationToken);
+    public MigrationApiInfo ApiInfo { get => _migrationInfo?.ToApiInfo(); }
 
-    public abstract Task<MigrationApiInfo> Parse();
+    public abstract void Init(string path, CancellationToken cancellationToken, string operation);
 
-    public abstract Task Migrate(MigrationApiInfo migrationInfo);
+    public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
+
+    public abstract Task MigrateAsync(MigrationApiInfo migrationInfo);
 
     public void Log(string msg, Exception exception = null)
     {
@@ -69,9 +69,9 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalen
         _logger.Dispose();
     }
 
-    public Stream GetLogs()
+    public string GetLogName()
     {
-        return _logger.GetStream();
+        return _logger.GetLogName();
     }
 
     public virtual List<Guid> GetGuidImportedUsers()

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,26 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
+using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.GoogleWorkspace.Models;
 
-public class GWSMigratingGroups : MigratingGroup
+[Transient]
+public class GWSMigratingGroups(UserManager userManager) : MigratingGroup
 {
     private string _groupName;
     private List<string> _userUidList;
-    private readonly UserManager _userManager;
-    private readonly string _rootFolder;
-    private GroupInfo _groupinfo;
-    public Guid Guid => _groupinfo.ID;
-    public MigrationModules Module = new MigrationModules();
-    public override List<string> UserUidList => _userUidList;
+    private string _rootFolder;
+    private GroupInfo _groupInfo;
+    public Guid Guid => _groupInfo.ID;
+    public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
-    public override string ModuleName => MigrationResource.ModuleNameGroups;
-    public GWSMigratingGroups(UserManager userManager, string rootFolder, Action<string, Exception> log) : base(log)
+
+    public void Init(string rootFolder, Action<string, Exception> log)
     {
-        _userManager = userManager;
         _rootFolder = rootFolder;
+        Log = log;
     }
 
     public override void Parse()
@@ -60,57 +59,44 @@ public class GWSMigratingGroups : MigratingGroup
                 _groupName = line.Split(',')[9];
                 if (!string.IsNullOrWhiteSpace(_groupName))
                 {
-                    _groupinfo = new GroupInfo()
+                    _groupInfo = new GroupInfo()
                     {
                         Name = _groupName
                     };
                 }
             }
         }
-        if (!string.IsNullOrWhiteSpace(_groupinfo.Name))
+        if (!string.IsNullOrWhiteSpace(_groupInfo.Name))
         {
             var groupMembers = Path.Combine(groupsFolder, "members.csv");
-            using (var sr = new StreamReader(groupMembers))
+            using var sr = new StreamReader(groupMembers);
+            var line = sr.ReadLine();
+            while ((line = sr.ReadLine()) != null)
             {
-                var line = sr.ReadLine();
-                while ((line = sr.ReadLine()) != null)
-                {
-                    var b = line.Split(',');
-                    _userUidList.Add(line.Split(',')[1]);
-                }
+                _userUidList.Add(line.Split(',')[1]);
             }
-        }
-        if (_userUidList.Count > 0)
-        {
-            Module = new MigrationModules(ModuleName, MigrationResource.OnlyofficeModuleNamePeople);
         }
     }
 
     public override async Task MigrateAsync()
     {
-        var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
-        var oldGroup = existingGroups.Find(g => g.Name == _groupinfo.Name);
-        if (oldGroup != null)
+        if (!ShouldImport || _userUidList.Count == 0)
         {
-            _groupinfo = oldGroup;
+            return;
         }
-        else
-        {
-            _groupinfo = await _userManager.SaveGroupInfoAsync(_groupinfo);
-        }
+        _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
         foreach (var userEmail in _userUidList)
         {
-            UserInfo user;
             try
             {
-                user = await _userManager.GetUserByEmailAsync(userEmail);
-                if (user == Constants.LostUser)
+                var user = await userManager.GetUserByEmailAsync(userEmail);
+                if (user.Equals(Constants.LostUser))
                 {
-                    throw new ArgumentNullException();
+                    continue;
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupinfo.ID))
+                if (!await userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupinfo.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                 }
             }
             catch (Exception ex)

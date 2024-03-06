@@ -44,16 +44,7 @@ public class Startup : BaseStartup
 
         services.AddBaseDbContextPool<FilesDbContext>();
 
-        services.AddScoped<UsersInRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-        services.AddScoped<UsersInRoomStatistic>();
-
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
+        services.RegisterQuotaFeature();
 
         DIHelper.TryAdd<ReassignProgressItem>();
         DIHelper.TryAdd<RemoveProgressItem>();
