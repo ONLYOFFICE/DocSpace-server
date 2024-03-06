@@ -394,9 +394,9 @@ public class FileStorageService //: IFileStorageService
         }, privacy, share);
     }
 
-    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool privacy, bool indexing)
+    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
 
         var parent = await folderDao.GetFolderAsync(parentId);
@@ -416,33 +416,37 @@ public class FileStorageService //: IFileStorageService
 
         var room = await CreateRoomAsync(async () =>
         {
-            Folder<T> folder;
-            try
+            var folder = parent;
+
+            if (createAsNewFolder)
             {
-                folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing);
+                try
+                {
+                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing);
+                }
+                catch
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+                }
             }
-            catch
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
-            }
+            
+            await providerDao.UpdateRoomProviderInfoAsync(new ProviderData 
+            { 
+                Id = providerInfo.ProviderId, 
+                Title = title, 
+                FolderId = folder.Id, 
+                FolderType = folderType, 
+                Private = privacy 
+            });
             
             folder.FolderType = folderType;
             folder.Shared = folderType == FolderType.PublicRoom;
             folder.RootFolderType = FolderType.VirtualRooms;
-            folder.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
+            folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
             return folder;
 
         }, false, null);
-        
-        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData 
-        { 
-            Id = providerInfo.ProviderId, 
-            Title = title, 
-            FolderId = room.Id.ToString(), 
-            FolderType = folderType, 
-            Private = privacy 
-        });
 
         return room;
     }
