@@ -26,6 +26,10 @@
 
 using System.Security;
 
+using ASC.Core.Common.Notify.Engine;
+
+using Microsoft.Extensions.Options;
+
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Files.ThumbnailBuilder;
@@ -49,8 +53,9 @@ internal class FileConverterService<T>(
             await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<FileConverterService<T>>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<FileConverterService<T>>>>().Value.InstanceId;
 
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<FileConverterService<T>>.InstanceId))
+            if (!await registerInstanceService.IsActive(instanceId))
             {
                 await Task.Delay(1000, stoppingToken);
 

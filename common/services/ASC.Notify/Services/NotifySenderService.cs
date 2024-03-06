@@ -53,10 +53,11 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
             await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySenderService>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<NotifySenderService>>>().Value.InstanceId;
 
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<NotifySenderService>.InstanceId))
+            if (!await registerInstanceService.IsActive(instanceId))
             {
-                _logger.Debug($"Notify Sender Service background task with instance id {RegisterInstanceWorkerService<NotifySenderService>.InstanceId} is't active.");
+                _logger.Debug($"Notify Sender Service background task with instance id {instanceId} is't active.");
 
                 await Task.Delay(1000, stoppingToken);
 

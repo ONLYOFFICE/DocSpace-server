@@ -25,8 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Apache.NMS;
-using ASC.EventBus.Serializers;
 
+using ASC.Common.Data;
+using ASC.EventBus.Serializers;
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -286,21 +287,44 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+
+    private static readonly List<string> _registeredActivePassiveHostedService = new();
+    private static readonly object _locker = new();
+
     /// <remarks>
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, IConfiguration configuration) where T : class, IHostedService
+    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
+                                                                                          IConfiguration configuration,
+                                                                                          string workerTypeName = null) where T : class, IHostedService
     {
+        var typeName = workerTypeName ?? typeof(T).GetFormattedName();
+
+        lock (_locker)
+        {
+            if (_registeredActivePassiveHostedService.Contains(typeName))
+            {
+                throw new Exception($"Sevice with name '{typeName}' already registered. Please, rename service name");
+            }
+            else
+            {
+                _registeredActivePassiveHostedService.Add(typeName);
+            }
+        }
+
         diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
         diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
-
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
-        services.Configure<HostingSettings>(configuration.GetSection("core:hosting"));
+        services.Configure<InstanceWorkerOptions<T>>(x =>
+        {
+            configuration.GetSection("core:hosting").Bind(x);
+            x.WorkerTypeName = workerTypeName;
+        });
+
 
         diHelper.TryAdd<T>();
         services.AddHostedService<T>();
-
     }
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)

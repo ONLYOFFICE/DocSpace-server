@@ -208,35 +208,28 @@ internal abstract class SecurityBaseDao<T>(
             yield break;
         }
 
-        var usersQuery = filesDbContext.UserGroup.Where(g =>
-                g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy)
-            .Join(filesDbContext.Users, ug => ug.Userid, u => u.Id,
-                (ug, u) => new
-                {
-                    u.Id,
-                    u.FirstName,
-                    u.LastName,
-                    u.Email
-                });
-
+        var users = filesDbContext.Users
+            .Join(filesDbContext.UserGroup, user => user.Id, ug => ug.Userid, (user, ug) => new { user, ug })
+            .Where(r => r.ug.TenantId == tenantId && r.ug.UserGroupId == groupId && !r.ug.Removed && r.ug.RefType == UserGroupRefType.Contains)
+            .Select(r => r.user);
+        
         if (!string.IsNullOrEmpty(text))
         {
-            text = GetSearchText(text);
-            
-            usersQuery = usersQuery.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
+            users = users.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
         }
 
-        var q = from user in usersQuery
-            join security in filesDbContext.Security on user.Id equals security.Subject into joinedSet
-            from s in joinedSet.DefaultIfEmpty()
-            where s == null || (s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType)
-            orderby user.FirstName
-            select new GroupMemberSecurityRecord
+        var q = users
+            .GroupJoin(filesDbContext.Security, user => user.Id, dbFilesSecurity => dbFilesSecurity.Subject,
+                (user, securities) => new { user, securities })
+            .OrderBy(r => r.user.FirstName)
+            .SelectMany(r => r.securities
+                .Where(s => s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType)
+                .DefaultIfEmpty(), (u, s) => new GroupMemberSecurityRecord
             {
-                UserId = user.Id,
-                UserShare = s != null ? s.Share : FileShare.None,
+                UserId = u.user.Id,
+                UserShare = s.Share,
                 GroupShare = groupShare
-            };
+            });
 
         if (offset > 0)
         {
@@ -266,7 +259,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = filesDbContext.UserGroup.Where(g =>
-            g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains && g.Userid != entry.CreateBy);
+            g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains);
 
         if (string.IsNullOrEmpty(text))
         {

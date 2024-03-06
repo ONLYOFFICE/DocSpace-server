@@ -26,6 +26,8 @@
 
 using ASC.Core.Configuration;
 
+using Microsoft.Extensions.Options;
+
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
@@ -51,10 +53,11 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
             await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupSchedulerService>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<BackupSchedulerService>>>().Value.InstanceId;
 
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId))
+            if (!await registerInstanceService.IsActive(instanceId))
             {
-                logger.DebugBackupSchedulerServiceIsNotActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId);
+                logger.DebugBackupSchedulerServiceIsNotActive(instanceId);
 
                 await Task.Delay(1000, stoppingToken);
 

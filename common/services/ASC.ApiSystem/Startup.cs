@@ -57,7 +57,12 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-
+        
+        services.AddMvcCore(config =>
+        {
+            config.Filters.Add<ASC.ApiSystem.Classes.CustomExceptionFilterAttribute>();
+        });
+        
         services.AddScoped<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();

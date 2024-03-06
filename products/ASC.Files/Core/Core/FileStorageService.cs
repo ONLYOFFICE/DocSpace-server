@@ -1674,8 +1674,24 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        var folderId = thirdPartyParams.Corporate ? await globalFolderHelper.FolderCommonAsync
-            : thirdPartyParams.RoomsStorage ? await globalFolderHelper.FolderVirtualRoomsAsync : await globalFolderHelper.FolderMyAsync;
+        int folderId;
+        FolderType folderType;
+
+        if (thirdPartyParams.Corporate)
+        {
+            folderId = await globalFolderHelper.FolderCommonAsync;
+            folderType = FolderType.COMMON;
+        }
+        else if (thirdPartyParams.RoomsStorage)
+        {
+            folderId = await globalFolderHelper.FolderVirtualRoomsAsync;
+            folderType = FolderType.VirtualRooms;
+        }
+        else
+        {
+            folderId = await globalFolderHelper.FolderMyAsync;
+            folderType = FolderType.USER;
+        }
 
         var parentFolder = await folderDaoInt.GetFolderAsync(folderId);
 
@@ -1689,10 +1705,8 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
-        var lostFolderType = FolderType.USER;
-        var folderType = thirdPartyParams.Corporate ? FolderType.COMMON : thirdPartyParams.RoomsStorage ? FolderType.VirtualRooms : FolderType.USER;
-
-        int curProviderId;
+        var currentFolderType = FolderType.USER;
+        int currentProviderId;
 
         MessageAction messageAction;
         if (string.IsNullOrEmpty(thirdPartyParams.ProviderId))
@@ -1711,7 +1725,7 @@ public class FileStorageService //: IFileStorageService
 
             try
             {
-                curProviderId = await providerDao.SaveProviderInfoAsync(thirdPartyParams.ProviderKey, thirdPartyParams.CustomerTitle, thirdPartyParams.AuthData, folderType);
+                currentProviderId = await providerDao.SaveProviderInfoAsync(thirdPartyParams.ProviderKey, thirdPartyParams.CustomerTitle, thirdPartyParams.AuthData, folderType);
                 messageAction = MessageAction.ThirdPartyCreated;
             }
             catch (UnauthorizedAccessException e)
@@ -1725,26 +1739,39 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            curProviderId = Convert.ToInt32(thirdPartyParams.ProviderId);
+            currentProviderId = Convert.ToInt32(thirdPartyParams.ProviderId);
 
-            var lostProvider = await providerDao.GetProviderInfoAsync(curProviderId);
-            if (lostProvider.Owner != authContext.CurrentAccount.ID)
+            var currentProvider = await providerDao.GetProviderInfoAsync(currentProviderId);
+            if (currentProvider.Owner != authContext.CurrentAccount.ID)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            lostFolderType = lostProvider.RootFolderType;
-            if (lostProvider.RootFolderType == FolderType.COMMON && !thirdPartyParams.Corporate)
+            currentFolderType = currentProvider.RootFolderType;
+            
+            switch (currentProvider.RootFolderType)
             {
-                var lostFolder = await folderDao.GetFolderAsync(lostProvider.RootFolderId);
-                await fileMarker.RemoveMarkAsNewForAllAsync(lostFolder);
+                case FolderType.COMMON when !thirdPartyParams.Corporate:
+                    {
+                        var lostFolder = await folderDao.GetFolderAsync(currentProvider.RootFolderId);
+                        await fileMarker.RemoveMarkAsNewForAllAsync(lostFolder);
+                        break;
+                    }
+                case FolderType.VirtualRooms or FolderType.Archive:
+                    {
+                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = currentProviderId, AuthData = thirdPartyParams.AuthData });
+                        currentProviderId = updatedProvider.ProviderId;
+                        break;
+                    }
+                default:
+                    currentProviderId = await providerDao.UpdateProviderInfoAsync(currentProviderId, thirdPartyParams.CustomerTitle, thirdPartyParams.AuthData, folderType);
+                    break;
             }
-
-            curProviderId = await providerDao.UpdateProviderInfoAsync(curProviderId, thirdPartyParams.CustomerTitle, thirdPartyParams.AuthData, folderType);
+            
             messageAction = MessageAction.ThirdPartyUpdated;
         }
 
-        var provider = await providerDao.GetProviderInfoAsync(curProviderId);
+        var provider = await providerDao.GetProviderInfoAsync(currentProviderId);
         await provider.InvalidateStorageAsync();
 
         var folderDao1 = daoFactory.GetFolderDao<string>();
@@ -1756,7 +1783,7 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(messageAction, parentFolder, folder.Id, provider.ProviderKey);
 
-        if (thirdPartyParams.Corporate && lostFolderType != FolderType.COMMON)
+        if (thirdPartyParams.Corporate && currentFolderType != FolderType.COMMON)
         {
             await fileMarker.MarkAsNewAsync(folder);
         }
