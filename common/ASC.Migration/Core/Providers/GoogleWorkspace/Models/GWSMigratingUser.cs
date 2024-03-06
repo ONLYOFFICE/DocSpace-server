@@ -26,6 +26,8 @@
 
 using System.Text.Json;
 
+using ASC.Common.Security.Authentication;
+
 namespace ASC.Migration.GoogleWorkspace.Models;
 
 [Transient]
@@ -47,12 +49,14 @@ public class GwsMigratingUser(
     private string _rootFolder;
     private UserInfo _userInfo;
     private bool _hasPhoto;
+    private IAccount _currentUser;
 
-    public void Init(string key, string rootFolder, Action<string, Exception> log)
+    public void Init(string key, string rootFolder, Action<string, Exception> log, IAccount currentUser)
     {
         Key = key;
         _rootFolder = rootFolder;
         Log = log;
+        _currentUser = currentUser;
     }
 
     public override void Parse()
@@ -69,7 +73,7 @@ public class GwsMigratingUser(
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
         MigratingFiles = serviceProvider.GetService<GwsMigratingFiles>();
-        MigratingFiles.Init(_rootFolder, this, log);
+        MigratingFiles.Init(_rootFolder, this, log, _currentUser);
         MigratingFiles.Parse();
 
         _userInfo.UserName = _userInfo.Email.Split('@').First();

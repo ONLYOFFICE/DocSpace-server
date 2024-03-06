@@ -27,6 +27,7 @@
 
 using System.Text.Json;
 
+using ASC.Common.Security.Authentication;
 using ASC.Web.Files.Utils;
 
 using ASCShare = ASC.Files.Core.Security.FileShare;
@@ -64,13 +65,15 @@ public class GwsMigratingFiles(
     private Dictionary<string, GwsMigratingUser> _users;
     private Dictionary<string, GWSMigratingGroups> _groups;
     private string _folderCreation;
+    private IAccount _currentUser;
     private readonly Dictionary<string, AceWrapper> _aces = new Dictionary<string, AceWrapper>();
 
-    public void Init(string rootFolder, GwsMigratingUser user, Action<string, Exception> log)
+    public void Init(string rootFolder, GwsMigratingUser user, Action<string, Exception> log, IAccount currentUser)
     {
         _rootFolder = rootFolder;
         _user = user;
         Log = log;
+        _currentUser = currentUser;
     }
 
     public override void Parse()
@@ -155,9 +158,85 @@ public class GwsMigratingFiles(
                         var parentId = i == 0 ? await globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                         try
                         {
-                            var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
-                            path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
-                            foldersDict.Add(path, createdFolder);
+                            var realPath = Path.Combine(drivePath, path.Replace(MigrationResource.GoogleModuleNameDocuments + " " + _folderCreation + Path.DirectorySeparatorChar, ""));
+                            if (ShouldImportSharedFolders && TryReadInfoFile(realPath, out var info))
+                            {
+                                var list = new List<AceWrapper>();
+                                foreach (var shareInfo in info.Permissions)
+                                {
+                                    if (shareInfo.Type is "user" or "group")
+                                    {
+                                        var shareType = GetPortalShare(shareInfo);
+                                        _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
+                                        _groups.TryGetValue(shareInfo.Name, out var groupToShare);
+                                        if ((userToShare == null && groupToShare == null) || shareType == null)
+                                        {
+                                            continue;
+                                        }
+
+                                        var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
+
+                                        list.Add(new AceWrapper
+                                        {
+                                            Access = shareType.Value,
+                                            Id = entryGuid,
+                                            SubjectGroup = false
+                                        });
+                                    }
+                                }
+
+                                path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
+                                if (list.Count == 0)
+                                {
+                                    var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                                    foldersDict.Add(path, createdFolder);
+                                }
+                                else
+                                {
+                                    if (_user.UserType == EmployeeType.Collaborator)
+                                    {
+                                        await securityContext.AuthenticateMeAsync(_currentUser);
+                                    }
+
+                                    var room = await fileStorageService.CreateRoomAsync(split[i],
+                                        RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
+                                    foldersDict.Add(path, room);
+
+                                    if (_user.UserType == EmployeeType.Collaborator)
+                                    {
+                                        list.Add(new AceWrapper
+                                        {
+                                            Access = ASCShare.Collaborator,
+                                            Id = _user.Guid,
+                                            SubjectGroup = false
+                                        });
+                                        await securityContext.AuthenticateMeAsync(_user.Guid);
+                                    }
+
+                                    var aceCollection = new AceCollection<int>
+                                    {
+                                        Files = new List<int>(),
+                                        Folders = new List<int> { room.Id },
+                                        Aces = list,
+                                        Message = null
+                                    };
+
+                                    try
+                                    {
+                                        await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log($"Couldn't change folder permissions for {room.Id}", ex);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                                path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
+                                foldersDict.Add(path, createdFolder);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -196,15 +275,13 @@ public class GwsMigratingFiles(
                 }
             }
 
-            if (!ShouldImportSharedFiles && !ShouldImportSharedFolders)
+            if (!ShouldImportSharedFiles)
             {
                 return;
             }
             var entries = filesDict
             .ToDictionary(kv => kv.Key, kv => (FileEntry<int>)kv.Value)
-            .Concat(foldersDict.ToDictionary(kv => Path.Combine(drivePath, kv.Key), kv => (FileEntry<int>)kv.Value))
-            .OrderBy(kv => kv.Value is File<int>)
-            .ThenBy(kv => kv.Key.Count(c => Path.DirectorySeparatorChar.Equals(c)));
+            .OrderBy(kv => kv.Key.Count(c => Path.DirectorySeparatorChar.Equals(c)));
 
             foreach (var kv in entries)
             {
@@ -213,7 +290,7 @@ public class GwsMigratingFiles(
                     continue;
                 }
 
-                if (kv.Value is File<int> && ShouldImportSharedFiles)
+                if (kv.Value is File<int>)
                 {
                     foreach (var shareInfo in info.Permissions)
                     {
@@ -251,114 +328,8 @@ public class GwsMigratingFiles(
                             }
                         }
                     }
-
-                }else if(ShouldImportSharedFiles)
-                {
-                    var list = new List<AceWrapper>();
-                    foreach (var shareInfo in info.Permissions)
-                    {
-                        if (shareInfo.Type is "user" or "group")
-                        {
-                            var shareType = GetPortalShare(shareInfo);
-                            _users.TryGetValue(shareInfo.EmailAddress, out var userToShare);
-                            _groups.TryGetValue(shareInfo.Name, out var groupToShare);
-                            if ((userToShare == null && groupToShare == null) || shareType == null)
-                            {
-                                continue;
-                            }
-
-                            var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
-
-                            list.Add(new AceWrapper
-                            {
-                                Access = shareType.Value,
-                                Id = entryGuid,
-                                SubjectGroup = false
-                            });
-                        }
-                    }
-
-                    if (list.Count == 0)
-                    {
-                        continue;
-                    }
-                    var fileDao = daoFactory.GetFileDao<int>();
-
-                    await securityContext.AuthenticateMeAsync(_user.Guid);
-                    var room = await fileStorageService.CreateRoomAsync($"{kv.Value.Title}",
-                        RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
-
-                    var matchingRoomIds = new Dictionary<int, int> { { kv.Value.Id, room.Id } };
-                    var foldersDictInRoom = new Dictionary<string, Folder<int>>();
-                    foreach (var folder in _folders)
-                    {
-                        var split = folder.Split(Path.DirectorySeparatorChar); // recursivly create all the folders
-                        for (var i = 0; i < split.Length; i++)
-                        {
-                            var path = string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i + 1));
-                            if (foldersDictInRoom.ContainsKey(path))
-                            {
-                                continue; // skip folder if it was already created as a part of another path
-                            }
-
-                            var parentId = i == 0 ? await globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
-                            if (matchingRoomIds.ContainsKey(parentId)) 
-                            {
-                                try
-                                {
-                                    var createdFolder = await fileStorageService.CreateNewFolderAsync(matchingRoomIds[parentId], split[i]);
-                                    path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
-                                    foldersDictInRoom.Add(path, createdFolder);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log($"Couldn't create folder {path}", ex);
-                                }
-                            }
-                        }
-                    }
-
-                    foreach (var file in _files)
-                    {
-                        var maskFile = file.Replace(MigrationResource.GoogleModuleNameDocuments + " " + _folderCreation + Path.DirectorySeparatorChar, "");
-                        var maskParentPath = Path.GetDirectoryName(maskFile);
-                        var realPath = Path.Combine(drivePath, maskFile);
-
-                        try
-                        {
-                            if (matchingRoomIds.ContainsKey(filesDict[realPath].ParentId)) 
-                            {
-                                await fileDao.CopyFileAsync(filesDict[realPath].Id, matchingRoomIds[filesDict[realPath].ParentId]);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log($"Couldn't create file {maskParentPath}/{Path.GetFileName(file)}", ex);
-                        }
-                    }
-
-                    var aceCollection = new AceCollection<int>
-                    {
-                        Files =  new List<int>(),
-                        Folders =  new List<int> { room.Id },
-                        Aces = list,
-                        Message = null
-                    };
-
-                    try
-                    {
-                        await fileStorageService.SetAceObjectAsync(aceCollection, false);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log($"Couldn't change folder permissions for {kv.Value.Id}", ex);
-                    }
                 }
             }
-        }
-        catch (Exception e)
-        {
-
         }
         finally
         {

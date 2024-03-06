@@ -80,20 +80,11 @@ public class GWSMigratingGroups(UserManager userManager) : MigratingGroup
 
     public override async Task MigrateAsync()
     {
-        if (!ShouldImport)
+        if (!ShouldImport || _userUidList.Count == 0)
         {
             return;
         }
-        var existingGroups = (await userManager.GetGroupsAsync()).ToList();
-        var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
-        if (oldGroup != null)
-        {
-            _groupInfo = oldGroup;
-        }
-        else
-        {
-            _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
-        }
+        _groupInfo = await userManager.SaveGroupInfoAsync(_groupInfo);
         foreach (var userEmail in _userUidList)
         {
             try
