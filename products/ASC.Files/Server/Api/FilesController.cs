@@ -481,6 +481,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
 
         return await fileShareDtoHelper.Get(linkAce);
     }
+
+    [HttpPost("file/{id}/saveaspdf")]
+    public async Task<FileDto<T>> SaveAsPdf(T id)
+    {
+        return await filesControllerHelper.SaveAsPdf(id);
+    }
 }
 
 public class FilesControllerCommon(

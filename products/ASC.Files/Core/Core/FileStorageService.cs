@@ -82,7 +82,9 @@ public class FileStorageService //: IFileStorageService
     ExternalShare externalShare,
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    IHttpClientFactory clientFactory,
+    TempStream tempStream)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -2641,6 +2643,61 @@ public class FileStorageService //: IFileStorageService
         }
 
         return (await fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
+    }
+
+    public async Task<File<T>> SaveAsPdf<T>(T fileId)
+    {
+        try
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var file = await fileDao.GetFileAsync(fileId);
+            var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+            var fileExtension = file.ConvertedExtension;
+            var docKey = await documentServiceHelper.GetDocKeyAsync(file);
+
+            fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+
+            var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+
+            var pdfFile = serviceProvider.GetService<File<T>>();
+            pdfFile.Title = FileUtility.ReplaceFileExtension(file.Title, "pdf");
+            pdfFile.ParentId = file.ParentId;
+            pdfFile.Comment = FilesCommonResource.CommentCreate;
+
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(convertedDocumentUri)
+            };
+
+            var httpClient = clientFactory.CreateClient();
+            using var response = await httpClient.SendAsync(request);
+            await using var fileStream = await response.Content.ReadAsStreamAsync();
+            File<T> result;
+
+            if (fileStream.CanSeek)
+            {
+                pdfFile.ContentLength = fileStream.Length;
+                result = await fileDao.SaveFileAsync(pdfFile, fileStream);
+            }
+            else
+            {
+                await using var buffered = await tempStream.GetBufferedAsync(fileStream);
+                pdfFile.ContentLength = buffered.Length;
+                result = await fileDao.SaveFileAsync(pdfFile, buffered);
+            }
+            if (result != null)
+            {
+                await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
+                await fileMarker.MarkAsNewAsync(result);
+                await socketManager.CreateFileAsync(result);
+            }
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            throw GenerateException(e);
+        }
     }
 
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,
