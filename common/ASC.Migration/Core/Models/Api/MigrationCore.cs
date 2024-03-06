@@ -34,7 +34,7 @@ public class MigrationCore(
     TenantManager tenantManager,
     MigrationWorker migrationWorker)
 {
-    public string[] GetAvailableMigrations() => serviceProvider.GetService<IEnumerable<IMigration>>().Select(r => r.Meta.Name).ToArray();
+    public string[] GetAvailableMigrations() => serviceProvider.GetService<IEnumerable<IMigration>>().Select(r => r.Meta.Name).Where(n => n != "Nextcloud" && n != "Owncloud").ToArray();
 
     public IMigration GetMigrator(string migrator)
     {
