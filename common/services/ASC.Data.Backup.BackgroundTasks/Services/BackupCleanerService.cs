@@ -24,55 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Notify.Engine;
-
-using Microsoft.Extensions.Options;
-
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
 internal sealed class BackupCleanerService(ConfigurationExtension configuration,
         ILogger<BackupCleanerService> logger,
         IServiceScopeFactory scopeFactory)
-    : BackgroundService
+    : ActivePassiveBackgroundService<BackupCleanerService>(logger, scopeFactory)
 {
-    private readonly TimeSpan _backupCleanerPeriod = configuration.GetSetting<BackupSettings>("backup").Cleaner.Period;
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Cleaner.Period;
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        logger.DebugBackupCleanerServiceStarting();
-
-        stoppingToken.Register(logger.DebugBackupCleanerServiceStopping);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            logger.DebugBackupCleanerServiceDoingWork();
-
-            await using var serviceScope = scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupCleanerService>>();
-            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<BackupCleanerService>>>().Value.InstanceId;
-
-            if (!await registerInstanceService.IsActive(instanceId))
-            {
-                logger.DebugBackupCleanerServiceIsNotActive(instanceId);
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ExecuteBackupCleanerAsync(stoppingToken);
-
-            await Task.Delay(_backupCleanerPeriod, stoppingToken);
-        }
-
-        logger.DebugBackupCleanerServiceStopping();
-    }
-
-    private async Task ExecuteBackupCleanerAsync(CancellationToken stoppingToken)
-    {
-        await using var serviceScope = scopeFactory.CreateAsyncScope();
+        await using var serviceScope = _scopeFactory.CreateAsyncScope();
 
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();
         var backupStorageFactory = serviceScope.ServiceProvider.GetRequiredService<BackupStorageFactory>();
@@ -140,6 +104,6 @@ internal sealed class BackupCleanerService(ConfigurationExtension configuration,
                 logger.WarningCanNotRemoveBackup(backupRecord.Id, error);
             }
         }
-
     }
+
 }
