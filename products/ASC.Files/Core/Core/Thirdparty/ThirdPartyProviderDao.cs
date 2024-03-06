@@ -551,16 +551,17 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         fileEntry.Error = entry.Error;
     }
 
-    protected void SetFolderType(Folder<string> folder, bool isRoot)
+    protected void ProcessFolderAsRoom(Folder<string> folder)
     {
-        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        folder.ProviderMapped = !string.IsNullOrEmpty(ProviderInfo.FolderId);
+        
+        if (ProviderInfo.FolderId != folder.Id)
         {
-            folder.FolderType = ProviderInfo.RootFolderType;
+            return;
         }
-        else if (ProviderInfo.FolderId == folder.Id)
-        {
-            folder.FolderType = ProviderInfo.FolderType;
-        }
+
+        folder.FolderType = ProviderInfo.FolderType;
+        folder.Title = ProviderInfo.CustomerTitle;
     }
 
     public bool CheckInvalidFilter(FilterType filterType)
