@@ -293,31 +293,41 @@ public class WorkspaceMigratingFiles(
                     AceWrapper ace = null;
                     if (!aces.ContainsKey($"{security.Security}{matchingIds[key].Id}")) 
                     {
-                        ace = await fileStorageService.SetExternalLinkAsync(matchingIds[key].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
-                            primary: false);
-                        aces.Add($"{security.Security}{matchingIds[key].Id}", ace);
+                        try
+                        {
+                            ace = await fileStorageService.SetExternalLinkAsync(matchingIds[key].Id, FileEntryType.File, Guid.Empty, null, (FileShare)security.Security, requiredAuth: true,
+                                primary: false);
+                            aces.Add($"{security.Security}{matchingIds[key].Id}", ace);
+                        }
+                        catch
+                        {
+                            ace = null;
+                            aces.Add($"{security.Security}{matchingIds[key].Id}", null);
+                        }
                     }
                     else
                     {
                         ace = aces[$"{security.Security}{matchingIds[key].Id}"];
                     }
-                    var user = await userManager.GetUsersAsync(Guid.Parse(_mappedGuids[security.Subject]));
-                    if (user.Id == Constants.LostUser.Id)
-                    {
-                        var users = userManager.GetUsers(false, EmployeeStatus.Active,
-                            new List<List<Guid>> { new List<Guid> { Guid.Parse(_mappedGuids[security.Subject]) } },
-                            new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
-                            true, 100000, 0).Where(u => u.Id != _user.Guid);
-                        await foreach (var u in users) 
+                    if (ace != null) {
+                        var user = await userManager.GetUsersAsync(Guid.Parse(_mappedGuids[security.Subject]));
+                        if (user.Id == Constants.LostUser.Id)
                         {
-                            await securityContext.AuthenticateMeAsync(u.Id);
+                            var users = userManager.GetUsers(false, EmployeeStatus.Active,
+                                new List<List<Guid>> { new List<Guid> { Guid.Parse(_mappedGuids[security.Subject]) } },
+                                new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
+                                true, 100000, 0).Where(u => u.Id != _user.Guid);
+                            await foreach (var u in users)
+                            {
+                                await securityContext.AuthenticateMeAsync(u.Id);
+                                await entryManager.MarkAsRecentByLink(matchingIds[key] as File<int>, ace.Id);
+                            }
+                        }
+                        else
+                        {
+                            await securityContext.AuthenticateMeAsync(user.Id);
                             await entryManager.MarkAsRecentByLink(matchingIds[key] as File<int>, ace.Id);
                         }
-                    }
-                    else
-                    {
-                        await securityContext.AuthenticateMeAsync(user.Id);
-                        await entryManager.MarkAsRecentByLink(matchingIds[key] as File<int>, ace.Id);
                     }
                 }
                 else if(ShouldImportSharedFolders)

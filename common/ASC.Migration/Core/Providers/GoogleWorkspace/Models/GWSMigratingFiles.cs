@@ -142,6 +142,15 @@ public class GwsMigratingFiles(
             var drivePath = Path.Combine(tmpFolder, "Takeout", "Drive");
             // Create all folders first
             var foldersDict = new Dictionary<string, Folder<int>>();
+
+            //create default folder
+            if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
+            {
+                var parentId = await globalFolderHelper.FolderMyAsync;
+                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
+                foldersDict.Add(_newParentFolder, createdFolder);
+            }
+
             if (_folders != null && _folders.Count != 0)
             {
                 foreach (var folder in _folders)
@@ -245,13 +254,6 @@ public class GwsMigratingFiles(
                     }
                 }
             }
-            //create default folder
-            if ((_folders == null || _folders.Count == 0) && (_files != null && _files.Count != 0))
-            {
-                var parentId = await globalFolderHelper.FolderMyAsync;
-                var createdFolder = await fileStorageService.CreateNewFolderAsync(parentId, _newParentFolder);
-                foldersDict.Add(_newParentFolder, createdFolder);
-            }
 
             var filesDict = new Dictionary<string, File<int>>();
             if (_files != null && _files.Count != 0)
@@ -303,9 +305,11 @@ public class GwsMigratingFiles(
                                 continue;
                             }
                             var ace = await GetAceAsync(kv, shareType.Value);
-
-                            await securityContext.AuthenticateMeAsync(userToShare.Guid);
-                            await entryManager.MarkAsRecentByLink(kv.Value as File<int>, ace.Id);
+                            if (ace != null)
+                            {
+                                await securityContext.AuthenticateMeAsync(userToShare.Guid);
+                                await entryManager.MarkAsRecentByLink(kv.Value as File<int>, ace.Id);
+                            }
                         }
                         else if(shareInfo.Type is "group")
                         {
@@ -316,15 +320,17 @@ public class GwsMigratingFiles(
                                 continue;
                             }
                             var ace = await GetAceAsync(kv, shareType.Value);
-
-                            var users = userManager.GetUsers(false, EmployeeStatus.Active,
+                            if (ace != null)
+                            {
+                                var users = userManager.GetUsers(false, EmployeeStatus.Active,
                                 new List<List<Guid>> { new List<Guid> { groupToShare.Guid } },
                                 new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
-                            true, 100000, 0).Where(u => u.Id != _user.Guid);
-                            await foreach (var u in users)
-                            {
-                                await securityContext.AuthenticateMeAsync(u.Id);
-                                await entryManager.MarkAsRecentByLink(kv.Value as File<int>, ace.Id);
+                                    true, 100000, 0).Where(u => u.Id != _user.Guid);
+                                await foreach (var u in users)
+                                {
+                                    await securityContext.AuthenticateMeAsync(u.Id);
+                                    await entryManager.MarkAsRecentByLink(kv.Value as File<int>, ace.Id);
+                                }
                             }
                         }
                     }
@@ -537,11 +543,19 @@ public class GwsMigratingFiles(
     {
         if (!_aces.ContainsKey($"{shareType}{kv.Value.Id}"))
         {
-            await securityContext.AuthenticateMeAsync(_user.Guid);
-            var ace = await fileStorageService.SetExternalLinkAsync(kv.Value.Id, FileEntryType.File, Guid.Empty, null, shareType, requiredAuth: true,
-                primary: false);
-            _aces.Add($"{shareType}{kv.Value.Id}", ace);
-            return ace;
+            try
+            {
+                await securityContext.AuthenticateMeAsync(_user.Guid);
+                var ace = await fileStorageService.SetExternalLinkAsync(kv.Value.Id, FileEntryType.File, Guid.Empty, null, shareType, requiredAuth: true,
+                    primary: false);
+                _aces.Add($"{shareType}{kv.Value.Id}", ace);
+                return ace;
+            }
+            catch
+            {
+                _aces.Add($"{shareType}{kv.Value.Id}", null);
+                return null;
+            }
         }
         else
         {
