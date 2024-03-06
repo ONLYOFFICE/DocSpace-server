@@ -482,7 +482,14 @@ public class FileStorageService //: IFileStorageService
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
                 var task2 = InternalCreateFolderAsync(folder.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
-                await Task.WhenAll(task1, task2);
+                
+                var folders = await Task.WhenAll(task1, task2);
+                foreach (var f in folders)
+                {
+                    await socketManager.CreateFolderAsync(f);
+                    await filesMessageService.SendAsync(MessageAction.FolderCreated, f, f.Title);
+                }
+                
                 break;
         }
         
