@@ -32,7 +32,7 @@ public class MigrationWorker(
     IServiceProvider serviceProvider)
 {
     private readonly object _locker = new();
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60); // 1 hour
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
 
