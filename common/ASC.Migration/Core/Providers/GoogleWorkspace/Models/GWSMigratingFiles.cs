@@ -208,7 +208,7 @@ public class GwsMigratingFiles(
                                     }
 
                                     var room = await fileStorageService.CreateRoomAsync(split[i],
-                                        RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
+                                        RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0);
                                     foldersDict.Add(path, room);
 
                                     if (_user.UserType == EmployeeType.Collaborator)
