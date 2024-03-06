@@ -310,7 +310,6 @@ public class WorkspaceMigration(
         progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         foreach (var kv in usersForImport)
         {
-            var key = kv.Key;
             var user = kv.Value;
             ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
             try
@@ -339,7 +338,7 @@ public class WorkspaceMigration(
         }
 
         _migrationInfo.FailedUsers = failedUsers.Count;
-        _migrationInfo.SuccessedUsers = usersCount - _migrationInfo.FailedUsers;
+        _migrationInfo.SuccessedUsers = usersForImport.Where(u => u.Value.ShouldImport).Count() - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 }
