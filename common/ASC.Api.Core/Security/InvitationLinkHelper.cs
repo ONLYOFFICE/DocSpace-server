@@ -61,16 +61,23 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
         var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
             key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
-        if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
+        if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
-            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
-                key, emailValidationKeyProvider.ValidEmailKeyInterval);
+            validationResult.Result = commonLinkResult;
+            validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.LinkInvite;
+
+            return validationResult;
         }
+
+        commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
+            key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             validationResult.Result = commonLinkResult;
             validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.EmpInvite;
 
             return validationResult;
         }
@@ -84,6 +91,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
 
         validationResult.Result = individualLinkResult;
         validationResult.LinkType = InvitationLinkType.Individual;
+        validationResult.ConfirmType = ConfirmType.LinkInvite;
 
         return validationResult;
     }
@@ -157,6 +165,7 @@ public enum InvitationLinkType
 public class LinkValidationResult
 {
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
+    public ConfirmType? ConfirmType { get; set; }
     public InvitationLinkType LinkType { get; set; }
     public Guid LinkId { get; set; }
 }

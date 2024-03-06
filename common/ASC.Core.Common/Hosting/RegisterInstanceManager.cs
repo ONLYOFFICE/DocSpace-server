@@ -31,9 +31,9 @@ namespace ASC.Core.Common.Hosting;
 [Scope]
 public class RegisterInstanceManager<T>(
     IRegisterInstanceDao<T> registerInstanceRepository,
-    IOptions<HostingSettings> optionsSettings) : IRegisterInstanceManager<T> where T : IHostedService
+    IOptions<InstanceWorkerOptions<T>> optionsSettings) : IRegisterInstanceManager<T> where T : IHostedService
 {
-    private readonly HostingSettings _settings = optionsSettings.Value;
+    private readonly InstanceWorkerOptions<T> _settings = optionsSettings.Value;
 
     public async Task Register(string instanceId)
     {
@@ -42,13 +42,14 @@ public class RegisterInstanceManager<T>(
             return;
         }
 
-        var instances = await registerInstanceRepository.GetAllAsync();
-        var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
+        var workerTypeName = instanceId.Split('_')[0];
 
+        var instances = await registerInstanceRepository.GetAllAsync(workerTypeName);
+        var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
         var instance = registeredInstance ?? new InstanceRegistration
         {
             InstanceRegistrationId = instanceId,
-            WorkerTypeName = typeof(T).GetFormattedName()
+            WorkerTypeName = workerTypeName
         };
 
         instance.LastUpdated = DateTime.UtcNow;
@@ -85,12 +86,12 @@ public class RegisterInstanceManager<T>(
             return true;
         }
 
-        var instances = await registerInstanceRepository.GetAllAsync();
+        var workerTypeName = instanceId.Split('_')[0];
+        var instances = await registerInstanceRepository.GetAllAsync(workerTypeName);
         var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
 
         return instance is not null && instance.IsActive;
-    }
-    
+    }    
 
     private InstanceRegistration? FirstAliveInstance(IEnumerable<InstanceRegistration> instances)
     {

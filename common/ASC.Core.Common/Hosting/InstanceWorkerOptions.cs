@@ -24,13 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Core.Common.Hosting;
 
-/// <summary>
-/// </summary>
-public class GenerateSharedLinkRequestDto
+public class InstanceWorkerOptions<T>
 {
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
-    public FileShare Share { get; set; }
+    private readonly long _registeredInstance = DateTime.UtcNow.Ticks;
+    public int TimeUntilUnregisterInSeconds { get; set; } = 15;
+    public int IntervalCheckRegisterInstanceInSeconds { get; set; } = 1;
+    public bool SingletonMode { get; set; } = true;
+    public string WorkerTypeName { get; set; }
+
+    public string InstanceId
+    {
+        get
+        {
+            var workerTypeName = WorkerTypeName ?? typeof(T).GetFormattedName();
+
+            return $"{workerTypeName}_{_registeredInstance}";
+        }
+    }
 }

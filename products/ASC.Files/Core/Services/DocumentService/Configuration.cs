@@ -331,12 +331,19 @@ public class EditorConfiguration<T>(
         };
 
         var folderDao = daoFactory.GetFolderDao<int>();
-        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false)).Cast<File<int>>();
-        foreach (var file in  files.Where(file => !Equals(fileId, file.Id)))
+        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
+            .Cast<File<int>>()
+            .Where(file => !Equals(fileId, file.Id))
+            .ToList();
+
+        var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
+        var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
+        
+        foreach (var file in files)
         {
             yield return new RecentConfig
             {
-                Folder = (await folderDao.GetFolderAsync(file.ParentId)).Title,
+                Folder = parentFolders.Find(r => file.ParentId == r.Id).Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
             };

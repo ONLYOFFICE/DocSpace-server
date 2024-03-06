@@ -203,7 +203,7 @@ internal class FolderDao(
         var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds.Contains(f.ParentId)));
+        var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds)
             : await BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
@@ -726,7 +726,8 @@ internal class FolderDao(
                         toFolderRoomId == -1 && 
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
-                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedAddAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -735,7 +736,8 @@ internal class FolderDao(
                         toFolderRoomId != -1 && 
                         ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
                     {
-                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedDeleteAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -769,7 +771,7 @@ internal class FolderDao(
                 }
                 foreach (var e in recalcFolders)
                 {
-                    await GetRecalculateFilesCountUpdateAsync(e);
+                    await RecalculateFilesCountUpdateAsync(context, e);
                 }
         });
 

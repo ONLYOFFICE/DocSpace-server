@@ -27,7 +27,8 @@
 namespace ASC.Web.Studio.UserControls.FirstTime;
 
 [Transient]
-public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
+public class FirstTimeTenantSettings(
+    ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
     SettingsManager settingsManager,
@@ -40,7 +41,8 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
     TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
-    CookiesManager cookiesManager)
+    CookiesManager cookiesManager,
+    CspSettingsHelper cspSettingsHelper)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -109,7 +111,8 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
             tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
             await tenantManager.SaveTenantAsync(tenant);
-
+            await cspSettingsHelper.SaveAsync(null, true);
+            
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 

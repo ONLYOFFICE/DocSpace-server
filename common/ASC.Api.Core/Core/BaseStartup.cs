@@ -240,7 +240,8 @@ public abstract class BaseStartup
             {
                 var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                 var permitLimit = 5;
-                var partitionKey = $"sensitive_api_{userId}";
+                var path = httpContext.Request.Path.ToString();
+                var partitionKey = $"sensitive_api_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
                 if (EnableNoLimiter(remoteIpAddress))
@@ -251,7 +252,7 @@ public abstract class BaseStartup
                 return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
-                    Window = TimeSpan.FromMinutes(1),
+                    Window = TimeSpan.FromMinutes(15),
                     ConnectionMultiplexerFactory = () => connectionMultiplexer
                 });
             });
@@ -440,7 +441,7 @@ public abstract class BaseStartup
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, _configuration);
+        services.AddHostedService<NotifySenderService>();
         
         if (!_hostEnvironment.IsDevelopment())
         {

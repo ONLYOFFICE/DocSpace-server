@@ -169,7 +169,7 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
 
         var progress = (int)(this[Process] / (double)progressSteps * 100);
 
-        this[Progress] = progress;
+        this[Progress] = progress < 100 ? progress : 100;
         PublishChanges();
     }
 }
