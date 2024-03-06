@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Security.Authentication;
 using ASC.Web.Files.Utils;
 
 using Constants = ASC.Core.Users.Constants;
@@ -55,10 +56,18 @@ public class WorkspaceMigratingFiles(
     private Dictionary<string, string> _mappedGuids;
     private WorkspaceMigratingUser _user;
     private FolderType _type;
+    private IAccount _currentUser;
     private readonly string _folderKey = "folder";
     private readonly string _fileKey = "file";
 
-    public void Init(string key, WorkspaceMigratingUser user, IDataReadOperator dataReader, WorkspaceStorage storage, Action<string, Exception> log, Dictionary<string, string> mappedGuids, FolderType type)
+    public void Init(string key,
+        WorkspaceMigratingUser user,
+        IDataReadOperator dataReader,
+        WorkspaceStorage storage,
+        Action<string, Exception> log,
+        Dictionary<string, string> mappedGuids,
+        FolderType type,
+        IAccount currentUser)
     {
         _key = key;
         _user = user;
@@ -68,6 +77,7 @@ public class WorkspaceMigratingFiles(
         _securities = new();
         _mappedGuids = mappedGuids;
         _type = type;
+        _currentUser = currentUser;
     }
 
     public override void Parse()
@@ -307,12 +317,42 @@ public class WorkspaceMigratingFiles(
                     var key = $"{_folderKey}-{security.EntryId}";
                     if (!matchingRoomIds.ContainsKey(security.EntryId)) 
                     {
-                        await securityContext.AuthenticateMeAsync(_user.Guid);
+                        if (_user.UserType == EmployeeType.Collaborator) 
+                        {
+                            await securityContext.AuthenticateMeAsync(_currentUser);
+                        }
+                        else
+                        {
+                            await securityContext.AuthenticateMeAsync(_user.Guid);
+                        }
                         var room = await fileStorageService.CreateRoomAsync($"{matchingIds[key].Title}",
                             RoomType.EditingRoom, false, false, new List<FileShareParams>(), false, "", 0);
 
                         orderedFolders = _storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
+
+                        if (_user.UserType == EmployeeType.Collaborator)
+                        {
+                            var aceList = new List<AceWrapper>
+                            {
+                                new AceWrapper
+                                {
+                                    Access = FileShare.Collaborator,
+                                    Id = _user.Guid
+                                }
+                            };
+
+                            var collection = new AceCollection<int>
+                            {
+                                Files = Array.Empty<int>(),
+                                Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
+                                Aces = aceList,
+                                Message = null
+                            };
+
+                            await fileStorageService.SetAceObjectAsync(collection, false);
+                        }
+
                         foreach (var folder in orderedFolders)
                         {
                             newFolder = await fileStorageService.CreateNewFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
@@ -332,6 +372,10 @@ public class WorkspaceMigratingFiles(
                             newFile.VersionGroup = file.VersionGroup;
                             newFile = await fileDao.SaveFileAsync(newFile, fs);
                         }
+                    }
+                    if (_user.UserType == EmployeeType.Collaborator && _currentUser.ID == Guid.Parse(_mappedGuids[security.Subject]))
+                    {
+                        continue;
                     }
 
                     var list = new List<AceWrapper>

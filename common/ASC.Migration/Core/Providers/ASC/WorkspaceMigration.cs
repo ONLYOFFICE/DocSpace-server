@@ -75,6 +75,7 @@ public class WorkspaceMigration(
         }
         try
         {
+            var currentUser = securityContext.CurrentAccount;
             _dataReader = DataOperatorFactory.GetReadOperator(_backup, reportProgress ? _cancellationToken : CancellationToken.None, false);
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
@@ -113,7 +114,7 @@ public class WorkspaceMigration(
                 }
 
                 var user = serviceProvider.GetService<WorkspaceMigratingUser>();
-                user.Init(u.Id, u, _tmpFolder, _dataReader, Log, _mappedGuids);
+                user.Init(u.Id, u, _tmpFolder, _dataReader, Log, _mappedGuids, currentUser);
                 user.Parse();
                 if (!(await userManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
                 {
@@ -155,7 +156,7 @@ public class WorkspaceMigration(
                 Files = new List<WorkspaceFile>(),
                 Folders = new List<WorkspaceFolder>()
             };
-            migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON);
+            migratingCommonFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids, FolderType.COMMON, currentUser);
             migratingCommonFiles.Parse();
 
             try
@@ -169,7 +170,7 @@ public class WorkspaceMigration(
                     Files = new List<WorkspaceFile>(), Folders = new List<WorkspaceFolder>()
                 };
                 migratingProjectFiles.Init(string.Empty, null, _dataReader, storage, Log, _mappedGuids,
-                    FolderType.BUNCH);
+                    FolderType.BUNCH, currentUser);
                 migratingProjectFiles.Parse();
             }
             catch

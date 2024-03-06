@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Security.Authentication;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Core.Providers.Models;
@@ -45,9 +47,16 @@ public class WorkspaceMigratingUser(
     private string _pathToPhoto;
     private string _rootFolder;
     private IDataReadOperator _dataReader;
+    private IAccount _currentUser;
     private Dictionary<string, string> _mappedGuids;
 
-    public void Init(string key, WorkspaceUser user, string rootFolder, IDataReadOperator dataReader, Action<string, Exception> log, Dictionary<string, string> mappedGuids)
+    public void Init(string key,
+        WorkspaceUser user,
+        string rootFolder, 
+        IDataReadOperator dataReader,
+        Action<string, Exception> log,
+        Dictionary<string, string> mappedGuids,
+        IAccount currentUser)
     {
         Key = key;
         _dataReader = dataReader;
@@ -55,6 +64,7 @@ public class WorkspaceMigratingUser(
         _user = user;
         Log = log;
         _mappedGuids = mappedGuids;
+        _currentUser = currentUser;
     }
 
     public override void Parse()
@@ -77,7 +87,7 @@ public class WorkspaceMigratingUser(
             Files = new List<WorkspaceFile>(),
             Folders = new List<WorkspaceFolder>()
         };
-        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log, _mappedGuids, FolderType.USER);
+        MigratingFiles.Init(Key, this, _dataReader, _user.Storage, Log, _mappedGuids, FolderType.USER, _currentUser);
         MigratingFiles.Parse();
     }
 
