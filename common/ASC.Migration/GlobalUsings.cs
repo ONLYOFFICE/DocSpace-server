@@ -24,50 +24,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Data;
 global using System.IO.Compression;
-global using System.Reflection;
-global using System.Runtime.Caching;
-global using System.Runtime.Serialization;
-global using System.Text;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
 global using ASC.Common;
-global using ASC.Common.Caching;
 global using ASC.Common.Log;
+global using ASC.Migration.Core.Core.Providers.ASC.Models;
+global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
+global using ASC.Core.Common.Quota;
+global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Users;
+global using ASC.Data.Storage;
+global using ASC.Data.Storage.DataOperators;
+global using ASC.Data.Storage.DiscStorage;
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Events;
 global using ASC.Files.Core;
+global using ASC.Files.Core.Helpers;
+global using ASC.Migration.Core.Core.Providers.ASC.Models.Parse;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
-global using ASC.Migration;
-global using ASC.Migration.ApiModels.ResponseDto;
 global using ASC.Migration.Core;
+global using ASC.Migration.Core.Core;
+global using ASC.Migration.Core.Core.Providers;
+global using ASC.Migration.Core.Core.Providers.Models;
+global using ASC.Migration.Core.Core.Providers.Models.Parse;
 global using ASC.Migration.Core.Models;
 global using ASC.Migration.Core.Models.Api;
+global using ASC.Migration.Core.Resources;
+global using ASC.Migration.GoogleWorkspace;
 global using ASC.Migration.GoogleWorkspace.Models;
 global using ASC.Migration.GoogleWorkspace.Models.Parse;
-global using ASC.Migration.Resources;
-global using ASC.Web.Api.Routing;
-global using ASC.Web.Core.Files;
+global using ASC.Migration.NextcloudWorkspace;
+global using ASC.Migration.NextcloudWorkspace.Models;
+global using ASC.Migration.NextcloudWorkspace.Models.Parse;
+global using ASC.Migration.OwnCloud;
+global using ASC.Migration.OwnCloud.Models;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
-global using ASC.Web.Studio.Core.Notify;
-
-global using Autofac;
+global using ASC.Files.Core.ApiModels;
+global using ASC.Files.Core.ApiModels.RequestDto;
 
 global using HtmlAgilityPack;
 
-global using Ical.Net;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.IdentityModel.Tokens;
 
-global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using MimeKit;
-
-global using Newtonsoft.Json;
-
-global using NLog;
+global using ProtoBuf;

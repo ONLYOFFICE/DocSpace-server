@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -67,6 +68,10 @@ try
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
     eventBus.Subscribe<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

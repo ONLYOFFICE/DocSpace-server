@@ -26,25 +26,15 @@
 
 namespace ASC.Migration.Core.Models;
 
-public abstract class MigratingUser<TContacts, TCalendar, TFiles, TMail> : ImportableEntity
-    where TContacts : MigratingContacts
-    where TCalendar : MigratingCalendar
+public abstract class MigratingUser<TFiles> : ImportableEntity
     where TFiles : MigratingFiles
-    where TMail : MigratingMail
 {
     public string Key { get; set; }
 
     public abstract string Email { get; }
     public abstract string DisplayName { get; }
-    public abstract string ModuleName { get; }
-
-    public TContacts MigratingContacts { get; set; }
-
-    public TCalendar MigratingCalendar { get; set; }
-
+    public EmployeeType UserType { get; set; } = EmployeeType.Collaborator;
     public TFiles MigratingFiles { get; set; }
-
-    public TMail MigratingMail { get; set; }
 
     public virtual MigratingApiUser ToApiInfo()
     {
@@ -53,11 +43,8 @@ public abstract class MigratingUser<TContacts, TCalendar, TFiles, TMail> : Impor
             Key = Key,
             Email = Email,
             DisplayName = DisplayName,
-            ModuleName = ModuleName,
-            MigratingCalendar = MigratingCalendar.ToApiInfo(),
-            MigratingContacts = MigratingContacts.ToApiInfo(),
+            UserType = UserType,
             MigratingFiles = MigratingFiles.ToApiInfo(),
-            MigratingMail = MigratingMail.ToApiInfo()
         };
     }
 

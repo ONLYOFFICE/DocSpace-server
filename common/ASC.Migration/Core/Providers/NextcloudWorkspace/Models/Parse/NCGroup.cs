@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,3 +31,4 @@ public class NCGroup
     public string GroupGid { get; set; }
     public List<string> UsersUid { get; set; }
 }
+
