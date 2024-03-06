@@ -30,6 +30,6 @@ namespace ASC.Core.Common.Hosting.Interfaces;
 public interface IRegisterInstanceDao<T> where T : IHostedService
 {
     Task AddOrUpdateAsync(InstanceRegistration obj);
-    Task<List<InstanceRegistration>> GetAllAsync();
+    Task<List<InstanceRegistration>> GetAllAsync(string workerTypeName);
     Task DeleteAsync(string instanceId);
 }

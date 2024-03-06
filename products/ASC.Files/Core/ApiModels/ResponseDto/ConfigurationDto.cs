@@ -361,7 +361,9 @@ public class InfoConfigConverter<T>
         {
             return null;
         }
-
+        
+        source.SetFavorite(null);//TODO: add display favorite settings to config
+        
         var result = new InfoConfigDto
         {
             Favorite = await source.GetFavorite(file),

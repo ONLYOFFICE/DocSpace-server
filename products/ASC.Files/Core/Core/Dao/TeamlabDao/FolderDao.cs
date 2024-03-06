@@ -726,7 +726,8 @@ internal class FolderDao(
                         toFolderRoomId == -1 && 
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
-                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedAddAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -735,7 +736,8 @@ internal class FolderDao(
                         toFolderRoomId != -1 && 
                         ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
                     {
-                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedDeleteAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -769,7 +771,7 @@ internal class FolderDao(
                 }
                 foreach (var e in recalcFolders)
                 {
-                    await GetRecalculateFilesCountUpdateAsync(e);
+                    await RecalculateFilesCountUpdateAsync(context, e);
                 }
         });
 

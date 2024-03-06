@@ -27,13 +27,13 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, IServiceScopeFactory serviceScopeFactory,
-        ILoggerProvider options)
-    : BackgroundService
+public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, 
+                                  IServiceScopeFactory serviceScopeFactory,
+                                  ILoggerProvider options) : BackgroundService
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.NotifyCleaner");
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
-    private readonly TimeSpan _waitingPeriod = TimeSpan.FromHours(8);
+    private readonly TimeSpan _waitingPeriod = TimeSpan.FromMilliseconds(1000);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -46,10 +46,11 @@ public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, I
             await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifyCleanerService>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<NotifyCleanerService>>>().Value.InstanceId;
 
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<NotifyCleanerService>.InstanceId))
+            if (!await registerInstanceService.IsActive(instanceId))
             {
-                _logger.Debug($"Notify Clean Service background task with instance id {RegisterInstanceWorkerService<NotifyCleanerService>.InstanceId} is't active.");
+                _logger.Debug($"Notify Clean Service background task with instance id {instanceId} is't active.");
 
                 await Task.Delay(1000, stoppingToken);
 

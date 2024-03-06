@@ -26,9 +26,21 @@
 
 namespace ASC.Core.Common.Hosting;
 
-public class HostingSettings
+public class InstanceWorkerOptions<T>
 {
+    private readonly long _registeredInstance = DateTime.UtcNow.Ticks;
     public int TimeUntilUnregisterInSeconds { get; set; } = 15;
     public int IntervalCheckRegisterInstanceInSeconds { get; set; } = 1;
     public bool SingletonMode { get; set; } = true;
+    public string WorkerTypeName { get; set; }
+
+    public string InstanceId
+    {
+        get
+        {
+            var workerTypeName = WorkerTypeName ?? typeof(T).GetFormattedName();
+
+            return $"{workerTypeName}_{_registeredInstance}";
+        }
+    }
 }

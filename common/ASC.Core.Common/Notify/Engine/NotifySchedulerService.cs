@@ -24,71 +24,107 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Hosting;
+
+using Microsoft.Extensions.Options;
+
 using static ASC.Notify.Engine.NotifyEngine;
 
 namespace ASC.Core.Common.Notify.Engine;
 
 [Singleton]
 public class NotifySchedulerService(NotifyEngine notifyEngine,
-        ILogger<NotifySenderService> logger)
-    : BackgroundService
+                                    ILogger<NotifyEngine> logger,
+                                    IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        logger.DebugNotifySchedulerServiceStarting();
+
+        stoppingToken.Register(logger.DebugNotifySchedulerServiceStopping);
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            var min = DateTime.MaxValue;
-            var now = DateTime.UtcNow;
-            List<SendMethodWrapper> copy;
-            lock (notifyEngine.SendMethods)
+            await using var serviceScope = scopeFactory.CreateAsyncScope();
+
+            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySchedulerService>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<NotifySchedulerService>>>().Value.InstanceId;
+
+            if (!await registerInstanceService.IsActive(instanceId))
             {
-                copy = notifyEngine.SendMethods.ToList();
+                logger.DebugNotifySchedulerServiceIsNotActive(instanceId);
+
+                await Task.Delay(1000, stoppingToken);
+
+                continue;
             }
 
-            foreach (var w in copy)
-            {
-                if (!w.ScheduleDate.HasValue)
-                {
-                    lock (notifyEngine.SendMethods)
-                    {
-                        notifyEngine.SendMethods.Remove(w);
-                    }
-                    continue;
-                }
+            var delay = await ExecuteNotifySchedulerAsync(stoppingToken);
 
-                if (w.ScheduleDate.Value <= now)
-                {
-                    try
-                    {
-                        await w.InvokeSendMethod(now);
-                    }
-                    catch (Exception error)
-                    {
-                        logger.ErrorInvokeSendMethod(error);
-                    }
-                    w.UpdateScheduleDate(now);
-                }
-
-                if (w.ScheduleDate.Value > now && w.ScheduleDate.Value < min)
-                {
-                    min = w.ScheduleDate.Value;
-                }
-            }
-
-            var wait = min != DateTime.MaxValue ? min - DateTime.UtcNow : _defaultSleep;
-
-            if (wait < _defaultSleep)
-            {
-                wait = _defaultSleep;
-            }
-            else if (wait.Ticks > int.MaxValue)
-            {
-                wait = TimeSpan.FromTicks(int.MaxValue);
-            }
-
-            await Task.Delay(wait, stoppingToken);
+            await Task.Delay(delay, stoppingToken);
         }
+    }
+
+    private async Task<TimeSpan> ExecuteNotifySchedulerAsync(CancellationToken stoppingToken)
+    {
+        var min = DateTime.MaxValue;
+        var now = DateTime.UtcNow;
+
+        List<SendMethodWrapper> copy;
+
+        lock (notifyEngine.SendMethods)
+        {
+            copy = notifyEngine.SendMethods.ToList();
+        }
+
+        foreach (var w in copy)
+        {
+            if (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            if (!w.ScheduleDate.HasValue)
+            {
+                lock (notifyEngine.SendMethods)
+                {
+                    notifyEngine.SendMethods.Remove(w);
+                }
+                continue;
+            }
+
+            if (w.ScheduleDate.Value <= now)
+            {
+                try
+                {
+                    await w.InvokeSendMethod(now);
+                }
+                catch (Exception error)
+                {
+                    logger.ErrorInvokeSendMethod(error);
+                }
+                w.UpdateScheduleDate(now);
+            }
+
+            if (w.ScheduleDate.Value > now && w.ScheduleDate.Value < min)
+            {
+                min = w.ScheduleDate.Value;
+            }
+        }
+
+        var wait = min != DateTime.MaxValue ? min - DateTime.UtcNow : _defaultSleep;
+
+        if (wait < _defaultSleep)
+        {
+            wait = _defaultSleep;
+        }
+        else if (wait.Ticks > int.MaxValue)
+        {
+            wait = TimeSpan.FromTicks(int.MaxValue);
+        }
+
+        return wait;
     }
 }

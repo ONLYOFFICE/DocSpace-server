@@ -29,6 +29,15 @@ using ASC.Core.Common.Notify.Engine;
 namespace ASC.Core.Common.Log;
 public static partial class NotifyEngineLogger
 {
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService is starting.")]
+    public static partial void DebugNotifySchedulerServiceStarting(this ILogger<NotifyEngine> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task is stopping.")]
+    public static partial void DebugNotifySchedulerServiceStopping(this ILogger<NotifyEngine> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task with instance id {instanceId} is't active.")]
+    public static partial void DebugNotifySchedulerServiceIsNotActive(this ILogger<NotifyEngine> logger, string instanceId);
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "error styling message")]
     public static partial void WarningErrorStyling(this ILogger logger, Exception exception);
 

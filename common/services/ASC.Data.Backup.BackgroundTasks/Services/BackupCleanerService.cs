@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Engine;
+
+using Microsoft.Extensions.Options;
+
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
@@ -47,10 +51,11 @@ internal sealed class BackupCleanerService(ConfigurationExtension configuration,
             await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupCleanerService>>();
+            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<BackupCleanerService>>>().Value.InstanceId;
 
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<BackupCleanerService>.InstanceId))
+            if (!await registerInstanceService.IsActive(instanceId))
             {
-                logger.DebugBackupCleanerServiceIsNotActive(RegisterInstanceWorkerService<BackupCleanerService>.InstanceId);
+                logger.DebugBackupCleanerServiceIsNotActive(instanceId);
 
                 await Task.Delay(1000, stoppingToken);
 

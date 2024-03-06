@@ -56,6 +56,6 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ProductEntryPoint>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration);
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");
     }
 }

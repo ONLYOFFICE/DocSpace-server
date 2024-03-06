@@ -74,9 +74,9 @@ public class RegisterInstanceDao<T>(
         while (saveFailed);
     }
 
-    public async Task<List<InstanceRegistration>> GetAllAsync()
+    public async Task<List<InstanceRegistration>> GetAllAsync(string workerTypeName)
     {
-        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
+        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, workerTypeName).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)
