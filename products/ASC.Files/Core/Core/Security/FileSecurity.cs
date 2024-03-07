@@ -1929,7 +1929,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                 action != FilesSecurityActions.ReadHistory &&
                 action != FilesSecurityActions.Copy &&
                 action != FilesSecurityActions.Duplicate &&
-                action != FilesSecurityActions.Lock)
+                action != FilesSecurityActions.Lock &&
+                action != FilesSecurityActions.Download)
             {
                 file.Security[action] = false;
             }
