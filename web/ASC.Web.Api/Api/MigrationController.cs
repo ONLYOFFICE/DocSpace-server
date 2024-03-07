@@ -140,7 +140,7 @@ public class MigrationController(
 
     private async Task DemandPermission()
     {
-        if (!coreBaseSettings.Standalone || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
