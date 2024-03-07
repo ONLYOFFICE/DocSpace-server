@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.HttpLogging;
-
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 
@@ -58,14 +55,6 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddHttpLogging(logging =>
-        { 
-            logging.RequestHeaders.Add("Origin");
-            logging.ResponseHeaders.Add("Origin");
-            logging.ResponseHeaders.Add("access-control-allow-origin");
-            logging.ResponseHeaders.Add("access-control-allow-methods");
-            logging.LoggingFields = HttpLoggingFields.All;
-        });
         
         services.AddMvcCore(config =>
         {
@@ -184,13 +173,11 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        app.UseHttpLogging();
-        
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         { 
-            app.UseMiddleware<CorsMiddleware>(CustomCorsPolicyName);
+            app.UseCors(CustomCorsPolicyName);
         }
 
         app.UseSynchronizationContextMiddleware();
