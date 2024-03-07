@@ -125,7 +125,7 @@ public class MigrationOperation(
 
             var discStore = await storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
             var folder = discStore.GetPhysicalPath("", "");
-            await migrator.InitAsync(folder, CancellationToken, onlyParse ? "parse" : "migration");
+            await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
 
             var result = await migrator.ParseAsync(onlyParse);
             if (!onlyParse)

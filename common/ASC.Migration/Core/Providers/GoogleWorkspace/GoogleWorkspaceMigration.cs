@@ -40,7 +40,7 @@ public class GoogleWorkspaceMigration(
     private string _path;
     public override MigratorMeta Meta => _meta;
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         await _logger.InitAsync();
         _cancellationToken = cancellationToken;
@@ -134,14 +134,14 @@ public class GoogleWorkspaceMigration(
                     }
                     else if ((await userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
-                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration")
+                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation is OperationType.Migration)
                         {
                             _migrationInfo.ExistUsers.Add(key, user);
                         }
                     }
                     else
                     {
-                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration") 
+                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation is OperationType.Migration) 
                         {
                             _migrationInfo.Users.Add(key, user);
                         }

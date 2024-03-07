@@ -46,7 +46,7 @@ public class WorkspaceMigration(
     private Dictionary<string, string> _mappedGuids;
     public override MigratorMeta Meta => _meta;
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         await _logger.InitAsync();
         _cancellationToken = cancellationToken;
