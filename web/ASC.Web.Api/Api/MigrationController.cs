@@ -28,39 +28,19 @@ namespace ASC.Api.Migration;
 
 [DefaultRoute]
 [ApiController]
-public class MigrationController : ControllerBase
+public class MigrationController(
+    CoreBaseSettings coreBaseSettings,
+    UserManager userManager,
+    AuthContext authContext,
+    StudioNotifyService studioNotifyService,
+    IHttpContextAccessor httpContextAccessor,
+    MigrationCore migrationCore) : ControllerBase
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly TempPath _tempPath;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly MigrationCore _migrationCore;
-
-    public MigrationController(
-        CoreBaseSettings coreBaseSettings,
-        UserManager userManager,
-        AuthContext authContext,
-        TempPath tempPath,
-        StudioNotifyService studioNotifyService,
-        IHttpContextAccessor httpContextAccessor,
-        MigrationCore migrationCore)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _userManager = userManager;
-        _authContext = authContext;
-        _tempPath = tempPath;
-        _studioNotifyService = studioNotifyService;
-        _httpContextAccessor = httpContextAccessor;
-        _migrationCore = migrationCore;
-    }
-
     [HttpGet("list")]
     public async Task<string[]> ListAsync()
     {
         await DemandPermission();
-        return _migrationCore.GetAvailableMigrations();
+        return migrationCore.GetAvailableMigrations();
     }
 
     [HttpPost("init/{migratorName}")]
@@ -68,7 +48,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.StartParseAsync(migratorName);
+        await migrationCore.StartParseAsync(migratorName);
     }
 
     [HttpGet("status")]
@@ -77,7 +57,7 @@ public class MigrationController : ControllerBase
         await DemandPermission();
         try
         {
-            var status = await _migrationCore.GetStatusAsync();
+            var status = await migrationCore.GetStatusAsync();
             if (status != null)
             {
                 var result = new MigrationStatusDto
@@ -102,7 +82,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.StopAsync();
+        await migrationCore.StopAsync();
     }
 
     [HttpPost("clear")]
@@ -110,7 +90,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.ClearAsync();
+        await migrationCore.ClearAsync();
     }
 
     [HttpPost("migrate")]
@@ -118,7 +98,7 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        await _migrationCore.StartAsync(info);
+        await migrationCore.StartAsync(info);
     }
 
     [HttpGet("logs")]
@@ -126,15 +106,15 @@ public class MigrationController : ControllerBase
     {
         await DemandPermission();
 
-        var status = await _migrationCore.GetStatusAsync();
+        var status = await migrationCore.GetStatusAsync();
         if (status == null)
         {
             throw new Exception(MigrationResource.MigrationProgressException);
         }
 
-        _httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
-        _httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
-        await status.CopyLogsAsync(_httpContextAccessor.HttpContext.Response.Body);
+        httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
+        httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
+        await status.CopyLogsAsync(httpContextAccessor.HttpContext.Response.Body);
     }
 
     [HttpPost("finish")]
@@ -144,7 +124,7 @@ public class MigrationController : ControllerBase
 
         if (inDto.IsSendWelcomeEmail)
         {
-            var status = await _migrationCore.GetStatusAsync();
+            var status = await migrationCore.GetStatusAsync();
             if (status == null)
             {
                 throw new Exception(MigrationResource.MigrationProgressException);
@@ -152,15 +132,15 @@ public class MigrationController : ControllerBase
             var guidUsers = status.ImportedUsers;
             foreach (var gu in guidUsers)
             {
-                var u = await _userManager.GetUsersAsync(gu);
-                await _studioNotifyService.UserInfoActivationAsync(u);
+                var u = await userManager.GetUsersAsync(gu);
+                await studioNotifyService.UserInfoActivationAsync(u);
             }
         }
     }
 
     private async Task DemandPermission()
     {
-        if (!_coreBaseSettings.Standalone || !await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID))
+        if (!coreBaseSettings.Standalone || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
