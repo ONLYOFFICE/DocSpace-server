@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
-
-using System.Linq;
-
-using net.openstack.Providers.Rackspace.Objects.Databases;
-
 namespace ASC.Migration.GoogleWorkspace;
 
 [Scope]
@@ -158,6 +152,10 @@ public class GoogleWorkspaceMigration(
             {
                 _migrationInfo.FailedArchives.Add(key);
                 Log($"Couldn't parse user from {key} archive", ex);
+                if (_migrationInfo.FailedArchives.Count == _takeouts.Length)
+                {
+                    throw new Exception("Couldn't parse arhives");
+                }
             }
             finally
             {

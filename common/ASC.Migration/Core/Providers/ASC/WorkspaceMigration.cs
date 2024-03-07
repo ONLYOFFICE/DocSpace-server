@@ -182,6 +182,7 @@ public class WorkspaceMigration(
         {
             _migrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
             Log($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive", ex);
+            throw new Exception($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
         }
         if (reportProgress)
         {
