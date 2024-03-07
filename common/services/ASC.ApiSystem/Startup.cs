@@ -39,7 +39,6 @@ public class Startup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly DIHelper _diHelper;
     private readonly string _corsOrigin;
-    private readonly bool _standalone;
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -47,7 +46,6 @@ public class Startup
         _hostEnvironment = hostEnvironment;
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
-        _standalone = _configuration["core:base-domain"] == "localhost";
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -176,21 +174,12 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-
-        if (_standalone)
-        {
-            services
-                .AddAuthentication()
-                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
-                .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
-        }
-        else
-        {
-            services.AddAuthentication()
-               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { });
-        }
+        
+        services
+            .AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
