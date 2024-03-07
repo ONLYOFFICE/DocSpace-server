@@ -31,21 +31,23 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger,
     protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
     protected abstract TimeSpan ExecuteTaskPeriod { get; set; }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {      
-        logger.DebugActivePassiveBackgroundServiceStarting(GetType().Name);
+    {
+        var serviceName = GetType().Name;
 
-        stoppingToken.Register(() => logger.DebugActivePassiveBackgroundServiceStopping(GetType().Name));
+        logger.DebugActivePassiveBackgroundServiceStarting(serviceName);
+
+        stoppingToken.Register(() => logger.DebugActivePassiveBackgroundServiceStopping(serviceName));
 
         while (!stoppingToken.IsCancellationRequested)
         {
             await using var serviceScope = scopeFactory.CreateAsyncScope();
            
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
-            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<T>>>().Value.InstanceId;
+            var workerOptions = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<T>>>().Value;
 
-            if (!await registerInstanceService.IsActive(instanceId))
+            if (!await registerInstanceService.IsActive())
             {
-                logger.DebugActivePassiveBackgroundServiceIsNotActive(GetType().Name, instanceId);
+                logger.DebugActivePassiveBackgroundServiceIsNotActive(serviceName, workerOptions.InstanceId);
 
                 await Task.Delay(1000, stoppingToken);
 

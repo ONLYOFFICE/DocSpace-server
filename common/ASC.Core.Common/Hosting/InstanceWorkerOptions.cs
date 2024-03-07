@@ -38,9 +38,9 @@ public class InstanceWorkerOptions<T>
     {
         get
         {
-            var workerTypeName = WorkerTypeName ?? typeof(T).GetFormattedName();
+            var hostname = Dns.GetHostName().ToLower(CultureInfo.InvariantCulture);
 
-            return $"{workerTypeName}_{_registeredInstance}";
+            return $"{WorkerTypeName}_{hostname}_{_registeredInstance}";
         }
     }
 }

@@ -53,7 +53,7 @@ public class RegisterInstanceWorkerService<T>(
             {
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.Register(_settings.InstanceId);
+                await registerInstanceService.Register();
 
                 logger.TraceWorkingRunnging(DateTimeOffset.Now);
 
@@ -76,7 +76,7 @@ public class RegisterInstanceWorkerService<T>(
 
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.UnRegister(_settings.InstanceId);
+                await registerInstanceService.UnRegister();
 
                 logger.InformationUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
