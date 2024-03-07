@@ -239,8 +239,6 @@ public class GoogleWorkspaceMigration(
                 continue;
             }
 
-            var smallStep = progressStep / 4;
-
             try
             {
                 var currentUser = securityContext.CurrentAccount;
@@ -257,7 +255,7 @@ public class GoogleWorkspaceMigration(
             }
             finally
             {
-                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }

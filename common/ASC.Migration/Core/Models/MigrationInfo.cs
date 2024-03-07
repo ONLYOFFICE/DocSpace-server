@@ -58,7 +58,7 @@ public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
             SuccessedUsers = SuccessedUsers,
             FailedUsers = FailedUsers,
             Groups = Groups.Select(g => g.ToApiInfo()).ToList(),
-            Operation = Operation.ToString(),
+            Operation = Operation.ToString().ToLower(),
             Files = Files,
         };
     }
