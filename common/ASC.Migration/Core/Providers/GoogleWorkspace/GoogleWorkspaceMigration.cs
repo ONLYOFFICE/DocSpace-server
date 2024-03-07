@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
-
-using System.Linq;
-
-using net.openstack.Providers.Rackspace.Objects.Databases;
-
 namespace ASC.Migration.GoogleWorkspace;
 
 [Scope]
@@ -46,7 +40,7 @@ public class GoogleWorkspaceMigration(
     private string _path;
     public override MigratorMeta Meta => _meta;
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         await _logger.InitAsync();
         _cancellationToken = cancellationToken;
@@ -140,14 +134,14 @@ public class GoogleWorkspaceMigration(
                     }
                     else if ((await userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
-                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration")
+                        if (!_migrationInfo.ExistUsers.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation is OperationType.Migration)
                         {
                             _migrationInfo.ExistUsers.Add(key, user);
                         }
                     }
                     else
                     {
-                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation == "migration") 
+                        if (!_migrationInfo.Users.Any(u => u.Value.Email == user.Email) || _migrationInfo.Operation is OperationType.Migration) 
                         {
                             _migrationInfo.Users.Add(key, user);
                         }
@@ -158,6 +152,10 @@ public class GoogleWorkspaceMigration(
             {
                 _migrationInfo.FailedArchives.Add(key);
                 Log($"Couldn't parse user from {key} archive", ex);
+                if (_migrationInfo.FailedArchives.Count == _takeouts.Length)
+                {
+                    throw new Exception("Couldn't parse arhives");
+                }
             }
             finally
             {
@@ -241,8 +239,6 @@ public class GoogleWorkspaceMigration(
                 continue;
             }
 
-            var smallStep = progressStep / 4;
-
             try
             {
                 var currentUser = securityContext.CurrentAccount;
@@ -259,7 +255,7 @@ public class GoogleWorkspaceMigration(
             }
             finally
             {
-                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }
