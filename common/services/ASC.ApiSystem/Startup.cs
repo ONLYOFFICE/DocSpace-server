@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.HttpLogging;
 
 using StackExchange.Redis;
@@ -199,8 +200,8 @@ public class Startup
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
-        {
-            app.UseCors(CustomCorsPolicyName);
+        { 
+            app.UseMiddleware<CorsMiddleware>(CustomCorsPolicyName);
         }
 
         app.UseSynchronizationContextMiddleware();
