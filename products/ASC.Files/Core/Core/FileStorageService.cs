@@ -1634,7 +1634,14 @@ public class FileStorageService //: IFileStorageService
     {
         await foreach (var r in providerDao.GetProvidersInfoAsync())
         {
-            yield return new ThirdPartyParams { CustomerTitle = r.CustomerTitle, Corporate = r.RootFolderType == FolderType.COMMON, ProviderId = r.ProviderId.ToString(), ProviderKey = r.ProviderKey };
+            yield return new ThirdPartyParams
+            {
+                CustomerTitle = r.CustomerTitle,
+                Corporate = r.RootFolderType == FolderType.COMMON,
+                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.Archive,
+                ProviderId = r.ProviderId,
+                ProviderKey = r.ProviderKey
+            };
         }
     }
 
@@ -1716,7 +1723,7 @@ public class FileStorageService //: IFileStorageService
         int currentProviderId;
 
         MessageAction messageAction;
-        if (string.IsNullOrEmpty(thirdPartyParams.ProviderId))
+        if (thirdPartyParams.ProviderId == null)
         {
             if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !await filesSettingsHelper.GetEnableThirdParty())
             {
@@ -1746,7 +1753,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            currentProviderId = Convert.ToInt32(thirdPartyParams.ProviderId);
+            currentProviderId = thirdPartyParams.ProviderId.Value;
 
             var currentProvider = await providerDao.GetProviderInfoAsync(currentProviderId);
             if (currentProvider.Owner != authContext.CurrentAccount.ID)

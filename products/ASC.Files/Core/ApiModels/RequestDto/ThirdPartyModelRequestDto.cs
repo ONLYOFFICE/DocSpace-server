@@ -63,6 +63,6 @@ public class ThirdPartyRequestDto
     public string ProviderKey { get; set; }
 
     /// <summary>Provider ID</summary>
-    /// <type>System.String, System</type>
-    public string ProviderId { get; set; }
+    /// <type>System.Nullable{System.Int32}, System</type>
+    public int? ProviderId { get; set; }
 }
