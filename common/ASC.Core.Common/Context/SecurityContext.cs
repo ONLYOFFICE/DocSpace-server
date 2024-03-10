@@ -249,7 +249,7 @@ public class SecurityContext(UserManager userManager,
 
             roles.Add(Role.RoomAdministrators);
 
-            account = new UserAccount(u, await tenantManager.GetCurrentTenantIdAsync(), userFormatter);
+            account = new UserAccount(u, tenant.Id, userFormatter);
         }
 
         var claims = new List<Claim>
