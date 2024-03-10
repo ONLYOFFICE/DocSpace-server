@@ -698,7 +698,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isUser = userType is EmployeeType.User;
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isRoomAdmin = userType is EmployeeType.RoomAdmin;
+        var isCollaborator = userType is EmployeeType.Collaborator;
         
         await foreach (var entry in entries)
         {
@@ -711,7 +711,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 .Where(r => _securityEntries[entry.FileEntryType].Contains(r))
                 .Select(async e =>
                 {
-                    var t = await FilterEntryAsync(entry, e, userId, null, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isRoomAdmin);
+                    var t = await FilterEntryAsync(entry, e, userId, null, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
                     return new KeyValuePair<FilesSecurityActions, bool>(e, t);
                 });
 
@@ -779,9 +779,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isUser = userType is EmployeeType.User;
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isRoomAdmin = userType is EmployeeType.RoomAdmin;
-
-        return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isRoomAdmin);
+        var isCollaborator = userType is EmployeeType.Collaborator;
+        
+        return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
     }
     
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entry, Guid userId, FilesSecurityActions action)
@@ -799,7 +799,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord> shares, bool isOutsider, bool isUser, bool isAuthenticated, bool isDocSpaceAdmin, bool isRoomAdmin)
+    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord> shares, bool isOutsider, bool isUser, bool isAuthenticated, bool isDocSpaceAdmin, bool isCollaborator)
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
@@ -891,7 +891,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return true;
                     }
 
-                    if (folder.FolderType == FolderType.VirtualRooms && !isRoomAdmin)
+                    if (folder.FolderType == FolderType.VirtualRooms && !isCollaborator)
                     {
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
@@ -961,7 +961,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
-                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isRoomAdmin))
+                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
                     return true;
                 }
@@ -985,7 +985,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isRoomAdmin))
+                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
                     return true;
                 }
