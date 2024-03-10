@@ -2672,11 +2672,20 @@ public class FileStorageService //: IFileStorageService
         return (await fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
     }
 
-    public async Task<File<T>> SaveAsPdf<T>(T fileId)
+    public async Task<File<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
     {
         try
         {
             var fileDao = daoFactory.GetFileDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
+
+            var folder = await folderDao.GetFolderAsync(folderId);
+            folder.NotFoundIfNull();
+            if (!await fileSecurity.CanEditAsync(folder))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
             var file = await fileDao.GetFileAsync(fileId);
             var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
             var fileExtension = file.ConvertedExtension;
@@ -2687,8 +2696,8 @@ public class FileStorageService //: IFileStorageService
             var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
 
             var pdfFile = serviceProvider.GetService<File<T>>();
-            pdfFile.Title = FileUtility.ReplaceFileExtension(file.Title, "pdf");
-            pdfFile.ParentId = file.ParentId;
+            pdfFile.Title = !string.IsNullOrEmpty(title) ? $"{title}.pdf" : FileUtility.ReplaceFileExtension(file.Title, "pdf");
+            pdfFile.ParentId = folder.Id;
             pdfFile.Comment = FilesCommonResource.CommentCreate;
 
             var request = new HttpRequestMessage

@@ -230,11 +230,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await GetFileInfoAsync(file.Id);
     }
 
-    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId)
+    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
     {
         try
         {
-            var resultFile = await _fileStorageService.SaveAsPdf(fileId);
+            var resultFile = await _fileStorageService.SaveAsPdf(fileId, folderId, title);
             return await _fileDtoHelper.GetAsync(resultFile);
         }
         catch (FileNotFoundException e)
