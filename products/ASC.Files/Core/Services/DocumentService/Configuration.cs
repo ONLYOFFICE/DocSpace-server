@@ -595,7 +595,7 @@ public class CustomizationConfig<T>(
 
     public bool? GetForceSave(File<T> file)
     {
-        return fileUtility.CanForcesave
+        return fileUtility.GetCanForcesave()
                && !file.ProviderEntry
                && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
                && filesSettingsHelper.GetForcesave();
