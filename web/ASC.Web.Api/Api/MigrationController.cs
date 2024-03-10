@@ -29,7 +29,6 @@ namespace ASC.Api.Migration;
 [DefaultRoute]
 [ApiController]
 public class MigrationController(
-    CoreBaseSettings coreBaseSettings,
     UserManager userManager,
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
