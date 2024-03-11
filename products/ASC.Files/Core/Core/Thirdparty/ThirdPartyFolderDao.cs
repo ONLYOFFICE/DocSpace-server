@@ -405,21 +405,21 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
+    
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
+    
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var thirdFolder = await dao.GetFolderAsync(folder.Id);
         var parentFolderId = dao.GetParentFolderId(thirdFolder);
         var renamedThirdFolder = thirdFolder;
 
-        if (dao.IsRoot(thirdFolder))
+        if (dao.IsRoot(thirdFolder) || DocSpaceHelper.IsRoom(folder.FolderType))
         {
-            //It's root folder
             await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
-            //rename provider customer title
         }
         else
         {
@@ -437,11 +437,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         }
 
         var newId = dao.MakeId(dao.GetId(renamedThirdFolder));
-        
-        if (DocSpaceHelper.IsRoom(folder.FolderType))
-        {
-            await daoSelector.RenameRoomProviderAsync(_providerInfo, newTitle, newId);
-        }
 
         if (_providerInfo.MutableEntityId)
         {
