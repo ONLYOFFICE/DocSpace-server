@@ -52,9 +52,7 @@ public class AuthenticationController(UserManager userManager,
         ProviderManager providerManager,
         AccountLinker accountLinker,
         CoreBaseSettings coreBaseSettings,
-        PersonalSettingsHelper personalSettingsHelper,
         StudioNotifyService studioNotifyService,
-        UserManagerWrapper userManagerWrapper,
         UserHelpTourHelper userHelpTourHelper,
         Signature signature,
         DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -545,8 +543,8 @@ public class AuthenticationController(UserManager userManager,
                 //}
 
                 await studioNotifyService.UserHasJoinAsync();
-                await userHelpTourHelper.SetIsNewUser(true);
-                await personalSettingsHelper.SetIsNewUser(true);
+                await userHelpTourHelper.SetIsNewUser(true); 
+                //await personalSettingsHelper.SetIsNewUser(true);
             }
 
             return userInfo;
@@ -558,67 +556,6 @@ public class AuthenticationController(UserManager userManager,
             securityContext.Logout();
             throw;
         }
-    }
-
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!await userManager.UserExistsAsync(userInfo.Id))
-        {
-            var newUserInfo = ProfileToUserInfo(loginProfile);
-
-            try
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
-            }
-            finally
-            {
-                securityContext.Logout();
-            }
-        }
-
-        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
-
-        return userInfo;
-    }
-
-    private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var firstName = loginProfile.FirstName;
-        if (string.IsNullOrEmpty(firstName))
-        {
-            firstName = loginProfile.DisplayName;
-        }
-
-        var userInfo = new UserInfo
-        {
-            FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName,
-            LastName = string.IsNullOrEmpty(loginProfile.LastName) ? UserControlsCommonResource.UnknownLastName : loginProfile.LastName,
-            Email = loginProfile.EMail,
-            Title = string.Empty,
-            Location = string.Empty,
-            CultureName = coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated
-        };
-
-        var gender = loginProfile.Gender;
-        if (!string.IsNullOrEmpty(gender))
-        {
-            userInfo.Sex = gender == "male";
-        }
-
-        return userInfo;
     }
 
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)

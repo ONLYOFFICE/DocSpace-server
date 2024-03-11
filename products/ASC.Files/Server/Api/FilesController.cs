@@ -42,34 +42,12 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         FileOperationsManager fileOperationsManager,
-        ThirdPartySelector thirdPartySelector,
-        DocumentServiceHelper documentServiceHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
-{
-    /// <summary>
-    /// Returns the detailed information about a third-party file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get third-party file information</short>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">File entry information</returns>
-    /// <path>api/2.0/files/file/app-{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/app-{fileId}", Order = 1)]
-    public async Task<FileEntryDto> GetFileInfoThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        return await GetFileEntryWrapperAsync(docParams.File);
-    }
-}
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
