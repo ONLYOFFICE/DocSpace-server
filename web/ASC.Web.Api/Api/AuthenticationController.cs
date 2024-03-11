@@ -453,9 +453,11 @@ public class AuthenticationController(UserManager userManager,
                     }
                 }
 
-                var requestIp = MessageSettings.GetIP(Request);
-
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
+                await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
+                    await userManager.GetUsersByPasswordHashAsync(
+                    await tenantManager.GetCurrentTenantIdAsync(),
+                    inDto.UserName,
+                    inDto.PasswordHash));
             }
             else
             {
@@ -470,8 +472,8 @@ public class AuthenticationController(UserManager userManager,
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
-
-                user = await GetUserByThirdParty(thirdPartyProfile);
+                
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
