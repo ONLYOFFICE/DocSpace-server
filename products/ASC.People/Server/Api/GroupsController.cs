@@ -98,6 +98,7 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
