@@ -74,7 +74,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             {
                 Group = g,
                 Manager = userDbContext.UserGroups
-                    .Where(ug => !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
+                    .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
                     .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
                     .FirstOrDefault()
             });
