@@ -346,7 +346,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Přihlášení úspěšné</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Přihlášení přes účet sociální sítě bylo úspěšné</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
