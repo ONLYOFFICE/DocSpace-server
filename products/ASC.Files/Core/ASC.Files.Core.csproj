@@ -21,7 +21,7 @@
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
-    <PackageReference Include="SharpZipLib" Version="2.4.2" />
+    <PackageReference Include="SharpZipLib" Version="2.4.3" />
     <PackageReference Include="WebDav.Client" Version="2.8.0" />
   </ItemGroup>
   <ItemGroup>
