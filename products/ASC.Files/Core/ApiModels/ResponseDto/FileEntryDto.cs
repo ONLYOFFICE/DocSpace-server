@@ -82,6 +82,10 @@ public abstract class FileEntryDto
     /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
     public FolderType RootFolderType { get; set; }
 
+    /// <summary>First parent folder type</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    public FolderType? ParentRoomType { get; set; }
+
     /// <summary>A user who updated a file</summary>
     /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
     public EmployeeDto UpdatedBy { get; set; }
@@ -106,6 +110,7 @@ public abstract class FileEntryDto
         Access = entry.Access;
         Shared = entry.Shared;
         RootFolderType = entry.RootFolderType;
+        ParentRoomType = entry.ParentRoomType;
         ProviderItem = entry.ProviderEntry.NullIfDefault();
         ProviderKey = entry.ProviderKey;
         ProviderId = entry.ProviderId.NullIfDefault();
@@ -183,6 +188,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             Updated = apiDateTimeHelper.Get(entry.ModifiedOn),
             UpdatedBy = await employeeWrapperHelper.GetAsync(entry.ModifiedBy),
             RootFolderType = entry.RootFolderType,
+            ParentRoomType = entry.ParentRoomType,
             RootFolderId = entry.RootId,
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
             ProviderKey = entry.ProviderKey,

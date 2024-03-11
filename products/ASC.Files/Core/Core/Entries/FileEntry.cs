@@ -81,6 +81,7 @@ public abstract class FileEntry : ICloneable
     public DateTime CreateOn { get; set; }
     public DateTime ModifiedOn { get; set; }
     public FolderType RootFolderType { get; set; }
+    public FolderType? ParentRoomType { get; set; }
     public Guid RootCreateBy { get; set; }
     public abstract bool IsNew { get; set; }
     public FileEntryType FileEntryType { get; set; }
