@@ -479,7 +479,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
 
-        return await fileShareDtoHelper.Get(linkAce);
+        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 }
 
