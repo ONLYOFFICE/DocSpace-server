@@ -184,9 +184,9 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         return !response.IsSuccessful ? null : await GetEntryAsync(resourceUrl);
     }
 
-    public long GetFileSize(WebDavEntry file)
+    public Task<long> GetFileSizeAsync(WebDavEntry file)
     {
-        return file.ContentLength ?? 0;
+        return Task.FromResult(file.ContentLength ?? 0);
     }
 
     public Task<WebDavEntry> GetFolderAsync(string folderId)

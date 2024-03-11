@@ -208,9 +208,9 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             .PutAsync<Item>(fileStream);
     }
 
-    public long GetFileSize(Item file)
+    public Task<long> GetFileSizeAsync(Item file)
     {
-        return file.Size ?? 0;
+        return Task.FromResult(file.Size ?? 0);
     }
     
     private IItemRequestBuilder GetItemRequest(string itemId)
