@@ -453,7 +453,7 @@ public class AuthenticationController(UserManager userManager,
                     }
                 }
 
-                await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
                     await userManager.GetUsersByPasswordHashAsync(
                     await tenantManager.GetCurrentTenantIdAsync(),
                     inDto.UserName,
