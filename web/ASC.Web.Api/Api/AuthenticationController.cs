@@ -57,7 +57,6 @@ public class AuthenticationController(UserManager userManager,
         UserManagerWrapper userManagerWrapper,
         UserHelpTourHelper userHelpTourHelper,
         Signature signature,
-        InstanceCrypto instanceCrypto,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         MessageTarget messageTarget,
         StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
@@ -76,6 +75,7 @@ public class AuthenticationController(UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILogger<AuthenticationController> logger,
         InvitationLinkService invitationLinkService,
+        LoginProfileTransport loginProfileTransport,
         IMapper mapper)
     : ControllerBase
 {
@@ -468,7 +468,7 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
+                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;

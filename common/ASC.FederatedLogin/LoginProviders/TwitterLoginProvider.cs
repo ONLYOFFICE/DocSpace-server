@@ -70,7 +70,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     {
         if (!string.IsNullOrEmpty(context.Request.Query["denied"]))
         {
-            return LoginProfile.FromError(new Exception("Canceled at provider"));
+            return new LoginProfile(new Exception("Canceled at provider"));
         }
 
         var appClient = new TwitterClient(ClientID, ClientSecret);

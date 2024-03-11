@@ -76,7 +76,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

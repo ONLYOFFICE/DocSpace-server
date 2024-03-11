@@ -90,7 +90,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

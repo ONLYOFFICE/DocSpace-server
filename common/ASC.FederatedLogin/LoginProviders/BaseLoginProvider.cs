@@ -102,7 +102,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 
