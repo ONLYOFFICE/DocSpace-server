@@ -38,14 +38,13 @@ public class MigrationFileUploadHandler
         TenantManager tenantManager,
         IConfiguration configuration,
         StorageFactory storageFactory,
-        CoreBaseSettings coreBaseSettings,
         UserManager userManager,
         AuthContext authContext)
     {
         MigrationFileUploadResult result = null;
         try
         {
-            if (!coreBaseSettings.Standalone || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
                 throw new SecurityException("Access denied.");
             }
