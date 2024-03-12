@@ -313,11 +313,6 @@ public class WorkspaceMigration(
 
         i = 1;
         progressStep = usersCount == 0 ? 25 : 25 / usersCount;
-        Log($"{_dataReader.GetFolder()} exist = {Directory.Exists(_dataReader.GetFolder())}");
-        if (!Directory.Exists(_dataReader.GetFolder()))
-        {
-            _dataReader = DataOperatorFactory.GetReadOperator(_backup, CancellationToken.None, false);
-        }
         foreach (var kv in usersForImport)
         {
             var user = kv.Value;

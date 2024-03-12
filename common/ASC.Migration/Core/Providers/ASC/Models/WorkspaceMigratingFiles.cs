@@ -248,6 +248,7 @@ public class WorkspaceMigratingFiles(
             {
                 var path =
                     $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                Log($"file path - {path}", null);
                 await using var fs = _dataReader.GetEntry(path);
 
                 var newFile = serviceProvider.GetService<File<int>>();
