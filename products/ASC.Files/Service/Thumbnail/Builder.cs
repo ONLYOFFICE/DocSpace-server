@@ -186,11 +186,13 @@ public class Builder<T>(ThumbnailSettings settings,
         var resultPercent = 0;
         var attempt = 1;
 
+        var maxSize = settings.Sizes.MaxBy(r => r.Width + r.Height);
+        
         do
         {
             try
             {
-                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString());
+                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString(), maxSize.Width, maxSize.Height);
 
                 if (resultPercent == 100)
                 {
@@ -256,7 +258,7 @@ public class Builder<T>(ThumbnailSettings settings,
         _logger.DebugMakeThumbnail4(file.Id.ToString());
     }
 
-    private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension)
+    private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
     {
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
@@ -274,8 +276,8 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             IgnorePrintArea = true,
             //Orientation = "landscape", // "297mm" x "210mm"
-            // FitToHeight = height,
-            // FitToWidth = width,
+            FitToHeight = height,
+            FitToWidth = width,
             Headings = false,
             GridLines = false,
             Margins = new SpreadsheetLayout.LayoutMargins
