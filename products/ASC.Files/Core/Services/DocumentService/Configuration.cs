@@ -333,7 +333,7 @@ public class EditorConfiguration<T>(
         var folderDao = daoFactory.GetFolderDao<int>();
         var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
             .Cast<File<int>>()
-            .Where(file => !Equals(fileId, file.Id))
+            .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
@@ -343,7 +343,7 @@ public class EditorConfiguration<T>(
         {
             yield return new RecentConfig
             {
-                Folder = parentFolders.Find(r => file.ParentId == r.Id).Title,
+                Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
             };
