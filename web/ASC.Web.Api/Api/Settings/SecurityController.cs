@@ -40,11 +40,12 @@ public class SecurityController(TenantManager tenantManager,
         WebItemManager webItemManager,
         WebItemManagerSecurity webItemManagerSecurity,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmployeeDtoHelper employeeWraperHelper,
+        EmployeeDtoHelper employeeWrapperHelper,
         MessageTarget messageTarget,
         IMemoryCache memoryCache,
         IMapper mapper,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IConfiguration configuration)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -85,7 +86,7 @@ public class SecurityController(TenantManager tenantManager,
 
             foreach (var e in i.Users)
             {
-                s.Users.Add(await employeeWraperHelper.GetAsync(e));
+                s.Users.Add(await employeeWrapperHelper.GetAsync(e));
             }
 
             yield return s;
@@ -167,6 +168,11 @@ public class SecurityController(TenantManager tenantManager,
 
         var userPasswordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
+        if (!PasswordSettings.CheckLengthInRange(configuration, inDto.MinLength))
+        {
+            throw new ArgumentException(nameof(inDto.MinLength));
+        }
+        
         userPasswordSettings.MinLength = inDto.MinLength;
         userPasswordSettings.UpperCase = inDto.UpperCase;
         userPasswordSettings.Digits = inDto.Digits;
@@ -308,7 +314,7 @@ public class SecurityController(TenantManager tenantManager,
 
         foreach (var a in admins)
         {
-            yield return await employeeWraperHelper.GetAsync(a);
+            yield return await employeeWrapperHelper.GetAsync(a);
         }
     }
 

@@ -134,4 +134,14 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         return def;
     }
+
+    public static bool CheckLengthInRange(IConfiguration configuration, int length)
+    {
+        if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
+        {
+            defaultMinLength = 0;
+        }
+
+        return length >= defaultMinLength && length <= MaxLength;
+    }
 }
