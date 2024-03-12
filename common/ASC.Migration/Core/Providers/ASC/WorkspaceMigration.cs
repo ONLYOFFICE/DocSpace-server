@@ -323,7 +323,6 @@ public class WorkspaceMigration(
             }
             catch (Exception ex)
             {
-                failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
             }
         }
