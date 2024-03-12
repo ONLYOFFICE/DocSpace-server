@@ -63,7 +63,12 @@ public class CommonChunkedUploadSessionHolder(
         var dict = new Dictionary<int, Chunk>();
         for (var i = 1; i <= count; i++)
         {
-            dict.Add(i, await cache.GetAsync<Chunk>($"{uploadSession.Id} - {i}"));
+            var chunk = await cache.GetAsync<Chunk>($"{uploadSession.Id} - {i}");
+            if (chunk == null)
+            {
+                break;
+            }
+            dict.Add(i, chunk);
         }
 
         return dict;
