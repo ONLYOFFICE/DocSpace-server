@@ -74,8 +74,9 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
     {
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
             var context = await contextFactory.CreateDbContextAsync();
-            var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.Link == shareLink);
+            var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.TenantId == tenantId && q.Link == shareLink);
             if (link != null)
             {
                 return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + link.Short);
@@ -93,7 +94,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
                         Id = id,
                         Link = shareLink,
                         Short = key,
-                        TenantId = (await tenantManager.GetCurrentTenantAsync()).Id
+                        TenantId = tenantId
                     };
                     await context.ShortLinks.AddAsync(newShortLink);
                     await context.SaveChangesAsync();
