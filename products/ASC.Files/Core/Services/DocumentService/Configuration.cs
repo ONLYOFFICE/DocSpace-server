@@ -563,8 +563,7 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility,
-    ThirdPartySelector thirdPartySelector)
+    CommonLinkUtility commonLinkUtility)
 {
     [JsonIgnore]
     public string GobackUrl;
@@ -597,7 +596,6 @@ public class CustomizationConfig<T>(
     {
         return fileUtility.GetCanForcesave()
                && !file.ProviderEntry
-               && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
                && filesSettingsHelper.GetForcesave();
     }
 

@@ -52,7 +52,6 @@ public class AuthenticationController(UserManager userManager,
         ProviderManager providerManager,
         AccountLinker accountLinker,
         CoreBaseSettings coreBaseSettings,
-        PersonalSettingsHelper personalSettingsHelper,
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         UserHelpTourHelper userHelpTourHelper,
@@ -545,8 +544,7 @@ public class AuthenticationController(UserManager userManager,
                 //}
 
                 await studioNotifyService.UserHasJoinAsync();
-                await userHelpTourHelper.SetIsNewUser(true);
-                await personalSettingsHelper.SetIsNewUser(true);
+                await userHelpTourHelper.SetIsNewUser(true); 
             }
 
             return userInfo;
@@ -560,7 +558,7 @@ public class AuthenticationController(UserManager userManager,
         }
     }
 
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
+        private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
         {
@@ -620,7 +618,6 @@ public class AuthenticationController(UserManager userManager,
 
         return userInfo;
     }
-
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;

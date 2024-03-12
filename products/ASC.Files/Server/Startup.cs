@@ -54,7 +54,6 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<FileHandlerService>();
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();
         DIHelper.TryAdd<DocuSignHandlerService>();
-        DIHelper.TryAdd<ThirdPartyAppHandlerService>();
         DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
@@ -92,13 +91,6 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseChunkedUploaderHandler();
-            });
-
-        app.MapWhen(
-                context => context.Request.Path.ToString().EndsWith("ThirdPartyApp", StringComparison.OrdinalIgnoreCase),
-            appBranch =>
-            {
-                appBranch.UseThirdPartyAppHandler();
             });
 
         app.MapWhen(

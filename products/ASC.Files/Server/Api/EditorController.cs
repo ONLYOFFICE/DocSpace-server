@@ -48,64 +48,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         SettingsManager settingsManager,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
-        ThirdPartySelector thirdPartySelector,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter)
-{
-    private readonly ConfigurationConverter<string> _configurationConverter = configurationConverter;
-
-    /// <summary>
-    /// Opens a third-party file with the ID specified in the request for editing.
-    /// </summary>
-    /// <short>
-    /// Open a third-party file
-    /// </short>
-    /// <category>Third-party integration</category>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Web.Files.Services.DocumentService.Configuration, ASC.Files.Core">Configuration parameters</returns>
-    /// <path>api/2.0/files/file/app-{fileId}/openedit</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
-    [AllowNotPayment]
-    [HttpGet("app-{fileId}/openedit")]
-    public async Task<ConfigurationDto<string>> OpenEditThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        var configuration = docParams.Configuration;
-        await configuration.Document.SetUrl(app.GetFileStreamUrl(file));
-        configuration.Document.Info.SetFavorite(null);
-        configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.Desktop;
-
-        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
-        {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
-            if (keyPair != null)
-            {
-                configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
-                {
-                    PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey
-                };
-            }
-        }
-
-        if (!file.Encrypted && !file.ProviderEntry)
-        {
-            await _entryManager.MarkAsRecent(file);
-        }
-
-        return await _configurationConverter.Convert(configuration, file);
-    }
-}
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
