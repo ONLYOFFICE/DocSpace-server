@@ -69,7 +69,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.Attachments)
                 .HasColumnName("attachments")
-                .HasColumnType("text")
+                .HasColumnType("mediumtext")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
