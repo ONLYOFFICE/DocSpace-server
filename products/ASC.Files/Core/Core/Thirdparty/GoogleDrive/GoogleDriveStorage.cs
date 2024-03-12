@@ -348,7 +348,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return uploadSession;
     }
 
-    public async ValueTask TransferAsync(RenewableUploadSession googleDriveSession, Stream stream, long chunkLength)
+    public async ValueTask TransferAsync(RenewableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
@@ -375,7 +375,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         {
             var bytesToTransfer = googleDriveSession.BytesTransferred + chunkLength;
             
-            if (bytesToTransfer == googleDriveSession.BytesToTransfer)
+            if (lastChunk)
             {
 
                 request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
