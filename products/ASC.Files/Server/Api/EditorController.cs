@@ -216,10 +216,26 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     }
 
     /// <summary>
+    /// Return list of users with their access rights to the file
+    /// </summary>
+    /// <short>Return list of users with their access rights to the file</short>
+    /// <category>Sharing</category>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetInfoUsersRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
+    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
+    /// <path>api/2.0/files/infousers</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
+    [HttpPost("infousers")]
+    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
+    {
+        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
+    }
+
+    /// <summary>
     /// Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.
     /// </summary>
     /// <short>Get reference data</short>
-    /// <category>Files</category>
+    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetReferenceDataDto, ASC.Files.Core" name="inDto">Request parameters for getting reference data</param>
     /// <returns type="ASC.Web.Files.Services.DocumentService.FileReference, ASC.Files.Core">File reference data</returns>
     /// <path>api/2.0/files/file/referencedata</path>

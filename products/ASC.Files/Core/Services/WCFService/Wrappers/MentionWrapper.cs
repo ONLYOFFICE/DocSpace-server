@@ -44,7 +44,7 @@ public class MentionWrapper
     /// <type>System.String, System</type>
     public string Id { get;internal set; }
 
-    /// <summary>User Image</summary>
+    /// <summary>User image</summary>
     /// <type>System.String, System</type>
     public string Image { get; internal set; }
 

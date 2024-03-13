@@ -287,13 +287,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         return true;
     }
 
-    [HttpPost("infousers")]
-    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
-    {
-        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
-    }
-
-
     /// <summary>
     /// Sets the sharing rights to all the files and folders specified in the request.
     /// </summary>
