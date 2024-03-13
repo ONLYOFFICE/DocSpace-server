@@ -277,8 +277,8 @@ public class PhotoController(UserManager userManager,
                             retina = await _userPhotoManager.GetRetinaPhotoURL(userId) + $"?hash={cacheKey}",
                             max = await _userPhotoManager.GetMaxPhotoURL(userId) + $"?hash={cacheKey}",
                             big = await _userPhotoManager.GetBigPhotoURL(userId) + $"?hash={cacheKey}",
-                            medium = await _userPhotoManager.GetMediumPhotoURL(userId) + $"?hash={cacheKey}",
-                            small = await _userPhotoManager.GetSmallPhotoURL(userId) + $"?hash={cacheKey}"
+                            medium = await _userPhotoManager.GetMediumPhotoURLAsync(userId) + $"?hash={cacheKey}",
+                            small = await _userPhotoManager.GetSmallPhotoURLAsync(userId) + $"?hash={cacheKey}"
                         };
                 }
                 else

@@ -214,12 +214,12 @@ public class UserPhotoManager(UserManager userManager,
         return await GetSizedPhotoAbsoluteWebPath(userID, BigFotoSize);
     }
 
-    public async Task<string> GetMediumPhotoURL(Guid userID)
+    public async Task<string> GetMediumPhotoURLAsync(Guid userID)
     {
         return await GetSizedPhotoAbsoluteWebPath(userID, MediumFotoSize);
     }
 
-    public async Task<string> GetSmallPhotoURL(Guid userID)
+    public async Task<string> GetSmallPhotoURLAsync(Guid userID)
     {
         return await GetSizedPhotoAbsoluteWebPath(userID, SmallFotoSize);
     }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Tweetinvi.Core.Models;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -283,6 +285,12 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         await securityControllerHelper.RemoveSecurityInfoAsync(fileStringIds, folderStringIds);
 
         return true;
+    }
+
+    [HttpPost("infousers")]
+    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
+    {
+        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
     }
 
 

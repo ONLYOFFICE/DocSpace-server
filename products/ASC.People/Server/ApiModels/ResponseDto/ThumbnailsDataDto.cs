@@ -42,8 +42,8 @@ public class ThumbnailsDataDto
             Retina = await userPhotoManager.GetRetinaPhotoURL(userInfo.Id) + $"?hash={cacheKey}",
             Max = await userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}",
             Big = await userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}",
-            Medium = await userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}",
-            Small = await userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}"
+            Medium = await userPhotoManager.GetMediumPhotoURLAsync(userInfo.Id) + $"?hash={cacheKey}",
+            Small = await userPhotoManager.GetSmallPhotoURLAsync(userInfo.Id) + $"?hash={cacheKey}"
         };
     }
 

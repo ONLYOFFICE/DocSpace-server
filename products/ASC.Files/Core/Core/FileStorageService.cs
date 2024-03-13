@@ -81,7 +81,8 @@ public class FileStorageService //: IFileStorageService
     ExternalShare externalShare,
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    MentionWrapperCreator mentionWrapperCreator)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -2641,6 +2642,34 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task<List<MentionWrapper>> GetInfoUsersAsync(List<string> userIds)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var users = new List<MentionWrapper>();
+
+        foreach (var uid in userIds)
+        {
+            if (!Guid.TryParse(uid, out var id))
+            {
+                continue;
+            }
+
+            var user = await userManager.GetUsersAsync(id);
+            if (user.Id.Equals(Constants.LostUser.Id))
+            {
+                continue;
+            }
+
+            users.Add(await mentionWrapperCreator.CreateMentionWrapperAsync(user));
+        }
+
+        return users;
+    }
+
     public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
@@ -2761,11 +2790,12 @@ public class FileStorageService //: IFileStorageService
             .Where(id => !id.Equals(authContext.CurrentAccount.ID))
             .Select(userManager.GetUsers);
 
-        var result = users
+        var result = await users
             .Where(u => u.Status != EmployeeStatus.Terminated)
-            .Select(u => new MentionWrapper(u, displayUserSettingsHelper))
+            .ToAsyncEnumerable()
+            .SelectAwait(async u => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
             .OrderBy(u => u.User, UserInfoComparer.Default)
-            .ToList();
+            .ToListAsync();
 
         return result;
     }
@@ -3230,11 +3260,12 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        users = usersInfo.Distinct()
+        users = await usersInfo.Distinct()
             .Where(user => !user.Id.Equals(authContext.CurrentAccount.ID)
                         && !user.Id.Equals(Constants.LostUser.Id))
-            .Select(user => new MentionWrapper(user, displayUserSettingsHelper))
-            .ToList();
+            .ToAsyncEnumerable()
+            .SelectAwait(async user => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
+            .ToListAsync();
 
         users = users
             .OrderBy(user => user.User, UserInfoComparer.Default)

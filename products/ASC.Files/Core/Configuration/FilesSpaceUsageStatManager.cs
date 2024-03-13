@@ -79,7 +79,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
                 else
                 {
                     item.Name = user.DisplayUserName(false, displayUserSettingsHelper);
-                    item.ImgUrl = await user.GetSmallPhotoURL(userPhotoManager);
+                    item.ImgUrl = await user.GetSmallPhotoURLAsync(userPhotoManager);
                     item.Url =await user.GetUserProfilePageUrl(commonLinkUtility);
                     item.Disabled = user.Status == EmployeeStatus.Terminated;
                 }

@@ -203,7 +203,8 @@ public class EditorConfiguration<T>(
     IDaoFactory daoFactory,
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    UserPhotoManager userPhotoManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -218,31 +219,29 @@ public class EditorConfiguration<T>(
     private UserInfo _userInfo;
     private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
     
-    private UserConfig user;
-    public UserConfig User
+    private UserConfig _user;
+    public async Task<UserConfig> GetUserAsync()
     {
-        get
-        {
-            if (user != null)
+        if (_user != null)
             {
-                return user;
+                return _user;
                 
             }
             
             if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-                user = new UserConfig
+                _user = new UserConfig
                 {
                     Id = UserInfo.Id.ToString(),
-                    Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper)
+                    Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
+                    Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager))
                 };
             }
 
-            return user;
-        }
+            return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId)
+    public async Task<string> GetCallbackUrlAsync(string fileId)
     {
         if (!ModeWrite)
         {
@@ -254,16 +253,18 @@ public class EditorConfiguration<T>(
         return externalShare.GetUrlWithShare(callbackUrl);
     }
 
-    public CoEditingConfig CoEditing =>
-        !ModeWrite && User == null
+    public async Task<CoEditingConfig> GetCoEditingAsync()
+    {
+        return !ModeWrite && await GetUserAsync() == null
             ? new CoEditingConfig
             {
                 Fast = false,
                 Change = false
             }
             : null;
+    }
 
-    public async Task<string> GetCreateUrl(EditorType editorType, FileType fileType)
+    public async Task<string> GetCreateUrlAsync(EditorType editorType, FileType fileType)
     {
         if (editorType != EditorType.Desktop)
         {
@@ -350,7 +351,7 @@ public class EditorConfiguration<T>(
         }
     }
 
-    public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
+    public async Task<List<TemplatesConfig>> GetTemplatesAsync(FileType fileType, string title)
     {
             if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
             {
@@ -820,6 +821,7 @@ public class UserConfig
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string Image { get; set; }
 }
 
 public static class ConfigurationFilesExtension

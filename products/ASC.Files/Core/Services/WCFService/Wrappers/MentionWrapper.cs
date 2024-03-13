@@ -28,27 +28,33 @@ namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
 /// </summary>
-public class MentionWrapper(UserInfo user, DisplayUserSettingsHelper displayUserSettingsHelper)
+public class MentionWrapper
 {
+    internal MentionWrapper() { }
+
     /// <summary>User information</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
-    public UserInfo User { get; set; } = user;
+    public UserInfo User { get; internal set; }
 
     /// <summary>User email</summary>
     /// <type>System.String, System</type>
-    public string Email => User.Email;
+    public string Email { get; internal set; }
 
     /// <summary>User ID</summary>
     /// <type>System.String, System</type>
-    public string Id => User.Id.ToString();
+    public string Id { get;internal set; }
+
+    /// <summary>User Image</summary>
+    /// <type>System.String, System</type>
+    public string Image { get; internal set; }
 
     /// <summary>Specifies if the user has the access to the file or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool HasAccess { get; set; }
+    public bool HasAccess { get; internal set; }
 
     /// <summary>User display name</summary>
     /// <type>System.String, System</type>
-    public string Name => User.DisplayUserName(false, displayUserSettingsHelper);
+    public string Name { get; internal set; }
 }
 
 /// <summary>

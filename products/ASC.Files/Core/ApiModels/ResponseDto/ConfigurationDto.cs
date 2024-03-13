@@ -226,18 +226,18 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto<T>
         {
-            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString()),
-            CoEditing = source.CoEditing,
-            CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
-            Customization = await configConverter.Convert(configuration, file),
+            CallbackUrl = await source.GetCallbackUrlAsync(file.Id.ToString()),
+            CoEditing = await source.GetCoEditingAsync(),
+            CreateUrl = await source.GetCreateUrlAsync(configuration.EditorType, fileType),
+            Customization = await configConverter.ConvertAsync(configuration, file),
             Embedded = source.GetEmbedded(configuration.EditorType),
             EncryptionKeys = source.EncryptionKeys,
             Lang = source.Lang,
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Templates = await source.GetTemplates(fileType, configuration.Document.Title),
-            User = source.User
+            Templates = await source.GetTemplatesAsync(fileType, configuration.Document.Title),
+            User = await source.GetUserAsync()
         };
 
         return result;
@@ -250,7 +250,7 @@ public class CustomizationConfigConverter<T>(
     CustomerConfigConverter customerConfigConverter,
     CoreBaseSettings coreBaseSettings)
 {
-    public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    public async Task<CustomizationConfigDto<T>> ConvertAsync(Configuration<T> configuration, File<T> file)
     {    
         var source = configuration.EditorConfig?.Customization;
         

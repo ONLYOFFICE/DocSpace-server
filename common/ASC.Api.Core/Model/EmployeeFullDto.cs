@@ -364,7 +364,7 @@ public class EmployeeFullDtoHelper(
 
         if (_httpContext.Check("avatarMedium"))
         {
-            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURLAsync(userInfo.Id) + $"?hash={cacheKey}";
         }
 
         if (_httpContext.Check("avatar"))

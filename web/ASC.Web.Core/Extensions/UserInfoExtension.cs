@@ -38,8 +38,13 @@ public static class UserInfoExtension
         return displayUserSettingsHelper.GetFullUserName(userInfo, withHtmlEncode);
     }
 
-    public static async Task<string> GetSmallPhotoURL(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
+    public static async Task<string> GetSmallPhotoURLAsync(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
     {
-        return await UserPhotoManager.GetSmallPhotoURL(userInfo.Id);
+        return await UserPhotoManager.GetSmallPhotoURLAsync(userInfo.Id);
+    }
+
+    public static async Task<string> GetMediumPhotoURLAsync(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
+    {
+        return await UserPhotoManager.GetMediumPhotoURLAsync(userInfo.Id);
     }
 }

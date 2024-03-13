@@ -31,6 +31,7 @@ global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.Diagnostics;
 global using System.Extensions;
+global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Net;
