@@ -241,6 +241,8 @@ public class SettingsController : BaseSettingsController
 
             var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
+
+            settings.InvitationLimit = _setupInfo.InvitationLimit;
         }
         else
         {

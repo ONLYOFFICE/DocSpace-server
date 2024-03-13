@@ -170,6 +170,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string UserNameRegex { get; set; }
 
+    /// <summary>Invitation limit</summary>
+    /// <type>System.Nullable{System.Int32}, System</type>
+    public int? InvitationLimit { get; set; }
+
     /// <summary>Plugins</summary>
     /// <type>ASC.Web.Api.ApiModel.ResponseDto.PluginsDto, ASC.Web.Api</type>
     public PluginsDto Plugins { get; set; }

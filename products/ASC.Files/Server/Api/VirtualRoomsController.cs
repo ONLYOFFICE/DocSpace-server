@@ -33,6 +33,7 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
         GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
+        SetupInfo setupInfo,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -45,6 +46,7 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
             globalFolderHelper,
             fileOperationDtoHelper,
             coreBaseSettings,
+            setupInfo,
             customTagsService,
             roomLogoManager,
             fileStorageService,
@@ -83,6 +85,7 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
         GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
+        SetupInfo setupInfo,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -95,6 +98,7 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
             globalFolderHelper,
             fileOperationDtoHelper,
             coreBaseSettings,
+            setupInfo,
             customTagsService,
             roomLogoManager,
             fileStorageService,
@@ -133,6 +137,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
     private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly SetupInfo _setupInfo;
     private readonly CustomTagsService _customTagsService;
     private readonly RoomLogoManager _roomLogoManager;
     protected readonly FileStorageService _fileStorageService;
@@ -145,6 +150,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
+        SetupInfo setupInfo,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
@@ -158,6 +164,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         _globalFolderHelper = globalFolderHelper;
         _fileOperationDtoHelper = fileOperationDtoHelper;
         _coreBaseSettings = coreBaseSettings;
+        _setupInfo = setupInfo;
         _customTagsService = customTagsService;
         _roomLogoManager = roomLogoManager;
         _fileStorageService = fileStorageService;
@@ -287,6 +294,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("rooms/{id}/share")]
+    [EnableRateLimiting("sensitive_api")]
     public async Task<RoomSecurityDto> SetRoomSecurityAsync(T id, RoomInvitationRequestDto inDto)
     {
         ErrorIfNotDocSpace();
@@ -296,6 +304,13 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         if (inDto.Invitations == null || !inDto.Invitations.Any())
         {
             return result;
+        }
+
+        var invitationsCount = inDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+        if (invitationsCount > _setupInfo.InvitationLimit)
+        {
+            throw new Exception(Resource.ErrorInvitationLimitExceeded);
         }
 
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
