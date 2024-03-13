@@ -45,7 +45,8 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         WebItemSecurityCache webItemSecurityCache,
         QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        IConfiguration configuration)
 {
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
@@ -318,7 +319,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!CheckPasswordRegex(passwordSettingsObj, password))
+        if (!CheckPasswordRegex(passwordSettingsObj, password) || !PasswordSettings.CheckLengthInRange(configuration, password.Length))
         {
             throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
         }

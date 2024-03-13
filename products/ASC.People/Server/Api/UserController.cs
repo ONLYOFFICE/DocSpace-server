@@ -372,6 +372,7 @@ public class UserController(ICache cache,
 
             if (!string.IsNullOrEmpty(inDto.Password))
             {
+                await userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
                 inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
             }
         }
