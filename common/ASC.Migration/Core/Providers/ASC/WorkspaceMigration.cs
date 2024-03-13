@@ -178,10 +178,10 @@ public class WorkspaceMigration(
                 migratingProjectFiles = null;
             }
         }
-        catch (Exception ex)
+        catch
         {
             _migrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            Log($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive", ex);
+            ReportProgress(GetProgress(), $"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
             throw new Exception($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
         }
         if (reportProgress)

@@ -154,6 +154,7 @@ public class GoogleWorkspaceMigration(
                 Log($"Couldn't parse user from {key} archive", ex);
                 if (_migrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
+                    ReportProgress(GetProgress(), "Couldn't parse arhives");
                     throw new Exception("Couldn't parse arhives");
                 }
             }
