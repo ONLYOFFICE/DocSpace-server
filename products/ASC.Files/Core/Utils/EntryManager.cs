@@ -97,6 +97,17 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
         {
             rootId = await globalFolderHelper.FolderShareAsync;
         }
+        else if (firstVisible.ProviderEntry && firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
+        {
+            if (authContext.IsAuthenticated && firstVisible.ShareRecord is not { IsLink: true })
+            {
+                rootId = firstVisible.RootFolderType == FolderType.VirtualRooms 
+                    ? await globalFolderHelper.FolderVirtualRoomsAsync
+                    : await globalFolderHelper.FolderArchiveAsync;
+            }
+                
+            breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+        }
         else
         {
             switch (firstVisible.FolderType)
@@ -121,20 +132,6 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
 
                 case FolderType.BUNCH:
                     rootId = await globalFolderHelper.FolderProjectsAsync;
-                    break;
-                case FolderType.VirtualRooms:
-                    if (firstVisible.ProviderEntry)
-                    {
-                        rootId = await globalFolderHelper.FolderVirtualRoomsAsync;
-                        breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
-                    }
-                    break;
-                case FolderType.Archive:
-                    if (firstVisible.ProviderEntry)
-                    {
-                        rootId = await globalFolderHelper.FolderArchiveAsync;
-                        breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
-                    }
                     break;
             }
         }

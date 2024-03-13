@@ -69,6 +69,6 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     {
         profile.CreateMap<ValidationInfo, ExternalShareDto>()
             .ForMember(dest => dest.RoomType, opt =>
-                opt.MapFrom(source => DocSpaceHelper.GetRoomType(source.FolderType)));
+                opt.MapFrom(source => DocSpaceHelper.MapToRoomType(source.FolderType)));
     }
 }

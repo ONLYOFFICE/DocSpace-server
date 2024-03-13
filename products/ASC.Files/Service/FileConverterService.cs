@@ -26,53 +26,27 @@
 
 using System.Security;
 
-using ASC.Core.Common.Notify.Engine;
-
-using Microsoft.Extensions.Options;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Files.ThumbnailBuilder;
 
 [Singleton(Additional = typeof(FileConverterQueueExtension))]
 internal class FileConverterService<T>(
-        IServiceScopeFactory serviceScopeFactory,
+        IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
-    : BackgroundService
-    {
-    private readonly int _timerDelay = 1000;
+     : ActivePassiveBackgroundService<FileConverterService<T>>(logger, scopeFactory)
+ {
+    private static readonly int _timerDelay = 1000;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        logger.DebugFileConverterServiceRuning();
-
-        stoppingToken.Register(logger.DebugFileConverterServiceStopping);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<FileConverterService<T>>>();
-            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<FileConverterService<T>>>>().Value.InstanceId;
-
-            if (!await registerInstanceService.IsActive(instanceId))
-            {
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ExecuteCheckFileConverterStatusAsync(serviceScope);
-
-            await Task.Delay(_timerDelay, stoppingToken);
-        }
-    }
-
-    private async Task ExecuteCheckFileConverterStatusAsync(IServiceScope scope)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(_timerDelay);
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         try
         {
-            var fileConverterQueue = scope.ServiceProvider.GetService<FileConverterQueue>();
+            await using var serviceScope = _scopeFactory.CreateAsyncScope();
+
+            var fileConverterQueue = serviceScope.ServiceProvider.GetService<FileConverterQueue>();
 
             var conversionQueue = fileConverterQueue.GetAllTask<T>().ToList();
 
@@ -97,10 +71,10 @@ internal class FileConverterService<T>(
                 int operationResultProgress;
                 var password = converter.Password;
 
-                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                var commonLinkUtility = serviceScope.ServiceProvider.GetService<CommonLinkUtility>();
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
-                var scopeClass = scope.ServiceProvider.GetService<FileConverterQueueScope>();
+                var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
                 var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
@@ -115,7 +89,7 @@ internal class FileConverterService<T>(
 
                 try
                 {
-                    var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
+                    var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
 
                     if (converter.Headers != null)
                     {

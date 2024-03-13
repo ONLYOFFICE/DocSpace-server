@@ -26,21 +26,24 @@
 
 namespace ASC.Migration.Core;
 
+[Scope]
 public interface IMigration : IDisposable
 {
     event Action<double, string> OnProgressUpdate;
 
     double GetProgress();
     string GetProgressStatus();
+    MigrationApiInfo ApiInfo { get; }
 
+    Task InitAsync(string path, CancellationToken token, string operation);
 
-    void Init(string path, CancellationToken token);
+    Task<MigrationApiInfo> ParseAsync(bool reportProgress);
 
-    Task<MigrationApiInfo> Parse();
+    Task MigrateAsync(MigrationApiInfo migrationInfo);
 
-    Task Migrate(MigrationApiInfo migrationInfo);
-
-    Stream GetLogs();
+    string GetLogName();
 
     List<Guid> GetGuidImportedUsers();
+
+    MigratorMeta Meta { get; }
 }

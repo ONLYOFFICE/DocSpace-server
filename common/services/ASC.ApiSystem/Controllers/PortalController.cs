@@ -68,7 +68,7 @@ public class PortalController(
     #region API methods
 
     [HttpPost("register")]
-    [AllowCrossSiteJson]
+    //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal")]
     public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {

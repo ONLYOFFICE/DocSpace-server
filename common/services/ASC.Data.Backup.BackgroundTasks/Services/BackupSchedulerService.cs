@@ -26,8 +26,6 @@
 
 using ASC.Core.Configuration;
 
-using Microsoft.Extensions.Options;
-
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
@@ -36,47 +34,16 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
         ConfigurationExtension configuration,
         CoreBaseSettings coreBaseSettings,
         IEventBus eventBus)
-    : BackgroundService
+     : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
-    private readonly TimeSpan _backupSchedulerPeriod = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
-
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        logger.DebugBackupSchedulerServiceStarting();
-
-        stoppingToken.Register(logger.DebugBackupSchedulerServiceStopping);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupSchedulerService>>();
-            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<BackupSchedulerService>>>().Value.InstanceId;
-
-            if (!await registerInstanceService.IsActive(instanceId))
-            {
-                logger.DebugBackupSchedulerServiceIsNotActive(instanceId);
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            logger.DebugBackupSchedulerServiceDoingWork();
-
-            await ExecuteBackupSchedulerAsync(stoppingToken);
-
-            await Task.Delay(_backupSchedulerPeriod, stoppingToken);
-        }
-
-        logger.DebugBackupSchedulerServiceStopping();
-    }
-
-    private async Task ExecuteBackupSchedulerAsync(CancellationToken stoppingToken)
-    {
-        using var serviceScope = scopeFactory.CreateScope();
+        using var serviceScope = _scopeFactory.CreateScope();
 
         var tariffService = serviceScope.ServiceProvider.GetRequiredService<ITariffService>();
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();

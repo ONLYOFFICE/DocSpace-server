@@ -40,14 +40,28 @@ public static class DataOperatorFactory
         return new ZipWriteOperator(tempStream, backupFilePath);
     }
 
-    public static IDataReadOperator GetReadOperator(string targetFile)
+    public static IDataReadOperator GetReadOperator(string targetFile, bool removeTarget = true)
     {
-        if (targetFile.EndsWith("tar.gz")) 
+        if (targetFile.EndsWith("tar.gz"))
         {
-            return new ZipReadOperator(targetFile);
+            return new ZipReadOperator(targetFile, removeTarget);
         }
+        else
+        {
+            return new TarReadOperator(targetFile, removeTarget);
+        }
+    }
 
-        return new TarReadOperator(targetFile);
+    public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
+    {
+        if (targetFile.EndsWith("tar.gz"))
+        {
+            return new ZipReadOperator(targetFile, token, removeTarget);
+        }
+        else
+        {
+            return new TarReadOperator(targetFile, token, removeTarget);
+        }
     }
 }
  

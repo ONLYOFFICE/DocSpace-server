@@ -26,14 +26,20 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
-public class MigratorMeta
+public class MigratorMeta(string name, int numberOfSteps, bool archivesIsMultiple)
 {
-    public Type MigratorType { get; private set; }
+    public string Name { get; private set; } = name;
+    public int NumberOfSteps { get; } = numberOfSteps;
+    public bool ArchivesIsMultiple { get; } = archivesIsMultiple;
+    public bool RequiresFolder { get; private set; }
+    public string[] RequiredFileTypes { get; private set; }
 
-    public ApiMigratorAttribute MigratorInfo { get => MigratorType.GetCustomAttribute<ApiMigratorAttribute>(); }
-
-    public MigratorMeta(Type type)
+    public MigratorMeta(string name, string[] fileTypes) : this(name, 0, false)
     {
-        MigratorType = type;
+        RequiredFileTypes = fileTypes;
+    }
+
+    public MigratorMeta(string name) : this(name, 0, false)
+    {
     }
 }

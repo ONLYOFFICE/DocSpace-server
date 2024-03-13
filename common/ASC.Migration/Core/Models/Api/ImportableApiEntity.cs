@@ -26,9 +26,9 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+[ProtoContract]
 public abstract class ImportableApiEntity
 {
-    [System.Text.Json.Serialization.JsonRequired]
-    [DataMember(Name = "shouldImport", IsRequired = true)]
-    public bool ShouldImport { get; set; } = true;
+    [ProtoMember(1)]
+    public bool ShouldImport { get; set; }
 }

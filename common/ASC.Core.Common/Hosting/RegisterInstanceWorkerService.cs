@@ -34,7 +34,6 @@ public class RegisterInstanceWorkerService<T>(
     IOptions<InstanceWorkerOptions<T>> optionsSettings)
     : BackgroundService where T : IHostedService
 {
-    private readonly string _workerTypeName = optionsSettings.Value.WorkerTypeName ?? typeof(T).GetFormattedName();
     private readonly InstanceWorkerOptions<T> _settings = optionsSettings.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

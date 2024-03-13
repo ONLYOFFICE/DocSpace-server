@@ -25,9 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Hosting;
-
-using Microsoft.Extensions.Options;
-
 using static ASC.Notify.Engine.NotifyEngine;
 
 namespace ASC.Core.Common.Notify.Engine;
@@ -35,39 +32,13 @@ namespace ASC.Core.Common.Notify.Engine;
 [Singleton]
 public class NotifySchedulerService(NotifyEngine notifyEngine,
                                     ILogger<NotifyEngine> logger,
-                                    IServiceScopeFactory scopeFactory) : BackgroundService
+                                    IServiceScopeFactory scopeFactory) :  ActivePassiveBackgroundService<NotifySchedulerService>(logger, scopeFactory)
 {
-    private readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        logger.DebugNotifySchedulerServiceStarting();
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = _defaultSleep;
 
-        stoppingToken.Register(logger.DebugNotifySchedulerServiceStopping);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySchedulerService>>();
-            var instanceId = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<NotifySchedulerService>>>().Value.InstanceId;
-
-            if (!await registerInstanceService.IsActive(instanceId))
-            {
-                logger.DebugNotifySchedulerServiceIsNotActive(instanceId);
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            var delay = await ExecuteNotifySchedulerAsync(stoppingToken);
-
-            await Task.Delay(delay, stoppingToken);
-        }
-    }
-
-    private async Task<TimeSpan> ExecuteNotifySchedulerAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         var min = DateTime.MaxValue;
         var now = DateTime.UtcNow;
@@ -125,6 +96,6 @@ public class NotifySchedulerService(NotifyEngine notifyEngine,
             wait = TimeSpan.FromTicks(int.MaxValue);
         }
 
-        return wait;
+        ExecuteTaskPeriod = wait;
     }
 }

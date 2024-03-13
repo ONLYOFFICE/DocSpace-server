@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Core;
 using ASC.Core.Common.Notify.Engine;
+using ASC.Migration.Core.Core;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -56,11 +57,8 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
 
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
+        MigrationCore.Register(DIHelper);
+        services.RegisterQuotaFeature();
 
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
@@ -93,6 +91,13 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseUrlShortRewriter();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
+            appBranch =>
+            {
+                appBranch.UseMigrationFileUploadHandler();
             });
     }
 }

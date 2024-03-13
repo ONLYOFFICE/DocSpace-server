@@ -35,6 +35,18 @@ public static class HttpRequestExtensions
         return request != null ? new Uri(request.GetDisplayUrl()) : null;
     }
 
+    public static Uri OriginUrl(this HttpRequest request)
+    {
+        if (request == null)
+        {
+            return null;
+        }
+
+        var origin = request.Headers[HeaderNames.Origin].FirstOrDefault();
+
+        return string.IsNullOrEmpty(origin) ? Url(request) : new Uri(origin);
+    }
+
     public static Uri PushRewritenUri(this HttpContext context)
     {
         return context != null ? PushRewritenUri(context, context.Request.Url()) : null;

@@ -61,7 +61,7 @@ public class BaseCommonLinkUtility
 
             if (_httpContextAccessor?.HttpContext?.Request != null)
             {
-                var u = _httpContextAccessor?.HttpContext.Request.Url();
+                var u = _httpContextAccessor?.HttpContext.Request.OriginUrl();
 
                 ArgumentNullException.ThrowIfNull(u);
 
@@ -105,7 +105,7 @@ public class BaseCommonLinkUtility
             // first, take from current request
             if (_httpContextAccessor?.HttpContext?.Request != null && !serverUriForce)
             {
-                var u = _httpContextAccessor?.HttpContext?.Request.Url();
+                var u = _httpContextAccessor?.HttpContext?.Request.OriginUrl();
 
                 ArgumentNullException.ThrowIfNull(u);
 

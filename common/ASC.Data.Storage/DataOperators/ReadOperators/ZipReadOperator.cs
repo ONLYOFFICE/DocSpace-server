@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage.DataOperators;
 public class ZipReadOperator : BaseReadOperator
 {
-    public ZipReadOperator(string targetFile)
+    public ZipReadOperator(string targetFile, bool removeTarget = true)
     {
         _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
 
@@ -37,7 +37,25 @@ public class ZipReadOperator : BaseReadOperator
         {
             tarOutputStream.ExtractContents(_tmpdir);
         }
+        if (removeTarget)
+        {
+            File.Delete(targetFile);
+        }
+    }
 
-        File.Delete(targetFile);
+    public ZipReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
+    {
+        _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
+
+        using (var stream = File.OpenRead(targetFile))
+        using (var reader = new GZipInputStream(stream))
+        using (var tarOutputStream = TarArchive.CreateInputTarArchive(reader, Encoding.UTF8))
+        {
+            tarOutputStream.ExtractContents(_tmpdir, false, token);
+        }
+        if (removeTarget)
+        {
+            File.Delete(targetFile);
+        }
     }
 }

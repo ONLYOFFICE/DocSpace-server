@@ -297,7 +297,7 @@ public static class ServiceCollectionExtension
     /// </remarks>
     public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
                                                                                           IConfiguration configuration,
-                                                                                          string workerTypeName = null) where T : class, IHostedService
+                                                                                          string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
         var typeName = workerTypeName ?? typeof(T).GetFormattedName();
 
