@@ -453,7 +453,7 @@ public class InfoConfig<T>(
 
         try
         {
-            return await fileSharing.GetSharedInfoShortFileAsync(file.Id);
+            return await fileSharing.GetSharedInfoShortFileAsync(file);
         }
         catch
         {

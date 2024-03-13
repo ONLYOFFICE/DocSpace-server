@@ -371,7 +371,7 @@ public class InfoConfigConverter<T>
             SharingSettings = await source.GetSharingSettings(file),
             Type = source.Type,
             Uploaded = source.GetUploaded(file)
-        };
+        }; 
 
         return result;
     }
