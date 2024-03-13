@@ -242,13 +242,24 @@ public class WorkspaceMigratingFiles(
         }
 
         var fileDao = daoFactory.GetFileDao<int>();
+
+        //docker unzip filesfolder_... instend of files/folder... 
+        var folderFiles = _dataReader.GetDirectories("").Select(d => Path.GetFileName(d)).FirstOrDefault(d => d.StartsWith("files"));
+        if (folderFiles.Equals("files"))
+        {
+            folderFiles = "files/folder";
+        }
+        else
+        {
+            folderFiles = folderFiles.Split('_')[0];
+        }
+
         foreach (var file in _storage.Files)
         {
             try
             {
                 var path =
-                    $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
-                Log($"file path - {path}", null);
+                    $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                 await using var fs = _dataReader.GetEntry(path);
 
                 var newFile = serviceProvider.GetService<File<int>>();
@@ -380,7 +391,7 @@ public class WorkspaceMigratingFiles(
                         }
                         foreach (var file in _storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))
                         {
-                            var path = $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                            var path = $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                             await using var fs = _dataReader.GetEntry(path);
 
                             var newFile = serviceProvider.GetService<File<int>>();
