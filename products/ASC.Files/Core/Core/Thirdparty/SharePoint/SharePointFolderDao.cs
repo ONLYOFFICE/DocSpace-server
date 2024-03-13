@@ -447,6 +447,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
             : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
     }
 
+    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;

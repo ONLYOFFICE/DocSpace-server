@@ -481,6 +481,22 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
 
         return await fileShareDtoHelper.Get(linkAce);
     }
+
+    /// <summary>
+    /// Saves a file with the identifier specified in the request as a PDF document
+    /// </summary>
+    /// <short>Save as pdf</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
+    /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("file/{id}/saveaspdf")]
+    public async Task<FileDto<T>> SaveAsPdf(T id, SaveAsPdfRequestDto<T> inDto)
+    {
+        return await filesControllerHelper.SaveAsPdf(id, inDto.FolderId, inDto.Title);
+    }
 }
 
 public class FilesControllerCommon(
