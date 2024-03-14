@@ -36,42 +36,12 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
         get { return new Guid("aa93a4d1-012d-4ccd-895a-e094e809c840"); }
     }
 
-    public const int MaxLength = 30;
     private readonly IConfiguration _configuration;
-
-    private bool? _printableASCII;
-
-    private bool PrintableASCII
-    {
-        get
-        {
-            if (_printableASCII == null)
-            {
-                _printableASCII = true;
-
-                if (bool.TryParse(_configuration["web:password:ascii:cut"], out var cut))
-                {
-                    _printableASCII = !cut;
-                }
-            }
-
-            return _printableASCII.Value;
-        }
-    }
+    
 
     /// <summary>Minimum password length</summary>
     /// <type>System.Int32, System</type>
     public int MinLength { get; set; }
-
-    /// <summary>Allowed characters for the password in the regex string format</summary>
-    /// <type>System.String, System</type>
-    public string AllowedCharactersRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
-        }
-    }
 
     /// <summary>Specifies if the password must include the uppercase letters or not</summary>
     /// <type>System.Boolean, System</type>
@@ -80,40 +50,12 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
     /// <summary>Specifies if the password must include the digits or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Digits { get; set; }
-
-    /// <summary>Allowed digits for the password in the regex string format</summary>
-    /// <type>System.String, System</type>
-    public string DigitsRegexStr
-    {
-        get
-        {
-            return @"(?=.*\d)";
-        }
-    }
-
-    /// <summary>Allowed uppercase letters for the password in the regex string format</summary>
-    /// <type>System.String, System</type>
-    public string UpperCaseRegexStr
-    {
-        get
-        {
-            return @"(?=.*[A-Z])";
-        }
-    }
+    
 
     /// <summary>Specifies if the password must include the special symbols or not</summary>
     /// <type>System.Boolean, System</type>
     public bool SpecSymbols { get; set; }
-
-    /// <summary>Allowed special symbols for the password in the regex string format</summary>
-    /// <type>System.String, System</type>
-    public string SpecSymbolsRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
-        }
-    }
+    
     public PasswordSettings(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -129,13 +71,105 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         if (_configuration != null && int.TryParse(_configuration["web:password:min"], out var defaultMinLength))
         {
-            def.MinLength = Math.Max(1, Math.Min(MaxLength, defaultMinLength));
+            def.MinLength = Math.Max(1, Math.Min(PasswordSettingsManager.MaxLength, defaultMinLength));
         }
 
         return def;
     }
+}
 
-    public static bool CheckLengthInRange(IConfiguration configuration, int length)
+[Singleton]
+public sealed class PasswordSettingsManager(IConfiguration configuration)
+{
+    public const int MaxLength = 30;
+
+    private bool? _printableASCII;
+
+    private bool PrintableASCII
+    {
+        get
+        {
+            if (_printableASCII == null)
+            {
+                _printableASCII = true;
+
+                if (bool.TryParse(configuration["web:password:ascii:cut"], out var cut))
+                {
+                    _printableASCII = !cut;
+                }
+            }
+
+            return _printableASCII.Value;
+        }
+    }
+    
+
+    /// <summary>Allowed characters for the password in the regex string format</summary>
+    /// <type>System.String, System</type>
+    public string AllowedCharactersRegexStr
+    {
+        get
+        {
+            return PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
+        }
+    }
+
+    /// <summary>Allowed digits for the password in the regex string format</summary>
+    /// <type>System.String, System</type>
+    public string DigitsRegexStr
+    {
+        get => @"(?=.*\d)";
+    }
+
+    /// <summary>Allowed uppercase letters for the password in the regex string format</summary>
+    /// <type>System.String, System</type>
+    public string UpperCaseRegexStr
+    {
+        get => @"(?=.*[A-Z])";
+    }
+
+    /// <summary>Allowed special symbols for the password in the regex string format</summary>
+    /// <type>System.String, System</type>
+    public string SpecSymbolsRegexStr
+    {
+        get
+        {
+            return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
+        }
+    }
+    
+    public string GetPasswordRegex(PasswordSettings passwordSettings)
+    {
+        var pwdBuilder = new StringBuilder("^");
+
+        if (passwordSettings.Digits)
+        {
+            pwdBuilder.Append(DigitsRegexStr);
+        }
+
+        if (passwordSettings.UpperCase)
+        {
+            pwdBuilder.Append(UpperCaseRegexStr);
+        }
+
+        if (passwordSettings.SpecSymbols)
+        {
+            pwdBuilder.Append(SpecSymbolsRegexStr);
+        }
+
+        pwdBuilder.Append($"{AllowedCharactersRegexStr}{{{passwordSettings.MinLength},{MaxLength}}}$");
+
+        return pwdBuilder.ToString();
+    }
+
+    public bool CheckPasswordRegex(PasswordSettings passwordSettings, string password)
+    {
+        var passwordRegex = GetPasswordRegex(passwordSettings);
+
+        return new Regex(passwordRegex).IsMatch(password);
+    }
+
+    public bool CheckLengthInRange(int length)
     {
         if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
         {

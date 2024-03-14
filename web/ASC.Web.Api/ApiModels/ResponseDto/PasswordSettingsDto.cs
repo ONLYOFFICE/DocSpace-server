@@ -24,71 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class TenantModel : IModel
+public class PasswordSettingsDto
 {
-    public string PortalName { get; set; }
+    public int MinLength { get; set; }
+    
+    public bool UpperCase { get; set; }
 
-    public int? TenantId { get; set; }
+    public bool Digits { get; set; }
+    
+    public bool SpecSymbols { get; set; }
+    
+    public string AllowedCharactersRegexStr { get; set; }
+    
+    public string DigitsRegexStr { get; set; }
 
-    [StringLength(255)]
-    public string AffiliateId { get; set; }
+    public string UpperCaseRegexStr { get; set; }
 
-    [StringLength(255)]
-    public string PartnerId { get; set; }
+    public string SpecSymbolsRegexStr { get; set; }
+}
 
-    public string Campaign { get; set; }
-
-    [StringLength(255)]
-    public string FirstName { get; set; }
-
-    //todo  [Email]
-    [StringLength(255)]
-    public string Email { get; set; }
-
-    public int Industry { get; set; }
-
-    [StringLength(7)]
-    public string Language { get; set; }
-
-    [StringLength(255)]
-    public string LastName { get; set; }
-
-    [StringLength(38)]
-    public string Module { get; set; }
-
-    //todo: delete after www update
-    [StringLength(PasswordSettingsManager.MaxLength)]
-    public string Password { get; set; }
-
-    public string PasswordHash { get; set; }
-
-    [StringLength(32)]
-    public string Phone { get; set; }
-
-    public string RecaptchaResponse { get; set; }
-
-    public RecaptchaType RecaptchaType { get; set; }
-
-    [StringLength(20)]
-    public string Region { get; set; }
-
-    [JsonPropertyName("awsRegion")]
-    public string AWSRegion { get; set; }
-
-    public TenantStatus Status { get; set; }
-
-    public bool SkipWelcome { get; set; }
-
-    [StringLength(255)]
-    public string TimeZoneName { get; set; }
-
-    public bool Spam { get; set; }
-
-    public bool Calls { get; set; }
-
-    public string AppKey { get; set; }
-
-    public bool LimitedAccessSpace { get; set; }
+[Singleton]
+public sealed class PasswordSettingsConverter(PasswordSettingsManager settingsManager)
+{
+    public PasswordSettingsDto Convert(PasswordSettings passwordSettings)
+    {
+        return new PasswordSettingsDto
+        {
+            MinLength = passwordSettings.MinLength,
+            UpperCase = passwordSettings.UpperCase,
+            Digits = passwordSettings.Digits,
+            SpecSymbols = passwordSettings.SpecSymbols,
+            AllowedCharactersRegexStr = settingsManager.AllowedCharactersRegexStr,
+            DigitsRegexStr = settingsManager.DigitsRegexStr,
+            UpperCaseRegexStr = settingsManager.UpperCaseRegexStr,
+            SpecSymbolsRegexStr = settingsManager.SpecSymbolsRegexStr
+        };
+    }
 }

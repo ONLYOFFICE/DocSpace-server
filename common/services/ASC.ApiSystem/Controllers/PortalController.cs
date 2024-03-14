@@ -41,7 +41,6 @@ public class PortalController(
         CoreSettings coreSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
-        UserManagerWrapper userManagerWrapper,
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
@@ -49,7 +48,8 @@ public class PortalController(
         PasswordHasher passwordHasher,
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
-        QuotaUsageManager quotaUsageManager)
+        QuotaUsageManager quotaUsageManager,
+        PasswordSettingsManager passwordSettingsManager)
     : ControllerBase
 {
     #region For TEST api
@@ -563,7 +563,7 @@ public class PortalController(
 
         var passwordSettings = settingsManager.GetDefault<PasswordSettings>();
 
-        if (!userManagerWrapper.CheckPasswordRegex(passwordSettings, pwd))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettings, pwd))
         {
             error = new { error = "passPolicyError", message = "Password is incorrect" };
             return false;
