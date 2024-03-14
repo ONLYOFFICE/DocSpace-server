@@ -129,6 +129,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
     {
         var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
         var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-        await storage.TransferAsync(googleDriveSession, stream, chunkLength);
+        var lastChunk = uploadSession.Items.ContainsKey("lastChunk");
+        await storage.TransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
     }
 }

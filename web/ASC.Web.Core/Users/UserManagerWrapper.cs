@@ -33,19 +33,21 @@ namespace ASC.Web.Core.Users;
 /// </summary>
 /// 
 [Scope]
-public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
-        UserManager userManager,
-        SecurityContext securityContext,
-        CustomNamingPeople customNamingPeople,
-        TenantUtil tenantUtil,
-        SettingsManager settingsManager,
-        UserFormatter userFormatter,
-        CountPaidUserChecker countPaidUserChecker,
-        TenantManager tenantManager,
-        WebItemSecurityCache webItemSecurityCache,
-        QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
-        IDistributedLockProvider distributedLockProvider)
+public sealed class UserManagerWrapper(
+    StudioNotifyService studioNotifyService,
+    UserManager userManager,
+    SecurityContext securityContext,
+    CustomNamingPeople customNamingPeople,
+    TenantUtil tenantUtil,
+    SettingsManager settingsManager,
+    UserFormatter userFormatter,
+    CountPaidUserChecker countPaidUserChecker,
+    TenantManager tenantManager,
+    WebItemSecurityCache webItemSecurityCache,
+    QuotaSocketManager quotaSocketManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+    IDistributedLockProvider distributedLockProvider,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
@@ -318,42 +320,13 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!CheckPasswordRegex(passwordSettingsObj, password))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettingsObj, password) || !passwordSettingsManager.CheckLengthInRange(password.Length))
         {
             throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
         }
     }
 
-    private string GetPasswordRegex(PasswordSettings passwordSettings)
-    {
-        var pwdBuilder = new StringBuilder("^");
 
-        if (passwordSettings.Digits)
-        {
-            pwdBuilder.Append(passwordSettings.DigitsRegexStr);
-        }
-
-        if (passwordSettings.UpperCase)
-        {
-            pwdBuilder.Append(passwordSettings.UpperCaseRegexStr);
-        }
-
-        if (passwordSettings.SpecSymbols)
-        {
-            pwdBuilder.Append(passwordSettings.SpecSymbolsRegexStr);
-        }
-
-        pwdBuilder.Append($"{passwordSettings.AllowedCharactersRegexStr}{{{passwordSettings.MinLength},{PasswordSettings.MaxLength}}}$");
-
-        return pwdBuilder.ToString();
-    }
-
-    public bool CheckPasswordRegex(PasswordSettings passwordSettings, string password)
-    {
-        var passwordRegex = GetPasswordRegex(passwordSettings);
-
-        return new Regex(passwordRegex).IsMatch(password);
-    }
 
     public async Task<string> SendUserPasswordAsync(string email)
     {
@@ -408,7 +381,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         var text = new StringBuilder();
 
         text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettings.MaxLength);
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
         text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
         text.Append($", {Resource.ErrorPasswordNoSpaces}");
 

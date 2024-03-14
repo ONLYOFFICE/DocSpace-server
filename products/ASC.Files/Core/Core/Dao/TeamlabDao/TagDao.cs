@@ -684,7 +684,7 @@ internal class TagDao(UserManager userManager,
         {
             tempTags = tempTags.Concat(Queries.TmpShareFileTagsAsync(filesDbContext, tenantId, subject, FolderType.USER));
             tempTags = tempTags.Concat(Queries.TmpShareFolderTagsAsync(filesDbContext, tenantId, subject, FolderType.USER));
-            tempTags = tempTags.Concat(Queries.TmpShareSBoxTagsAsync(filesDbContext, tenantId, subject));
+            tempTags = tempTags.Concat(Queries.TmpShareSBoxTagsAsync(filesDbContext, tenantId, subject, Selectors.All.Select(s => s.Id).ToList()));
         }
         else if (parentFolder.FolderType == FolderType.Privacy)
         {
@@ -894,27 +894,26 @@ static file class Queries
                     .Select(r => r.tagLink)
                     .Distinct());
 
-    public static readonly Func<FilesDbContext, int, Guid, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> selectorsIds) =>
                 ctx.Tag
-                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
-                    .Join(ctx.TagLink, r => r.Id, l => l.TagId,
+                    .Join(ctx.TagLink, r => r.Id, l => l.TagId, 
                         (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => ctx.Security.Any(a =>
+                    .Where(r => ctx.Security.Any(a => 
                         a.TenantId == tenantId && a.EntryId == r.Link.EntryId && a.EntryType == r.Link.EntryType))
-                    .Join(ctx.ThirdpartyIdMapping, r => r.Link.EntryId, r => r.HashId,
+                    .Join(ctx.ThirdpartyIdMapping, r => r.Link.EntryId, r => r.HashId, 
                         (tagLink, mapping) => new { tagLink, mapping })
                     .Where(r => r.mapping.TenantId == r.tagLink.Link.TenantId)
-                    .Join(ctx.ThirdpartyAccount, r => r.mapping.TenantId, r => r.TenantId,
+                    .Join(ctx.ThirdpartyAccount, r => r.mapping.TenantId, r => r.TenantId, 
                         (tagLinkMapping, account) => new { tagLinkMapping.tagLink, tagLinkMapping.mapping, account })
-                    .Where(r => r.account.UserId != subject &&
-                                r.account.FolderType == FolderType.USER &&
-                                Selectors.All.Any(s => r.mapping.Id.StartsWith($"{s.Id}-" + r.account.Id)))
+                    .Where(r => r.account.UserId != subject && 
+                                r.account.FolderType == FolderType.USER && 
+                                selectorsIds.Any(id => r.mapping.Id.StartsWith($"{id}-" + r.account.Id)))
                     .Select(r => r.tagLink)
                     .Distinct());
 

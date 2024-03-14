@@ -27,13 +27,14 @@
 namespace ASC.Web.Core;
 
 [Scope]
-public class BruteForceLoginManager(SettingsManager settingsManager,
-        UserManager userManager,
-        TenantManager tenantManager,
-        IDistributedCache distributedCache,
-        SetupInfo setupInfo,
-        Recaptcha recaptcha, 
-        IDistributedLockProvider distributedLockProvider)
+public class BruteForceLoginManager(
+    IHttpContextAccessor httpContextAccessor,
+    SettingsManager settingsManager,
+    UserManager userManager,
+    IDistributedCache distributedCache,
+    SetupInfo setupInfo,
+    Recaptcha recaptcha, 
+    IDistributedLockProvider distributedLockProvider)
     {
 
     public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
@@ -105,10 +106,11 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
         }
     }
 
-    public async Task<UserInfo> AttemptAsync(string login, string passwordHash, string requestIp, string recaptchaResponse)
+    public async Task<UserInfo> AttemptAsync(string login,  string recaptchaResponse,  Func<Task<UserInfo>> getUser)
     {
         UserInfo user;
 
+        var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
         var secretEmail = SetupInfo.IsSecretEmail(login);
 
         var recaptchaPassed = secretEmail || await CheckRecaptchaAsync(recaptchaResponse, requestIp);
@@ -153,10 +155,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
                 SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
-            user = await userManager.GetUsersByPasswordHashAsync(
-                   await tenantManager.GetCurrentTenantIdAsync(),
-                login,
-                passwordHash);
+            user = await getUser();
 
             if (user == null || !userManager.UserExists(user))
             {

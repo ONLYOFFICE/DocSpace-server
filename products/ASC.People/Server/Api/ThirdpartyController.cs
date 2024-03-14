@@ -34,7 +34,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         IHttpClientFactory httpClientFactory,
-        InstanceCrypto instanceCrypto,
         MobileDetector mobileDetector,
         ProviderManager providerManager,
         UserHelpTourHelper userHelpTourHelper,
@@ -50,7 +49,8 @@ public class ThirdpartyController(AccountLinker accountLinker,
         InvitationLinkService invitationLinkService,
         FileSecurity fileSecurity,
         UsersInRoomChecker usersInRoomChecker, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        LoginProfileTransport loginProfileTransport)
     : ApiControllerBase
     {
     
@@ -124,7 +124,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
-        var profile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
+        var profile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -170,7 +170,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             mustChangePassword = true;
         }
 
-        var thirdPartyProfile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
+        var thirdPartyProfile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
             // ignore cancellation

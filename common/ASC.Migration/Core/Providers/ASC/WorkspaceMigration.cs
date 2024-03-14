@@ -46,7 +46,7 @@ public class WorkspaceMigration(
     private Dictionary<string, string> _mappedGuids;
     public override MigratorMeta Meta => _meta;
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, string operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         await _logger.InitAsync();
         _cancellationToken = cancellationToken;
@@ -178,10 +178,11 @@ public class WorkspaceMigration(
                 migratingProjectFiles = null;
             }
         }
-        catch (Exception ex)
+        catch
         {
             _migrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            Log($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive", ex);
+            ReportProgress(GetProgress(), $"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
+            throw new Exception($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
         }
         if (reportProgress)
         {
@@ -322,7 +323,6 @@ public class WorkspaceMigration(
             }
             catch (Exception ex)
             {
-                failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
             }
         }

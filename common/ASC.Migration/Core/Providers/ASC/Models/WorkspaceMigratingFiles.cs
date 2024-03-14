@@ -220,6 +220,7 @@ public class WorkspaceMigratingFiles(
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
                 RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+        Log($"create root folder", null);
         
         var matchingIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{_folder}", newFolder } };
 
@@ -230,6 +231,7 @@ public class WorkspaceMigratingFiles(
                 || matchingIds[$"{_folderKey}-{folder.ParentId}"].Id != 0) 
             {
                 newFolder = await fileStorageService.CreateFolderAsync(matchingIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
+                Log($"create folder {newFolder.Title}", null);
             }
             else
             {
@@ -240,12 +242,24 @@ public class WorkspaceMigratingFiles(
         }
 
         var fileDao = daoFactory.GetFileDao<int>();
+
+        //docker unzip filesfolder_... instend of files/folder... 
+        var folderFiles = _dataReader.GetDirectories("").Select(d => Path.GetFileName(d)).FirstOrDefault(d => d.StartsWith("files"));
+        if (folderFiles.Equals("files"))
+        {
+            folderFiles = "files/folder";
+        }
+        else
+        {
+            folderFiles = folderFiles.Split('_')[0];
+        }
+
         foreach (var file in _storage.Files)
         {
             try
             {
                 var path =
-                    $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                    $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                 await using var fs = _dataReader.GetEntry(path);
 
                 var newFile = serviceProvider.GetService<File<int>>();
@@ -259,13 +273,10 @@ public class WorkspaceMigratingFiles(
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                 }
-                try
+                if (!matchingIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     matchingIds.Add($"{_fileKey}-{file.Id}", newFile);
-                }
-                catch
-                {
-
+                    Log($"create file {file.Title}", null);
                 }
             }
             catch(Exception ex)
@@ -348,6 +359,7 @@ public class WorkspaceMigratingFiles(
 
                         orderedFolders = _storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
+                        Log($"create share room {room.Title}", null);
 
                         if (_user.UserType == EmployeeType.Collaborator)
                         {
@@ -375,10 +387,11 @@ public class WorkspaceMigratingFiles(
                         {
                             newFolder = await fileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
+                            Log($"create folder {newFolder.Title}", null);
                         }
                         foreach (var file in _storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))
                         {
-                            var path = $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                            var path = $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                             await using var fs = _dataReader.GetEntry(path);
 
                             var newFile = serviceProvider.GetService<File<int>>();
@@ -389,6 +402,7 @@ public class WorkspaceMigratingFiles(
                             newFile.Version = file.Version;
                             newFile.VersionGroup = file.VersionGroup;
                             newFile = await fileDao.SaveFileAsync(newFile, fs);
+                            Log($"create file {newFile.Title}", null);
                         }
                     }
                     if (_user.UserType == EmployeeType.Collaborator && _currentUser.ID == Guid.Parse(_mappedGuids[security.Subject]))

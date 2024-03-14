@@ -145,8 +145,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-    IHttpClientFactory clientFactory,
-    ThirdPartySelector thirdPartySelector)
+    IHttpClientFactory clientFactory)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
@@ -195,27 +194,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
     private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
     {
-        if (thirdPartySelector.GetAppByFileId(fileId.ToString()) != null)
-        {
-            return;
-        }
-
         var users = fileTracker.GetEditingBy(fileId);
         var usersDrop = new List<string>();
         File<T> file = null;
 
-        string docKey;
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app == null)
-        {
-            var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
-            docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
-        }
-        else
-        {
-            docKey = fileData.Key;
-        }
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
 
         if (!fileData.Key.Equals(docKey))
         {
@@ -291,21 +276,17 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         {
             userId = Guid.Empty;
         }
+        
+        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app == null)
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
+        if (!fileData.Key.Equals(docKey))
         {
-            var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+            logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
-            var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
-            if (!fileData.Key.Equals(docKey))
-            {
-                logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
+            await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
-                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
-
-                return new TrackResponse { Message = "Expected key " + docKey };
-            }
+            return new TrackResponse { Message = "Expected key " + docKey };
         }
 
         UserInfo user = null;

@@ -358,7 +358,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Вход успех</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Вход чрез социален профил Успех</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">

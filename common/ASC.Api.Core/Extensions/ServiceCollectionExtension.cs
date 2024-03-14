@@ -319,7 +319,7 @@ public static class ServiceCollectionExtension
         services.Configure<InstanceWorkerOptions<T>>(x =>
         {
             configuration.GetSection("core:hosting").Bind(x);
-            x.WorkerTypeName = workerTypeName;
+            x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
         });
 
 

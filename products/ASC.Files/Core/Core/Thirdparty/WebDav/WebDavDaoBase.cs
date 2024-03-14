@@ -113,7 +113,9 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
             return PathPrefix;
         }
 
-        return $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}";
+        return path.StartsWith('/') 
+            ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" 
+            : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(WebDavEntry folder)

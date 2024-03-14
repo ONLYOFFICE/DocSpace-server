@@ -89,7 +89,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

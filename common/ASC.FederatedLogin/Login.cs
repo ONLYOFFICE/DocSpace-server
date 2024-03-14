@@ -29,8 +29,8 @@ namespace ASC.FederatedLogin;
 [Scope]
 public class Login(
     IWebHostEnvironment webHostEnvironment,
-    InstanceCrypto instanceCrypto,
-    ProviderManager providerManager)
+    ProviderManager providerManager,
+    LoginProfileTransport loginProfileTransport)
 {
     private string Callback => _params.Get("callback") ?? "loginCallback";
     private string Auth => _params.Get("auth");
@@ -116,7 +116,7 @@ public class Login(
             }
             catch (Exception ex)
             {
-                await SendJsCallbackAsync(context, LoginProfile.FromError(ex));
+                await SendJsCallbackAsync(context, new LoginProfile(ex));
             }
         }
         else
@@ -140,7 +140,7 @@ public class Login(
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(
             JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{profile.Transport(instanceCrypto)}\"")
+            .Replace("%PROFILE%", $"\"{await loginProfileTransport.ToString(profile)}\"")
             .Replace("%CALLBACK%", Callback)
             .Replace("%DESKTOP%", (Mode == LoginMode.Redirect).ToString().ToLowerInvariant())
             );

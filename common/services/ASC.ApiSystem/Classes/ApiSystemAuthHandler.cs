@@ -34,29 +34,18 @@ using Microsoft.Extensions.Options;
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
-public class ApiSystemAuthHandler : CookieAuthHandler
+public class ApiSystemAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    SecurityContext securityContext,
+    CookiesManager cookiesManager,
+    IHttpContextAccessor httpContextAccessor,
+    CoreBaseSettings coreBaseSettings,
+    AuthContext authContext,
+    UserManager userManager)
+    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly AuthContext _authContext;
-    private readonly UserManager _userManager;
-
-    public ApiSystemAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        SecurityContext securityContext,
-        CookiesManager cookiesManager,
-        IHttpContextAccessor httpContextAccessor,
-        CoreBaseSettings coreBaseSettings,
-        AuthContext authContext,
-        UserManager userManager)
-        : base(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _authContext = authContext;
-        _userManager = userManager;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var baseResult = await base.HandleAuthenticateAsync();
@@ -64,15 +53,15 @@ public class ApiSystemAuthHandler : CookieAuthHandler
         {
             return baseResult;
         }
-
-        if (_coreBaseSettings.Standalone)
+        
+        if (coreBaseSettings.Standalone)
         {
-            if (!_authContext.IsAuthenticated)
+            if (!authContext.IsAuthenticated)
             {
                 return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
             }
 
-            if (!await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID))
+            if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
                 return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
             }

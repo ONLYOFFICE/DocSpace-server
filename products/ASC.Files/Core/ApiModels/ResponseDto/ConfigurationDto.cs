@@ -236,7 +236,6 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
             User = source.User
         };
@@ -372,7 +371,7 @@ public class InfoConfigConverter<T>
             SharingSettings = await source.GetSharingSettings(file),
             Type = source.Type,
             Uploaded = source.GetUploaded(file)
-        };
+        }; 
 
         return result;
     }

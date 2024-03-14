@@ -154,25 +154,34 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
 
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
-                if (folder.ProviderEntry && folder.Id.Equals(folder.RootId))
+                if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
                 {
                     if (ProviderDao != null)
                     {
+                        List<AceWrapper> aces = null;
+                        
                         if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                         {
                             var providerInfo = await ProviderDao.GetProviderInfoAsync(folder.ProviderId);
-
                             if (providerInfo.FolderId != null)
                             {
-                                var room = await roomLogoManager.DeleteAsync(providerInfo.FolderId, checkPermissions);
-                                await socketManager.UpdateFolderAsync(room);
+                                await roomLogoManager.DeleteAsync(providerInfo.FolderId, checkPermissions);
                             }
+                            
+                            aces = await fileSharing.GetSharedInfoAsync(folder);
                         }
 
-                        await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
+                        await socketManager.DeleteFolder(folder, action: async () => await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId));
+
+                        if (isRoom)
+                        {
+                            await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
+                        }
+                        
                         if (isNeedSendActions)
                         {
-                            await filesMessageService.SendAsync(MessageAction.ThirdPartyDeleted, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
+                            await filesMessageService.SendAsync(isRoom ? MessageAction.RoomDeleted : MessageAction.ThirdPartyDeleted, folder, _headers, 
+                                folder.Id.ToString(), folder.ProviderKey);
                         }
                     }
 
@@ -199,15 +208,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 aces = await fileSharing.GetSharedInfoAsync(folder);
                             }
 
-                            await socketManager.DeleteFolder(folder, action: async () =>
-                            {
-                                await FolderDao.DeleteFolderAsync(folder.Id);
-
-                                if (isRoom && folder.ProviderEntry)
-                                {
-                                    await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                                }
-                            });
+                            await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
                             if (isRoom)
                             {
@@ -243,15 +244,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     aces = await fileSharing.GetSharedInfoAsync(folder);
                                 }
 
-                                    await socketManager.DeleteFolder(folder, action: async () =>
-                                    {
-                                    await FolderDao.DeleteFolderAsync(folder.Id);
-
-                                    if (isRoom && folder.ProviderEntry)
-                                    {
-                                        await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId);
-                                    }
-                                });
+                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
 
                                 if (isNeedSendActions)
                                 {

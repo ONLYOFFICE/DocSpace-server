@@ -60,7 +60,8 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 UserIDColumns = ["user_id"],
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
             },
-            new("files_thirdparty_id_mapping", "tenant_id")
+            new("files_thirdparty_id_mapping", "tenant_id"),
+            new("files_room_settings", "tenant_id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -76,6 +77,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             new("core_group", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
 
             new("files_folder", "id", "files_bunch_objects", "left_node"),
+            new("files_folder", "id", "files_room_settings", "room_id"),
             new("files_folder", "id", "files_file", "folder_id"),
             new("files_folder", "id", "files_folder", "parent_id"),
             new("files_folder", "id", "files_folder_tree", "folder_id"),

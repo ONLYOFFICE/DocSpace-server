@@ -149,6 +149,7 @@ public class GwsMigratingFiles(
                 var parentId = await globalFolderHelper.FolderMyAsync;
                 var createdFolder = await fileStorageService.CreateFolderAsync(parentId, _newParentFolder);
                 foldersDict.Add(_newParentFolder, createdFolder);
+                Log($"Сreate root folder", null);
             }
 
             if (_folders != null && _folders.Count != 0)
@@ -231,6 +232,7 @@ public class GwsMigratingFiles(
 
                                     try
                                     {
+                                        Log($"Сreate share room {room.Title}", null);
                                         await fileStorageService.SetAceObjectAsync(aceCollection, false);
                                         await securityContext.AuthenticateMeAsync(_user.Guid);
                                     }
@@ -245,6 +247,7 @@ public class GwsMigratingFiles(
                                 var createdFolder = await fileStorageService.CreateFolderAsync(parentId, split[i]);
                                 path = path.Contains(_newParentFolder + Path.DirectorySeparatorChar.ToString()) ? path.Replace(_newParentFolder + Path.DirectorySeparatorChar.ToString(), "") : path;
                                 foldersDict.Add(path, createdFolder);
+                                Log($"Сreate folder {path}", null);
                             }
                         }
                         catch (Exception ex)
@@ -269,6 +272,7 @@ public class GwsMigratingFiles(
                         var parentFolder = string.IsNullOrWhiteSpace(maskParentPath) ? foldersDict[_newParentFolder] : foldersDict[maskParentPath];
                         var newFile = await AddFileAsync(realPath, parentFolder.Id, Path.GetFileName(file));
                         filesDict.Add(realPath, newFile);
+                        Log($"Сreate file {maskParentPath}/{Path.GetFileName(file)}", null);
                     }
                     catch (Exception ex)
                     {

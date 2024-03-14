@@ -69,7 +69,6 @@ public class FileStorageService //: IFileStorageService
     IEventBus eventBus,
     EntryStatusManager entryStatusManager,
     OFormRequestManager oFormRequestManager,
-    ThirdPartySelector thirdPartySelector,
     ThumbnailSettings thumbnailSettings,
     FileShareParamsHelper fileShareParamsHelper,
     EncryptionLoginProvider encryptionLoginProvider,
@@ -1147,36 +1146,20 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            IThirdPartyApp app;
             if (editingAlone)
             {
                 if (fileTracker.IsEditing(fileId))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
                 }
-
-                app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-                if (app == null)
-                {
+                
                     await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, doc, await tenantManager.GetCurrentTenantIdAsync(), true);
-                }
 
                 //without StartTrack, track via old scheme
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
             }
 
-            (File<string> File, Configuration<string> Configuration, bool LocatedInPrivateRoom) fileOptions;
-
-            app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-            if (app == null)
-            {
-                fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, doc, true, true, false);
-            }
-            else
-            {
-                var (file, editable) = await app.GetFileAsync(fileId.ToString());
-                fileOptions = await documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-            }
+            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, doc, true, true, false);
 
             var configuration = fileOptions.Configuration;
             if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
@@ -1640,7 +1623,14 @@ public class FileStorageService //: IFileStorageService
     {
         await foreach (var r in providerDao.GetProvidersInfoAsync())
         {
-            yield return new ThirdPartyParams { CustomerTitle = r.CustomerTitle, Corporate = r.RootFolderType == FolderType.COMMON, ProviderId = r.ProviderId.ToString(), ProviderKey = r.ProviderKey };
+            yield return new ThirdPartyParams
+            {
+                CustomerTitle = r.CustomerTitle,
+                Corporate = r.RootFolderType == FolderType.COMMON,
+                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.Archive,
+                ProviderId = r.ProviderId,
+                ProviderKey = r.ProviderKey
+            };
         }
     }
 
@@ -1722,7 +1712,7 @@ public class FileStorageService //: IFileStorageService
         int currentProviderId;
 
         MessageAction messageAction;
-        if (string.IsNullOrEmpty(thirdPartyParams.ProviderId))
+        if (thirdPartyParams.ProviderId == null)
         {
             if (!thirdpartyConfiguration.SupportInclusion(daoFactory) || !await filesSettingsHelper.GetEnableThirdParty())
             {
@@ -1752,7 +1742,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            currentProviderId = Convert.ToInt32(thirdPartyParams.ProviderId);
+            currentProviderId = thirdPartyParams.ProviderId.Value;
 
             var currentProvider = await providerDao.GetProviderInfoAsync(currentProviderId);
             if (currentProvider.Owner != authContext.CurrentAccount.ID)
@@ -3023,7 +3013,7 @@ public class FileStorageService //: IFileStorageService
             _logger.ErrorWithException(ex);
         }
 
-        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(fileId) : null;
+        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
     }
 
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)

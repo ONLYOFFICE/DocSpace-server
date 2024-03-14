@@ -73,7 +73,7 @@ public static partial class FileShareExtensions
 {
     public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
     {
-        var prefix = useRoomFormat ? "RoleEnum_" : "AceStatusEnum_";
+        var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         switch (fileShare)
         {

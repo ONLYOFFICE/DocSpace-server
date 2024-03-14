@@ -27,16 +27,10 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class LockerManager(AuthContext authContext, IDaoFactory daoFactory, ThirdPartySelector thirdPartySelector)
+public class LockerManager(AuthContext authContext, IDaoFactory daoFactory)
 {
     public async Task<bool> FileLockedForMeAsync<T>(T fileId, Guid userId = default)
     {
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            return false;
-        }
-
         userId = userId == Guid.Empty ? authContext.CurrentAccount.ID : userId;
         var tagDao = daoFactory.GetTagDao<T>();
         var lockedBy = await FileLockedByAsync(fileId, tagDao);
@@ -246,7 +240,6 @@ public class EntryManager(IDaoFactory daoFactory,
     ICache cache,
     FileTrackerHelper fileTracker,
     EntryStatusManager entryStatusManager,
-    ThirdPartySelector thirdPartySelector,
     IHttpClientFactory clientFactory,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -1207,14 +1200,6 @@ public class EntryManager(IDaoFactory daoFactory,
         if (!string.IsNullOrEmpty(newExtension))
         {
             newExtension = "." + newExtension.Trim('.');
-        }
-
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            await app.SaveFileAsync(fileId.ToString(), newExtension, downloadUri, stream);
-
-            return null;
         }
 
         var fileDao = daoFactory.GetFileDao<T>();

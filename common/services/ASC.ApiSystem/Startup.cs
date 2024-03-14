@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.HttpLogging;
-
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 
@@ -38,7 +36,6 @@ public class Startup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly DIHelper _diHelper;
     private readonly string _corsOrigin;
-    private readonly bool _standalone;
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -46,7 +43,6 @@ public class Startup
         _hostEnvironment = hostEnvironment;
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
-        _standalone = _configuration["core:base-domain"] == "localhost";
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
@@ -59,14 +55,6 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddHttpLogging(logging =>
-        { 
-            logging.RequestHeaders.Add("Origin");
-            logging.ResponseHeaders.Add("Origin");
-            logging.ResponseHeaders.Add("access-control-allow-origin");
-            logging.ResponseHeaders.Add("access-control-allow-methods");
-            logging.LoggingFields = HttpLoggingFields.All;
-        });
         
         services.AddMvcCore(config =>
         {
@@ -175,31 +163,20 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-
-        if (_standalone)
-        {
-            services
-                .AddAuthentication()
-                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
-                .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
-        }
-        else
-        {
-            services.AddAuthentication()
-               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { });
-        }
+        
+        services
+            .AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        app.UseHttpLogging();
-        
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
-        {
+        { 
             app.UseCors(CustomCorsPolicyName);
         }
 

@@ -69,34 +69,19 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
 /// <summary>
 /// </summary>
-public class AceShortWrapper
+public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
     /// <summary>User</summary>
     /// <type>System.String, System</type>
-    public string User { get; set; }
+    public string User { get; init; } = subjectName;
 
     /// <summary>User access rights to the file</summary>
     /// <type>System.String, System</type>
-    public string Permissions { get; set; }
+    public string Permissions { get; init; } = permission;
 
-    public AceShortWrapper(AceWrapper aceWrapper)
-    {
-        var permission = aceWrapper.Access switch
-        {
-            FileShare.Read => FilesCommonResource.AceStatusEnum_Read,
-            FileShare.ReadWrite => FilesCommonResource.AceStatusEnum_ReadWrite,
-            FileShare.CustomFilter => FilesCommonResource.AceStatusEnum_CustomFilter,
-            FileShare.Review => FilesCommonResource.AceStatusEnum_Review,
-            FileShare.FillForms => FilesCommonResource.AceStatusEnum_FillForms,
-            FileShare.Comment => FilesCommonResource.AceStatusEnum_Comment,
-            FileShare.Restrict => FilesCommonResource.AceStatusEnum_Restrict,
-            _ => string.Empty
-        };
-
-        User = aceWrapper.SubjectName;
-
-        Permissions = permission;
-    }
+    /// <summary>Is link</summary>
+    /// <type>System.Boolean, System</type>
+    public bool isLink { get; init; } = isLink;
 }
 
 public class AceAdvancedSettingsWrapper

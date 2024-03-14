@@ -328,7 +328,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
 
         var storage = await ProviderInfo.StorageAsync;
-        var size = storage.GetFileSize(thirdFile);
+        var size = await storage.GetFileSizeAsync(thirdFile);
 
         return size;
     }

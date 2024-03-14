@@ -59,6 +59,7 @@ public class GroupController(UserManager userManager,
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -97,6 +98,7 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 

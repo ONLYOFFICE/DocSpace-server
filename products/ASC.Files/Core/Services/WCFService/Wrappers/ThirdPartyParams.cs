@@ -49,9 +49,9 @@ public class ThirdPartyParams
     public string CustomerTitle { get; set; }
 
     /// <summary>Provider ID</summary>
-    /// <type>System.String, System</type>
+    /// <type>System.Nullable{System.Int32}, System</type>
     [JsonPropertyName("provider_id")]
-    public string ProviderId { get; init; }
+    public int? ProviderId { get; init; }
 
     /// <summary>Provider key</summary>
     /// <type>System.String, System</type>

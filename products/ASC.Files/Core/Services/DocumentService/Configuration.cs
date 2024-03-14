@@ -333,7 +333,7 @@ public class EditorConfiguration<T>(
         var folderDao = daoFactory.GetFolderDao<int>();
         var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
             .Cast<File<int>>()
-            .Where(file => !Equals(fileId, file.Id))
+            .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
@@ -343,7 +343,7 @@ public class EditorConfiguration<T>(
         {
             yield return new RecentConfig
             {
-                Folder = parentFolders.Find(r => file.ParentId == r.Id).Title,
+                Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
             };
@@ -453,7 +453,7 @@ public class InfoConfig<T>(
 
         try
         {
-            return await fileSharing.GetSharedInfoShortFileAsync(file.Id);
+            return await fileSharing.GetSharedInfoShortFileAsync(file);
         }
         catch
         {
@@ -563,8 +563,7 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility,
-    ThirdPartySelector thirdPartySelector)
+    CommonLinkUtility commonLinkUtility)
 {
     [JsonIgnore]
     public string GobackUrl;
@@ -595,9 +594,8 @@ public class CustomizationConfig<T>(
 
     public bool? GetForceSave(File<T> file)
     {
-        return fileUtility.CanForcesave
+        return fileUtility.GetCanForcesave()
                && !file.ProviderEntry
-               && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
                && filesSettingsHelper.GetForcesave();
     }
 

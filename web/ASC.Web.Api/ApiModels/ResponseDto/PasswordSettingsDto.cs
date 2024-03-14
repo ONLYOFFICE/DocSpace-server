@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Log;
-internal static partial class ThirdPartyAppHandlerLogger
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+public class PasswordSettingsDto
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ThirdPartyApp: handler request - {url}")]
-    public static partial void DebugThirdPartyAppHandlerRequest(this ILogger<ThirdPartyAppHandlerService> logger, Uri url);
+    public int MinLength { get; set; }
+    
+    public bool UpperCase { get; set; }
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ThirdPartyApp: app - {app}")]
-    public static partial void DebugThirdPartyAppApp(this ILogger<ThirdPartyAppHandlerService> logger, IThirdPartyApp app);
+    public bool Digits { get; set; }
+    
+    public bool SpecSymbols { get; set; }
+    
+    public string AllowedCharactersRegexStr { get; set; }
+    
+    public string DigitsRegexStr { get; set; }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "ThirdPartyApp")]
-    public static partial void ErrorThirdPartyApp(this ILogger<ThirdPartyAppHandlerService> logger, Exception exception);
+    public string UpperCaseRegexStr { get; set; }
+
+    public string SpecSymbolsRegexStr { get; set; }
+}
+
+[Singleton]
+public sealed class PasswordSettingsConverter(PasswordSettingsManager settingsManager)
+{
+    public PasswordSettingsDto Convert(PasswordSettings passwordSettings)
+    {
+        return new PasswordSettingsDto
+        {
+            MinLength = passwordSettings.MinLength,
+            UpperCase = passwordSettings.UpperCase,
+            Digits = passwordSettings.Digits,
+            SpecSymbols = passwordSettings.SpecSymbols,
+            AllowedCharactersRegexStr = settingsManager.AllowedCharactersRegexStr,
+            DigitsRegexStr = settingsManager.DigitsRegexStr,
+            UpperCaseRegexStr = settingsManager.UpperCaseRegexStr,
+            SpecSymbolsRegexStr = settingsManager.SpecSymbolsRegexStr
+        };
+    }
 }

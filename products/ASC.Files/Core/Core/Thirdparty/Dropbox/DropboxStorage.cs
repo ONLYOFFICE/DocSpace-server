@@ -178,9 +178,9 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         return tempBuffer;
     }
 
-    public long GetFileSize(FileMetadata file)
+    public Task<long> GetFileSizeAsync(FileMetadata file)
     {
-        return (long)file.Size;
+        return Task.FromResult((long)file.Size);
     }
     
     public async Task<FolderMetadata> CreateFolderAsync(string title, string parentId)

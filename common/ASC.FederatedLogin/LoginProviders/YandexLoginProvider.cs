@@ -80,7 +80,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

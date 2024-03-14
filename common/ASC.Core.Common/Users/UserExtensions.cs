@@ -131,14 +131,20 @@ public static class UserExtensions
 
     public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, Guid id)
     {
-        if ((await userManager.GetUsersAsync(id)).Equals(Constants.LostUser))
+        return await userManager.GetUserTypeAsync(await userManager.GetUsersAsync(id));
+    }
+
+    public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, UserInfo user)
+    {
+        if (user.Equals(Constants.LostUser))
         {
             return EmployeeType.User;
         }
         
-        return await userManager.IsDocSpaceAdminAsync(id) ? EmployeeType.DocSpaceAdmin : 
-            await userManager.IsUserAsync(id) ? EmployeeType.User : 
-            await userManager.IsCollaboratorAsync(id) ? EmployeeType.Collaborator :
+        return 
+            await userManager.IsDocSpaceAdminAsync(user) ? EmployeeType.DocSpaceAdmin : 
+            await userManager.IsUserAsync(user) ? EmployeeType.User : 
+            await userManager.IsCollaboratorAsync(user) ? EmployeeType.Collaborator :
             EmployeeType.RoomAdmin;
     }
 
