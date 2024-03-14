@@ -1906,7 +1906,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join $Message room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join a DocSpace room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
