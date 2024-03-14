@@ -298,6 +298,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     public async Task<RoomSecurityDto> SetRoomSecurityAsync(T id, RoomInvitationRequestDto inDto)
     {
         ErrorIfNotDocSpace();
+        ArgumentNullException.ThrowIfNull(inDto);
 
         var result = new RoomSecurityDto();
 

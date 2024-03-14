@@ -193,7 +193,7 @@ public class SetupInfo
 
         AmiMetaUrl = GetAppSettings("web:ami:meta", "");
 
-        InvitationLimit = GetAppSettings("web:invitation-limit", 50);
+        InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
     }
 
 

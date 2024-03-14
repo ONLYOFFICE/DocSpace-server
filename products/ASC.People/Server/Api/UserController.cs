@@ -372,6 +372,14 @@ public class UserController : PeopleControllerBase
     [HttpPost("invite")]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto);
+        ArgumentNullException.ThrowIfNull(inDto.Invitations);
+
+        if (inDto.Invitations.Count() > _setupInfo.InvitationLimit)
+        {
+            throw new Exception(Resource.ErrorInvitationLimitExceeded);
+        }
+
         var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
 
         foreach (var invite in inDto.Invitations)
