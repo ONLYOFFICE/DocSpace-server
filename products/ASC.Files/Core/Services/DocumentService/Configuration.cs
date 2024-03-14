@@ -475,6 +475,7 @@ public class PermissionsConfig
     public bool Edit { get; set; } = true;
     public bool FillForms { get; set; } = true;
     public bool ModifyFilter { get; set; } = true;
+    public bool Protect { get; set; } = true;
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
