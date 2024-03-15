@@ -772,7 +772,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>こんにちは！
 
-"${__VirtualRootPath}":"${__VirtualRootPath}"の$Messageルームに招待されています。リンクをクリックして招待を承諾してください：
+"${__VirtualRootPath}":"${__VirtualRootPath}"のDocSpaceルームに招待されています。リンクをクリックして招待を承諾してください：
  
 $OrangeButton
  

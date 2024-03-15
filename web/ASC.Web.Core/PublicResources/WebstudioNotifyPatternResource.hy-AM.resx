@@ -1802,7 +1802,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
-Դուք հրավիրված եք միանալու $Message սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
+Դուք հրավիրված եք միանալու DocSpace-ի սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ անցնելով հղումով.
 
 $OrangeButton
 

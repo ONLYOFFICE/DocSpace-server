@@ -1687,7 +1687,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Salam!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında $Message otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
+"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında DocSpace otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
 $OrangeButton
 

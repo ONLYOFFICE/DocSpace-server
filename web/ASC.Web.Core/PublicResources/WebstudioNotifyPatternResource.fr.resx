@@ -1335,7 +1335,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bonjour !
 
-Vous êtes invité à rejoindre la salle $Message à "${__VirtualRootPath}":"${__VirtualRootPath}". Acceptez l'invitation en cliquant sur le lien :
+Vous êtes invité à rejoindre la salle de DocSpace à "${__VirtualRootPath}":"${__VirtualRootPath}". Acceptez l'invitation en cliquant sur le lien :
 
 $OrangeButton
 

@@ -888,7 +888,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hei!
 
-Sinut on kutsuttu liittymään $Message huoneeseen "${__VirtualRootPath}":"${__VirtualRootPath}". 
+Sinut on kutsuttu liittymään DocSpace-huoneeseen "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
 
 $OrangeButton
 

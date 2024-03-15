@@ -1151,9 +1151,9 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
-    <value>Xin chào! 
+    <value>Xin chào!
 
-Bạn được mời tham gia phòng $Message tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+Bạn được mời tham gia phòng DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 

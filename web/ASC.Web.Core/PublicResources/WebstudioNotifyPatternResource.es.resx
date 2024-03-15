@@ -1621,13 +1621,13 @@ $TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>¡Hola!
- 
-Le invitamos a unirse a la sala $Message en "${__VirtualRootPath}":"${__VirtualRootPath}". Acepte la invitación haciendo clic en el enlace:
- 
+
+Está invitado a unirse a una sala de DocSpace en "${__VirtualRootPath}":"${__VirtualRootPath}". Acepte la invitación haciendo clic en el enlace:
+
 $OrangeButton
- 
+
 Después de hacer clic en el enlace de invitación, establezca una nueva contraseña para su cuenta.
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
