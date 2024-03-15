@@ -442,6 +442,12 @@ public class FileSharingHelper(
             return true;
         }
 
+        if ((entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive) 
+            && (entry is not IFolder folder || !DocSpaceHelper.IsRoom(folder.FolderType)))
+        {
+            return false;
+        }
+
         if (await fileSecurity.CanEditAccessAsync(entry))
         {
             return true;

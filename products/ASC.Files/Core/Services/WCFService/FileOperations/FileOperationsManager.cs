@@ -429,8 +429,11 @@ public class FileOperationsManager(
     private Dictionary<string, string> GetHttpHeaders()
     {
         var request = httpContextAccessor?.HttpContext?.Request;
-
-        return MessageSettings.GetHttpHeaders(request).ToDictionary(x => x.Key, x => x.Value.ToString());
+        var headers = MessageSettings.GetHttpHeaders(request);
+        
+        return headers == null 
+            ? new Dictionary<string, string>() 
+            : headers.ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 }
 
