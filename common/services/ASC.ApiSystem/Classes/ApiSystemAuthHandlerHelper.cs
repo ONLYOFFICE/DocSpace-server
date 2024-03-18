@@ -27,29 +27,26 @@
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
-public class ApiSystemBasicAuthHandler(
-    IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger,
-    UrlEncoder encoder,
-    SecurityContext securityContext,
-    UserManager userManager,
-    PasswordHasher passwordHasher,
-    ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
-    : BasicAuthHandler(options, logger, encoder, userManager, securityContext, passwordHasher)
+public class ApiSystemAuthHandlerHelper(
+    CoreBaseSettings coreBaseSettings,
+    AuthContext authContext,
+    UserManager userManager)
 {
-    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+    public async Task<bool> HandleAuthenticateAsync()
     {
-        var baseResult = await base.HandleAuthenticateAsync();
-        if (!baseResult.Succeeded)
+        if (coreBaseSettings.Standalone)
         {
-            return baseResult;
+            if (!authContext.IsAuthenticated)
+            {
+                return false;
+            }
+
+            if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            {
+                return false;
+            }
         }
 
-        if (!await systemAuthHandlerHelper.HandleAuthenticateAsync())
-        {
-            return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
-        }
-
-        return baseResult;
+        return true;
     }
 }

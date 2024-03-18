@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security.Authentication;
-using System.Text.Encodings.Web;
-
-using ASC.Web.Core;
-
-using Microsoft.Extensions.Options;
-
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
@@ -41,9 +34,7 @@ public class ApiSystemAuthHandler(
     SecurityContext securityContext,
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
-    CoreBaseSettings coreBaseSettings,
-    AuthContext authContext,
-    UserManager userManager)
+    ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
     : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -53,18 +44,10 @@ public class ApiSystemAuthHandler(
         {
             return baseResult;
         }
-        
-        if (coreBaseSettings.Standalone)
-        {
-            if (!authContext.IsAuthenticated)
-            {
-                return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
-            }
 
-            if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-            {
-                return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
-            }
+        if (!await systemAuthHandlerHelper.HandleAuthenticateAsync())
+        {
+            return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
         }
 
         return baseResult;
