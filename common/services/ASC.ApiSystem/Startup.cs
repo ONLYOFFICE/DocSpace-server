@@ -168,7 +168,8 @@ public class Startup
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemBasicAuthHandler>("auth:portalbasic", _ => { });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
