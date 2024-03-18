@@ -49,7 +49,8 @@ public class CookiesManager(
     DbLoginEventsManager dbLoginEventsManager,
     MessageService messageService,
     IPSecurity.IPSecurity ipSecurity,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    SettingsManager settingsManager)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -85,6 +86,7 @@ public class CookiesManager(
             }
 
             var urlRewriter = httpContextAccessor.HttpContext.Request.Url();
+            
             if (urlRewriter.Scheme == "https")
             {
                 options.Secure = true;
@@ -92,7 +94,21 @@ public class CookiesManager(
                 if (sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = sameSiteMode.Value;
+                } 
+                else if (!sameSiteMode.HasValue)
+                {
+                    var cspSettings = await settingsManager.LoadAsync<CspSettings>();
+
+                    if (cspSettings.Domains.Any())
+                    {
+                        options.SameSite = SameSiteMode.None;
+                    }
                 }
+            }
+
+            if (options.SameSite == SameSiteMode.Unspecified)
+            {
+                options.SameSite = SameSiteMode.Strict;
             }
 
             if (FromCors(httpContextAccessor.HttpContext.Request))
