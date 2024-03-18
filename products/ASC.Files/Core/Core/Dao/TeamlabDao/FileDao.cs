@@ -66,7 +66,7 @@ internal class FileDao(
               settingsManager,
               authContext,
         serviceProvider), IFileDao<int>
-    {
+{
 
     private const string LockKey = "file";
     private const string FilePathPart = "file_";
@@ -433,7 +433,7 @@ internal class FileDao(
 
                     if (file.Id == default)
                     {
-                        file.Id = await Queries.FileAnyAsync(filesDbContext) ? await Queries.FileMaxIdAsync(filesDbContext) + 1 : 1;
+                        file.Id = await Queries.FileMaxIdAsync(filesDbContext) + 1;
                         file.Version = 1;
                         file.VersionGroup = 1;
                         isNew = true;
@@ -2368,18 +2368,10 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
-
                     .Select(r => r.Id));
 
-    public static readonly Func<FilesDbContext, Task<bool>> FileAnyAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.Files.Any());
-
     public static readonly Func<FilesDbContext, Task<int>> FileMaxIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.Files.Max(r => r.Id));
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.Files.OrderByDescending(r => r.Id).Select(r=> r.Id).FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DisableCurrentVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
