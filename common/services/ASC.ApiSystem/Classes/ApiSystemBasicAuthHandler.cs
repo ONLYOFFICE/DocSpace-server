@@ -27,15 +27,15 @@
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
-public class ApiSystemAuthHandler(
+public class ApiSystemBasicAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
-    CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor,
+    UserManager userManager,
+    PasswordHasher passwordHasher,
     ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
-    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
+    : BasicAuthHandler(options, logger, encoder, userManager, securityContext, passwordHasher)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {

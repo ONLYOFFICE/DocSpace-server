@@ -27,29 +27,26 @@
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
-public class ApiSystemAuthHandler(
-    IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger,
-    UrlEncoder encoder,
-    SecurityContext securityContext,
-    CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor,
-    ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
-    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
+public class ApiSystemAuthHandlerHelper(
+    CoreBaseSettings coreBaseSettings,
+    AuthContext authContext,
+    UserManager userManager)
 {
-    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+    public async Task<bool> HandleAuthenticateAsync()
     {
-        var baseResult = await base.HandleAuthenticateAsync();
-        if (!baseResult.Succeeded)
+        if (coreBaseSettings.Standalone)
         {
-            return baseResult;
+            if (!authContext.IsAuthenticated)
+            {
+                return false;
+            }
+
+            if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            {
+                return false;
+            }
         }
 
-        if (!await systemAuthHandlerHelper.HandleAuthenticateAsync())
-        {
-            return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
-        }
-
-        return baseResult;
+        return true;
     }
 }
