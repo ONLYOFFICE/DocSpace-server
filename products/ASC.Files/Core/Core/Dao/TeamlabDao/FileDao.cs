@@ -429,12 +429,11 @@ internal class FileDao(
                 var strategy = filesDbContext.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
-                    await using var context = await _dbContextFactory.CreateDbContextAsync();
-                    await using var tx = await context.Database.BeginTransactionAsync();
+                    await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
                     if (file.Id == default)
                     {
-                        file.Id = await Queries.FileAnyAsync(context) ? await Queries.FileMaxIdAsync(context) + 1 : 1;
+                        file.Id = await Queries.FileAnyAsync(filesDbContext) ? await Queries.FileMaxIdAsync(filesDbContext) + 1 : 1;
                         file.Version = 1;
                         file.VersionGroup = 1;
                         isNew = true;
@@ -458,7 +457,7 @@ internal class FileDao(
 
                     if (!isNew)
                     {
-                        await Queries.DisableCurrentVersionAsync(context, tenantId, file.Id);
+                        await Queries.DisableCurrentVersionAsync(filesDbContext, tenantId, file.Id);
                     }
 
                     toInsert = new DbFile
@@ -483,8 +482,16 @@ internal class FileDao(
                         TenantId = tenantId
                     };
 
-                    await context.AddOrUpdateAsync(r => r.Files, toInsert);
-                    await context.SaveChangesAsync();
+                    if (isNew)
+                    {
+                        await filesDbContext.Files.AddAsync(toInsert);
+                    }
+                    else
+                    {                    
+                        await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
+                    }
+                    
+                    await filesDbContext.SaveChangesAsync();
 
                     await tx.CommitAsync();
                 });
