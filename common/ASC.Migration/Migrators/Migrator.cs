@@ -144,9 +144,9 @@ public abstract class Migrator : IDisposable
                 ReportProgress(_lastProgressUpdate + progressStep, string.Format(MigrationResource.MigratingUserFiles, kv.Value.Info.DisplayUserName(DisplayUserSettingsHelper), i++, _usersForImport.Count));
                 await MigrateStorageAsync(kv.Value.Storage, kv.Value);
             }
-            catch
+            catch(Exception e)
             {
-
+                Log("can't import user files", e);
             }
         }
 
@@ -157,9 +157,9 @@ public abstract class Migrator : IDisposable
                 ReportProgress(80, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.CommonStorage);
             }
-            catch
+            catch(Exception e)
             {
-
+                Log("can't import common files", e);
             }
         }
 
@@ -170,9 +170,9 @@ public abstract class Migrator : IDisposable
                 ReportProgress(90, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.ProjectStorage);
             }
-            catch
+            catch (Exception e)
             {
-
+                Log("can't import project files", e);
             }
         }
 
@@ -240,9 +240,12 @@ public abstract class Migrator : IDisposable
                     _importedUsers.Add(user.Info.Email);
                 }
             }
-            catch
+            catch(Exception e)
             {
+                Log("can't import user", e);
                 _failedUsers.Add(user.Info.Email);
+                MigrationInfo.Users.Remove(key);
+                _usersForImport.Remove(key);
             }
         }
     }
@@ -311,13 +314,10 @@ public abstract class Migrator : IDisposable
             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
         }
 
-        var rootName = $"{MigrationInfo.Name} migration {DateTime.UtcNow.ToString("dd mm yy")}";
-
         var newFolder = storage.Type == FolderType.USER
-            ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, rootName)
-            : await FileStorageService.CreateRoomAsync(rootName,
-                RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
-        //Log($"create root folder", null);
+            ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
+                : await FileStorageService.CreateRoomAsync($"ASC migration {(storage.Type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+        Log($"create root folder");
 
         var _matchingFilesIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{storage.RootKey}", newFolder } };
 
@@ -328,7 +328,7 @@ public abstract class Migrator : IDisposable
                 || _matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id != 0)
             {
                 newFolder = await FileStorageService.CreateFolderAsync(_matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
-                //Log($"create folder {newFolder.Title}", null);
+                Log($"create folder {newFolder.Title}");
             }
             else
             {

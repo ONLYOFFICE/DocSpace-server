@@ -39,9 +39,6 @@ public class MigrationInfo
     public List<string> FailedArchives = new List<string>();
     public Dictionary<string, MigrationGroup> Groups = new Dictionary<string, MigrationGroup>();
 
-    public bool ImportSharedFiles { get; set; }
-    public bool ImportSharedFolders { get; set; }
-
     public MigrationStorage CommonStorage { get; set; }
     public MigrationStorage ProjectStorage { get; set; }
 
@@ -83,8 +80,8 @@ public class MigrationInfo
             user.Storage.ShouldImportSharedFolders = apiInfo.ImportSharedFolders;
         }
 
-        ImportSharedFiles = apiInfo.ImportSharedFiles;
-        ImportSharedFolders = apiInfo.ImportSharedFolders;
+        CommonStorage.ShouldImport = apiInfo.ImportSharedFiles;
+        ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
 
         foreach (var group in Groups)
         {
