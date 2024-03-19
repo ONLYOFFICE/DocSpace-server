@@ -45,6 +45,7 @@ public class LogoUploader
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+            var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
             var width = Convert.ToInt32(context.Request.Form["width"]);
             var height = Convert.ToInt32(context.Request.Form["height"]);
             var size = new Size(width, height);
@@ -54,9 +55,18 @@ public class LogoUploader
                 const string imgContentType = @"image";
 
                 var logo = context.Request.Form.Files[0];
-                if (!logo.ContentType.StartsWith(imgContentType))
+                var ext = Path.GetExtension(logo.FileName).ToLowerInvariant();
+
+                if (!logo.ContentType.StartsWith(imgContentType) ||
+                    !TenantWhiteLabelSettings.AvailableExtensions.Contains(ext))
                 {
                     throw new Exception(Resource.ErrorFileNotImage);
+                }
+
+                var maxSize = TenantWhiteLabelSettings.GetSize(type);
+                if (size.Height > maxSize.Height && size.Width != maxSize.Width)
+                {
+                    throw new ImageSizeLimitException();
                 }
 
                 var data = new byte[logo.Length];
