@@ -1186,7 +1186,7 @@ internal class FileDao(
 
         if (toFolderRoomId != -1 || oldFolderRoomId != -1)
         {
-            var tenantId = _tenantManager.GetCurrentTenant().Id;
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
             if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
             {

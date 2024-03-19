@@ -27,10 +27,11 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
-        ILogger<WebhooksGlobalFilterAttribute> logger,
-        SettingsManager settingsManager,
-        DbWorker dbWorker)
+public class WebhooksGlobalFilterAttribute(
+    IWebhookPublisher webhookPublisher,
+    ILogger<WebhooksGlobalFilterAttribute> logger,
+    SettingsManager settingsManager,
+    DbWorker dbWorker)
     : ResultFilterAttribute, IDisposable
 {
     private readonly MemoryStream _stream = new();
@@ -38,7 +39,8 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var skip = await SkipAsync(context.HttpContext);
+        var webhook = await GetWebhookAsync(context.HttpContext);
+        var skip = webhook == null;
 
         if (!skip)
         {
@@ -61,11 +63,7 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
 
             try
             {
-                var (method, routePattern, _) = GetData(context.HttpContext);
-
                 var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
-
-                var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
 
                 await webhookPublisher.PublishAsync(webhook.Id, resultContent);
             }
@@ -81,40 +79,34 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
         _stream?.Dispose();
     }
 
-    private (string, string, bool) GetData(HttpContext context)
+    private async Task<Webhook> GetWebhookAsync(HttpContext context)
     {
         var method = context.Request.Method;
         var endpoint = (RouteEndpoint)context.GetEndpoint();
         var routePattern = endpoint?.RoutePattern.RawText;
         var disabled = endpoint?.Metadata.OfType<WebhookDisableAttribute>().FirstOrDefault();
-        return (method, routePattern, disabled != null);
-    }
-
-    private async Task<bool> SkipAsync(HttpContext context)
-    {
-        var (method, routePattern, disabled) = GetData(context);
 
         if (routePattern == null)
         {
-            return true;
+            return null;
         }
         
-        if (disabled)
+        if (disabled != null)
         {
-            return true;
+            return null;
         }
         
         if (!DbWorker.MethodList.Contains(method))
         {
-            return true;
+            return null;
         }
 
         var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
         if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
         {
-            return true;
+            return null;
         }
 
-        return false;
+        return webhook;
     }
 }
