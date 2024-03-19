@@ -24,23 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
-
-namespace ASC.Migration.Core;
+namespace ASC.Migration.Core.Models.Api;
 
 [ProtoContract]
-public record MigrationIntegrationEvent : IntegrationEvent
+public class MigratingApiFiles
 {
+    [ProtoMember(1)]
+    public int FoldersCount { get; set; }
 
-    [ProtoMember(6)]
-    public MigrationApiInfo ApiInfo { get; set; }
+    [ProtoMember(2)]
+    public int FilesCount { get; set; }
 
-
-    public MigrationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
-    {
-    }
-
-    protected MigrationIntegrationEvent()
-    {
-    }
+    [ProtoMember(3)]
+    public long BytesTotal { get; set; }
 }

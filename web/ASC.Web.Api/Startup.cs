@@ -27,6 +27,7 @@
 using ASC.Api.Core.Core;
 using ASC.Core.Common.Notify.Engine;
 using ASC.Migration.Core.Core;
+using ASC.Migration.Core.Models;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
+using ASC.Web.Core.Users;
 
-namespace ASC.Migration.Core;
-
-[ProtoContract]
-public record MigrationIntegrationEvent : IntegrationEvent
+namespace ASC.Migration.Core.Migrators.Model;
+public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
 {
+    public UserInfo Info { get; set; }
+    public EmployeeType UserType { get; set; } = EmployeeType.Collaborator;
+    public MigrationStorage Storage { get; set; }
+    public bool ShouldImport { get; set; }
+    public bool HasPhoto { get; set; }
+    public string PathToPhoto { get; set; }
 
-    [ProtoMember(6)]
-    public MigrationApiInfo ApiInfo { get; set; }
-
-
-    public MigrationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    public virtual MigratingApiUser ToApiInfo(string key)
     {
-    }
-
-    protected MigrationIntegrationEvent()
-    {
+        return new MigratingApiUser()
+        {
+            Key = key,
+            Email = Info.Email,
+            DisplayName = Info.DisplayUserName(displayUserSettingsHelper),
+            UserType = UserType,
+            MigratingFiles = Storage.ToApiInfo(),
+        };
     }
 }

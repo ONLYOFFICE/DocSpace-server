@@ -24,23 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
+namespace ASC.Migration.Core.Models.Api;
 
-namespace ASC.Migration.Core;
-
-[ProtoContract]
-public record MigrationIntegrationEvent : IntegrationEvent
+public class MigratorMeta(string name, int numberOfSteps, bool archivesIsMultiple)
 {
+    public string Name { get; private set; } = name;
+    public int NumberOfSteps { get; } = numberOfSteps;
+    public bool ArchivesIsMultiple { get; } = archivesIsMultiple;
+    public bool RequiresFolder { get; private set; }
+    public string[] RequiredFileTypes { get; private set; }
 
-    [ProtoMember(6)]
-    public MigrationApiInfo ApiInfo { get; set; }
-
-
-    public MigrationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    public MigratorMeta(string name, string[] fileTypes) : this(name, 0, false)
     {
+        RequiredFileTypes = fileTypes;
     }
 
-    protected MigrationIntegrationEvent()
+    public MigratorMeta(string name) : this(name, 0, false)
     {
     }
 }

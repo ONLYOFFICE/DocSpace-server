@@ -24,23 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
-
-namespace ASC.Migration.Core;
+namespace ASC.Migration.Core.Models.Api;
 
 [ProtoContract]
-public record MigrationIntegrationEvent : IntegrationEvent
+public class MigratingApiUser : ImportableApiEntity
 {
+    [ProtoMember(2)]
+    public string Key { get; set; }
+
+    [ProtoMember(3)]
+    public string Email { get; set; }
+
+    [ProtoMember(4)]
+    public string DisplayName { get; set; }
+
+    [ProtoMember(5)]
+    public EmployeeType UserType { get; set; }
 
     [ProtoMember(6)]
-    public MigrationApiInfo ApiInfo { get; set; }
-
-
-    public MigrationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
-    {
-    }
-
-    protected MigrationIntegrationEvent()
-    {
-    }
+    public MigratingApiFiles MigratingFiles { get; set; }
 }

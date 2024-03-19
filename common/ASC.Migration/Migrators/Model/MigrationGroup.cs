@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
-
-namespace ASC.Migration.Core;
-
-[ProtoContract]
-public record MigrationIntegrationEvent : IntegrationEvent
+namespace ASC.Migration.Core.Migrators.Model;
+public class MigrationGroup
 {
-
-    [ProtoMember(6)]
-    public MigrationApiInfo ApiInfo { get; set; }
-
-
-    public MigrationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    public GroupInfo Info { get; set; }
+    public HashSet<string> UserKeys { get; set; }
+    public string ManagerKey { get; set; }
+    public bool ShouldImport { get; set; }
+    public virtual MigratingApiGroup ToApiInfo()
     {
-    }
-
-    protected MigrationIntegrationEvent()
-    {
+        return new MigratingApiGroup()
+        {
+            GroupName = Info.Name,
+            UserUidList = UserKeys.ToList()
+        };
     }
 }

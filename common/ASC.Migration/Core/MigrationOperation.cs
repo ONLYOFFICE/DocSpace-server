@@ -26,6 +26,9 @@
 
 using System.Extensions;
 
+using ASC.Migration.Core.Models;
+using ASC.Migration.Core.Migrators;
+
 namespace ASC.Migration.Core;
 
 [Transient]
@@ -63,10 +66,10 @@ public class MigrationOperation(
         }
     }
 
-    private List<Guid> _importedUsers;
-    public List<Guid> ImportedUsers
+    private List<string> _importedUsers;
+    public List<string> ImportedUsers
     {
-        get => _migrationApiInfo ?? System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(this[nameof(_importedUsers)]);
+        get => _importedUsers ?? System.Text.Json.JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
         set
         {
             _importedUsers = value;
@@ -102,7 +105,7 @@ public class MigrationOperation(
 
     protected override async Task DoJob()
     {
-        IMigration migrator = null;
+        Migrator migrator = null;
         try
         {
             var onlyParse = _migrationApiInfo == null;
@@ -159,9 +162,9 @@ public class MigrationOperation(
         void Migrator_OnProgressUpdate(double arg1, string arg2)
         {
             Percentage = arg1;
-            if (migrator != null && migrator.ApiInfo != null)
+            if (migrator != null && migrator.MigrationInfo != null)
             {
-                MigrationApiInfo = migrator.ApiInfo;
+                MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }
             PublishChanges();
         }

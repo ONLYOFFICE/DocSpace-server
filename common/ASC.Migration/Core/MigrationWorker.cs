@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Migration.Core.Models;
+
 namespace ASC.Migration.Core;
 
 [Singleton(Additional = typeof(MigrationWorkerExtension))]
@@ -32,7 +34,7 @@ public class MigrationWorker(
     IServiceProvider serviceProvider)
 {
     private readonly object _locker = new();
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME); // 1 day
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
 
