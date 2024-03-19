@@ -114,10 +114,6 @@ public class WhitelabelController(ApiContext apiContext,
 
         settings.SetLogoText(inDto.LogoText);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-
-        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenant.Id, tenantLogoManager);
-
         await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
     }
 
