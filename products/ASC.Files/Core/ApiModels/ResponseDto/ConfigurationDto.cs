@@ -100,6 +100,7 @@ public class CustomizationConfigDto<T>
     public bool About { get; set; }
 
     public CustomerConfigDto Customer { get; set; }
+    public AnonymousConfigDto Anonymous { get; set; }
 
     public FeedbackConfig Feedback  { get; set; }
 
@@ -125,6 +126,11 @@ public class LogoConfigDto
     public string ImageEmbedded { get; set; }
 
     public string Url { get; set; }
+}
+
+public class AnonymousConfigDto
+{
+    public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
@@ -248,7 +254,8 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
 public class CustomizationConfigConverter<T>(
     LogoConfigConverter<T> configConverter, 
     CustomerConfigConverter customerConfigConverter,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    AnonymousConfigConverter<T> anonymousConfigConverter)
 {
     public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
     {    
@@ -269,7 +276,8 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite)
+            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
         return result;
@@ -294,6 +302,27 @@ public class LogoConfigConverter<T>
             ImageDark = await source.GetImageDark(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
             Url = source.Url
+        };
+
+        return result;
+    }
+}
+
+[Scope]
+public class AnonymousConfigConverter<T>
+{
+    public AnonymousConfigDto Convert(Configuration<T> configuration)
+    {
+        var source = configuration.EditorConfig?.Customization?.Logo;
+
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new AnonymousConfigDto
+        {
+            Request = configuration.Document.Permissions.Chat
         };
 
         return result;
