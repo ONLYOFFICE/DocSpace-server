@@ -33,6 +33,7 @@ global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
 global using System.Linq.Expressions;
+global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;

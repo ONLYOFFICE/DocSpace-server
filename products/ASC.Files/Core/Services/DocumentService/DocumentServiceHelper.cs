@@ -40,7 +40,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -265,7 +266,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload,
-            Copy = rightToDownload
+            Copy = rightToDownload,
+            Protect = authContext.IsAuthenticated,
+            Chat = file.Access != FileShare.Read
         };
 
         configuration.EditorConfig.ModeWrite = modeWrite;
