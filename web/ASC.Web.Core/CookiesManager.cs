@@ -65,6 +65,8 @@ public class CookiesManager(
             return;
         }
 
+        var httpContext = httpContextAccessor.HttpContext;
+
         var options = new CookieOptions
         {
             Expires = await GetExpiresDateAsync(session)
@@ -85,9 +87,9 @@ public class CookiesManager(
                 options.SameSite = sameSiteMode.Value;
             }
 
-            var urlRewriter = httpContextAccessor.HttpContext.Request.Url();
-            
-            if (urlRewriter.Scheme == "https")
+            var requestUrlScheme = httpContext.Request.Url().Scheme;
+
+            if (Uri.UriSchemeHttps.Equals(requestUrlScheme, StringComparison.OrdinalIgnoreCase))
             {
                 options.Secure = true;
 
@@ -99,7 +101,7 @@ public class CookiesManager(
                 {
                     var cspSettings = await settingsManager.LoadAsync<CspSettings>();
 
-                    if (cspSettings.Domains.Any())
+                    if (cspSettings.Domains != null && cspSettings.Domains.Any())
                     {
                         options.SameSite = SameSiteMode.None;
                     }
@@ -111,7 +113,7 @@ public class CookiesManager(
                 options.SameSite = SameSiteMode.Strict;
             }
 
-            if (FromCors(httpContextAccessor.HttpContext.Request))
+            if (FromCors(httpContext.Request))
             {
                 options.Domain = $".{coreBaseSettings.Basedomain}";
             }
@@ -119,7 +121,7 @@ public class CookiesManager(
 
         var cookieName = GetFullCookiesName(type, itemId);
 
-        httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
+        httpContext.Response.Cookies.Append(cookieName, value, options);
     }
 
     public string GetCookies(CookiesType type)
