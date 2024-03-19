@@ -267,7 +267,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             Print = rightToDownload,
             Download = rightToDownload,
             Copy = rightToDownload,
-            Protect = authContext.IsAuthenticated
+            Protect = authContext.IsAuthenticated,
+            Chat = file.Access != FileShare.Read
         };
 
         configuration.EditorConfig.ModeWrite = modeWrite;

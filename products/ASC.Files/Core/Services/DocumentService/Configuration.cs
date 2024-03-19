@@ -471,6 +471,7 @@ public class PermissionsConfig
 {
     public bool ChangeHistory { get; set; }
     public bool Comment { get; set; } = true;
+    public bool Chat { get; set; } = true;
     public bool Download { get; set; } = true;
     public bool Edit { get; set; } = true;
     public bool FillForms { get; set; } = true;
