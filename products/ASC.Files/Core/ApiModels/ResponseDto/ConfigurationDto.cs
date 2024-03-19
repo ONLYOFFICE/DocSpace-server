@@ -227,7 +227,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var result = new EditorConfigurationDto<T>
         {
             CallbackUrl = await source.GetCallbackUrl(file.Id.ToString()),
-            CoEditing = source.CoEditing,
+            CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),
             Embedded = source.GetEmbedded(configuration.EditorType),
@@ -237,7 +237,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
-            User = source.User
+            User = await source.GetUserAsync()
         };
 
         return result;
