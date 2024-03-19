@@ -64,7 +64,7 @@ public class LogoUploader
                 }
 
                 var maxSize = TenantWhiteLabelSettings.GetSize(type);
-                if (size.Height > maxSize.Height && size.Width != maxSize.Width)
+                if (size.Height > maxSize.Height || size.Width > maxSize.Width)
                 {
                     throw new ImageSizeLimitException();
                 }
