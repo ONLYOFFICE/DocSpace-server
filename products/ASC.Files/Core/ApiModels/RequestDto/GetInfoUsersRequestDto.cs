@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class GetInfoUsersRequestDto
 {
     /// <summary>List of user ids</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
-    public List<string> UserIds { get; set; }
+    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    public List<Guid> UserIds { get; set; }
 }

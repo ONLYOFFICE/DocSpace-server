@@ -2648,7 +2648,7 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<List<MentionWrapper>> GetInfoUsersAsync(List<string> userIds)
+    public async Task<List<MentionWrapper>> GetInfoUsersAsync(List<Guid> userIds)
     {
         if (!authContext.IsAuthenticated)
         {
@@ -2659,12 +2659,7 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var uid in userIds)
         {
-            if (!Guid.TryParse(uid, out var id))
-            {
-                continue;
-            }
-
-            var user = await userManager.GetUsersAsync(id);
+            var user = await userManager.GetUsersAsync(uid);
             if (user.Id.Equals(Constants.LostUser.Id))
             {
                 continue;
