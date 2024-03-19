@@ -1714,6 +1714,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
     {
+        if (await globalFolderHelper.FolderMyAsync == default)
+        {
+            return;
+        }
+        
         var tagDao = daoFactory.GetTagDao<T>();
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();

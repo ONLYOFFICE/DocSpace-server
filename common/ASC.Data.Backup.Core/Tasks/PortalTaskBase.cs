@@ -51,6 +51,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     public void Init(int tenantId)
     {
         TenantId = tenantId;
+        IgnoreTable("hosting_instance_registration");
     }
 
     public void IgnoreModule(ModuleName moduleName)

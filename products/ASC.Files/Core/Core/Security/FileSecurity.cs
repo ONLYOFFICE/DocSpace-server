@@ -931,14 +931,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                var mytrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
-                if (!Equals(mytrashId, 0))
+                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+                if (!Equals(myTrashId, 0))
                 {
-                    return Equals(e.RootId, mytrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, mytrashId));
+                    return Equals(e.RootId, myTrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, myTrashId));
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || isUser || action == FilesSecurityActions.Lock)
+                if (isOutsider || action == FilesSecurityActions.Lock || (isUser && !e.Shared))
                 {
                     return false;
                 }

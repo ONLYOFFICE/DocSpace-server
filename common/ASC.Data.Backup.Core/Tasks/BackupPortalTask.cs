@@ -204,8 +204,9 @@ public class BackupPortalTask(DbFactory dbFactory,
             for (var j = 0; j < TasksLimit && i + j < tables.Count; j++)
             {
                 var t = tables[i + j];
-                tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir, connectionString)));
-                if (!excluded.Exists(t.StartsWith))
+                var ignore = excluded.Exists(t.StartsWith);
+                tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir, connectionString, ignore)));
+                if (!ignore)
                 {
                     tasks.Add(Task.Run(() => DumpTableData(t, dataDir, dict[t], connectionString)));
                 }
@@ -232,7 +233,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     }
 
-    private void DumpTableScheme(string t, string dir, string connectionString)
+    private void DumpTableScheme(string t, string dir, string connectionString, bool ignore)
     {
         try
         {
@@ -243,12 +244,23 @@ public class BackupPortalTask(DbFactory dbFactory,
                 command.CommandText = $"SHOW CREATE TABLE `{t}`";
                 var createScheme = ExecuteList(command);
                 var creates = new StringBuilder();
-                creates.Append($"DROP TABLE IF EXISTS `{t}`;");
-                creates.AppendLine();
-                creates.Append(createScheme
-                        .Select(r => Convert.ToString(r[1]))
-                        .FirstOrDefault());
-                creates.Append(';');
+                if (ignore)
+                {
+                    creates.Append(createScheme
+                            .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
+                            .FirstOrDefault());
+                    creates.Append(';');
+                }
+                else
+                {
+
+                    creates.Append($"DROP TABLE IF EXISTS `{t}`;");
+                    creates.AppendLine();
+                    creates.Append(createScheme
+                            .Select(r => Convert.ToString(r[1]))
+                            .FirstOrDefault());
+                    creates.Append(';');
+                }
 
                 var path = CrossPlatform.PathCombine(dir, t);
                 using (var stream = File.OpenWrite(path))
