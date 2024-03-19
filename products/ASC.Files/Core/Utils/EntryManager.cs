@@ -247,7 +247,8 @@ public class EntryManager(IDaoFactory daoFactory,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    ExternalShare externalShare)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1386,25 +1387,21 @@ public class EntryManager(IDaoFactory daoFactory,
                 return null;
             }
         }
-
-        var fileDao = daoFactory.GetFileDao<T>();
-        var check = await fileShareLink.CheckAsync(doc, false, fileDao);
-        var editLink = check.EditLink;
-        var file = check.File ?? await fileDao.GetFileAsync(fileId);
-
+        
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!editLink
-            && (!await fileSecurity.CanEditAsync(file, userId)
-                && !await fileSecurity.CanCustomFilterEditAsync(file, userId)
-                && !await fileSecurity.CanReviewAsync(file, userId)
-                && !await fileSecurity.CanFillFormsAsync(file, userId)
-                && !await fileSecurity.CanCommentAsync(file, userId)))
+
+        var linkId = await externalShare.GetLinkIdAsync();
+        var canEditByLink = linkId != Guid.Empty && await CanEditAsync(linkId, file);
+        
+        if (!canEditByLink && !await CanEditAsync(userId, file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
+        
         if (await FileLockedForMeAsync(file.Id, userId))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
@@ -1422,6 +1419,15 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         return file;
+        
+        async Task<bool> CanEditAsync(Guid guid, FileEntry<T> entry)
+        {
+            return await fileSecurity.CanEditAsync(entry, guid)
+                   || await fileSecurity.CanCustomFilterEditAsync(entry, guid)
+                   || await fileSecurity.CanReviewAsync(entry, guid)
+                   || await fileSecurity.CanFillFormsAsync(entry, guid)
+                   || await fileSecurity.CanCommentAsync(entry, guid);
+        }
     }
 
     public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, string doc = null, bool checkRight = true, bool finalize = false)
