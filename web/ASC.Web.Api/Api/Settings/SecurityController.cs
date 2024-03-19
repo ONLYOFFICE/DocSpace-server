@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,8 @@ public class SecurityController(TenantManager tenantManager,
         IMemoryCache memoryCache,
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor,
-        IConfiguration configuration)
+        PasswordSettingsConverter passwordSettingsConverter,
+        PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -145,9 +146,10 @@ public class SecurityController(TenantManager tenantManager,
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
-    public async Task<PasswordSettings> GetPasswordSettingsAsync()
+    public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
     {
-        return await settingsManager.LoadAsync<PasswordSettings>();
+        var settings = await settingsManager.LoadAsync<PasswordSettings>();
+        return passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -162,13 +164,13 @@ public class SecurityController(TenantManager tenantManager,
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("password")]
-    public async Task<PasswordSettings> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
+    public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var userPasswordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!PasswordSettings.CheckLengthInRange(configuration, inDto.MinLength))
+        if (!passwordSettingsManager.CheckLengthInRange(inDto.MinLength))
         {
             throw new ArgumentException(nameof(inDto.MinLength));
         }
@@ -182,7 +184,7 @@ public class SecurityController(TenantManager tenantManager,
 
         await messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
 
-        return userPasswordSettings;
+        return passwordSettingsConverter.Convert(userPasswordSettings);
     }
 
     /// <summary>

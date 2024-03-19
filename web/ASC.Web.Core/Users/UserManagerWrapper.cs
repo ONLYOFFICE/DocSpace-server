@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -33,20 +33,21 @@ namespace ASC.Web.Core.Users;
 /// </summary>
 /// 
 [Scope]
-public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
-        UserManager userManager,
-        SecurityContext securityContext,
-        CustomNamingPeople customNamingPeople,
-        TenantUtil tenantUtil,
-        SettingsManager settingsManager,
-        UserFormatter userFormatter,
-        CountPaidUserChecker countPaidUserChecker,
-        TenantManager tenantManager,
-        WebItemSecurityCache webItemSecurityCache,
-        QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
-        IDistributedLockProvider distributedLockProvider,
-        IConfiguration configuration)
+public sealed class UserManagerWrapper(
+    StudioNotifyService studioNotifyService,
+    UserManager userManager,
+    SecurityContext securityContext,
+    CustomNamingPeople customNamingPeople,
+    TenantUtil tenantUtil,
+    SettingsManager settingsManager,
+    UserFormatter userFormatter,
+    CountPaidUserChecker countPaidUserChecker,
+    TenantManager tenantManager,
+    WebItemSecurityCache webItemSecurityCache,
+    QuotaSocketManager quotaSocketManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+    IDistributedLockProvider distributedLockProvider,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
@@ -319,42 +320,13 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
 
         var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!CheckPasswordRegex(passwordSettingsObj, password) || !PasswordSettings.CheckLengthInRange(configuration, password.Length))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettingsObj, password) || !passwordSettingsManager.CheckLengthInRange(password.Length))
         {
             throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
         }
     }
 
-    private string GetPasswordRegex(PasswordSettings passwordSettings)
-    {
-        var pwdBuilder = new StringBuilder("^");
 
-        if (passwordSettings.Digits)
-        {
-            pwdBuilder.Append(passwordSettings.DigitsRegexStr);
-        }
-
-        if (passwordSettings.UpperCase)
-        {
-            pwdBuilder.Append(passwordSettings.UpperCaseRegexStr);
-        }
-
-        if (passwordSettings.SpecSymbols)
-        {
-            pwdBuilder.Append(passwordSettings.SpecSymbolsRegexStr);
-        }
-
-        pwdBuilder.Append($"{passwordSettings.AllowedCharactersRegexStr}{{{passwordSettings.MinLength},{PasswordSettings.MaxLength}}}$");
-
-        return pwdBuilder.ToString();
-    }
-
-    public bool CheckPasswordRegex(PasswordSettings passwordSettings, string password)
-    {
-        var passwordRegex = GetPasswordRegex(passwordSettings);
-
-        return new Regex(passwordRegex).IsMatch(password);
-    }
 
     public async Task<string> SendUserPasswordAsync(string email)
     {
@@ -409,7 +381,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         var text = new StringBuilder();
 
         text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettings.MaxLength);
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
         text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
         text.Append($", {Resource.ErrorPasswordNoSpaces}");
 

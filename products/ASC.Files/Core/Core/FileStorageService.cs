@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -82,7 +82,8 @@ public class FileStorageService //: IFileStorageService
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
     IDistributedLockProvider distributedLockProvider,
-    MentionWrapperCreator mentionWrapperCreator)
+    IHttpClientFactory clientFactory,
+    TempStream tempStream)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -168,6 +169,10 @@ public class FileStorageService //: IFileStorageService
             if (parent != null && !string.IsNullOrEmpty(parent.Error))
             {
                 throw new Exception(parent.Error);
+            }
+            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms)
+            {
+                parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
             }
         }
         catch (Exception e)
@@ -372,7 +377,7 @@ public class FileStorageService //: IFileStorageService
     public async Task<Folder<T>> CreateFolderAsync<T>(T parentId, string title)
     {
         var folder = await InternalCreateFolderAsync(parentId, title);
-        
+
         await socketManager.CreateFolderAsync(folder);
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
@@ -386,16 +391,16 @@ public class FileStorageService //: IFileStorageService
 
         return await CreateRoomAsync(async () =>
         {
-            await using(await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
-            {
-                await countRoomChecker.CheckAppend();
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+        {
+            await countRoomChecker.CheckAppend();
                 return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota);
             }
         }, privacy, share);
-    }
+            }
 
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder)
-    {
+            {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
 
@@ -411,7 +416,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ProviderAlreadyConnect);
         }
-        
+
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
         var room = await CreateRoomAsync(async () =>
@@ -419,29 +424,29 @@ public class FileStorageService //: IFileStorageService
             var folder = parent;
 
             if (createAsNewFolder)
-            {
+        {
                 try
                 {
                     folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing);
                 }
                 catch
                 {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
-                }
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+        }
             }
-            
-            await providerDao.UpdateRoomProviderInfoAsync(new ProviderData 
-            { 
-                Id = providerInfo.ProviderId, 
-                Title = title, 
+
+                await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+                {
+                    Id = providerInfo.ProviderId,
+                    Title = title,
                 FolderId = folder.Id, 
-                FolderType = folderType, 
-                Private = privacy 
-            });
-            
-            folder.FolderType = folderType;
-            folder.Shared = folderType == FolderType.PublicRoom;
-            folder.RootFolderType = FolderType.VirtualRooms;
+                    FolderType = folderType,
+                    Private = privacy
+                });
+
+                folder.FolderType = folderType;
+                folder.Shared = folderType == FolderType.PublicRoom;
+                folder.RootFolderType = FolderType.VirtualRooms;
             folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
             return folder;
@@ -449,8 +454,8 @@ public class FileStorageService //: IFileStorageService
         }, false, null);
 
         return room;
-    }
-    
+            }
+
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)
     {
         ArgumentNullException.ThrowIfNull(folderFactory);
@@ -466,23 +471,23 @@ public class FileStorageService //: IFileStorageService
             
             aces = await GetFullAceWrappersAsync(shares);
             await CheckEncryptionKeysAsync(aces);
-        }
-        
+    }
+
         var folder = await folderFactory();
         if (folder == null)
-        {
+    {
             return null;
-        }
+    }
 
         switch (folder.FolderType)
-        {
+    {
             case FolderType.PublicRoom:
                 await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
                 var task2 = InternalCreateFolderAsync(folder.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
-                
+
                 var folders = await Task.WhenAll(task1, task2);
                 foreach (var f in folders)
                 {
@@ -515,7 +520,7 @@ public class FileStorageService //: IFileStorageService
         var parent = await folderDao.GetFolderAsync(parentId);
         var isRoom = DocSpaceHelper.IsRoom(folderType);
 
-        if (parent == null)
+        if(parent == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
@@ -568,18 +573,18 @@ public class FileStorageService //: IFileStorageService
                 return folder;
             }
 
-            if (folder.Id.Equals(folder.RootId))
-            {
-                return null;
-            }
+                if (folder.Id.Equals(folder.RootId))
+                {
+                    return null;
+                }
 
             if (folder.ProviderEntry)
-            {
+                {
                 return folder;
             }
 
-            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
-            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
 
             return folder;
         }
@@ -2684,6 +2689,70 @@ public class FileStorageService //: IFileStorageService
         }
 
         return (await fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
+    }
+
+    public async Task<File<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
+    {
+        try
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
+
+            var folder = await folderDao.GetFolderAsync(folderId);
+            folder.NotFoundIfNull();
+            if (!await fileSecurity.CanEditAsync(folder))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            var file = await fileDao.GetFileAsync(fileId);
+            var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+            var fileExtension = file.ConvertedExtension;
+            var docKey = await documentServiceHelper.GetDocKeyAsync(file);
+
+            fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+
+            var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+
+            var pdfFile = serviceProvider.GetService<File<T>>();
+            pdfFile.Title = !string.IsNullOrEmpty(title) ? $"{title}.pdf" : FileUtility.ReplaceFileExtension(file.Title, "pdf");
+            pdfFile.ParentId = folder.Id;
+            pdfFile.Comment = FilesCommonResource.CommentCreate;
+
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(convertedDocumentUri)
+            };
+
+            var httpClient = clientFactory.CreateClient();
+            using var response = await httpClient.SendAsync(request);
+            await using var fileStream = await response.Content.ReadAsStreamAsync();
+            File<T> result;
+
+            if (fileStream.CanSeek)
+            {
+                pdfFile.ContentLength = fileStream.Length;
+                result = await fileDao.SaveFileAsync(pdfFile, fileStream);
+            }
+            else
+            {
+                await using var buffered = await tempStream.GetBufferedAsync(fileStream);
+                pdfFile.ContentLength = buffered.Length;
+                result = await fileDao.SaveFileAsync(pdfFile, buffered);
+            }
+            if (result != null)
+            {
+                await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
+                await fileMarker.MarkAsNewAsync(result);
+                await socketManager.CreateFileAsync(result);
+            }
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            throw GenerateException(e);
+        }
     }
 
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,

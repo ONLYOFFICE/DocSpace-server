@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Runtime.CompilerServices;
+using Serializer = ProtoBuf.Serializer;
 
 namespace ASC.Web.Files.Utils;
 
@@ -32,6 +32,7 @@ namespace ASC.Web.Files.Utils;
 public class FileTrackerHelper
 {
     private const string Tracker = "filesTracker";
+    private readonly IDistributedCache _distributedCache;
     private readonly ICache _cache;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FileTrackerHelper> _logger;
@@ -40,8 +41,9 @@ public class FileTrackerHelper
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Action<object, object, EvictionReason, object> _callbackAction;
 
-    public FileTrackerHelper(ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
+    public FileTrackerHelper(IDistributedCache distributedCache, ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
     {
+        _distributedCache = distributedCache;
         _cache = cache;
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -156,19 +158,12 @@ public class FileTrackerHelper
         var tracker = GetTracker(fileId);
         if (tracker != null)
         {
-            foreach (var value in tracker.EditingBy.Values)
+            foreach (var value in tracker.EditingBy.Values.Where(value => value.UserId == userId || userId == Guid.Empty))
             {
-                if (value.UserId == userId || userId == Guid.Empty)
-                {
-                    value.CheckRightTime = check ? DateTime.MinValue : DateTime.UtcNow;
-                }
+                value.CheckRightTime = check ? DateTime.MinValue : DateTime.UtcNow;
             }
 
             SetTracker(fileId, tracker);
-        }
-        else
-        {
-            RemoveTracker(fileId);
         }
     }
 
@@ -178,31 +173,51 @@ public class FileTrackerHelper
 
         return tracker != null && IsEditing(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
-            : new List<Guid>();
+            : [];
     }
 
     private FileTracker GetTracker<T>(T fileId)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default))
+        if (EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            return _cache.Get<FileTracker>(Tracker + fileId);
+            return null;
         }
 
-        return null;
+        var serializedObject = _distributedCache.Get(Tracker + fileId);
+
+        if (serializedObject == null)
+        {
+            return default;
+        }
+
+        using var ms = new MemoryStream(serializedObject);
+
+        return Serializer.Deserialize<FileTracker>(ms);
+
     }
 
     private void SetTracker<T>(T fileId, FileTracker tracker)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
+        if (EqualityComparer<T>.Default.Equals(fileId, default) || tracker == null)
         {
-            _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
+            return;
         }
+
+        using var ms = new MemoryStream();
+
+        Serializer.Serialize(ms,  tracker with {});
+        _distributedCache.Set(Tracker + fileId, ms.ToArray(), new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = _cacheTimeout
+        });
+        _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
     }
     
     private void RemoveTracker<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
+            _distributedCache.Remove(Tracker + fileId);
             _cache.Remove(Tracker + fileId);
         }
     }
@@ -216,17 +231,11 @@ public class FileTrackerHelper
                 return;
             }
 
-            ConfiguredTaskAwaitable t;
             var fId = cacheFileId.ToString()?.Substring(Tracker.Length);
             
-            if(int.TryParse(fId, out var internalFileId))
-            {
-                t = Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false);
-            }
-            else
-            {
-                t = Callback(fId, fileTracker as FileTracker).ConfigureAwait(false);
-            }
+            var t = int.TryParse(fId, out var internalFileId) ? 
+                Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false) : 
+                Callback(fId, fileTracker as FileTracker).ConfigureAwait(false);
 
             t.GetAwaiter().GetResult();
         };
@@ -254,16 +263,13 @@ public class FileTrackerHelper
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
                 var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileAsync(fileId));
-                using (_logger.BeginScope(new[]
-                       {
-                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}")
-                       }))
+                using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
-                if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
-                {
-                    _cache.Insert(Tracker + fileId, fileTracker with {}, _cacheTimeout, _callbackAction);
+                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
+                    {
+                        SetTracker(fileId, fileTracker);
+                    }
                 }
-            }
             }
             catch (Exception e)
             {
@@ -273,15 +279,22 @@ public class FileTrackerHelper
     }
 }
 
+[ProtoContract]
 public record FileTracker
 {
+    [ProtoMember(1)]
     internal Dictionary<Guid, TrackInfo> EditingBy { get; }
 
+    private FileTracker()
+    {
+        
+    }
+    
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
         EditingBy = new()
         { 
-                {
+            {
                 tabId,
                 new TrackInfo
                 {
@@ -295,16 +308,28 @@ public record FileTracker
         };
     }
 
-
+    [ProtoContract]
     internal class TrackInfo
     {
+        [ProtoMember(1)]
         public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;
+        
+        [ProtoMember(2)]
         public DateTime TrackTime { get; set; } = DateTime.UtcNow;
+        
+        [ProtoMember(3)]
         public required Guid UserId { get; init; }
+        
+        [ProtoMember(4)]
         public required int TenantId { get; init; }
         
+        [ProtoMember(5)]
         public required string BaseUri { get; init; }
+        
+        [ProtoMember(6)]
         public required bool NewScheme { get;  init; }
+        
+        [ProtoMember(7)]
         public required bool EditingAlone { get;  init; }
     }
 }

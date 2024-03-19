@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -1614,6 +1614,21 @@ internal class FolderDao(
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
+    }
+    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var folderId = Convert.ToInt32(entry.ParentId);
+
+        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
+
+        if (parentFolders.Count > 1)
+        {
+            return parentFolders[1].FolderType;
+        }
+
+        return parentFolders[0].FolderType;
     }
 
     public async Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
