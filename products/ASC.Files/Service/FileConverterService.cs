@@ -89,13 +89,6 @@ internal class FileConverterService<T>(
 
                 try
                 {
-                    var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
-
-                    if (converter.Headers != null)
-                    {
-                        externalShare.Init(converter.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
-                    }
-
                     var user = await userManager.GetUsersAsync(converter.Account);
 
                     var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);

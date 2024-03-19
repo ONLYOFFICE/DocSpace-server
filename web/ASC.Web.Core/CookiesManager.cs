@@ -122,18 +122,6 @@ public class CookiesManager(
         httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
     }
 
-    public string GetCookies(IReadOnlyDictionary<string, string> cookies, CookiesType type, string itemId)
-    {
-        if (cookies == null)
-        {
-            return string.Empty;
-        }
-
-        var name = GetFullCookiesName(type, itemId);
-
-        return cookies.TryGetValue(name, out var value) ? value : string.Empty;
-    }
-
     public string GetCookies(CookiesType type)
     {
         return httpContextAccessor?.HttpContext != null && httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(GetCookiesName(type), out var cookie)

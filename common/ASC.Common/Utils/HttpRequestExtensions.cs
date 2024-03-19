@@ -28,7 +28,7 @@ namespace System.Web;
 
 public static class HttpRequestExtensions
 {
-    public static readonly string RequestTokenHeader = "Request-Token";
+    public const string RequestTokenHeader = "Request-Token";
 
     public static Uri Url(this HttpRequest request)
     {
