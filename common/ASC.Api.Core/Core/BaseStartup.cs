@@ -63,7 +63,16 @@ public abstract class BaseStartup
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
+
         services.AddHttpClient();
+        services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            return new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+            };
+        });
+
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
         

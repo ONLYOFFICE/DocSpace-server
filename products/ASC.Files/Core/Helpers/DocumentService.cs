@@ -401,7 +401,7 @@ public static class DocumentService
             RequestUri = new Uri(healthcheckUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient("customHttpClient");
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
 
         using var response = await httpClient.SendAsync(request);

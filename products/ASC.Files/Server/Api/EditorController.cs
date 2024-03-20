@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -274,7 +276,28 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
         var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
         var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
-        
+
+        bool validateUrl(string url)
+        {
+            Uri? uri;
+
+            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri);
+
+            if (uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
+            {
+                return false;
+            }
+
+            return success;
+        }
+
+        if (!validateUrl(inDto.DocServiceUrl) ||
+            !validateUrl(inDto.DocServiceUrlInternal) ||
+            !validateUrl(inDto.DocServiceUrlPortal))
+        {
+            throw new Exception("Invalid input urls");
+        }
+
         filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
@@ -297,7 +320,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
             filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
             filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
-            throw;
+          
+            throw new Exception("Unable to establish a connection with the Document Server.");
         }
 
         return await GetDocServiceUrlAsync(false);
