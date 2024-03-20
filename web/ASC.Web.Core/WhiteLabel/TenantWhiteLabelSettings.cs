@@ -32,6 +32,8 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 {
     public const string DefaultLogoText = BaseWhiteLabelSettings.DefaultLogoText;
 
+    public static readonly List<string> AvailableExtensions = [".bmp", ".jpg", ".jpeg", ".ico", ".png", ".svg"];
+
     #region Logos information: extension, isDefault, text for img auto generating
 
     public string LogoLightSmallExt { get; set; }
@@ -504,8 +506,10 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 return (logoData, extNotification);
             case "svg":
                 return (GetLogoDataFromSvg(), extNotification);
+            case "bmp":
             case "jpg":
             case "jpeg":
+            case "ico":
                 return (GetLogoDataFromJpg(), extNotification);
             default:
                 return (null, extNotification);
