@@ -825,6 +825,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
+        if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
+        {
+            return true;
+        }
+
         if (e.FileEntryType == FileEntryType.Folder)
         {
             if (folder == null)
