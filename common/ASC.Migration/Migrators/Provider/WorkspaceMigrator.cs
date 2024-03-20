@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Amazon.Runtime.Internal.Transform;
-
 using ASC.Migration.Core.Migrators.Model;
 using ASC.Web.Core.Users;
 using ASC.Web.Files.Utils;
@@ -34,15 +32,12 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators.Provider;
 
-[Scope]
+[Transient]
 public class WorkspaceMigrator : Migrator
 {
     private CancellationToken _cancellationToken;
     private string _backup;
     private IDataReadOperator _dataReader;
-
-    protected override string TmpFolder { get; set; }
-    public override MigrationInfo MigrationInfo { get; set; } = new MigrationInfo() { Name = "Workspace" };
     
     public WorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
@@ -57,11 +52,11 @@ public class WorkspaceMigrator : Migrator
         AuthContext authContext, 
         DisplayUserSettingsHelper displayUserSettingsHelper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper)
     {
+        MigrationInfo = new MigrationInfo() { Name = "Workspace" };
     }
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        MigrationInfo = new MigrationInfo() { Name = "Workspace" };
         await MigrationLogger.InitAsync();
         _cancellationToken = cancellationToken;
 

@@ -32,7 +32,6 @@ public class MigrationInfo
     public Dictionary<string, MigrationUser> Users = new Dictionary<string, MigrationUser>();
     public Dictionary<string, MigrationUser> WithoutEmailUsers = new Dictionary<string, MigrationUser>();
     public Dictionary<string, MigrationUser> ExistUsers = new Dictionary<string, MigrationUser>();
-    public string Path { get; set; }
     public string Name { get; set; }
     public OperationType Operation { get; set; }
     public List<string> Files { get; set; }
@@ -80,8 +79,14 @@ public class MigrationInfo
             user.Storage.ShouldImportSharedFolders = apiInfo.ImportSharedFolders;
         }
 
-        CommonStorage.ShouldImport = apiInfo.ImportSharedFiles;
-        ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
+        if (CommonStorage != null)
+        {
+            CommonStorage.ShouldImport = apiInfo.ImportSharedFiles;
+        }
+        if (ProjectStorage != null)
+        { 
+            ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
+        }
 
         foreach (var group in Groups)
         {

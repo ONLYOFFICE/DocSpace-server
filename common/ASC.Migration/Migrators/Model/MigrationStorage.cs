@@ -31,7 +31,7 @@ public class MigrationStorage
     public List<MigrationFile> Files { get; } = new List<MigrationFile>();
     public List<MigrationSecurity> Securities { get; } = new List<MigrationSecurity>();
     public long BytesTotal { get; set; }
-    public FolderType Type { get; set; }
+    public FolderType Type { get; set; } = FolderType.USER;
     public string RootKey { get; set; }
 
     public bool ShouldImport { get; set; }
@@ -43,8 +43,8 @@ public class MigrationStorage
         return new MigratingApiFiles()
         {
             BytesTotal = BytesTotal,
-            FilesCount = Folders.Count(),
-            FoldersCount = Files.Count()
+            FilesCount = Files.Count(),
+            FoldersCount = Folders.Count()
         };
     }
 }

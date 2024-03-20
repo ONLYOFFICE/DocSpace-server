@@ -33,7 +33,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
 
-[Scope]
+[Transient]
 public abstract class Migrator : IDisposable
 {
     protected SecurityContext SecurityContext { get; }
@@ -49,7 +49,7 @@ public abstract class Migrator : IDisposable
     protected AuthContext AuthContext { get; }
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; }
 
-    public abstract MigrationInfo MigrationInfo { get; set; }
+    public MigrationInfo MigrationInfo { get; set; }
     protected IAccount _currentUser;
     private Dictionary<string, MigrationUser> _usersForImport;
     protected List<string> _importedUsers;
@@ -60,7 +60,7 @@ public abstract class Migrator : IDisposable
     protected double _lastProgressUpdate;
     protected string _lastStatusUpdate;
 
-    protected abstract string TmpFolder { get; set; }
+    protected string TmpFolder { get; set; }
 
     public event Action<double, string> OnProgressUpdate;
     
@@ -204,6 +204,7 @@ public abstract class Migrator : IDisposable
 
                 if (user.ShouldImport && (saved.Equals(Constants.LostUser) || saved.Removed))
                 {
+                    DataСhange(user);
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {
@@ -247,6 +248,14 @@ public abstract class Migrator : IDisposable
                 MigrationInfo.Users.Remove(key);
                 _usersForImport.Remove(key);
             }
+        }
+    }
+
+    private void DataСhange(MigrationUser user)
+    {
+        if (user.Info.LastName == null)
+        {
+            user.Info.LastName = "NOTPROVIDED";
         }
     }
 

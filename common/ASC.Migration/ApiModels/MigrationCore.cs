@@ -26,6 +26,7 @@
 
 using ASC.Migration.Core.Migrators;
 using ASC.Migration.Core.Migrators.Provider;
+using ASC.Migration.Core.Migrators.Provider.Google;
 
 namespace ASC.Migration.Core.Models.Api;
 
@@ -80,5 +81,6 @@ public class MigrationCore(
         services.TryAdd<MigrationCore>();
 
         services.TryAdd<Migrator, WorkspaceMigrator>();
+        services.TryAdd<Migrator, GoogleWorkspaceMigrator>();
     }
 }
