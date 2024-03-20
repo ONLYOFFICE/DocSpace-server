@@ -55,7 +55,7 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddExceptionHandler<Classes.CustomExceptionHandler>();
         services.AddProblemDetails();
 
         //services.AddMvcCore(config =>
