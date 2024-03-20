@@ -48,7 +48,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         FileUtility fileUtility,
         StudioNotifyHelper studioNotifyHelper,
         BadgesSettingsHelper badgesSettingsHelper,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthManager authManager)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -777,9 +778,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var userType = await userManager.GetUserTypeAsync(user);
         var isUser = userType is EmployeeType.User;
-        var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isCollaborator = userType is EmployeeType.Collaborator;
+        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
         
         return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
     }

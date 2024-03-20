@@ -247,8 +247,7 @@ public class EntryManager(IDaoFactory daoFactory,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
-    TenantUtil tenantUtil,
-    ExternalShare externalShare)
+    TenantUtil tenantUtil)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -297,7 +296,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
-        }
+            }
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
@@ -1393,11 +1392,8 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-
-        var linkId = await externalShare.GetLinkIdAsync();
-        var canEditByLink = linkId != Guid.Empty && await CanEditAsync(linkId, file);
         
-        if (!canEditByLink && !await CanEditAsync(userId, file))
+        if (!await CanEditAsync(userId, file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
