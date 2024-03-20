@@ -904,6 +904,16 @@ public class UserController(ICache cache,
             }
             else
             {
+                if (viewer.Id != user.Id)
+                {
+                    var type = await _userManager.GetUserTypeAsync(user.Id);
+
+                    if (!await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(type), Constants.Action_AddRemoveUser))
+                    {
+                        continue;
+                    }
+                }
+
                 await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
             }
         }
