@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Concurrent;
+
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
@@ -34,7 +36,8 @@ public class WebhooksGlobalFilterAttribute(
     DbWorker dbWorker)
     : ResultFilterAttribute, IDisposable
 {
-    private readonly MemoryStream _stream = new();
+    private static readonly ConcurrentDictionary<string, Webhook> _webhooks = new();
+    private MemoryStream _stream;
     private Stream _bodyStream;
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
@@ -44,6 +47,7 @@ public class WebhooksGlobalFilterAttribute(
 
         if (!skip)
         {
+            _stream = new MemoryStream();
             _bodyStream = context.HttpContext.Response.Body;
             context.HttpContext.Response.Body = _stream;
         }
@@ -101,7 +105,16 @@ public class WebhooksGlobalFilterAttribute(
             return null;
         }
 
-        var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
+        var key = $"{method}{routePattern}";
+        if (!_webhooks.TryGetValue(key, out var webhook))
+        {
+            webhook = await dbWorker.GetWebhookAsync(method, routePattern);
+            if (webhook != null)
+            {
+                _webhooks.TryAdd(key, webhook);
+            }
+        }
+        
         if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
         {
             return null;
