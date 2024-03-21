@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
+using Microsoft.AspNetCore.RateLimiting;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
@@ -539,6 +543,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("suspend")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -566,6 +571,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("delete")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

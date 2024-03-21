@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 namespace ASC.People.Api;
 
 public class UserController(ICache cache,
@@ -334,7 +336,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid:guid}/password")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
     {
@@ -1002,7 +1004,7 @@ public class UserController(ICache cache,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("email")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
@@ -1094,7 +1096,7 @@ public class UserController(ICache cache,
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendUserPasswordAsync(MemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
