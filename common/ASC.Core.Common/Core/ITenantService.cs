@@ -37,7 +37,6 @@ public interface ITenantService
     Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash);
     Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync();
     Task<Tenant> GetTenantAsync(int id);
-    Tenant GetTenant(int id);
     Task<Tenant> GetTenantAsync(string domain);
     Tenant GetTenant(string domain);
     Tenant GetTenantForStandaloneWithoutAlias(string ip);

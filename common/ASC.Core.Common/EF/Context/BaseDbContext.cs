@@ -54,7 +54,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
         switch (provider)
         {
             case Provider.MySql:
-                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.ReplaceService<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>();
                 optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), providerOptions =>
                 {
@@ -68,7 +68,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 });
                 break;
             case Provider.PostgreSql:
-                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.UseNpgsql(connectionString.ConnectionString, providerOptions =>
                 {
                     if (!string.IsNullOrEmpty(migrateAssembly))
