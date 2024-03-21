@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -277,23 +275,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
         var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
 
-        bool validateUrl(string url)
-        {
-            Uri? uri;
-
-            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri);
-
-            if (uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
-            {
-                return false;
-            }
-
-            return success;
-        }
-
-        if (!validateUrl(inDto.DocServiceUrl) ||
-            !validateUrl(inDto.DocServiceUrlInternal) ||
-            !validateUrl(inDto.DocServiceUrlPortal))
+        if (!ValidateUrl(inDto.DocServiceUrl) ||
+            !ValidateUrl(inDto.DocServiceUrlInternal) ||
+            !ValidateUrl(inDto.DocServiceUrlPortal))
         {
             throw new Exception("Invalid input urls");
         }
@@ -325,6 +309,18 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
 
         return await GetDocServiceUrlAsync(false);
+
+        bool ValidateUrl(string url)
+        {
+            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+
+            if (uri == null || uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
+            {
+                return false;
+            }
+
+            return success;
+        }
     }
 
     /// <summary>
