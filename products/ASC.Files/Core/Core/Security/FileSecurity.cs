@@ -1978,8 +1978,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when canEdit && FileUtility.GetFileExtension(file.Title) != ".pdf":
-                case FileShare.FillForms when fileType is FileType.OForm:
+                case FileShare.Editing when canEdit:
+                case FileShare.FillForms when fileType is FileType.OForm or FileType.Pdf:
                 case FileShare.CustomFilter when canCustomFiltering:
                 case FileShare.Comment when canComment:
                 case FileShare.Review when canReview:
