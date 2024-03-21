@@ -269,10 +269,9 @@ internal class FolderDao(
     {
         var fileRootFolders = new List<FolderType>() { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var result = new FilesStatisticsResultDto() { };
-
-        await foreach (var rootFolder in Queries.FolderTypeUsedSpaceAsync(filesDbContext, fileRootFolders))
+        await foreach (var rootFolder in Queries.FolderTypeUsedSpaceAsync(filesDbContext, tenantId, fileRootFolders))
         {
             switch (rootFolder.FolderType)
             {
@@ -2457,10 +2456,11 @@ static file class Queries
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdFolderTypePair { ParentId = r.Tree.ParentId, FolderType = r.Folders.FolderType }));
 
-    public static readonly Func<FilesDbContext, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, IEnumerable<FolderType> folderTypes) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable <FolderType> folderTypes) =>
                 ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
                     .AsNoTracking()
                     .Where(r => folderTypes.Contains(r.FolderType))
                     .GroupBy(r => r.FolderType)
