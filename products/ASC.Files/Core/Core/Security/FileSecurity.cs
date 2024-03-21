@@ -1157,7 +1157,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || e.Access is FileShare.Editing && !MustConvert(e))
                         {
                             return true;
                         }
@@ -1196,7 +1196,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || e.Access is FileShare.Editing && !MustConvert(e))
                         {
                             return true;
                         }
@@ -1405,8 +1405,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             e.Access = FileShare.None; //HACK: for client
         }
 
-
         return false;
+        
+        bool MustConvert(FileEntry entry)
+        {
+            return entry.FileEntryType == FileEntryType.File && fileUtility.MustConvert(entry.Title);
+        }
     }
 
     public async Task ShareAsync<T>(T entryId, FileEntryType entryType, Guid @for, FileShare share, SubjectType subjectType = default, FileShareOptions options = null)
