@@ -1546,6 +1546,17 @@ public class UserController(ICache cache,
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.Quota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
 
         foreach (var user in users)
             {

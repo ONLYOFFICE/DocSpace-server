@@ -82,6 +82,7 @@ public class FileStorageService //: IFileStorageService
     ExternalShare externalShare,
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
+    CoreBaseSettings coreBaseSettings,
     IDistributedLockProvider distributedLockProvider)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -600,6 +601,17 @@ public class FileStorageService //: IFileStorageService
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < quota)
+                {
+                    throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+                }
+            }
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
