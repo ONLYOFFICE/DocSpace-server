@@ -850,6 +850,7 @@ public class UserController(ICache cache,
     /// <collection>list</collection>
     [AllowNotPayment]
     [HttpPut("invite")]
+    [EnableRateLimiting("sensitive_api")]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
