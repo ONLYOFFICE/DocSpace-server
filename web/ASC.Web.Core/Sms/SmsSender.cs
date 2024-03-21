@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,53 +27,39 @@
 namespace ASC.Web.Core.Sms;
 
 [Scope]
-public class SmsSender
+public class SmsSender(IConfiguration configuration,
+    TenantManager tenantManager,
+    ILogger<SmsSender> logger,
+    SmsProviderManager smsProviderManager)
 {
-    private readonly IConfiguration _configuration;
-    private readonly TenantManager _tenantManager;
-    private readonly SmsProviderManager _smsProviderManager;
-    private readonly ILogger<SmsSender> _log;
-
-    public SmsSender(
-        IConfiguration configuration,
-        TenantManager tenantManager,
-        ILogger<SmsSender> logger,
-        SmsProviderManager smsProviderManager)
-    {
-        _configuration = configuration;
-        _tenantManager = tenantManager;
-        _smsProviderManager = smsProviderManager;
-        _log = logger;
-    }
-
     public async Task<bool> SendSMSAsync(string number, string message)
     {
         ArgumentException.ThrowIfNullOrEmpty(number);
         ArgumentException.ThrowIfNullOrEmpty(message);
 
-        if (!_smsProviderManager.Enabled())
+        if (!smsProviderManager.Enabled())
         {
             throw new MethodAccessException();
         }
 
-        if ("log".Equals(_configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase))
+        if ("log".Equals(configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase))
         {
-            var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-            var tenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+            var tenant = await tenantManager.GetCurrentTenantAsync(false);
+            var tenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
-            _log.InformationSendSmsToPhoneNumber(tenantId, number, message);
+            logger.InformationSendSmsToPhoneNumber(tenantId, number, message);
             return false;
         }
 
         number = new Regex("[^\\d+]").Replace(number, string.Empty);
-        return await _smsProviderManager.SendMessageAsync(number, message);
+        return await smsProviderManager.SendMessageAsync(number, message);
     }
 
     public static string GetPhoneValueDigits(string mobilePhone)
     {
         var reg = new Regex(@"[^\d]");
         mobilePhone = reg.Replace(mobilePhone ?? "", string.Empty).Trim();
-        return mobilePhone.Substring(0, Math.Min(64, mobilePhone.Length));
+        return mobilePhone[..Math.Min(64, mobilePhone.Length)];
     }
 
     public static string BuildPhoneNoise(string mobilePhone)

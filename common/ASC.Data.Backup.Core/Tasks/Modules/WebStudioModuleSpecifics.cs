@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,22 +26,20 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public class WebStudioModuleSpecifics : ModuleSpecificsBase
+public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override ModuleName ModuleName => ModuleName.WebStudio;
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _relations;
 
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
-            new TableInfo("webstudio_settings", "TenantID") {UserIDColumns = new[] {"UserID"}},
-            new TableInfo("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
-        };
+    private readonly TableInfo[] _tables =
+    [
+        new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
+            new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
+            new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
+    ];
 
-    private readonly RelationInfo[] _relations = new RelationInfo[0];
-
-    public WebStudioModuleSpecifics(Helpers helpers) : base(helpers) { }
+    private readonly RelationInfo[] _relations = Array.Empty<RelationInfo>();
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

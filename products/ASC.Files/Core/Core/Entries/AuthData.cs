@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,24 +26,31 @@
 
 namespace ASC.Files.Core;
 
-[DebuggerDisplay("{Login} {Password} {Token} {Url}")]
-public class AuthData
+[DebuggerDisplay("{Login} {Password} {RawToken} {Url}")]
+public class AuthData(string url = null, string login = null, string password = null, string token = null, string provider = null)
 {
-    public string Login { get; init; }
-    public string Password { get; init; }
-    public string Token { get; init; }
-    public string Url { get; set; }
+    public string Login { get; init; } = login ?? string.Empty;
+    public string Password { get; init; } = password ?? string.Empty;
+    public string RawToken { get; init; } = token ?? string.Empty;
+    public string Url { get; set; } = url ?? string.Empty;
+    public string Provider { get; init; } = provider ?? string.Empty;
 
-    public AuthData(string url = null, string login = null, string password = null, string token = null)
+    public OAuth20Token Token
     {
-        Url = url ?? string.Empty;
-        Login = login ?? string.Empty;
-        Password = password ?? string.Empty;
-        Token = token ?? string.Empty;
+        get
+        {
+            return _token ??= OAuth20Token.FromJson(RawToken);
+        }
+        set
+        {
+            _token = value;
+        }
     }
+
+    private OAuth20Token _token;
 
     public bool IsEmpty()
     {
-        return string.IsNullOrEmpty((Url ?? string.Empty) + (Login ?? string.Empty) + (Password ?? string.Empty) + (Token ?? string.Empty));
+        return string.IsNullOrEmpty((Url ?? string.Empty) + (Login ?? string.Empty) + (Password ?? string.Empty) + (RawToken ?? string.Empty));
     }
 }

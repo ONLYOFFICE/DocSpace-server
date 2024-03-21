@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,10 +78,6 @@ public class SettingsDto
     /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? ThirdpartyEnable { get; set; }
 
-    /// <summary>Specifies if this is a Personal portal or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Personal { get; set; }
-
     /// <summary>Specifies if this is a DocSpace portal or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DocSpace { get; set; }
@@ -150,6 +146,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string ZendeskKey { get; set; }
 
+    /// <summary>Tag manager id</summary>
+    /// <type>System.String, System</type>
+    public string TagManagerId { get; set; }
+
     /// <summary>Email for training booking</summary>
     /// <type>System.String, System</type>
     public string BookTrainingEmail { get; set; }
@@ -165,6 +165,7 @@ public class SettingsDto
     /// <summary>Specifies whether the cookie settings are enabled</summary>
     /// <type>System.Boolean, System</type>
     public bool CookieSettingsEnabled { get; set; }
+    public bool LimitedAccessSpace { get; set; }
 
     /// <summary>User name validation regex</summary>
     /// <type>System.String, System</type>
@@ -188,7 +189,7 @@ public class SettingsDto
         {
             Culture = "en-US",
             Timezone = TimeZoneInfo.Utc.ToString(),
-            TrustedDomains = new List<string> { "mydomain.com" },
+            TrustedDomains = ["mydomain.com"],
             UtcHoursOffset = -8.5,
             UtcOffset = TimeSpan.FromHours(-8.5),
             GreetingSettings = "Web Office Applications",

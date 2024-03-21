@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,11 @@ namespace ASC.Core.Notify;
 
 public abstract class NotifySource : INotifySource
 {
-    private readonly IDictionary<CultureInfo, IActionProvider> _actions = new Dictionary<CultureInfo, IActionProvider>();
-    private readonly IDictionary<CultureInfo, IPatternProvider> _patterns = new Dictionary<CultureInfo, IPatternProvider>();
+    private readonly Dictionary<CultureInfo, IActionProvider> _actions = new();
+    private readonly Dictionary<CultureInfo, IPatternProvider> _patterns = new();
 
-    protected ISubscriptionProvider _subscriprionProvider;
-    protected readonly IRecipientProvider _recipientsProvider;
-    public string Id { get; private set; }
+    private readonly IRecipientProvider _recipientsProvider;
+    public string Id { get; }
 
     private readonly UserManager _userManager;
     private readonly SubscriptionManager _subscriptionManager;
@@ -63,12 +62,15 @@ public abstract class NotifySource : INotifySource
 
         lock (_actions)
         {
-            if (!_actions.ContainsKey(culture))
+            if (_actions.TryGetValue(culture, out var value))
             {
-                _actions[culture] = CreateActionProvider();
+                return value;
             }
 
-            return _actions[culture];
+            value = CreateActionProvider();
+            _actions[culture] = value;
+
+            return value;
         }
     }
 
@@ -80,12 +82,15 @@ public abstract class NotifySource : INotifySource
 
         lock (_patterns)
         {
-            if (!_patterns.ContainsKey(culture))
+            if (_patterns.TryGetValue(culture, out var value))
             {
-                _patterns[culture] = CreatePatternsProvider();
+                return value;
             }
 
-            return _patterns[culture];
+            value = CreatePatternsProvider();
+            _patterns[culture] = value;
+
+            return value;
         }
     }
 
@@ -111,7 +116,7 @@ public abstract class NotifySource : INotifySource
         return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders);
     }
 
-    protected virtual IRecipientProvider CreateRecipientsProvider()
+    private IRecipientProvider CreateRecipientsProvider()
     {
         return new RecipientProviderImpl(_userManager);
     }

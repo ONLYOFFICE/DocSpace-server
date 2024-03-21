@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,24 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Apache.NMS.AMQP;
+
 namespace ASC.EventBus.ActiveMQ;
 
-public class DefaultActiveMQPersistentConnection
+public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFactory,
+        ILogger<DefaultActiveMQPersistentConnection> logger, int retryCount = 5)
     : IActiveMQPersistentConnection
 {
-    private readonly IConnectionFactory _connectionFactory;
-    private readonly ILogger<DefaultActiveMQPersistentConnection> _logger;
-    private readonly int _retryCount;
+    private readonly IConnectionFactory _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+    private readonly ILogger<DefaultActiveMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
     readonly object sync_root = new();
-
-    public DefaultActiveMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultActiveMQPersistentConnection> logger, int retryCount = 5)
-    {
-        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _retryCount = retryCount;
-    }
 
     public bool IsConnected
     {
@@ -122,7 +117,7 @@ public class DefaultActiveMQPersistentConnection
         lock (sync_root)
         {
             var policy = Policy.Handle<SocketException>()
-                .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                 {
                     _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
                 }
@@ -141,9 +136,9 @@ public class DefaultActiveMQPersistentConnection
                 _connection.ConnectionInterruptedListener += OnConnectionInterruptedListener;
                 _connection.ConnectionResumedListener += OnConnectionResumedListener;
 
-                if (_connection is Apache.NMS.AMQP.NmsConnection)
+                if (_connection is NmsConnection connection)
                 {
-                    var hostname = ((Apache.NMS.AMQP.NmsConnection)_connection).ConnectionInfo.ConfiguredUri.Host;
+                    var hostname = connection.ConnectionInfo.ConfiguredUri.Host;
 
                     _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
 
@@ -152,12 +147,10 @@ public class DefaultActiveMQPersistentConnection
 
                 return true;
             }
-            else
-            {
-                _logger.CriticalActiveMQCouldNotBeCreated();
 
-                return false;
-            }
+            _logger.CriticalActiveMQCouldNotBeCreated();
+
+            return false;
         }
     }
 

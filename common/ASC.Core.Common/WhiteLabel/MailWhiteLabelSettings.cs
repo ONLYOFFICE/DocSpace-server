@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,20 +113,13 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 }
 
 [Singleton]
-public class MailWhiteLabelSettingsHelper
+public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public MailWhiteLabelSettingsHelper(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public string DefaultMailSupportUrl
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(_configuration["web:support-feedback"] ?? string.Empty, null);
+            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:support-feedback"] ?? string.Empty, null);
 
             return !string.IsNullOrEmpty(url) ? url : "http://helpdesk.onlyoffice.com";
         }
@@ -136,7 +129,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var email = _configuration["web:support-email"];
+            var email = configuration["web:support-email"];
 
             return !string.IsNullOrEmpty(email) ? email : "support@onlyoffice.com";
         }
@@ -146,7 +139,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var email = _configuration["core:payment:email"];
+            var email = configuration["core:payment:email"];
 
             return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
         }
@@ -156,7 +149,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(_configuration["web:demo-order"] ?? string.Empty, null);
+            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:demo-order"] ?? string.Empty, null);
 
             return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com/demo-order.aspx";
         }
@@ -166,7 +159,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var url = _configuration["web:teamlab-site"];
+            var url = configuration["web:teamlab-site"];
 
             return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com";
         }

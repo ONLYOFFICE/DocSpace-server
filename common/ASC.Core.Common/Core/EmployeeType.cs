@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
-
 namespace ASC.Core.Users;
 
 /// <summary>
 /// </summary>
 [Flags]
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
 [EnumExtensions]
 public enum EmployeeType
 {
@@ -39,5 +37,5 @@ public enum EmployeeType
     RoomAdmin = 1,
     User = 2,
     DocSpaceAdmin = 3,
-    Collaborator = 4,
+    Collaborator = 4
 }

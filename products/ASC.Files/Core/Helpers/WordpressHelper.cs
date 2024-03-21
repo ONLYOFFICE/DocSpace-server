@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,40 +27,28 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class WordpressToken
+public class WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFactory, OAuth20TokenHelper oAuth20TokenHelper)
 {
-    private readonly TokenHelper _tokenHelper;
-    private readonly ConsumerFactory _consumerFactory;
-
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-
     public const string AppAttr = "wordpress";
-
-    public WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFactory, OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _tokenHelper = tokenHelper;
-        _consumerFactory = consumerFactory;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
 
     public async Task<OAuth20Token> GetTokenAsync()
     {
-        return await _tokenHelper.GetTokenAsync(AppAttr);
+        return await tokenHelper.GetTokenAsync(AppAttr);
     }
 
     public async Task SaveTokenAsync(OAuth20Token token)
     {
         ArgumentNullException.ThrowIfNull(token);
 
-        await _tokenHelper.SaveTokenAsync(new Token(token, AppAttr));
+        await tokenHelper.SaveTokenAsync(new Token(token, AppAttr));
     }
 
     public async Task<OAuth20Token> SaveTokenFromCodeAsync(string code)
     {
-        var token = _oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(_consumerFactory, code);
+        var token = oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(consumerFactory, code);
         ArgumentNullException.ThrowIfNull(token);
 
-        await _tokenHelper.SaveTokenAsync(new Token(token, AppAttr));
+        await tokenHelper.SaveTokenAsync(new Token(token, AppAttr));
 
         return token;
     }
@@ -69,37 +57,28 @@ public class WordpressToken
     {
         ArgumentNullException.ThrowIfNull(token);
 
-        await _tokenHelper.DeleteTokenAsync(AppAttr);
+        await tokenHelper.DeleteTokenAsync(AppAttr);
     }
 }
 
 [Singleton]
-public class WordpressHelper
+public class WordpressHelper(ILogger<WordpressHelper> logger, RequestHelper requestHelper)
 {
-    private readonly ILogger<WordpressHelper> _logger;
-    private readonly RequestHelper _requestHelper;
-
     public enum WordpressStatus
     {
         draft = 0,
         publish = 1
     }
 
-    public WordpressHelper(ILogger<WordpressHelper> logger, RequestHelper requestHelper)
-    {
-        _logger = logger;
-        _requestHelper = requestHelper;
-    }
-
     public string GetWordpressMeInfo(string token)
     {
         try
         {
-            return WordpressLoginProvider.GetWordpressMeInfo(_requestHelper, token);
+            return WordpressLoginProvider.GetWordpressMeInfo(requestHelper, token);
         }
         catch (Exception ex)
         {
-            _logger.ErrorGetWordpressInfo(ex);
+            logger.ErrorGetWordpressInfo(ex);
 
             return string.Empty;
         }
@@ -111,13 +90,13 @@ public class WordpressHelper
         try
         {
             var wpStatus = ((WordpressStatus)status).ToString();
-            WordpressLoginProvider.CreateWordpressPost(_requestHelper, title, content, wpStatus, blogId, token);
+            WordpressLoginProvider.CreateWordpressPost(requestHelper, title, content, wpStatus, blogId, token);
 
             return true;
         }
         catch (Exception ex)
         {
-            _logger.ErrorCreateWordpressPost(ex);
+            logger.ErrorCreateWordpressPost(ex);
 
             return false;
         }

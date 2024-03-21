@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
+
 namespace ASC.People.Api;
 
-public class PhotoController : PeopleControllerBase
-{
-    private readonly MessageService _messageService;
-    private readonly MessageTarget _messageTarget;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly SecurityContext _securityContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly FileSizeComment _fileSizeComment;
-    private readonly SetupInfo _setupInfo;
-    private readonly Core.TenantManager _tenantManager;
-
-    public PhotoController(
-        UserManager userManager,
+public class PhotoController(UserManager userManager,
         PermissionContext permissionContext,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
@@ -51,19 +41,9 @@ public class PhotoController : PeopleControllerBase
         SetupInfo setupInfo,
         IHttpClientFactory httpClientFactory,
         IHttpContextAccessor httpContextAccessor,
-        Core.TenantManager tenantManager)
-        : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
-        _messageService = messageService;
-        _messageTarget = messageTarget;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _securityContext = securityContext;
-        _settingsManager = settingsManager;
-        _fileSizeComment = fileSizeComment;
-        _setupInfo = setupInfo;
-        _tenantManager = tenantManager;
-    }
-
+        TenantManager tenantManager)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+{
     /// <summary>
     /// Creates photo thumbnails by coordinates of the original image specified in the request.
     /// </summary>
@@ -105,7 +85,7 @@ public class PhotoController : PeopleControllerBase
                 settings = new UserPhotoThumbnailSettings(inDto.X, inDto.Y, inDto.Width, inDto.Height);
             }
 
-            await _settingsManager.SaveAsync(settings, user.Id);
+            await settingsManager.SaveAsync(settings, user.Id);
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userPhotoManager.SaveOrUpdatePhoto(user.Id, data);
@@ -113,11 +93,11 @@ public class PhotoController : PeopleControllerBase
         }
         else
         {
-            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, _settingsManager, inDto.X, inDto.Y, inDto.Width, inDto.Height, user.Id);
+            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, settingsManager, inDto.X, inDto.Y, inDto.Width, inDto.Height, user.Id);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await _messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -144,15 +124,15 @@ public class PhotoController : PeopleControllerBase
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != _securityContext.CurrentAccount.ID)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await _messageService.SendAsync(MessageAction.UserDeletedAvatar, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserDeletedAvatar, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -203,8 +183,8 @@ public class PhotoController : PeopleControllerBase
             throw new SecurityException();
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != _securityContext.CurrentAccount.ID)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
@@ -215,7 +195,7 @@ public class PhotoController : PeopleControllerBase
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await _messageService.SendAsync(MessageAction.UserAddedAvatar, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserAddedAvatar, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -249,23 +229,23 @@ public class PhotoController : PeopleControllerBase
                 }
                 catch
                 {
-                    userId = _securityContext.CurrentAccount.ID;
+                    userId = securityContext.CurrentAccount.ID;
                 }
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
 
-                var tenant = await _tenantManager.GetCurrentTenantAsync();
-                if (_securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != _securityContext.CurrentAccount.ID)
+                var tenant = await tenantManager.GetCurrentTenantAsync();
+                if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
                 {
                     throw new Exception(Resource.ErrorAccessDenied);
                 }
 
                 var userPhoto = formCollection.Files[0];
 
-                if (userPhoto.Length > _setupInfo.MaxImageUploadSize)
+                if (userPhoto.Length > setupInfo.MaxImageUploadSize)
                 {
                     result.Success = false;
-                    result.Message = _fileSizeComment.FileImageSizeExceptionString;
+                    result.Message = fileSizeComment.FileImageSizeExceptionString;
 
                     return result;
                 }
@@ -274,14 +254,14 @@ public class PhotoController : PeopleControllerBase
                 await using var inputStream = userPhoto.OpenReadStream();
 
                 var br = new BinaryReader(inputStream);
-                br.Read(data, 0, (int)userPhoto.Length);
+                _ = br.Read(data, 0, (int)userPhoto.Length);
                 br.Close();
 
                 CheckImgFormat(data);
 
                 if (autosave)
                 {
-                    if (data.Length > _setupInfo.MaxImageUploadSize)
+                    if (data.Length > setupInfo.MaxImageUploadSize)
                     {
                         throw new ImageSizeLimitException();
                     }
@@ -303,7 +283,7 @@ public class PhotoController : PeopleControllerBase
                 }
                 else
                 {
-                    result.Data = await _userPhotoManager.SaveTempPhoto(data, _setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
+                    result.Data = await _userPhotoManager.SaveTempPhoto(data, setupInfo.MaxImageUploadSize, UserPhotoManager.OriginalFotoSize.Width, UserPhotoManager.OriginalFotoSize.Height);
                 }
 
                 result.Success = true;
@@ -315,7 +295,7 @@ public class PhotoController : PeopleControllerBase
             }
 
         }
-        catch (Web.Core.Users.UnknownImageFormatException)
+        catch (UnknownImageFormatException)
         {
             result.Success = false;
             result.Message = PeopleResource.ErrorUnknownFileImageType;
@@ -353,12 +333,12 @@ public class PhotoController : PeopleControllerBase
         }
         catch (ArgumentException error)
         {
-            throw new Web.Core.Users.UnknownImageFormatException(error);
+            throw new UnknownImageFormatException(error);
         }
 
         if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
         {
-            throw new Web.Core.Users.UnknownImageFormatException();
+            throw new UnknownImageFormatException();
         }
     }
 }

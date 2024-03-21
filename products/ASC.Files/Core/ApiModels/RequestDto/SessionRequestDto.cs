@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,4 +49,5 @@ public class SessionRequestDto
     /// <summary>Specifies whether to encrypt a file or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Encrypted { get; set; }
+    public bool CreateNewIfExist { get; set; }
 }

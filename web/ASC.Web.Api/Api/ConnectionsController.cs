@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,27 +31,10 @@ namespace ASC.Web.Api;
 /// </summary>
 /// <name>security</name>
 [Scope]
-[DefaultRoute]
+[DefaultRoute("activeconnections")]
 [ApiController]
 [ControllerName("security")]
-public class ConnectionsController : ControllerBase
-{
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly DbLoginEventsManager _dbLoginEventsManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly ILogger<ConnectionsController> _logger;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly MessageService _messageService;
-    private readonly MessageTarget _messageTarget;
-    private readonly CookiesManager _cookiesManager;
-    private readonly CookieStorage _cookieStorage;
-    private readonly GeolocationHelper _geolocationHelper;
-
-    public ConnectionsController(
-        UserManager userManager,
+public class ConnectionsController(UserManager userManager,
         SecurityContext securityContext,
         DbLoginEventsManager dbLoginEventsManager,
         IHttpContextAccessor httpContextAccessor,
@@ -63,23 +46,10 @@ public class ConnectionsController : ControllerBase
         MessageTarget messageTarget,
         CookiesManager cookiesManager,
         CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _dbLoginEventsManager = dbLoginEventsManager;
-        _httpContextAccessor = httpContextAccessor;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _logger = logger;
-        _webItemSecurity = webItemSecurity;
-        _messageService = messageService;
-        _messageTarget = messageTarget;
-        _cookiesManager = cookiesManager;
-        _cookieStorage = cookieStorage;
-        _geolocationHelper = geolocationHelper;
-    }
-
+        GeolocationHelper geolocationHelper,
+        ApiDateTimeHelper apiDateTimeHelper)
+    : ControllerBase
+{
     /// <summary>
     /// Returns all the active connections to the portal.
     /// </summary>
@@ -90,12 +60,12 @@ public class ConnectionsController : ControllerBase
     /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("activeconnections")]
-    public async Task<object> GetAllActiveConnections()
+    [HttpGet("")]
+    public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
-        var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        var loginEvents = await _dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
-        var tasks = loginEvents.ConvertAll(async r => await _geolocationHelper.AddGeolocationAsync(r));
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
+        var tasks = loginEvents.ConvertAll(async r => await geolocationHelper.AddGeolocationAsync(r));
         var listLoginEvents = (await Task.WhenAll(tasks)).ToList();
         var loginEventId = GetLoginEventIdFromCookie();
         if (loginEventId != 0)
@@ -109,9 +79,9 @@ public class ConnectionsController : ControllerBase
         }
         else
         {
-            if (listLoginEvents.Count == 0 && _httpContextAccessor.HttpContext != null)
+            if (listLoginEvents.Count == 0 && httpContextAccessor.HttpContext != null)
             {
-                var request = _httpContextAccessor.HttpContext.Request;
+                var request = httpContextAccessor.HttpContext.Request;
                 var uaHeader = MessageSettings.GetUAHeader(request);
                 var clientInfo = MessageSettings.GetClientInfo(uaHeader);
                 var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
@@ -127,16 +97,29 @@ public class ConnectionsController : ControllerBase
                     IP = ip
                 };
 
-                listLoginEvents.Add(await _geolocationHelper.AddGeolocationAsync(baseEvent));
+                listLoginEvents.Add(await geolocationHelper.AddGeolocationAsync(baseEvent));
             }
         }
 
-        var result = new
+        return new ActiveConnectionsDto
         {
-            Items = listLoginEvents,
-            LoginEvent = loginEventId
+            LoginEvent = loginEventId,
+            Items = listLoginEvents.Select(q => new ActiveConnectionsItemDto
+            {
+                Id = q.Id,
+                Browser = q.Browser,
+                City = q.City,
+                Country = q.Country,
+                Date = apiDateTimeHelper.Get(q.Date),
+                Ip = q.IP,
+                Mobile = q.Mobile,
+                Page = q.Page,
+                TenantId = q.TenantId,
+                Platform = q.Platform,
+                UserId = q.UserId,
+                
+            }).ToList()
         };
-        return result;
     }
 
     /// <summary>
@@ -149,31 +132,31 @@ public class ConnectionsController : ControllerBase
     /// <returns type="System.Object, System">URL to the confirmation message for changing a password</returns>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("activeconnections/logoutallchangepassword")]
+    [HttpPut("logoutallchangepassword")]
     public async Task<object> LogOutAllActiveConnectionsChangePassword()
     {
         try
         {
-            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-            var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
+            var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+            var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
             await LogOutAllActiveConnections(user.Id);
 
-            _securityContext.Logout();
+            securityContext.Logout();
 
             var auditEventDate = DateTime.UtcNow;
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await _messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, _messageTarget.Create(user.Id), auditEventDate, userName);
+            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
             return null;
         }
     }
@@ -189,13 +172,13 @@ public class ConnectionsController : ControllerBase
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
-    [HttpPut("activeconnections/logoutall/{userId}")]
+    [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
-        if (!await _userManager.IsDocSpaceAdminAsync(currentUserId) && 
-            !await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
-            (currentUserId != userId && await _userManager.IsDocSpaceAdminAsync(userId)))
+        var currentUserId = securityContext.CurrentAccount.ID;
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
         {
             throw new SecurityException("Method not available");
         }
@@ -213,23 +196,23 @@ public class ConnectionsController : ControllerBase
     /// <returns type="System.Object, System">Current user name</returns>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("activeconnections/logoutallexceptthis")]
+    [HttpPut("logoutallexceptthis")]
     public async Task<object> LogOutAllExceptThisConnection()
     {
         try
         {
-            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-            var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
+            var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+            var userName = user.DisplayUserName(false, displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await _dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+            await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
 
-            await _messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
             return null;
         }
     }
@@ -245,49 +228,55 @@ public class ConnectionsController : ControllerBase
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("activeconnections/logout/{loginEventId}")]
+    [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(int loginEventId)
     {
         try
         {
-            var currentUserId = _securityContext.CurrentAccount.ID;
-            var loginEvent = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
-            
-            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await _userManager.IsDocSpaceAdminAsync(currentUserId))
+            var currentUserId = securityContext.CurrentAccount.ID;
+            var user = await userManager.GetUsersAsync(currentUserId);
+
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+
+            if (loginEvent == null)
+            {
+                return false;
+            }
+
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(user))
             {
                 throw new SecurityException("Method not available");
             }
-            
-            var user = await _userManager.GetUsersAsync(currentUserId);
-            var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
-            
-            await _dbLoginEventsManager.LogOutEventAsync(loginEventId);
 
-            await _messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+            await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
+
+            await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
             return false;
         }
     }
 
     private async Task LogOutAllActiveConnections(Guid? userId = null)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
-        var user = await _userManager.GetUsersAsync(userId ?? currentUserId);
-        var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
+        var currentUserId = securityContext.CurrentAccount.ID;
+        var user = await userManager.GetUsersAsync(userId ?? currentUserId);
+        var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await _messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, _messageTarget.Create(user.Id), auditEventDate, userName);
-        await _cookiesManager.ResetUserCookieAsync(user.Id);
+        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, messageTarget.Create(user.Id), auditEventDate, userName);
+        await cookiesManager.ResetUserCookieAsync(user.Id);
     }
 
     private int GetLoginEventIdFromCookie()
     {
-        var cookie = _cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = _cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
+        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
         return loginEventId;
     }
 }

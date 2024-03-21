@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,9 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton(Additional = typeof(FirebaseSenderExtension))]
-public class PushSender : INotifySender
+public class PushSender(ILoggerProvider options, IServiceProvider serviceProvider) : INotifySender
 {
-    private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
-
-    public PushSender(ILoggerProvider options, IServiceProvider serviceProvider)
-    {
-        _logger = options.CreateLogger("ASC.Notify");
-        _serviceProvider = serviceProvider;
-    }
+    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
 
 
     public void Init(IDictionary<string, string> properties) { }
@@ -50,7 +43,7 @@ public class PushSender : INotifySender
         }
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var FirebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
             await FirebaseHelper.SendMessageAsync(m);
         }

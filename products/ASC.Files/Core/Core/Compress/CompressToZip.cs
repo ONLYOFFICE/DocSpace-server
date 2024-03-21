@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Core.Compress;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Archives the data stream into the format .zip
@@ -39,10 +38,11 @@ public class CompressToZip : ICompress
 
     /// <summary> </summary>
     /// <param name="stream">Accepts a new stream, it will contain an archive upon completion of work</param>
-    public void SetStream(Stream stream)
+    public Task SetStream(Stream stream)
     {
         _zipStream = new ZipOutputStream(stream) { UseZip64 = UseZip64.Dynamic };
         _zipStream.IsStreamOwner = false;
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class CompressToZip : ICompress
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
-    public void CreateEntry(string title, DateTime? lastModification = null)
+    public Task CreateEntry(string title, DateTime? lastModification = null)
     {
         _zipEntry = new ZipEntry(title) { IsUnicodeText = true };
 
@@ -58,45 +58,48 @@ public class CompressToZip : ICompress
         {
             _zipEntry.DateTime = lastModification.Value;
         }
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Transfer the file itself to the archive
     /// </summary>
     /// <param name="readStream">File data</param>
-        public async Task PutStream(Stream readStream)
+    public async Task PutStream(Stream readStream)
     {
-            PutNextEntry();
-            await readStream.CopyToAsync(_zipStream);
-        }
+        await PutNextEntry();
+        await readStream.CopyToAsync(_zipStream);
+    }
 
     /// <summary>
     /// Put an entry on the output stream.
     /// </summary>
-    public void PutNextEntry()
+    public Task PutNextEntry()
     {
         _zipStream.PutNextEntry(_zipEntry);
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Closes the current entry.
     /// </summary>
-    public void CloseEntry()
+    public Task CloseEntry()
     {
         _zipStream.CloseEntry();
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Resource title (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    public string Title => FilesUCResource.FilesWillBeCompressedZip;
+    public Task<string> GetTitle() => Task.FromResult(FilesUCResource.FilesWillBeCompressedZip);
 
     /// <summary>
     /// Extension the archive (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    public string ArchiveExtension => CompressToArchive.ZipExt;
+    public Task<string> GetArchiveExtension() => Task.FromResult(CompressToArchive.ZipExt);
 
     public void Dispose()
     {

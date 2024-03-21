@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
+                                s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -56,7 +56,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder.Services);
 
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
@@ -67,16 +67,17 @@ try
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
     eventBus.Subscribe<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }
@@ -88,6 +89,6 @@ finally
 
 public partial class Program
 {
-    private static readonly string Namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1).Replace(".", "");
+    private static readonly string _namespace = typeof(Startup).Namespace;
+    public static readonly string AppName = _namespace[(_namespace.LastIndexOf('.', _namespace.LastIndexOf('.') - 1) + 1)..].Replace(".", "");
 }

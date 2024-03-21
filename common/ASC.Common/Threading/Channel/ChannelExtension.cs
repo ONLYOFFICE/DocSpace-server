@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,14 +66,14 @@ public static class ChannelExtension
             }
             finally
             {
-                foreach (var ch in outputs)
+                foreach (var output in outputs)
                 {
-                    ch.Writer.Complete();
+                    output.Writer.Complete();
                 }
             }
-        });
+        }, cancellationToken);
 
-        return outputs.Select(ch => ch.Reader).ToArray();
+        return outputs.Select(output => output.Reader).ToArray();
     }
     
     public static ChannelReader<T> Merge<T>(this IEnumerable<ChannelReader<T>> inputs, CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ public static class ChannelExtension
                     }
                 }
 
-                await Task.WhenAll(inputs.Select(i => Redirect(i)).ToArray());
+                await Task.WhenAll(inputs.Select(Redirect).ToArray());
             }
             catch (OperationCanceledException)
             {
@@ -106,7 +106,7 @@ public static class ChannelExtension
             {
                 output.Writer.Complete();
             }
-        });
+        }, cancellationToken);
 
         return output;
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,9 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
 
-internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> : IProviderInfo<TFile, TFolder, TItem>
+internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(DisposableWrapper wrapper,
+        ProviderInfoHelper providerInfoHelper)
+    : IProviderInfo<TFile, TFolder, TItem>
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
@@ -36,16 +38,12 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
 {
     public abstract Selector Selector { get; }
     public abstract ProviderFilter ProviderFilter { get; }
-    private readonly DisposableWrapper _wrapper;
-    internal readonly ProviderInfoHelper ProviderInfoHelper;
-
-    protected AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
-    {
-        _wrapper = wrapper;
-        ProviderInfoHelper = providerInfoHelper;
-    }
+    public virtual bool MutableEntityId => false;
+    
+    internal readonly ProviderInfoHelper ProviderInfoHelper = providerInfoHelper;
 
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public string CustomerTitle { get; set; }
     public string FolderId { get; set; }
     public FolderType FolderType { get; set; }
@@ -56,16 +54,17 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     public string ProviderKey { get; set; }
     public string RootFolderId => $"{Selector.Id}-" + ProviderId;
     public FolderType RootFolderType { get; set; }
-    public OAuth20Token Token { get; set; }
-    public bool StorageOpened => _wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
+    public AuthData AuthData { get; set; }
+    public string Color { get; set; }
+    private bool StorageOpened => wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync
     {
         get
         {
-            if (!_wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
+            if (!wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
             {
-                return _wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(Token, ProviderId);
+                return wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(AuthData, ProviderId);
             }
 
             return Task.FromResult(storage);
@@ -89,10 +88,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
 
     public Task InvalidateStorageAsync()
     {
-        if (_wrapper != null)
-        {
-            _wrapper.Dispose();
-        }
+        wrapper?.Dispose();
 
         return CacheResetAsync();
     }
@@ -145,7 +141,7 @@ public class ProviderInfoHelper
         _cacheNotify = cacheNotify;
         foreach (var selector in _selectors)
         {
-            _cacheNotify.Subscribe((i) =>
+            _cacheNotify.Subscribe(i =>
             {
                 if (i.ResetAll)
                 {
@@ -157,8 +153,9 @@ public class ProviderInfoHelper
                 if (!i.IsFileExists)
                 {
                     _cache.Remove($"{selector}-" + i.Key);
-
                     _cache.Remove($"{selector}d-" + i.Key);
+                    _cache.Remove($"{selector}-" + i.Key + "-d");
+                    _cache.Remove($"{selector}-" + i.Key + "-f");
                 }
                 else
                 {
@@ -226,22 +223,31 @@ public class ProviderInfoHelper
 
     internal async Task<List<TItem>> GetItemsAsync<TItem>(IThirdPartyItemStorage<TItem> storage, int id, string folderId, string selector, bool? folder = null) where TItem : class
     {
-        var items = _cache.Get<List<TItem>>($"{selector}-{folder}" + id + "-" + folderId);
+        var key = $"{selector}-" + id + "-" + folderId;
 
-        if (items == null)
+        if (folder.HasValue)
         {
-            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
-            {
-                items = await googleStorage.GetItemsAsync(folderId, folder);
-            }
-            else
-            {
-                items = await storage.GetItemsAsync(folderId);
-            }
-            var key = $"{selector}-" + id + "-" + folderId;
-            _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-            _cacheKeys.TryAdd(key, null);
+            key += folder.Value ? "-d" : "-f";
         }
+        
+        var items = _cache.Get<List<TItem>>(key);
+
+        if (items != null)
+        {
+            return items;
+        }
+
+        if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
+        {
+            items = await googleStorage.GetItemsAsync(folderId, folder);
+        }
+        else
+        {
+            items = await storage.GetItemsAsync(folderId);
+        }
+            
+        _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
 
         return items;
     }
@@ -253,19 +259,11 @@ public class ProviderInfoHelper
 }
 
 [Transient(Additional = typeof(DisposableWrapperExtension))]
-public class DisposableWrapper : IDisposable
+public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider,
+        OAuth20TokenHelper oAuth20TokenHelper)
+    : IDisposable
 {
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
-
-    public DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _consumerFactory = consumerFactory;
-        _serviceProvider = serviceProvider;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
 
     public void Dispose()
     {
@@ -276,7 +274,7 @@ public class DisposableWrapper : IDisposable
         }
     }
 
-    internal Task<T> CreateStorageAsync<T, T1>(OAuth20Token token, int id)
+    internal Task<T> CreateStorageAsync<T, T1>(AuthData authData, int id)
         where T : IThirdPartyStorage
         where T1 : Consumer, IOAuthProvider, new()
     {
@@ -285,7 +283,7 @@ public class DisposableWrapper : IDisposable
             return Task.FromResult(storage);
         }
 
-        return InternalCreateStorageAsync<T, T1>(token, id);
+        return InternalCreateStorageAsync<T, T1>(authData, id);
     }
 
     internal bool TryGetStorage<T>(int providerId, out T storage)
@@ -300,30 +298,38 @@ public class DisposableWrapper : IDisposable
         return _storages.TryGetValue(providerId, out storage);
     }
 
-    private async ValueTask CheckTokenAsync<T>(OAuth20Token token, int id) where T : Consumer, IOAuthProvider, new()
+    private async ValueTask<OAuth20Token> CheckTokenAsync<T>(OAuth20Token token, int id) where T : Consumer, IOAuthProvider, new()
     {
         if (token == null)
         {
             throw new UnauthorizedAccessException("Cannot create third party session with given token");
         }
 
-        if (token.IsExpired)
+        if (!token.IsExpired)
         {
-            token = _oAuth20TokenHelper.RefreshToken<T>(_consumerFactory, token);
-
-            var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
-            await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));
+            return token;
         }
+
+        token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
+
+        var dbDao = serviceProvider.GetService<ProviderAccountDao>();
+        await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));
+
+        return token;
     }
 
-    private async Task<T> InternalCreateStorageAsync<T, T1>(OAuth20Token token, int id)
+    private async Task<T> InternalCreateStorageAsync<T, T1>(AuthData authData, int id)
         where T : IThirdPartyStorage
         where T1 : Consumer, IOAuthProvider, new()
     {
-        var storage = _serviceProvider.GetService<T>();
-        await CheckTokenAsync<T1>(token, id);
+        var storage = serviceProvider.GetService<T>();
 
-        storage.Open(token);
+        if (storage.AuthScheme == AuthScheme.OAuth)
+        {
+            authData.Token = await CheckTokenAsync<T1>(authData.Token, id);
+        }
+
+        storage.Open(authData);
 
         _storages.TryAdd(id, storage);
 
@@ -339,5 +345,6 @@ public static class DisposableWrapperExtension
         services.TryAdd<IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, DropboxStorage>();
         services.TryAdd<IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, GoogleDriveStorage>();
         services.TryAdd<IThirdPartyStorage<Item, Item, Item>, OneDriveStorage>();
+        services.TryAdd<IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavStorage>();
     }
 }

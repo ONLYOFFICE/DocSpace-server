@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,15 +28,15 @@ public static class Selectors
 {
     public static Regex Pattern => new(@"^(?'selector'.*)-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
     
-    public static readonly Selector SharpBox = new() { Name = "SharpBox", Id = "sbox" };
+    public static readonly Selector WebDav = new() { Name = "WebDav", Id = "sbox" };
     public static readonly Selector SharePoint = new() { Name = "sharepoint", Id = "spoint" };
     public static readonly Selector GoogleDrive = new() { Name = "GoogleDrive", Id = "drive" };
     public static readonly Selector Box = new() { Name = "Box", Id = "box" };
     public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
     public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
 
-    public static readonly List<Selector> All = new() { SharpBox, SharePoint, GoogleDrive, Box, Dropbox, OneDrive };
-    public static readonly List<Selector> StoredCache = new() { GoogleDrive, Box, Dropbox, OneDrive };
+    public static readonly List<Selector> All = [WebDav, SharePoint, GoogleDrive, Box, Dropbox, OneDrive];
+    public static readonly List<Selector> StoredCache = [GoogleDrive, Box, Dropbox, OneDrive, WebDav];
 }
 
 public class Selector

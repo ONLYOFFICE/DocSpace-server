@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 
     public TenantInfoSettings GetDefault()
     {
-        return new TenantInfoSettings()
+        return new TenantInfoSettings
         {
             IsDefault = true
         };
@@ -53,24 +53,11 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 }
 
 [Scope]
-public class TenantInfoSettingsHelper
+public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
+    StorageFactory storageFactory,
+    TenantManager tenantManager,
+    IConfiguration configuration)
 {
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
-    private readonly IConfiguration _configuration;
-
-    public TenantInfoSettingsHelper(
-        WebImageSupplier webImageSupplier,
-        StorageFactory storageFactory,
-        TenantManager tenantManager,
-        IConfiguration configuration)
-    {
-        _webImageSupplier = webImageSupplier;
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-        _configuration = configuration;
-    }
     public async Task RestoreDefaultAsync(TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
         await RestoreDefaultTenantNameAsync();
@@ -79,16 +66,16 @@ public class TenantInfoSettingsHelper
 
     public async Task RestoreDefaultTenantNameAsync()
     {
-        var currentTenant = await _tenantManager.GetCurrentTenantAsync();
-        currentTenant.Name = _configuration["web:portal-name"] ?? "";
-        await _tenantManager.SaveTenantAsync(currentTenant);
+        var currentTenant = await tenantManager.GetCurrentTenantAsync();
+        currentTenant.Name = configuration["web:portal-name"] ?? "";
+        await tenantManager.SaveTenantAsync(currentTenant);
     }
 
     public async Task RestoreDefaultLogoAsync(TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
         tenantInfoSettings.IsDefault = true;
 
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
         try
         {
             await store.DeleteFilesAsync("", "*", false);
@@ -103,7 +90,7 @@ public class TenantInfoSettingsHelper
 
     public async Task SetCompanyLogoAsync(string companyLogoFileName, byte[] data, TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
 
         if (!tenantInfoSettings.IsDefault)
         {
@@ -133,10 +120,10 @@ public class TenantInfoSettingsHelper
     {
         if (tenantInfoSettings.IsDefault)
         {
-            return _webImageSupplier.GetAbsoluteWebPath("notifications/logo.png");
+            return webImageSupplier.GetAbsoluteWebPath("notifications/logo.png");
         }
 
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
         return (await store.GetUriAsync(tenantInfoSettings.CompanyLogoFileName ?? "")).ToString();
     }
 
@@ -150,7 +137,7 @@ public class TenantInfoSettingsHelper
             return null;
         }
 
-        var storage = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
 
         if (storage == null)
         {

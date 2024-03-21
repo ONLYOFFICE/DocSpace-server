@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -92,17 +92,9 @@ public class ConfirmData
     /// <type>System.String, System</type>
     public string Email { get; set; }
 
-    /// <summary>Module</summary>
-    /// <type>System.String, System</type>
-    public string Module { get; set; }
-
     /// <summary>Access an account for the first time or not</summary>
     /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? First { get; set; }
-
-    /// <summary>Sends SMS code or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? Sms { get; set; }
 
     /// <summary>Key</summary>
     /// <type>System.String, System</type>

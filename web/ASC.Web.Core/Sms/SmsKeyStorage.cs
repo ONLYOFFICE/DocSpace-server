@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,11 @@ namespace ASC.Web.Core.Sms;
 public class SmsKeyStorageCache
 {
     private readonly ICacheNotify<SmsKeyCacheKey> _keyCacheNotify;
-    private readonly ICache _keyCache;
 
     public SmsKeyStorageCache(ICacheNotify<SmsKeyCacheKey> keyCacheNotify, ICache cache)
     {
-        _keyCache = cache;
         _keyCacheNotify = keyCacheNotify;
-        _keyCacheNotify.Subscribe(r => _keyCache.Remove(r.Key), CacheNotifyAction.Remove);
+        _keyCacheNotify.Subscribe(r => cache.Remove(r.Key), CacheNotifyAction.Remove);
     }
 
     public void RemoveFromCache(string cacheKey)
@@ -85,7 +83,7 @@ public class SmsKeyStorage
     private async Task<string> BuildCacheKeyAsync(string phone)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-        var tenantCache = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        var tenantCache = tenant?.Id ?? Tenant.DefaultTenant;
         return "smskey" + phone + tenantCache;
     }
 
@@ -191,6 +189,6 @@ public class SmsKeyStorage
         Invalide,
         Empty,
         TooMuch,
-        Timeout,
+        Timeout
     }
 }

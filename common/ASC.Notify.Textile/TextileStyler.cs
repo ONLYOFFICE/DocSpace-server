@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,15 @@
 namespace ASC.Notify.Textile;
 
 [Scope]
-public class TextileStyler : IPatternStyler
+public class TextileStyler(CoreBaseSettings coreBaseSettings,
+        IConfiguration configuration,
+        InstanceCrypto instanceCrypto,
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    : IPatternStyler
 {
     private static readonly Regex _velocityArguments
         = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IConfiguration _configuration;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly MailWhiteLabelSettingsHelper _mailWhiteLabelSettingsHelper;
 
     static TextileStyler()
     {
@@ -44,18 +43,6 @@ public class TextileStyler : IPatternStyler
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(file);
         using var reader = new StreamReader(stream);
         BlockAttributesParser.Styler = new StyleReader(reader.ReadToEnd().Replace("\n", "").Replace("\r", ""));
-    }
-
-    public TextileStyler(
-        CoreBaseSettings coreBaseSettings,
-        IConfiguration configuration,
-        InstanceCrypto instanceCrypto,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _configuration = configuration;
-        _instanceCrypto = instanceCrypto;
-        _mailWhiteLabelSettingsHelper = mailWhiteLabelSettingsHelper;
     }
 
     public void ApplyFormating(NoticeMessage message)
@@ -123,24 +110,17 @@ public class TextileStyler : IPatternStyler
     {
         string logoImg;
 
-        if (_coreBaseSettings.Personal && !_coreBaseSettings.CustomMode)
+        logoImg = configuration["web:logo:mail"];
+        if (string.IsNullOrEmpty(logoImg))
         {
-            logoImg = imagePath + "/mail_logo.png";
-        }
-        else
-        {
-            logoImg = _configuration["web:logo:mail"];
-            if (string.IsNullOrEmpty(logoImg))
+            var logo = message.GetArgument("LetterLogo");
+            if (logo != null && ((string)logo.Value).Length != 0)
             {
-                var logo = message.GetArgument("LetterLogo");
-                if (logo != null && ((string)logo.Value).Length != 0)
-                {
-                    logoImg = (string)logo.Value;
-                }
-                else
-                {
-                    logoImg = imagePath + "/mail_logo.png";
-                }
+                logoImg = (string)logo.Value;
+            }
+            else
+            {
+                logoImg = imagePath + "/mail_logo.png";
             }
         }
 
@@ -149,7 +129,7 @@ public class TextileStyler : IPatternStyler
 
     private string GetLogoText(NoticeMessage message)
     {
-        var logoText = _configuration["web:logotext:mail"];
+        var logoText = configuration["web:logotext:mail"];
 
         if (string.IsNullOrEmpty(logoText))
         {
@@ -171,7 +151,7 @@ public class TextileStyler : IPatternStyler
     {
         var mailWhiteLabelTag = message.GetArgument("MailWhiteLabelSettings");
 
-        return mailWhiteLabelTag == null ? null : mailWhiteLabelTag.Value as MailWhiteLabelSettings;
+        return mailWhiteLabelTag?.Value as MailWhiteLabelSettings;
     }
 
     private void InitFooter(NoticeMessage message, MailWhiteLabelSettings settings, out string footerContent, out string footerSocialContent)
@@ -201,11 +181,6 @@ public class TextileStyler : IPatternStyler
             case "social":
                 InitSocialFooter(settings, out footerSocialContent);
                 break;
-            case "personal":
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
-                break;
-            case "personalCustomMode":
-                break;
             case "opensource":
                 footerContent = NotifyTemplateResource.FooterOpensourceV10;
                 footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
@@ -218,7 +193,7 @@ public class TextileStyler : IPatternStyler
         var imagePath = GetImagePath(message);
         var logoImg = GetLogoImg(message, imagePath);
         var logoText = GetLogoText(message);
-        var siteUrl = settings == null ? _mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : settings.SiteUrl;
+        var siteUrl = settings == null ? mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : settings.SiteUrl;
         var topGif = message.GetArgument("TopGif");
 
         if (topGif != null && !string.IsNullOrEmpty((string)topGif.Value))
@@ -245,9 +220,9 @@ public class TextileStyler : IPatternStyler
         {
             footerContent =
                 NotifyTemplateResource.FooterCommonV10
-                                      .Replace("%SUPPORTURL%", _mailWhiteLabelSettingsHelper.DefaultMailSupportUrl)
-                                      .Replace("%SALESEMAIL%", _mailWhiteLabelSettingsHelper.DefaultMailSalesEmail)
-                                      .Replace("%DEMOURL%", _mailWhiteLabelSettingsHelper.DefaultMailDemoUrl);
+                                      .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailSupportUrl)
+                                      .Replace("%SALESEMAIL%", mailWhiteLabelSettingsHelper.DefaultMailSalesEmail)
+                                      .Replace("%DEMOURL%", mailWhiteLabelSettingsHelper.DefaultMailDemoUrl);
             footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
 
         }
@@ -282,9 +257,7 @@ public class TextileStyler : IPatternStyler
             return string.Empty;
         }
 
-        var unsubscribeLink = _coreBaseSettings.CustomMode && _coreBaseSettings.Personal
-                                  ? GetSiteUnsubscribeLink(message, settings)
-                                  : GetPortalUnsubscribeLink(message, settings);
+        var unsubscribeLink = GetPortalUnsubscribeLink(message, settings);
 
         if (string.IsNullOrEmpty(unsubscribeLink))
         {
@@ -328,16 +301,16 @@ public class TextileStyler : IPatternStyler
             return string.Empty;
         }
 
-        var format = _coreBaseSettings.CustomMode
+        var format = coreBaseSettings.CustomMode
                          ? "{0}/unsubscribe/{1}"
                          : "{0}/Unsubscribe.aspx?id={1}";
 
         var site = settings == null
-                       ? _mailWhiteLabelSettingsHelper.DefaultMailSiteUrl
+                       ? mailWhiteLabelSettingsHelper.DefaultMailSiteUrl
                        : settings.SiteUrl;
 
         return string.Format(format, site,
-            WebEncoders.Base64UrlEncode(_instanceCrypto.Encrypt(
+            WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(
                 Encoding.UTF8.GetBytes(mail.ToLowerInvariant()))));
     }
 }

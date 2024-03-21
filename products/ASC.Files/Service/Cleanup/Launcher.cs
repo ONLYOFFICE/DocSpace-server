@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,43 +27,35 @@
 namespace ASC.Files.AutoCleanUp;
 
 [Singleton]
-public class Launcher : BackgroundService
+public class Launcher(ILogger<Launcher> logger, Worker worker, IConfiguration configuration)
+    : BackgroundService
 {
-    private readonly ILogger<Launcher> _logger;
-    private readonly Worker _worker;
-    private readonly TimeSpan _period;
-
-    public Launcher(ILogger<Launcher> logger, Worker worker, IConfiguration configuration)
-    {
-        _logger = logger;
-        _worker = worker;
-        _period = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
-    }
+    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.InformationAutoCleanUpWorkerRunning();
+        logger.InformationAutoCleanUpWorkerRunning();
 
         while (!stoppingToken.IsCancellationRequested)
         {
             await Procedure(stoppingToken);
         }
 
-        _logger.InformationAutoCleanUpWorkerStopping();
+        logger.InformationAutoCleanUpWorkerStopping();
     }
 
     private async Task Procedure(CancellationToken stoppingToken)
     {
-        _logger.TraceAutoCleanUpStart();
+        logger.TraceAutoCleanUpStart();
 
         if (stoppingToken.IsCancellationRequested)
         {
             return;
         }
 
-        await _worker.DeleteExpiredFilesInTrash(stoppingToken);
+        await worker.DeleteExpiredFilesInTrash(stoppingToken);
 
-        _logger.TraceAutoCleanUpProcedureFinish();
+        logger.TraceAutoCleanUpProcedureFinish();
 
         await Task.Delay(_period, stoppingToken);
     }

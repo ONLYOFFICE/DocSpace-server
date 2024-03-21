@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,63 +27,31 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifySenderService : BackgroundService
-{
-    private readonly DbWorker _db;
-    private readonly ILogger _logger;
-    private readonly NotifyServiceCfg _notifyServiceCfg;
-    private readonly NotifyConfiguration _notifyConfiguration;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public NotifySenderService(
-        IOptions<NotifyServiceCfg> notifyServiceCfg,
+public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
         NotifyConfiguration notifyConfiguration,
         DbWorker dbWorker,
         IServiceScopeFactory scopeFactory,
-        ILoggerProvider options)
+        ILogger<NotifySenderService> logger)
+    : ActivePassiveBackgroundService<NotifySenderService>(logger, scopeFactory)
+
+{
+    private readonly ILogger<NotifySenderService> _logger = logger;
+    private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Zero;
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        _logger = options.CreateLogger("ASC.NotifySender");
-        _notifyServiceCfg = notifyServiceCfg.Value;
-        _notifyConfiguration = notifyConfiguration;
-        _db = dbWorker;
-        _scopeFactory = scopeFactory;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.InformationNotifySenderRunning();
-
-        stoppingToken.Register(() => _logger.Debug("NotifySenderService background task is stopping."));
-
         if (_notifyServiceCfg.Schedulers != null && _notifyServiceCfg.Schedulers.Any())
         {
             InitializeNotifySchedulers();
         }
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySenderService>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<NotifySenderService>.InstanceId))
-            {
-                _logger.Debug($"Notify Sender Service background task with instance id {RegisterInstanceWorkerService<NotifySenderService>.InstanceId} is't active.");
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ThreadManagerWorkAsync(stoppingToken);
-        }
-
-        _logger.InformationNotifySenderStopping();
+        await ThreadManagerWorkAsync(stoppingToken);
     }
-
+       
     private void InitializeNotifySchedulers()
     {
-        _notifyConfiguration.Configure();
+        notifyConfiguration.Configure();
 
         foreach (var pair in _notifyServiceCfg.Schedulers.Where(r => r.MethodInfo != null))
         {
@@ -100,7 +68,7 @@ public class NotifySenderService : BackgroundService
         {
             if (tasks.Count < _notifyServiceCfg.Process.MaxThreads)
             {
-                var messages = await _db.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
+                var messages = await dbWorker.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
                 if (messages.Count > 0)
                 {
                     var t = new Task(async () => await SendMessagesAsync(messages, stoppingToken), stoppingToken, TaskCreationOptions.LongRunning);
@@ -114,7 +82,7 @@ public class NotifySenderService : BackgroundService
             }
             else
             {
-                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted));
+                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted), stoppingToken);
             }
         }
         catch (ThreadAbortException)
@@ -158,7 +126,7 @@ public class NotifySenderService : BackgroundService
                     _logger.ErrorWithException(e);
                 }
 
-                await _db.SetStateAsync(m.Key, result);
+                await dbWorker.SetStateAsync(m.Key, result);
             }
         }
         catch (ThreadAbortException)

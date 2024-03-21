@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Mukautettu</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Vahvistuslinkki on lähetetty sivuston omistajan sähköpostiosoitteeseen {0}.</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Virheellinen sähköpostiosoite</value>
   </data>

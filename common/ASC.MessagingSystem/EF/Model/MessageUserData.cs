@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,8 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-public class MessageUserData
+public class MessageUserData(int tenentId, Guid userId)
 {
-    public int TenantId { get; init; }
-    public Guid UserId { get; init; }
-
-    public MessageUserData(int tenentId, Guid userId)
-    {
-        TenantId = tenentId;
-        UserId = userId;
-    }
+    public int TenantId { get; init; } = tenentId;
+    public Guid UserId { get; init; } = userId;
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,12 @@
 namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Singleton(Additional = typeof(LdapOperationExtension))]
-public class LdapSaveSyncOperation
+public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
+    IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
-    private readonly IServiceProvider _serviceProvider;
-
-    public LdapSaveSyncOperation(
-        IServiceProvider serviceProvider,
-         IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
@@ -52,7 +44,7 @@ public class LdapSaveSyncOperation
         }
         if (item == null)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             item = scope.ServiceProvider.GetRequiredService<LdapOperationJob>();
             await item.InitJobAsync(settings, tenant, operationType, resource, userId);
             _progressQueue.EnqueueTask(item);

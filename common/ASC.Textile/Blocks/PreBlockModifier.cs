@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,8 +33,8 @@ public class PreBlockModifier : BlockModifier
         // Encode the contents of the "<pre>" tags so that we don't
         // generate formatting out of it.
         line = NoTextileEncoder.EncodeNoTextileZones(line,
-                                @"(?<=(^|\s)<pre(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</pre>)");
+                                @"(?<=(^|\s)<pre(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</pre>)");
         return line;
     }
 
@@ -42,9 +42,9 @@ public class PreBlockModifier : BlockModifier
     {
         // Recode everything.
         line = NoTextileEncoder.DecodeNoTextileZones(line,
-                                @"(?<=(^|\s)<pre(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</pre>)",
-                                new[] { "<", ">" });
+                                @"(?<=(^|\s)<pre(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</pre>)",
+                                ["<", ">"]);
         return line;
     }
 }

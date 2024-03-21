@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,14 +77,8 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     }
 }
 
-public class WebPluginState
+public class WebPluginState(bool enabled, string settings)
 {
-    public bool Enabled { get; set; }
-    public string Settings { get; set; }
-
-    public WebPluginState(bool enabled, string settings)
-    {
-        Enabled = enabled;
-        Settings = settings;
-    }
+    public bool Enabled { get; set; } = enabled;
+    public string Settings { get; set; } = settings;
 }

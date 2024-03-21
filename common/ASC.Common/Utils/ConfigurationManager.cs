@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,11 @@
 
 namespace ASC.Common.Utils;
 
-public class ConnectionStringCollection : IEnumerable<ConnectionStringSettings>
+public class ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data) : IEnumerable<ConnectionStringSettings>
 {
-    private readonly List<ConnectionStringSettings> _data;
+    private readonly List<ConnectionStringSettings> _data = data.ToList();
 
     public ConnectionStringSettings this[string name] => _data.Find(r => r.Name == name);
-
-    public ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data)
-    {
-        _data = data.ToList();
-    }
 
     public IEnumerator<ConnectionStringSettings> GetEnumerator()
     {
@@ -107,10 +102,8 @@ public class ConfigurationExtension
         {
             return GetConnectionStrings()[key];
         }
-        else
-        {
-            var connectionStrings = new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"regions:{region}:ConnectionStrings"));
-            return connectionStrings[key];
-        }
+
+        var connectionStrings = new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"regions:{region}:ConnectionStrings"));
+        return connectionStrings[key];
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Data.Backup.Tasks;
 
 public class RestoreDbModuleTask : PortalTaskBase
 {
-    private const int _transactionLength = 10000;
+    private const int TransactionLength = 10000;
 
     private readonly IDataReadOperator _reader;
     private readonly ILogger<RestoreDbModuleTask> _logger;
@@ -63,36 +63,31 @@ public class RestoreDbModuleTask : PortalTaskBase
         Init(-1);
     }
 
-    public override Task RunJob()
+    public override async Task RunJob()
     {
         _logger.DebugBeginRestoreDataForModule(_module.ModuleName);
         SetStepsCount(_module.Tables.Count(t => !_ignoredTables.Contains(t.Name)));
 
-        using (var connection = DbFactory.OpenConnection(region:_region))
+        await using (var connection = DbFactory.OpenConnection(region:_region))
         {
             foreach (var table in _module.GetTablesOrdered().Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None))
             {
                 _logger.DebugBeginRestoreTable(table.Name);
 
-                var transactionsCommited = 0;
-                var rowsInserted = 0;
-                ActionInvoker.Try(
-                    state =>
-                        RestoreTable(connection.Fix(), (TableInfo)state, ref transactionsCommited,
-                            ref rowsInserted), table, 5,
+                var transactionData = new TransactionData();
+                await ActionInvoker.TryAsync(state => RestoreTable(connection.Fix(), (TableInfo)state, transactionData), table, 5,
                     onAttemptFailure: _ => _columnMapper.Rollback(),
-                    onFailure: error => { throw ThrowHelper.CantRestoreTable(table.Name, error); });
+                    onFailure: error => throw ThrowHelper.CantRestoreTable(table.Name, error));
 
                 SetStepCompleted();
-                _logger.DebugRowsInserted(rowsInserted, table.Name);
+                _logger.DebugRowsInserted(transactionData.RowsInserted, table.Name);
             }
         }
 
         _logger.DebugEndRestoreDataForModule(_module.ModuleName);
-        return Task.CompletedTask;
     }
 
-    public string[] ExecuteArray(DbCommand command)
+    private string[] ExecuteArray(DbCommand command)
     {
         var list = new List<string>();
         using (var result = command.ExecuteReader())
@@ -106,16 +101,14 @@ public class RestoreDbModuleTask : PortalTaskBase
         return list.ToArray();
     }
 
-    private void RestoreTable(DbConnection connection, TableInfo tableInfo, ref int transactionsCommited, ref int rowsInserted)
+    private async Task RestoreTable(DbConnection connection, TableInfo tableInfo, TransactionData transactionData)
     {
         SetColumns(connection, tableInfo);
 
-        using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
+        await using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
         var lowImportanceRelations = _module
             .TableRelations
-            .Where(
-                r =>
-                    string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))
+            .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))
             .Where(r => r.Importance == RelationImportance.Low && !r.IsSelfRelation())
             .Select(r => Tuple.Create(r, _module.Tables.Single(t => t.Name == r.ChildTable)))
             .ToList();
@@ -123,10 +116,10 @@ public class RestoreDbModuleTask : PortalTaskBase
         foreach (
             var rows in
                 GetRows(tableInfo, stream)
-                    .Skip(transactionsCommited * _transactionLength)
-                    .MakeParts(_transactionLength))
+                    .Skip(transactionData.TransactionsCommited * TransactionLength)
+                    .MakeParts(TransactionLength))
         {
-            using var transaction = connection.BeginTransaction();
+            await using var transaction = await connection.BeginTransactionAsync();
             var rowsSuccess = 0;
             foreach (var row in rows)
             {
@@ -155,7 +148,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                         {
                             var command = connection.CreateCommand();
                             command.CommandText = $"select max({tableInfo.IdColumn}) from {tableInfo.Name};";
-                            newIdValue = (int)command.WithTimeout(120).ExecuteScalar() + 1;
+                            newIdValue = (int)await command.WithTimeout(120).ExecuteScalarAsync() + 1;
                         }
                     }
                     if (newIdValue != null)
@@ -165,8 +158,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                     }
                 }
 
-                var insertCommand = _module.CreateInsertCommand(_dump, connection, _columnMapper, tableInfo,
-                    row);
+                var insertCommand = await _module.CreateInsertCommand(_dump, connection, _columnMapper, tableInfo, row);
                 if (insertCommand == null)
                 {
                     _logger.WarningCantCreateCommand(tableInfo, row);
@@ -174,14 +166,14 @@ public class RestoreDbModuleTask : PortalTaskBase
 
                     continue;
                 }
-                insertCommand.WithTimeout(120).ExecuteNonQuery();
+                await insertCommand.WithTimeout(120).ExecuteNonQueryAsync();
                 rowsSuccess++;
 
                 if (tableInfo.HasIdColumn() && tableInfo.IdType == IdType.Autoincrement)
                 {
                     var lastIdCommand = DbFactory.CreateLastInsertIdCommand();
                     lastIdCommand.Connection = connection;
-                    newIdValue = Convert.ToInt32(lastIdCommand.ExecuteScalar());
+                    newIdValue = Convert.ToInt32(await lastIdCommand.ExecuteScalarAsync());
                     _columnMapper.SetMapping(tableInfo.Name, tableInfo.IdColumn, oldIdValue, newIdValue);
                 }
 
@@ -207,13 +199,13 @@ public class RestoreDbModuleTask : PortalTaskBase
                             oldValue is string ? "'" + oldValue + "'" : oldValue,
                             relation.Item2.TenantColumn,
                             _columnMapper.GetTenantMapping());
-                    command.WithTimeout(120).ExecuteNonQuery();
+                    await command.WithTimeout(120).ExecuteNonQueryAsync();
                 }
             }
 
-            transaction.Commit();
-            transactionsCommited++;
-            rowsInserted += rowsSuccess;
+            await transaction.CommitAsync();
+            transactionData.TransactionsCommited++;
+            transactionData.RowsInserted += rowsSuccess;
         }
     }
 
@@ -231,7 +223,7 @@ public class RestoreDbModuleTask : PortalTaskBase
         {
             rows = rows
                 .ToTree(x => x[selfRelation.ParentColumn], x => x[selfRelation.ChildColumn])
-                .SelectMany(x => OrderNode(x));
+                .SelectMany(OrderNode);
         }
 
         return rows;
@@ -240,7 +232,7 @@ public class RestoreDbModuleTask : PortalTaskBase
     private static IEnumerable<DataRowInfo> OrderNode(TreeNode<DataRowInfo> node)
     {
         var result = new List<DataRowInfo> { node.Entry };
-        result.AddRange(node.Children.SelectMany(x => OrderNode(x)));
+        result.AddRange(node.Children.SelectMany(OrderNode));
 
         return result;
     }
@@ -251,5 +243,11 @@ public class RestoreDbModuleTask : PortalTaskBase
         showColumnsCommand.Connection = connection;
 
         table.Columns = ExecuteArray(showColumnsCommand);
+    }
+
+    private class TransactionData
+    {
+        public int TransactionsCommited { get; set; }
+        public int RowsInserted { get; set; }
     }
 }

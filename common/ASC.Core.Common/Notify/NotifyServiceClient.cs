@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,11 @@
 namespace ASC.Core.Notify;
 
 [Singleton]
-public class NotifyServiceClient : INotifyService
-{ 
-    private readonly SecurityContext _securityContext;
-    private readonly IEventBus _eventBus;
-
-    public NotifyServiceClient(IEventBus eventBus, SecurityContext securityContext)
-    {
-        _eventBus = eventBus;
-        _securityContext = securityContext;
-    }
-
+public class NotifyServiceClient(IEventBus eventBus, SecurityContext securityContext) : INotifyService
+{
     public void SendNotifyMessage(NotifyMessage m)
     {       
-        _eventBus.Publish(new NotifySendMessageRequestedIntegrationEvent(_securityContext.CurrentAccount.ID, m.TenantId)
+        eventBus.Publish(new NotifySendMessageRequestedIntegrationEvent(securityContext.CurrentAccount.ID, m.TenantId)
         {
             NotifyMessage = m
         });
@@ -48,7 +39,7 @@ public class NotifyServiceClient : INotifyService
 
     public void InvokeSendMethod(NotifyInvoke notifyInvoke)
     {
-        _eventBus.Publish(new NotifyInvokeSendMethodRequestedIntegrationEvent(_securityContext.CurrentAccount.ID, notifyInvoke.Tenant)
+        eventBus.Publish(new NotifyInvokeSendMethodRequestedIntegrationEvent(securityContext.CurrentAccount.ID, notifyInvoke.Tenant)
         {
             NotifyInvoke = notifyInvoke
         });

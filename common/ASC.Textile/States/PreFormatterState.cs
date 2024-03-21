@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,10 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<pre" + Globals.HtmlAttributesPattern + ">")]
-public class PreFormatterState : FormatterState
+public class PreFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private bool _shouldExitNextTime;
     private int _fakeNestingDepth;
-
-    public PreFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {
@@ -80,7 +75,7 @@ public class PreFormatterState : FormatterState
             return true;
         }
 
-        if (Regex.IsMatch(input, @"</pre>"))
+        if (Regex.IsMatch(input, "</pre>"))
         {
             _fakeNestingDepth--;
         }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,8 +78,23 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
+    /// <summary>Folder type</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    public FolderType? Type { get; set; }
+
     public bool? InRoom { get; set; }
 
+    /// <summary>Quota</summary>
+    /// <type>System.Int32, System</type>
+    public long? QuotaLimit { get; set; }
+
+    /// <summary>Specifies if the room has a custom quota or not.</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsCustomQuota { get; set; }
+
+    /// <summary>Counter</summary>
+    /// <type>System.Int32, System</type>
+    public long? UsedSpace { get; set; }
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>
@@ -103,18 +118,7 @@ public class FolderDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FolderDtoHelper : FileEntryDtoHelper
-{
-    private readonly AuthContext _authContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly RoomLogoManager _roomLogoManager;
-    private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-    private readonly FileSecurityCommon _fileSecurityCommon;
-    
-    public FolderDtoHelper(
-        ApiDateTimeHelper apiDateTimeHelper,
+public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -126,19 +130,14 @@ public class FolderDtoHelper : FileEntryDtoHelper
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime, 
-        FileSecurityCommon fileSecurityCommon)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        FileSecurityCommon fileSecurityCommon,
+        SettingsManager settingsManager,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
-        _authContext = authContext;
-        _daoFactory = daoFactory;
-        _globalFolderHelper = globalFolderHelper;
-        _roomLogoManager = roomLogoManager;
-        _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
-        _fileSecurityCommon = fileSecurityCommon;
-        _badgesSettingsHelper = badgesSettingsHelper;
-    }
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -148,7 +147,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         {
             if (folder.Tags == null)
             {
-                var tagDao = _daoFactory.GetTagDao<T>();
+                var tagDao = daoFactory.GetTagDao<T>();
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
             }
             else
@@ -156,34 +155,52 @@ public class FolderDtoHelper : FileEntryDtoHelper
                 result.Tags = folder.Tags.Select(t => t.Name);
             }
 
-            result.Logo = await _roomLogoManager.GetLogoAsync(folder);
-            result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
+            result.Logo = await roomLogoManager.GetLogoAsync(folder);
+            result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
 
-            if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
+            if (folder.ProviderEntry)
             {
-                result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
+                result.ParentId = folder.RootFolderType switch
+                {
+                    FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
+                    FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
+                    _ => result.ParentId
+                };
             }
-            
-            result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
-            
-            if (folder.CreateBy == _authContext.CurrentAccount.ID ||
-                !await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
+
+            result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
+
+            if (folder.CreateBy == authContext.CurrentAccount.ID ||
+                !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
             {
                 result.InRoom = true;
             }
             else
             {
-                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>(_authContext.CurrentAccount.ID).ToListAsync();
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
 
                 result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
             }
-        }
 
-        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
+            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
+                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
+                     ((result.RootFolderType == FolderType.Archive || result.RootFolderType == FolderType.TRASH) && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            {
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                result.UsedSpace = folder.Counter;
+
+                if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
+                {
+                    result.IsCustomQuota = folder.SettingsQuota > -2;
+                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
+                }
+            }
+        }
+        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
 
-            var folderDao = _daoFactory.GetFolderDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
 
             if (folders != null)
             {
@@ -204,6 +221,19 @@ public class FolderDtoHelper : FileEntryDtoHelper
             }
         }
 
+        if (folder.Order != 0)
+        {
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
+        }
+
+        if (folder.FolderType == FolderType.InProcessFormFolder || 
+            folder.FolderType == FolderType.ReadyFormFolder || 
+            folder.FolderType == FolderType.FormFillingFolderDone || 
+            folder.FolderType == FolderType.FormFillingFolderInProgress)
+        {
+            result.Type = folder.FolderType;
+        }
+
         return result;
     }
 
@@ -213,7 +243,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
 
         if (folder.RootFolderType == FolderType.VirtualRooms)
         {
-            var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+            var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
             if (!isEnabledBadges)
             {
@@ -228,7 +258,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;
         result.Pinned = folder.Pinned;
-        result.Private = folder.Private;
+        result.Private = folder.SettingsPrivate;
 
         return result;
     }

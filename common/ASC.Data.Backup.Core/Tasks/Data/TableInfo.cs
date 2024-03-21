@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,27 +42,16 @@ public enum IdType
 }
 
 [DebuggerDisplay("{Name}")]
-public class TableInfo
+public class TableInfo(string name, string tenantColumn = null, string idColumn = null, IdType idType = IdType.Autoincrement)
 {
     public string[] Columns { get; set; }
-    public string[] UserIDColumns { get; init; }
-    public Dictionary<string, bool> DateColumns { get; init; }
-    public InsertMethod InsertMethod { get; init; }
-    public string Name { get; private set; }
-    public string IdColumn { get; private set; }
-    public IdType IdType { get; private set; }
-    public string TenantColumn { get; private set; }
-
-    public TableInfo(string name, string tenantColumn = null, string idColumn = null, IdType idType = IdType.Autoincrement)
-    {
-        Name = name;
-        IdColumn = idColumn;
-        IdType = idType;
-        TenantColumn = tenantColumn;
-        UserIDColumns = new string[0];
-        DateColumns = new Dictionary<string, bool>();
-        InsertMethod = InsertMethod.Insert;
-    }
+    public string[] UserIDColumns { get; init; } = Array.Empty<string>();
+    public Dictionary<string, bool> DateColumns { get; init; } = new();
+    public InsertMethod InsertMethod { get; init; } = InsertMethod.Insert;
+    public string Name { get; private set; } = name;
+    public string IdColumn { get; private set; } = idColumn;
+    public IdType IdType { get; private set; } = idType;
+    public string TenantColumn { get; private set; } = tenantColumn;
 
     public bool HasIdColumn()
     {

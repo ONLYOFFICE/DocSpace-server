@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,6 +44,7 @@ global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Billing;

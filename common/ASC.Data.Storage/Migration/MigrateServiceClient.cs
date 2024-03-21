@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,21 +71,14 @@ public class ServiceClientListener
 }
 
 [Scope]
-public class ServiceClient : IService
-{
-    public ServiceClientListener ServiceClientListener { get; }
-    public ICacheNotify<MigrationCache> CacheMigrationNotify { get; }
-    public ICacheNotify<MigrationUploadCdn> UploadCdnMigrationNotify { get; }
-
-    public ServiceClient(
-        ServiceClientListener serviceClientListener,
+public class ServiceClient(ServiceClientListener serviceClientListener,
         ICacheNotify<MigrationCache> cacheMigrationNotify,
         ICacheNotify<MigrationUploadCdn> uploadCdnMigrationNotify)
-    {
-        ServiceClientListener = serviceClientListener;
-        CacheMigrationNotify = cacheMigrationNotify;
-        UploadCdnMigrationNotify = uploadCdnMigrationNotify;
-    }
+    : IService
+{
+    public ServiceClientListener ServiceClientListener { get; } = serviceClientListener;
+    public ICacheNotify<MigrationCache> CacheMigrationNotify { get; } = cacheMigrationNotify;
+    public ICacheNotify<MigrationUploadCdn> UploadCdnMigrationNotify { get; } = uploadCdnMigrationNotify;
 
     public void Migrate(int tenant, StorageSettings storageSettings)
     {

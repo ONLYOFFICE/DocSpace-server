@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
     {
         _processedProtoTypes = new SynchronizedCollection<string>();
 
-        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), a => BuildTypeModelFromAssembly(a));
+        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), BuildTypeModelFromAssembly);
     }
 
     private void BuildTypeModelFromAssembly(Assembly assembly)
@@ -108,7 +108,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
 
         var baseType = RuntimeTypeModel.Default[protoType.BaseType];
 
-        if (!baseType.GetSubtypes().Any(s => s.DerivedType == itemType))
+        if (baseType.GetSubtypes().All(s => s.DerivedType != itemType))
         {
             var md5Hasher = MD5.Create();
             var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(protoType.FullName));

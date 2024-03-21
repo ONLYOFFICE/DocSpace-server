@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,8 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<(h[0-9]|p|pre|blockquote)" + Globals.HtmlAttributesPattern + ">")]
-public class PassthroughFormatterState : FormatterState
+public class PassthroughFormatterState(TextileFormatter f) : FormatterState(f)
 {
-    public PassthroughFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
-
     public override string Consume(string input, Match m)
     {
         this.Formatter.ChangeState(this);

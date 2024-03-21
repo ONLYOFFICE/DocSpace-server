@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,15 @@
 namespace ASC.Core.Tenants;
 
 [Scope]
-internal class TenantQuotaPriceResolver : IValueResolver<DbQuota, TenantQuota, decimal>
+internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper) : IValueResolver<DbQuota, TenantQuota, decimal>
 {
-    private readonly TenantManager _tenantManager;
-    private readonly RegionHelper _regionHelper;
-
-    public TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper)
-    {
-        _tenantManager = tenantManager;
-        _regionHelper = regionHelper;
-    }
-
     public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
     {
-        var priceInfo = _tenantManager.GetProductPriceInfo(source.ProductId);
+        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId);
 
         if (priceInfo != null)
         {
-            var currentRegion = _regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
             
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {            
@@ -53,7 +44,7 @@ internal class TenantQuotaPriceResolver : IValueResolver<DbQuota, TenantQuota, d
             }
         }
         
-        destination.PriceCurrencySymbol = _regionHelper.GetDefaultRegionInfo().CurrencySymbol;
+        destination.PriceCurrencySymbol = regionHelper.GetDefaultRegionInfo().CurrencySymbol;
         return source.Price;
     }
 }

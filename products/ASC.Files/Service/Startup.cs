@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,40 +25,32 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;
 
 public class Startup : BaseWorkerStartup
 {
-    private readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         : base(configuration, hostEnvironment)
     {
-        _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
-
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
-
+        await base.ConfigureServices(services);
         services.AddHttpClient();
 
-        DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
-
-        if (!bool.TryParse(_configuration["disable_elastic"], out var disableElastic))
+        if (!Enum.TryParse<ElasticLaunchType>(Configuration["elastic:mode"], true, out var elasticLaunchType))
         {
-            disableElastic = false;
+            elasticLaunchType = ElasticLaunchType.Inclusive;
         }
 
-        if (!disableElastic)
+        if (elasticLaunchType != ElasticLaunchType.Disabled)
         {
             services.AddHostedService<ElasticSearchIndexService>();
             DIHelper.TryAdd<FactoryIndexer>();
@@ -68,28 +60,37 @@ public class Startup : BaseWorkerStartup
             DIHelper.TryAdd<FactoryIndexerFolder>();
         }
 
-        services.AddHostedService<FeedAggregatorService>();
-        DIHelper.TryAdd<FeedAggregatorService>();
+        if (elasticLaunchType != ElasticLaunchType.Exclusive)
+        {
+            services.AddHostedService<FeedAggregatorService>();
+            DIHelper.TryAdd<FeedAggregatorService>();
 
-        //services.AddHostedService<FeedCleanerService>();
-        //DIHelper.TryAdd<FeedCleanerService>();
+            //services.AddHostedService<FeedCleanerService>();
+            //DIHelper.TryAdd<FeedCleanerService>();
 
-        services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper);
-        DIHelper.TryAdd<FileConverterService<int>>();
+            services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
+            DIHelper.TryAdd<FileConverterService<int>>();
 
-        services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper);
-        DIHelper.TryAdd<FileConverterService<string>>();
+            services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
+            DIHelper.TryAdd<FileConverterService<string>>();
 
-        services.AddHostedService<ThumbnailBuilderService>();
-        DIHelper.TryAdd<ThumbnailBuilderService>();
+            services.AddHostedService<ThumbnailBuilderService>();
+            DIHelper.TryAdd<ThumbnailBuilderService>();
 
-        DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+            DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+            DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+            DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+            DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+            DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+            DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+            DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
-        services.AddHostedService<Launcher>();
-        DIHelper.TryAdd<Launcher>();
+            services.AddHostedService<Launcher>();
+            DIHelper.TryAdd<Launcher>();
 
-        services.AddHostedService<DeleteExpiredService>();
-        DIHelper.TryAdd<DeleteExpiredService>();
+            services.AddHostedService<DeleteExpiredService>();
+            DIHelper.TryAdd<DeleteExpiredService>();
+        }
 
         DIHelper.TryAdd<AuthManager>();
         DIHelper.TryAdd<BaseCommonLinkUtility>();
@@ -100,8 +101,11 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
-        
+        DIHelper.TryAdd<NotifyConfiguration>();
+
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();
 
@@ -113,11 +117,13 @@ public class Startup : BaseWorkerStartup
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
 
         services.AddScoped<UsersInRoomStatistic>();
-        
+
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
 
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+        services.AddDocumentServiceHttpClient();
     }
 }

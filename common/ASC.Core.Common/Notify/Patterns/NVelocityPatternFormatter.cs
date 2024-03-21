@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,13 @@
 
 namespace ASC.Notify.Patterns;
 
-public sealed class NVelocityPatternFormatter : PatternFormatter
+public sealed class NVelocityPatternFormatter() : PatternFormatter(DefaultPattern)
 {
     public const string DefaultPattern = @"(^|[^\\])\$[\{]{0,1}(?<tagName>[a-zA-Z0-9_]+)";
     public const string NoStylePreffix = "==";
     public const string NoStyleSuffix = "==";
 
     private VelocityContext _nvelocityContext;
-
-    public NVelocityPatternFormatter()
-        : base(DefaultPattern)
-    {
-    }
 
     protected override void BeforeFormat(INoticeMessage message, ITagValue[] tagsValues)
     {

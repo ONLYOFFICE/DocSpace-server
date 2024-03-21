@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,69 +27,37 @@
 namespace ASC.Web.Studio.UserControls.FirstTime;
 
 [Transient]
-public class FirstTimeTenantSettings
+public class FirstTimeTenantSettings(
+    ILogger<FirstTimeTenantSettings> logger,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    SettingsManager settingsManager,
+    UserManager userManager,
+    SetupInfo setupInfo,
+    SecurityContext securityContext,
+    MessageService messageService,
+    LicenseReader licenseReader,
+    StudioNotifyService studioNotifyService,
+    TimeZoneConverter timeZoneConverter,
+    CoreBaseSettings coreBaseSettings,
+    IHttpClientFactory clientFactory,
+    CookiesManager cookiesManager,
+    CspSettingsHelper cspSettingsHelper)
 {
-    private readonly ILogger<FirstTimeTenantSettings> _log;
-    private readonly TenantManager _tenantManager;
-    private readonly TenantExtra _tenantExtra;
-    private readonly SettingsManager _settingsManager;
-    private readonly UserManager _userManager;
-    private readonly SetupInfo _setupInfo;
-    private readonly SecurityContext _securityContext;
-    private readonly MessageService _messageService;
-    private readonly LicenseReader _licenseReader;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly TimeZoneConverter _timeZoneConverter;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly CookiesManager _cookiesManager;
-
-    public FirstTimeTenantSettings(
-        ILogger<FirstTimeTenantSettings> logger,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        SettingsManager settingsManager,
-        UserManager userManager,
-        SetupInfo setupInfo,
-        SecurityContext securityContext,
-        MessageService messageService,
-        LicenseReader licenseReader,
-        StudioNotifyService studioNotifyService,
-        TimeZoneConverter timeZoneConverter,
-        CoreBaseSettings coreBaseSettings,
-        IHttpClientFactory clientFactory,
-        CookiesManager cookiesManager)
-    {
-        _log = logger;
-        _tenantManager = tenantManager;
-        _tenantExtra = tenantExtra;
-        _settingsManager = settingsManager;
-        _userManager = userManager;
-        _setupInfo = setupInfo;
-        _securityContext = securityContext;
-        _messageService = messageService;
-        _licenseReader = licenseReader;
-        _studioNotifyService = studioNotifyService;
-        _timeZoneConverter = timeZoneConverter;
-        _coreBaseSettings = coreBaseSettings;
-        _clientFactory = clientFactory;
-        _cookiesManager = cookiesManager;
-    }
-
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
         try
         {
             var (email, passwordHash, lng, timeZone, amiid, subscribeFromSite) = inDto;
 
-            var tenant = await _tenantManager.GetCurrentTenantAsync();
-            var settings = await _settingsManager.LoadAsync<WizardSettings>();
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var settings = await settingsManager.LoadAsync<WizardSettings>();
             if (settings.Completed)
             {
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(_setupInfo.AmiMetaUrl) && IncorrectAmiId(amiid))
+            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && IncorrectAmiId(amiid))
             {
                 //throw new Exception(Resource.EmailAndPasswordIncorrectAmiId); TODO
             }
@@ -97,14 +65,14 @@ public class FirstTimeTenantSettings
             if (tenant.OwnerId == Guid.Empty)
             {
                 await Task.Delay(TimeSpan.FromSeconds(6));// wait cache interval
-                tenant = await _tenantManager.GetTenantAsync(tenant.Id);
+                tenant = await tenantManager.GetTenantAsync(tenant.Id);
                 if (tenant.OwnerId == Guid.Empty)
                 {
-                    _log.ErrorOwnerEmpty(tenant.Id);
+                    logger.ErrorOwnerEmpty(tenant.Id);
                 }
             }
 
-            var currentUser = await _userManager.GetUsersAsync((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync((await tenantManager.GetCurrentTenantAsync()).OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
@@ -116,7 +84,7 @@ public class FirstTimeTenantSettings
                 throw new Exception(Resource.ErrorPasswordEmpty);
             }
 
-            await _securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
+            await securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
 
             email = email.Trim();
             if (currentUser.Email != email)
@@ -125,34 +93,35 @@ public class FirstTimeTenantSettings
                 currentUser.ActivationStatus = EmployeeActivationStatus.NotActivated;
             }
 
-            await _userManager.UpdateUserInfoAsync(currentUser);
+            await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (_tenantExtra.EnableTariffSettings && _tenantExtra.Enterprise)
+            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
             {
-                await TariffSettings.SetLicenseAcceptAsync(_settingsManager);
-                await _messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
-                await _licenseReader.RefreshLicenseAsync();
+                await licenseReader.RefreshLicenseAsync();
             }
 
             settings.Completed = true;
-            await _settingsManager.SaveAsync(settings);
+            await settingsManager.SaveAsync(settings);
 
             TrySetLanguage(tenant, lng);
 
-            tenant.TimeZone = _timeZoneConverter.GetTimeZone(timeZone).Id;
+            tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
-            await _tenantManager.SaveTenantAsync(tenant);
+            await tenantManager.SaveTenantAsync(tenant);
+            await cspSettingsHelper.SaveAsync(null, true);
+            
+            await studioNotifyService.SendCongratulationsAsync(currentUser);
+            await studioNotifyService.SendRegDataAsync(currentUser);
 
-            await _studioNotifyService.SendCongratulationsAsync(currentUser);
-            await _studioNotifyService.SendRegDataAsync(currentUser);
-
-            if (subscribeFromSite && _tenantExtra.Opensource && !_coreBaseSettings.CustomMode)
+            if (subscribeFromSite && tenantExtra.Opensource && !coreBaseSettings.CustomMode)
             {
                 SubscribeFromSite(currentUser);
             }
 
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id);
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id);
 
             return settings;
         }
@@ -170,18 +139,16 @@ public class FirstTimeTenantSettings
         }
         catch (Exception ex)
         {
-            _log.ErrorFirstTimeTenantSettings(ex);
+            logger.ErrorFirstTimeTenantSettings(ex);
             throw;
         }
     }
 
-    public bool RequestLicense
+    public async Task<bool> GetRequestLicense()
     {
-        get
-        {
-            return _tenantExtra.EnableTariffSettings && _tenantExtra.Enterprise
-                && !File.Exists(_licenseReader.LicensePath);
-        }
+        return await tenantExtra.GetEnableTariffSettings() && 
+               tenantExtra.Enterprise &&
+               !File.Exists(licenseReader.LicensePath);
     }
 
     private void TrySetLanguage(Tenant tenant, string lng)
@@ -198,7 +165,7 @@ public class FirstTimeTenantSettings
         }
         catch (Exception err)
         {
-            _log.ErrorTrySetLanguage(err);
+            logger.ErrorTrySetLanguage(err);
         }
     }
 
@@ -214,7 +181,7 @@ public class FirstTimeTenantSettings
 
         if (string.IsNullOrEmpty(_amiId))
         {
-            var getAmiIdUrl = _setupInfo.AmiMetaUrl + "instance-id";
+            var getAmiIdUrl = setupInfo.AmiMetaUrl + "instance-id";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(getAmiIdUrl)
@@ -222,7 +189,7 @@ public class FirstTimeTenantSettings
 
             try
             {
-                var httpClient = _clientFactory.CreateClient();
+                var httpClient = clientFactory.CreateClient();
                 using (var response = httpClient.Send(request))
                 using (var responseStream = response.Content.ReadAsStream())
                 using (var reader = new StreamReader(responseStream))
@@ -230,11 +197,11 @@ public class FirstTimeTenantSettings
                     _amiId = reader.ReadToEnd();
                 }
 
-                _log.DebugInstanceId(_amiId);
+                logger.DebugInstanceId(_amiId);
             }
             catch (Exception e)
             {
-                _log.ErrorRequestAMIId(e);
+                logger.ErrorRequestAMIId(e);
             }
         }
 
@@ -245,7 +212,7 @@ public class FirstTimeTenantSettings
     {
         try
         {
-            var url = (_setupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
+            var url = (setupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
 
             if (string.IsNullOrEmpty(url))
             {
@@ -266,15 +233,15 @@ public class FirstTimeTenantSettings
             var data = JsonSerializer.Serialize(values);
             request.Content = new StringContent(data);
 
-            var httpClient = _clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var response = httpClient.Send(request);
 
-            _log.DebugSubscribeResponse(response);//toto write
+            logger.DebugSubscribeResponse(response);//toto write
 
         }
         catch (Exception e)
         {
-            _log.ErrorSubscribeRequest(e);
+            logger.ErrorSubscribeRequest(e);
         }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,11 +74,8 @@ class InterceptorStorage
             throw new ArgumentException("empty name", nameof(name));
         }
 
-        var result = GetInternal(name, CallInterceptors);
-        if (result == null)
-        {
-            result = GetInternal(name, _globalInterceptors);
-        }
+        var result = GetInternal(name, CallInterceptors) ?? 
+                     GetInternal(name, _globalInterceptors);
 
         return result;
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,11 @@
 namespace ASC.Common.Utils;
 
 [Singleton]
-public class Signature
+public class Signature(MachinePseudoKeys machinePseudoKeys)
 {
-    private readonly MachinePseudoKeys _machinePseudoKeys;
-
-    public Signature(MachinePseudoKeys machinePseudoKeys)
-    {
-        _machinePseudoKeys = machinePseudoKeys;
-    }
-
     public string Create<T>(T obj)
     {
-        return Create(obj, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()));
+        return Create(obj, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()));
     }
 
     public static string Create<T>(T obj, string secret)
@@ -48,15 +41,10 @@ public class Signature
 
         return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(payload));
     }
-
-    public T Read<T>(string signature)
-    {
-        return Read<T>(signature, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()));
-    }
-
+    
     public T Read<T>(string signature, Action<string> signatureResolver = null)
     {
-        return Read<T>(signature, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()), signatureResolver);
+        return Read<T>(signature, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), signatureResolver);
     }
 
     public static T Read<T>(string signature, string secret, Action<string> signatureResolver = null)
@@ -82,12 +70,5 @@ public class Signature
         using var sha256 = SHA256.Create();
 
         return Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(str)));
-    }
-
-    private static string GetHashBase64MD5(string str)
-    {
-        using var md5 = MD5.Create();
-
-        return Convert.ToBase64String(md5.ComputeHash(Encoding.UTF8.GetBytes(str)));
     }
 }

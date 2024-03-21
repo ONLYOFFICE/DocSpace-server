@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -236,7 +236,7 @@ public class TimeZoneConverter
         }
         catch (Exception error)
         {
-            _mapZones = new MapZone[0];
+            _mapZones = Array.Empty<MapZone>();
             _logger.ErrorInitMapZones(error);
         }
     }
@@ -281,7 +281,7 @@ public class TimeZoneConverter
                                 FileName = "/bin/bash",
                                 Arguments = "date +%Z",
                                 RedirectStandardOutput = true,
-                                UseShellExecute = false,
+                                UseShellExecute = false
                             };
 
                             using var p = Process.Start(psi);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using HttpContext = Microsoft.AspNetCore.Http.HttpContext;
-
 namespace System.Web;
 
 public static class HttpRequestExtensions
 {
-    public static readonly string RequestTokenHeader = "Request-Token";
+    public const string RequestTokenHeader = "Request-Token";
 
     public static Uri Url(this HttpRequest request)
     {
@@ -42,7 +40,7 @@ public static class HttpRequestExtensions
         return context != null ? PushRewritenUri(context, context.Request.Url()) : null;
     }
 
-    public static Uri PushRewritenUri(this HttpContext context, Uri rewrittenUri)
+    private static Uri PushRewritenUri(this HttpContext context, Uri rewrittenUri)
     {
         Uri oldUri = null;
 
@@ -54,7 +52,6 @@ public static class HttpRequestExtensions
 
             if (url != rewrittenUri)
             {
-                var requestUri = url;
                 try
                 {
                     //Push it
@@ -71,15 +68,15 @@ public static class HttpRequestExtensions
                     else
                     {
                         request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host + ":" + requestUri.Port);
+                                                    rewrittenUri.Host + ":" + url.Port);
                     }
                     //Hack:
                     typeof(HttpRequest).InvokeMember("_url",
                                                       BindingFlags.NonPublic | BindingFlags.SetField |
                                                       BindingFlags.Instance,
                                                       null, request,
-                                                      new object[] { null });
-                    oldUri = requestUri;
+                                                      [null]);
+                    oldUri = url;
                     context.Items["oldUri"] = oldUri;
 
                 }
@@ -112,49 +109,8 @@ public static class HttpRequestExtensions
                 || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("AscDesktopEditor"));
     }
 
-    public static bool SailfishApp(this HttpRequest request)
-    {
-        return request != null
-               && (!string.IsNullOrEmpty(request.Headers["sailfish"])
-                   || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("SailfishOS"));
-    }
-
     public static bool MobileApp(this HttpRequest request)
     {
         return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].Contains("iOS") || request.Headers[HeaderNames.UserAgent].Contains("Android"));
-    }
-
-    private static Uri ParseRewriterUrl(string s)
-    {
-        if (string.IsNullOrEmpty(s))
-        {
-            return null;
-        }
-
-        const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
-        if (0 < s.Length && s.StartsWith('0'))
-        {
-            s = Uri.UriSchemeHttp + s.Substring(1);
-        }
-        else if (3 < s.Length && s.StartsWith("OFF", cmp))
-        {
-            s = Uri.UriSchemeHttp + s.Substring(3);
-        }
-        else if (0 < s.Length && s.StartsWith('1'))
-        {
-            s = Uri.UriSchemeHttps + s.Substring(1);
-        }
-        else if (2 < s.Length && s.StartsWith("ON", cmp))
-        {
-            s = Uri.UriSchemeHttps + s.Substring(2);
-        }
-        else if (s.StartsWith(Uri.UriSchemeHttp + "%3A%2F%2F", cmp) || s.StartsWith(Uri.UriSchemeHttps + "%3A%2F%2F", cmp))
-        {
-            s = HttpUtility.UrlDecode(s);
-        }
-
-        Uri.TryCreate(s, UriKind.Absolute, out var result);
-
-        return result;
     }
 }

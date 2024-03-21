@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,40 +39,21 @@ public class MailMergeTask : IDisposable
     public int MessageId { get; set; }
     public string StreamId { get; set; }
 
-    public MailMergeTask()
-    {
-        MessageId = 0;
-    }
-
     public void Dispose()
     {
-        if (Attach != null)
-        {
-            Attach.Dispose();
-        }
+        Attach?.Dispose();
     }
 }
 
 [Scope]
-public class MailMergeTaskRunner
+public class MailMergeTaskRunner(SetupInfo setupInfo, SecurityContext securityContext, BaseCommonLinkUtility baseCommonLinkUtility)
 {
-    private readonly SetupInfo _setupInfo;
-    private readonly SecurityContext _securityContext;
-    private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
-
     //private ApiServer _apiServer;
 
     //protected ApiServer Api
     //{
     //    get { return _apiServer ?? (_apiServer = new ApiServer()); }
     //}
-
-    public MailMergeTaskRunner(SetupInfo setupInfo, SecurityContext securityContext, BaseCommonLinkUtility baseCommonLinkUtility)
-    {
-        _setupInfo = setupInfo;
-        _securityContext = securityContext;
-        _baseCommonLinkUtility = baseCommonLinkUtility;
-    }
 
     public async Task<string> RunAsync(MailMergeTask mailMergeTask, IHttpClientFactory clientFactory)
     {
@@ -129,16 +110,16 @@ public class MailMergeTaskRunner
         }
 
         var apiUrlAttach = string.Format("{0}mail/messages/attachment/add?id_message={1}&name={2}",
-                                         _setupInfo.WebApiBaseUrl,
+                                         setupInfo.WebApiBaseUrl,
                                          mailMergeTask.MessageId,
                                          mailMergeTask.AttachTitle);
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(_baseCommonLinkUtility.GetFullAbsolutePath(apiUrlAttach)),
+            RequestUri = new Uri(baseCommonLinkUtility.GetFullAbsolutePath(apiUrlAttach)),
             Method = HttpMethod.Post
         };
-        request.Headers.Add("Authorization", await _securityContext.AuthenticateMeAsync(_securityContext.CurrentAccount.ID));
+        request.Headers.Add("Authorization", await securityContext.AuthenticateMeAsync(securityContext.CurrentAccount.ID));
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(mailMergeTask.AttachTitle);
         request.Content = new StreamContent(mailMergeTask.Attach);
 

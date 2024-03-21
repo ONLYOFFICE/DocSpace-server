@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,26 +26,19 @@
 
 namespace Textile.States;
 
-public class TableCellParser
+public class TableCellParser(string input)
 {
-    readonly string _lineFragment;
-
-    public TableCellParser(string input)
-    {
-        _lineFragment = input;
-    }
-
     public string GetLineFragmentFormatting()
     {
         var htmlTag = "td";
 
-        var m = Regex.Match(_lineFragment,
-                                @"^((?<head>_?)" +
+        var m = Regex.Match(input,
+                                "^((?<head>_?)" +
                                 Globals.SpanPattern +
                                 Globals.AlignPattern +
                                 Globals.BlockModifiersPattern +
                                 @"(?<dot>\.)\s?)?" +
-                                @"(?<content>.*)"
+                                "(?<content>.*)"
                                 );
         if (!m.Success)
         {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,48 +23,35 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 namespace ASC.Data.Backup.Tasks;
 
-public class ProgressChangedEventArgs : EventArgs
+public class ProgressChangedEventArgs(int progress) : EventArgs
 {
-    public int Progress { get; private set; }
-
-    public ProgressChangedEventArgs(int progress)
-    {
-        Progress = progress;
-    }
+    public int Progress { get; private set; } = progress;
 }
 
-public abstract class PortalTaskBase
+public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
 {
     protected const int TasksLimit = 10;
 
-    protected StorageFactory StorageFactory { get; set; }
-    protected StorageFactoryConfig StorageFactoryConfig { get; set; }
-    protected ILogger Logger { get; set; }
+    protected StorageFactory StorageFactory { get; set; } = storageFactory;
+    protected StorageFactoryConfig StorageFactoryConfig { get; set; } = storageFactoryConfig;
+    protected ILogger Logger { get; set; } = logger;
     public int Progress { get; private set; }
     public int TenantId { get; private set; }
-    public bool ProcessStorage { get; set; }
+    public bool ProcessStorage { get; set; } = true;
     protected IDataWriteOperator WriteOperator { get; set; }
-    protected ModuleProvider ModuleProvider { get; set; }
-    protected DbFactory DbFactory { get; init; }
+    protected ModuleProvider ModuleProvider { get; set; } = moduleProvider;
+    protected DbFactory DbFactory { get; init; } = dbFactory;
 
     protected readonly List<ModuleName> _ignoredModules = new();
     protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
 
-    protected PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
-    {
-        Logger = logger;
-        ProcessStorage = true;
-        StorageFactory = storageFactory;
-        StorageFactoryConfig = storageFactoryConfig;
-        ModuleProvider = moduleProvider;
-        DbFactory = dbFactory;
-    }
-
     public void Init(int tenantId)
     {
         TenantId = tenantId;
+        IgnoreTable("hosting_instance_registration");
     }
 
     public void IgnoreModule(ModuleName moduleName)
@@ -85,7 +72,7 @@ public abstract class PortalTaskBase
 
     public abstract Task RunJob();
 
-    internal virtual IEnumerable<IModuleSpecifics> GetModulesToProcess()
+    internal IEnumerable<IModuleSpecifics> GetModulesToProcess()
     {
         return ModuleProvider.AllModules.Where(module => !_ignoredModules.Contains(module.ModuleName));
     }
@@ -203,14 +190,14 @@ public abstract class PortalTaskBase
         OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
-    protected virtual void OnProgressChanged(ProgressChangedEventArgs eventArgs)
+    protected void OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
         ProgressChanged?.Invoke(this, eventArgs);
     }
 
     #endregion
 
-    protected Dictionary<string, string> ParseConnectionString(string connectionString)
+    private Dictionary<string, string> ParseConnectionString(string connectionString)
     {
         var result = new Dictionary<string, string>();
 
@@ -299,13 +286,13 @@ public abstract class PortalTaskBase
                         newline = await reader.ReadLineAsync();
                         if (string.IsNullOrEmpty(newline))
                         {
-                            break;
-                        }
-
-                        sb.Append(newline);
+                        break;
                     }
 
-                    commandText = sb.ToString();
+                    sb.Append(newline);
+                }
+
+                commandText = sb.ToString();
                 }
 
                 try
@@ -319,10 +306,10 @@ public abstract class PortalTaskBase
                     try
                     {
                         Thread.Sleep(2000);//avoiding deadlock
-                        command = connection.CreateCommand();
-                        command.CommandText = commandText;
-                        await command.ExecuteNonQueryAsync();
-                    }
+                            command = connection.CreateCommand();
+                            command.CommandText = commandText;
+                            await command.ExecuteNonQueryAsync();
+                        }
                     catch (Exception ex)
                     {
                         Logger.ErrorRestore(ex);

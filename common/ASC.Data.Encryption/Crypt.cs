@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2020
- *
- * This program is freeware. You can redistribute it and/or modify it under the terms of the GNU 
- * General Public License (GPL) version 3 as published by the Free Software Foundation (https://www.gnu.org/copyleft/gpl.html). 
- * In accordance with Section 7(a) of the GNU GPL its Section 15 shall be amended to the effect that 
- * Ascensio System SIA expressly excludes the warranty of non-infringement of any third-party rights.
- *
- * THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
- * FITNESS FOR A PARTICULAR PURPOSE. For more details, see GNU GPL at https://www.gnu.org/copyleft/gpl.html
- *
- * You can contact Ascensio System SIA by email at sales@onlyoffice.com
- *
- * The interactive user interfaces in modified source and object code versions of ONLYOFFICE must display 
- * Appropriate Legal Notices, as required under Section 5 of the GNU GPL version 3.
- *
- * Pursuant to Section 7 § 3(b) of the GNU GPL you must retain the original ONLYOFFICE logo which contains 
- * relevant author attributions when distributing the software. If the display of the logo in its graphic 
- * form is not reasonably feasible for technical reasons, you must include the words "Powered by ONLYOFFICE" 
- * in every copy of the program you distribute. 
- * Pursuant to Section 7 § 3(e) we decline to grant you any rights under trademark law for use of our trademarks.
- *
-*/
-
 
 namespace ASC.Data.Encryption;
 
 [Transient]
-public class Crypt : ICrypt
+public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 {
     private string Storage { get; set; }
     private EncryptionSettings Settings { get; set; }
     private string TempDir { get; set; }
 
-    private IConfiguration Configuration { get; set; }
-    public TempPath TempPath { get; }
+    private IConfiguration Configuration { get; set; } = configuration;
+    public TempPath TempPath { get; } = tempPath;
 
     public void Init(string storageName, EncryptionSettings encryptionSettings)
     {
@@ -69,17 +44,14 @@ public class Crypt : ICrypt
         TempDir = TempPath.GetTempPath();
     }
 
-    public Crypt(IConfiguration configuration, TempPath tempPath)
-    {
-        Configuration = configuration;
-        TempPath = tempPath;
-    }
-
     public byte Version { get { return 1; } }
 
     public void EncryptFile(string filePath)
     {
-        if (string.IsNullOrEmpty(Settings.Password)) return;
+        if (string.IsNullOrEmpty(Settings.Password))
+        {
+            return;
+        }
 
         var metadata = new Metadata(Configuration);
 
@@ -199,7 +171,10 @@ public class Crypt : ICrypt
 
             using (var fileStream = File.OpenRead(filePath))
             {
-                if (!metadata.TryReadFromStream(fileStream, Version)) return;
+                if (!metadata.TryReadFromStream(fileStream, Version))
+                {
+                    return;
+                }
 
                 metadata.ComputeAndValidateHmacHash(fileStream);
 
@@ -266,10 +241,8 @@ public class Crypt : ICrypt
         {
             return metadata.GetFileSize();
         }
-        else
-        {
-            return new FileInfo(filePath).Length;
-        }
+
+        return new FileInfo(filePath).Length;
     }
 
 

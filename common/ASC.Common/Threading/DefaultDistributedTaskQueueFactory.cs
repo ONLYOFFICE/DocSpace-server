@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,45 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2018
- *
- * This program is freeware. You can redistribute it and/or modify it under the terms of the GNU 
- * General Public License (GPL) version 3 as published by the Free Software Foundation (https://www.gnu.org/copyleft/gpl.html). 
- * In accordance with Section 7(a) of the GNU GPL its Section 15 shall be amended to the effect that 
- * Ascensio System SIA expressly excludes the warranty of non-infringement of any third-party rights.
- *
- * THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
- * FITNESS FOR A PARTICULAR PURPOSE. For more details, see GNU GPL at https://www.gnu.org/copyleft/gpl.html
- *
- * You can contact Ascensio System SIA by email at sales@onlyoffice.com
- *
- * The interactive user interfaces in modified source and object code versions of ONLYOFFICE must display 
- * Appropriate Legal Notices, as required under Section 5 of the GNU GPL version 3.
- *
- * Pursuant to Section 7 § 3(b) of the GNU GPL you must retain the original ONLYOFFICE logo which contains 
- * relevant author attributions when distributing the software. If the display of the logo in its graphic 
- * form is not reasonably feasible for technical reasons, you must include the words "Powered by ONLYOFFICE" 
- * in every copy of the program you distribute. 
- * Pursuant to Section 7 § 3(e) we decline to grant you any rights under trademark law for use of our trademarks.
- *
-*/
-
 namespace ASC.Common.Threading;
 
-public class DefaultDistributedTaskQueueFactory : IDistributedTaskQueueFactory
-{
-    private readonly IOptionsMonitor<DistributedTaskQueueFactoryOptions> _options;
-    private readonly IServiceProvider _serviceProvider;
-
-    public DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider,
+public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider,
                                               IOptionsMonitor<DistributedTaskQueueFactoryOptions> options)
+    : IDistributedTaskQueueFactory
     {
-        _serviceProvider = serviceProvider;
-        _options = options;
-    }
-
     public DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
     {
         return CreateQueue(typeof(T).FullName, timeUntilUnregisterInSeconds);
@@ -73,10 +40,10 @@ public class DefaultDistributedTaskQueueFactory : IDistributedTaskQueueFactory
         return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
     }
 
-    public DistributedTaskQueue CreateQueue(string name = default(string), int timeUntilUnregisterInSeconds = 60)
+    public DistributedTaskQueue CreateQueue(string name = default, int timeUntilUnregisterInSeconds = 60)
     {
-        var option = _options.Get(name);
-        var queue = _serviceProvider.GetRequiredService<DistributedTaskQueue>();
+        var option = options.Get(name);
+        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue>();
 
         queue.MaxThreadsCount = option.MaxThreadsCount;
         queue.Name = name;

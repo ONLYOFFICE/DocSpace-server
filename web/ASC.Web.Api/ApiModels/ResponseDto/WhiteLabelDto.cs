@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SixLabors.ImageSharp;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
@@ -36,7 +38,7 @@ public class WhiteLabelItemDto
 
     /// <summary>Size</summary>
     /// <type>SixLabors.ImageSharp.Size, SixLabors.ImageSharp</type>
-    public SixLabors.ImageSharp.Size Size { get; set; }
+    public Size Size { get; set; }
 
     /// <summary>Path</summary>
     /// <type>ASC.Web.Api.ApiModels.ResponseDto.WhiteLabelItemPathDto, ASC.Web.Api</type>

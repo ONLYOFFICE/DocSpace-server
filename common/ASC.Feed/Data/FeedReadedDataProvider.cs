@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,19 +27,8 @@
 namespace ASC.Feed.Data;
 
 [Scope]
-public class FeedReadedDataProvider
+public class FeedReadedDataProvider(AuthContext authContext, TenantManager tenantManager, IDbContextFactory<FeedDbContext> dbContextFactory)
 {
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<FeedDbContext> _dbContextFactory;
-
-    public FeedReadedDataProvider(AuthContext authContext, TenantManager tenantManager, IDbContextFactory<FeedDbContext> dbContextFactory)
-    {
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-    }
-
     public async Task<DateTime> GetTimeReadedAsync()
     {
         return await GetTimeReadedAsync(GetUser(), "all", await GetTenantAsync());
@@ -52,7 +41,7 @@ public class FeedReadedDataProvider
 
     public async Task<DateTime> GetTimeReadedAsync(Guid user, string module, int tenant)
     {
-        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.MaxTimeStampAsync(feedDbContext, tenant, user, module);
     }
 
@@ -86,7 +75,7 @@ public class FeedReadedDataProvider
             TenantId = tenant
         };
 
-        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
         await feedDbContext.AddOrUpdateAsync(q => q.FeedReaded, feedReaded);
         await feedDbContext.SaveChangesAsync();
     }
@@ -98,18 +87,18 @@ public class FeedReadedDataProvider
 
     public async Task<IEnumerable<string>> GetReadedModulesAsync(Guid user, int tenant, DateTime fromTime)
     {
-        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.ModulesAsync(feedDbContext, tenant, user, fromTime).ToListAsync();
     }
 
     private async Task<int> GetTenantAsync()
     {
-        return await _tenantManager.GetCurrentTenantIdAsync();
+        return await tenantManager.GetCurrentTenantIdAsync();
     }
 
     private Guid GetUser()
     {
-        return _authContext.CurrentAccount.ID;
+        return authContext.CurrentAccount.ID;
     }
 }
 

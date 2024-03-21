@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,57 +27,49 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class BackupRepository : IBackupRepository
+public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext)
+    : IBackupRepository
 {
-    private readonly IDbContextFactory<BackupsContext> _dbContextFactory;
-    private readonly CreatorDbContext _creatorDbContext;
-
-    public BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext)
-    {
-        _dbContextFactory = dbContextFactory;
-        _creatorDbContext = creatorDbContext;
-    }
-
     public async Task SaveBackupRecordAsync(BackupRecord backupRecord)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         await backupContext.AddOrUpdateAsync(b => b.Backups, backupRecord);
         await backupContext.SaveChangesAsync();
     }
 
     public async Task<BackupRecord> GetBackupRecordAsync(Guid id)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await backupContext.Backups.FindAsync(id);
     }
 
     public async Task<BackupRecord> GetBackupRecordAsync(string hash, int tenant)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupAsync(backupContext, tenant, hash);
     }
 
     public async Task<List<BackupRecord>> GetExpiredBackupRecordsAsync()
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.ExpiredBackupsAsync(backupContext).ToListAsync();
     }
 
     public async Task<List<BackupRecord>> GetScheduledBackupRecordsAsync()
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.ScheduledBackupsAsync(backupContext).ToListAsync();
     }
 
     public async Task<List<BackupRecord>> GetBackupRecordsByTenantIdAsync(int tenantId)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupsAsync(backupContext, tenantId).ToListAsync();
     }
 
     public async Task MigrationBackupRecordsAsync(int tenantId, int newTenantId, string region)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
 
         var backups = await Queries.BackupsForMigrationAsync(backupContext, tenantId).ToListAsync();
 
@@ -87,14 +79,14 @@ public class BackupRepository : IBackupRepository
             backup.Id = Guid.NewGuid();
         });
 
-        var backupContextByNewTenant = _creatorDbContext.CreateDbContext<BackupsContext>(region);
+        var backupContextByNewTenant = creatorDbContext.CreateDbContext<BackupsContext>(region);
         await backupContextByNewTenant.Backups.AddRangeAsync(backups);
         await backupContextByNewTenant.SaveChangesAsync();
     }
 
     public async Task DeleteBackupRecordAsync(Guid id)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
 
         var backup = await backupContext.Backups.FindAsync(id);
         if (backup != null)
@@ -107,26 +99,26 @@ public class BackupRepository : IBackupRepository
 
     public async Task SaveBackupScheduleAsync(BackupSchedule schedule)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         await backupContext.AddOrUpdateAsync(q => q.Schedules, schedule);
         await backupContext.SaveChangesAsync();
     }
 
     public async Task DeleteBackupScheduleAsync(int tenantId)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         await Queries.DeleteSchedulesAsync(backupContext, tenantId);
     }
 
     public async Task<List<BackupSchedule>> GetBackupSchedulesAsync()
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupSchedulesAsync(backupContext).ToListAsync();
     }
 
     public async Task<BackupSchedule> GetBackupScheduleAsync(int tenantId)
     {
-        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupScheduleAsync(backupContext, tenantId);
     }
 }

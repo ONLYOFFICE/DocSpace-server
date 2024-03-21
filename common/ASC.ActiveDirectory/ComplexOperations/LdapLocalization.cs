@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -596,13 +596,13 @@ public class LdapLocalization
     {
         try
         {
-            var val = _resourceManager != null ? _resourceManager.GetString(key) : null;
+            var val = _resourceManager?.GetString(key);
             if (val == null && _notifyResourceManager != null)
             {
                 val = _notifyResourceManager.GetString(key);
             }
 
-            return val != null ? val : defaultValue;
+            return val ?? defaultValue;
         }
         catch
         {

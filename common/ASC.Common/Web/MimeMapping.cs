@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Common.Web;
 public static class MimeMapping
 {
     private static readonly Hashtable _extensionToMimeMappingTable = new(200, StringComparer.CurrentCultureIgnoreCase);
-    private static readonly IDictionary<string, IList<string>> _mimeSynonyms = new Dictionary<string, IList<string>>();
+    private static readonly Dictionary<string, IList<string>> _mimeSynonyms = new();
 
     static MimeMapping()
     {
@@ -853,15 +853,10 @@ public static class MimeMapping
 
         if (0 <= startIndex && fileName.LastIndexOf('\\') < startIndex)
         {
-            str = (string)_extensionToMimeMappingTable[fileName.Substring(startIndex)];
+            str = (string)_extensionToMimeMappingTable[fileName[startIndex..]];
         }
 
-        if (str == null)
-        {
-            str = (string)_extensionToMimeMappingTable[".*"];
-        }
-
-        return str;
+        return str ?? (string)_extensionToMimeMappingTable[".*"];
     }
 
     private static void AddMimeMapping(string extension, string MimeType)

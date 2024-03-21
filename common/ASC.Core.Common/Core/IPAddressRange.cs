@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,21 +26,12 @@
 
 using System.Net.Sockets;
 
-namespace ASC.Core;
-
-public class IPAddressRange
+public class IPAddressRange(IPAddress lower, IPAddress upper)
 {
-    private readonly AddressFamily _addressFamily;
-    private readonly byte[] _lowerBytes;
-    private readonly byte[] _upperBytes;
+    private readonly AddressFamily _addressFamily = lower.AddressFamily;
+    private readonly byte[] _lowerBytes = lower.GetAddressBytes();
+    private readonly byte[] _upperBytes = upper.GetAddressBytes();
 
-    private IPAddressRange(IPAddress lower, IPAddress upper)
-    {
-        _addressFamily = lower.AddressFamily;
-        _lowerBytes = lower.GetAddressBytes();
-        _upperBytes = upper.GetAddressBytes();
-    }
-    
     public static bool MatchIPs(string requestIp, string restrictionIp)
     {
         var ipWithoutPort = GetIpWithoutPort(requestIp);
@@ -94,10 +85,10 @@ public class IPAddressRange
 
     private static bool IsInRange(string ipAddress, string CIDRmask)
     {
-        var parts = CIDRmask.Split('/');
+        var network =  IPNetwork.Parse(CIDRmask);
 
         var requestIP = IPAddress.Parse(ipAddress);
-        var restrictionIP = IPAddress.Parse(parts[0]);
+        var restrictionIP = network.BaseAddress;
 
         if (requestIP.AddressFamily != restrictionIP.AddressFamily)
         {
@@ -106,7 +97,7 @@ public class IPAddressRange
 
         var IP_addr = BitConverter.ToInt32(requestIP.GetAddressBytes(), 0);
         var CIDR_addr = BitConverter.ToInt32(restrictionIP.GetAddressBytes(), 0);
-        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - int.Parse(parts[1])));
+        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - network.PrefixLength));
 
         return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask);
     }
@@ -116,5 +107,5 @@ public class IPAddressRange
         var portIdx = ip.IndexOf(':');
 
         return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
-    }
+}
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,16 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 /// <visible>false</visible>
-public class VersionController : BaseSettingsController
-{
-    private readonly TenantManager _tenantManager;
-    private readonly PermissionContext _permissionContext;
-    private readonly BuildVersion _buildVersion;
-
-    public VersionController(
-        PermissionContext permissionContext,
+[DefaultRoute("version")]
+public class VersionController(PermissionContext permissionContext,
         ApiContext apiContext,
         TenantManager tenantManager,
         WebItemManager webItemManager,
         BuildVersion buildVersion,
         IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _permissionContext = permissionContext;
-        _tenantManager = tenantManager;
-        _buildVersion = buildVersion;
-    }
-
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Returns the current build version.
     /// </summary>
@@ -59,10 +49,10 @@ public class VersionController : BaseSettingsController
     /// <visible>false</visible>
     [AllowAnonymous]
     [AllowNotPayment]
-    [HttpGet("version/build")]
+    [HttpGet("build")]
     public async Task<BuildVersion> GetBuildVersionsAsync()
     {
-        return await _buildVersion.GetCurrentBuildVersionAsync();
+        return await buildVersion.GetCurrentBuildVersionAsync();
     }
 
     /// <summary>
@@ -76,11 +66,11 @@ public class VersionController : BaseSettingsController
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
     /// <visible>false</visible>
-    [HttpGet("version")]
+    [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        return new TenantVersionDto(tenant.Version, await _tenantManager.GetTenantVersionsAsync());
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return new TenantVersionDto(tenant.Version, await tenantManager.GetTenantVersionsAsync());
     }
 
     /// <summary>
@@ -95,15 +85,15 @@ public class VersionController : BaseSettingsController
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
     /// <visible>false</visible>
-    [HttpPut("version")]
+    [HttpPut("")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        (await _tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
+        (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
         
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await _tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 
         return await GetVersionsAsync();
     }

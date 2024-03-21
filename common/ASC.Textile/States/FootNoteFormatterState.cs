@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,10 @@
 
 namespace Textile.States;
 
-[FormatterState(PatternBegin + @"fn[0-9]+" + PatternEnd)]
-public class FootNoteFormatterState : SimpleBlockFormatterState
+[FormatterState(PatternBegin + "fn[0-9]+" + PatternEnd)]
+public class FootNoteFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
     private int _noteID;
-
-    public FootNoteFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override void Enter()
     {
@@ -61,7 +56,7 @@ public class FootNoteFormatterState : SimpleBlockFormatterState
     }
     protected override void OnContextAcquired()
     {
-        var m = Regex.Match(Tag, @"^fn(?<id>[0-9]+)");
+        var m = Regex.Match(Tag, "^fn(?<id>[0-9]+)");
         _noteID = int.Parse(m.Groups["id"].Value);
     }
 

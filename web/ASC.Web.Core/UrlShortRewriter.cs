@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,16 @@
 namespace ASC.Web.Core;
 public class UrlShortRewriter
 {
-    public const string BasePath = "/s/";
-
-    public UrlShortRewriter(RequestDelegate next)
+    public UrlShortRewriter(RequestDelegate _)
     {
-
     }
+
+    public const string BasePath = "/s/";
 
     public async Task InvokeAsync(HttpContext httpContext, IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
     {
         var path = httpContext.Request.Path.ToString();
-        path = path.Substring(BasePath.Length);
+        path = path[BasePath.Length..];
 
         var id = ShortUrl.Decode(path);
 

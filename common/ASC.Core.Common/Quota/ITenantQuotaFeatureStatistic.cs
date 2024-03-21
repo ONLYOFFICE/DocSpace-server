@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,5 @@ public interface ITenantQuotaFeatureStat<T>
     Task<T> GetValueAsync();
 }
 
-public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>
-{
-}
+public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>;
 

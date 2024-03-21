@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public static class StudioUserInfoExtension
 
     public static async Task<List<string>> GetListAdminModulesAsync(this UserInfo ui, WebItemSecurity webItemSecurity, WebItemManager webItemManager)
     {
-        var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
+        var products = webItemManager.GetItemsAll().Where(i => i is IProduct);
 
         return await products.ToAsyncEnumerable().WhereAwait(async q => await webItemSecurity.IsProductAdministratorAsync(q.ID, ui.Id)).Select(q => q.ProductClassName).ToListAsync();
     }

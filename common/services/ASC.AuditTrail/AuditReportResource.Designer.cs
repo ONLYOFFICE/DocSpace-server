@@ -18,7 +18,7 @@ namespace ASC.AuditTrail {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class AuditReportResource {
@@ -1041,15 +1041,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login Via Social Account Success.
-        /// </summary>
-        public static string LoginSuccessSocialAccount {
-            get {
-                return ResourceManager.GetString("LoginSuccessSocialAccount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Successful login via social application.
         /// </summary>
         public static string LoginSuccessSocialApp {
@@ -1073,6 +1064,15 @@ namespace ASC.AuditTrail {
         public static string LoginSuccessViaApiSms {
             get {
                 return ResourceManager.GetString("LoginSuccessViaApiSms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login Via Social Account Success.
+        /// </summary>
+        public static string LoginSuccessViaApiSocialAccount {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaApiSocialAccount", resourceCulture);
             }
         }
         
@@ -1262,6 +1262,15 @@ namespace ASC.AuditTrail {
         public static string PortalDeleted {
             get {
                 return ResourceManager.GetString("PortalDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Portal Renamed.
+        /// </summary>
+        public static string PortalRenamed {
+            get {
+                return ResourceManager.GetString("PortalRenamed", resourceCulture);
             }
         }
         

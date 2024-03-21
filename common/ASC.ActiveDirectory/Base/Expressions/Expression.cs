@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -277,8 +277,8 @@ public class Expression : ICloneable
             return null;
         }
 
-        var attributeName = origin.Substring(0, index);
-        var attributeValue = origin.Substring(index + 1);
+        var attributeName = origin[..index];
+        var attributeValue = origin[(index + 1)..];
 
         if (string.IsNullOrEmpty(attributeName) || string.IsNullOrEmpty(attributeValue))
         {

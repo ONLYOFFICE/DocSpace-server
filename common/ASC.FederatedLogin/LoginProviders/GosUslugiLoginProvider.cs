@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,11 +51,9 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -84,7 +82,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return  new LoginProfile(ex);
         }
     }
 
@@ -106,13 +104,13 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
             throw new Exception("userinfo is incorrect");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = oid,
             FirstName = userInfo.Value<string>("firstName"),
             LastName = userInfo.Value<string>("lastName"),
 
-            Provider = ProviderConstants.GosUslugi,
+            Provider = ProviderConstants.GosUslugi
         };
 
         var userContactsString = _requestHelper.PerformRequest(GosUslugiProfileUrl + oid + "/ctts", "application/x-www-form-urlencoded", headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });

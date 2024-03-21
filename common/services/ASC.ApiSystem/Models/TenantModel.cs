@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class TenantModel : IModel
     public string Module { get; set; }
 
     //todo: delete after www update
-    [StringLength(PasswordSettings.MaxLength)]
+    [StringLength(PasswordSettingsManager.MaxLength)]
     public string Password { get; set; }
 
     public string PasswordHash { get; set; }
@@ -89,4 +89,6 @@ public class TenantModel : IModel
     public bool Calls { get; set; }
 
     public string AppKey { get; set; }
+
+    public bool LimitedAccessSpace { get; set; }
 }

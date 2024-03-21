@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,7 +81,7 @@ public abstract class PatternFormatter : IPatternFormatter
 
     protected virtual void AfterFormat(INoticeMessage message) { }
 
-    protected virtual string[] SearchTags(string text)
+    protected string[] SearchTags(string text)
     {
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(_tagSearchPattern))
         {

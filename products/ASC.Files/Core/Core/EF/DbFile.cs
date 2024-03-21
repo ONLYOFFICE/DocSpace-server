@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,15 +77,15 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     {
         if (searchSettings.CanSearchByContentAsync(GetType()).Result)
         {
-            return (a) => new[] { Title, Comment, Changes, Document.Attachment.Content };
+            return a => new[] { Title, Comment, Changes, Document.Attachment.Content };
         }
 
-        return (a) => new[] { Title, Comment, Changes };
+        return a => new[] { Title, Comment, Changes };
     }
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, Id, Version };
+        return [TenantId, Id, Version];
     }
 }
 
@@ -123,7 +123,7 @@ public static class DbFileExtension
 
             entity.HasIndex(e => e.ModifiedOn)
                 .HasDatabaseName("modified_on");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_folder_id_title");
 
@@ -247,7 +247,7 @@ public static class DbFileExtension
 
             entity.HasIndex(e => e.ModifiedOn)
                 .HasDatabaseName("modified_on_files_file");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_folder_id_title");
 

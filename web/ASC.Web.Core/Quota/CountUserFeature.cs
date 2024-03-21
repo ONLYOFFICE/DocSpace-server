@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,20 +28,18 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Core.Quota;
 
-public class CountUserChecker : TenantQuotaFeatureCheckerCount<CountUserFeature>
+public class CountUserChecker(ITenantQuotaFeatureStat<CountUserFeature, int> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager, ITariffService tariffService)
+    : TenantQuotaFeatureCheckerCount<CountUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    private readonly ITariffService _tariffService;
-    public override string Exception => Resource.TariffsFeature_users_exception;
 
-    public CountUserChecker(ITenantQuotaFeatureStat<CountUserFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager, ITariffService tariffService)
-        : base(tenantQuotaFeatureStatistic, tenantManager)
+    public override string GetExceptionMessage(long count)
     {
-        _tariffService = tariffService;
+        return string.Format(Resource.TariffsFeature_users_exception, count);
     }
-
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
-        if ((await _tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
             throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "users");
         }
@@ -50,18 +48,11 @@ public class CountUserChecker : TenantQuotaFeatureCheckerCount<CountUserFeature>
     }
 }
 
-public class CountUserStatistic : ITenantQuotaFeatureStat<CountUserFeature, int>
+public class CountUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountUserFeature, int>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public CountUserStatistic(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task<int> GetValueAsync()
     {
-        var userManager = _serviceProvider.GetService<UserManager>();
+        var userManager = serviceProvider.GetService<UserManager>();
         return (await userManager.GetUsersByGroupAsync(Constants.GroupUser.ID)).Length;
     }
 }

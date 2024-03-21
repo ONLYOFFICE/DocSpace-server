@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,21 +29,14 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class SettingsController : ControllerBase
-{
-    private CommonMethods CommonMethods { get; }
-    private CoreSettings CoreSettings { get; }
-    private ILogger<SettingsController> Log { get; }
-
-    public SettingsController(
-        CommonMethods commonMethods,
+public class SettingsController(CommonMethods commonMethods,
         CoreSettings coreSettings,
         ILogger<SettingsController> option)
-    {
-        CommonMethods = commonMethods;
-        CoreSettings = coreSettings;
-        Log = option;
-    }
+    : ControllerBase
+{
+    private CommonMethods CommonMethods { get; } = commonMethods;
+    private CoreSettings CoreSettings { get; } = coreSettings;
+    private ILogger<SettingsController> Log { get; } = option;
 
     #region For TEST api
 
@@ -61,7 +54,7 @@ public class SettingsController : ControllerBase
     #region API methods
 
     [HttpGet("get")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -88,7 +81,7 @@ public class SettingsController : ControllerBase
     }
 
     [HttpPost("save")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -115,7 +108,7 @@ public class SettingsController : ControllerBase
             });
         }
 
-        Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId);
+        Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
 
         await CoreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
 
@@ -127,13 +120,57 @@ public class SettingsController : ControllerBase
         });
     }
 
+    [HttpPost("checkdomain")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
+    public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
+    {
+        if (model == null || string.IsNullOrEmpty(model.HostName))
+        {
+            return BadRequest(new
+            {
+                error = "hostNameEmpty",
+                message = "HostName is required"
+            });
+        }
+
+        if (Uri.CheckHostName(model.HostName) != UriHostNameType.Dns)
+        {
+            return BadRequest(new
+            {
+                error = "hostNameInvalid",
+                message = "HostName is not valid"
+            });
+        }
+
+        try
+        {
+            var currentHostIps = await CommonMethods.GetHostIpsAsync();
+
+            var hostIps = (await Dns.GetHostAddressesAsync(model.HostName)).Select(ip => ip.ToString());
+
+            return Ok(new
+            {
+                value = currentHostIps.Any(ip => hostIps.Contains(ip))
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "checkdomain " + model.HostName);
+
+            return Ok(new
+            {
+                value= false
+            });
+        }
+    }
+
     #endregion
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
+    private async Task<(bool, int, object)> GetTenantAsync(IModel model)
     {
-        object error = null;
+        object error;
         var tenantId = -1;
 
         if (model == null)

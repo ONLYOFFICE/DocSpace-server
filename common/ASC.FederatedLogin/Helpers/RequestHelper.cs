@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,8 @@
 namespace ASC.FederatedLogin.Helpers;
 
 [Singleton]
-public class RequestHelper
+public class RequestHelper(IHttpClientFactory httpClientFactory)
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public RequestHelper(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
     public string PerformRequest(string uri, string contentType = "", string method = "GET", string body = "", Dictionary<string, string> headers = null, int timeout = 30000)
     {
         if (string.IsNullOrEmpty(uri))
@@ -49,7 +42,7 @@ public class RequestHelper
             Method = new HttpMethod(method)
         };
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
 
         if (headers != null)
@@ -72,11 +65,6 @@ public class RequestHelper
 
         using var response = httpClient.Send(request);
         using var stream = response.Content.ReadAsStream();
-        if (stream == null)
-        {
-            return null;
-        }
-
         using var readStream = new StreamReader(stream);
 
         return readStream.ReadToEnd();

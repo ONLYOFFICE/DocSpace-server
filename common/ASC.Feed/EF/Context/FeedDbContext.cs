@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,12 @@
 
 namespace ASC.Feed.Context;
 
-public class FeedDbContext : DbContext
+public class FeedDbContext(DbContextOptions<FeedDbContext> options) : DbContext(options)
 {
     public DbSet<FeedLast> FeedLast { get; set; }
     public DbSet<FeedAggregate> FeedAggregates { get; set; }
     public DbSet<FeedUsers> FeedUsers { get; set; }
     public DbSet<FeedReaded> FeedReaded { get; set; }
-
-    public FeedDbContext(DbContextOptions<FeedDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,24 +26,15 @@
 
 namespace ASC.Web.Core.Mobile;
 
-public class CachedMobileAppInstallRegistrator : IMobileAppInstallRegistrator
+public class CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TimeSpan cacheExpiration,
+        TenantManager tenantManager, ICache cache)
+    : IMobileAppInstallRegistrator
 {
-    private readonly ICache _cache;
-    private readonly TimeSpan _cacheExpiration;
-    private readonly IMobileAppInstallRegistrator _registrator;
-    private readonly TenantManager _tenantManager;
+    private readonly MobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
 
     public CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TenantManager tenantManager, ICache cache)
         : this(registrator, TimeSpan.FromMinutes(30), tenantManager, cache)
     {
-    }
-
-    public CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TimeSpan cacheExpiration, TenantManager tenantManager, ICache cache)
-    {
-        _cache = cache;
-        _tenantManager = tenantManager;
-        this._registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
-        this._cacheExpiration = cacheExpiration;
     }
 
     public async Task RegisterInstallAsync(string userEmail, MobileAppType appType)
@@ -54,8 +45,8 @@ public class CachedMobileAppInstallRegistrator : IMobileAppInstallRegistrator
         }
 
         await _registrator.RegisterInstallAsync(userEmail, appType);
-        _cache.Insert(await GetCacheKeyAsync(userEmail, null), true, _cacheExpiration);
-        _cache.Insert(await GetCacheKeyAsync(userEmail, appType), true, _cacheExpiration);
+        cache.Insert(await GetCacheKeyAsync(userEmail, null), true, cacheExpiration);
+        cache.Insert(await GetCacheKeyAsync(userEmail, appType), true, cacheExpiration);
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)
@@ -65,7 +56,7 @@ public class CachedMobileAppInstallRegistrator : IMobileAppInstallRegistrator
             return false;
         }
 
-        var fromCache = _cache.Get<string>(await GetCacheKeyAsync(userEmail, appType));
+        var fromCache = cache.Get<string>(await GetCacheKeyAsync(userEmail, appType));
 
 
         if (bool.TryParse(fromCache, out var cachedValue))
@@ -74,7 +65,7 @@ public class CachedMobileAppInstallRegistrator : IMobileAppInstallRegistrator
         }
 
         var isRegistered = await _registrator.IsInstallRegisteredAsync(userEmail, appType);
-        _cache.Insert(await GetCacheKeyAsync(userEmail, appType), isRegistered.ToString(), _cacheExpiration);
+        cache.Insert(await GetCacheKeyAsync(userEmail, appType), isRegistered.ToString(), cacheExpiration);
         return isRegistered;
     }
 
@@ -82,6 +73,6 @@ public class CachedMobileAppInstallRegistrator : IMobileAppInstallRegistrator
     {
         var cacheKey = appType.HasValue ? userEmail + "/" + appType : userEmail;
 
-        return string.Format("{0}:mobile:{1}", await _tenantManager.GetCurrentTenantIdAsync(), cacheKey);
+        return string.Format("{0}:mobile:{1}", await tenantManager.GetCurrentTenantIdAsync(), cacheKey);
     }
 }

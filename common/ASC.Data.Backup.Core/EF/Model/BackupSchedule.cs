@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,12 +35,13 @@ public class BackupSchedule : BaseEntity
     public string StorageBasePath { get; set; }
     public DateTime LastBackupTime { get; set; }
     public string StorageParams { get; set; }
+    public bool Dump { get; set; }
 
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId };
+        return [TenantId];
     }
 }
 
@@ -108,6 +109,11 @@ public static class BackupScheduleExtension
                 .UseCollation("utf8_general_ci")
                 .HasDefaultValueSql("NULL");
 
+            entity.Property(e => e.Dump)
+                .HasColumnName("dump")
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
+
             entity.HasOne(e => e.Tenant)
                    .WithOne()
                    .HasForeignKey<BackupSchedule>(b => b.TenantId)
@@ -163,6 +169,11 @@ public static class BackupScheduleExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .HasDefaultValueSql("NULL");
+
+            entity.Property(e => e.Dump)
+                .HasColumnName("dump")
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
 
             entity.HasOne(e => e.Tenant)
                    .WithOne()

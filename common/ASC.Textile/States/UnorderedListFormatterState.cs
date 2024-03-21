@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,8 @@ namespace Textile.States;
 /// Formatting state for a bulleted list.
 /// </summary>
 [FormatterState(PatternBegin + @"\*+" + PatternEnd)]
-public class UnorderedListFormatterState : ListFormatterState
+public class UnorderedListFormatterState(TextileFormatter formatter) : ListFormatterState(formatter)
 {
-    public UnorderedListFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     protected override void WriteIndent()
     {
         Formatter.Output.WriteLine("<ul" + FormattedStylesAndAlignment("ul") + ">");
@@ -49,11 +44,11 @@ public class UnorderedListFormatterState : ListFormatterState
 
     protected override bool IsMatchForMe(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*[\*]{" + minNestingDepth + @"," + maxNestingDepth + @"}" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*[\*]{" + minNestingDepth + "," + maxNestingDepth + "}" + Globals.BlockModifiersPattern + @"\s");
     }
 
     protected override bool IsMatchForOthers(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*[#]{" + minNestingDepth + @"," + maxNestingDepth + @"}" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*[#]{" + minNestingDepth + "," + maxNestingDepth + "}" + Globals.BlockModifiersPattern + @"\s");
     }
 }

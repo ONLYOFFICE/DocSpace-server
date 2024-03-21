@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,8 +32,8 @@ public class OutlookCSVUserImporter : TextFileUserImporter
         : base(stream)
     {
         HasHeader = true;
-        NameMapping = new Dictionary<string, string>()
-                              {
+        NameMapping = new Dictionary<string, string>
+        {
                                   {"First Name", "FirstName"},
                                   {"Last Name", "LastName"},
                                   {"Middle Name", ""},

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,10 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class NotifyDbContext : DbContext
+public class NotifyDbContext(DbContextOptions<NotifyDbContext> options) : DbContext(options)
 {
     public DbSet<NotifyInfo> NotifyInfo { get; set; }
     public DbSet<NotifyQueue> NotifyQueue { get; set; }
-
-    public NotifyDbContext(DbContextOptions<NotifyDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

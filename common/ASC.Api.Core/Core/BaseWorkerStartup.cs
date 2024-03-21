@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,13 @@
 
 namespace ASC.Api.Core;
 
-public class BaseWorkerStartup
+public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
 {
-    protected IConfiguration Configuration { get; }
-    protected IHostEnvironment HostEnvironment { get; }
-    protected DIHelper DIHelper { get; }
-    public BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    {
-        Configuration = configuration;
-        HostEnvironment = hostEnvironment;
+    protected IConfiguration Configuration { get; } = configuration;
+    protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    protected DIHelper DIHelper { get; } = new();
 
-        DIHelper = new DIHelper();
-    }
-
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
@@ -72,20 +65,37 @@ public class BaseWorkerStartup
 
 
         services.AddMemoryCache();
+        
+        var redisConfiguration = Configuration.GetSection("Redis").Get<RedisConfiguration>();
+        IConnectionMultiplexer connectionMultiplexer = null;
 
-        services.AddDistributedCache(Configuration);
-        services.AddEventBus(Configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(Configuration);
-        services.AddHttpClient();
+        if (redisConfiguration != null)
+        {
+            var configurationOption = redisConfiguration?.ConfigurationOptions;
+
+            configurationOption.ClientName = GetType().Namespace;
+
+            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+            services.AddSingleton(redisConfiguration)
+                    .AddSingleton(redisConnection);
+
+            connectionMultiplexer = redisConnection?.GetConnection();
+        }
+
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(Configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(Configuration)
+                .AddHttpClient()
+                .AddDistributedLock(Configuration);
 
         DIHelper.Configure(services);
 
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
+        services.AddHostedService<NotifySenderService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
@@ -99,11 +109,11 @@ public class BaseWorkerStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {
                 Predicate = r => r.Name.Contains("self")

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,6 @@
 namespace ASC.ActiveDirectory.Novell;
 
 [Scope]
-public class NovellLdapUserImporter : LdapUserImporter
-{
-    public NovellLdapUserImporter(ILogger<LdapUserImporter> logger, UserManager userManager, IConfiguration configuration, NovellLdapHelper novellLdapHelper, LdapObjectExtension ldapObjectExtension)
-        : base(logger, userManager, configuration, novellLdapHelper, ldapObjectExtension)
-    {
-    }
-}
+public class NovellLdapUserImporter(ILogger<LdapUserImporter> logger, UserManager userManager,
+        IConfiguration configuration, NovellLdapHelper novellLdapHelper, LdapObjectExtension ldapObjectExtension)
+    : LdapUserImporter(logger, userManager, configuration, novellLdapHelper, ldapObjectExtension);

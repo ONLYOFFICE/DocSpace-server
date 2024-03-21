@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,20 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class TenantStatusFilter : IAsyncResourceFilter
+public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
+    : IAsyncResourceFilter
 {
-    private readonly TenantManager _tenantManager;
-    private readonly ILogger<TenantStatusFilter> _logger;
-    private readonly string[] _passthroughtRequestEndings = new[] { "preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme.json", "logos.json", "build.json", "@self.json" }; //TODO add or update when "preparation-portal" will be done
+    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme.json", "logos.json", "build.json", "@self.json"
+    ]; //TODO add or update when "preparation-portal" will be done
 
-
-    public TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
-    {
-        _logger = logger;
-        _tenantManager = tenantManager;
-    }
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
         if (tenant == null)
         {
             context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);
-            _logger.WarningTenantNotFound();
+            logger.WarningTenantNotFound();
             return;
         }
 
@@ -61,7 +55,7 @@ public class TenantStatusFilter : IAsyncResourceFilter
             }
 
             context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);
-            _logger.WarningTenantIsNotRemoved(tenant.Id);
+            logger.WarningTenantIsNotRemoved(tenant.Id);
             return;
         }
 
@@ -74,7 +68,7 @@ public class TenantStatusFilter : IAsyncResourceFilter
             }
 
             context.Result = new StatusCodeResult((int)HttpStatusCode.Forbidden);
-            _logger.WarningTenantStatus(tenant.Id, tenant.Status);
+            logger.WarningTenantStatus(tenant.Id, tenant.Status);
             return;
         }
         await next();

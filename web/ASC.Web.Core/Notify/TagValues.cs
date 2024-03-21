@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,21 +33,10 @@ public static class TagValues
         return new TagValue(CommonTags.WithoutUnsubscribe, true);
     }
 
-    public static ITagValue PersonalHeaderStart()
-    {
-        return new TagValue("PersonalHeaderStart",
-                            "<table style=\"margin: 0; border-spacing: 0; empty-cells: show; width: 540px; width: 100%;\" cellspacing=\"0\" cellpadding=\"0\"><tbody><tr><td style=\"width: 100%;color: #333333;font-size: 18px;font-weight: bold;margin: 0;height: 71px;padding-right:165px;background: url('https://d2nlctn12v279m.cloudfront.net/media/newsletters/images/personal-header-bg.png') top right no-repeat;\">");
-    }
-
-    public static ITagValue PersonalHeaderEnd()
-    {
-        return new TagValue("PersonalHeaderEnd", "</td></tr></tbody></table>");
-    }
-
     public static ITagValue OrangeButton(string btnText, string btnUrl)
     {
         const string td = "<td style=\"height: 48px; width: 80px; margin:0; padding-bottom:56px;\">&nbsp;</td>";
-        const string color = "background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; padding-top: 15px; padding-right: 25px; padding-bottom: 15px; padding-left: 25px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; letter-spacing: 0.04em;";
+        const string color = "background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; padding-top: 15px; padding-right: 25px; padding-bottom: 15px; padding-left: 25px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; letter-spacing: 0.04em;";
 
         var action = $@"<table style=""border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;""><tbody><tr cellpadding=""0"" cellspacing=""0"" border=""0"">{td}<td style=""height: 48px; width: 380px; margin:0; padding:0; text-align:center;""><a style=""{color}"" target=""_blank"" href=""{btnUrl}"">{btnText}</a></td>{td}</tr></tbody></table>";
 

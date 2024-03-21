@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,11 @@ namespace ASC.Core.Users;
 
 [Singleton]
 public class UserFormatter : IComparer<UserInfo>
-{        
+{
     private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
     {
         { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
-        { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } },
+        { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } }
     };
     
     private readonly IConfiguration _configuration;
@@ -40,7 +40,7 @@ public class UserFormatter : IComparer<UserInfo>
     private bool _forceFormatChecked;
     private string _forceFormat;
     public Regex UserNameRegex { get; }
-    
+
     public UserFormatter(IConfiguration configuration)
     {
         _format = DisplayUserNameFormat.Default;
@@ -61,7 +61,7 @@ public class UserFormatter : IComparer<UserInfo>
         {
             throw new ArgumentException(firstName);
         }
-        
+
         if (string.IsNullOrEmpty(lastName))
         {
             throw new ArgumentException(lastName);
@@ -77,12 +77,16 @@ public class UserFormatter : IComparer<UserInfo>
 
     public static int Compare(UserInfo x, UserInfo y, DisplayUserNameFormat format)
     {
-
         if (x == null)
         {
-            return y == null ? 0 : -1;
+            if (y == null)
+            {
+                return 0;
+            }
+            
+            return -1;
         }
-
+        
         if (y == null)
         {
             return +1;

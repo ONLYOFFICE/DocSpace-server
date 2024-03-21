@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,25 +27,11 @@
 namespace ASC.AuditTrail.Repositories;
 
 [Scope(Additional = typeof(LoginEventsRepositoryExtensions))]
-public class LoginEventsRepository
+public class LoginEventsRepository(TenantManager tenantManager,
+    IDbContextFactory<MessagesContext> dbContextFactory,
+    IMapper mapper,
+    GeolocationHelper geolocationHelper)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-    private readonly GeolocationHelper _geolocationHelper;
-
-    public LoginEventsRepository(
-        TenantManager tenantManager,
-        IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper,
-        GeolocationHelper geolocationHelper)
-    {
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-        _geolocationHelper = geolocationHelper;
-    }
-
     public async Task<IEnumerable<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
         MessageAction? action = null,
@@ -54,8 +40,8 @@ public class LoginEventsRepository
         int startIndex = 0,
         int limit = 0)
     {
-        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var messagesContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
 
         var query =
             from q in messagesContext.LoginEvents
@@ -96,26 +82,21 @@ public class LoginEventsRepository
         {
             if (hasFromFilter)
             {
-                if (hasToFilter)
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value);
-                }
-                else
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value);
-                }
+                query = hasToFilter ? 
+                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) : 
+                    query.Where(q => q.Event.Date >= fromDate.Value);
             }
-            else if (hasToFilter)
+            else
             {
                 query = query.Where(q => q.Event.Date <= to.Value);
             }
         }
 
-        var events = _mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
+        var events = mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
 
         foreach (var e in events)
         {
-            await _geolocationHelper.AddGeolocationAsync(e);
+            await geolocationHelper.AddGeolocationAsync(e);
         }
         return events;
     }

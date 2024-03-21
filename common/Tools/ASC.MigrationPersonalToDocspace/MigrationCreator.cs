@@ -221,11 +221,17 @@ public class MigrationCreator
             {
                 foreach (var table in tablesToProcess)
                 {
-                    if (table.Name == "files_thirdparty_account" || table.Name == "files_thirdparty_id_mapping" || table.Name == "core_subscription" || table.Name == "files_security")
+                    try
                     {
-                        continue;
+                        await ArhiveTable(table, writer, module, connection, id);
                     }
-                    await ArhiveTable(table, writer, module, connection, id);
+                    catch
+                    {
+                        if (table.Name != "files_thirdparty_account" && table.Name != "files_thirdparty_id_mapping" && table.Name != "core_subscription" || table.Name == "files_security")
+                        {
+                            throw;
+                        }
+                    }
                 }
             }
         }
@@ -236,45 +242,46 @@ public class MigrationCreator
         Console.WriteLine($"backup table {table.Name}");
         using (var data = new DataTable(table.Name))
         {
-            ActionInvoker.Try(
-                state =>
+            try
+            {
+                data.Clear();
+                int counts;
+                var offset = 0;
+                do
                 {
-                    data.Clear();
-                    int counts;
-                    var offset = 0;
-                    do
-                    {
-                        var t = (TableInfo)state;
-                        var dataAdapter = _dbFactory.CreateDataAdapter();
-                        dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), _fromTenantId, t, _limit, offset, id).WithTimeout(600);
-                        counts = ((DbDataAdapter)dataAdapter).Fill(data);
-                        offset += _limit;
-                    } while (counts == _limit);
+                    var dataAdapter = _dbFactory.CreateDataAdapter();
+                    dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), _fromTenantId, table, _limit, offset, id).WithTimeout(600);
+                    counts = ((DbDataAdapter)dataAdapter).Fill(data);
+                    offset += _limit;
+                } while (counts == _limit);
 
-                },
-                table,
-                maxAttempts: 5,
-                onFailure: error => { throw ThrowHelper.CantBackupTable(table.Name, error); });
+                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                {
+                    col.DateTimeMode = DataSetDateTime.Unspecified;
+                }
 
-            foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
-            {
-                col.DateTimeMode = DataSetDateTime.Unspecified;
+                module.PrepareData(data);
+
+                if (data.TableName == "tenants_tenants")
+                {
+                    ChangeAlias(data);
+                    ChangeName(data);
+                }
+
+                if (data.TableName == "files_bunch_objects")
+                {
+                    ClearCommonBunch(data);
+                }
+
+                await WriteEnrty(data, writer, module);
             }
-
-            module.PrepareData(data);
-
-            if (data.TableName == "tenants_tenants")
+            catch(MySqlException)
             {
-                ChangeAlias(data);
-                ChangeName(data);
+                if (table.Name != "tenants_tariffrow")
+                {
+                    throw;
+                }
             }
-
-            if (data.TableName == "files_bunch_objects")
-            {
-                ClearCommonBunch(data);
-            }
-
-            await WriteEnrty(data, writer, module);
         }
     }
 

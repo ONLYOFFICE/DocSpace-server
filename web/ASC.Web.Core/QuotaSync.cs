@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,13 @@
 namespace ASC.Web.Studio.Core.Quota;
 
 [Singleton(Additional = typeof(QuotaSyncOperationExtension))]
-public class QuotaSyncOperation
+public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    private readonly IServiceProvider _serviceProvider;
-
-    public QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-;
-        _serviceProvider = serviceProvider;
-
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
     public void RecalculateQuota(Tenant tenant)
     {
         var item = _progressQueue.GetAllTasks<QuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
@@ -54,7 +45,7 @@ public class QuotaSyncOperation
         
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<QuotaSyncJob>();
+            item = serviceProvider.GetRequiredService<QuotaSyncJob>();
             item.InitJob(tenant);
             _progressQueue.EnqueueTask(item);
         }
@@ -84,10 +75,8 @@ public class QuotaSyncOperation
 
 }
 
-public class QuotaSyncJob : DistributedTaskProgress
+public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
     private int? _tenantId;
     public int TenantId
     {
@@ -102,10 +91,6 @@ public class QuotaSyncJob : DistributedTaskProgress
         }
     }
 
-    public QuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
@@ -114,21 +99,21 @@ public class QuotaSyncJob : DistributedTaskProgress
     {
         try
         {
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var _storageFactoryConfig = scope.ServiceProvider.GetRequiredService<StorageFactoryConfig>();
             var _storageFactory = scope.ServiceProvider.GetRequiredService<StorageFactory>();
 
             await _tenantManager.SetCurrentTenantAsync(TenantId);
-            var storageModules = _storageFactoryConfig.GetModuleList(string.Empty);
+            var storageModules = _storageFactoryConfig.GetModuleList();
 
             foreach (var module in storageModules)
             {
                 var storage = await _storageFactory.GetStorageAsync(TenantId, module);
                 await storage.ResetQuotaAsync("");
 
-                var domains = _storageFactoryConfig.GetDomainList(string.Empty, module);
+                var domains = _storageFactoryConfig.GetDomainList(module);
                 foreach (var domain in domains)
                 {
                     await storage.ResetQuotaAsync(domain);

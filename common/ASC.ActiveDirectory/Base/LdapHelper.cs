@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,15 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Scope]
-public abstract class LdapHelper : IDisposable
+public abstract class LdapHelper(ILogger<LdapHelper> logger,
+        InstanceCrypto instanceCrypto)
+    : IDisposable
 {
     public LdapSettings Settings { get; private set; }
     public abstract bool IsConnected { get; }
 
-    protected readonly ILogger<LdapHelper> _logger;
-    protected readonly InstanceCrypto _instanceCrypto;
-
-    protected LdapHelper(
-        ILogger<LdapHelper> logger,
-        InstanceCrypto instanceCrypto)
-    {
-        _logger = logger;
-        _instanceCrypto = instanceCrypto;
-    }
+    protected readonly ILogger<LdapHelper> _logger = logger;
+    protected readonly InstanceCrypto _instanceCrypto = instanceCrypto;
 
     public void Init(LdapSettings settings)
     {
@@ -95,20 +89,18 @@ public abstract class LdapHelper : IDisposable
                 // Domain Users found
                 return true;
             }
-            else
+
+            var members = domainGroup.GetValues(groupAttribute);
+
+            if (members.Count == 0)
             {
-                var members = domainGroup.GetValues(groupAttribute);
+                return false;
+            }
 
-                if (members.Count == 0)
-                {
-                    return false;
-                }
-
-                if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)
-                    || member.Equals(domainUser.DistinguishedName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    return true;
-                }
+            if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)
+                                      || member.Equals(domainUser.DistinguishedName, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                return true;
             }
         }
         catch (Exception e)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,8 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class TipsController : BaseSettingsController
-{
-    private readonly AuthContext _authContext;
-    private readonly StudioNotifyHelper _studioNotifyHelper;
-    private readonly SettingsManager _settingsManager;
-    private readonly SetupInfo _setupInfo;
-    private readonly ILogger _log;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly TenantManager _tenantManager;
-
-    public TipsController(
-        ILoggerProvider option,
+[DefaultRoute("tips")]
+public class TipsController(ILoggerProvider option,
         ApiContext apiContext,
         AuthContext authContext,
         StudioNotifyHelper studioNotifyHelper,
@@ -47,16 +37,10 @@ public class TipsController : BaseSettingsController
         IMemoryCache memoryCache,
         IHttpClientFactory clientFactory,
         TenantManager tenantManager,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _log = option.CreateLogger("ASC.Api");
-        _authContext = authContext;
-        _studioNotifyHelper = studioNotifyHelper;
-        _settingsManager = settingsManager;
-        _setupInfo = setupInfo;
-        _clientFactory = clientFactory;
-        _tenantManager = tenantManager;
-    }
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
+    private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
     /// Updates the tip settings with a parameter specified in the request.
@@ -67,31 +51,31 @@ public class TipsController : BaseSettingsController
     /// <returns type="ASC.Web.Studio.Core.TipsSettings, ASC.Web.Core">Updated tip settings</returns>
     /// <path>api/2.0/settings/tips</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("tips")]
+    [HttpPut("")]
     public async Task<TipsSettings> UpdateTipsSettingsAsync(SettingsRequestsDto inDto)
     {
         var settings = new TipsSettings { Show = inDto.Show };
-        await _settingsManager.SaveForCurrentUserAsync(settings);
+        await settingsManager.SaveForCurrentUserAsync(settings);
 
-        if (!inDto.Show && !string.IsNullOrEmpty(_setupInfo.TipsAddress))
+        if (!inDto.Show && !string.IsNullOrEmpty(setupInfo.TipsAddress))
         {
             try
             {
-                var tenant = await _tenantManager.GetCurrentTenantAsync();
+                var tenant = await tenantManager.GetCurrentTenantAsync();
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri($"{_setupInfo.TipsAddress}/tips/deletereaded")
+                    RequestUri = new Uri($"{setupInfo.TipsAddress}/tips/deletereaded")
                 };
 
                 var data = new NameValueCollection
                 {
-                    ["userId"] = _authContext.CurrentAccount.ID.ToString(),
+                    ["userId"] = authContext.CurrentAccount.ID.ToString(),
                     ["tenantId"] = tenant.Id.ToString(CultureInfo.InvariantCulture)
                 };
                 var body = JsonSerializer.Serialize(data);//todo check
                 request.Content = new StringContent(body);
 
-                var httpClient = _clientFactory.CreateClient();
+                var httpClient = clientFactory.CreateClient();
                 using var response = await httpClient.SendAsync(request);
 
             }
@@ -112,10 +96,10 @@ public class TipsController : BaseSettingsController
     /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("tips/change/subscription")]
+    [HttpPut("change/subscription")]
     public async Task<bool> UpdateTipsSubscriptionAsync()
     {
-        return await StudioPeriodicNotify.ChangeSubscriptionAsync(_authContext.CurrentAccount.ID, _studioNotifyHelper);
+        return await StudioPeriodicNotify.ChangeSubscriptionAsync(authContext.CurrentAccount.ID, studioNotifyHelper);
     }
 
     /// <summary>
@@ -126,9 +110,9 @@ public class TipsController : BaseSettingsController
     /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/subscription</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("tips/subscription")]
+    [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscriptionAsync()
     {
-        return await _studioNotifyHelper.IsSubscribedToNotifyAsync(_authContext.CurrentAccount.ID, Actions.PeriodicNotify);
+        return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, Actions.PeriodicNotify);
     }
 }

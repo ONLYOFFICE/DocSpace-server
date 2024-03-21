@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,9 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class LicenseReaderConfig
+public class LicenseReaderConfig(IConfiguration configuration)
 {
-    public readonly string LicensePath;
-    public LicenseReaderConfig(IConfiguration configuration)
-    {
-        LicensePath = configuration["license:file:path"] ?? "";
-    }
+    public readonly string LicensePath = configuration["license:file:path"] ?? "";
 }
 
 [Scope]
@@ -68,7 +64,7 @@ public class LicenseReader
         await _coreSettings.SaveSettingAsync(CustomerIdKey, value);
     }
 
-    private Stream GetLicenseStream(bool temp = false)
+    private FileStream GetLicenseStream(bool temp = false)
     {
         var path = temp ? _licensePathTemp : LicensePath;
         if (!File.Exists(path))
@@ -205,20 +201,20 @@ public class LicenseReader
             Oauth = true,
             ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,
-            MaxTotalSize = defaultQuota.MaxTotalSize,
             DocsEdition = true,
-            Customization = license.Customization
+            Customization = license.Customization,
+            Statistic = true
         };
 
         await _tenantManager.SaveTenantQuotaAsync(quota);
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = license.DueDate
         };
 
-        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     private void LogError(Exception error)

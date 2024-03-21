@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,30 +26,20 @@
 
 namespace ASC.People.Api;
 
-public abstract class PeopleControllerBase : ApiControllerBase
-{
-    protected readonly UserManager _userManager;
-    protected readonly PermissionContext _permissionContext;
-    protected readonly ApiContext _apiContext;
-    protected readonly UserPhotoManager _userPhotoManager;
-    protected readonly IHttpClientFactory _httpClientFactory;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-
-    public PeopleControllerBase(
-        UserManager userManager,
+public abstract class PeopleControllerBase(UserManager userManager,
         PermissionContext permissionContext,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
         IHttpClientFactory httpClientFactory,
         IHttpContextAccessor httpContextAccessor)
-    {
-        _userManager = userManager;
-        _permissionContext = permissionContext;
-        _apiContext = apiContext;
-        _userPhotoManager = userPhotoManager;
-        _httpClientFactory = httpClientFactory;
-        _httpContextAccessor = httpContextAccessor;
-    }
+    : ApiControllerBase
+{
+    protected readonly UserManager _userManager = userManager;
+    protected readonly PermissionContext _permissionContext = permissionContext;
+    protected readonly ApiContext _apiContext = apiContext;
+    protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
+    protected readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     protected async Task<UserInfo> GetUserInfoAsync(string userNameOrId)
     {

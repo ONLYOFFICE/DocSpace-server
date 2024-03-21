@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Engine;
+using ASC.Web.Core;
+using ASC.Web.Files.Configuration;
 using ASC.Web.Studio.IntegrationEvents;
 
 namespace ASC.Studio.Notify;
@@ -39,18 +42,20 @@ public class Startup : BaseWorkerStartup
         }        
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         services.AddHttpClient();
-
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         DIHelper.TryAdd<ServiceLauncher>();
         NotifyConfigurationExtension.Register(DIHelper);
         DIHelper.TryAdd<EmailSenderSink>();
         DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
+        DIHelper.TryAdd<ProductEntryPoint>();
+        services.AddScoped<IWebItem, ProductEntryPoint>();
+        
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");
     }
 }

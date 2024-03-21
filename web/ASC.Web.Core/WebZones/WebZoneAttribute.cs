@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,17 +37,10 @@ public enum WebZoneType
     All = Nowhere | StartProductList | TopNavigationProductList | CustomProductList
 }
 
-[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public class WebZoneAttribute : Attribute
+[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class)]
+public class WebZoneAttribute(WebZoneType type) : Attribute
 {
-    public WebZoneType Type { get; private set; }
-
-    public WebZoneAttribute(WebZoneType type)
-    {
-        Type = type;
-    }
+    public WebZoneType Type { get; private set; } = type;
 }
 
-public interface IRenderWebItem
-{
-}
+public interface IRenderWebItem;

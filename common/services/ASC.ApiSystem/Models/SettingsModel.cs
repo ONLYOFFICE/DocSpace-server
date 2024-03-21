@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,4 +38,10 @@ public class SettingsModel : IModel
     public string Key { get; set; }
 
     public string Value { get; set; }
+}
+
+public class DomainModel
+{
+    [StringLength (255)]
+    public string HostName { get; set; }
 }

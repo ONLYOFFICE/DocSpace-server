@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,10 @@
 namespace ASC.Web.Api.Mapping;
 
 [Scope]
-public class WebPluginMappingConverter : ITypeConverter<Guid, EmployeeDto>
+public class WebPluginMappingConverter(EmployeeDtoHelper employeeDtoHelper) : ITypeConverter<Guid, EmployeeDto>
 {
-    private readonly EmployeeDtoHelper _employeeDtoHelper;
-
-    public WebPluginMappingConverter(EmployeeDtoHelper employeeDtoHelper)
-    {
-        _employeeDtoHelper = employeeDtoHelper;
-    }
-
     public EmployeeDto Convert(Guid source, EmployeeDto destination, ResolutionContext context)
     {
-        return _employeeDtoHelper.GetAsync(source).Result;
+        return employeeDtoHelper.GetAsync(source).Result;
     }
 }

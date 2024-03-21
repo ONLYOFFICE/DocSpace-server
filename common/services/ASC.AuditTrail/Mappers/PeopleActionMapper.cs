@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,19 +28,13 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class PeopleActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; }
-    public ProductType Product { get; }
+    public List<IModuleActionMapper> Mappers { get; } =
+    [
+        new UsersActionMapper(),
+        new GroupsActionMapper()
+    ];
 
-    public PeopleActionMapper()
-    {
-        Product = ProductType.People;
-
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new UsersActionMapper(),
-            new GroupsActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.People;
 }
 
 internal class UsersActionMapper : IModuleActionMapper
@@ -56,23 +50,28 @@ internal class UsersActionMapper : IModuleActionMapper
         {
             {
                 EntryType.User,
-                new Dictionary<ActionType, MessageAction[]>()
+                new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create,  new[] { MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite }  },
+                    { ActionType.Create, [MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite
+                        ]
+                    },
                     {
-                        ActionType.Update,  new[]
-                        {
+                        ActionType.Update, [
                             MessageAction.UserActivated, MessageAction.GuestActivated, MessageAction.UserUpdated,
                             MessageAction.UserUpdatedMobileNumber, MessageAction.UserUpdatedLanguage, MessageAction.UserAddedAvatar,
                             MessageAction.UserUpdatedAvatarThumbnails, MessageAction.UserUpdatedEmail, MessageAction.UsersUpdatedType,
-                            MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions,
-                        }
+                            MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
+                        ]
                     },
-                    { ActionType.Delete, new[] { MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving } },
-                    { ActionType.Import, new[] { MessageAction.UserImported, MessageAction.GuestImported } },
-                    { ActionType.Logout, new[] { MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser } },
+                    { ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving
+                        ]
+                    },
+                    { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },
+                    { ActionType.Logout, [MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser
+                        ]
+                    }
                 },
-                new Dictionary<ActionType, MessageAction>()
+                new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Reassigns, MessageAction.UserDataReassigns }
                 }
@@ -104,7 +103,7 @@ internal class GroupsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.People, Module)
         {
             {
-                EntryType.Group, new Dictionary<ActionType, MessageAction>()
+                EntryType.Group, new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Create, MessageAction.GroupCreated },
                     { ActionType.Update, MessageAction.GroupUpdated },

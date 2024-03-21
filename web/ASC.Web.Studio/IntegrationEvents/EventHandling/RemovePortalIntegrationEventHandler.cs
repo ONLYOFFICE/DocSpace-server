@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
 namespace ASC.Web.Studio.IntegrationEvents;
 
 [Scope]
@@ -40,15 +38,13 @@ public class RemovePortalIntegrationEventHandler : IIntegrationEventHandler<Remo
         _logger = logger;
     }
 
-    public Task Handle(RemovePortalIntegrationEvent @event)
+    public async Task Handle(RemovePortalIntegrationEvent @event)
     {
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            _worker.Start(@event.TenantId);
-
-            return Task.CompletedTask;
+            await _worker.StartAsync(@event.TenantId);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public class DbFilesThirdpartyApp : BaseEntity, IDbFile
 
     public override object[] GetKeys()
     {
-        return new object[] { UserId, App };
+        return [UserId, App];
     }
 }
 

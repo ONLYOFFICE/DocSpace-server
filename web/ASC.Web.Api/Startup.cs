@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Core;
+using ASC.Core.Common.Notify.Engine;
+using ASC.Migration.Core.Core;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,8 +34,6 @@ namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
 {
-    protected override bool ConfirmAddScheme { get => true; }
-
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
         WebhooksEnabled = true;
@@ -44,9 +44,9 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
@@ -57,16 +57,15 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
 
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
+        MigrationCore.Register(DIHelper);
+        services.RegisterQuotaFeature();
 
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
+                
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration, "WebApiNotifySchedulerService");
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -92,6 +91,13 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseUrlShortRewriter();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
+            appBranch =>
+            {
+                appBranch.UseMigrationFileUploadHandler();
             });
     }
 }

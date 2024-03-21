@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,7 +85,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
             }
             else
             {
-                safe.Add(d.Substring(0, maxLength - currentLength - 3) + "...");
+                safe.Add(d[..(maxLength - currentLength - 3)] + "...");
                 break;
             }
         }

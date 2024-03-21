@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,9 @@
 
 namespace Textile.States;
 
-[FormatterState(PatternBegin + @"bc" + PatternEnd)]
-public class PreCodeFormatterState : SimpleBlockFormatterState
+[FormatterState(PatternBegin + "bc" + PatternEnd)]
+public class PreCodeFormatterState(TextileFormatter formatter) : SimpleBlockFormatterState(formatter)
 {
-    public PreCodeFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     public override void Enter()
     {
         Formatter.Output.Write("<pre><code>");

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,4 +33,8 @@ public class UpdateRoomRequestDto
     /// <summary>New room name</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Room quota</summary>
+    /// <type>System.Int64, System</type>
+    public long? Quota { get; set; }
 }

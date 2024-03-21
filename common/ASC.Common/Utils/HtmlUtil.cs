@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,7 +77,7 @@ public static class HtmlUtil
 
                     unformatedText = lastSpaceIndex > 0 && lastSpaceIndex < unformatedText.Length
                                          ? unformatedText.Remove(lastSpaceIndex)
-                                         : unformatedText.Substring(0, maxLength);
+                                         : unformatedText[..maxLength];
 
                     if (!string.IsNullOrEmpty(endBlockTemplate))
                     {
