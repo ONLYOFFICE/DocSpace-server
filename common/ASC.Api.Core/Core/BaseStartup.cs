@@ -40,13 +40,13 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
-    
+
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool WebhooksEnabled { get; init; }
-    
+
     protected bool OpenApiEnabled { get; init; }
-    
+
     protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
@@ -75,7 +75,7 @@ public abstract class BaseStartup
 
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
-        
+
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -85,6 +85,13 @@ public abstract class BaseStartup
 
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
+            var allowedHosts = _configuration.GetSection("core:hosting:forwardedHeadersOptions:allowedHosts").Get<List<String>>();
+
+            if (allowedHosts is { Count: > 0 })
+            {
+                options.ForwardedHeaders |= ForwardedHeaders.XForwardedHost;
+                options.AllowedHosts = allowedHosts;
+            }
 
             if (knownProxies is { Count: > 0 })
             {
@@ -214,7 +221,7 @@ public abstract class BaseStartup
                         QueueLimit = 0,
                         ConnectionMultiplexerFactory = () => connectionMultiplexer
                     });
-                }), 
+                }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                    {
                        var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
@@ -327,7 +334,7 @@ public abstract class BaseStartup
                                       policy.WithOrigins(_corsOrigin)
                                       .SetIsOriginAllowedToAllowWildcardSubdomains()
                                       .AllowAnyHeader()
-                                            .AllowAnyMethod();                                            
+                                            .AllowAnyMethod();
 
                                       if (_corsOrigin != "*")
                                       {
@@ -337,7 +344,7 @@ public abstract class BaseStartup
             });
         }
 
-        
+
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
@@ -365,13 +372,13 @@ public abstract class BaseStartup
             //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
-        
+
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
             services.AddOpenApi();
         }
-        
+
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
@@ -453,7 +460,7 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
-        
+
         if (!_hostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>()
@@ -505,7 +512,7 @@ public abstract class BaseStartup
         {
             app.UseOpenApi();
         }
-        
+
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
