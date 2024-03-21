@@ -301,6 +301,17 @@ public class SettingsController(MessageService messageService,
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
 
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
         quotaSettings.DefaultQuota = inDto.DefaultQuota;
@@ -341,6 +352,17 @@ public class SettingsController(MessageService messageService,
         if (maxTotalSize < inDto.DefaultQuota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
         }
 
         var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
