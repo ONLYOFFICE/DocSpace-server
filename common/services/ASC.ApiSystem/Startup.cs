@@ -58,11 +58,6 @@ public class Startup
         services.AddExceptionHandler<Classes.CustomExceptionHandler>();
         services.AddProblemDetails();
 
-        //services.AddMvcCore(config =>
-        //{
-        //    config.Filters.Add<Classes.CustomExceptionFilterAttribute>();
-        //});
-
         services.AddScoped<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
