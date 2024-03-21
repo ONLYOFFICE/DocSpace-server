@@ -78,7 +78,5 @@ public class MigrationSecurity
     public int EntryId { get; set; }
     public int EntryType { get; set; }
     public string Subject { get; set; }
-    public int SubjectType { get; set; }
-    public string Owner { get; set; }
     public int Security { get; set; }
 }

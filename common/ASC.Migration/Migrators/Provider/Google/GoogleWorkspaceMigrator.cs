@@ -29,10 +29,13 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using ASC.Migration.Core.Migrators.Model;
+using ASC.Migration.GoogleWorkspace.Models.Parse;
 using ASC.Web.Core.Users;
 using ASC.Web.Files.Utils;
 
 using HtmlAgilityPack;
+
+using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
 
@@ -45,12 +48,13 @@ public class GoogleWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
 
-    private static readonly Regex _workspacesRegex = new Regex(@"Workspaces(\(\d+\))?.json");
-    private static readonly Regex _pinnedRegex = new Regex(@".*-at-.*-pinned\..*");
+    private  readonly Regex _workspacesRegex = new Regex(@"Workspaces(\(\d+\))?.json");
+    private readonly Regex _pinnedRegex = new Regex(@".*-at-.*-pinned\..*");
     private const string CommentsFile = "-comments.html";
     private const string InfoFile = "-info.json";
-    private static readonly Regex _commentsVersionFile = new Regex(@"-comments(\([\d]+\))\.html");
-    private static readonly Regex _infoVersionFile = new Regex(@"-info(\([\d]+\))\.json");
+    private readonly Regex _commentsVersionFile = new Regex(@"-comments(\([\d]+\))\.html");
+    private readonly Regex _infoVersionFile = new Regex(@"-info(\([\d]+\))\.json");
+    private readonly Regex _versionRegex = new Regex(@"(\([\d]+\))");
 
     public GoogleWorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
@@ -154,16 +158,24 @@ public class GoogleWorkspaceMigrator : Migrator
                     }
                     else if (await UserManager.GetUserByEmailAsync(user.Info.Email) != ASC.Core.Users.Constants.LostUser)
                     {
-                        if (!MigrationInfo.ExistUsers.Any(u => u.Value.Info.Email == user.Info.Email) || MigrationInfo.Operation is OperationType.Migration)
+                        if (!MigrationInfo.ExistUsers.ContainsKey(user.Info.Email))
                         {
-                            MigrationInfo.ExistUsers.Add(key, user);
+                            MigrationInfo.ExistUsers.Add(user.Info.Email, user);
+                        }
+                        else
+                        {
+                            MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
                         }
                     }
                     else
                     {
-                        if (!MigrationInfo.Users.Any(u => u.Value.Info.Email == user.Info.Email) || MigrationInfo.Operation is OperationType.Migration)
+                        if (!MigrationInfo.Users.ContainsKey(user.Info.Email))
                         {
-                            MigrationInfo.Users.Add(key, user);
+                            MigrationInfo.Users.Add(user.Info.Email, user);
+                        }
+                        else
+                        {
+                            MergeStorages(MigrationInfo.Users[user.Info.Email], user);
                         }
                     }
                 }
@@ -194,7 +206,14 @@ public class GoogleWorkspaceMigrator : Migrator
         return MigrationInfo.ToApiInfo();
     }
 
-    public void ParseGroup(string tmpFolder)
+    private void MergeStorages(MigrationUser user1, MigrationUser user2)
+    {
+        user1.Storage.BytesTotal += user2.Storage.BytesTotal;
+        user1.Storage.Files.AddRange(user2.Storage.Files);
+        user1.Storage.Folders.AddRange(user2.Storage.Folders);
+        user1.Storage.Securities.AddRange(user2.Storage.Securities);
+    }
+    private void ParseGroup(string tmpFolder)
     {
         var group = new MigrationGroup() { Info = new(), UserKeys = new HashSet<string>() };
         var groupsFolder = Path.Combine(tmpFolder, "Groups");
@@ -225,7 +244,7 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo.Groups.Add(group.Info.Name, group);
     }
 
-    public MigrationUser ParseUser(string tmpFolder)
+    private MigrationUser ParseUser(string tmpFolder)
     {
         var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new() };
 
@@ -301,6 +320,72 @@ public class GoogleWorkspaceMigrator : Migrator
             }
         }
         user.Storage.Folders.AddRange(foldersdictionary.Select(f => f.Value));
+
+        foreach(var file in user.Storage.Files)
+        {
+            ParseShare(user.Storage.Securities, file.Path, file.Id, 2);
+        }
+
+        foreach (var folder in foldersdictionary)
+        {
+            ParseShare(user.Storage.Securities, Path.Combine(drivePath, folder.Key), folder.Value.Id, 1);
+        }
+    }
+
+    private void ParseShare(List<MigrationSecurity> list, string path, int id, int entryType)
+    {
+        if (!TryReadInfoFile(path, out var info))
+        {
+            return;
+        }
+
+        foreach (var shareInfo in info.Permissions)
+        {
+            if (shareInfo.Type is "user" or "group")
+            {
+                var shareType = GetPortalShare(shareInfo);
+                var subject = shareInfo.Type is "group" ? shareInfo.Name : shareInfo.EmailAddress;
+                if (shareType == null || string.IsNullOrEmpty(subject))
+                {
+                    continue;
+                }
+
+                var security = new MigrationSecurity()
+                {
+                    Subject = subject,
+                    EntryId = id,
+                    EntryType = entryType,
+                    Security = (int)shareType.Value
+                };
+                list.Add(security);
+            }
+        }
+    }
+
+    private ASCShare? GetPortalShare(GwsDriveFilePermission fileInfo)
+    {
+        switch (fileInfo.Role)
+        {
+            case "writer":
+                return ASCShare.Editing;
+            case "reader":
+                if (fileInfo.AdditionalRoles == null)
+                {
+                    return ASCShare.Read;
+                }
+
+                if (fileInfo.AdditionalRoles.Contains("commenter"))
+                {
+                    return ASCShare.Comment;
+                }
+                else
+                {
+                    return ASCShare.Read;
+                }
+
+            default:
+                return null;
+        };
     }
 
     private void ParseFolders(string entry, Dictionary<string, MigrationFolder> foldersdictionary, int i)
@@ -537,5 +622,69 @@ public class GoogleWorkspaceMigrator : Migrator
             user.Info.ContactsList.Add("mobphone"); // SocialContactsManager.ContactType_mobphone in ASC.WebStudio
             user.Info.ContactsList.Add(phone);
         }
+    }
+
+    private bool TryReadInfoFile(string entry, out GwsDriveFileInfo info)
+    {
+        info = null;
+        var infoFilePath = FindInfoFile(entry);
+
+        if (infoFilePath == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            JsonSerializerOptions options = new()
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            info = JsonSerializer.Deserialize<GwsDriveFileInfo>(File.ReadAllText(infoFilePath), options);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log($"Couldn't read info file for {entry}", ex);
+        }
+
+        return false;
+    }
+
+    private string FindInfoFile(string entry)
+    {
+        var infoFilePath = entry + InfoFile;
+        if (File.Exists(infoFilePath))
+        {
+            return infoFilePath; // file.docx-info.json
+        }
+
+        var ext = Path.GetExtension(entry);
+        infoFilePath = entry.Substring(0, entry.Length - ext.Length) + InfoFile;
+        if (File.Exists(infoFilePath))
+        {
+            return infoFilePath; // file-info.json
+        }
+
+        var versionMatch = _versionRegex.Match(entry);
+        if (!versionMatch.Success)
+        {
+            return null;
+        }
+
+        var version = versionMatch.Groups[1].Value;
+        infoFilePath = entry.Replace(version, "") + InfoFile.Replace(".", version + ".");
+        if (File.Exists(infoFilePath))
+        {
+            return infoFilePath; // file.docx-info(1).json
+        }
+
+        infoFilePath = entry.Substring(0, entry.Length - ext.Length).Replace(version, "") + InfoFile.Replace(".", version + ".");
+        if (File.Exists(infoFilePath))
+        {
+            return infoFilePath; // file-info(1).json
+        }
+
+        return null;
     }
 }

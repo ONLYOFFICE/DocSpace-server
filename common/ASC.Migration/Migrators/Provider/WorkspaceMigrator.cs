@@ -309,9 +309,7 @@ public class WorkspaceMigrator : Migrator
             {
                 var security = new MigrationSecurity()
                 {
-                    Owner = row["owner"].ToString(),
                     Subject = row["subject"].ToString(),
-                    SubjectType = int.Parse(row["subject_type"].ToString()),
                     EntryId = id,
                     EntryType = int.Parse(row["entry_type"].ToString()),
                     Security = int.Parse(row["security"].ToString())
