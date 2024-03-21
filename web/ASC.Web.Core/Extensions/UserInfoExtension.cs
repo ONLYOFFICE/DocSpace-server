@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,5 +41,10 @@ public static class UserInfoExtension
     public static async Task<string> GetSmallPhotoURL(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
     {
         return await UserPhotoManager.GetSmallPhotoURL(userInfo.Id);
+    }
+
+    public static async Task<string> GetMediumPhotoURLAsync(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
+    {
+        return await UserPhotoManager.GetMediumPhotoURL(userInfo.Id);
     }
 }

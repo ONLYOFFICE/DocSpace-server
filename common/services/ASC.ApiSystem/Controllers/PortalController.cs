@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,6 @@ public class PortalController(
         CoreSettings coreSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
-        UserManagerWrapper userManagerWrapper,
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
@@ -49,7 +48,8 @@ public class PortalController(
         PasswordHasher passwordHasher,
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
-        QuotaUsageManager quotaUsageManager)
+        QuotaUsageManager quotaUsageManager,
+        PasswordSettingsManager passwordSettingsManager)
     : ControllerBase
 {
     #region For TEST api
@@ -69,7 +69,7 @@ public class PortalController(
 
     [HttpPost("register")]
     //[AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
     public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {
         if (model == null)
@@ -298,7 +298,7 @@ public class PortalController(
 
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -334,7 +334,7 @@ public class PortalController(
 
     [HttpPut("status")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -405,7 +405,7 @@ public class PortalController(
 
     [HttpGet("get")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model, [FromQuery] bool statistics)
     {
         if (!coreBaseSettings.Standalone)
@@ -563,7 +563,7 @@ public class PortalController(
 
         var passwordSettings = settingsManager.GetDefault<PasswordSettings>();
 
-        if (!userManagerWrapper.CheckPasswordRegex(passwordSettings, pwd))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettings, pwd))
         {
             error = new { error = "passPolicyError", message = "Password is incorrect" };
             return false;

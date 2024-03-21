@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,10 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class LockerManager(AuthContext authContext, IDaoFactory daoFactory, ThirdPartySelector thirdPartySelector)
+public class LockerManager(AuthContext authContext, IDaoFactory daoFactory)
 {
     public async Task<bool> FileLockedForMeAsync<T>(T fileId, Guid userId = default)
     {
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            return false;
-        }
-
         userId = userId == Guid.Empty ? authContext.CurrentAccount.ID : userId;
         var tagDao = daoFactory.GetTagDao<T>();
         var lockedBy = await FileLockedByAsync(fileId, tagDao);
@@ -246,7 +240,6 @@ public class EntryManager(IDaoFactory daoFactory,
     ICache cache,
     FileTrackerHelper fileTracker,
     EntryStatusManager entryStatusManager,
-    ThirdPartySelector thirdPartySelector,
     IHttpClientFactory clientFactory,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -1072,15 +1065,27 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
             {
+                T inProcessFormFolderId;
+                T readyFormFolderId;
+
                 var inProcessFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).ToListAsync()).FirstOrDefault();
                 var readyFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).ToListAsync()).FirstOrDefault();
+                if (inProcessFormFolder == null && readyFormFolder == null)
+                {
+                    (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folderId, folderDao);
+                }
+                else
+                {
+                    readyFormFolderId = readyFormFolder.Id;
+                    inProcessFormFolderId = inProcessFormFolder.Id;
+                }
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
                 title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 if (properties == null)
                 {
-                    var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolder.Id, readyFormFolder.Id, folderIfNew.CreateBy, fileDao, folderDao);
+                    var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, fileDao, folderDao);
                     linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
                 }
                 else
@@ -1195,14 +1200,6 @@ public class EntryManager(IDaoFactory daoFactory,
         if (!string.IsNullOrEmpty(newExtension))
         {
             newExtension = "." + newExtension.Trim('.');
-        }
-
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            await app.SaveFileAsync(fileId.ToString(), newExtension, downloadUri, stream);
-
-            return null;
         }
 
         var fileDao = daoFactory.GetFileDao<T>();
@@ -1717,6 +1714,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
     {
+        if (await globalFolderHelper.FolderMyAsync == default)
+        {
+            return;
+        }
+        
         var tagDao = daoFactory.GetTagDao<T>();
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
@@ -1753,7 +1755,25 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await tagDao.SaveTagsAsync(tag);
     }
-    
+    private async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao)
+    {
+        var readyFormFolder = serviceProvider.GetService<Folder<T>>();
+        readyFormFolder.Title = FilesUCResource.ReadyFormFolder;
+        readyFormFolder.ParentId = formFillingRoomId;
+        readyFormFolder.FolderType = FolderType.ReadyFormFolder;
+
+        var inProcessFolder = serviceProvider.GetService<Folder<T>>();
+        inProcessFolder.Title = FilesUCResource.InProcessFormFolder;
+        inProcessFolder.ParentId = formFillingRoomId;
+        inProcessFolder.FolderType = FolderType.InProcessFormFolder;
+
+        var readyFormFolderTask = folderDao.SaveFolderAsync(readyFormFolder);
+        var inProcessFolderTask = folderDao.SaveFolderAsync(inProcessFolder);
+
+        await Task.WhenAll(readyFormFolderTask, inProcessFolderTask);
+
+        return (await readyFormFolderTask, await inProcessFolderTask);
+    }
     private async Task<EntryProperties> InitFormFillingProperties<T>(string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();

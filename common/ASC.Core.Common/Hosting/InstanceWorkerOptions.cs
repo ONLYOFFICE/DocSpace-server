@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,9 +38,9 @@ public class InstanceWorkerOptions<T>
     {
         get
         {
-            var workerTypeName = WorkerTypeName ?? typeof(T).GetFormattedName();
+            var hostname = Dns.GetHostName().ToLower(CultureInfo.InvariantCulture);
 
-            return $"{workerTypeName}_{_registeredInstance}";
+            return $"{WorkerTypeName}_{hostname}_{_registeredInstance}";
         }
     }
 }

@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -90,15 +90,19 @@ jobs:
     - name: update yarn
       if: matrix.language == 'javascript-typescript'
       run: |
-         yarn set version 3.2.4
+         YARN_VER=$(cat ./common/ASC.SsoAuth/package.json | jq -r '.packageManager' | egrep -i -o '[0-9].[0-9].[0-9]')
+         yarn set version ${YARN_VER}
          
     - name: build js
       if: matrix.language == 'javascript-typescript'
       run: |
+        currentDir=$(pwd)
         services=("ASC.Socket.IO" "ASC.SsoAuth")
         for i in ${services[@]}; do
+          cd ./common/${i}
           echo "==== build ${i} ===="
-          yarn install --cwd ./common/${i} --frozen-lockfile
+          yarn install --frozen-lockfile
+          cd ${currentDir}
         done
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

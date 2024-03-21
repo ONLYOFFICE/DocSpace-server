@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,9 @@ public abstract class BaseStartup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-
+        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddProblemDetails();
+        
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -351,7 +353,7 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            config.Filters.Add<CustomExceptionFilterAttribute>();
+            //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
         
@@ -458,7 +460,7 @@ public abstract class BaseStartup
     public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseForwardedHeaders();
-
+        app.UseExceptionHandler();
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))

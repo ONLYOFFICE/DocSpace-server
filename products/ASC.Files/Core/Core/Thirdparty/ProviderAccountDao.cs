@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -187,18 +187,18 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         if (data.AuthData != null && !data.AuthData.IsEmpty())
         {
             ProviderTypesExtensions.TryParse(forUpdate.Provider, true, out var key);
-            var checkedData = GetEncodedAccessToken(data.AuthData, key);
-            checkedData.Url = forUpdate.Url;
+            var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
+            updatedAuthData.Url = forUpdate.Url;
             
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, checkedData, securityContext.CurrentAccount.ID, forUpdate.FolderType, 
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, updatedAuthData, securityContext.CurrentAccount.ID, forUpdate.FolderType, 
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
             
-            forUpdate.UserName = data.AuthData.Login ?? "";
-            forUpdate.Password = EncryptPassword(data.AuthData.Password);
-            forUpdate.Token = EncryptPassword(data.AuthData.RawToken ?? "");
+            forUpdate.UserName = updatedAuthData.Login ?? string.Empty;
+            forUpdate.Password = EncryptPassword(updatedAuthData.Password);
+            forUpdate.Token = EncryptPassword(updatedAuthData.RawToken);
         }
 
         if (!string.IsNullOrEmpty(data.Title))

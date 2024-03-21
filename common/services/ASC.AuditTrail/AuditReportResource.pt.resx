@@ -486,7 +486,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Bem-sucedido</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Login através da Conta de Redes Sociais Bem-sucedido</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">

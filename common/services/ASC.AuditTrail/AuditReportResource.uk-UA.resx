@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Вхід виконано успішно</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Вхід за допомогою соціального аккаунта успішний</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

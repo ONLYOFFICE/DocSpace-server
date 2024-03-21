@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         UserManager userManager,
         TenantManager tenantManager,
         AuthContext authContext,
-        AuthManager authManager,
         GlobalFolder globalFolder,
         FileSecurityCommon fileSecurityCommon,
         FileUtility fileUtility,
@@ -475,7 +474,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             shares = shares.Where(r => !r.IsLink);
         }
-        
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
 
         FileShareRecord[] defaultRecords;
@@ -492,7 +492,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         EntryType = entry.FileEntryType,
                         Share = DefaultCommonShare,
                         Subject = Constants.GroupEveryone.ID,
-                        TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                        TenantId = tenantId,
                         Owner = authContext.CurrentAccount.ID
                     }
                 ];
@@ -523,7 +523,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         EntryType = entry.FileEntryType,
                         Share = DefaultMyShare,
                         Subject = entry.RootCreateBy,
-                        TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                        TenantId = tenantId,
                         Owner = entry.RootCreateBy
                     }
                 ];
@@ -547,7 +547,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         EntryType = entry.FileEntryType,
                         Share = DefaultPrivacyShare,
                         Subject = entry.RootCreateBy,
-                        TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                        TenantId = tenantId,
                         Owner = entry.RootCreateBy
                     }
                 ];
@@ -600,7 +600,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         EntryType = entry.FileEntryType,
                         Share = FileShare.Read,
                         Subject = Constants.GroupEveryone.ID,
-                        TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                        TenantId = tenantId,
                         Owner = entry.RootCreateBy
                     }
                 ];
@@ -690,15 +690,16 @@ public class FileSecurity(IDaoFactory daoFactory,
         return SetSecurity(entries, authContext.CurrentAccount.ID);
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> SetSecurity<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId)
+    private async IAsyncEnumerable<FileEntry<T>> SetSecurity<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId)
     {
         var user = await userManager.GetUsersAsync(userId);
         var isOutsider = await userManager.IsOutsiderAsync(user);
-        var isUser = await userManager.IsUserAsync(user);
-        var isAuthenticated = (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
-        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
-        var isCollaborator = await userManager.IsCollaboratorAsync(user);
-
+        var userType = await userManager.GetUserTypeAsync(user);
+        var isUser = userType is EmployeeType.User;
+        var isAuthenticated =  authContext.IsAuthenticated;
+        var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
+        var isCollaborator = userType is EmployeeType.Collaborator;
+        
         await foreach (var entry in entries)
         {
             if (entry.Security != null)
@@ -774,11 +775,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        var isUser = await userManager.IsUserAsync(user);
-        var isAuthenticated = (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
-        var isDocSpaceAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
-        var isCollaborator = await userManager.IsCollaboratorAsync(user);
-
+        var userType = await userManager.GetUserTypeAsync(user);
+        var isUser = userType is EmployeeType.User;
+        var isAuthenticated =  authContext.IsAuthenticated;
+        var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
+        var isCollaborator = userType is EmployeeType.Collaborator;
+        
         return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
     }
     
@@ -929,14 +931,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                var mytrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
-                if (!Equals(mytrashId, 0))
+                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+                if (!Equals(myTrashId, 0))
                 {
-                    return Equals(e.RootId, mytrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, mytrashId));
+                    return Equals(e.RootId, myTrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, myTrashId));
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || isUser || action == FilesSecurityActions.Lock)
+                if (isOutsider || action == FilesSecurityActions.Lock || (isUser && !e.Shared))
                 {
                     return false;
                 }
@@ -1929,7 +1931,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                 action != FilesSecurityActions.ReadHistory &&
                 action != FilesSecurityActions.Copy &&
                 action != FilesSecurityActions.Duplicate &&
-                action != FilesSecurityActions.Lock)
+                action != FilesSecurityActions.Lock &&
+                action != FilesSecurityActions.Download)
             {
                 file.Security[action] = false;
             }

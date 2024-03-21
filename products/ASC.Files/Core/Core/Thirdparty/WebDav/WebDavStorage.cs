@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -184,9 +184,9 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         return !response.IsSuccessful ? null : await GetEntryAsync(resourceUrl);
     }
 
-    public long GetFileSize(WebDavEntry file)
+    public Task<long> GetFileSizeAsync(WebDavEntry file)
     {
-        return file.ContentLength ?? 0;
+        return Task.FromResult(file.ContentLength ?? 0);
     }
 
     public Task<WebDavEntry> GetFolderAsync(string folderId)

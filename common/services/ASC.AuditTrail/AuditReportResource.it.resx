@@ -370,7 +370,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Accesso riuscito</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Accesso via account sociale riuscito</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">

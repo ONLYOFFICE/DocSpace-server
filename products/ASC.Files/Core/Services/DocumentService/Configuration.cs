@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -203,7 +203,8 @@ public class EditorConfiguration<T>(
     IDaoFactory daoFactory,
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    UserPhotoManager userPhotoManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -217,29 +218,27 @@ public class EditorConfiguration<T>(
     
     private UserInfo _userInfo;
     private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
-    
-    private UserConfig user;
-    public UserConfig User
-    {
-        get
-        {
-            if (user != null)
-            {
-                return user;
-                
-            }
-            
-            if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                user = new UserConfig
-                {
-                    Id = UserInfo.Id.ToString(),
-                    Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper)
-                };
-            }
 
-            return user;
+    private UserConfig _user;
+    public async Task<UserConfig> GetUserAsync()
+    {
+        if (_user != null)
+        {
+            return _user;
+
         }
+
+        if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        {
+            _user = new UserConfig
+            {
+                Id = UserInfo.Id.ToString(),
+                Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
+                Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager))
+            };
+        }
+
+        return _user;
     }
 
     public async Task<string> GetCallbackUrl(string fileId)
@@ -254,14 +253,16 @@ public class EditorConfiguration<T>(
         return externalShare.GetUrlWithShare(callbackUrl);
     }
 
-    public CoEditingConfig CoEditing =>
-        !ModeWrite && User == null
+    public async Task<CoEditingConfig> GetCoEditingAsync()
+    {
+        return !ModeWrite && await GetUserAsync() == null
             ? new CoEditingConfig
             {
                 Fast = false,
                 Change = false
             }
             : null;
+    }
 
     public async Task<string> GetCreateUrl(EditorType editorType, FileType fileType)
     {
@@ -333,7 +334,7 @@ public class EditorConfiguration<T>(
         var folderDao = daoFactory.GetFolderDao<int>();
         var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
             .Cast<File<int>>()
-            .Where(file => !Equals(fileId, file.Id))
+            .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
@@ -343,7 +344,7 @@ public class EditorConfiguration<T>(
         {
             yield return new RecentConfig
             {
-                Folder = parentFolders.Find(r => file.ParentId == r.Id).Title,
+                Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
             };
@@ -453,7 +454,7 @@ public class InfoConfig<T>(
 
         try
         {
-            return await fileSharing.GetSharedInfoShortFileAsync(file.Id);
+            return await fileSharing.GetSharedInfoShortFileAsync(file);
         }
         catch
         {
@@ -470,10 +471,12 @@ public class PermissionsConfig
 {
     public bool ChangeHistory { get; set; }
     public bool Comment { get; set; } = true;
+    public bool Chat { get; set; } = true;
     public bool Download { get; set; } = true;
     public bool Edit { get; set; } = true;
     public bool FillForms { get; set; } = true;
     public bool ModifyFilter { get; set; } = true;
+    public bool Protect { get; set; } = true;
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
@@ -563,8 +566,7 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility,
-    ThirdPartySelector thirdPartySelector)
+    CommonLinkUtility commonLinkUtility)
 {
     [JsonIgnore]
     public string GobackUrl;
@@ -595,9 +597,8 @@ public class CustomizationConfig<T>(
 
     public bool? GetForceSave(File<T> file)
     {
-        return fileUtility.CanForcesave
+        return fileUtility.GetCanForcesave()
                && !file.ProviderEntry
-               && thirdPartySelector.GetAppByFileId(file.Id.ToString()) == null
                && filesSettingsHelper.GetForcesave();
     }
 
@@ -822,6 +823,7 @@ public class UserConfig
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string Image { get; set; }
 }
 
 public static class ConfigurationFilesExtension

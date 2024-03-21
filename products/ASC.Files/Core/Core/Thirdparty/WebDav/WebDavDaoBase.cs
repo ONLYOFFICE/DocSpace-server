@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,7 +113,9 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
             return PathPrefix;
         }
 
-        return $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}";
+        return path.StartsWith('/') 
+            ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" 
+            : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(WebDavEntry folder)

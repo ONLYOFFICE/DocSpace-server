@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -220,6 +220,7 @@ public class WorkspaceMigratingFiles(
                 $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
             : await fileStorageService.CreateRoomAsync($"ASC migration {(_type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}",
                 RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+        Log($"create root folder", null);
         
         var matchingIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{_folder}", newFolder } };
 
@@ -230,6 +231,7 @@ public class WorkspaceMigratingFiles(
                 || matchingIds[$"{_folderKey}-{folder.ParentId}"].Id != 0) 
             {
                 newFolder = await fileStorageService.CreateFolderAsync(matchingIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
+                Log($"create folder {newFolder.Title}", null);
             }
             else
             {
@@ -240,12 +242,24 @@ public class WorkspaceMigratingFiles(
         }
 
         var fileDao = daoFactory.GetFileDao<int>();
+
+        //docker unzip filesfolder_... instend of files/folder... 
+        var folderFiles = _dataReader.GetDirectories("").Select(d => Path.GetFileName(d)).FirstOrDefault(d => d.StartsWith("files"));
+        if (folderFiles.Equals("files"))
+        {
+            folderFiles = "files/folder";
+        }
+        else
+        {
+            folderFiles = folderFiles.Split('_')[0];
+        }
+
         foreach (var file in _storage.Files)
         {
             try
             {
                 var path =
-                    $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                    $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                 await using var fs = _dataReader.GetEntry(path);
 
                 var newFile = serviceProvider.GetService<File<int>>();
@@ -259,13 +273,10 @@ public class WorkspaceMigratingFiles(
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                 }
-                try
+                if (!matchingIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     matchingIds.Add($"{_fileKey}-{file.Id}", newFile);
-                }
-                catch
-                {
-
+                    Log($"create file {file.Title}", null);
                 }
             }
             catch(Exception ex)
@@ -348,6 +359,7 @@ public class WorkspaceMigratingFiles(
 
                         orderedFolders = _storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
+                        Log($"create share room {room.Title}", null);
 
                         if (_user.UserType == EmployeeType.Collaborator)
                         {
@@ -375,10 +387,11 @@ public class WorkspaceMigratingFiles(
                         {
                             newFolder = await fileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
+                            Log($"create folder {newFolder.Title}", null);
                         }
                         foreach (var file in _storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))
                         {
-                            var path = $"files/folder_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
+                            var path = $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}";
                             await using var fs = _dataReader.GetEntry(path);
 
                             var newFile = serviceProvider.GetService<File<int>>();
@@ -389,6 +402,7 @@ public class WorkspaceMigratingFiles(
                             newFile.Version = file.Version;
                             newFile.VersionGroup = file.VersionGroup;
                             newFile = await fileDao.SaveFileAsync(newFile, fs);
+                            Log($"create file {newFile.Title}", null);
                         }
                     }
                     if (_user.UserType == EmployeeType.Collaborator && _currentUser.ID == Guid.Parse(_mappedGuids[security.Subject]))

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,64 +48,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         SettingsManager settingsManager,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
-        ThirdPartySelector thirdPartySelector,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter)
-{
-    private readonly ConfigurationConverter<string> _configurationConverter = configurationConverter;
-
-    /// <summary>
-    /// Opens a third-party file with the ID specified in the request for editing.
-    /// </summary>
-    /// <short>
-    /// Open a third-party file
-    /// </short>
-    /// <category>Third-party integration</category>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Web.Files.Services.DocumentService.Configuration, ASC.Files.Core">Configuration parameters</returns>
-    /// <path>api/2.0/files/file/app-{fileId}/openedit</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
-    [AllowNotPayment]
-    [HttpGet("app-{fileId}/openedit")]
-    public async Task<ConfigurationDto<string>> OpenEditThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        var configuration = docParams.Configuration;
-        await configuration.Document.SetUrl(app.GetFileStreamUrl(file));
-        configuration.Document.Info.SetFavorite(null);
-        configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.Desktop;
-
-        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
-        {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
-            if (keyPair != null)
-            {
-                configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
-                {
-                    PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey
-                };
-            }
-        }
-
-        if (!file.Encrypted && !file.ProviderEntry)
-        {
-            await _entryManager.MarkAsRecent(file);
-        }
-
-        return await _configurationConverter.Convert(configuration, file);
-    }
-}
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -186,6 +134,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.String, System" name="doc">Shared token</param>
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
+    /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type</param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -194,12 +143,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType)
     {
         var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
-        configuration.EditorType = EditorType.Desktop;
+        configuration.EditorType = editorType;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -264,6 +213,22 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {
         return await fileStorageService.SharedUsersAsync(fileId);
+    }
+
+    /// <summary>
+    /// Return list of users with their access rights to the file
+    /// </summary>
+    /// <short>Return list of users with their access rights to the file</short>
+    /// <category>Files</category>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetInfoUsersRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
+    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
+    /// <path>api/2.0/files/infousers</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
+    [HttpPost("infousers")]
+    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
+    {
+        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
     }
 
     /// <summary>

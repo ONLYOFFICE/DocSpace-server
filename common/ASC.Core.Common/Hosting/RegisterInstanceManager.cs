@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,22 +33,22 @@ public class RegisterInstanceManager<T>(
     IRegisterInstanceDao<T> registerInstanceRepository,
     IOptions<InstanceWorkerOptions<T>> optionsSettings) : IRegisterInstanceManager<T> where T : IHostedService
 {
-    private readonly InstanceWorkerOptions<T> _settings = optionsSettings.Value;
+    private readonly InstanceWorkerOptions<T> _options = optionsSettings.Value;
 
-    public async Task Register(string instanceId)
+    public async Task Register()
     {
-        if (_settings.SingletonMode)
+        if (_options.SingletonMode)
         {
             return;
         }
 
-        var workerTypeName = instanceId.Split('_')[0];
+        var workerTypeName = _options.WorkerTypeName;
 
         var instances = await registerInstanceRepository.GetAllAsync(workerTypeName);
-        var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
+        var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == _options.InstanceId);
         var instance = registeredInstance ?? new InstanceRegistration
         {
-            InstanceRegistrationId = instanceId,
+            InstanceRegistrationId = _options.InstanceId,
             WorkerTypeName = workerTypeName
         };
 
@@ -74,34 +74,34 @@ public class RegisterInstanceManager<T>(
         }
     }
 
-    public async Task UnRegister(string instanceId)
+    public async Task UnRegister()
     {
-        await registerInstanceRepository.DeleteAsync(instanceId);
+        await registerInstanceRepository.DeleteAsync(_options.InstanceId);
     }
 
-    public async Task<bool> IsActive(string instanceId)
+    public async Task<bool> IsActive()
     {
-        if (_settings.SingletonMode)
+        if (_options.SingletonMode)
         {
             return true;
         }
 
-        var workerTypeName = instanceId.Split('_')[0];
+        var workerTypeName = _options.WorkerTypeName;
         var instances = await registerInstanceRepository.GetAllAsync(workerTypeName);
-        var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
+        var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == _options.InstanceId);
 
         return instance is not null && instance.IsActive;
     }    
 
     private InstanceRegistration? FirstAliveInstance(IEnumerable<InstanceRegistration> instances)
     {
-        Func<InstanceRegistration, long> getTicksCreationService = x => Convert.ToInt64(x.InstanceRegistrationId.Split('_')[1]);
+        Func<InstanceRegistration, long> getTicksCreationService = x => Convert.ToInt64(x.InstanceRegistrationId.Split('_').Last());
 
         return instances.Where(x => !IsOrphanInstance(x)).MinBy(getTicksCreationService);
     }
 
     private bool IsOrphanInstance(InstanceRegistration obj)
     {
-        return obj.LastUpdated.HasValue && obj.LastUpdated.Value.AddSeconds(_settings.TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
+        return obj.LastUpdated.HasValue && obj.LastUpdated.Value.AddSeconds(_options.TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
     }
 }

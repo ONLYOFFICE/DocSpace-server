@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -359,7 +359,7 @@ public abstract class VirtualRoomsController<T>(
             _ => throw new InvalidOperationException()
         };
 
-        return await fileShareDtoHelper.Get(linkAce);
+        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 
     /// <summary>
@@ -570,6 +570,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         DocumentBuilderTaskManager documentBuilderTaskManager,
         TenantManager tenantManager,
         IEventBus eventBus,
+        UserManager userManager,
         IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -696,6 +697,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(IFormCollection formCollection)
     {
+        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        if (currentUserType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         var result = new UploadResultDto();
 
         try

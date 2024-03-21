@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -267,9 +267,9 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
     
-    public long GetFileSize(BoxFile file)
+    public Task<long> GetFileSizeAsync(BoxFile file)
     {
-        return file.Size ?? 0;
+        return Task.FromResult(file.Size ?? 0);
     }
     
     public async Task<long> GetMaxUploadSizeAsync()

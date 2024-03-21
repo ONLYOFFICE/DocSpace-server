@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -938,13 +938,14 @@ internal class FolderDao(
     public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await Queries.FolderWithSettingsAsync(filesDbContext, tenantId, folder.Id);
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))
         {
             toUpdate.Settings.Quota = newQuota >= TenantEntityQuotaSettings.NoQuota ? newQuota : TenantEntityQuotaSettings.DefaultQuotaValue;
         }
+        
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
@@ -1612,6 +1613,21 @@ internal class FolderDao(
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
+    }
+    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var folderId = Convert.ToInt32(entry.ParentId);
+
+        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
+
+        if (parentFolders.Count > 1)
+        {
+            return parentFolders[1].FolderType;
+        }
+
+        return parentFolders[0].FolderType;
     }
 
     public async Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
@@ -2285,6 +2301,11 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders.FirstOrDefault(r => r.TenantId == tenantId && r.Id == folderId));
+    
+    public static readonly Func<FilesDbContext, int, int, Task<DbFolder>> FolderWithSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Folders.Include(r => r.Settings).FirstOrDefault(r => r.TenantId == tenantId && r.Id == folderId));
 
     public static readonly Func<FilesDbContext, int, Task<int>> CountTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
