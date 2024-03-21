@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class SecurityControllerHelper : FilesHelperBase
-{
-    private readonly FileShareDtoHelper _fileShareDtoHelper;
-    private readonly FileShareParamsHelper _fileShareParamsHelper;
-
-    public SecurityControllerHelper(
-        FilesSettingsHelper filesSettingsHelper,
+public class SecurityControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
@@ -43,56 +37,16 @@ public class SecurityControllerHelper : FilesHelperBase
         FolderDtoHelper folderDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         FileShareParamsHelper fileShareParamsHelper)
-        : base(
-            filesSettingsHelper,
-            fileUploader,
-            socketManager,
-            fileDtoHelper,
-            apiContext,
-            fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
-    {
-        _fileShareDtoHelper = fileShareDtoHelper;
-        _fileShareParamsHelper = fileShareParamsHelper;
-    }
-
-    public async Task<string> GenerateSharedLinkAsync<T>(T fileId, FileShare share)
-    {
-        await GetFileInfoAsync(fileId);
-
-        var tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
-        var sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
-
-        if (sharedInfo == null || sharedInfo.Access != share)
-        {
-            var list = new List<AceWrapper>
-            {
-                new()
-                {
-                    Id = FileConstant.ShareLinkId,
-                    SubjectGroup = true,
-                    Access = share
-                }
-            };
-
-            var aceCollection = new AceCollection<T>
-            {
-                Files = new List<T> { fileId },
-                Folders = new List<T>(0),
-                Aces = list
-            };
-
-            await _fileStorageService.SetAceObjectAsync(aceCollection, false);
-
-            tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
-            sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
-        }
-
-        return sharedInfo.Link;
-    }
-
+    : FilesHelperBase(filesSettingsHelper,
+    fileUploader,
+    socketManager,
+    fileDtoHelper,
+    apiContext,
+    fileStorageService,
+    folderContentDtoHelper,
+    httpContextAccessor,
+    folderDtoHelper)
+{
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {
         return GetSecurityInfoAsync(new List<T> { fileId }, new List<T>());
@@ -109,7 +63,7 @@ public class SecurityControllerHelper : FilesHelperBase
 
         foreach (var fileShareDto in fileShares)
         {
-            yield return await _fileShareDtoHelper.Get(fileShareDto);
+            yield return await fileShareDtoHelper.Get(fileShareDto);
         }
     }
 
@@ -129,7 +83,7 @@ public class SecurityControllerHelper : FilesHelperBase
     {
         if (share != null && share.Any())
         {
-            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await _fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
 
             var aceCollection = new AceCollection<T>
             {

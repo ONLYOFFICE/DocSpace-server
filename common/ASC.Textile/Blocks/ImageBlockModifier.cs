@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public class ImageBlockModifier : BlockModifier
                                 @"\!" +                   // closing
                                 @"(?::(?<href>(\S+)))?" +     // optional href
                                 @"(?=\s|\.|,|;|\)|\||$)",               // lookahead: space or simple punctuation or end of string
-                            new MatchEvaluator(ImageFormatMatchEvaluator)
+                            ImageFormatMatchEvaluator
                             );
         return line;
     }
@@ -74,7 +74,7 @@ public class ImageBlockModifier : BlockModifier
             var endMatch = Regex.Match(href, @"(.*)(?<end>\.|,|;|\))$");
             if (m.Success && !string.IsNullOrEmpty(endMatch.Groups["end"].Value))
             {
-                href = href[0..^1];
+                href = href[..^1];
                 end = endMatch.Groups["end"].Value;
             }
             res = "<a href=\"" + Globals.EncodeHTMLLink(href) + "\">" + res + "</a>" + end;

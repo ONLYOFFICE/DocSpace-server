@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,11 +35,6 @@ public class NotifyException : ApplicationException
 
     public NotifyException(string message, Exception innerException)
         : base(message, innerException)
-    {
-    }
-
-    protected NotifyException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,8 @@
 namespace ASC.Common.Radicale;
 
 [Singleton]
-public class RadicaleClient
+public class RadicaleClient(ILogger<RadicaleClient> logger)
 {
-    private readonly ILogger<RadicaleClient> _logger;
-
-    public RadicaleClient(ILogger<RadicaleClient> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<DavResponse> CreateAsync(DavRequest davRequest)
     {
         davRequest.Method = "MKCOL";
@@ -47,7 +40,7 @@ public class RadicaleClient
     {
         davRequest.Method = "GET";
         var response = await RequestAsync(davRequest);
-        var davResponse = new DavResponse()
+        var davResponse = new DavResponse
         {
             StatusCode = (int)response.StatusCode
         };
@@ -115,7 +108,7 @@ public class RadicaleClient
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
             throw new RadicaleException(ex.Message);
         }
     }
@@ -125,22 +118,20 @@ public class RadicaleClient
     {
         if (response.IsSuccessStatusCode)
         {
-            return new DavResponse()
+            return new DavResponse
             {
                 Completed = true,
-                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase,
+                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase
             };
 
         }
-        else
+
+        return new DavResponse
         {
-            return new DavResponse()
-            {
-                Completed = false,
-                StatusCode = (int)response.StatusCode,
-                Error = response.ReasonPhrase
-            };
-        }
+            Completed = false,
+            StatusCode = (int)response.StatusCode,
+            Error = response.ReasonPhrase
+        };
 
     }
 }

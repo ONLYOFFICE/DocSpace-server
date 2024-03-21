@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,25 +102,16 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 }
 
 [Scope]
-public class CompanyWhiteLabelSettingsHelper
+public class CompanyWhiteLabelSettingsHelper(CoreSettings coreSettings, SettingsManager settingsManager)
 {
-    private readonly CoreSettings _coreSettings;
-    private readonly SettingsManager _settingsManager;
-
-    public CompanyWhiteLabelSettingsHelper(CoreSettings coreSettings, SettingsManager settingsManager)
-    {
-        _coreSettings = coreSettings;
-        _settingsManager = settingsManager;
-    }
-
     public async Task<CompanyWhiteLabelSettings> InstanceAsync()
     {
-        return await _settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
     }
 
     public bool IsDefault(CompanyWhiteLabelSettings settings)
     {
-        settings.CoreSettings = _coreSettings;
+        settings.CoreSettings = coreSettings;
         var defaultSettings = settings.GetDefault();
 
         return settings.CompanyName == defaultSettings.CompanyName &&

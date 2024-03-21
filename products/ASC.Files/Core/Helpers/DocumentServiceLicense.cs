@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,59 +27,43 @@
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class DocumentServiceLicense
+public class DocumentServiceLicense(ICache cache,
+    CoreBaseSettings coreBaseSettings,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility,
+    IHttpClientFactory clientFactory)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
 
-    private readonly ICache _cache;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FileUtility _fileUtility;
-    private readonly IHttpClientFactory _clientFactory;
-
-
-    public DocumentServiceLicense(
-        ICache cache,
-        CoreBaseSettings coreBaseSettings,
-        FilesLinkUtility filesLinkUtility,
-        FileUtility fileUtility,
-        IHttpClientFactory clientFactory)
-    {
-        _cache = cache;
-        _coreBaseSettings = coreBaseSettings;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _clientFactory = clientFactory;
-    }
 
     private async Task<CommandResponse> GetDocumentServiceLicenseAsync()
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return null;
         }
 
-        if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceCommandUrl))
+        if (string.IsNullOrEmpty(filesLinkUtility.DocServiceCommandUrl))
         {
             return null;
         }
 
         var cacheKey = "DocumentServiceLicense";
-        var commandResponse = _cache.Get<CommandResponse>(cacheKey);
+        var commandResponse = cache.Get<CommandResponse>(cacheKey);
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
-                   _fileUtility,
-                   _filesLinkUtility.DocServiceCommandUrl,
+                   fileUtility,
+                   filesLinkUtility.DocServiceCommandUrl,
                    CommandMethod.License,
                    null,
                    null,
                    null,
                    null,
-                   _fileUtility.SignatureSecret,
-                   _clientFactory
+                   fileUtility.SignatureSecret,
+                   clientFactory
                    );
-            _cache.Insert(cacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
+            cache.Insert(cacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
         }
 
         return commandResponse;

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,4 +34,4 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("people")]
-public abstract class ApiControllerBase : ControllerBase { }
+public abstract class ApiControllerBase : ControllerBase;

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,11 @@ using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 namespace ASC.Api.Settings.Smtp;
 
 [Transient]
-public class SmtpJob : DistributedTaskProgress
+public class SmtpJob(UserManager userManager,
+        SecurityContext securityContext,
+        TenantManager tenantManager,
+        ILogger<SmtpJob> logger)
+    : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -57,25 +61,7 @@ public class SmtpJob : DistributedTaskProgress
     }
 
     private Guid _currentUser;
-    private SmtpSettingsDto _smtpSettings;
-
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-    private readonly ILogger<SmtpJob> _logger;
-
-    public SmtpJob(
-        UserManager userManager,
-        SecurityContext securityContext,
-        TenantManager tenantManager,
-        ILogger<SmtpJob> logger)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-        _smtpSettings = new SmtpSettingsDto();
-        _logger = logger;
-    }
+    private SmtpSettingsDto _smtpSettings = new();
 
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
     {
@@ -90,15 +76,15 @@ public class SmtpJob : DistributedTaskProgress
         {
             SetProgress(5, "Setup tenant");
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await tenantManager.SetCurrentTenantAsync(TenantId);
 
             SetProgress(10, "Setup user");
 
-            await _securityContext.AuthenticateMeWithoutCookieAsync(_currentUser);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_currentUser);
 
             SetProgress(15, "Find user data");
 
-            var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+            var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
             SetProgress(20, "Create mime message");
 
@@ -155,7 +141,7 @@ public class SmtpJob : DistributedTaskProgress
         catch (AuthorizingException authError)
         {
             Exception = new SecurityException(Resource.ErrorAccessDenied, authError);
-            _logger.ErrorWithException(Exception);
+            logger.ErrorWithException(Exception);
         }
         catch (AggregateException ae)
         {
@@ -164,17 +150,17 @@ public class SmtpJob : DistributedTaskProgress
         catch (SocketException ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
         catch (AuthenticationException ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
         catch (Exception ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
         finally
         {
@@ -183,11 +169,11 @@ public class SmtpJob : DistributedTaskProgress
                 IsCompleted = true;
                 PublishChanges();
 
-                _securityContext.Logout();
+                securityContext.Logout();
             }
             catch (Exception ex)
             {
-                _logger.ErrorLdapOperationFinalizationProblem(ex);
+                logger.ErrorLdapOperationFinalizationProblem(ex);
             }
         }
     }

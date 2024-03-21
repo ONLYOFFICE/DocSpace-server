@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,65 +27,38 @@
 namespace ASC.Web.Studio.Utility;
 
 [Scope]
-public class TenantExtra
+public class TenantExtra(TenantManager tenantManager,
+    ITariffService tariffService,
+    CoreBaseSettings coreBaseSettings,
+    LicenseReader licenseReader,
+    SetupInfo setupInfo,
+    SettingsManager settingsManager,
+    TenantExtraConfig tenantExtraConfig,
+    CountPaidUserStatistic countPaidUserStatistic,
+    MaxTotalSizeStatistic maxTotalSizeStatistic)
 {
-    private readonly TenantExtraConfig _tenantExtraConfig;
-    private readonly CountPaidUserStatistic _countPaidUserStatistic;
-    private readonly MaxTotalSizeStatistic _maxTotalSizeStatistic;
-    private readonly TenantManager _tenantManager;
-    private readonly ITariffService _tariffService;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReader _licenseReader;
-    private readonly SetupInfo _setupInfo;
-    private readonly SettingsManager _settingsManager;
-
-    public TenantExtra(
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        CoreBaseSettings coreBaseSettings,
-        LicenseReader licenseReader,
-        SetupInfo setupInfo,
-        SettingsManager settingsManager,
-        TenantExtraConfig tenantExtraConfig,
-        CountPaidUserStatistic countPaidUserStatistic,
-        MaxTotalSizeStatistic maxTotalSizeStatistic)
+    public async Task<bool> GetEnableTariffSettings()
     {
-        _tenantManager = tenantManager;
-        _tariffService = tariffService;
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReader = licenseReader;
-        _setupInfo = setupInfo;
-        _settingsManager = settingsManager;
-        _tenantExtraConfig = tenantExtraConfig;
-        _countPaidUserStatistic = countPaidUserStatistic;
-        _maxTotalSizeStatistic = maxTotalSizeStatistic;
-    }
-
-    public bool EnableTariffSettings
-    {
-        get
-        {
-            return
-                SetupInfo.IsVisibleSettings<TariffSettings>()
-                && !_settingsManager.Load<TenantAccessSettings>().Anyone
-                && (!_coreBaseSettings.Standalone || !string.IsNullOrEmpty(_licenseReader.LicensePath))
-                && string.IsNullOrEmpty(_setupInfo.AmiMetaUrl);
-        }
+        return
+            SetupInfo.IsVisibleSettings<TariffSettings>()
+            && !(await settingsManager.LoadAsync<TenantAccessSettings>()).Anyone
+            && (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
+            && string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
     }
 
     public bool Saas
     {
-        get => _tenantExtraConfig.Saas;
+        get => tenantExtraConfig.Saas;
     }
 
     public bool Enterprise
     {
-        get => _tenantExtraConfig.Enterprise;
+        get => tenantExtraConfig.Enterprise;
     }
 
     public bool Opensource
     {
-        get => _tenantExtraConfig.Opensource;
+        get => tenantExtraConfig.Opensource;
     }
 
     public async Task<bool> EnterprisePaidAsync(bool withRequestToPaymentSystem = true)
@@ -95,19 +68,19 @@ public class TenantExtra
 
     public async Task<Tariff> GetCurrentTariffAsync(bool withRequestToPaymentSystem = true, bool refresh = false)
     {
-        return await _tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem, refresh);
+        return await tariffService.GetTariffAsync(await tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem, refresh);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        return await _tenantManager.GetTenantQuotasAsync();
+        return await tenantManager.GetTenantQuotasAsync();
     }
 
 
     public async Task<TenantQuota> GetRightQuota()
     {
-        var usedSpace = await _maxTotalSizeStatistic.GetValueAsync();
-        var needUsersCount = await _countPaidUserStatistic.GetValueAsync();
+        var usedSpace = await maxTotalSizeStatistic.GetValueAsync();
+        var needUsersCount = await countPaidUserStatistic.GetValueAsync();
         var quotas = await GetTenantQuotasAsync();
 
         return quotas.OrderBy(q => q.CountUser)
@@ -120,7 +93,7 @@ public class TenantExtra
 
     public async Task<bool> IsNotPaidAsync(bool withRequestToPaymentSystem = true)
     {
-        if (!EnableTariffSettings)
+        if (!await GetEnableTariffSettings())
         {
             return false;
         }
@@ -135,7 +108,7 @@ public class TenantExtra
     /// </summary>
     public async Task<long> GetMaxUploadSizeAsync()
     {
-        return Math.Min(_setupInfo.AvailableFileSize, await GetMaxChunkedUploadSizeAsync());
+        return Math.Min(setupInfo.AvailableFileSize, await GetMaxChunkedUploadSizeAsync());
     }
 
     /// <summary>
@@ -143,13 +116,21 @@ public class TenantExtra
     /// </summary>
     public async Task<long> GetMaxChunkedUploadSizeAsync()
     {
-        var diskQuota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        var diskQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         if (diskQuota != null)
         {
-            var usedSize = await _maxTotalSizeStatistic.GetValueAsync();
+            var usedSize = await maxTotalSizeStatistic.GetValueAsync();
             var freeSize = Math.Max(diskQuota.MaxTotalSize - usedSize, 0);
             return Math.Min(freeSize, diskQuota.MaxFileSize);
         }
-        return _setupInfo.ChunkUploadSize;
+        return setupInfo.ChunkUploadSize;
+    }
+
+    public async Task DemandAccessSpacePermissionAsync()
+    {
+        if (!coreBaseSettings.Standalone || (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
     }
 }

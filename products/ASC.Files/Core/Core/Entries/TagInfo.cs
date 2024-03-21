@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,4 +32,6 @@ public class TagInfo : IMapFrom<DbFilesTag>
     public string Name { get; init; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
+    public object EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
 }

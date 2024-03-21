@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,17 +61,17 @@ global using ASC.Common.Radicale;
 global using ASC.Common.Radicale.Core;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
-global using ASC.Core.Common.Quota.Features;
+global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Configuration;
@@ -83,6 +83,7 @@ global using ASC.Core.Users;
 global using ASC.Data.Backup;
 global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.EF.Context;
+global using ASC.Data.Storage;
 global using ASC.Data.Storage.Configuration;
 global using ASC.Data.Storage.Encryption;
 global using ASC.Data.Storage.Migration;
@@ -106,6 +107,8 @@ global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
+global using ASC.Migration.Core.Models.Api;
+global using ASC.Migration.Core.Resources;
 global using ASC.Notify.Cron;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api;
@@ -119,6 +122,7 @@ global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
 global using ASC.Web.Core.Notify;
@@ -131,6 +135,7 @@ global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Core.WebZones;
 global using ASC.Web.Core.WhiteLabel;
+global using ASC.Web.Files;
 global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;

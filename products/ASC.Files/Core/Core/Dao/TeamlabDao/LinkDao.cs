@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,42 +27,33 @@
 namespace ASC.Files.Core.Data;
 
 [Scope]
-internal class LinkDao : AbstractDao, ILinkDao
+internal class LinkDao(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider)
+    : AbstractDao(dbContextManager,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider), ILinkDao
 {
-    public LinkDao(
-        UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache)
-        : base(
-              dbContextManager,
-              userManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider)
-    { }
-
     public async Task AddLinkAsync(string sourceId, string linkedId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink()
+        await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink
         {
             TenantId = tenantId,
             SourceId = (await MappingIDAsync(sourceId)).ToString(),
@@ -142,7 +133,8 @@ static file class Queries
                 ctx.FilesLink
                     .Where(r => r.TenantId == tenantId && r.SourceId == sourceId && r.LinkedFor == id)
                     .Select(r => r.LinkedId)
-                    .SingleOrDefault());
+                    .OrderByDescending(r => r)
+                    .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, string, Guid, Task<DbFilesLink>> FileLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

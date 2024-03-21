@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,16 @@
 namespace ASC.Files.Core.Core.Thirdparty;
 
 [Scope]
-internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
+internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDbContext> dbContextFactory,
+        IDaoSelector<TFile, TFolder, TItem> daoSelector,
+        IDaoBase<TFile, TFolder, TItem> dao,
+        TenantManager tenantManager)
+    : IThirdPartyTagDao
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
 {
-    private int TenantId => _tenantManager.GetCurrentTenant().Id;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly IDaoSelector<TFile, TFolder, TItem> _daoSelector;
-    private readonly IDaoBase<TFile, TFolder, TItem> _dao;
-    private readonly TenantManager _tenantManager;
     private string PathPrefix { get; set; }
-
-    public ThirdPartyTagDao(
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        IDaoSelector<TFile, TFolder, TItem> daoSelector,
-        IDaoBase<TFile, TFolder, TItem> dao,
-        TenantManager tenantManager
-        )
-    {
-        _dbContextFactory = dbContextFactory;
-        _daoSelector = daoSelector;
-        _dao = dao;
-        _tenantManager = tenantManager;
-    }
 
     public void Init(string pathPrefix)
     {
@@ -59,9 +45,10 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
 
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
-        var folderId = _daoSelector.ConvertId(parentFolder.Id);
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var folderId = daoSelector.ConvertId(parentFolder.Id);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
         if (!entryIds.Any())
@@ -69,7 +56,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 
@@ -80,7 +67,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
                 Name = r.Tag.Name,
                 Type = r.Tag.Type,
                 Owner = r.Tag.Owner,
-                EntryId = await _dao.MappingIDAsync(r.TagLink.EntryId),
+                EntryId = await dao.MappingIDAsync(r.TagLink.EntryId),
                 EntryType = r.TagLink.EntryType,
                 Count = r.TagLink.Count,
                 Id = r.Tag.Id
@@ -98,7 +85,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
         }
 
         var folderFileIds = new[] { parentFolder.Id }
-            .Concat(await _dao.GetChildrenAsync(folderId));
+            .Concat(await dao.GetChildrenAsync(folderId));
 
         foreach (var e in tags.Where(tag => folderFileIds.Contains(tag.EntryId.ToString())))
         {

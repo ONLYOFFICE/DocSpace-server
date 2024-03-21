@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Po meri</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Povezava za potrditev operacije je bila poslana na {0} (e-naslov lastnika portala).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Nepravilen e-naslov</value>
   </data>

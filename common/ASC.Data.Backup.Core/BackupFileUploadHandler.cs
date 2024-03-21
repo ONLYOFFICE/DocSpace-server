@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Studio.Core.Backup;
 
 public class BackupFileUploadHandler
 {
-    public BackupFileUploadHandler(RequestDelegate next)
+    public BackupFileUploadHandler(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke(HttpContext context,
@@ -48,7 +51,7 @@ public class BackupFileUploadHandler
                 throw new ArgumentException("Access denied.");
             }
             var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
-            string path = "";
+            string path;
             try
             {
                 path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
@@ -131,7 +134,7 @@ public class BackupFileUploadHandler
             result = Error(error.Message);
         }
 
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions()
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }));

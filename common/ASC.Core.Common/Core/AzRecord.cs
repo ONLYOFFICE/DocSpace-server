@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,7 +56,7 @@ public class AzRecord : IMapFrom<Acl>
 
     public static implicit operator AzRecord(AzRecordCache cache)
     {
-        var result = new AzRecord()
+        var result = new AzRecord
         {
             TenantId = cache.Tenant
         };

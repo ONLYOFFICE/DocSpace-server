@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,17 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Singleton]
-public class EncryptionWorker
+public class EncryptionWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
 
-    public EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
+    public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-    public void Start(EncryptionSettings encryptionSettings, string serverRootPath)
-    {
-        EncryptionOperation encryptionOperation;
-
-        lock (_locker)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
             var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
 
@@ -58,8 +49,7 @@ public class EncryptionWorker
 
             if (item == null)
             {
-
-                encryptionOperation = _serviceProvider.GetService<EncryptionOperation>();
+                var encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
                 encryptionOperation.Init(encryptionSettings, GetCacheId(), serverRootPath);
 
                 _queue.EnqueueTask(encryptionOperation);

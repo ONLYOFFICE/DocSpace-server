@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -204,7 +204,7 @@ public enum MessageAction
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,
-    RoomCreateUser = 5085,// last
+    RoomCreateUser = 5085,
     RoomInvitationLinkUpdated = 5082,
     RoomInvitationLinkCreated = 5086,
     RoomInvitationLinkDeleted = 5087,
@@ -220,6 +220,10 @@ public enum MessageAction
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,
+    
+    FileExternalLinkCreated = 5091,
+    FileExternalLinkUpdated = 5092,
+    FileExternalLinkDeleted = 5093,  // last
 
     #endregion
 
@@ -280,6 +284,8 @@ public enum MessageAction
     TwoFactorAuthenticationDisabled = 6036,
     TwoFactorAuthenticationEnabledBySms = 6037,
     TwoFactorAuthenticationEnabledByTfaApp = 6038,
+
+    PortalRenamed = 6039,
 
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,

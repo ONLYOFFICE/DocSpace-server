@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,9 +39,6 @@ public class UnencodedUri : Uri
 
     public UnencodedUri(Uri baseUri, Uri relativeUri)
         : base(baseUri, relativeUri) { }
-
-    protected UnencodedUri(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        : base(serializationInfo, streamingContext) { }
 
     public override string ToString()
     {

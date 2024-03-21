@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,9 +65,6 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    internal readonly Signature Signature;
-    internal readonly InstanceCrypto InstanceCrypto;
-
     protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
@@ -80,14 +77,10 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
         : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _oAuth20TokenHelper = oAuth20TokenHelper;
-        Signature = signature;
-        InstanceCrypto = instanceCrypto;
     }
 
     public virtual LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
@@ -109,7 +102,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -121,11 +121,11 @@ public class MessageMaps
     }
 }
 
-internal class MessageMapsDictionary : IDictionary<MessageAction, MessageMaps>
+internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
 {
     private readonly ProductType _productType;
     private readonly ModuleType _moduleType;
-    private IDictionary<MessageAction, MessageMaps> Actions { get; }
+    private IDictionary<MessageAction, MessageMaps> Actions { get; } = new Dictionary<MessageAction, MessageMaps>();
 
     public ICollection<MessageAction> Keys
     {
@@ -171,18 +171,13 @@ internal class MessageMapsDictionary : IDictionary<MessageAction, MessageMaps>
         }
     }
 
-    public MessageMapsDictionary()
-    {
-        Actions = new Dictionary<MessageAction, MessageMaps>();
-    }
-
     public MessageMapsDictionary(ProductType productType, ModuleType moduleType) : this()
     {
         _productType = productType;
         _moduleType = moduleType;
     }
 
-    public void Add(MessageAction[] value)
+    public void Add(IEnumerable<MessageAction> value)
     {
         foreach (var item in value)
         {
@@ -222,7 +217,7 @@ internal class MessageMapsDictionary : IDictionary<MessageAction, MessageMaps>
         }
     }
 
-    public void Add(ActionType key, MessageAction[] value)
+    public void Add(ActionType key, IEnumerable<MessageAction> value)
     {
         foreach (var item in value)
         {

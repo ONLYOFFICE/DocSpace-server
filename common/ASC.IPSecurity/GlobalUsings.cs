@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,6 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.IPSecurity.Log;
-global using ASC.Web.Studio.Utility;
 
 global using AutoMapper;
 global using AutoMapper.QueryableExtensions;

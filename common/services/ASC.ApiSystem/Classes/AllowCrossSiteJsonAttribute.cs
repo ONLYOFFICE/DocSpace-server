@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,12 +30,9 @@ public class AllowCrossSiteJsonAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
     {
-        if (actionExecutedContext.Response != null)
-        {
-            actionExecutedContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-            //actionExecutedContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
-            //actionExecutedContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-        }
+        actionExecutedContext.Response?.Headers.Add("Access-Control-Allow-Origin", "*");
+        //actionExecutedContext.Response.Headers.Add("Access-Control-Allow-Headers", "*");
+        //actionExecutedContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
 
         base.OnActionExecuted(actionExecutedContext);
     }

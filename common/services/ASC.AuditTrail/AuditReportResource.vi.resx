@@ -346,7 +346,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Đăng nhập thành công</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

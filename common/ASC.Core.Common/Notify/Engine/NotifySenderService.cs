@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,42 +29,29 @@ using System.Threading.Channels;
 namespace ASC.Core.Common.Notify.Engine;
 
 [Singleton]
-public class NotifySenderService : BackgroundService
-{
-    private readonly NotifyEngine _notifyEngine;
-    private readonly ChannelReader<NotifyRequest> _channelReader;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<NotifySenderService> _logger;
-
-    public NotifySenderService(
-        NotifyEngine notifyEngine,
+public class NotifySenderService(NotifyEngine notifyEngine,
         ChannelReader<NotifyRequest> channelReader,
         IServiceScopeFactory serviceScopeFactory,
         ILogger<NotifySenderService> logger)
-    {
-        _notifyEngine = notifyEngine;
-        _channelReader = channelReader;
-        _serviceScopeFactory = serviceScopeFactory;
-        _logger = logger;
-    }
-
+    : BackgroundService
+{
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (var request in _channelReader.ReadAllAsync(stoppingToken))
+        await foreach (var request in channelReader.ReadAllAsync(stoppingToken))
         {
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
-            foreach (var action in _notifyEngine.Actions)
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            foreach (var action in notifyEngine.Actions)
             {
                 ((INotifyEngineAction)scope.ServiceProvider.GetRequiredService(action)).AfterTransferRequest(request);
             }
 
             try
             {
-                await _notifyEngine.SendNotify(request, scope);
+                await notifyEngine.SendNotify(request, scope);
             }
             catch (Exception e)
             {
-                _logger.ErrorSendNotify(e);
+                logger.ErrorSendNotify(e);
             }
         }
     }

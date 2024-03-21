@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Studio.UserControls.CustomNavigation;
 
 public class LogoUploader
 {
-    public LogoUploader(RequestDelegate next)
+    public LogoUploader(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke
@@ -44,6 +45,7 @@ public class LogoUploader
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+            var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
             var width = Convert.ToInt32(context.Request.Form["width"]);
             var height = Convert.ToInt32(context.Request.Form["height"]);
             var size = new Size(width, height);
@@ -53,15 +55,24 @@ public class LogoUploader
                 const string imgContentType = @"image";
 
                 var logo = context.Request.Form.Files[0];
-                if (!logo.ContentType.StartsWith(imgContentType))
+                var ext = Path.GetExtension(logo.FileName).ToLowerInvariant();
+
+                if (!logo.ContentType.StartsWith(imgContentType) ||
+                    !TenantWhiteLabelSettings.AvailableExtensions.Contains(ext))
                 {
                     throw new Exception(Resource.ErrorFileNotImage);
+                }
+
+                var maxSize = TenantWhiteLabelSettings.GetSize(type);
+                if (size.Height > maxSize.Height || size.Width > maxSize.Width)
+                {
+                    throw new ImageSizeLimitException();
                 }
 
                 var data = new byte[logo.Length];
 
                 var reader = new BinaryReader(logo.OpenReadStream());
-                reader.Read(data, 0, (int)logo.Length);
+                _ = reader.Read(data, 0, (int)logo.Length);
                 reader.Close();
 
                 if (logo.ContentType.Contains("image/x-icon"))
@@ -110,7 +121,7 @@ public class LogoUploader
             result.Success = false;
             result.Message = ex.Message.HtmlEncode();
         }
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result));
     }
 }
 

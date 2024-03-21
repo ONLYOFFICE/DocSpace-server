@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.FederatedLogin.LoginProviders;
 [Scope]
 public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 {
-    private const string _appleUrlKeys = "https://appleid.apple.com/auth/keys";
+    private const string AppleUrlKeys = "https://appleid.apple.com/auth/keys";
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly RequestHelper _requestHelper;
 
@@ -53,12 +53,10 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         IHttpContextAccessor httpContextAccessor,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _httpContextAccessor = httpContextAccessor;
         _requestHelper = requestHelper;
@@ -78,7 +76,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 
@@ -106,11 +104,11 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private LoginProfile GetProfileFromClaims(ClaimsPrincipal claims)
     {
-        return new LoginProfile(Signature, InstanceCrypto)
+        return new LoginProfile
         {
             Id = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             EMail = claims.FindFirst(ClaimTypes.Email)?.Value,
-            Provider = ProviderConstants.AppleId,
+            Provider = ProviderConstants.AppleId
         };
     }
 
@@ -139,7 +137,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     private ClaimsPrincipal ValidateIdToken(string idToken)
     {
         var handler = new JwtSecurityTokenHandler();
-        var claims = handler.ValidateToken(idToken, new TokenValidationParameters()
+        var claims = handler.ValidateToken(idToken, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = GetApplePublicKeys(),
@@ -159,7 +157,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private IEnumerable<SecurityKey> GetApplePublicKeys()
     {
-        var applePublicKeys = _requestHelper.PerformRequest(_appleUrlKeys);
+        var applePublicKeys = _requestHelper.PerformRequest(AppleUrlKeys);
 
         var keys = new List<SecurityKey>();
         foreach (var webKey in JObject.Parse(applePublicKeys).Value<JArray>("keys"))

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,25 +27,16 @@
 namespace ASC.Files.Expired;
 
 [Singleton]
-public class DeleteExpiredService : BackgroundService
-{
-    private readonly TimeSpan _launchFrequency;
-    private readonly ILogger<DeleteExpiredService> _log;
-    private readonly GlobalStore _globalStore;
-
-    public DeleteExpiredService(
-        ILogger<DeleteExpiredService> log,
+public class DeleteExpiredService(ILogger<DeleteExpiredService> log,
         GlobalStore globalStore,
         IConfiguration configuration)
-    {
-        _launchFrequency = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
-        _log = log;
-        _globalStore = globalStore;
-    }
+    : BackgroundService
+{
+    private readonly TimeSpan _launchFrequency = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var dataStore = await _globalStore.GetStoreAsync(false);
+        var dataStore = await globalStore.GetStoreAsync(false);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -55,7 +46,7 @@ public class DeleteExpiredService : BackgroundService
             }
             catch (Exception err)
             {
-                _log.ErrorDeleteExpired(err);
+                log.ErrorDeleteExpired(err);
             }
 
             await Task.Delay(_launchFrequency, stoppingToken);

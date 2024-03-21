@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,18 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
-using ResumableUploadSession = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSession;
-using ResumableUploadSessionStatus = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSessionStatus;
+using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.GoogleDrive;
 
 [Scope]
-internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>
-{
-    private readonly TempPath _tempPath;
-    private readonly SetupInfo _setupInfo;
-
-    public GoogleDriveFileDao(UserManager userManager,
+internal class GoogleDriveFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> daoSelector,
         CrossDao crossDao,
@@ -44,15 +38,14 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         IDaoBase<DriveFile, DriveFile, DriveFile> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _tempPath = tempPath;
-        _setupInfo = setupInfo;
-    }
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
+    protected override string UploadSessionKey => "GoogleDriveSession";
 
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false };
         }
@@ -69,17 +62,17 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         else
         {
             var folder = await Dao.GetFolderAsync(file.ParentId);
-            driveFile = storage.FileConstructor(file.Title, null, folder.Id);
+            driveFile = GoogleDriveStorage.FileConstructor(file.Title, null, folder.Id);
         }
 
-        var googleDriveSession = await storage.CreateResumableSessionAsync(driveFile, contentLength);
+        var googleDriveSession = await storage.CreateRenewableSessionAsync(driveFile, contentLength);
         if (googleDriveSession != null)
         {
-            uploadSession.Items["GoogleDriveSession"] = googleDriveSession;
+            uploadSession.Items[UploadSessionKey] = googleDriveSession;
         }
         else
         {
-            uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+            uploadSession.TempPath = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);
@@ -87,54 +80,11 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         return uploadSession;
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
-    {
-        if (!uploadSession.UseChunks)
-        {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
-
-            return uploadSession.File;
-        }
-
-        if (uploadSession.Items.ContainsKey("GoogleDriveSession"))
-        {
-            var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
-            var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.LastChunk);
-        }
-        else
-        {
-            var tempPath = uploadSession.GetItemOrDefault<string>("TempPath");
-            await using var fs = new FileStream(tempPath, FileMode.Append);
-            await stream.CopyToAsync(fs);
-        }
-
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
-
-        return uploadSession.File;
-    }
-
     public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("GoogleDriveSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
+            var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
 
             await ProviderInfo.CacheResetAsync(googleDriveSession.FileId);
             var parentDriveId = googleDriveSession.FolderId;
@@ -146,31 +96,40 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
             return Dao.ToFile(await Dao.GetFileAsync(googleDriveSession.FileId));
         }
 
-        await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"), FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        await using var fs = new FileStream(uploadSession.TempPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
 
         return await SaveFileAsync(uploadSession.File, fs);
     }
 
     public override Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("GoogleDriveSession"))
+        if (uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
+            var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
 
-            if (googleDriveSession.Status != ResumableUploadSessionStatus.Completed)
+            if (googleDriveSession.Status != RenewableUploadSessionStatus.Completed)
             {
-                googleDriveSession.Status = ResumableUploadSessionStatus.Aborted;
+                googleDriveSession.Status = RenewableUploadSessionStatus.Aborted;
             }
 
             return Task.CompletedTask;
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
-        {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 
-            return Task.CompletedTask;
+        var path = uploadSession.TempPath;
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            File.Delete(path);
         }
 
         return Task.CompletedTask;
+    }
+
+    protected override async Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    {
+        var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
+        var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
+        var lastChunk = uploadSession.Items.ContainsKey("lastChunk");
+        await storage.TransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
-public class ProviderManager
+public class ProviderManager(ConsumerFactory consumerFactory)
 {
     public bool IsNotEmpty
     {
@@ -39,37 +39,26 @@ public class ProviderManager
         }
     }
 
-    public static readonly List<string> AuthProviders = new()
-    {
-            ProviderConstants.Google,
-            ProviderConstants.Zoom,
-            ProviderConstants.LinkedIn,
-            ProviderConstants.Facebook ,
-            ProviderConstants.Twitter,
-            ProviderConstants.Microsoft,
-            ProviderConstants.AppleId
-        };
+    public static readonly List<string> AuthProviders =
+    [
+        ProviderConstants.Google,
+        ProviderConstants.Zoom,
+        ProviderConstants.LinkedIn,
+        ProviderConstants.Facebook,
+        ProviderConstants.Twitter,
+        ProviderConstants.Microsoft,
+        ProviderConstants.AppleId
+    ];
 
-    public static readonly List<string> InviteExceptProviders = new()
-    {
-                ProviderConstants.Twitter,
-                ProviderConstants.AppleId,
-            };
-
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly ConsumerFactory _consumerFactory;
-
-    public ProviderManager(Signature signature, InstanceCrypto instanceCrypto, ConsumerFactory consumerFactory)
-    {
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _consumerFactory = consumerFactory;
-    }
+    public static readonly List<string> InviteExceptProviders =
+    [
+        ProviderConstants.Twitter,
+        ProviderConstants.AppleId
+    ];
 
     public ILoginProvider GetLoginProvider(string providerType)
     {
-        return _consumerFactory.GetByKey(providerType) as ILoginProvider;
+        return consumerFactory.GetByKey(providerType) as ILoginProvider;
     }
 
     public LoginProfile Process(string providerType, HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs = null)
@@ -95,7 +84,7 @@ public class ProviderManager
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(_signature, _instanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 }

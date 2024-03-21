@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,23 +28,14 @@ using ASC.Common.IntegrationEvents.Events;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction : INotifyAction
+public class NotifyAction(string id, string name = null) : INotifyAction
 {
-    public string ID { get; private set; }
-    public string Name { get; private set; }
-
-    public NotifyAction(string id)
-        : this(id, null) { }
-
-    public NotifyAction(string id, string name)
-    {
-        ID = id ?? throw new ArgumentNullException(nameof(id));
-        Name = name;
-    }
+    public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
+    public string Name { get; } = name;
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
-        return new NotifyActionItem() { Id = cache.ID };
+        return new NotifyActionItem { Id = cache.ID };
     }
 
     public static explicit operator NotifyAction(NotifyActionItem cache)

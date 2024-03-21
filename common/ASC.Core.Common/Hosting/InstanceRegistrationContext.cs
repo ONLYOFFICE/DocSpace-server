@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,9 @@
 
 namespace ASC.Core.Common.Hosting;
 
-public class InstanceRegistrationContext : DbContext
+public class InstanceRegistrationContext(DbContextOptions<InstanceRegistrationContext> options) : DbContext(options)
 {
     public DbSet<InstanceRegistration> InstanceRegistrations { get; set; }
-
-    public InstanceRegistrationContext(DbContextOptions<InstanceRegistrationContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

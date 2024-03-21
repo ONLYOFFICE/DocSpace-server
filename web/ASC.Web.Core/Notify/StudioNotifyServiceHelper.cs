@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,28 +30,12 @@ using ASC.EventBus.Abstractions;
 namespace ASC.Web.Core.Notify;
 
 [Scope]
-public class StudioNotifyServiceHelper
+public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    CommonLinkUtility commonLinkUtility,
+    IEventBus eventBus)
 {
-    private readonly IEventBus _eventBus;
-    private readonly StudioNotifyHelper _studioNotifyHelper;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly CommonLinkUtility _commonLinkUtility;
-
-    public StudioNotifyServiceHelper(
-        StudioNotifyHelper studioNotifyHelper,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        CommonLinkUtility commonLinkUtility,
-        IEventBus eventBus)
-    {
-        _studioNotifyHelper = studioNotifyHelper;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _commonLinkUtility = commonLinkUtility;
-        _eventBus = eventBus;
-    }
-
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
     {
         await SendNoticeToAsync(action, null, recipients, senderNames, false, null, args);
@@ -69,11 +53,11 @@ public class StudioNotifyServiceHelper
 
     public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri, params ITagValue[] args)
     {
-        var item = new NotifyItemIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
+        var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
         {
             Action = (NotifyAction)action,
             CheckSubsciption = checkSubsciption,
-            BaseUrl = baseUri ?? _commonLinkUtility.GetFullAbsolutePath("")
+            BaseUrl = baseUri ?? commonLinkUtility.GetFullAbsolutePath("")
         };
 
         if (objectID != null)
@@ -113,12 +97,12 @@ public class StudioNotifyServiceHelper
             item.Tags = args.Where(r => r.Value != null).Select(r => new Tag { Key = r.Tag, Value = r.Value.ToString() }).ToList();
         }
 
-        _eventBus.Publish(item);
+        eventBus.Publish(item);
     }
     
     public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)
     {
-        var subscriptionSource = _studioNotifyHelper.NotifySource.GetSubscriptionProvider();
+        var subscriptionSource = studioNotifyHelper.NotifySource.GetSubscriptionProvider();
         var recipients = await subscriptionSource.GetRecipientsAsync(action, null);
 
         await SendNoticeToAsync(action, null, recipients, null, false, null, args);

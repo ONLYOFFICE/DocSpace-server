@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,11 +29,10 @@ using Tenant = ASC.Core.Tenants.Tenant;
 namespace ASC.Data.Storage.Encryption;
 
 [Transient(Additional = typeof(EncryptionOperationExtension))]
-public class EncryptionOperation : DistributedTaskProgress
+public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     private const string ProgressFileName = "EncryptionProgress.tmp";
 
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     private bool _hasErrors;
     private EncryptionSettings _encryptionSettings;
     private bool _isEncryption;
@@ -41,11 +40,6 @@ public class EncryptionOperation : DistributedTaskProgress
     private IEnumerable<string> _modules;
     private IEnumerable<Tenant> _tenants;
     private string _serverRootPath;
-
-    public EncryptionOperation(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
 
     public void Init(EncryptionSettings encryptionSettings, string id, string serverRootPath)
     {
@@ -57,9 +51,9 @@ public class EncryptionOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
-        var (log, encryptionSettingsHelper, tenantManager, notifyHelper, coreBaseSettings, storageFactoryConfig, storageFactory, configuration) = scopeClass;
+        var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper,   configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);
         _tenants = await tenantManager.GetTenantsAsync(false);
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
@@ -177,7 +171,7 @@ public class EncryptionOperation : DistributedTaskProgress
         return encryptedFiles;
     }
 
-    private async Task<IEnumerable<string>> GetFilesAsync(List<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
+    private async Task<IEnumerable<string>> GetFilesAsync(IEnumerable<string> domains, ICollection<string> progress, DiscDataStore targetStore, string targetDomain)
     {
         IEnumerable<string> files = await targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true).ToListAsync();
 
@@ -326,49 +320,15 @@ public class EncryptionOperation : DistributedTaskProgress
 }
 
 [Scope]
-public class EncryptionOperationScope
-{
-    private readonly ILogger _logger;
-    private readonly EncryptionSettingsHelper _encryptionSettingsHelper;
-    private readonly TenantManager _tenantManager;
-    private readonly NotifyHelper _notifyHelper;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly StorageFactoryConfig _storageFactoryConfig;
-    private readonly StorageFactory _storageFactory;
-    private readonly IConfiguration _configuration;
-
-    public EncryptionOperationScope(
-        ILogger<EncryptionOperationScope> logger,
-       StorageFactoryConfig storageFactoryConfig,
-       StorageFactory storageFactory,
-       TenantManager tenantManager,
-       CoreBaseSettings coreBaseSettings,
-       NotifyHelper notifyHelper,
-       EncryptionSettingsHelper encryptionSettingsHelper,
-       IConfiguration configuration)
-    {
-        _logger = logger;
-        _storageFactoryConfig = storageFactoryConfig;
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-        _coreBaseSettings = coreBaseSettings;
-        _notifyHelper = notifyHelper;
-        _encryptionSettingsHelper = encryptionSettingsHelper;
-        _configuration = configuration;
-    }
-
-    public void Deconstruct(out ILogger log, out EncryptionSettingsHelper encryptionSettingsHelper, out TenantManager tenantManager, out NotifyHelper notifyHelper, out CoreBaseSettings coreBaseSettings, out StorageFactoryConfig storageFactoryConfig, out StorageFactory storageFactory, out IConfiguration configuration)
-    {
-        log = _logger;
-        encryptionSettingsHelper = _encryptionSettingsHelper;
-        tenantManager = _tenantManager;
-        notifyHelper = _notifyHelper;
-        coreBaseSettings = _coreBaseSettings;
-        storageFactoryConfig = _storageFactoryConfig;
-        storageFactory = _storageFactory;
-        configuration = _configuration;
-    }
-}
+public record EncryptionOperationScope(
+    ILogger<EncryptionOperationScope> Logger,
+    StorageFactoryConfig StorageFactoryConfig,
+    StorageFactory StorageFactory,
+    TenantManager TenantManager,
+    CoreBaseSettings CoreBaseSettings,
+    NotifyHelper NotifyHelper,
+    EncryptionSettingsHelper EncryptionSettingsHelper,
+    IConfiguration Configuration);
 
 public static class EncryptionOperationExtension
 {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,10 @@
 
 namespace ASC.Feed.Aggregator;
 
-public class FeedComment
+public class FeedComment(Guid author)
 {
     public string Id { get; set; }
     public string Description { get; set; }
     public DateTime Date { get; set; }
-    public Guid AuthorId { get; private set; }
-
-    public FeedComment(Guid author)
-    {
-        AuthorId = author;
-    }
+    public Guid AuthorId { get; private set; } = author;
 }

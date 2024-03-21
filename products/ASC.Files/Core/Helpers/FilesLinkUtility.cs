@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -259,16 +259,23 @@ public class FilesLinkUtility
     {
         get
         {
-            bool isDefault;
-
-            GetUrlSetting(PublicUrlKey, out isDefault);
-            if (!isDefault) return false;
+            GetUrlSetting(PublicUrlKey, out var isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
 
             GetUrlSetting(InternalUrlKey, out isDefault);
-            if (!isDefault) return false;
+            if (!isDefault)
+            {
+                return false;
+            }
 
             GetUrlSetting(PortalUrlKey, out isDefault);
-            if (!isDefault) return false;
+            if (!isDefault)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -422,8 +429,7 @@ public class FilesLinkUtility
 
     private string GetFileUploaderHandlerVirtualPath()
     {
-        var virtualPath = _filesUploaderURL;
-        return virtualPath.EndsWith(".ashx") ? virtualPath : virtualPath.TrimEnd('/') + "/ChunkedUploader.ashx";
+        return _filesUploaderURL.EndsWith(".ashx") ? _filesUploaderURL : _filesUploaderURL.TrimEnd('/') + "/ChunkedUploader.ashx";
     }
 
     private string GetUrlSetting(string key, out bool isDefault)

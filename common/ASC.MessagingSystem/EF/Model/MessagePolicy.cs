@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,11 @@
 namespace ASC.MessagingSystem.EF.Model;
 
 [Singleton]
-public class MessagePolicy
+public class MessagePolicy(IConfiguration configuration)
 {
-    private readonly IEnumerable<string> _secretIps;
-
-    public MessagePolicy(IConfiguration configuration)
-    {
-        _secretIps =
-            configuration["messaging.secret-ips"] == null
-            ? Array.Empty<string>()
-            : configuration["messaging.secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-    }
+    private readonly IEnumerable<string> _secretIps = configuration["messaging:secret-ips"] == null
+        ? Array.Empty<string>()
+        : configuration["messaging:secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
     public bool Check(EventMessage message)
     {
@@ -65,6 +59,6 @@ public class MessagePolicy
 
         var portIdx = ip.IndexOf(':');
 
-        return portIdx > -1 ? ip.Substring(0, portIdx) : ip;
+        return portIdx > -1 ? ip[..portIdx] : ip;
     }
 }

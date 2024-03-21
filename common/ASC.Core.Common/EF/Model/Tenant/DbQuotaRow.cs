@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 
     public override object[] GetKeys()
     {
-        return new object[] { TenantId, UserId, Path };
+        return [TenantId, UserId, Path];
     }
 }
 

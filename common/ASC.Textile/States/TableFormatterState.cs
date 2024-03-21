@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,15 +31,10 @@ namespace Textile.States;
                 Globals.AlignPattern +
                 Globals.BlockModifiersPattern +
                 @"\.\s*$")]
-public class TableFormatterState : FormatterState
+public class TableFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private string _attsInfo;
     private string _alignInfo;
-
-    public TableFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

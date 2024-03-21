@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,14 +80,8 @@ public class EditHistoryDto
     }
 }
 
-public class EditHistoryChangesWrapper
+public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
-    public EditHistoryAuthor User { get; set; }
-    public ApiDateTime Created { get; set; }
-
-    public EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
-    {
-        User = historyChanges.Author;
-        Created = apiDateTimeHelper.Get(historyChanges.Date);
-    }
+    public EditHistoryAuthor User { get; set; } = historyChanges.Author;
+    public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

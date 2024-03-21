@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,11 +65,11 @@ public class UserSecurityProvider : SecurityObject
     {
         return _employeeType switch
         {
-            EmployeeType.DocSpaceAdmin => new[] { AuthConstants.DocSpaceAdmin },
-            EmployeeType.RoomAdmin => new[] { AuthConstants.RoomAdmin },
-            EmployeeType.Collaborator => new[] { AuthConstants.Collaborator },
-            EmployeeType.User => new[] { AuthConstants.User },
-            _ => Array.Empty<IRole>(),
+            EmployeeType.DocSpaceAdmin => [AuthConstants.DocSpaceAdmin],
+            EmployeeType.RoomAdmin => [AuthConstants.RoomAdmin],
+            EmployeeType.Collaborator => [AuthConstants.Collaborator],
+            EmployeeType.User => [AuthConstants.User],
+            _ => Array.Empty<IRole>()
         };
     }
 

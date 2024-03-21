@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ public class DeletePortalTask : PortalTaskBase
                     {
                         var t = (TableInfo)state;
                         module.CreateDeleteCommand(connection.Fix(), TenantId, t).WithTimeout(120).ExecuteNonQuery();
-                    }, table, 5, onFailure: error => { throw ThrowHelper.CantDeleteTable(table.Name, error); });
+                    }, table, 5, onFailure: error => throw ThrowHelper.CantDeleteTable(table.Name, error));
                 SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
             }
         }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,14 @@
 
 namespace ASC.Web.Core.Quota;
 
-public class MaxFileSizeChecker : TenantQuotaFeatureChecker<MaxFileSizeFeature, long>
+public class MaxFileSizeChecker(ITenantQuotaFeatureStat<MaxFileSizeFeature, long> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager)
+    : TenantQuotaFeatureChecker<MaxFileSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_file_size_exception;
 
-    public MaxFileSizeChecker(ITenantQuotaFeatureStat<MaxFileSizeFeature, long> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
+    public override string GetExceptionMessage(long size)
     {
+        return string.Format(Resource.TariffsFeature_file_size_exception, FileSizeComment.FilesSizeToString(size));
     }
 }
 

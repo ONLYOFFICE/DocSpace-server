@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,11 +38,12 @@ public class CompressToTarGz : ICompress
 
     /// <summary></summary>
     /// <param name="stream">Accepts a new stream, it will contain an archive upon completion of work</param>
-    public void SetStream(Stream stream)
+    public Task SetStream(Stream stream)
     {
         _gzoStream = new GZipOutputStream(stream) { IsStreamOwner = false };
         _gzip = new TarOutputStream(_gzoStream, Encoding.UTF8);
         _gzoStream.IsStreamOwner = false;
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -50,13 +51,14 @@ public class CompressToTarGz : ICompress
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
-    public void CreateEntry(string title, DateTime? lastModification = null)
+    public Task CreateEntry(string title, DateTime? lastModification = null)
     {
         _tarEntry = TarEntry.CreateTarEntry(title);
         if (lastModification.HasValue)
         {
             _tarEntry.ModTime = lastModification.Value;
         }
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -65,37 +67,39 @@ public class CompressToTarGz : ICompress
     /// <param name="readStream">File data</param>
     public async Task PutStream(Stream readStream)
     {
-        PutNextEntry();
+        await PutNextEntry();
         await readStream.CopyToAsync(_gzip);
     }
 
     /// <summary>
     /// Put an entry on the output stream.
     /// </summary>
-    public void PutNextEntry()
+    public Task PutNextEntry()
     {
         _gzip.PutNextEntry(_tarEntry);
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Closes the current entry.
     /// </summary>
-    public void CloseEntry()
+    public Task CloseEntry()
     {
         _gzip.CloseEntry();
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Resource title (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    public string Title => FilesUCResource.FilesWillBeCompressedTarGz;
+    public Task<string> GetTitle() => Task.FromResult(FilesUCResource.FilesWillBeCompressedTarGz);
 
     /// <summary>
     /// Extension the archive (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    public string ArchiveExtension => CompressToArchive.TarExt;
+    public Task<string> GetArchiveExtension() => Task.FromResult(CompressToArchive.TarExt);
 
     /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     public void Dispose()

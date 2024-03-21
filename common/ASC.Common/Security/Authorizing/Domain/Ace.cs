@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,8 @@
 
 namespace ASC.Common.Security.Authorizing;
 
-public class Ace
+public class Ace(Guid actionId, AceType reaction)
 {
-    public Guid ActionId { get; set; }
-    public AceType Reaction { get; set; }
-
-    public Ace(Guid actionId, AceType reaction)
-    {
-        ActionId = actionId;
-        Reaction = reaction;
+    public Guid ActionId { get; set; } = actionId;
+    public AceType Reaction { get; set; } = reaction;
     }
-}

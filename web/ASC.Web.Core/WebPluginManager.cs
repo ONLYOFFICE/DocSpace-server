@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ASC.Web.Core;
 
@@ -54,40 +56,48 @@ public class WebPlugin
 [Singleton]
 public class WebPluginCache
 {
-    private readonly ICache _сache;
+    private readonly ICache _cache;
     private readonly ICacheNotify<WebPluginCacheItem> _notify;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
 
     public WebPluginCache(ICacheNotify<WebPluginCacheItem> notify, ICache cache)
     {
-        _сache = cache;
+        _cache = cache;
         _notify = notify;
 
-        _notify.Subscribe((i) => _сache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public List<WebPlugin> Get(string key)
     {
-        return _сache.Get<List<WebPlugin>>(key);
+        return _cache.Get<List<WebPlugin>>(key);
     }
 
     public void Insert(string key, object value)
     {
         _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
-        _сache.Insert(key, value, _cacheExpiration);
+        _cache.Insert(key, value, _cacheExpiration);
     }
 
     public void Remove(string key)
     {
         _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
-        _сache.Remove(key);
+        _cache.Remove(key);
     }
 }
 
 [Scope]
-public class WebPluginManager
+public class WebPluginManager(
+    CoreBaseSettings coreBaseSettings,
+    SettingsManager settingsManager,
+    InstanceCrypto instanceCrypto,
+    WebPluginConfigSettings webPluginConfigSettings,
+    WebPluginCache webPluginCache,
+    StorageFactory storageFactory,
+    AuthContext authContext,
+    ILogger<WebPluginManager> log)
 {
     private const string StorageSystemModuleName = "systemwebplugins";
     private const string StorageModuleName = "webplugins";
@@ -95,43 +105,14 @@ public class WebPluginManager
     private const string PluginFileName = "plugin.js";
     private const string AssetsFolderName = "assets";
 
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SettingsManager _settingsManager;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly WebPluginConfigSettings _webPluginConfigSettings;
-    private readonly WebPluginCache _webPluginCache;
-    private readonly StorageFactory _storageFactory;
-    private readonly AuthContext _authContext;
-    private readonly ILogger<WebPluginManager> _log;
-
-    public WebPluginManager(
-        CoreBaseSettings coreBaseSettings,
-        SettingsManager settingsManager,
-        InstanceCrypto instanceCrypto,
-        WebPluginConfigSettings webPluginConfigSettings,
-        WebPluginCache webPluginCache,
-        StorageFactory storageFactory,
-        AuthContext authContext,
-        ILogger<WebPluginManager> log)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _settingsManager = settingsManager;
-        _instanceCrypto = instanceCrypto;
-        _webPluginConfigSettings = webPluginConfigSettings;
-        _webPluginCache = webPluginCache;
-        _storageFactory = storageFactory;
-        _authContext = authContext;
-        _log = log;
-    }
-
     private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
-        if (!_webPluginConfigSettings.Enabled)
+        if (!webPluginConfigSettings.Enabled)
         {
             throw new SecurityException("Plugins disabled");
         }
 
-        if ((upload && !_webPluginConfigSettings.Upload) || (delete && !_webPluginConfigSettings.Delete))
+        if ((upload && !webPluginConfigSettings.Upload) || (delete && !webPluginConfigSettings.Delete))
         {
             throw new SecurityException("Forbidden action");
         }
@@ -141,7 +122,7 @@ public class WebPluginManager
     {
         var module = tenantId == Tenant.DefaultTenant ? StorageSystemModuleName : StorageModuleName;
 
-        var storage = await _storageFactory.GetStorageAsync(tenantId, module);
+        var storage = await storageFactory.GetStorageAsync(tenantId, module);
 
         return storage;
     }
@@ -162,17 +143,17 @@ public class WebPluginManager
     {
         DemandWebPlugins(upload: true);
 
-        if (system && !_coreBaseSettings.Standalone)
+        if (system && !coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        if (Path.GetExtension(file.FileName).ToLowerInvariant() != _webPluginConfigSettings.Extension)
+        if (Path.GetExtension(file.FileName).ToLowerInvariant() != webPluginConfigSettings.Extension)
         {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileExtension);
         }
 
-        if (file.Length > _webPluginConfigSettings.MaxSize)
+        if (file.Length > webPluginConfigSettings.MaxSize)
         {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileSize);
         }
@@ -203,7 +184,7 @@ public class WebPluginManager
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             };
 
-            webPlugin = System.Text.Json.JsonSerializer.Deserialize<WebPlugin>(configContent, options);
+            webPlugin = JsonSerializer.Deserialize<WebPlugin>(configContent, options);
 
             await ValidatePlugin(webPlugin, tenantId, system);
 
@@ -212,10 +193,10 @@ public class WebPluginManager
                 await storage.DeleteDirectoryAsync(webPlugin.Name);
             }
 
-            webPlugin.CreateBy = _authContext.CurrentAccount.ID;
+            webPlugin.CreateBy = authContext.CurrentAccount.ID;
             webPlugin.CreateOn = DateTime.UtcNow;
 
-            var configString = System.Text.Json.JsonSerializer.Serialize(webPlugin, options);
+            var configString = JsonSerializer.Serialize(webPlugin, options);
 
             using var configStream = new MemoryStream(Encoding.UTF8.GetBytes(configString));
 
@@ -233,7 +214,7 @@ public class WebPluginManager
             {
                 var ext = Path.GetExtension(zipEntry.Name);
 
-                if (_webPluginConfigSettings.AssetExtensions.Any() && !_webPluginConfigSettings.AssetExtensions.Contains(ext))
+                if (webPluginConfigSettings.AssetExtensions.Any() && !webPluginConfigSettings.AssetExtensions.Contains(ext))
                 {
                     continue;
                 }
@@ -282,15 +263,15 @@ public class WebPluginManager
         if (system)
         {
             if (tenantWebPlugins.Any(x => 
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
-                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                    x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
 
             if (systemWebPlugins.Any(x => 
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
-                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                    !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
@@ -298,15 +279,15 @@ public class WebPluginManager
         else
         {
             if (systemWebPlugins.Any(x =>
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
-                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                    x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
 
             if (tenantWebPlugins.Any(x =>
-                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
-                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                    !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
             }
@@ -322,7 +303,7 @@ public class WebPluginManager
         webPlugins.AddRange((await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant)).Select(x => x.Clone()));
         webPlugins.AddRange((await GetWebPluginsFromCacheAsync(tenantId)).Select(x => x.Clone()));
 
-        var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
@@ -333,7 +314,7 @@ public class WebPluginManager
                 if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
                 {
                     webPlugin.Enabled = webPluginState.Enabled;
-                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : _instanceCrypto.Decrypt(webPluginState.Settings);
+                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : instanceCrypto.Decrypt(webPluginState.Settings);
                 }
             }
         }
@@ -345,13 +326,13 @@ public class WebPluginManager
     {
         var key = GetCacheKey(tenantId);
 
-        var webPlugins = _webPluginCache.Get(key);
+        var webPlugins = webPluginCache.Get(key);
 
         if (webPlugins == null)
         {
             webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            _webPluginCache.Insert(key, webPlugins);
+            webPluginCache.Insert(key, webPlugins);
         }
 
         return webPlugins;
@@ -384,7 +365,7 @@ public class WebPluginManager
                     PropertyNameCaseInsensitive = true
                 };
 
-                var webPlugin = System.Text.Json.JsonSerializer.Deserialize<WebPlugin>(configContent, options);
+                var webPlugin = JsonSerializer.Deserialize<WebPlugin>(configContent, options);
 
                 webPlugin.System = system;
 
@@ -394,7 +375,7 @@ public class WebPluginManager
             }
             catch (Exception e)
             {
-                _log.ErrorWithException(e);
+                log.ErrorWithException(e);
             }
         }
 
@@ -419,24 +400,17 @@ public class WebPluginManager
 
     private async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, WebPlugin webPlugin, bool enabled, string settings)
     {
-        var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
-        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : _instanceCrypto.Encrypt(settings);
+        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : instanceCrypto.Encrypt(settings);
 
         if (enabled || encryptedSettings != null)
         {
             var webPluginState = new WebPluginState(enabled, encryptedSettings);
 
-            if (enabledPlugins.ContainsKey(webPlugin.Name))
-            {
-                enabledPlugins[webPlugin.Name] = webPluginState;
-            }
-            else
-            {
-                enabledPlugins.Add(webPlugin.Name, webPluginState);
-            }
+            enabledPlugins[webPlugin.Name] = webPluginState;
         }
         else
         {
@@ -447,14 +421,14 @@ public class WebPluginManager
 
         webPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
 
-        await _settingsManager.SaveAsync(webPluginSettings);
+        await settingsManager.SaveAsync(webPluginSettings);
 
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
 
         var key = GetCacheKey(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
-        _webPluginCache.Remove(key);
+        webPluginCache.Remove(key);
 
         return webPlugin;
     }
@@ -465,7 +439,7 @@ public class WebPluginManager
 
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 
-        if (webPlugin.System && !_coreBaseSettings.Standalone)
+        if (webPlugin.System && !coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }

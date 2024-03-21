@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,29 +26,17 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class IpRestrictionsController : BaseSettingsController
-{
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly IPRestrictionsService _iPRestrictionsService;
-    private readonly TenantManager _tenantManager;
-
-    public IpRestrictionsController(
-        ApiContext apiContext,
+[DefaultRoute("iprestrictions")]
+public class IpRestrictionsController(ApiContext apiContext,
         PermissionContext permissionContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         IPRestrictionsService iPRestrictionsService,
         IMemoryCache memoryCache,
         TenantManager tenantManager,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _iPRestrictionsService = iPRestrictionsService;
-        _tenantManager = tenantManager;
-    }
-
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Returns the IP portal restrictions.
     /// </summary>
@@ -58,12 +46,12 @@ public class IpRestrictionsController : BaseSettingsController
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("iprestrictions")]
+    [HttpGet("")]
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        return await _iPRestrictionsService.GetAsync(tenant.Id);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return await iPRestrictionsService.GetAsync(tenant.Id);
     }
 
     /// <summary>
@@ -76,12 +64,18 @@ public class IpRestrictionsController : BaseSettingsController
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("iprestrictions")]
+    [HttpPut("")]
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        return await _iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
+        if (inDto.IpRestrictions.Any(r => !IPAddress.TryParse(r.Ip, out _)))
+        {
+            throw new ArgumentException(nameof(inDto.IpRestrictions));
+        }
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
     }
 
     /// <summary>
@@ -92,12 +86,12 @@ public class IpRestrictionsController : BaseSettingsController
     /// <returns type="ASC.IPSecurity.IPRestrictionsSettings, ASC.IPSecurity">IP restriction settings</returns>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("iprestrictions/settings")]
+    [HttpGet("settings")]
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await _settingsManager.LoadAsync<IPRestrictionsSettings>();
+        return await settingsManager.LoadAsync<IPRestrictionsSettings>();
     }
 
     /// <summary>
@@ -109,13 +103,13 @@ public class IpRestrictionsController : BaseSettingsController
     /// <returns type="ASC.IPSecurity.IPRestrictionsSettings, ASC.IPSecurity">Updated IP restriction settings</returns>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("iprestrictions/settings")]
+    [HttpPut("settings")]
     public async Task<IPRestrictionsSettings> UpdateIpRestrictionsSettingsAsync(IpRestrictionsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
 
         return settings;
     }

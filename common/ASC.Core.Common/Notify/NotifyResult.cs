@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class NotifyResult
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.AppendFormat("SendResult: {0} whith {1} sub-results", Result, Responses.Count);
+        sb.Append($"SendResult: {Result} whith {Responses.Count} sub-results");
         foreach (var responce in Responses)
         {
             var recipient = "<recipient:nomessage>";

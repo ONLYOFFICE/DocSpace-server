@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public static class LinqExtensions
         var method = typeof(Queryable).GetMethods().FirstOrDefault(m => m.Name == (sortOrderAsc ? "OrderBy" : "OrderByDescending") && m.GetParameters().Length == 2);
         var genericMethod = method.MakeGenericMethod(typeof(T), propInfo.PropertyType);
 
-        return (IOrderedQueryable<T>)genericMethod.Invoke(null, new object[] { query, expr });
+        return (IOrderedQueryable<T>)genericMethod.Invoke(null, [query, expr]);
     }
 
     public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> query, string name, bool sortOrderAsc)
@@ -47,7 +47,7 @@ public static class LinqExtensions
         var method = typeof(Queryable).GetMethods().FirstOrDefault(m => m.Name == (sortOrderAsc ? "ThenBy" : "ThenByDescending") && m.GetParameters().Length == 2);
         var genericMethod = method.MakeGenericMethod(typeof(T), propInfo.PropertyType);
 
-        return (IOrderedQueryable<T>)genericMethod.Invoke(null, new object[] { query, expr });
+        return (IOrderedQueryable<T>)genericMethod.Invoke(null, [query, expr]);
     }
 
 

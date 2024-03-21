@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,11 @@
 
 namespace ASC.Core.Common.Quota;
 [Scope]
-public class TenantQuotaFeatureStatHelper
+public class TenantQuotaFeatureStatHelper(IServiceProvider serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-    public TenantQuotaFeatureStatHelper(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
     public async Task<(string Name, T1 Value)> GetStatAsync<T, T1>() where T : TenantQuotaFeature
     {
-        var statisticProvider = (ITenantQuotaFeatureStat<T1>)_serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(typeof(T), typeof(T1)));
+        var statisticProvider = (ITenantQuotaFeatureStat<T1>)serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(typeof(T), typeof(T1)));
 
         var quota = new TenantQuota();
         var name = quota.GetFeature<T>().Name;
@@ -45,6 +40,6 @@ public class TenantQuotaFeatureStatHelper
             return (name, await statisticProvider.GetValueAsync());
         }
 
-        return (name, default(T1));
+        return (name, default);
     }
 }

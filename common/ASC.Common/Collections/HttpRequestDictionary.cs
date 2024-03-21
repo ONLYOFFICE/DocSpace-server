@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
 
     public HttpRequestDictionary(HttpContext httpContext, string baseKey)
     {
-        Condition = (_) => true;
+        Condition = _ => true;
         BaseKey = baseKey;
         _httpContext = httpContext;
     }

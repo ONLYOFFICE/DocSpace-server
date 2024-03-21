@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,8 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class WebPluginsController : BaseSettingsController
-{
-    private readonly PermissionContext _permissionContext;
-    private readonly WebPluginManager _webPluginManager;
-    private readonly TenantManager _tenantManager;
-    private readonly CspSettingsHelper _cspSettingsHelper;
-    private readonly IMapper _mapper;
-
-    public WebPluginsController(
-        ApiContext apiContext,
+[DefaultRoute("webplugins")]
+public class WebPluginsController(ApiContext apiContext,
         IMemoryCache memoryCache,
         WebItemManager webItemManager,
         IHttpContextAccessor httpContextAccessor,
@@ -43,19 +35,13 @@ public class WebPluginsController : BaseSettingsController
         WebPluginManager webPluginManager,
         TenantManager tenantManager,
         CspSettingsHelper cspSettingsHelper,
-        IMapper mapper) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _permissionContext = permissionContext;
-        _webPluginManager = webPluginManager;
-        _tenantManager = tenantManager;
-        _cspSettingsHelper = cspSettingsHelper;
-        _mapper = mapper;
-    }
-
-    [HttpPost("webplugins")]
+        IMapper mapper)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
+    [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
@@ -69,25 +55,25 @@ public class WebPluginsController : BaseSettingsController
 
         var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await _webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
+        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var outDto = _mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
         return outDto;
     }
 
-    [HttpGet("webplugins")]
+    [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugins = await _webPluginManager.GetWebPluginsAsync(tenant.Id);
+        var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
 
-        var outDto = _mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
+        var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
 
         if (enabled.HasValue)
         {
@@ -97,38 +83,38 @@ public class WebPluginsController : BaseSettingsController
         return outDto;
     }
 
-    [HttpGet("webplugins/{name}")]
+    [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(string name)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await _webPluginManager.GetWebPluginByNameAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, name);
 
-        var outDto = _mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
         return outDto;
     }
 
-    [HttpPut("webplugins/{name}")]
+    [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await _webPluginManager.UpdateWebPluginAsync(tenant.Id, name, inDto.Enabled, inDto.Settings);
+        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, name, inDto.Enabled, inDto.Settings);
 
         await ChangeCspSettings(webPlugin, inDto.Enabled);
     }
 
-    [HttpDelete("webplugins/{name}")]
+    [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(string name)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await _webPluginManager.DeleteWebPluginAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, name);
 
         await ChangeCspSettings(webPlugin, false);
     }
@@ -140,7 +126,7 @@ public class WebPluginsController : BaseSettingsController
             return;
         }
 
-        var settings = await _cspSettingsHelper.LoadAsync();
+        var settings = await cspSettingsHelper.LoadAsync();
 
         var domains = plugin.CspDomains.Split(',');
 
@@ -155,6 +141,6 @@ public class WebPluginsController : BaseSettingsController
             _ = currentDomains.RemoveAll(x => domains.Contains(x));
         }
 
-        _ = await _cspSettingsHelper.SaveAsync(currentDomains.Distinct(), settings.SetDefaultIfEmpty);
+        _ = await cspSettingsHelper.SaveAsync(currentDomains.Distinct(), settings.SetDefaultIfEmpty);
     }
 }

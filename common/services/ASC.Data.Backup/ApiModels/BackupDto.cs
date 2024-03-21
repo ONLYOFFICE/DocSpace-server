@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,4 +38,9 @@ public class BackupDto
     /// <summary>Storage parameters</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
+
+    /// <summary>Dump</summary>
+    /// <type>System.Bolean, System</type>
+    /// <example>true</example>
+    public bool Dump { get; set; }
 }

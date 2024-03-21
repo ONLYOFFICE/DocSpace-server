@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,11 @@ namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
 /// </summary>
-public class MentionWrapper
+public class MentionWrapper(UserInfo user, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     /// <summary>User information</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
-    public UserInfo User { get; set; }
+    public UserInfo User { get; set; } = user;
 
     /// <summary>User email</summary>
     /// <type>System.String, System</type>
@@ -48,15 +48,7 @@ public class MentionWrapper
 
     /// <summary>User display name</summary>
     /// <type>System.String, System</type>
-    public string Name => User.DisplayUserName(false, _displayUserSettingsHelper);
-
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-
-    public MentionWrapper(UserInfo user, DisplayUserSettingsHelper displayUserSettingsHelper)
-    {
-        User = user;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-    }
+    public string Name => User.DisplayUserName(false, displayUserSettingsHelper);
 }
 
 /// <summary>

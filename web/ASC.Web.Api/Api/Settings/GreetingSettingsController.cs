@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,8 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class GreetingSettingsController : BaseSettingsController
-{
-    private readonly MessageService _messageService;
-    private readonly TenantManager _tenantManager;
-    private readonly PermissionContext _permissionContext;
-    private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public GreetingSettingsController(
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
+[DefaultRoute("greetingsettings")]
+public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSettingsHelper,
         MessageService messageService,
         ApiContext apiContext,
         TenantManager tenantManager,
@@ -43,15 +35,9 @@ public class GreetingSettingsController : BaseSettingsController
         WebItemManager webItemManager,
         IMemoryCache memoryCache,
         CoreBaseSettings coreBaseSettings,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
-        _messageService = messageService;
-        _tenantManager = tenantManager;
-        _permissionContext = permissionContext;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Returns the greeting settings for the current portal.
     /// </summary>
@@ -60,10 +46,10 @@ public class GreetingSettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Greeting settings: tenant name</returns>
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("greetingsettings")]
+    [HttpGet("")]
     public async Task<object> GetGreetingSettings()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 
@@ -75,10 +61,10 @@ public class GreetingSettingsController : BaseSettingsController
     /// <returns type="System.Boolean, System">Boolean value: true if the greeting settings of the current portal are set to default</returns>
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("greetingsettings/isdefault")]
+    [HttpGet("isdefault")]
     public async Task<bool> IsDefault()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         return tenant.Name == "";
     }
 
@@ -91,26 +77,26 @@ public class GreetingSettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Message about saving greeting settings successfully</returns>
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("greetingsettings")]
+    [HttpPost("")]
     public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
-            var quota = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
+            var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
             if (quota.Free || quota.Trial)
             {
-                _tenantManager.ValidateTenantName(inDto.Title);
+                tenantManager.ValidateTenantName(inDto.Title);
             }
         }
 
         tenant.Name = inDto.Title;
-        await _tenantManager.SaveTenantAsync(tenant);
+        await tenantManager.SaveTenantAsync(tenant);
 
-        await _messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
+        await messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
 
         return Resource.SuccessfullySaveGreetingSettingsMessage;
     }
@@ -123,14 +109,14 @@ public class GreetingSettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Greeting settings: tenant name</returns>
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("greetingsettings/restore")]
+    [HttpPost("restore")]
     public async Task<object> RestoreGreetingSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
+        await tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }

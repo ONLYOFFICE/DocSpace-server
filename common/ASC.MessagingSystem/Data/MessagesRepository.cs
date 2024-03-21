@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,14 +32,15 @@ public class MessagesRepository : IDisposable
     private DateTime _lastSave = DateTime.UtcNow;
     private bool _timerStarted;
     private readonly TimeSpan _cacheTime;
-    private readonly IDictionary<string, EventMessage> _cache;
+    private readonly Dictionary<string, EventMessage> _cache;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-    private readonly HashSet<MessageAction> _forceSaveAuditActions = new() { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
+    private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly HashSet<MessageAction> _forceSaveAuditActions =
+        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions];
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -149,7 +150,7 @@ public class MessagesRepository : IDisposable
                 _timer.Change(-1, -1);
                 _timerStarted = false;
 
-                events = new List<EventMessage>(_cache.Values);
+                events = [.._cache.Values];
                 _cache.Clear();
                 _lastSave = DateTime.UtcNow;
             }
@@ -225,7 +226,7 @@ public class MessagesRepository : IDisposable
             _timer.Change(-1, -1);
             _timerStarted = false;
 
-            events = new List<EventMessage>(_cache.Values);
+            events = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
         }
@@ -304,10 +305,7 @@ public class MessagesRepository : IDisposable
 
     public void Dispose()
     {
-        if (_timer != null)
-        {
-            _timer.Dispose();
-        }
+        _timer?.Dispose();
     }
 }
 

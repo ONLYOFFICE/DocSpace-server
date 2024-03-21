@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,14 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.EF.Context;
-public class FirebaseDbContext : DbContext
+public class FirebaseDbContext(DbContextOptions<FirebaseDbContext> options) : DbContext(options)
 {
     public DbSet<FireBaseUser> Users { get; set; }
-
-    public FirebaseDbContext(DbContextOptions<FirebaseDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

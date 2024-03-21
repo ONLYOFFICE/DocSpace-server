@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,8 @@
 
 namespace ASC.Api.Core.Middleware;
 
-public class CultureMiddleware
+public class CultureMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public CultureMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(HttpContext context, UserManager userManager, TenantManager tenantManager, AuthContext authContext)
     {
         CultureInfo culture = null;
@@ -49,10 +42,7 @@ public class CultureMiddleware
             }
         }
 
-        if (culture == null)
-        {
-            culture = (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture();
-        }
+        culture ??= (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture();
 
         if (culture != null)
         {
@@ -60,7 +50,7 @@ public class CultureMiddleware
             CultureInfo.CurrentUICulture = culture;
         }
 
-        await _next.Invoke(context);
+        await next.Invoke(context);
     }
 }
 

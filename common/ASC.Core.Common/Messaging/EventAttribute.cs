@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,8 @@
 namespace ASC.AuditTrail;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class EventAttribute : Attribute
+public class EventAttribute(string resource, int order = 0) : Attribute
 {
-    public string Resource { get; private set; }
-    public int Order { get; private set; }
-
-    public EventAttribute(string resource, int order = 0)
-    {
-        Resource = resource;
-        Order = order;
-    }
+    public string Resource { get; private set; } = resource;
+    public int Order { get; private set; } = order;
 }

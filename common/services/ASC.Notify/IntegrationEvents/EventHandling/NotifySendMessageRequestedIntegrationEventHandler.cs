@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,37 +27,29 @@
 namespace ASC.Notify.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifySendMessageRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifySendMessageRequestedIntegrationEvent>
-{
-    private readonly ILogger<NotifySendMessageRequestedIntegrationEventHandler> _logger;
-    private readonly DbWorker _db;
-
-    public NotifySendMessageRequestedIntegrationEventHandler(
+public class NotifySendMessageRequestedIntegrationEventHandler(
         ILogger<NotifySendMessageRequestedIntegrationEventHandler> logger,
         DbWorker db)
-    {
-        _logger = logger;
-        _db = db;
-    }
-
+    : IIntegrationEventHandler<NotifySendMessageRequestedIntegrationEvent>
+{
     private async Task SendNotifyMessageAsync(NotifyMessage notifyMessage)
     {
         try
         {
-            await _db.SaveMessageAsync(notifyMessage);
+            await db.SaveMessageAsync(notifyMessage);
         }
         catch (Exception e)
         {
-            _logger.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
     }
 
     public async Task Handle(NotifySendMessageRequestedIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
             await SendNotifyMessageAsync(@event.NotifyMessage);
 

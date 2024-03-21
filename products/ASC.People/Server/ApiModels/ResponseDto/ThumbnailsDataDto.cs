@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,7 +80,7 @@ public class ThumbnailsDataDto
             Max = "default_user_photo_size_200-200.png",
             Big = "default_user_photo_size_82-82.png",
             Medium = "default_user_photo_size_48-48.png",
-            Small = "default_user_photo_size_32-32.png",
+            Small = "default_user_photo_size_32-32.png"
         };
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,9 @@
 namespace ASC.Security.Cryptography;
 
 [Singleton]
-public class InstanceCrypto
+public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
 {
-    private readonly byte[] _eKey;
-
-    public InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
-    {
-        _eKey = machinePseudoKeys.GetMachineConstant(32);
-    }
+    private readonly byte[] _eKey = machinePseudoKeys.GetMachineConstant(32);
 
     public string Encrypt(string data)
     {

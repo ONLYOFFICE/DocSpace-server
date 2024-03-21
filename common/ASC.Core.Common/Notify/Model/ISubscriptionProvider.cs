@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,10 +55,14 @@ public static class SubscriptionProviderHelper
                 var properties = subscriptionRecord.GetType().GetProperties();
                 if (properties.Length > 0)
                 {
-                    var property = properties.Single(p => p.Name == "Subscribed");
+                    var property = properties.SingleOrDefault(p => p.Name == "Subscribed");
                     if (property != null)
                     {
-                        result = (bool)property.GetValue(subscriptionRecord, null);
+                        var val = property.GetValue(subscriptionRecord, null);
+                        if (val != null)
+                        {
+                            result = (bool)val;
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,13 @@
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope]
-internal class ProviderTagDao : ProviderDaoBase, IThirdPartyTagDao
-{
-    public ProviderTagDao(
-        IServiceProvider serviceProvider,
+internal class ProviderTagDao(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,
         SelectorFactory selectorFactory,
         ISecurityDao<string> securityDao)
-        : base(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao)
-    {
-    }
-
+    : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IThirdPartyTagDao
+{
     public IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         return _selectorFactory.GetSelector(parentFolder.Id)

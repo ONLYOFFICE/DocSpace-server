@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ public static class ConfigurationManagerExtension
     public static ConfigurationManager AddApiSystemConfiguration(this ConfigurationManager config, IHostEnvironment env)
     {
         config
-          .AddJsonFile($"apisystem.json")
+          .AddJsonFile("apisystem.json")
           .AddJsonFile($"apisystem.{env.EnvironmentName}.json", true)
           .AddJsonFile("notify.json")
           .AddJsonFile($"notify.{env.EnvironmentName}.json", true);

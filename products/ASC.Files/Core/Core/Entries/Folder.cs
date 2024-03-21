@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,12 @@ public enum FolderType
     CustomRoom = 19,
     Archive = 20,
     ThirdpartyBackup = 21,
-    PublicRoom = 22
+    PublicRoom = 22,
+    FormRoom = 24,
+    ReadyFormFolder = 25,
+    InProcessFormFolder = 26,
+    FormFillingFolderDone = 27,
+    FormFillingFolderInProgress = 28
 }
 
 public interface IFolder
@@ -75,9 +80,12 @@ public class Folder<T> : FileEntry<T>, IFolder
     public int NewForMe { get; set; }
     public string FolderUrl { get; set; }
     public bool Pinned { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
+    public bool SettingsPrivate { get; set; }
+    public bool SettingsHasLogo { get; set; }
+    public string SettingsColor { get; set; }
+    public bool SettingsIndexing { get; set; }
+    public long SettingsQuota { get; set; }
+    public long Counter { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);
@@ -85,6 +93,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public bool IsFavorite { get; set; }
+    public bool ProviderMapped { get; set; }
 
     public Folder()
     {
@@ -95,9 +104,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public Folder(
         FileHelper fileHelper,
         Global global,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global)
+        SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

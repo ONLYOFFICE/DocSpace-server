@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,7 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class FileUploader
-{
-    private readonly FilesSettingsHelper _filesSettingsHelper;
-    private readonly FileUtility _fileUtility;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthContext _authContext;
-    private readonly SetupInfo _setupInfo;
-    private readonly MaxTotalSizeStatistic _maxTotalSizeStatistic;
-    private readonly FileMarker _fileMarker;
-    private readonly FileConverter _fileConverter;
-    private readonly IDaoFactory _daoFactory;
-    private readonly Global _global;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FilesMessageService _filesMessageService;
-    private readonly FileSecurity _fileSecurity;
-    private readonly EntryManager _entryManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
-    private readonly FileTrackerHelper _fileTracker;
-    private readonly SocketManager _socketManager;
-
-    public FileUploader(
-        FilesSettingsHelper filesSettingsHelper,
+public class FileUploader(
         FileUtility fileUtility,
         UserManager userManager,
         TenantManager tenantManager,
@@ -69,53 +46,27 @@ public class FileUploader
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         FileTrackerHelper fileTracker,
         SocketManager socketManager)
-    {
-        _filesSettingsHelper = filesSettingsHelper;
-        _fileUtility = fileUtility;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _authContext = authContext;
-        _setupInfo = setupInfo;
-        _maxTotalSizeStatistic = maxTotalSizeStatistic;
-        _fileMarker = fileMarker;
-        _fileConverter = fileConverter;
-        _daoFactory = daoFactory;
-        _global = global;
-        _filesLinkUtility = filesLinkUtility;
-        _filesMessageService = filesMessageService;
-        _fileSecurity = fileSecurity;
-        _entryManager = entryManager;
-        _serviceProvider = serviceProvider;
-        _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
-        _fileTracker = fileTracker;
-        _socketManager = socketManager;
-    }
-
-    public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data)
-    {
-        return await ExecAsync(folderId, title, contentLength, data, !_filesSettingsHelper.UpdateIfExist);
-    }
-
+{
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
         if (contentLength <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
 
         var file = await VerifyFileUploadAsync(folderId, title, contentLength, !createNewIfExist);
 
-        var dao = _daoFactory.GetFileDao<T>();
+        var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
 
-        var linkDao = _daoFactory.GetLinkDao();
+        var linkDao = daoFactory.GetLinkDao();
         await linkDao.DeleteAllLinkAsync(file.Id.ToString());
 
-        await _fileMarker.MarkAsNewAsync(file);
+        await fileMarker.MarkAsNewAsync(file);
 
-        if (_fileConverter.EnableAsUploaded && _fileConverter.MustConvert(file))
+        if (fileConverter.EnableAsUploaded && fileConverter.MustConvert(file))
         {
-            await _fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus);
+            await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
 
         return file;
@@ -125,14 +76,14 @@ public class FileUploader
     {
         fileName = Global.ReplaceInvalidCharsAndTruncate(fileName);
 
-        if (_global.EnableUploadFilter && !_fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(fileName)))
+        if (global.EnableUploadFilter && !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(fileName)))
         {
-            throw new NotSupportedException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new NotSupportedException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
 
         folderId = await GetFolderIdAsync(folderId, string.IsNullOrEmpty(relativePath) ? null : relativePath.Split('/').ToList());
 
-        var fileDao = _daoFactory.GetFileDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(folderId, fileName);
 
         if (updateIfExists && await CanEditAsync(file))
@@ -148,7 +99,7 @@ public class FileUploader
             return file;
         }
 
-        var newFile = _serviceProvider.GetService<File<T>>();
+        var newFile = serviceProvider.GetService<File<T>>();
         newFile.ParentId = folderId;
         newFile.Title = fileName;
 
@@ -159,7 +110,7 @@ public class FileUploader
     {
         if (fileSize <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
 
         var maxUploadSize = await GetMaxFileSizeAsync(folderId);
@@ -178,27 +129,27 @@ public class FileUploader
     private async Task<bool> CanEditAsync<T>(File<T> file)
     {
         return file != null
-               && await _fileSecurity.CanEditAsync(file)
-               && !await _userManager.IsUserAsync(_authContext.CurrentAccount.ID)
-               && !await _entryManager.FileLockedForMeAsync(file.Id)
-               && !_fileTracker.IsEditing(file.Id)
+               && await fileSecurity.CanEditAsync(file)
+               && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
+               && !await entryManager.FileLockedForMeAsync(file.Id)
+               && !fileTracker.IsEditing(file.Id)
                && file.RootFolderType != FolderType.TRASH
                && !file.Encrypted;
     }
 
     private async Task<T> GetFolderIdAsync<T>(T folderId, IList<string> relativePath)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
 
         if (folder == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await _fileSecurity.CanCreateAsync(folder))
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         if (relativePath is { Count: > 0 })
@@ -211,14 +162,14 @@ public class FileUploader
 
                 if (folder == null)
                 {
-                    var newFolder = _serviceProvider.GetService<Folder<T>>();
+                    var newFolder = serviceProvider.GetService<Folder<T>>();
                     newFolder.Title = subFolderTitle;
                     newFolder.ParentId = folderId;
 
                     folderId = await folderDao.SaveFolderAsync(newFolder);
                     folder = await folderDao.GetFolderAsync(folderId);
-                    await _socketManager.CreateFolderAsync(folder);
-                    await _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
+                    await socketManager.CreateFolderAsync(folder);
+                    await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
                 }
 
                 folderId = folder.Id;
@@ -250,13 +201,13 @@ public class FileUploader
 
     public async Task<File<T>> VerifyChunkedUploadForEditing<T>(T fileId, long fileSize)
     {
-        var fileDao = _daoFactory.GetFileDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
 
         var file = await fileDao.GetFileAsync(fileId);
 
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var maxUploadSize = await GetMaxFileSizeAsync(file.ParentId, true);
@@ -268,7 +219,7 @@ public class FileUploader
 
         if (!await CanEditAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         file.ConvertedType = null;
@@ -283,89 +234,88 @@ public class FileUploader
 
     public async Task<ChunkedUploadSession<T>> InitiateUploadAsync<T>(T folderId, T fileId, string fileName, long contentLength, bool encrypted, bool keepVersion = false, ApiDateTime createOn = null)
     {
-        var file = _serviceProvider.GetService<File<T>>();
+        var file = serviceProvider.GetService<File<T>>();
         file.Id = fileId;
         file.ParentId = folderId;
         file.Title = fileName;
         file.ContentLength = contentLength;
         file.CreateOn = createOn;
 
-        var dao = _daoFactory.GetFileDao<T>();
+        var dao = daoFactory.GetFileDao<T>();
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
-        uploadSession.Location = _filesLinkUtility.GetUploadChunkLocationUrl(uploadSession.Id);
-        uploadSession.TenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        uploadSession.UserId = _authContext.CurrentAccount.ID;
+        uploadSession.Location = filesLinkUtility.GetUploadChunkLocationUrl(uploadSession.Id);
+        uploadSession.TenantId = await tenantManager.GetCurrentTenantIdAsync();
+        uploadSession.UserId = authContext.CurrentAccount.ID;
         uploadSession.FolderId = folderId;
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
-
-        await _chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
+        
+        await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
         return uploadSession;
     }
 
-    public async Task<ChunkedUploadSession<T>> UploadChunkAsync<T>(string uploadId, Stream stream, long chunkLength)
+    public async Task<ChunkedUploadSession<T>> UploadChunkAsync<T>(string uploadId, Stream stream, long chunkLength, int? chunkNumber = null)
     {
-        var uploadSession = await _chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         uploadSession.Expired = DateTime.UtcNow + ChunkedUploadSessionHolder.SlidingExpiration;
 
         if (chunkLength <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_EmptyFile);
+            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
         }
-
-        if (chunkLength > _setupInfo.ChunkUploadSize)
+        if (chunkLength > setupInfo.ChunkUploadSize)
         {
-            throw FileSizeComment.GetFileSizeException(await _setupInfo.MaxUploadSize(_tenantManager, _maxTotalSizeStatistic));
+            throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
         }
 
-        var maxUploadSize = await GetMaxFileSizeAsync(uploadSession.FolderId, uploadSession.BytesTotal > 0);
+        var dao = daoFactory.GetFileDao<T>();
+        await dao.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber);
 
-        if (uploadSession.BytesUploaded + chunkLength > maxUploadSize)
-        {
-            await AbortUploadAsync(uploadSession);
+        return uploadSession;
+    }
+    
+    public async Task<ChunkedUploadSession<T>> FinalizeUploadSessionAsync<T>(string uploadId)
+    {
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+        var dao = daoFactory.GetFileDao<T>();
 
-            throw FileSizeComment.GetFileSizeException(maxUploadSize);
-        }
+        uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
 
-        var dao = _daoFactory.GetFileDao<T>();
-        await dao.UploadChunkAsync(uploadSession, stream, chunkLength);
+        var linkDao = daoFactory.GetLinkDao();
+        await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            var linkDao = _daoFactory.GetLinkDao();
-            await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
-
-            await _fileMarker.MarkAsNewAsync(uploadSession.File);
-            await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
-        }
-        else
-        {
-            await _chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
-        }
+        await fileMarker.MarkAsNewAsync(uploadSession.File);
+        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
     }
 
     public async Task AbortUploadAsync<T>(string uploadId)
     {
-        await AbortUploadAsync(await _chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
+        await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
+    }
+    
+    public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
+    {
+        var dao = daoFactory.GetFileDao<T>();
+
+        return dao.GetTransferredBytesCountAsync(uploadSession);
     }
 
     private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
-        await _daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
+        await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
-        await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
+        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
     }
 
     private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
     }

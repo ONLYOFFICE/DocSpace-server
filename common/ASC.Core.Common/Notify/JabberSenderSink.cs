@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,17 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core.Notify;
 
-class JabberSenderSink : Sink
+class JabberSenderSink(INotifySender sender) : Sink
 {
-    private static readonly string _senderName = Configuration.Constants.NotifyMessengerSenderSysName;
-    private readonly INotifySender _sender;
-
-    public JabberSenderSink(INotifySender sender)
-    {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-    }
+    private static readonly string _senderName = Constants.NotifyMessengerSenderSysName;
+    private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
     {
@@ -62,20 +59,11 @@ class JabberSenderSink : Sink
 }
 
 [Scope]
-public class JabberSenderSinkMessageCreator : SinkMessageCreator
+public class JabberSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
 {
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-
-    public JabberSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager)
-    {
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-    }
-
     public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
-        var username = (await _userManager.GetUsersAsync(new Guid(message.Recipient.ID))).UserName;
+        var username = (await userManager.GetUsersAsync(new Guid(message.Recipient.ID))).UserName;
 
         var m = new NotifyMessage
         {
@@ -84,11 +72,11 @@ public class JabberSenderSinkMessageCreator : SinkMessageCreator
             ContentType = message.ContentType,
             Content = message.Body,
             SenderType = senderName,
-            CreationDate = DateTime.UtcNow,
+            CreationDate = DateTime.UtcNow
         };
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-        m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
         return m;
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,9 @@
 namespace ASC.Api.Core.Convention;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class ControllerNameAttribute : Attribute
+public class ControllerNameAttribute(string name) : Attribute
 {
-    public string Name { get; }
-
-    public ControllerNameAttribute(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; } = name;
 }
 
 public class ControllerNameAttributeConvention : IControllerModelConvention

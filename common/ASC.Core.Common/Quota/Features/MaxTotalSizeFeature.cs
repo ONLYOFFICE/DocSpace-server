@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,11 +26,8 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class MaxTotalSizeFeature : TenantQuotaFeatureSize
+public class MaxTotalSizeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureSize(tenantQuota)
 {
     public override string Name { get => "total_size"; }
     public override bool Paid { get => true; }
-    public MaxTotalSizeFeature(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
 }

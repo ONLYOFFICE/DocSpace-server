@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,6 +63,6 @@ public class ThirdPartyRequestDto
     public string ProviderKey { get; set; }
 
     /// <summary>Provider ID</summary>
-    /// <type>System.String, System</type>
-    public string ProviderId { get; set; }
+    /// <type>System.Nullable{System.Int32}, System</type>
+    public int? ProviderId { get; set; }
 }

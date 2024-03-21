@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class HyperLinkBlockModifier : BlockModifier
     public override string ModifyLine(string line)
     {
         line = Regex.Replace(line,
-                                @"(?<pre>[\s[{(]|" + Globals.PunctuationPattern + @")?" +       // $pre
+                                @"(?<pre>[\s[{(]|" + Globals.PunctuationPattern + ")?" +       // $pre
                                 "\"" +									// start
                                 Globals.BlockModifiersPattern +			// attributes
                                 "(?<text>[\\w\\W]+?)" +					// text
@@ -44,7 +44,7 @@ public class HyperLinkBlockModifier : BlockModifier
                                 @"(?<slash>\/)?" +						// slash
                                 @"(?<post>[^\w\/;]*)" +					// post
                                 @"(?=\s|$)",
-                                new MatchEvaluator(HyperLinksFormatMatchEvaluator));
+                                HyperLinksFormatMatchEvaluator);
         return line;
     }
 

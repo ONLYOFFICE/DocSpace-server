@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,12 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Singleton]
-public class EncryptionFactory
+public class EncryptionFactory(IServiceScopeFactory serviceScopeFactory)
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public EncryptionFactory(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     public ICrypt GetCrypt(string storageName, EncryptionSettings encryptionSettings)
     {
-        ICrypt result = null;
-
-        using var scope = _serviceScopeFactory.CreateScope();
-        if (scope != null)
-        {
-            result = scope.ServiceProvider.GetService<ICrypt>();
-        }
+        using var scope = serviceScopeFactory.CreateScope();
+        var result = scope.ServiceProvider.GetService<ICrypt>();
 
         result ??= new FakeCrypt();
         result.Init(storageName, encryptionSettings);

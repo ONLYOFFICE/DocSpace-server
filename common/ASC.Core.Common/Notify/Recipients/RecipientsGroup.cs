@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,19 +26,12 @@
 
 namespace ASC.Notify.Recipients;
 
-public class RecipientsGroup
-    : IRecipientsGroup
+public class RecipientsGroup(string id, string name) : IRecipientsGroup
 {
-    public RecipientsGroup(string id, string name)
-    {
-        ID = id;
-        Name = name;
-    }
-
     #region IRecipientsGroup Members
 
-    public string ID { get; private set; }
-    public string Name { get; private set; }
+    public string ID { get; private set; } = id;
+    public string Name { get; private set; } = name;
 
     #endregion
 

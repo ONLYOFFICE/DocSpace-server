@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,11 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class FileSizeComment
+public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
 {
-    private readonly TenantExtra _tenantExtra;
-    private readonly SetupInfo _setupInfo;
-
-    public FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
-    {
-        _tenantExtra = tenantExtra;
-        _setupInfo = setupInfo;
-    }
-
     public string FileImageSizeExceptionString
     {
-        get { return GetFileSizeExceptionString(_setupInfo.MaxImageUploadSize); }
+        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
     }
 
     public static string GetFileSizeExceptionString(long size)
@@ -51,6 +42,15 @@ public class FileSizeComment
     public static string GetPersonalFreeSpaceExceptionString(long size)
     {
         return $"{Resource.PersonalFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
+
+    public static string GetRoomFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
+    public static string GetUserFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.UserFreeSpaceException} ({FilesSizeToString(size)}).";
     }
 
     /// <summary>
@@ -71,6 +71,16 @@ public class FileSizeComment
         return new TenantQuotaException(GetPersonalFreeSpaceExceptionString(size));
     }
 
+    public static Exception GetRoomFreeSpaceException(long size)
+    {
+        return new TenantQuotaException(GetRoomFreeSpaceExceptionString(size));
+    }
+
+    public static Exception GetUserFreeSpaceException(long size)
+    {
+        return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
+    }
+
     /// <summary>
     /// The maximum file size is exceeded (25 MB).
     /// </summary>
@@ -81,7 +91,7 @@ public class FileSizeComment
 
     public async Task<string> GetFileSizeExceptionStringAsync()
     {
-        return GetFileSizeExceptionString(await _tenantExtra.GetMaxUploadSizeAsync());
+        return GetFileSizeExceptionString(await tenantExtra.GetMaxUploadSizeAsync());
     }
 
     /// <summary>
@@ -113,7 +123,7 @@ public class FileSizeComment
     {
         return
             string.Format(note,
-                          FilesSizeToString(await _tenantExtra.GetMaxUploadSizeAsync()),
+                          FilesSizeToString(await tenantExtra.GetMaxUploadSizeAsync()),
                           withHtmlStrong ? "<strong>" : string.Empty,
                           withHtmlStrong ? "</strong>" : string.Empty);
     }
@@ -128,7 +138,7 @@ public class FileSizeComment
     {
         return
             string.Format(note,
-                          FilesSizeToString(_setupInfo.MaxImageUploadSize),
+                          FilesSizeToString(setupInfo.MaxImageUploadSize),
                           withHtmlStrong ? "<strong>" : string.Empty,
                           withHtmlStrong ? "</strong>" : string.Empty);
     }
@@ -141,8 +151,7 @@ public class FileSizeComment
     public static string FilesSizeToString(long size)
     {
         var sizeNames = !string.IsNullOrEmpty(Resource.FileSizePostfix) ? 
-            Resource.FileSizePostfix.Split(',', '،') : 
-            new[] { "bytes", "KB", "MB", "GB", "TB" };
+            Resource.FileSizePostfix.Split(',', '،') : ["bytes", "KB", "MB", "GB", "TB"];
         var power = 0;
 
         double resultSize = size;

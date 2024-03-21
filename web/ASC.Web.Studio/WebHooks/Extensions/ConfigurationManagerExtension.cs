@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ public static class ConfigurationManagerExtension
     public static ConfigurationManager AddWebStudioConfiguration(
     this ConfigurationManager config)
     {
-        config.AddJsonFile($"appsettings.services.json", optional: false, reloadOnChange: true);
+        config.AddJsonFile("appsettings.services.json", optional: false, reloadOnChange: true);
 
         return config;
     }

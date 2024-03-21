@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -147,9 +147,7 @@ public class DeleteBatchModelBinder : BaseBatchModelBinder
 
         var result = new DeleteBatchRequestDto();
 
-        var baseResult = bindingContext.Result.Model as BaseBatchRequestDto;
-
-        if (baseResult == null)
+        if (bindingContext.Result.Model is not BaseBatchRequestDto baseResult)
         {
             bindingContext.Result = ModelBindingResult.Success(result);
 
@@ -184,9 +182,7 @@ public class DownloadModelBinder : BaseBatchModelBinder
 
         var result = new DownloadRequestDto();
 
-        var baseResult = bindingContext.Result.Model as BaseBatchRequestDto;
-
-        if (baseResult == null)
+        if (bindingContext.Result.Model is not BaseBatchRequestDto baseResult)
         {
             bindingContext.Result = ModelBindingResult.Success(result);
 
@@ -212,9 +208,7 @@ public class BatchModelBinder : BaseBatchModelBinder
 
         var result = new BatchRequestDto();
 
-        var baseResult = bindingContext.Result.Model as BaseBatchRequestDto;
-
-        if (baseResult == null)
+        if (bindingContext.Result.Model is not BaseBatchRequestDto baseResult)
         {
             bindingContext.Result = ModelBindingResult.Success(result);
 
@@ -292,10 +286,7 @@ public class UploadModelBinder : IModelBinder
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        var defaultBindingContext = bindingContext as DefaultModelBindingContext;
-        var composite = bindingContext.ValueProvider as CompositeValueProvider;
-
-        if (defaultBindingContext != null && composite is { Count: 0 })
+        if (bindingContext is DefaultModelBindingContext defaultBindingContext && bindingContext.ValueProvider is CompositeValueProvider { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }

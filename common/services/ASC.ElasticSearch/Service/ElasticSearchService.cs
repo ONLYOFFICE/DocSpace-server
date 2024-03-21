@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,11 @@
 namespace ASC.ElasticSearch.Service;
 
 [Singleton]
-public class ElasticSearchService
+public class ElasticSearchService(IServiceProvider serviceProvider, ICacheNotify<ReIndexAction> cacheNotify)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICacheNotify<ReIndexAction> _cacheNotify;
-
-    public ElasticSearchService(IServiceProvider serviceProvider, ICacheNotify<ReIndexAction> cacheNotify)
-    {
-        _serviceProvider = serviceProvider;
-        _cacheNotify = cacheNotify;
-    }
-
     public void Subscribe()
     {
-        _cacheNotify.Subscribe((a) =>
+        cacheNotify.Subscribe(a =>
         {
             ReIndex(a.Names.ToList(), a.Tenant);
         }, CacheNotifyAction.Any);
@@ -48,12 +39,12 @@ public class ElasticSearchService
 
     public bool Support(string table)
     {
-        return _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().Any(r => r.IndexName == table);
+        return serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().Any(r => r.IndexName == table);
     }
 
     private void ReIndex(List<string> toReIndex, int tenant)
     {
-        var allItems = _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().ToList();
+        var allItems = serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().ToList();
         var tasks = new List<Task>(toReIndex.Count);
 
         foreach (var item in toReIndex)
@@ -76,7 +67,7 @@ public class ElasticSearchService
 
         Task.WhenAll(tasks).ContinueWith(async _ =>
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             await tenantManager.SetCurrentTenantAsync(tenant);

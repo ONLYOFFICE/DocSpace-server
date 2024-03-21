@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,14 +29,14 @@ namespace ASC.Web.Files.Core.Compress;
 ///<summary>Archiving Class Unification Interface</summary>
 public interface ICompress : IDisposable
 {
-    void SetStream(Stream stream);
+    Task SetStream(Stream stream);
 
     /// <summary>
     /// The record name is created (the name of a separate file in the archive)
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
-    void CreateEntry(string title, DateTime? lastModification = null);
+    Task CreateEntry(string title, DateTime? lastModification = null);
 
     /// <summary>
     /// Transfer the file itself to the archive
@@ -47,22 +47,22 @@ public interface ICompress : IDisposable
     /// <summary>
     /// Put an entry on the output stream.
     /// </summary>
-    void PutNextEntry();
+    Task PutNextEntry();
 
     /// <summary>
     /// Closes the current entry.
     /// </summary>
-    void CloseEntry();
+    Task CloseEntry();
 
     /// <summary>
     /// Resource title (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    string Title { get; }
+    Task<string> GetTitle();
 
     /// <summary>
     /// Extension the archive (does not affect the work of the class)
     /// </summary>
     /// <returns></returns>
-    string ArchiveExtension { get; }
+    Task<string> GetArchiveExtension();
 }

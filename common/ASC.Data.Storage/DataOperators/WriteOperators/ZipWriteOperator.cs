@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
     {
-        await using var buffered = _tempStream.GetBuffered(stream);
+        await using var buffered = await _tempStream.GetBufferedAsync(stream);
         var entry = TarEntry.CreateTarEntry(tarKey);
         entry.Size = buffered.Length;
         await _tarOutputStream.PutNextEntryAsync(entry, default);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,11 @@
 
 namespace ASC.Data.Backup.Extensions;
 
-public class TreeNode<TEntry>
+public class TreeNode<TEntry>()
 {
     public TEntry Entry { get; set; }
     public TreeNode<TEntry> Parent { get; set; }
-    public List<TreeNode<TEntry>> Children { get; private set; }
-
-    public TreeNode()
-    {
-        Children = new List<TreeNode<TEntry>>();
-    }
+    public List<TreeNode<TEntry>> Children { get; private set; } = new();
 
     public TreeNode(TEntry entry)
         : this()

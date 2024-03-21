@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,55 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core;
 
 [Scope]
-public class AuthManager
+public class AuthManager(IUserService service, UserManager userManager, UserFormatter userFormatter, TenantManager tenantManager)
 {
-    private readonly IUserService _userService;
-    private readonly UserManager _userManager;
-    private readonly UserFormatter _userFormatter;
-    private readonly TenantManager _tenantManager;
-
-    public AuthManager(IUserService service, UserManager userManager, UserFormatter userFormatter, TenantManager tenantManager)
-    {
-        _userService = service;
-        _userManager = userManager;
-        _userFormatter = userFormatter;
-        _tenantManager = tenantManager;
-    }
-
-
     public async Task<IUserAccount[]> GetUserAccountsAsync(Tenant tenant)
     {
-        return (await _userManager.GetUsersAsync(EmployeeStatus.Active)).Select(u => ToAccount(tenant.Id, u)).ToArray();
+        return (await userManager.GetUsersAsync(EmployeeStatus.Active)).Select(u => ToAccount(tenant.Id, u)).ToArray();
     }
 
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
-        await _userService.SetUserPasswordHashAsync(await _tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);
+        await service.SetUserPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(Guid userID)
     {
-        return await _userService.GetUserPasswordStampAsync(await _tenantManager.GetCurrentTenantIdAsync(), userID);
+        return await service.GetUserPasswordStampAsync(await tenantManager.GetCurrentTenantIdAsync(), userID);
     }
 
     public async Task<IAccount> GetAccountByIDAsync(int tenantId, Guid id)
     {
-        var s = Array.Find(Configuration.Constants.SystemAccounts, a => a.ID == id);
+        var s = Array.Find(Constants.SystemAccounts, a => a.ID == id);
         if (s != null)
         {
             return s;
         }
 
-        var u = await _userManager.GetUsersAsync(id);
+        var u = await userManager.GetUsersAsync(id);
 
-        return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Configuration.Constants.Guest;
+        return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Constants.Guest;
     }
 
     private IUserAccount ToAccount(int tenantId, UserInfo u)
     {
-        return new UserAccount(u, tenantId, _userFormatter);
+        return new UserAccount(u, tenantId, userFormatter);
     }
 }

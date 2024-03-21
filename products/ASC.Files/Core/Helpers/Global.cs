@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public class GlobalNotify
     {
         try
         {
-            _notify.Subscribe((_) =>
+            _notify.Subscribe(_ =>
             {
                 try
                 {
@@ -191,11 +191,11 @@ public class Global
             var pos = title.LastIndexOf('.');
             if (MaxTitle - 20 < pos)
             {
-                title = title.Substring(0, MaxTitle - (title.Length - pos)) + title.Substring(pos);
+                title = title[..(MaxTitle - (title.Length - pos))] + title[pos..];
             }
             else
             {
-                title = title.Substring(0, MaxTitle);
+                title = title[..MaxTitle];
             }
         }
 
@@ -217,28 +217,7 @@ public class Global
         var userInfo = await _userManager.GetUsersAsync(userId);
         if (userInfo.Equals(Constants.LostUser))
         {
-            return alive ? FilesCommonResource.Guest : _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
-        }
-
-        return userInfo.DisplayUserName(false, _displayUserSettingsHelper);
-    }
-
-    public string GetUserName(Guid userId, bool alive = false)
-    {
-        if (userId.Equals(_authContext.CurrentAccount.ID))
-        {
-            return FilesCommonResource.Author_Me;
-        }
-
-        if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-        {
-            return FilesCommonResource.Guest;
-        }
-
-        var userInfo = _userManager.GetUsers(userId);
-        if (userInfo.Equals(Constants.LostUser))
-        {
-            return alive ? FilesCommonResource.Guest : _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
+            return alive ? FilesCommonResource.Guest : await _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
         }
 
         return userInfo.DisplayUserName(false, _displayUserSettingsHelper);
@@ -246,104 +225,57 @@ public class Global
 }
 
 [Scope]
-public class GlobalStore
-{
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
-
-    public GlobalStore(StorageFactory storageFactory, TenantManager tenantManager)
-    {
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-    }
-
+public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager)
+{    
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
-        return await _storageFactory.GetStorageAsync(currentTenant ? await _tenantManager.GetCurrentTenantIdAsync() : -1, FileConstant.StorageModule);
+        return await GetStoreAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1);
     }
+    
+    private readonly ConcurrentDictionary<int, IDataStore> _currentTenantStore = new();
+    internal async Task<IDataStore> GetStoreAsync(int tenantId)
+    {
+        if (_currentTenantStore.TryGetValue(tenantId, out var result))
+        {
+            return result;
+        }
 
+        result = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
+        _currentTenantStore.TryAdd(tenantId, result);
 
+        return result;
+    }
+    
     public async Task<IDataStore> GetStoreTemplateAsync()
     {
-        return await _storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
+        return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
     }
 }
 
 [Scope]
-public class GlobalSpace
+public class GlobalFolder(
+    WebItemManager webItemManager,
+    WebItemSecurity webItemSecurity,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    UserManager userManager,
+    SettingsManager settingsManager,
+    ILoggerProvider options,
+    IServiceProvider serviceProvider)
 {
-    private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
-    private readonly AuthContext _authContext;
-
-    public GlobalSpace(FilesSpaceUsageStatManager filesSpaceUsageStatManager, AuthContext authContext)
-    {
-        _filesSpaceUsageStatManager = filesSpaceUsageStatManager;
-        _authContext = authContext;
-    }
-
-    public async Task<long> GetUserUsedSpaceAsync()
-    {
-        return await GetUserUsedSpaceAsync(_authContext.CurrentAccount.ID);
-    }
-
-    public async Task<long> GetUserUsedSpaceAsync(Guid userId)
-    {
-        return await _filesSpaceUsageStatManager.GetUserSpaceUsageAsync(userId);
-    }
-}
-
-[Scope]
-public class GlobalFolder
-{
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly WebItemManager _webItemManager;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly UserManager _userManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger _logger;
-
-    public GlobalFolder(
-        CoreBaseSettings coreBaseSettings,
-        WebItemManager webItemManager,
-        WebItemSecurity webItemSecurity,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        UserManager userManager,
-        SettingsManager settingsManager,
-        ILoggerProvider options,
-        IServiceProvider serviceProvider
-    )
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _webItemManager = webItemManager;
-        _webItemSecurity = webItemSecurity;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-        _settingsManager = settingsManager;
-        _serviceProvider = serviceProvider;
-        _logger = options.CreateLogger("ASC.Files");
-    }
+    private readonly ILogger _logger = options.CreateLogger("ASC.Files");
 
     internal static readonly IDictionary<int, int> ProjectsRootFolderCache =
         new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
 
     public async ValueTask<int> GetFolderProjectsAsync(IDaoFactory daoFactory)
     {
-        if (_coreBaseSettings.Personal)
+        if (await webItemManager[WebItemManager.ProjectsProductID].IsDisabledAsync(webItemSecurity, authContext))
         {
             return default;
         }
 
-        if (await _webItemManager[WebItemManager.ProjectsProductID].IsDisabledAsync(_webItemSecurity, _authContext))
-        {
-            return default;
-        }
-
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var folderDao = daoFactory.GetFolderDao<int>();
         if (!ProjectsRootFolderCache.TryGetValue(tenant.Id, out var result))
         {
@@ -364,12 +296,7 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderVirtualRoomsAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
     {
-        if (_coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
-        var key = $"vrooms/{await _tenantManager.GetCurrentTenantIdAsync()}";
+        var key = $"vrooms/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (DocSpaceFolderCache.TryGetValue(key, out var result))
         {
@@ -388,12 +315,7 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderArchiveAsync(IDaoFactory daoFactory)
     {
-        if (_coreBaseSettings.DisableDocSpace)
-        {
-            return default;
-        }
-
-        var key = $"archive/{await _tenantManager.GetCurrentTenantIdAsync()}";
+        var key = $"archive/{await tenantManager.GetCurrentTenantIdAsync()}";
 
         if (!DocSpaceFolderCache.TryGetValue(key, out var result))
         {
@@ -407,21 +329,21 @@ public class GlobalFolder
 
     internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
 
-    public async ValueTask<int> GetFolderMyAsync(FileMarker fileMarker, IDaoFactory daoFactory)
+    public async ValueTask<int> GetFolderMyAsync(IDaoFactory daoFactory)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return default;
         }
 
-        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             return default;
         }
 
-        var cacheKey = $"my/{await _tenantManager.GetCurrentTenantIdAsync()}/{_authContext.CurrentAccount.ID}";
+        var cacheKey = $"my/{await tenantManager.GetCurrentTenantIdAsync()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, (_) => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
 
         return myFolderId.Value;
     }
@@ -436,12 +358,7 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderCommonAsync(IDaoFactory daoFactory)
     {
-        if (_coreBaseSettings.Personal)
-        {
-            return default;
-        }
-
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (CommonFolderCache.TryGetValue(tenant.Id, out var commonFolderId))
         {
             return commonFolderId;
@@ -462,17 +379,12 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderShareAsync(IDaoFactory daoFactory)
     {
-        if (_coreBaseSettings.Personal)
-        {
-            return default;
-        }
-
         if (await IsOutsiderAsync)
         {
             return default;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (!ShareFolderCache.TryGetValue(tenant.Id, out var sharedFolderId))
         {
             sharedFolderId = await daoFactory.GetFolderDao<int>().GetFolderIDShareAsync(true);
@@ -496,12 +408,12 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderRecentAsync(IDaoFactory daoFactory)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return 0;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (!RecentFolderCache.TryGetValue(tenant.Id, out var recentFolderId))
         {
             var folderDao = daoFactory.GetFolderDao<int>();
@@ -521,12 +433,12 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderFavoritesAsync(IDaoFactory daoFactory)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return 0;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (!FavoritesFolderCache.TryGetValue(tenant.Id, out var favoriteFolderId))
         {
             var folderDao = daoFactory.GetFolderDao<int>();
@@ -546,16 +458,16 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderTemplatesAsync(IDaoFactory daoFactory)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return 0;
         }
 
-        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (!TemplatesFolderCache.TryGetValue(tenant.Id, out var templatesFolderId))
         {
             var folderDao = daoFactory.GetFolderDao<int>();
@@ -580,17 +492,17 @@ public class GlobalFolder
 
     public async ValueTask<int> GetFolderPrivacyAsync(IDaoFactory daoFactory)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return 0;
         }
 
-        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }
 
-        var cacheKey = $"privacy/{await _tenantManager.GetCurrentTenantIdAsync()}/{_authContext.CurrentAccount.ID}";
+        var cacheKey = $"privacy/{await tenantManager.GetCurrentTenantIdAsync()}/{authContext.CurrentAccount.ID}";
 
         if (!PrivacyFolderCache.TryGetValue(cacheKey, out var privacyFolderId))
         {
@@ -618,10 +530,10 @@ public class GlobalFolder
             return id;
         }
 
-        var cacheKey = $"trash/{(await _tenantManager.GetCurrentTenantAsync()).Id}/{_authContext.CurrentAccount.ID}";
+        var cacheKey = $"trash/{(await tenantManager.GetCurrentTenantAsync()).Id}/{authContext.CurrentAccount.ID}";
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
-            id = _authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
+            id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
             TrashFolderCache[cacheKey] = id;
         }
         else
@@ -634,7 +546,7 @@ public class GlobalFolder
 
     public async Task SetFolderTrashAsync(object value)
     {
-        var cacheKey = $"trash/{await _tenantManager.GetCurrentTenantIdAsync()}/{value}";
+        var cacheKey = $"trash/{await tenantManager.GetCurrentTenantIdAsync()}/{value}";
         TrashFolderCache.Remove(cacheKey);
     }
 
@@ -651,15 +563,15 @@ public class GlobalFolder
 
         id = my ? await folderDao.GetFolderIDUserAsync(true) : await folderDao.GetFolderIDCommonAsync(true);
         
-        if (!_settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>().StartDocsEnabled)
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
         {
             return id;
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var userId = _authContext.CurrentAccount.ID;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
 
-        var task = new Task(async () => await CreateSampleDocumentsAsync(_serviceProvider, tenantId, userId, id, my), 
+        var task = new Task(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my), 
             TaskCreationOptions.LongRunning);
 
         _ = task.ConfigureAwait(false);
@@ -782,32 +694,21 @@ public class GlobalFolder
         }
     }
 
-    private Task<bool> IsOutsiderAsync => _userManager.IsOutsiderAsync(_authContext.CurrentAccount.ID);
+    private Task<bool> IsOutsiderAsync => userManager.IsOutsiderAsync(authContext.CurrentAccount.ID);
 }
 
 [Scope]
-public class GlobalFolderHelper
+public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolder)
 {
-    private readonly FileMarker _fileMarker;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolder _globalFolder;
-
-    public GlobalFolderHelper(FileMarker fileMarker, IDaoFactory daoFactory, GlobalFolder globalFolder)
-    {
-        _fileMarker = fileMarker;
-        _daoFactory = daoFactory;
-        _globalFolder = globalFolder;
-    }
-
-    public ValueTask<int> FolderProjectsAsync => _globalFolder.GetFolderProjectsAsync(_daoFactory);
-    public ValueTask<int> FolderCommonAsync => _globalFolder.GetFolderCommonAsync(_daoFactory);
-    public ValueTask<int> FolderMyAsync => _globalFolder.GetFolderMyAsync(_fileMarker, _daoFactory);
-    public ValueTask<int> FolderPrivacyAsync => _globalFolder.GetFolderPrivacyAsync(_daoFactory);
-    public ValueTask<int> FolderRecentAsync => _globalFolder.GetFolderRecentAsync(_daoFactory);
-    public ValueTask<int> FolderFavoritesAsync => _globalFolder.GetFolderFavoritesAsync(_daoFactory);
-    public ValueTask<int> FolderTemplatesAsync => _globalFolder.GetFolderTemplatesAsync(_daoFactory);
-    public ValueTask<int> FolderVirtualRoomsAsync => _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
-    public ValueTask<int> FolderArchiveAsync => _globalFolder.GetFolderArchiveAsync(_daoFactory);
+    public ValueTask<int> FolderProjectsAsync => globalFolder.GetFolderProjectsAsync(daoFactory);
+    public ValueTask<int> FolderCommonAsync => globalFolder.GetFolderCommonAsync(daoFactory);
+    public ValueTask<int> FolderMyAsync => globalFolder.GetFolderMyAsync(daoFactory);
+    public ValueTask<int> FolderPrivacyAsync => globalFolder.GetFolderPrivacyAsync(daoFactory);
+    public ValueTask<int> FolderRecentAsync => globalFolder.GetFolderRecentAsync(daoFactory);
+    public ValueTask<int> FolderFavoritesAsync => globalFolder.GetFolderFavoritesAsync(daoFactory);
+    public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
+    public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+    public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
 
     public async Task<T> GetFolderMyAsync<T>()
     {
@@ -838,15 +739,15 @@ public class GlobalFolderHelper
     {
         return IdConverter.Convert<T>(await FolderShareAsync);
     }
-    public ValueTask<int> FolderShareAsync => _globalFolder.GetFolderShareAsync(_daoFactory);
+    public ValueTask<int> FolderShareAsync => globalFolder.GetFolderShareAsync(daoFactory);
 
     public async Task SetFolderTrashAsync(object value)
     {
-        await _globalFolder.SetFolderTrashAsync(value);
+        await globalFolder.SetFolderTrashAsync(value);
     }
     public ValueTask<int> FolderTrashAsync
     {
-        get => _globalFolder.GetFolderTrashAsync(_daoFactory);
+        get => globalFolder.GetFolderTrashAsync(daoFactory);
     }
 
 }

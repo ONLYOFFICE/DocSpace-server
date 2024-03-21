@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,9 +42,9 @@ public static class LdapUtils
 
         var matchList = _dcRegex.Matches(distinguishedName);
 
-        var dcList = matchList.Cast<Match>().Select(match => match.Groups[1].Value).ToList();
+        var dcList = matchList.Select(match => match.Groups[1].Value).ToList();
 
-        return !dcList.Any() ? null : string.Join(".", dcList);
+        return dcList.Count == 0 ? null : string.Join(".", dcList);
     }
 
     public static bool IsLoginAccepted(LdapLogin ldapLogin, UserInfo ldapUser, string ldapDomain)
@@ -158,10 +158,7 @@ public static class LdapUtils
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorSkipErrors(ex);
-            }
+            log?.ErrorSkipErrors(ex);
         }
     }
 
@@ -175,7 +172,7 @@ public static class LdapUtils
         var sBuilder = new StringBuilder();
         foreach (var contact in userInfo.Contacts)
         {
-            sBuilder.AppendFormat("{0}|", contact);
+            sBuilder.Append($"{contact}|");
         }
         return sBuilder.ToString();
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,30 +40,11 @@ public class TenantTooShortException : Exception
         MinLength = minLength;
         MaxLength = maxLength;
     }
-
-    protected TenantTooShortException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
 }
 
-public class TenantIncorrectCharsException : Exception
+public class TenantIncorrectCharsException(string message) : Exception(message);
+
+public class TenantAlreadyExistsException(string message, IEnumerable<string> existsTenants) : Exception(message)
 {
-    public TenantIncorrectCharsException(string message)
-        : base(message) { }
-
-    protected TenantIncorrectCharsException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
-}
-
-public class TenantAlreadyExistsException : Exception
-{
-    public IEnumerable<string> ExistsTenants { get; private set; }
-
-    public TenantAlreadyExistsException(string message, IEnumerable<string> existsTenants)
-        : base(message)
-    {
-        ExistsTenants = existsTenants ?? Enumerable.Empty<string>();
-    }
-
-    protected TenantAlreadyExistsException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
+    public IEnumerable<string> ExistsTenants { get; private set; } = existsTenants ?? Enumerable.Empty<string>();
 }

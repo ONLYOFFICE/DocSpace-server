@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
+
 namespace ASC.Files.Core.Core.Thirdparty.Box;
 
 [Scope]
-internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
-{
-    private readonly TempPath _tempPath;
-    private readonly SetupInfo _setupInfo;
-
-    public BoxFileDao(UserManager userManager,
+internal class BoxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<BoxFile, BoxFolder, BoxItem> daoSelector,
         CrossDao crossDao,
@@ -40,78 +37,48 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
         IDaoBase<BoxFile, BoxFolder, BoxItem> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _tempPath = tempPath;
-        _setupInfo = setupInfo;
-    }
-
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
+    protected override string UploadSessionKey => "BoxSession";
+    
     public override Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return Task.FromResult(new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false });
         }
 
-        var uploadSession = new ChunkedUploadSession<string>(file, contentLength);
-
-        uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+        var uploadSession = new ChunkedUploadSession<string>(file, contentLength) { TempPath = tempPath.GetTempFileName() };
 
         uploadSession.File = RestoreIds(uploadSession.File);
 
         return Task.FromResult(uploadSession);
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
-    {
-        if (!uploadSession.UseChunks)
-        {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
-
-            return uploadSession.File;
-        }
-
-        var tempPath = uploadSession.GetItemOrDefault<string>("TempPath");
-        await using (var fs = new FileStream(tempPath, FileMode.Append))
-        {
-            await stream.CopyToAsync(fs);
-        }
-
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
-                                           FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
-            uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
-
-        return uploadSession.File;
-    }
-
     public override Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        if (uploadSession.Items.ContainsKey("TempPath"))
+        var path = uploadSession.TempPath;
+        if (!string.IsNullOrEmpty(path))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(path);
         }
 
         return Task.CompletedTask;
     }
 
-    public override Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
+    public override async Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
     {
-        throw new NotImplementedException();
+        await using var fs = new FileStream(uploadSession.TempPath,
+            FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
+        
+        uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
+
+        return uploadSession.File;
+    }
+
+    protected override Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    {
+        throw new NotSupportedException();
     }
 }

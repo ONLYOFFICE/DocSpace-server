@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,21 +26,14 @@
 
 namespace ASC.Core.Security.Authorizing;
 
-class PermissionProvider : IPermissionProvider
+class PermissionProvider(AuthorizationManager authorizationManager) : IPermissionProvider
 {
-    private readonly AuthorizationManager _authorizationManager;
-
-    public PermissionProvider(AuthorizationManager authorizationManager)
-    {
-        _authorizationManager = authorizationManager;
-    }
-
     public async Task<IEnumerable<Ace>> GetAclAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider secObjProvider)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(action);
 
-        return (await _authorizationManager
+        return (await authorizationManager
             .GetAcesWithInheritsAsync(subject.ID, action.ID, objectId, secObjProvider))
             .Select(r => new Ace(r.Action, r.AceType));
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,7 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class UsersInRoomFeature : TenantQuotaFeatureCount
+public class UsersInRoomFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota)
 {
     public override string Name { get => "usersInRoom"; }
-    public UsersInRoomFeature(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,24 +26,18 @@
 
 namespace ASC.Data.Reassigns;
 
-public class QueueWorker<T> where T : DistributedTaskProgress
-{
-    private readonly object _synchRoot = new();
-
-    protected readonly IServiceProvider _serviceProvider;
-    private readonly DistributedTaskQueue _queue;
-    protected readonly IDictionary<string, StringValues> _httpHeaders;
-
-    public QueueWorker(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory,
-            string queueName)
+public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
+    IServiceProvider serviceProvider,
+    IDistributedTaskQueueFactory queueFactory,
+        string queueName,
+        IDistributedLockProvider distributedLockProvider)
+    where T : DistributedTaskProgress
     {
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(queueName);
-        _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
-    }
+
+
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(queueName);
+    protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {
@@ -67,9 +61,9 @@ public class QueueWorker<T> where T : DistributedTaskProgress
         }
     }
 
-    protected T Start(int tenantId, Guid userId, T newTask)
+    protected async Task<T> StartAsync(int tenantId, Guid userId, T newTask)
     {
-        lock (_synchRoot)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             var task = GetProgressItemStatus(tenantId, userId);
 
@@ -91,47 +85,39 @@ public class QueueWorker<T> where T : DistributedTaskProgress
 }
 
 [Scope(Additional = typeof(ReassignProgressItemExtension))]
-public class QueueWorkerReassign : QueueWorker<ReassignProgressItem>
+public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider)
+    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, distributedLockProvider)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_data_reassign";
 
-    public QueueWorkerReassign(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
-    {
-    }
-
-    public ReassignProgressItem Start(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
+    public async Task<ReassignProgressItem> StartAsync(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
         var result = _serviceProvider.GetService<ReassignProgressItem>();
 
         result.Init(_httpHeaders, tenantId, fromUserId, toUserId, currentUserId, notify, deleteProfile);
 
-        return Start(tenantId, fromUserId, result);
+        return await StartAsync(tenantId, fromUserId, result);
     }
 }
 
 [Scope(Additional = typeof(RemoveProgressItemExtension))]
-public class QueueWorkerRemove : QueueWorker<RemoveProgressItem>
+public class QueueWorkerRemove(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider)
+    : QueueWorker<RemoveProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, distributedLockProvider)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_data_remove";
 
-    public QueueWorkerRemove(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
-    {
-    }
-
-    public RemoveProgressItem Start(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    public async Task<RemoveProgressItem> StartAsync(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
     {
         var result = _serviceProvider.GetService<RemoveProgressItem>();
 
         result.Init(_httpHeaders, tenantId, user, currentUserId, notify, deleteProfile);
 
-        return Start(tenantId, user.Id, result);
+        return await StartAsync(tenantId, user.Id, result);
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -148,11 +148,11 @@ public class Tenant : IMapFrom<DbTenant>
         {
             if (MappedDomain.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase))
             {
-                MappedDomain = MappedDomain.Substring(7);
+                MappedDomain = MappedDomain[7..];
             }
             if (MappedDomain.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
             {
-                MappedDomain = MappedDomain.Substring(8);
+                MappedDomain = MappedDomain[8..];
             }
             result = MappedDomain.ToLowerInvariant();
         }
@@ -173,7 +173,7 @@ public class Tenant : IMapFrom<DbTenant>
 
     internal string GetTrustedDomains()
     {
-        TrustedDomains.RemoveAll(d => string.IsNullOrEmpty(d));
+        TrustedDomains.RemoveAll(string.IsNullOrEmpty);
         if (TrustedDomains.Count == 0)
         {
             return null;

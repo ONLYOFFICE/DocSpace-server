@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -110,13 +110,6 @@ public static class Hasher
         ArgumentNullException.ThrowIfNull(str);
 
         return Encoding.UTF8.GetBytes(str);
-    }
-
-    private static string B2S(byte[] data)
-    {
-        ArgumentNullException.ThrowIfNull(data);
-
-        return Encoding.UTF8.GetString(data);
     }
 
     private static byte[] S642B(string str)

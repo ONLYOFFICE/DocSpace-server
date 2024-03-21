@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using IAccount = ASC.Common.Security.Authentication.IAccount;
-
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 public abstract class FileOperation : DistributedTaskProgress
 {
+    protected readonly IServiceProvider _serviceProvider;
     public const string SplitChar = ":";
     public const string Owner = "Owner";
     public const string OpType = "OperationType";
@@ -40,18 +39,21 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
+    public const string Data = "Data";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
 
     protected int _processed;
     public int Total { get; set; }
+
     protected FileOperation(IServiceProvider serviceProvider)
     {
+        _serviceProvider = serviceProvider;
         _principal = serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.User ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal;
         _culture = CultureInfo.CurrentCulture.Name;
 
-        if ((_principal ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal)?.Identity is IAccount account)
+        if (_principal is { Identity: IAccount { IsAuthenticated: true } account })
         {
             this[Owner] = account.ID.ToString();
         }
@@ -79,44 +81,49 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(IServiceScope serviceScope);
 }
 
-internal class ComposeFileOperation<T1, T2> : FileOperation
+internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
+    protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    protected ComposeFileOperation(
-        IServiceProvider serviceProvider,
-        FileOperation<T1, string> thirdPartyOperation,
-        FileOperation<T2, int> daoOperation)
-        : base(serviceProvider)
+    public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
     {
-        ThirdPartyOperation = thirdPartyOperation;
-        DaoOperation = daoOperation;
-        this[Hold] = ThirdPartyOperation[Hold] || DaoOperation[Hold];
+        this[OpType] = (int)FileOperationType;
+        this[Data] = JsonSerializer.Serialize(data);
+        this[Hold] = data.HoldResult;
+    }
+
+    public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
+    {
+        var data = JsonSerializer.Deserialize<T>(jsonData);
+        this[OpType] = (int)FileOperationType;
+        this[Data] = jsonData;
+        this[Hold] = data.HoldResult;
+        Id = taskId;
+        return data;
     }
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        if (ThirdPartyOperation.Files.Any() || ThirdPartyOperation.Folders.Any())
-        {
-            ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
-        }
-        else
-        {
-            ThirdPartyOperation[Finish] = true;
-        }
+        var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
+        var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
 
-        if (DaoOperation.Files.Any() || DaoOperation.Folders.Any())
+        DaoOperation[Finish] = !daoOperation;
+        ThirdPartyOperation[Finish] = !thirdPartyOperation;
+
+        if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
             await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
-        else
+
+        if (thirdPartyOperation)
         {
-            DaoOperation[Finish] = true;
+            ThirdPartyOperation.Publication = PublishChanges;
+            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
     }
 
@@ -186,27 +193,12 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     }
 }
 
-abstract class FileOperationData<T>
-{
-    public List<T> Folders { get; private set; }
-    public List<T> Files { get; private set; }
-    public Tenant Tenant { get; }
-    public ExternalShareData ExternalShareData { get; }
-    public bool HoldResult { get; set; }
-
-    protected FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, ExternalShareData externalShareData, bool holdResult = true)
-    {
-        Folders = folders?.ToList() ?? new List<T>();
-        Files = files?.ToList() ?? new List<T>();
-        Tenant = tenant;
-        ExternalShareData = externalShareData;
-        HoldResult = holdResult;
-    }
-}
+abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, ExternalSessionSnapshot SessionSnapshot, 
+    bool HoldResult = true);
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
-    protected Tenant CurrentTenant { get; private set; }
+    protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }
     protected IFolderDao<TId> FolderDao { get; private set; }
     protected IFileDao<TId> FileDao { get; private set; }
@@ -214,28 +206,27 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected ILinkDao LinkDao { get; private set; }
     protected IProviderDao ProviderDao { get; private set; }
     protected ILogger Logger { get; private set; }
-    protected internal List<TId> Folders { get; private set; }
-    protected internal List<TId> Files { get; private set; }
-    protected ExternalShareData CurrentShareData { get; private set; }
-
-    protected readonly IServiceProvider _serviceProvider;
+    protected internal List<TId> Folders { get; }
+    protected internal List<TId> Files { get; }
+    protected IDictionary<string, StringValues> Headers { get; }
+    protected ExternalSessionSnapshot SessionSnapshot { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {
-        _serviceProvider = serviceProvider;
-        Files = fileOperationData.Files;
-        Folders = fileOperationData.Folders;
+        Files = fileOperationData.Files?.ToList() ?? [];
+        Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
-        CurrentTenant = fileOperationData.Tenant;
-        CurrentShareData = fileOperationData.ExternalShareData;
+        CurrentTenantId = fileOperationData.TenantId;
+        Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        SessionSnapshot = fileOperationData.SessionSnapshot;
 
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(CurrentTenant);
+        tenantManager.SetCurrentTenantAsync(CurrentTenantId).Wait();
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
-        
+        externalShare.Initialize(SessionSnapshot);
+
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
 
@@ -252,10 +243,10 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             await using var scope = _serviceProvider.CreateAsyncScope();
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
-            tenantManager.SetCurrentTenant(CurrentTenant);
+            await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.SetCurrentShareData(CurrentShareData);
+            externalShare.Initialize(SessionSnapshot);
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -274,7 +265,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         }
         catch (AuthorizingException authError)
         {
-            this[Err] = FilesCommonResource.ErrorMassage_SecurityException;
+            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
             Logger.ErrorWithException(new SecurityException(this[Err], authError));
         }
         catch (AggregateException ae)
@@ -292,17 +283,20 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
                 this[Finish] = true;
                 PublishTaskInfo();
             }
-            catch { /* ignore */ }
+            catch
+            {
+                /* ignore */
+            }
         }
     }
 
-    public AsyncServiceScope CreateScopeAsync()
+    public async Task<AsyncServiceScope> CreateScopeAsync()
     {
         var scope = _serviceProvider.CreateAsyncScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(CurrentTenant);
+        await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.SetCurrentShareData(CurrentShareData);
+        externalShare.Initialize(SessionSnapshot);
 
         return scope;
     }
@@ -359,26 +353,8 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
 }
 
 [Scope]
-public class FileOperationScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly ILogger _options;
-
-    public FileOperationScope(TenantManager tenantManager, IDaoFactory daoFactory, FileSecurity fileSecurity, ILogger<FileOperationScope> options)
-    {
-        _tenantManager = tenantManager;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _options = options;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager, out IDaoFactory daoFactory, out FileSecurity fileSecurity, out ILogger optionsMonitor)
-    {
-        tenantManager = _tenantManager;
-        daoFactory = _daoFactory;
-        fileSecurity = _fileSecurity;
-        optionsMonitor = _options;
-    }
-}
+public record FileOperationScope(
+    TenantManager TenantManager,
+    IDaoFactory DaoFactory,
+    FileSecurity FileSecurity,
+    ILogger<FileOperationScope> Options);

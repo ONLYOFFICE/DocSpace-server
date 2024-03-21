@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,14 +29,9 @@ namespace Textile.States;
 /// <summary>
 /// Formatting state for a numbered list.
 /// </summary>
-[FormatterState(PatternBegin + @"#+" + PatternEnd)]
-public class OrderedListFormatterState : ListFormatterState
+[FormatterState(PatternBegin + "#+" + PatternEnd)]
+public class OrderedListFormatterState(TextileFormatter formatter) : ListFormatterState(formatter)
 {
-    public OrderedListFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     protected override void WriteIndent()
     {
         Formatter.Output.WriteLine("<ol" + FormattedStylesAndAlignment("ol") + ">");
@@ -49,11 +44,11 @@ public class OrderedListFormatterState : ListFormatterState
 
     protected override bool IsMatchForMe(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + @"," + (maxNestingDepth - 1) + @"})#" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + "," + (maxNestingDepth - 1) + "})#" + Globals.BlockModifiersPattern + @"\s");
     }
 
     protected override bool IsMatchForOthers(string input, int minNestingDepth, int maxNestingDepth)
     {
-        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + @"," + (maxNestingDepth - 1) + @"})\*" + Globals.BlockModifiersPattern + @"\s");
+        return Regex.IsMatch(input, @"^\s*([\*#]{" + (minNestingDepth - 1) + "," + (maxNestingDepth - 1) + @"})\*" + Globals.BlockModifiersPattern + @"\s");
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,26 +28,19 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Notify;
 
-public class RecipientProviderImpl : IRecipientProvider
+public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
 {
-    private readonly UserManager _userManager;
-
-    public RecipientProviderImpl(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
-
     public virtual async Task<IRecipient> GetRecipientAsync(string id)
     {
         if (TryParseGuid(id, out var recID))
         {
-            var user = await _userManager.GetUsersAsync(recID);
+            var user = await userManager.GetUsersAsync(recID);
             if (user.Id != Constants.LostUser.Id)
             {
                 return new DirectRecipient(user.Id.ToString(), user.ToString());
             }
 
-            var group = await _userManager.GetGroupInfoAsync(recID);
+            var group = await userManager.GetGroupInfoAsync(recID);
             if (group.ID != Constants.LostGroupInfo.ID)
             {
                 return new RecipientsGroup(group.ID.ToString(), group.Name);
@@ -64,10 +57,10 @@ public class RecipientProviderImpl : IRecipientProvider
         var result = new List<IRecipient>();
         if (TryParseGuid(group.ID, out var groupID))
         {
-            var coreGroup = await _userManager.GetGroupInfoAsync(groupID);
+            var coreGroup = await userManager.GetGroupInfoAsync(groupID);
             if (coreGroup.ID != Constants.LostGroupInfo.ID)
             {
-                var users = await _userManager.GetUsersByGroupAsync(coreGroup.ID);
+                var users = await userManager.GetUsersByGroupAsync(coreGroup.ID);
                 Array.ForEach(users, u => result.Add(new DirectRecipient(u.Id.ToString(), u.ToString())));
             }
         }
@@ -84,7 +77,7 @@ public class RecipientProviderImpl : IRecipientProvider
         {
             if (recipient is IRecipientsGroup)
             {
-                var group = await _userManager.GetGroupInfoAsync(recID);
+                var group = await userManager.GetGroupInfoAsync(recID);
                 while (group is { Parent: not null })
                 {
                     result.Add(new RecipientsGroup(group.Parent.ID.ToString(), group.Parent.Name));
@@ -93,7 +86,7 @@ public class RecipientProviderImpl : IRecipientProvider
             }
             else if (recipient is IDirectRecipient)
             {
-                foreach (var group in (await _userManager.GetUserGroupsAsync(recID, IncludeType.Distinct)))
+                foreach (var group in (await userManager.GetUserGroupsAsync(recID, IncludeType.Distinct)))
                 {
                     result.Add(new RecipientsGroup(group.ID.ToString(), group.Name));
                 }
@@ -109,27 +102,27 @@ public class RecipientProviderImpl : IRecipientProvider
 
         if (TryParseGuid(recipient.ID, out var userID))
         {
-            var user = await _userManager.GetUsersAsync(userID);
+            var user = await userManager.GetUsersAsync(userID);
             if (user.Id != Constants.LostUser.Id)
             {
                 if (senderName == Configuration.Constants.NotifyEMailSenderSysName)
                 {
-                    return new[] { user.Email };
+                    return [user.Email];
                 }
 
                 if (senderName == Configuration.Constants.NotifyMessengerSenderSysName)
                 {
-                    return new[] { user.UserName };
+                    return [user.UserName];
                 }
 
                 if (senderName == Configuration.Constants.NotifyPushSenderSysName)
                 {
-                    return new[] { user.UserName };
+                    return [user.UserName];
                 }
 
                 if (senderName == Configuration.Constants.NotifyTelegramSenderSysName)
                 {
-                    return new[] { user.Id.ToString() };
+                    return [user.Id.ToString()];
                 }
             }
         }
@@ -163,7 +156,7 @@ public class RecipientProviderImpl : IRecipientProvider
 
     private async ValueTask<bool> WhereAsync(string address)
     {
-        var user = await _userManager.GetUserByEmailAsync(address);
+        var user = await userManager.GetUserByEmailAsync(address);
         return user.Id == Constants.LostUser.Id || (user.IsActive && (user.Status & EmployeeStatus.Default) == user.Status);
     }
 

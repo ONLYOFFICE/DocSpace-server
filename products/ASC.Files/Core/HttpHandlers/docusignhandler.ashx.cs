@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Web.Files.HttpHandlers;
 
 public class DocuSignHandler
 {
-    public DocuSignHandler(RequestDelegate next)
+    public DocuSignHandler(RequestDelegate _)
     {
     }
 
@@ -39,36 +39,20 @@ public class DocuSignHandler
 }
 
 [Scope]
-public class DocuSignHandlerService
+public class DocuSignHandlerService(ILogger<DocuSignHandlerService> logger,
+    TenantExtra tenantExtra,
+    DocuSignHelper docuSignHelper,
+    SecurityContext securityContext,
+    NotifyClient notifyClient)
 {
     public static string Path(FilesLinkUtility filesLinkUtility)
     {
         return filesLinkUtility.FilesBaseAbsolutePath + "docusignhandler.ashx";
     }
 
-    private readonly ILogger<DocuSignHandlerService> _log;
-    private readonly TenantExtra _tenantExtra;
-    private readonly DocuSignHelper _docuSignHelper;
-    private readonly SecurityContext _securityContext;
-    private readonly NotifyClient _notifyClient;
-
-    public DocuSignHandlerService(
-        ILogger<DocuSignHandlerService> logger,
-        TenantExtra tenantExtra,
-        DocuSignHelper docuSignHelper,
-        SecurityContext securityContext,
-        NotifyClient notifyClient)
-    {
-        _tenantExtra = tenantExtra;
-        _docuSignHelper = docuSignHelper;
-        _securityContext = securityContext;
-        _notifyClient = notifyClient;
-        _log = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
-        if (await _tenantExtra.IsNotPaidAsync())
+        if (await tenantExtra.IsNotPaidAsync())
         {
             context.Response.StatusCode = (int)HttpStatusCode.PaymentRequired;
             await context.Response.WriteAsync("Payment Required.");
@@ -86,18 +70,18 @@ public class DocuSignHandlerService
                     await WebhookAsync(context);
                     break;
                 default:
-                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMassage_BadRequest);
+                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
             }
         }
         catch (InvalidOperationException e)
         {
-            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMassage_BadRequest, e);
+            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMessage_BadRequest, e);
         }
     }
 
     private void Redirect(HttpContext context)
     {
-        _log.InformationDocuSignRedirectQuery(context.Request.QueryString);
+        logger.InformationDocuSignRedirectQuery(context.Request.QueryString);
 
         var eventRedirect = context.Request.Query["event"].FirstOrDefault();
         switch (eventRedirect?.ToLower())
@@ -121,12 +105,12 @@ public class DocuSignHandlerService
 
     private async Task WebhookAsync(HttpContext context)
     {
-        _log.InformationDocuSignWebhook(context.Request.QueryString);
+        logger.InformationDocuSignWebhook(context.Request.QueryString);
         try
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.Load(context.Request.Body);
-            _log.InformationDocuSignWebhookOuterXml(xmlDocument.OuterXml);
+            logger.InformationDocuSignWebhookOuterXml(xmlDocument.OuterXml);
 
             var mgr = new XmlNamespaceManager(xmlDocument.NameTable);
             mgr.AddNamespace(XmlPrefix, "http://www.docusign.net/API/3.0");
@@ -142,7 +126,7 @@ public class DocuSignHandlerService
                 throw new Exception("DocuSign webhook unknown status: " + statusString);
             }
 
-            _log.InformationDocuSignWebhook2(envelopeId, subject, status);
+            logger.InformationDocuSignWebhook2(envelopeId, subject, status);
 
             var customFieldUserIdNode = GetSingleNode(envelopeStatusNode, "CustomFields/" + XmlPrefix + ":CustomField[" + XmlPrefix + ":Name='" + DocuSignHelper.UserField + "']", mgr);
             var userIdString = GetSingleNode(customFieldUserIdNode, "Value", mgr).InnerText;
@@ -178,13 +162,13 @@ public class DocuSignHandlerService
                                 }
                             }
 
-                            var file = await _docuSignHelper.SaveDocumentAsync(envelopeId, documentId, documentName, folderId);
+                            var file = await docuSignHelper.SaveDocumentAsync(envelopeId, documentId, documentName, folderId);
 
-                            await _notifyClient.SendDocuSignCompleteAsync(file, sourceTitle ?? documentName);
+                            await notifyClient.SendDocuSignCompleteAsync(file, sourceTitle ?? documentName);
                         }
                         catch (Exception ex)
                         {
-                            _log.ErrorDocuSignWebhookSaveDocument(documentStatus.InnerText, ex);
+                            logger.ErrorDocuSignWebhookSaveDocument(documentStatus.InnerText, ex);
                         }
                     }
                     break;
@@ -193,13 +177,13 @@ public class DocuSignHandlerService
                     var statusFromResource = status == DocuSignStatus.Declined
                                                  ? FilesCommonResource.DocuSignStatusDeclined
                                                  : FilesCommonResource.DocuSignStatusVoided;
-                    await _notifyClient.SendDocuSignStatusAsync(subject, statusFromResource);
+                    await notifyClient.SendDocuSignStatusAsync(subject, statusFromResource);
                     break;
             }
         }
         catch (Exception e)
         {
-            _log.ErrorDocuSignWebhook(e);
+            logger.ErrorDocuSignWebhook(e);
 
             throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
         }
@@ -212,7 +196,7 @@ public class DocuSignHandlerService
             throw new Exception("DocuSign incorrect User ID: " + userIdString);
         }
 
-        await _securityContext.AuthenticateMeWithoutCookieAsync(userId);
+        await securityContext.AuthenticateMeWithoutCookieAsync(userId);
     }
 
     private static XmlNode GetSingleNode(XmlNode node, string xpath, XmlNamespaceManager mgr, bool canMiss = false)

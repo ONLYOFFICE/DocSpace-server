@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,15 +28,10 @@ namespace ASC.ApiSystem.Models;
 
 public class CoreSettingsModel
 {
-    public int Tenant { get; set; }
+    public int Tenant { get; set; } = -1;
 
     [StringLength(255)]
     public string Key { get; set; }
 
     public string Value { get; set; }
-
-    public CoreSettingsModel()
-    {
-        Tenant = -1;
-    }
 }

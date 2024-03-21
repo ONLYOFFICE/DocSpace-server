@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,21 +29,14 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class TariffController : ControllerBase
-{
-    private CommonMethods CommonMethods { get; }
-    private HostedSolution HostedSolution { get; }
-    private ILogger<TariffController> Log { get; }
-    public TariffController(
-        CommonMethods commonMethods,
+public class TariffController(CommonMethods commonMethods,
         HostedSolution hostedSolution,
-        ILogger<TariffController> option
-        )
-    {
-        CommonMethods = commonMethods;
-        HostedSolution = hostedSolution;
-        Log = option;
-    }
+        ILogger<TariffController> option)
+    : ControllerBase
+{
+    private CommonMethods CommonMethods { get; } = commonMethods;
+    private HostedSolution HostedSolution { get; } = hostedSolution;
+    private ILogger<TariffController> Log { get; } = option;
 
     #region For TEST api
 
@@ -94,7 +87,7 @@ public class TariffController : ControllerBase
             Features = model.Features ?? "",
             MaxFileSize = 1024 * 1024 * 1024,
             MaxTotalSize = 1024L * 1024 * 1024 * 1024 - 1,
-            Name = "api",
+            Name = "api"
         };
 
         if (model.ActiveUsers != default)
@@ -116,8 +109,8 @@ public class TariffController : ControllerBase
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1),
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1)
         };
 
         await HostedSolution.SetTariffAsync(tenant.Id, tariff);
@@ -185,7 +178,7 @@ public class TariffController : ControllerBase
         return Ok(new
         {
             tenant = CommonMethods.ToTenantWrapper(tenant),
-            tariff = ToTariffWrapper(tariff, quota),
+            tariff = ToTariffWrapper(tariff, quota)
         });
     }
 
@@ -194,11 +187,11 @@ public class TariffController : ControllerBase
         return new
         {
             countManager = q.CountRoomAdmin,
-            dueDate = t == null ? DateTime.MaxValue : t.DueDate,
+            dueDate = t?.DueDate ?? DateTime.MaxValue,
             features = q.Features,
             maxFileSize = q.MaxFileSize,
             maxTotalSize = q.MaxTotalSize,
-            state = t == null ? TariffState.Paid : t.State,
+            state = t?.State ?? TariffState.Paid
         };
     }
 

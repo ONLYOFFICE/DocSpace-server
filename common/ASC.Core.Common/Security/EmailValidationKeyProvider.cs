@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -191,13 +191,17 @@ public class EmailValidationKeyModel
     /// <summary>Confirmation email type</summary>
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
     public ConfirmType? Type { get; init; }
-    
+
+    /// <summary>Access an account for the first time or not</summary>
+    /// <type>System.String, System</type>
+    public string First { get; init; }
+
     /// <summary>Room ID</summary>
     /// <type>System.String, System</type>
-    public string RoomId { get; set; }
+    public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string roomId)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)
     {
-        (key, emplType, email, uiD, type, roomId) = (Key, EmplType, Email, UiD, Type, RoomId);
+        (key, emplType, email, uiD, type, first) = (Key, EmplType, Email, UiD, Type, First);
     }
 }

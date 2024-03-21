@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,15 +30,7 @@ using ASC.Web.Core.Notify;
 namespace ASC.Files;
 
 [Scope]
-public class ApiProductEntryPoint : ProductEntryPoint
-{
-    public override string ApiURL
-    {
-        get => "api/2.0/files/info.json";
-    }
-
-    public ApiProductEntryPoint(
-       FilesSpaceUsageStatManager filesSpaceUsageStatManager,
+public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStatManager,
        CoreBaseSettings coreBaseSettings,
        AuthContext authContext,
        UserManager userManager,
@@ -52,9 +44,8 @@ public class ApiProductEntryPoint : ProductEntryPoint
        FileSecurity fileSecurity,
        GlobalFolder globalFolder,
        CommonLinkUtility commonLinkUtility,
-       ILogger<ProductEntryPoint> logger
-       //SubscriptionManager subscriptionManager
-       ) : base(filesSpaceUsageStatManager,
+       ILogger<ProductEntryPoint> logger)
+    : ProductEntryPoint(filesSpaceUsageStatManager,
            coreBaseSettings,
            authContext, 
            userManager,
@@ -70,6 +61,10 @@ public class ApiProductEntryPoint : ProductEntryPoint
            commonLinkUtility,
            logger)
     {
-
+    public override string ApiURL
+    {
+        get => "api/2.0/files/info.json";
     }
-}
+
+    //SubscriptionManager subscriptionManager
+    }
