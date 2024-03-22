@@ -1113,7 +1113,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Sveiki!
 
-Jūs esat uzaicināts (-a) pievienoties $Message room šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
+Jūs esat uzaicināts (-a) pievienoties DocSpace telpai šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
 $OrangeButton
 
