@@ -335,9 +335,7 @@ public class WorkspaceMigrator : Migrator
             {
                 Info = new()
                 {
-                    Name = row["name"].ToString(),
-                    CategoryID = Guid.Parse(row["categoryid"].ToString()),
-                    Sid = row["sid"].ToString()
+                    Name = row["name"].ToString()
                 },
                 UserKeys = new HashSet<string>()
             };

@@ -27,6 +27,7 @@
 using ASC.Migration.Core.Migrators;
 using ASC.Migration.Core.Migrators.Provider;
 using ASC.Migration.Core.Migrators.Provider.Google;
+using ASC.Migration.Core.Migrators.Provider.NC;
 
 namespace ASC.Migration.Core.Models.Api;
 
@@ -38,7 +39,7 @@ public class MigrationCore(
     TenantManager tenantManager,
     MigrationWorker migrationWorker)
 {
-    public string[] GetAvailableMigrations() => serviceProvider.GetService<IEnumerable<Migrator>>().Select(r => r.MigrationInfo.Name).Where(n => n != "Nextcloud" && n != "Owncloud").ToArray();
+    public string[] GetAvailableMigrations() => serviceProvider.GetService<IEnumerable<Migrator>>().Select(r => r.MigrationInfo.Name).ToArray();
 
     public Migrator GetMigrator(string migrator)
     {
@@ -82,5 +83,6 @@ public class MigrationCore(
 
         services.TryAdd<Migrator, WorkspaceMigrator>();
         services.TryAdd<Migrator, GoogleWorkspaceMigrator>();
+        services.TryAdd<Migrator, NextcloudWorkspaceMigrator>();
     }
 }

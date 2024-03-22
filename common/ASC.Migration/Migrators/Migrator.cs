@@ -253,6 +253,10 @@ public abstract class Migrator : IDisposable
 
     private void DataСhange(MigrationUser user)
     {
+        if (user.Info.UserName == null)
+        {
+            user.Info.UserName = user.Info.Email.Split('@').First();
+        }
         if (user.Info.LastName == null)
         {
             user.Info.LastName = "NOTPROVIDED";
