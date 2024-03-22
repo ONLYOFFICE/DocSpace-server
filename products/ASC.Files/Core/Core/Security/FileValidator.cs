@@ -27,37 +27,21 @@
 namespace ASC.Files.Core.Security;
 
 [Scope]
-public class FileValidator : IDataStoreValidator
+public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : IDataStoreValidator
 {
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly FileUtility _fileUtility;
-
-    public FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory, FileUtility fileUtility)
-    {
-        _fileSecurity = fileSecurity;
-        _daoFactory = daoFactory;
-        _fileUtility = fileUtility;
-    }
-
     public async Task<bool> Validate(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
         
         if (FileDao.TryGetFileId(path, out var fileId))
         {
-            var file = await _daoFactory.GetFileDao<int>().GetFileAsync(fileId);
+            var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileId);
             if (file == null)
             {
                 return false;
             }
 
-            if (_fileUtility.CanImageView(file.Title) || _fileUtility.CanMediaView(file.Title))
-            {
-                return true;
-            }
-
-            return await _fileSecurity.CanDownloadAsync(file);
+            return await fileSecurity.CanDownloadAsync(file);
         }
 
         var pathPart = path.Split(Path.DirectorySeparatorChar).FirstOrDefault();
@@ -66,7 +50,7 @@ public class FileValidator : IDataStoreValidator
             return true;
         }
 
-        var record = await _daoFactory.GetSecurityDao<int>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<int>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
         if (record is { IsLink: true, Options: not null })
         {
             return !record.Options.DenyDownload;
