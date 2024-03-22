@@ -283,16 +283,13 @@ public record FileTrackerNotify
 public record FileTracker
 {
     [ProtoMember(1)]
-    internal Dictionary<Guid, TrackInfo> EditingBy { get; }
+    public Dictionary<Guid, TrackInfo> EditingBy { get; }
 
-    public FileTracker()
-    {
-        
-    }
+    public FileTracker() { }
     
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
-        EditingBy = new()
+        EditingBy = new Dictionary<Guid, TrackInfo>
         { 
             {
                 tabId,
@@ -309,7 +306,7 @@ public record FileTracker
     }
 
     [ProtoContract]
-    internal class TrackInfo
+    public class TrackInfo
     {
         [ProtoMember(1)]
         public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;
