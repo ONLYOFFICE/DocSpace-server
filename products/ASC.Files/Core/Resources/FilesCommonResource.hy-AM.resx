@@ -487,4 +487,46 @@
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Դուք չափազանց շատ անգամներ եք փորձել մուտքագրել ձեր գաղտնաբառը: Խնդրում ենք փորձեք մի փոքր ուշ</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Հեղինակ</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Ընկերություն</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Ստեղծված</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Ստեղծման ամսաթիվ</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Արտահանման հեղինակ</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Թղթապանակ</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Ինդեքս</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Փոփոխված</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Անուն</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Սենյակ</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Սենյակի ինդեքս</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Չափը (ՄԲ)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Ընդհանուր</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Տեսակ</value>
+  </data>
 </root>

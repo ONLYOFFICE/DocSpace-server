@@ -1065,4 +1065,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Չափից շատ մուտք գործելու փորձեր: Խնդրում ենք փորձել մի փոքր ուշ։</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Վերջին ամբողջական մուտքի տարածքը չի կարող ջնջվել</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Սխալ պլագինների արխիվ</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Պլագինն արդեն գոյություն ունի</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Ֆայլի սխալ ընդլայնում</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Ֆայլի չափը գերազանցում է սահմանաչափը</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Համակարգի պլագինների փոփոխություններն արգելված են</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Փլագինների սխալ անուն</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Մուտքային ֆայլ չկա</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Փլագինը չի գտնվել</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Մուտքային շատ ֆայլերի համար</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Չհաջողվեց սահմանել հիշողության քվոտան. ձեր սահմանած հիշողության չափաբաժինը ավելի մեծ է, քան պորտալների քվոտան:</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Սենյակի տարածքի չափաբաժինը գերազանցվել է</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Օգտատիրոջ տարածքի չափաբաժինը գերազանցել է</value>
+  </data>
 </root>

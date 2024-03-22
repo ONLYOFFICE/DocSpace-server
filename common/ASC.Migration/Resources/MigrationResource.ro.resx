@@ -117,49 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Archive" xml:space="preserve">
-    <value>Պահոց</value>
+  <data name="ClearingTemporaryData" xml:space="preserve">
+    <value>Se golesc datele temporare</value>
   </data>
-  <data name="CorporateFiles" xml:space="preserve">
-    <value>Ընդհանուր</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Procesare date...</value>
   </data>
-  <data name="Favorites" xml:space="preserve">
-    <value>Ընտրյալներ</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Procesarea datelor s-a terminat</value>
   </data>
-  <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
-    <value>Ֆայլերը կսեղմվեն {0}.tar.gz ֆայլում{1}</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Analiză baza de date</value>
   </data>
-  <data name="FilesWillBeCompressedZip" xml:space="preserve">
-    <value>Ֆայլերը կսեղմվեն {0}.zip ֆայլի մեջ{1}</value>
+  <data name="GoogleModuleNameContacts" xml:space="preserve">
+    <value>Contacte Mail</value>
   </data>
-  <data name="MyFiles" xml:space="preserve">
-    <value>Իմ փաստաթղթերը</value>
+  <data name="GoogleModuleNameDocuments" xml:space="preserve">
+    <value>Fișiere Google Drive</value>
   </data>
-  <data name="Personal" xml:space="preserve">
-    <value>Անձնական</value>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Migrare de group {0} ({1}/{2})</value>
   </data>
-  <data name="PrivacyRoom" xml:space="preserve">
-    <value>Անձնական սենյակ</value>
+  <data name="MigratingUserContacts" xml:space="preserve">
+    <value>Migrare contacte utilizator {0} ({1}/{2})</value>
   </data>
-  <data name="ProjectFiles" xml:space="preserve">
-    <value>Նախագծերում</value>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Migrare fișiere utilizator {0} ({1}/{2})</value>
   </data>
-  <data name="Recent" xml:space="preserve">
-    <value>Վերջին</value>
+  <data name="MigrationCanceled" xml:space="preserve">
+    <value>Migrarea a fost anulată</value>
   </data>
-  <data name="SharedForMe" xml:space="preserve">
-    <value>Համօգտագործած ինձ հետ</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrare fișiere comune</value>
   </data>
-  <data name="Trash" xml:space="preserve">
-    <value>Աղբարկղ</value>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migrarea a fost finalizată</value>
   </data>
-  <data name="VirtualRooms" xml:space="preserve">
-    <value>Սենյակներ</value>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>A intervenit o eroare în timpul inițializării {0} a migratorului</value>
   </data>
-  <data name="InProcessFormFolder" xml:space="preserve">
-    <value>Ընթացքի մեջ</value>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Nicio migrare în desfășurare</value>
   </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Պատրաստ</value>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrare fișiere de proiect</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Analiză este încă în desfășurare</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nu există un astfel de furnizor de migrare</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrare este deja în desfășurare</value>
+  </data>
+  <data name="ModuleNameCalendar" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="ModuleNameGroups" xml:space="preserve">
+    <value>Grupuri</value>
+  </data>
+  <data name="ModuleNameMail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="ModuleNameUsers" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="NextcloudModuleNameContacts" xml:space="preserve">
+    <value>Contacte</value>
+  </data>
+  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
+    <value>Fișierele utilizatorului</value>
+  </data>
+  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
+    <value>Documente</value>
+  </data>
+  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
+    <value>Persoane</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Pregătire pentru migrare</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Pornire procesare de date...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Decomprimare...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Decomprimarea finalizată...</value>
+  </data>
+  <data name="UserCalendarMigration" xml:space="preserve">
+    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
+  </data>
+  <data name="UserSkipped" xml:space="preserve">
+    <value>Import utilizatori nu a reușit: {0} ({1}/{2})</value>
   </data>
 </root>
