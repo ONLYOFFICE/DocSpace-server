@@ -29,35 +29,33 @@ namespace ASC.Data.Reassigns;
 public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
     IServiceProvider serviceProvider,
     IDistributedTaskQueueFactory queueFactory,
-        string queueName,
-        IDistributedLockProvider distributedLockProvider)
+    string queueName,
+    IDistributedLockProvider distributedLockProvider)
     where T : DistributedTaskProgress
-    {
-
-
+{
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(queueName);
     protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {
-        return string.Format("{0}_{1}_{2}", tenantId, userId, typeof(T).Name);
+        return $"{tenantId}_{userId}_{typeof(T).Name}";
     }
 
-    public T GetProgressItemStatus(int tenantId, Guid userId)
+    public async Task<T> GetProgressItemStatus(int tenantId, Guid userId)
     {
         var id = GetProgressItemId(tenantId, userId);
 
-        return _queue.PeekTask<T>(id);
+        return await _queue.PeekTask<T>(id);
     }
 
-    public void Terminate(int tenantId, Guid userId)
+    public async Task Terminate(int tenantId, Guid userId)
     {
-        var item = GetProgressItemStatus(tenantId, userId);
+        var item = await GetProgressItemStatus(tenantId, userId);
 
         if (item != null)
         {
-            _queue.DequeueTask(item.Id);
+            await _queue.DequeueTask(item.Id);
         }
     }
 
@@ -65,18 +63,18 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
-            var task = GetProgressItemStatus(tenantId, userId);
+            var task = await GetProgressItemStatus(tenantId, userId);
 
             if (task is { IsCompleted: true })
             {
-                _queue.DequeueTask(task.Id);
+                await _queue.DequeueTask(task.Id);
                 task = null;
             }
 
             if (task == null)
             {
                 task = newTask;
-                _queue.EnqueueTask(task);
+                await _queue.EnqueueTask(task);
             }
 
             return task;

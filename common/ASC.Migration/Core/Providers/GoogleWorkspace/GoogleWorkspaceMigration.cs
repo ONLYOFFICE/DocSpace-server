@@ -65,7 +65,7 @@ public class GoogleWorkspaceMigration(
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.StartOfDataProcessing);
+            await ReportProgress(5, MigrationResource.StartOfDataProcessing);
         }
 
         var progressStep = 90 / _takeouts.Length;
@@ -79,7 +79,7 @@ public class GoogleWorkspaceMigration(
 
             if (reportProgress)
             {
-                ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
+                await ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
             }
 
             var tmpFolder = Path.Combine(tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(takeout)); 
@@ -154,7 +154,7 @@ public class GoogleWorkspaceMigration(
                 Log($"Couldn't parse user from {key} archive", ex);
                 if (_migrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    ReportProgress(GetProgress(), "Couldn't parse arhives");
+                    await ReportProgress(GetProgress(), "Couldn't parse arhives");
                     throw new Exception("Couldn't parse arhives");
                 }
             }
@@ -168,7 +168,7 @@ public class GoogleWorkspaceMigration(
         }
         if (reportProgress)
         {
-            ReportProgress(100, MigrationResource.DataProcessingCompleted);
+            await ReportProgress(100, MigrationResource.DataProcessingCompleted);
         }
 
         return _migrationInfo.ToApiInfo();
@@ -176,7 +176,7 @@ public class GoogleWorkspaceMigration(
 
     public override async Task MigrateAsync(MigrationApiInfo migrationApiInfo)
     {
-        ReportProgress(0, MigrationResource.PreparingForMigration);
+        await ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationApiInfo);
 
@@ -191,7 +191,7 @@ public class GoogleWorkspaceMigration(
         var i = 1;
         foreach (var user in usersForImport)
         {
-            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
+            await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
                 var elem = migrationApiInfo.Users.Find(element => element.Key == user.Key);
@@ -218,7 +218,7 @@ public class GoogleWorkspaceMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
                     await group.MigrateAsync();
@@ -236,7 +236,7 @@ public class GoogleWorkspaceMigration(
         {
             if (failedUsers.Contains(user))
             {
-                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
+                await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
                 continue;
             }
 
@@ -256,7 +256,7 @@ public class GoogleWorkspaceMigration(
             }
             finally
             {
-                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
+                await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }
@@ -268,6 +268,6 @@ public class GoogleWorkspaceMigration(
 
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersForImport.Count - _migrationInfo.FailedUsers;
-        ReportProgress(100, MigrationResource.MigrationCompleted);
+        await ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 }

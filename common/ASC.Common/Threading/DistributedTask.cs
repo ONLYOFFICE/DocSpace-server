@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Action = System.Action;
+
 namespace ASC.Common.Threading;
 
 /// <summary>
@@ -38,7 +40,7 @@ public class DistributedTask
     [ProtoMember(11)]
     protected readonly Dictionary<string, string> _props = new();
 
-    public Action<DistributedTask> Publication { get; set; }
+    public Func<DistributedTask, Task> Publication { get; set; }
 
     /// <summary>Instance ID</summary>
     /// <type>System.Int32, System</type>
@@ -69,14 +71,14 @@ public class DistributedTask
     }
 
 
-    public void PublishChanges()
+    public async Task PublishChanges()
     {
         if (Publication == null)
         {
             throw new InvalidOperationException("Publication not found.");
         }
 
-        Publication(this);
+        await Publication(this);
     }
 
     public dynamic this[string propName]

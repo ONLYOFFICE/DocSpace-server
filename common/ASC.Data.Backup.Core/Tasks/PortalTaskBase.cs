@@ -135,7 +135,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     #region Progress
 
-    public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+    public Func<ProgressChangedEventArgs, Task> ProgressChanged;
 
     private int _stepsCount = 1;
     private volatile int _stepsCompleted;
@@ -150,7 +150,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         Logger.DebugCountSteps(+_stepsCount);
     }
 
-    protected void SetStepCompleted(int increment = 1)
+    protected async Task SetStepCompleted(int increment = 1)
     {
         if (_stepsCount == 1)
         {
@@ -161,10 +161,10 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             throw new InvalidOperationException("All steps completed.");
         }
         _stepsCompleted += increment;
-        SetProgress(100 * _stepsCompleted / _stepsCount);
+        await SetProgress(100 * _stepsCompleted / _stepsCount);
     }
 
-    protected void SetCurrentStepProgress(int value)
+    protected async Task SetCurrentStepProgress(int value)
     {
         if (value is < 0 or > 100)
         {
@@ -172,27 +172,27 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         }
         if (value == 100)
         {
-            SetStepCompleted();
+            await SetStepCompleted();
         }
         else
         {
-            SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+            await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
         }
     }
 
-    protected void SetProgress(int value)
+    private async Task SetProgress(int value)
     {
         if (value is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
         Progress = value;
-        OnProgressChanged(new ProgressChangedEventArgs(value));
+        await OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
-    protected void OnProgressChanged(ProgressChangedEventArgs eventArgs)
+    private async Task OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
-        ProgressChanged?.Invoke(this, eventArgs);
+        await ProgressChanged(eventArgs);
     }
 
     #endregion

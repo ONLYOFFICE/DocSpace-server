@@ -34,12 +34,12 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 
     private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    public void RecalculateQuota(Tenant tenant)
+    public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<QuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
         
@@ -47,18 +47,18 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
         {
             item = serviceProvider.GetRequiredService<QuotaSyncJob>();
             item.InitJob(tenant);
-            _progressQueue.EnqueueTask(item);
+            await _progressQueue.EnqueueTask(item);
         }
 
-        item.PublishChanges();
+        await item.PublishChanges();
     }
 
-    public bool CheckRecalculateQuota(Tenant tenant)
+    public async Task<bool> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<QuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             return false;
         }
 
@@ -101,19 +101,19 @@ public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distribute
         {
             await using var scope = serviceScopeFactory.CreateAsyncScope();
 
-            var _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            var _storageFactoryConfig = scope.ServiceProvider.GetRequiredService<StorageFactoryConfig>();
-            var _storageFactory = scope.ServiceProvider.GetRequiredService<StorageFactory>();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var storageFactoryConfig = scope.ServiceProvider.GetRequiredService<StorageFactoryConfig>();
+            var storageFactory = scope.ServiceProvider.GetRequiredService<StorageFactory>();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
-            var storageModules = _storageFactoryConfig.GetModuleList();
+            await tenantManager.SetCurrentTenantAsync(TenantId);
+            var storageModules = storageFactoryConfig.GetModuleList();
 
             foreach (var module in storageModules)
             {
-                var storage = await _storageFactory.GetStorageAsync(TenantId, module);
+                var storage = await storageFactory.GetStorageAsync(TenantId, module);
                 await storage.ResetQuotaAsync("");
 
-                var domains = _storageFactoryConfig.GetDomainList(module);
+                var domains = storageFactoryConfig.GetDomainList(module);
                 foreach (var domain in domains)
                 {
                     await storage.ResetQuotaAsync(domain);
@@ -129,6 +129,6 @@ public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distribute
         {
             IsCompleted = true;
         }
-        PublishChanges();
+        await PublishChanges();
     }
 }

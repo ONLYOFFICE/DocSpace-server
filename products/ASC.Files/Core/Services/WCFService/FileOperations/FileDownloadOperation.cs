@@ -144,10 +144,10 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         }
 
         this[Finish] = true;
-        PublishChanges();
+        await PublishChanges();
     }
 
-    public override void PublishChanges(DistributedTask task)
+    protected override async Task PublishChanges(DistributedTask task)
     {
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
@@ -171,7 +171,7 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         var progress = (int)(this[Process] / (double)progressSteps * 100);
 
         this[Progress] = progress < 100 ? progress : 100;
-        PublishChanges();
+        await PublishChanges();
     }
 }
 
@@ -214,7 +214,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         Total = _entriesPathId.Count;
 
-        PublishChanges();
+        await PublishChanges();
 
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         foreach (var file in filesForSend)
@@ -354,7 +354,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             if (string.IsNullOrEmpty(path))
             {
-                ProgressStep();
+                await ProgressStep();
                 continue;
             }
 
@@ -415,7 +415,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                             
                         while (!t.IsCompleted)
                         {
-                            PublishChanges();
+                            await PublishChanges();
                             await Task.Delay(100);
                         }
                         
@@ -447,7 +447,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 }
             }
 
-            ProgressStep();
+            await ProgressStep();
         }
     }
 

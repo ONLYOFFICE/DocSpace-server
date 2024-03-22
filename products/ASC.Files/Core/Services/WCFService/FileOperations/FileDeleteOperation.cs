@@ -277,7 +277,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                 }
             }
-            ProgressStep(canCalculate);
+            await ProgressStep(canCalculate);
         }
     }
 
@@ -366,7 +366,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 ProcessedFile(fileId);
             }
 
-            ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
+            await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
         }
     }
 

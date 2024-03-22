@@ -50,21 +50,12 @@ public class OperationController(
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
     {
-        var files = new List<FilesDownloadOperationItem<JsonElement>>();
+        var files = inDto.FileConvertIds.Select(fileId => new FilesDownloadOperationItem<JsonElement>(fileId.Key, fileId.Value)).ToList();
+        files.AddRange(inDto.FileIds.Select(fileId => new FilesDownloadOperationItem<JsonElement>(fileId, string.Empty)));
 
-        foreach (var fileId in inDto.FileConvertIds)
-        {
-            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId.Key, fileId.Value));
-        }
-
-        foreach (var fileId in inDto.FileIds)
-        {
-            files.Add(new FilesDownloadOperationItem<JsonElement>(fileId, string.Empty));
-        }
-        
         await fileOperationsManager.PublishDownload(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -85,7 +76,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -106,7 +97,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -128,7 +119,7 @@ public class OperationController(
         
         await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -147,7 +138,7 @@ public class OperationController(
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -168,7 +159,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMarkAsRead(inDto.FolderIds, inDto.FileIds);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -189,7 +180,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -242,7 +233,7 @@ public class OperationController(
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
     {
-        var tasks = fileOperationsManager.CancelOperations(id);
+        var tasks = await fileOperationsManager.CancelOperations(id);
 
         foreach (var e in tasks)
         {

@@ -34,12 +34,12 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
 
-    public void RecalculateQuota(Tenant tenant)
+    public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
 
@@ -47,12 +47,12 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
         {
             item = serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
             item.InitJob(tenant);
-            _progressQueue.EnqueueTask(item.RunJobAsync, item);
+            await _progressQueue.EnqueueTask(item.RunJobAsync, item);
         }
     }
-    public TaskProgressDto CheckRecalculateQuota(Tenant tenant)
+    public async Task<TaskProgressDto> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         var progress = new TaskProgressDto();
 
         if (item == null)
@@ -66,7 +66,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 
         if (item.IsCompleted)
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
         }
 
         return progress;
@@ -117,7 +117,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
 
             var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            quotaSyncOperation.RecalculateQuota(tenant);
+            await quotaSyncOperation.RecalculateQuota(tenant);
 
             var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
             tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
@@ -134,7 +134,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
                 }
 
                 Percentage += 1.0 * 100 / users.Length;
-                PublishChanges();
+                await PublishChanges();
 
                 var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
                 await securityContext.AuthenticateMeAsync(account);
@@ -163,6 +163,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
         {
             IsCompleted = true;
         }
-        PublishChanges();
+        
+        await PublishChanges();
     }
 }

@@ -283,7 +283,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/progress</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("encryption/progress")]
-    public double? GetStorageEncryptionProgress()
+    public async Task<double?> GetStorageEncryptionProgress()
     {
         if (coreBaseSettings.CustomMode)
         {
@@ -300,7 +300,7 @@ public class StorageController(ILoggerProvider option,
             throw new NotSupportedException();
         }
 
-        return encryptionWorker.GetEncryptionProgress();
+        return await encryptionWorker.GetEncryptionProgress();
     }
 
     /// <summary>

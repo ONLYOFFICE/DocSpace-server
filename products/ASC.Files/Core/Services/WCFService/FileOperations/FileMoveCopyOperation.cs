@@ -638,7 +638,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 }
             }
 
-            ProgressStep(FolderDao.CanCalculateSubitems(folderId) ? default : folderId);
+            await ProgressStep(FolderDao.CanCalculateSubitems(folderId) ? default : folderId);
         }
 
         return needToMark;
@@ -907,7 +907,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 }
             }
 
-            ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
+            await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
         }
 
         this[Res] = sb.ToString();

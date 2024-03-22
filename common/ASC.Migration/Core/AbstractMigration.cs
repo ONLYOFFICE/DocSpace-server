@@ -39,13 +39,13 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup>(M
     protected List<Guid> _importedUsers;
     public abstract MigratorMeta Meta { get; }
 
-    public event Action<double, string> OnProgressUpdate;
+    public Func<double, string, Task> OnProgressUpdate { get; set; }
 
-    protected void ReportProgress(double value, string status)
+    protected async Task ReportProgress(double value, string status)
     {
         _lastProgressUpdate = value;
         _lastStatusUpdate = status;
-        OnProgressUpdate?.Invoke(value, status);
+        await OnProgressUpdate(value, status);
         _logger.Log($"{value:0.00} progress: {status}");
     }
 

@@ -104,7 +104,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
             }
 
-            ProgressStep();
+            await ProgressStep();
         }
 
 

@@ -206,7 +206,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }

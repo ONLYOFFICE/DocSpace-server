@@ -117,7 +117,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             while (true)
             {
-                var statuses = fileOperationsManager.GetOperationResults();
+                var statuses = await fileOperationsManager.GetOperationResults();
 
                 if (statuses.TrueForAll(r => r.Finished))
                 {

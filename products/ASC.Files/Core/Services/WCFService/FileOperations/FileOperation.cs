@@ -122,12 +122,12 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
 
         if (thirdPartyOperation)
         {
-            ThirdPartyOperation.Publication = PublishChanges;
+            ThirdPartyOperation.Publication = task => PublishChanges(task);
             await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
     }
 
-    public virtual void PublishChanges(DistributedTask task)
+    protected virtual async Task PublishChanges(DistributedTask task)
     {
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
@@ -184,7 +184,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         }
 
         this[Progress] = progress < 100 ? progress : 100;
-        PublishChanges();
+        await PublishChanges();
     }
 
     protected override Task DoJob(IServiceScope serviceScope)
@@ -281,7 +281,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             try
             {
                 this[Finish] = true;
-                PublishTaskInfo();
+                await PublishTaskInfo();
             }
             catch
             {
@@ -309,14 +309,14 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         return count;
     }
 
-    protected void ProgressStep(TId folderId = default, TId fileId = default)
+    protected async Task ProgressStep(TId folderId = default, TId fileId = default)
     {
         if (Equals(folderId, default(TId)) && Equals(fileId, default(TId))
             || !Equals(folderId, default(TId)) && Folders.Contains(folderId)
             || !Equals(fileId, default(TId)) && Files.Contains(fileId))
         {
             IncrementProgress();
-            PublishTaskInfo();
+            await PublishTaskInfo();
         }
     }
 
@@ -346,9 +346,9 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         return false;
     }
 
-    protected void PublishTaskInfo()
+    protected async Task PublishTaskInfo()
     {
-        PublishChanges();
+        await PublishChanges();
     }
 }
 

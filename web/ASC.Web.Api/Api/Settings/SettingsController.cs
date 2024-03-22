@@ -293,7 +293,7 @@ public class SettingsController(MessageService messageService,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
         {
@@ -332,7 +332,7 @@ public class SettingsController(MessageService messageService,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
         {
@@ -492,7 +492,7 @@ public class SettingsController(MessageService messageService,
     public async Task RecalculateQuotaAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -510,7 +510,7 @@ public class SettingsController(MessageService messageService,
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        return quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>

@@ -36,7 +36,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
     private BackupRepository _backupRepository;
-    private RestorePortalTask _restorePortalTask;
     private readonly CoreBaseSettings _coreBaseSettings;
 
     private string _region;
@@ -101,7 +100,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             tenant.SetStatus(TenantStatus.Restoring);
             await _tenantManager.SaveTenantAsync(tenant);
 
-            _restorePortalTask = scope.ServiceProvider.GetService<RestorePortalTask>();
+            var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
 
@@ -130,12 +129,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            var restoreTask = _restorePortalTask;
             restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
-            restoreTask.ProgressChanged += (_, args) =>
+            restoreTask.ProgressChanged = async (args) =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
-                PublishChanges();
+                await PublishChanges();
             };
             await restoreTask.RunJob();
 
@@ -175,7 +173,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 75;
 
-            PublishChanges();
+            await PublishChanges();
 
             File.Delete(tempFile);
 
@@ -198,7 +196,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         {
             try
             {
-                PublishChanges();
+                await PublishChanges();
             }
             catch (Exception error)
             {
