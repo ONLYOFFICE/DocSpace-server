@@ -299,7 +299,6 @@ public class UserController(ICache cache,
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [HttpPost("invite")]
-    [EnableRateLimiting("sensitive_api")]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
