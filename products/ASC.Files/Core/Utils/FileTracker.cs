@@ -272,7 +272,10 @@ public class FileTrackerHelper
 [ProtoContract]
 public record FileTrackerNotify
 {
+    [ProtoMember(1)]
     public string FileId { get; set; }
+    
+    [ProtoMember(2)]
     public FileTracker FileTracker { get; set; }
 }
 
