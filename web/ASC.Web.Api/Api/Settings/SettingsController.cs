@@ -56,7 +56,6 @@ public class SettingsController(MessageService messageService,
         DnsSettings dnsSettings,
         AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
-        UserInvitationSettingsHelper userInvitationSettingsHelper,
         QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
@@ -178,8 +177,6 @@ public class SettingsController(MessageService messageService,
 
             var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
-
-            settings.InvitationLimit = await userInvitationSettingsHelper.GetLimit();
         }
         else
         {
