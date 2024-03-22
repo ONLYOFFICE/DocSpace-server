@@ -225,7 +225,15 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        var cancellationTokenSource = new CancellationTokenSource(Timeout);
+        var defaultTimeout = Timeout;
+        var commandTimeout = defaultTimeout;
+
+        if (method == CommandMethod.Version)
+        {
+            commandTimeout = 5000;
+        }
+
+        var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(documentTrackerUrl),
@@ -233,7 +241,7 @@ public static class DocumentService
         };
 
         var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        httpClient.Timeout = TimeSpan.FromMilliseconds(commandTimeout);
 
         var body = new CommandBody
         {

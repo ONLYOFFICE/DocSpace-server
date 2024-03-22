@@ -267,16 +267,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (!readLink && !await fileSecurity.CanDownloadAsync(file))
+            if (!await fileSecurity.CanDownloadAsync(file))
             {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || FileUtility.GetFileExtension(file.Title) == ".pdf") ||
-                    linkId == Guid.Empty || !await fileSecurity.CanReadAsync(file, linkId))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
             }
 
             if (readLink && linkShare is FileShare.Comment or FileShare.Read && file.DenyDownload)
