@@ -280,6 +280,11 @@
       }
   }
 
+  function changeInvitationLimitValue({ value, room } = {}) {
+    logger.info(`changed user invitation limit in room ${room}, value ${value}`);
+    filesIO.to(room).emit("s:change-invitation-limit-value", value);
+ }
+
   return {
     startEdit,
     stopEdit,
@@ -293,6 +298,7 @@
     changeQuotaFeatureValue,
     changeUserQuotaFeatureValue,
     markAsNewFiles,
-    markAsNewFolders
+    markAsNewFolders,
+    changeInvitationLimitValue
   };
 };

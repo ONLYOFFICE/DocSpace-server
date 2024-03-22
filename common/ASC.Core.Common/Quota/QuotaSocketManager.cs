@@ -55,6 +55,13 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
+    public async Task ChangeInvitationLimitValue(int value)
+    {
+        var room = await GetQuotaRoom();
+
+        await MakeRequest("change-invitation-limit-value", new { room, value });
+    }
+
     private async Task<string> GetQuotaRoom()
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();

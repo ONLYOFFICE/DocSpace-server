@@ -47,7 +47,8 @@ public class UserInvitationSettings : ISettings<UserInvitationSettings>
 [Scope]
 public class UserInvitationSettingsHelper(
     SettingsManager settingsManager,
-    SetupInfo setupInfo)
+    SetupInfo setupInfo,
+    QuotaSocketManager quotaSocketManager)
 {
     public bool LimitEnabled { get; internal set; } = setupInfo.InvitationLimit != int.MaxValue;
 
@@ -73,6 +74,8 @@ public class UserInvitationSettingsHelper(
         settings.Limit = int.Min(settings.Limit + value, setupInfo.InvitationLimit);
 
         _ = await settingsManager.SaveAsync(settings);
+
+        await quotaSocketManager.ChangeInvitationLimitValue(settings.Limit);
     }
 
     public async Task ReduceLimit(int value = 1)
@@ -87,6 +90,8 @@ public class UserInvitationSettingsHelper(
         settings.Limit = int.Max(settings.Limit - value, 0);
 
         _ = await settingsManager.SaveAsync(settings);
+
+        await quotaSocketManager.ChangeInvitationLimitValue(settings.Limit);
     }
 
     private async Task<UserInvitationSettings> GetSettings()
