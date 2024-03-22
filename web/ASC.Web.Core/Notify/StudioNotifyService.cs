@@ -39,6 +39,7 @@ public class StudioNotifyService(UserManager userManager,
         CommonLinkUtility commonLinkUtility,
         SetupInfo setupInfo,
         DisplayUserSettingsHelper displayUserSettingsHelper,
+        UserInvitationSettingsHelper userInvitationSettingsHelper,
         SettingsManager settingsManager,
         MessageService messageService,
         MessageTarget messageTarget,
@@ -137,7 +138,7 @@ public class StudioNotifyService(UserManager userManager,
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
+    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null, bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -158,9 +159,14 @@ public class StudioNotifyService(UserManager userManager,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationSettingsHelper.ReduceLimit();
+        }
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -181,6 +187,11 @@ public class StudioNotifyService(UserManager userManager,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationSettingsHelper.ReduceLimit();
+        }
     }
 
     #endregion

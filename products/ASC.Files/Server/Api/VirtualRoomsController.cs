@@ -29,7 +29,7 @@ namespace ASC.Files.Api;
 [ConstraintRoute("int")]
 public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        SetupInfo setupInfo,
+        UserInvitationSettingsHelper userInvitationSettingsHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
@@ -42,7 +42,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
     fileOperationDtoHelper,
-    setupInfo,
+    userInvitationSettingsHelper,
     customTagsService,
     roomLogoManager,
     fileOperationsManager,
@@ -74,7 +74,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
 
 public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        SetupInfo setupInfo,
+        UserInvitationSettingsHelper userInvitationSettingsHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
@@ -87,7 +87,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
     fileOperationDtoHelper,
-    setupInfo,
+    userInvitationSettingsHelper,
     customTagsService,
     roomLogoManager,
     fileOperationsManager,
@@ -122,7 +122,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
-    SetupInfo setupInfo,
+    UserInvitationSettingsHelper userInvitationSettingsHelper,
     CustomTagsService customTagsService,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
@@ -302,8 +302,7 @@ public abstract class VirtualRoomsController<T>(
         }
 
         var invitationsCount = inDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
-
-        if (invitationsCount > setupInfo.InvitationLimit)
+        if (invitationsCount > await userInvitationSettingsHelper.GetLimit())
         {
             throw new Exception(Resource.ErrorInvitationLimitExceeded);
         }
