@@ -254,7 +254,7 @@ public abstract class BaseStartup
                    }
             ));
 
-            options.AddPolicy("sensitive_api", httpContext =>
+            options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
                 var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                 var permitLimit = 5;

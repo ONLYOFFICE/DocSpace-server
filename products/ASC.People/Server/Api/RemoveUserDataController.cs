@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 namespace ASC.People.Api;
 
 public class RemoveUserDataController(PermissionContext permissionContext,
@@ -67,6 +69,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/self/delete</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("self/delete")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendInstructionsToDeleteAsync()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
