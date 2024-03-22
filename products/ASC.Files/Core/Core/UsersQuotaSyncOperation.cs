@@ -114,11 +114,10 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
 
-            await tenantManager.SetCurrentTenantAsync(TenantId);
+            var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            quotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
+            quotaSyncOperation.RecalculateQuota(tenant);
 
             var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
             tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;

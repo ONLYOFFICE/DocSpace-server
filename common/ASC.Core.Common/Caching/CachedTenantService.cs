@@ -237,22 +237,6 @@ class CachedTenantService() : ITenantService
         return t;
     }
 
-    public Tenant GetTenant(int id)
-    {
-        var tenants = _tenantServiceCache.GetTenantStore();
-        var t = tenants.Get(id);
-        if (t == null)
-        {
-            t = _service.GetTenant(id);
-            if (t != null)
-            {
-                tenants.Insert(t);
-            }
-        }
-
-        return t;
-    }
-
     public Tenant GetTenant(string domain)
     {
         var tenants = _tenantServiceCache.GetTenantStore();

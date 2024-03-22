@@ -40,7 +40,8 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     PathProvider pathProvider,
     BreadCrumbsManager breadCrumbsManager,
-    DocumentServiceConnector documentServiceConnector)
+    DocumentServiceConnector documentServiceConnector,
+    TenantUtil tenantUtil)
 {
     private record FolderIndex(int ChildFoldersCount, string Order);
     
@@ -175,7 +176,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
                 company = tenantWhiteLabelSettings.LogoText,
                 room = room.Title,
                 exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
-                dateGenerated = room.CreateOnString
+                dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
             },
 
             data = items

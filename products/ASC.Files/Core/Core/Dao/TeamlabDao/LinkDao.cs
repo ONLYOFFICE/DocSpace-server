@@ -133,7 +133,8 @@ static file class Queries
                 ctx.FilesLink
                     .Where(r => r.TenantId == tenantId && r.SourceId == sourceId && r.LinkedFor == id)
                     .Select(r => r.LinkedId)
-                    .SingleOrDefault());
+                    .OrderByDescending(r => r)
+                    .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, string, Guid, Task<DbFilesLink>> FileLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

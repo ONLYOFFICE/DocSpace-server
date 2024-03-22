@@ -290,7 +290,14 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
         var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
         var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
-        
+
+        if (!ValidateUrl(inDto.DocServiceUrl) ||
+            !ValidateUrl(inDto.DocServiceUrlInternal) ||
+            !ValidateUrl(inDto.DocServiceUrlPortal))
+        {
+            throw new Exception("Invalid input urls");
+        }
+
         filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
@@ -313,10 +320,23 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
             filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
             filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
-            throw;
+          
+            throw new Exception("Unable to establish a connection with the Document Server.");
         }
 
         return await GetDocServiceUrlAsync(false);
+
+        bool ValidateUrl(string url)
+        {
+            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+
+            if (uri == null || uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
+            {
+                return false;
+            }
+
+            return success;
+        }
     }
 
     /// <summary>

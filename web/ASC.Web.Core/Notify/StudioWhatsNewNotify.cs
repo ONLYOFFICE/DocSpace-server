@@ -147,7 +147,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew auditEvents count : {auditEvents.Count}");//temp
 
-                var userActivities = new List<string>();
+                var userActivities = new HashSet<string>();
 
                 foreach (var e in auditEvents)
                 {

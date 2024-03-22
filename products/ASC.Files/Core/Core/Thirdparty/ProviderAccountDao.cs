@@ -235,6 +235,11 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         {
             forUpdate.Color = data.Color;
         }
+        
+        if (data.CreateBy.HasValue)
+        {
+            forUpdate.UserId = data.CreateBy.Value;
+        }
 
         forUpdate.ModifiedOn = DateTime.UtcNow;
         
@@ -734,6 +739,7 @@ public class ProviderData
     public bool? HasLogo { get; init; }
     public string Color { get; init; }
     public AuthData AuthData { get; init; }
+    public Guid? CreateBy { get; init; }
 }
 
 static file class Queries

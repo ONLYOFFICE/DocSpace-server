@@ -55,12 +55,9 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        
-        services.AddMvcCore(config =>
-        {
-            config.Filters.Add<Classes.CustomExceptionFilterAttribute>();
-        });
-        
+        services.AddExceptionHandler<Classes.CustomExceptionHandler>();
+        services.AddProblemDetails();
+
         services.AddScoped<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
@@ -104,6 +101,7 @@ public class Startup
         _diHelper.TryAdd<CookieAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
         _diHelper.TryAdd<FilesSpaceUsageStatManager>();
+        _diHelper.TryAdd<ApiSystemAuthHandlerHelper>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -174,6 +172,8 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseExceptionHandler();
+
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))

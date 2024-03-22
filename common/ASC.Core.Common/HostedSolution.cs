@@ -65,11 +65,6 @@ public class HostedSolution(ITenantService tenantService,
         return await tenantService.GetTenantAsync(id);
     }
 
-    public Tenant GetTenant(int id)
-    {
-        return tenantService.GetTenant(id);
-    }
-
     public async Task CheckTenantAddressAsync(string address)
     {
         await tenantService.ValidateDomainAsync(address);
