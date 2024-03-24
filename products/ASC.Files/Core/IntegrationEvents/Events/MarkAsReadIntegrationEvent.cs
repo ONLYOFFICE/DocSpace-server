@@ -38,4 +38,8 @@ public record MarkAsReadIntegrationEvent : IntegrationEvent
     
     [ProtoMember(1)]
     public string TaskId { get; set; }
+    
+    
+    [ProtoMember(2)]
+    public string Data { get; set; }
 }

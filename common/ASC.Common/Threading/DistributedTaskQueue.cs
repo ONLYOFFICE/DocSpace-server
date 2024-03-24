@@ -233,7 +233,6 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
             queueTasks.Add(task);
 
             await SaveToCache(queueTasks);
-
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
         };
     }

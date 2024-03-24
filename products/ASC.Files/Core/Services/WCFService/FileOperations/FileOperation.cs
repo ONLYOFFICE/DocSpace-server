@@ -92,17 +92,15 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
     {
         this[OpType] = (int)FileOperationType;
-        this[Data] = JsonSerializer.Serialize(data);
         this[Hold] = data.HoldResult;
     }
 
     public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
     {
         var data = JsonSerializer.Deserialize<T>(jsonData);
-        this[OpType] = (int)FileOperationType;
         this[Data] = jsonData;
-        this[Hold] = data.HoldResult;
         Id = taskId;
+        Init(data);
         return data;
     }
 
@@ -122,7 +120,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
 
         if (thirdPartyOperation)
         {
-            ThirdPartyOperation.Publication = task => PublishChanges(task);
+            ThirdPartyOperation.Publication = PublishChanges;
             await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
     }
@@ -193,8 +191,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     }
 }
 
-abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, ExternalSessionSnapshot SessionSnapshot, 
-    bool HoldResult = true);
+public abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, ExternalSessionSnapshot SessionSnapshot, bool HoldResult = true);
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {

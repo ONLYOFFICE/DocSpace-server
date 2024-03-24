@@ -79,11 +79,6 @@ public class FileOperationsManagerHolder(
         return await GetOperationResults(userId);
     }
 
-    public async Task<DistributedTask> FindById(string taskId)
-    {
-        return (await _tasks.GetAllTasks()).FirstOrDefault(r => r.Id == taskId);
-    }
-
     public async Task Enqueue(DistributedTaskProgress task)
     {
         await _tasks.EnqueueTask(task);
@@ -135,16 +130,11 @@ public class FileOperationsManager(
 
     #region MarkAsRead
 
-    public async Task EnqueueMarkAsRead(string taskId)
+    public async Task EnqueueMarkAsRead(string taskId, string data)
     {
-        var op = await fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-            operation.Init<FileMarkAsReadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            await fileOperationsManagerHolder.Enqueue(operation);
-        }
+        var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
+        operation.Init<FileMarkAsReadOperationData<JsonElement>>(data, taskId);
+        await fileOperationsManagerHolder.Enqueue(operation);
     }
 
     public async Task PublishMarkAsRead(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
@@ -158,13 +148,15 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        op.Init(new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot));
+        var data = new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+        op.Init(data);
         
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = JsonSerializer.Serialize(data)
         });
     }
 
@@ -172,16 +164,11 @@ public class FileOperationsManager(
 
     #region Download
     
-    public async Task EnqueueDownload(string taskId)
+    public async Task EnqueueDownload(string taskId, string data)
     {
-        var op = await fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-            operation.Init<FileDownloadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            await fileOperationsManagerHolder.Enqueue(operation);
-        }
+        var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
+        operation.Init<FileDownloadOperationData<JsonElement>>(data, taskId);
+        await fileOperationsManagerHolder.Enqueue(operation);
     }
     
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
@@ -196,13 +183,15 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        op.Init(new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri));
+        var data = new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
+        op.Init(data);
         
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = JsonSerializer.Serialize(data)
         });
     }
 
@@ -210,16 +199,11 @@ public class FileOperationsManager(
 
     #region MoveOrCopy
 
-    public async Task EnqueueMoveOrCopy(string taskId)
+    public async Task EnqueueMoveOrCopy(string taskId, string data)
     {
-        var op = await fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-            operation.Init<FileMoveCopyOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            await fileOperationsManagerHolder.Enqueue(operation);
-        }
+        var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
+        operation.Init<FileMoveCopyOperationData<JsonElement>>(data, taskId);
+        await fileOperationsManagerHolder.Enqueue(operation);
     }
 
     public async Task PublishMoveOrCopyAsync(
@@ -264,13 +248,15 @@ public class FileOperationsManager(
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        op.Init(new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot));
+        var data = new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
+        op.Init(data);
         
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = JsonSerializer.Serialize(data) 
         });
         
         return;
@@ -297,16 +283,11 @@ public class FileOperationsManager(
 
     #region Delete
 
-    public async Task EnqueueDelete(string taskId)
+    public async Task EnqueueDelete(string taskId, string data)
     {
-        var op = await fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-            operation.Init<FileDeleteOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            await fileOperationsManagerHolder.Enqueue(operation);
-        }
+        var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
+        operation.Init<FileDeleteOperationData<JsonElement>>(data, taskId);
+        await fileOperationsManagerHolder.Enqueue(operation);
     }
 
     public async Task PublishDelete<T>(
@@ -339,18 +320,19 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash));
+        var data = new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
+        op.Init(data);
         
         var taskId = await fileOperationsManagerHolder.Publish(op);
 
         IntegrationEvent toPublish;
         if (isEmptyTrash)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId };
+            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId, Data = JsonSerializer.Serialize(data) };
         }
         else
         {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId };
+            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId, Data = JsonSerializer.Serialize(data) };
         }
         
         eventBus.Publish(toPublish);

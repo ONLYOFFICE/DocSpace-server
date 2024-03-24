@@ -41,4 +41,7 @@ public record EmptyTrashIntegrationEvent : IntegrationEvent
 
     [ProtoMember(2)]
     public IDictionary<string, string> Headers { get; set; }
+    
+    [ProtoMember(3)]
+    public string Data { get; set; }
 }

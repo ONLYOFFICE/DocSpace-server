@@ -45,8 +45,7 @@ public class MoveOrCopyIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-
-            await fileOperationsManager.EnqueueMoveOrCopy(@event.TaskId);
+            await fileOperationsManager.EnqueueMoveOrCopy(@event.TaskId, @event.Data);
         }
     }
 }
