@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Serializer = ProtoBuf.Serializer;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton]
@@ -130,10 +132,10 @@ public class FileOperationsManager(
 
     #region MarkAsRead
 
-    public async Task EnqueueMarkAsRead(string taskId, string data)
+    public async Task EnqueueMarkAsRead(string taskId, FileMarkAsReadOperationData<int> data, FileMarkAsReadOperationData<string> thirdPartyData)
     {
         var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        operation.Init<FileMarkAsReadOperationData<JsonElement>>(data, taskId);
+        operation.Init(data, thirdPartyData, taskId);
         await fileOperationsManagerHolder.Enqueue(operation);
     }
 
@@ -148,15 +150,19 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        var data = new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot);
-        op.Init(data);
-        
+        op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
+        
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
         eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
-            Data = JsonSerializer.Serialize(data)
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
     }
 
@@ -164,10 +170,10 @@ public class FileOperationsManager(
 
     #region Download
     
-    public async Task EnqueueDownload(string taskId, string data)
+    public async Task EnqueueDownload(string taskId, FileDownloadOperationData<int> data, FileDownloadOperationData<string> thirdPartyData)
     {
         var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        operation.Init<FileDownloadOperationData<JsonElement>>(data, taskId);
+        operation.Init(data, thirdPartyData, taskId);
         await fileOperationsManagerHolder.Enqueue(operation);
     }
     
@@ -183,15 +189,20 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        var data = new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
-        op.Init(data);
-        
+        op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
+        
+        var (folderIntIds, folderStringIds) = GetIds(folders);
+        var (fileIntIds, fileStringIds) = GetIds(files);
+        
+        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
+        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
         eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
             TaskId = taskId,
-            Data = JsonSerializer.Serialize(data)
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
     }
 
@@ -199,10 +210,10 @@ public class FileOperationsManager(
 
     #region MoveOrCopy
 
-    public async Task EnqueueMoveOrCopy(string taskId, string data)
+    public async Task EnqueueMoveOrCopy(string taskId, FileMoveCopyOperationData<int> data, FileMoveCopyOperationData<string> thirdPartyData)
     {
         var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        operation.Init<FileMoveCopyOperationData<JsonElement>>(data, taskId);
+        operation.Init(data, thirdPartyData, taskId, data?.Copy ?? thirdPartyData?.Copy ?? false);
         await fileOperationsManagerHolder.Enqueue(operation);
     }
 
@@ -228,35 +239,27 @@ public class FileOperationsManager(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
-        var toCopyFolderIds = folderIds;
-        var toCopyFilesIds = fileIds;
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
         
         if (content)
         {        
-            var (folderIntIds, folderStringIds) = GetIds(folderIds);
-            var (fileIntIds, fileStringIds) = GetIds(fileIds);
             await GetContent(folderIntIds, fileIntIds);
             await GetContent(folderStringIds, fileStringIds);
-
-            toCopyFilesIds = fileIntIds.Select(r => JsonSerializer.SerializeToElement(r))
-                .Concat(fileStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
-                .ToList();
-            
-            toCopyFolderIds = folderIntIds.Select(r => JsonSerializer.SerializeToElement(r))
-                .Concat(folderStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
-                .ToList();
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        var data = new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
-        op.Init(data);
-        
+        op.Init(holdResult, copy);
         var taskId = await fileOperationsManagerHolder.Publish(op);
+        
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
         
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
-            Data = JsonSerializer.Serialize(data) 
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
         
         return;
@@ -283,14 +286,14 @@ public class FileOperationsManager(
 
     #region Delete
 
-    public async Task EnqueueDelete(string taskId, string data)
+    public async Task EnqueueDelete(string taskId, FileDeleteOperationData<int> data, FileDeleteOperationData<string> thirdPartyData)
     {
         var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        operation.Init<FileDeleteOperationData<JsonElement>>(data, taskId);
+        operation.Init(data, thirdPartyData, taskId);
         await fileOperationsManagerHolder.Enqueue(operation);
     }
 
-    public async Task PublishDelete<T>(
+    public Task PublishDelete<T>(
         IEnumerable<T> folders, 
         IEnumerable<T> files, 
         bool ignoreException, 
@@ -298,41 +301,74 @@ public class FileOperationsManager(
         bool immediately,
         bool isEmptyTrash = false)
     {        
-        var jsonFolders = folders.Select(r => JsonSerializer.SerializeToElement(r));
-        var jsonFiles = files.Select(r => JsonSerializer.SerializeToElement(r));
-        await PublishDelete(jsonFolders, jsonFiles, ignoreException, holdResult, immediately, isEmptyTrash);
+        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        {
+            return Task.CompletedTask;
+        }
+        
+        var folderIds = (folders.OfType<int>(), folders.OfType<string>());
+        var fileIds = (files.OfType<int>(), files.OfType<string>());
+        
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
     }
-    
-    public async Task PublishDelete(
-        IEnumerable<JsonElement> folderIds, 
-        IEnumerable<JsonElement> fileIds, 
+
+    public Task PublishDelete(
+        IEnumerable<JsonElement> folders, 
+        IEnumerable<JsonElement> files, 
         bool ignoreException, 
-        bool holdResult, 
+        bool holdResult,
         bool immediately,
         bool isEmptyTrash = false)
-    {      
-        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+    {        
+        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
-            return;
+            return Task.CompletedTask;
         }
+        
+        var folderIds = GetIds(folders);
+        var fileIds = GetIds(files);
+
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+    }
+
+    private async Task PublishDelete(
+        (IEnumerable<int>, IEnumerable<string>) folders, 
+        (IEnumerable<int>, IEnumerable<string>) files, 
+        bool ignoreException, 
+        bool holdResult,
+        bool immediately,
+        bool isEmptyTrash = false)
+    {        
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        var data = new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
-        op.Init(data);
-        
+        op.Init(holdResult);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-
+        
+        
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        
         IntegrationEvent toPublish;
         if (isEmptyTrash)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId, Data = JsonSerializer.Serialize(data) };
+            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = taskId, 
+                Data = data,
+                ThirdPartyData = thirdPartyData
+            };
         }
         else
         {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId, Data = JsonSerializer.Serialize(data) };
+            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = taskId, 
+                Data = data,
+                ThirdPartyData = thirdPartyData
+            };
         }
         
         eventBus.Publish(toPublish);

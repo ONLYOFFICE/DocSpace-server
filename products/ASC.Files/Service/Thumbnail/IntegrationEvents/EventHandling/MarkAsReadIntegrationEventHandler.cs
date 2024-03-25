@@ -45,7 +45,7 @@ public class MarkAsReadIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-            await fileOperationsManager.EnqueueMarkAsRead(@event.TaskId, @event.Data);
+            await fileOperationsManager.EnqueueMarkAsRead(@event.TaskId, @event.Data, @event.ThirdPartyData);
         }
     }
 }

@@ -43,5 +43,8 @@ public record EmptyTrashIntegrationEvent : IntegrationEvent
     public IDictionary<string, string> Headers { get; set; }
     
     [ProtoMember(3)]
-    public string Data { get; set; }
+    public FileDeleteOperationData<int> Data { get; set; }
+    
+    [ProtoMember(4)]
+    public FileDeleteOperationData<string> ThirdPartyData { get; set; }
 }

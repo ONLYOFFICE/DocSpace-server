@@ -26,15 +26,32 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-record FileDownloadOperationData<T>(
-    IEnumerable<T> Folders,
-    IEnumerable<FilesDownloadOperationItem<T>> FilesDownload,
-    int TenantId,
-    IDictionary<string, string> Headers,
-    ExternalSessionSnapshot SessionSnapshot,
-    string BaseUri =  null,
-    bool HoldResult = true)
-    : FileOperationData<T>(Folders, FilesDownload.Select(f => f.Id).ToList(), TenantId, Headers, SessionSnapshot, HoldResult);
+[ProtoContract]
+public record FileDownloadOperationData<T> : FileOperationData<T>
+{
+    public FileDownloadOperationData()
+    {
+        
+    }
+    
+    public FileDownloadOperationData(IEnumerable<T> folders,
+        IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
+        int tenantId,
+        IDictionary<string, string> headers,
+        ExternalSessionSnapshot sessionSnapshot,
+        string baseUri =  null,
+        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, headers, sessionSnapshot, holdResult)
+    {
+        FilesDownload = filesDownload;
+        BaseUri = baseUri;
+    }
+
+    [ProtoMember(1)]
+    public IEnumerable<FilesDownloadOperationItem<T>> FilesDownload { get; init; }
+    
+    [ProtoMember(2)]
+    public string BaseUri { get; init; }
+}
 
 public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
@@ -44,12 +61,12 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
-    {        
-        var data = JsonSerializer.Deserialize<FileDownloadOperationData<JsonElement>>((string)this[Data]);
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.FilesDownload);
-        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.SessionSnapshot));
-        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.SessionSnapshot));
+    {
+        var data = Data as FileDownloadOperationData<int>;
+        var thirdPartyData = ThirdPartyData as FileDownloadOperationData<string>;
+        
+        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, data);
+        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, thirdPartyData);
 
         await base.RunJob(distributedTask, cancellationToken);
 
@@ -63,10 +80,11 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var stream = tempStream.Create();
 
-        if (!string.IsNullOrEmpty(data.BaseUri))
+        var baseUri = data?.BaseUri ?? thirdPartyData?.BaseUri;
+        if (!string.IsNullOrEmpty(baseUri))
         {
             var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
-            commonLinkUtility.ServerUri = data.BaseUri;
+            commonLinkUtility.ServerUri = baseUri;
         }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;

@@ -26,17 +26,38 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-record FileDeleteOperationData<T>(
-    IEnumerable<T> Folders,
-    IEnumerable<T> Files,
-    int TenantId,
-    IDictionary<string, string> Headers,
-    ExternalSessionSnapshot SessionSnapshot,
-    bool HoldResult = true,
-    bool IgnoreException = false,
-    bool Immediately = false,
-    bool IsEmptyTrash = false)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
+[ProtoContract]
+public record FileDeleteOperationData<T> : FileOperationData<T>
+{
+    [ProtoMember(7)]
+    public bool IgnoreException { get; set; }
+    
+    [ProtoMember(8)]
+    public bool Immediately { get; set; }
+    
+    [ProtoMember(9)]
+    public bool IsEmptyTrash { get; set; }
+
+    public FileDeleteOperationData()
+    {
+        
+    }
+
+    public FileDeleteOperationData(IEnumerable<T> folders,
+        IEnumerable<T> files,
+        int tenantId,
+        IDictionary<string, string> headers,
+        ExternalSessionSnapshot sessionSnapshot,
+        bool holdResult = true,
+        bool ignoreException = false,
+        bool immediately = false,
+        bool isEmptyTrash = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
+    {
+        IgnoreException = ignoreException;
+        Immediately = immediately;
+        IsEmptyTrash = isEmptyTrash;
+    }
+}
 
 [Transient]
 class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
@@ -45,13 +66,8 @@ class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperati
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        var data = JsonSerializer.Deserialize<FileDeleteOperationData<JsonElement>>((string)this[Data]);
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, 
-            data.SessionSnapshot, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
-        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, data.TenantId, 
-            data.Headers, data.SessionSnapshot, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
+        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data as FileDeleteOperationData<int>);
+        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData as FileDeleteOperationData<string>);
 
         return base.RunJob(distributedTask, cancellationToken);
     }

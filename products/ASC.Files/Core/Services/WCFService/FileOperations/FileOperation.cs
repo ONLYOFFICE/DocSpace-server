@@ -39,7 +39,6 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
-    public const string Data = "Data";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -88,20 +87,23 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
+    
+    protected  FileOperationData<string> ThirdPartyData { get; set; }
+    protected  FileOperationData<int> Data { get; set; }
 
-    public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
+
+    public void Init(bool holdResult)
     {
         this[OpType] = (int)FileOperationType;
-        this[Hold] = data.HoldResult;
+        this[Hold] = holdResult;
     }
 
-    public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
+    public void Init(FileOperationData<int> data, FileOperationData<string> thirdPartyData, string taskId)
     {
-        var data = JsonSerializer.Deserialize<T>(jsonData);
-        this[Data] = jsonData;
+        Data = data;
+        ThirdPartyData = thirdPartyData;
         Id = taskId;
-        Init(data);
-        return data;
+        Init(data.HoldResult);
     }
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
@@ -191,7 +193,50 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     }
 }
 
-public abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, ExternalSessionSnapshot SessionSnapshot, bool HoldResult = true);
+[ProtoContract]
+[ProtoInclude(100, typeof(FileDeleteOperationData<string>))]
+[ProtoInclude(101, typeof(FileDeleteOperationData<int>))]
+[ProtoInclude(102, typeof(FileMoveCopyOperationData<int>))]
+[ProtoInclude(103, typeof(FileMoveCopyOperationData<string>))]
+[ProtoInclude(104, typeof(FileMarkAsReadOperationData<int>))]
+[ProtoInclude(105, typeof(FileMarkAsReadOperationData<string>))]
+[ProtoInclude(104, typeof(FileDownloadOperationData<int>))]
+[ProtoInclude(105, typeof(FileDownloadOperationData<string>))]
+public record FileOperationData<T>
+{
+    [ProtoMember(1)]
+    public IEnumerable<T> Folders { get; set; }
+    
+    [ProtoMember(2)]
+    public IEnumerable<T> Files { get; set; }
+    
+    [ProtoMember(3)]
+    public int TenantId { get; set; }
+    
+    [ProtoMember(4)]
+    public IDictionary<string, string> Headers { get; set; }
+    
+    [ProtoMember(5)]
+    public ExternalSessionSnapshot SessionSnapshot { get; set; }
+    
+    [ProtoMember(6)]
+    public bool HoldResult { get; set; }
+
+    public FileOperationData()
+    {
+        
+    }
+
+    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
+    {
+        Folders = folders;
+        Files = files;
+        TenantId = tenantId;
+        Headers = headers;
+        SessionSnapshot = sessionSnapshot;
+        HoldResult = holdResult;
+    }
+}
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {

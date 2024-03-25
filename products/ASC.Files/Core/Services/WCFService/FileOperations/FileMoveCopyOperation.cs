@@ -26,57 +26,77 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-record FileMoveCopyOperationData<T>(
-    IEnumerable<T> Folders,
-    IEnumerable<T> Files,
-    int TenantId,
-    JsonElement DestFolderId,
-    bool Copy,
-    FileConflictResolveType ResolveType,
-    bool HoldResult = true,
-    IDictionary<string, string> Headers = null,
-    ExternalSessionSnapshot SessionSnapshot = null)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
+[ProtoContract]
+public record FileMoveCopyOperationData<T> : FileOperationData<T>
+{
+    public FileMoveCopyOperationData()
+    {
+        
+    }
+    
+    public FileMoveCopyOperationData(IEnumerable<T> Folders,
+        IEnumerable<T> Files,
+        int TenantId,
+        JsonElement DestFolderId,
+        bool Copy,
+        FileConflictResolveType ResolveType,
+        bool HoldResult = true,
+        IDictionary<string, string> Headers = null,
+        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+    {
+        this.DestFolderId = DestFolderId.ValueKind switch
+        {
+            JsonValueKind.String => !int.TryParse(DestFolderId.GetString(), out var i) ? DestFolderId.GetString() : i.ToString(),
+            JsonValueKind.Number => DestFolderId.GetInt32().ToString(),
+            _ => this.DestFolderId
+        };
+
+        this.Copy = Copy;
+        this.ResolveType = ResolveType;
+    }
+
+    [ProtoMember(1)]
+    public string DestFolderId { get; init; }
+    
+    [ProtoMember(2)]
+    public bool Copy { get; init; }
+    
+    [ProtoMember(3)]
+    public FileConflictResolveType ResolveType { get; init; }
+}
 
 [Transient]
 class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
-    public override void Init<T>(T data)
+    public void Init(bool holdResult, bool copy)
     {
-        base.Init(data);
+        base.Init(holdResult);
         
-        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
+        if (!copy)
         {
             this[OpType] = (int)FileOperationType.Move;
         }
     }
 
-    public override T Init<T>(string jsonData, string taskId)
+    public void Init(FileOperationData<int> data, FileOperationData<string> thirdPartyData, string taskId, bool copy)
     {
-        var data  = base.Init<T>(jsonData, taskId);
+        base.Init(data, thirdPartyData, taskId);
         
-        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
+        if (!copy)
         {
             this[OpType] = (int)FileOperationType.Move;
         }
-
-        return data;
     }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>((string)this[Data]);
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        
-        DaoOperation =  new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.DestFolderId, 
-            data.Copy, data.ResolveType, data.HoldResult, data.Headers, data.SessionSnapshot));
-        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, data.TenantId, 
-            data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers, data.SessionSnapshot));
-        
+        DaoOperation = new FileMoveCopyOperation<int>(_serviceProvider, Data as FileMoveCopyOperationData<int>);
+        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, ThirdPartyData as FileMoveCopyOperationData<string>);
+
         return base.RunJob(distributedTask, cancellationToken);
+
     }
 }
 
@@ -93,23 +113,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         : base(serviceProvider, data)
     {
         var toFolderId = data.DestFolderId;
-        
-        if (toFolderId.ValueKind == JsonValueKind.String)
+
+        if (!int.TryParse(data.DestFolderId, out var i))
         {
-            if (!int.TryParse(toFolderId.GetString(), out var i))
-            {
-                _thirdPartyFolderId = toFolderId.GetString();
-            }
-            else
-            {
-                _daoFolderId = i;
-            }
+            _thirdPartyFolderId = toFolderId;
         }
-        else if (toFolderId.ValueKind == JsonValueKind.Number)
+        else
         {
-            _daoFolderId = toFolderId.GetInt32();
+            _daoFolderId = i;
         }
-        
+    
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 

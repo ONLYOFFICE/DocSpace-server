@@ -39,7 +39,9 @@ public record MarkAsReadIntegrationEvent : IntegrationEvent
     [ProtoMember(1)]
     public string TaskId { get; set; }
     
-    
     [ProtoMember(2)]
-    public string Data { get; set; }
+    public FileMarkAsReadOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileMarkAsReadOperationData<string> ThirdPartyData { get; set; }
 }

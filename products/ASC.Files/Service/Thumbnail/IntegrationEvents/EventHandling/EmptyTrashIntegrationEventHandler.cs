@@ -46,7 +46,7 @@ public class EmptyTrashIntegrationEventHandler(
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await fileOperationsManager.EnqueueDelete(@event.TaskId, @event.Data);
+            await fileOperationsManager.EnqueueDelete(@event.TaskId, @event.Data, @event.ThirdPartyData);
         }
     }
 }

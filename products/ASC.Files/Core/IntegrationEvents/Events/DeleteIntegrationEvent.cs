@@ -40,5 +40,8 @@ public record DeleteIntegrationEvent : IntegrationEvent
     public string TaskId { get; set; }
     
     [ProtoMember(2)]
-    public string Data { get; set; }
+    public FileDeleteOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileDeleteOperationData<string> ThirdPartyData { get; set; }
 }
