@@ -76,7 +76,7 @@ public class MessageSettings
 
         if (result != null)
         {
-            return HttpUtility.UrlDecode(result);
+            return result;
         }
 
         return request?.Headers[UserAgentHeader].FirstOrDefault();
@@ -103,7 +103,7 @@ public class MessageSettings
 
         if (result != null)
         {
-            return HttpUtility.UrlDecode(result);
+            return result;
         }
 
         return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
