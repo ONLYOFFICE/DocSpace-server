@@ -26,9 +26,6 @@
 
 using System.Extensions;
 
-using ASC.Migration.Core.Models;
-using ASC.Migration.Core.Migrators;
-
 namespace ASC.Migration.Core;
 
 [Transient]

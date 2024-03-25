@@ -24,17 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.IO.Compression;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-
-using ASC.Migration.Core.Migrators.Model;
-using ASC.Migration.GoogleWorkspace.Models.Parse;
-using ASC.Web.Core.Users;
-using ASC.Web.Files.Utils;
-
-using HtmlAgilityPack;
-
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;

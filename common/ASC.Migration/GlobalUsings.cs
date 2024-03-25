@@ -25,10 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Data;
+global using System.IO.Compression;
+global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Text.RegularExpressions;
 
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Common.Security.Authentication;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -46,10 +50,22 @@ global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Migration.Core.Core;
+global using ASC.Migration.Core.Migrators;
+global using ASC.Migration.Core.Migrators.Model;
+global using ASC.Migration.Core.Migrators.Provider;
+global using ASC.Migration.Core.Migrators.Provider.Google;
+global using ASC.Migration.Core.Migrators.Provider.NC;
 global using ASC.Migration.Core.Models.Api;
 global using ASC.Migration.Core.Resources;
+global using ASC.Migration.GoogleWorkspace.Models.Parse;
+global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
+global using ASC.Web.Files.Utils;
+
+global using DotNetOpenAuth.Messaging;
+
+global using HtmlAgilityPack;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

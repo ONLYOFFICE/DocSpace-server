@@ -25,15 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using System.IO.Compression;
-using System.Text.RegularExpressions;
-
-using ASC.AuditTrail.Types;
-using ASC.Migration.Core.Migrators.Model;
-using ASC.Web.Core.Users;
-using ASC.Web.Files.Services.FFmpegService;
-using ASC.Web.Files.Utils;
-
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
