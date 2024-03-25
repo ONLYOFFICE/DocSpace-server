@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,4 @@
 
 namespace ASC.Files.ThumbnailBuilder;
 
-public class FileData<T>(int tenantId, T fileId, string baseUri, TariffState tariffState)
-{
-    public TariffState TariffState { get; private set; } = tariffState;
-    public int TenantId { get; private set; } = tenantId;
-    public T FileId { get; private set; } = fileId;
-    public string BaseUri { get; private set; } = baseUri;
-}
+public record FileData<T>(int TenantId, Guid CreatedBy, T FileId, string BaseUri, TariffState TariffState);

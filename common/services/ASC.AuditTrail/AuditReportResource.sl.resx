@@ -307,7 +307,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Uspešen vpis</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Uspešen vpis preko socialnega računa</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

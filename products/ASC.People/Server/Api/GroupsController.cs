@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,6 +59,7 @@ public class GroupController(UserManager userManager,
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -97,6 +98,7 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
@@ -161,7 +163,7 @@ public class GroupController(UserManager userManager,
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id:guid}")]
-    public async Task<GroupDto> UpdateGroupAsync(Guid id, GroupRequestDto inDto)
+    public async Task<GroupDto> UpdateGroupAsync(Guid id, UpdateGroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
@@ -170,15 +172,21 @@ public class GroupController(UserManager userManager,
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
 
-        await RemoveMembersFromAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
-
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
-        if (inDto.Members != null)
+        if (inDto.MembersToAdd != null)
         {
-            foreach (var member in inDto.Members)
+            foreach (var memberToAdd in inDto.MembersToAdd)
             {
-                await TransferUserToDepartmentAsync(member, group, false);
+                await TransferUserToDepartmentAsync(memberToAdd, group, false);
+            }
+        }
+        
+        if (inDto.MembersToRemove != null)
+        {
+            foreach (var memberToRemove in inDto.MembersToRemove)
+            {
+                await RemoveUserFromDepartmentAsync(memberToRemove, group);
             }
         }
 
@@ -354,7 +362,7 @@ public class GroupController(UserManager userManager,
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        if (!await userManager.UserExistsAsync(userId) && userId != Guid.Empty)
+        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
         {
             return;
         }
@@ -364,19 +372,19 @@ public class GroupController(UserManager userManager,
             await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
         
-        await userManager.AddUserIntoGroupAsync(userId, group.ID);
+        await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
     }
 
     private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
     {
-        if (!await userManager.UserExistsAsync(userId))
+        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
         {
             return;
         }
 
         var user = await userManager.GetUsersAsync(userId);
         await userManager.RemoveUserFromGroupAsync(user.Id, group.ID);
-        await userManager.UpdateUserInfoAsync(user);
+        await userManager.UpdateUserInfoAsync(user, notifyWebSocket: false);
     }
 }
 

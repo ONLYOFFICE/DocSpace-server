@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -147,7 +147,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew auditEvents count : {auditEvents.Count}");//temp
 
-                var userActivities = new List<string>();
+                var userActivities = new HashSet<string>();
 
                 foreach (var e in auditEvents)
                 {

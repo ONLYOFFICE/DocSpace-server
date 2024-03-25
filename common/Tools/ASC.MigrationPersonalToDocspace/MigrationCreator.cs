@@ -275,7 +275,7 @@ public class MigrationCreator
 
                 await WriteEnrty(data, writer, module);
             }
-            catch(MySqlException e)
+            catch(MySqlException)
             {
                 if (table.Name != "tenants_tariffrow")
                 {

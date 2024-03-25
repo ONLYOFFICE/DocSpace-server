@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -445,6 +445,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
             ? (string.Empty, string.Empty) 
             : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+    }
+
+    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    {
+        throw new NotImplementedException();
     }
 
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)

@@ -150,6 +150,21 @@
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migration completed</value>
   </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Error while initializing {0} migrator</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>No such migration provider</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>No migration is in progress</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsing is still in progress</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migration is already in progress</value>
+  </data>
   <data name="ModuleNameCalendar" xml:space="preserve">
     <value>Calendar</value>
   </data>
@@ -200,5 +215,11 @@
   </data>
   <data name="UserSkipped" xml:space="preserve">
     <value>Failed to import user: {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migration common files</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migration project files</value>
   </data>
 </root>

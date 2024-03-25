@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,6 +81,7 @@ public abstract class FileEntry : ICloneable
     public DateTime CreateOn { get; set; }
     public DateTime ModifiedOn { get; set; }
     public FolderType RootFolderType { get; set; }
+    public FolderType? ParentRoomType { get; set; }
     public Guid RootCreateBy { get; set; }
     public abstract bool IsNew { get; set; }
     public FileEntryType FileEntryType { get; set; }

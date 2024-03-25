@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,15 @@ using ASC.Core.Common.Notify.Engine;
 namespace ASC.Core.Common.Log;
 public static partial class NotifyEngineLogger
 {
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService is starting.")]
+    public static partial void DebugNotifySchedulerServiceStarting(this ILogger<NotifyEngine> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task is stopping.")]
+    public static partial void DebugNotifySchedulerServiceStopping(this ILogger<NotifyEngine> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task with instance id {instanceId} is't active.")]
+    public static partial void DebugNotifySchedulerServiceIsNotActive(this ILogger<NotifyEngine> logger, string instanceId);
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "error styling message")]
     public static partial void WarningErrorStyling(this ILogger logger, Exception exception);
 

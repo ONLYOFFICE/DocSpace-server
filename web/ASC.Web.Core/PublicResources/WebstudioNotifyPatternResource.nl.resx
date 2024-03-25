@@ -1072,7 +1072,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hallo!
 
-U bent uitgenodigd om deel te nemen aan $Message kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
+U bent uitgenodigd om deel te nemen aan een DocSpace-kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
 
 $OrangeButton
 

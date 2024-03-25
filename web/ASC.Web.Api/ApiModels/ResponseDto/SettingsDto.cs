@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -145,6 +145,10 @@ public class SettingsDto
     /// <summary>Zendesk key</summary>
     /// <type>System.String, System</type>
     public string ZendeskKey { get; set; }
+
+    /// <summary>Tag manager id</summary>
+    /// <type>System.String, System</type>
+    public string TagManagerId { get; set; }
 
     /// <summary>Email for training booking</summary>
     /// <type>System.String, System</type>

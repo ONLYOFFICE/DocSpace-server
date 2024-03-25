@@ -367,7 +367,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>ログイン成功</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>ソーシャルアカウントを介してログイン成功</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -203,7 +203,7 @@ internal class FolderDao(
         var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds.Contains(f.ParentId)));
+        var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
 
         q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds)
             : await BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
@@ -739,7 +739,8 @@ internal class FolderDao(
                         toFolderRoomId == -1 && 
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
-                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedAddAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -748,7 +749,8 @@ internal class FolderDao(
                         toFolderRoomId != -1 && 
                         ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
                     {
-                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedDeleteAsync(
+                            await _tenantManager.GetCurrentTenantIdAsync(), 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -782,7 +784,7 @@ internal class FolderDao(
                 }
                 foreach (var e in recalcFolders)
                 {
-                    await GetRecalculateFilesCountUpdateAsync(e);
+                    await RecalculateFilesCountUpdateAsync(context, e);
                 }
         });
 
@@ -950,13 +952,14 @@ internal class FolderDao(
     public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await Queries.FolderWithSettingsAsync(filesDbContext, tenantId, folder.Id);
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))
         {
             toUpdate.Settings.Quota = newQuota >= TenantEntityQuotaSettings.NoQuota ? newQuota : TenantEntityQuotaSettings.DefaultQuotaValue;
         }
+        
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
@@ -1634,6 +1637,21 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
+    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var folderId = Convert.ToInt32(entry.ParentId);
+
+        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
+
+        if (parentFolders.Count > 1)
+        {
+            return parentFolders[1].FolderType;
+        }
+
+        return parentFolders[0].FolderType;
+    }
 
     public async Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
     {
@@ -2306,6 +2324,11 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders.FirstOrDefault(r => r.TenantId == tenantId && r.Id == folderId));
+    
+    public static readonly Func<FilesDbContext, int, int, Task<DbFolder>> FolderWithSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Folders.Include(r => r.Settings).FirstOrDefault(r => r.TenantId == tenantId && r.Id == folderId));
 
     public static readonly Func<FilesDbContext, int, Task<int>> CountTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

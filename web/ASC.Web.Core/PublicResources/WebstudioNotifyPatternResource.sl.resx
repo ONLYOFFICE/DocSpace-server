@@ -651,7 +651,7 @@ Ekipa ONLYOFFICE
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Pozdravljeni!
 
-Povabljeni ste, da se pridružite $Message sobi na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
+Povabljeni ste, da se pridružite sobi DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
 $OrangeButton
 

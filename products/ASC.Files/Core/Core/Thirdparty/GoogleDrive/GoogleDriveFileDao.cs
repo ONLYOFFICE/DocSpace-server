@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -129,6 +129,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
     {
         var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
         var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-        await storage.TransferAsync(googleDriveSession, stream, chunkLength);
+        var lastChunk = uploadSession.Items.ContainsKey("lastChunk");
+        await storage.TransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
     }
 }

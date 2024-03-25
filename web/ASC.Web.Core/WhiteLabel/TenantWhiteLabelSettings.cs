@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,8 @@ namespace ASC.Web.Core.WhiteLabel;
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 {
     public const string DefaultLogoText = BaseWhiteLabelSettings.DefaultLogoText;
+
+    public static readonly List<string> AvailableExtensions = [".bmp", ".jpg", ".jpeg", ".ico", ".png", ".svg"];
 
     #region Logos information: extension, isDefault, text for img auto generating
 
@@ -504,8 +506,10 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 return (logoData, extNotification);
             case "svg":
                 return (GetLogoDataFromSvg(), extNotification);
+            case "bmp":
             case "jpg":
             case "jpeg":
+            case "ico":
                 return (GetLogoDataFromJpg(), extNotification);
             default:
                 return (null, extNotification);

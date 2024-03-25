@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -265,7 +266,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload,
-            Copy = rightToDownload
+            Copy = rightToDownload,
+            Protect = authContext.IsAuthenticated,
+            Chat = file.Access != FileShare.Read
         };
 
         configuration.EditorConfig.ModeWrite = modeWrite;
@@ -344,18 +347,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
     {
-        var sharedLink =
-            await fileSecurity.CanEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCustomFilterEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanReviewAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanFillFormsAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCommentAsync(file, FileConstant.ShareLinkId);
-
         var usersDrop = new List<string>();
 
         foreach (var uid in fileTracker.GetEditingBy(file.Id))
         {
-            if (!await userManager.UserExistsAsync(uid) && !sharedLink)
+            if (!await userManager.UserExistsAsync(uid))
             {
                 usersDrop.Add(uid.ToString());
                 continue;

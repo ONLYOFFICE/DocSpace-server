@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -95,16 +95,17 @@ public class SocketServiceClient
     }
     
     private HttpRequestMessage GenerateRequest(string method, object data)
-    {
-        var request = new HttpRequestMessage();
-        request.Headers.Add("Authorization", CreateAuthToken());
-        request.Method = HttpMethod.Post;
-        request.RequestUri = new Uri(GetMethod(method));
-
+    {        
         var jsonData = JsonSerializer.Serialize(data, _options);
-        _logger.DebugMakeRequest(method, jsonData);
-
-        request.Content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post, 
+            RequestUri = new Uri(GetMethod(method)),
+            Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
+        };
+        
+        request.Headers.Add("Authorization", CreateAuthToken());
+        
         return request;
     }
 

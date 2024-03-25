@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,6 +55,7 @@ public class GroupDto
     public List<EmployeeFullDto> Members { get; set; }
     
     public bool? Shared { get; set; }
+    public int MembersCount { get; set; }
 }
 
 [Scope]
@@ -68,9 +69,17 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             Category = group.CategoryID,
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))),
             Shared = shared
         };
+        
+        var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
+        if (manager != null && !manager.Equals(Constants.LostUser))
+        {
+            result.Manager = await employeeFullDtoHelper.GetFullAsync(manager);
+        }
+
+        var members = await userManager.GetUsersByGroupAsync(group.ID);
+        result.MembersCount = members.Length;
 
         if (!includeMembers)
         {
@@ -78,7 +87,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
         }
 
         result.Members = [];
-        foreach (var m in await userManager.GetUsersByGroupAsync(group.ID))
+        foreach (var m in members)
         { 
             result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }

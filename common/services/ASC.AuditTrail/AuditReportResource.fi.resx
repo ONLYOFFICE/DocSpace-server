@@ -340,7 +340,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Kirjautuminen onnistui</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

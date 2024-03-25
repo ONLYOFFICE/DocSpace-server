@@ -435,7 +435,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>تم تسجيل الدخول بنجاح</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>تم تسجيل الدخول من خلال حسابات مواقع التواصل الاجتماعي بنجاح</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">

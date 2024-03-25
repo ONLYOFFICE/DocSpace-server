@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,7 @@ public class SettingsController(CommonMethods commonMethods,
     #region API methods
 
     [HttpGet("get")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -81,7 +81,7 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     [HttpPost("save")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -121,7 +121,7 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     [HttpPost("checkdomain")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
     {
         if (model == null || string.IsNullOrEmpty(model.HostName))

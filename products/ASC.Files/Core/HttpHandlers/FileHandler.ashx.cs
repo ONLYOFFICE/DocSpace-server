@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory,
     ThumbnailSettings thumbnailSettings,
     ExternalLinkHelper externalLinkHelper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    EntryManager entryManager)
 {
     public string FileHandlerPath
     {
@@ -266,16 +267,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (!readLink && !await fileSecurity.CanDownloadAsync(file))
+            if (!await fileSecurity.CanDownloadAsync(file))
             {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || FileUtility.GetFileExtension(file.Title) == ".pdf") ||
-                    linkId == Guid.Empty || !await fileSecurity.CanReadAsync(file, linkId))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
             }
 
             if (readLink && linkShare is FileShare.Comment or FileShare.Read && file.DenyDownload)
@@ -295,6 +290,16 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
 
                 return;
+            }
+            
+            if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+                && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
+            {
+                var linkId = await externalShare.GetLinkIdAsync();
+                if (linkId != Guid.Empty)
+                {
+                    await entryManager.MarkAsRecentByLink(file, linkId);
+                }
             }
 
             await fileMarker.RemoveMarkAsNewAsync(file);

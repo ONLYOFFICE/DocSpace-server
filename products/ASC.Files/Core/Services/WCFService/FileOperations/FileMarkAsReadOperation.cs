@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,8 +31,9 @@ record FileMarkAsReadOperationData<T>(
     IEnumerable<T> Files,
     int TenantId,
     IDictionary<string, string> Headers,
+    ExternalSessionSnapshot SessionSnapshot,
     bool HoldResult = true)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
 
 [Transient]
 class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
@@ -45,8 +46,10 @@ class FileMarkAsReadOperation(IServiceProvider serviceProvider) :
         var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)this[Data]);
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.HoldResult));
-        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.HoldResult));
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, 
+            data.Headers, data.SessionSnapshot, data.HoldResult));
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, 
+            data.TenantId, data.Headers, data.SessionSnapshot, data.HoldResult));
 
         return base.RunJob(distributedTask, cancellationToken);
     }

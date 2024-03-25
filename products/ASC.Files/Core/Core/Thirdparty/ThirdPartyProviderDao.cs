@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -340,9 +340,9 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filter = GetProviderTypes(providerFilter);
+        var providerType = GetProviderType(providerFilter);
 
-        return rooms.Where(f => filter.Contains(f.ProviderKey));
+        return rooms.Where(f => f.ProviderKey == providerType);
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
@@ -388,21 +388,22 @@ internal abstract class ThirdPartyProviderDao
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
     }
 
-    internal static string[] GetProviderTypes(ProviderFilter providerFilter)
+    internal static string GetProviderType(ProviderFilter providerFilter)
     {
         var filter = providerFilter switch
         {
-            ProviderFilter.WebDav => [ProviderTypes.WebDav.ToStringFast()],
-            ProviderFilter.GoogleDrive => [ProviderTypes.GoogleDrive.ToStringFast()],
-            ProviderFilter.OneDrive => [ProviderTypes.OneDrive.ToStringFast()],
-            ProviderFilter.DropBox => [ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast()],
-            ProviderFilter.kDrive => [ProviderTypes.kDrive.ToStringFast()],
-            ProviderFilter.Yandex => [ProviderTypes.Yandex.ToStringFast()],
-            ProviderFilter.SharePoint => [ProviderTypes.SharePoint.ToStringFast()],
-            ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
+            ProviderFilter.WebDav => ProviderTypes.WebDav,
+            ProviderFilter.GoogleDrive => ProviderTypes.GoogleDrive,
+            ProviderFilter.OneDrive => ProviderTypes.OneDrive,
+            ProviderFilter.DropBox => ProviderTypes.DropboxV2,
+            ProviderFilter.kDrive => ProviderTypes.kDrive,
+            ProviderFilter.Yandex => ProviderTypes.Yandex,
+            ProviderFilter.SharePoint => ProviderTypes.SharePoint,
+            ProviderFilter.Box => ProviderTypes.Box,
             _ => throw new NotImplementedException()
         };
-        return filter;
+        
+        return filter.ToStringFast();
     }
     
     internal static FolderType GetRoomFolderType(FilterType filterType)
@@ -551,16 +552,17 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         fileEntry.Error = entry.Error;
     }
 
-    protected void SetFolderType(Folder<string> folder, bool isRoot)
+    protected void ProcessFolderAsRoom(Folder<string> folder)
     {
-        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        folder.ProviderMapped = !string.IsNullOrEmpty(ProviderInfo.FolderId);
+        
+        if (ProviderInfo.FolderId != folder.Id)
         {
-            folder.FolderType = ProviderInfo.RootFolderType;
+            return;
         }
-        else if (ProviderInfo.FolderId == folder.Id)
-        {
-            folder.FolderType = ProviderInfo.FolderType;
-        }
+
+        folder.FolderType = ProviderInfo.FolderType;
+        folder.Title = ProviderInfo.CustomerTitle;
     }
 
     public bool CheckInvalidFilter(FilterType filterType)

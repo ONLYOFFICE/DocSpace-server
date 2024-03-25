@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -91,7 +91,7 @@ public class AccountLinker(
             Id = obj.ToString(),
             UId = profile.HashId,
             Provider = profile.Provider,
-            Profile = profile.ToSerializedString(),
+            Profile = profile.ToString(),
             Linked = DateTime.UtcNow
         };
 
@@ -130,7 +130,7 @@ public class AccountLinker(
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         //Retrieve by unique id
         return (await Queries.LinkedProfilesFromDbAsync(accountLinkContext, obj).ToListAsync())
-                .ConvertAll(LoginProfile.CreateFromSerializedString);
+                .ConvertAll(r => new LoginProfile(r));
     }
 
     private async Task<IDictionary<string, LoginProfile>> GetLinkedProfilesAsync(IEnumerable<string> objects)
@@ -139,7 +139,7 @@ public class AccountLinker(
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
-            .ToDictionaryAsync(k => k.Id, v => LoginProfile.CreateFromSerializedString(v.Profile));
+            .ToDictionaryAsync(k => k.Id, v =>  new LoginProfile(v.Profile));
     }
 }
 

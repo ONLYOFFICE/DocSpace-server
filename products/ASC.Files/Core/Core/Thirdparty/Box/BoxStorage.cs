@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,15 +36,18 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     private readonly List<string> _boxFields = ["created_at", "modified_at", "name", "parent", "size"];
 
     public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
 
     private const long MaxChunkedUploadFileSize = 250L * 1024L * 1024L;
 
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
+
+        var token = authData.Token;
 
         var config = new BoxConfig(token.ClientID, token.ClientSecret, new Uri(token.RedirectUri));
         var session = new OAuthSession(token.AccessToken, token.RefreshToken, (int)token.ExpiresIn, "bearer");
@@ -264,9 +267,9 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
     
-    public long GetFileSize(BoxFile file)
+    public Task<long> GetFileSizeAsync(BoxFile file)
     {
-        return file.Size ?? 0;
+        return Task.FromResult(file.Size ?? 0);
     }
     
     public async Task<long> GetMaxUploadSizeAsync()

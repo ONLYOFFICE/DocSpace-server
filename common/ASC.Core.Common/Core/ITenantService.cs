@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,6 @@ public interface ITenantService
     Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash);
     Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync();
     Task<Tenant> GetTenantAsync(int id);
-    Tenant GetTenant(int id);
     Task<Tenant> GetTenantAsync(string domain);
     Tenant GetTenant(string domain);
     Tenant GetTenantForStandaloneWithoutAlias(string ip);

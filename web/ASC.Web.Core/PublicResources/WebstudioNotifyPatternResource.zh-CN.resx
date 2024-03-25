@@ -1099,7 +1099,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>你好！
 
-您受邀加入在 "${__VirtualRootPath}":"${__VirtualRootPath}"的 $Message 房间。请点击链接接受邀请：
+您受邀加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的协作空间房间。请点击链接接受邀请：
 
 $OrangeButton
 

@@ -2083,7 +2083,7 @@ $TrulyYours</comment>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join $Message room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join a DocSpace room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 

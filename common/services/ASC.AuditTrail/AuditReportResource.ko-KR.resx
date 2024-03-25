@@ -474,7 +474,7 @@
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>SSO를 통한 로그인에 실패했습니다</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>소셜 계정을 통한 로그인에 성공했습니다</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">

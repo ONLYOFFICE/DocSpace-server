@@ -1,5 +1,6 @@
 const express = require("express");
 const { Server } = require("socket.io");
+const { createAdapter } = require('@socket.io/redis-adapter');
 const { createServer } = require("http");
 const logger = require("morgan");
 const redis = require("redis");
@@ -87,6 +88,15 @@ io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
   .use((socket, next) => {
     auth(socket, next);
   });
+
+if (redisOptions != null) 
+{
+  const pubClient = redis.createClient(redisOptions);
+  const subClient = pubClient.duplicate();
+
+  io.adapter(createAdapter(pubClient, subClient));
+}
+
 
 app.get("/", (req, res) => {
   res.send("<h1>Invalid Endpoint</h1>");

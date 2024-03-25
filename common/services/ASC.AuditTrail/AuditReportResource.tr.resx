@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Giriş Başarılı</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Sosyal Hesapla Giriş Başarılı</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

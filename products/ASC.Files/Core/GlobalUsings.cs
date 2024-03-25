@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,7 @@ global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
 global using System.Linq.Expressions;
+global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
@@ -49,11 +50,6 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
-
-global using AppLimit.CloudComputing.SharpBox;
-global using AppLimit.CloudComputing.SharpBox.Exceptions;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider.DropBox;
 
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
@@ -120,6 +116,7 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Thirdparty;
+global using ASC.Files.Core.Core.Thirdparty.WebDav;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
@@ -128,7 +125,6 @@ global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
 global using ASC.Files.Thirdparty.ProviderDao;
 global using ASC.Files.Thirdparty.SharePoint;
-global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
@@ -225,6 +221,8 @@ global using Newtonsoft.Json.Linq;
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;
+
+global using WebDav;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;
