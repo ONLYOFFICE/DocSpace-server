@@ -131,8 +131,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 ReportProgress(30, MigrationResource.UnzippingFinished);
             }
 
-            var bdFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
-            if (bdFile == null)
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
+            if (dbFile == null)
             {
                 throw new Exception();
             }
@@ -140,7 +140,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             {
                 ReportProgress(40, MigrationResource.DumpParse);
             }
-            var users = DbExtractUser(bdFile);
+            var users = DbExtractUser(dbFile);
             var progress = 40;
             foreach (var user in users)
             {
@@ -180,7 +180,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                                 user.Value.HasPhoto = user.Value.PathToPhoto != null ? true : false;
                             }
                         }
-                        ParseStorage(user.Key, user.Value, bdFile);
+                        ParseStorage(user.Key, user.Value, dbFile);
                         if (string.IsNullOrEmpty(user.Value.Info.Email))
                         {
                             MigrationInfo.WithoutEmailUsers.Add(user.Key, user.Value);
@@ -204,7 +204,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             {
                 ReportProgress(80, MigrationResource.DataProcessing);
             }
-            DbExtractGroup(bdFile);
+            DbExtractGroup(dbFile);
         }
         catch (Exception ex)
         {
