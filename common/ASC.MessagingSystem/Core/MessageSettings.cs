@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Web;
+
 namespace ASC.MessagingSystem;
 
 public class MessageSettings
@@ -70,6 +72,13 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
+        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return HttpUtility.UrlDecode(result);
+        }
+
         return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
@@ -90,6 +99,13 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
+        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return HttpUtility.UrlDecode(result);
+        }
+
         return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 
