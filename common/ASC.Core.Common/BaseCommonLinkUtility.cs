@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,7 +61,7 @@ public class BaseCommonLinkUtility
 
             if (_httpContextAccessor?.HttpContext?.Request != null)
             {
-                var u = _httpContextAccessor?.HttpContext.Request.OriginUrl();
+                var u = _httpContextAccessor?.HttpContext.Request.Url();
 
                 ArgumentNullException.ThrowIfNull(u);
 
@@ -105,7 +105,7 @@ public class BaseCommonLinkUtility
             // first, take from current request
             if (_httpContextAccessor?.HttpContext?.Request != null && !serverUriForce)
             {
-                var u = _httpContextAccessor?.HttpContext?.Request.OriginUrl();
+                var u = _httpContextAccessor?.HttpContext?.Request.Url();
 
                 ArgumentNullException.ThrowIfNull(u);
 

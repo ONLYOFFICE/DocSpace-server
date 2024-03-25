@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         FileUtility fileUtility,
         StudioNotifyHelper studioNotifyHelper,
         BadgesSettingsHelper badgesSettingsHelper,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthManager authManager)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -777,9 +778,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var userType = await userManager.GetUserTypeAsync(user);
         var isUser = userType is EmployeeType.User;
-        var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isCollaborator = userType is EmployeeType.Collaborator;
+        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
         
         return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
     }
@@ -822,6 +823,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             file is not { FilterType: FilterType.OFormTemplateOnly })
         {
             return false;
+        }
+
+        if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
+        {
+            return true;
         }
 
         if (e.FileEntryType == FileEntryType.Folder)
@@ -931,14 +937,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                var mytrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
-                if (!Equals(mytrashId, 0))
+                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+                if (!Equals(myTrashId, 0))
                 {
-                    return Equals(e.RootId, mytrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, mytrashId));
+                    return Equals(e.RootId, myTrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, myTrashId));
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || isUser || action == FilesSecurityActions.Lock)
+                if (isOutsider || action == FilesSecurityActions.Lock || (isUser && !e.Shared))
                 {
                     return false;
                 }
@@ -1151,7 +1157,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || e.Access is FileShare.Editing && !MustConvert(e))
                         {
                             return true;
                         }
@@ -1190,7 +1196,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || e.Access is FileShare.Editing && !MustConvert(e))
                         {
                             return true;
                         }
@@ -1294,7 +1300,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing && isAuthenticated)
+                        if (e.Access != FileShare.Restrict && isAuthenticated && !isUser)
                         {
                             return true;
                         }
@@ -1399,8 +1405,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             e.Access = FileShare.None; //HACK: for client
         }
 
-
         return false;
+        
+        bool MustConvert(FileEntry entry)
+        {
+            return entry.FileEntryType == FileEntryType.File && fileUtility.MustConvert(entry.Title);
+        }
     }
 
     public async Task ShareAsync<T>(T entryId, FileEntryType entryType, Guid @for, FileShare share, SubjectType subjectType = default, FileShareOptions options = null)
@@ -1972,8 +1982,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when canEdit && FileUtility.GetFileExtension(file.Title) != ".pdf":
-                case FileShare.FillForms when fileType is FileType.OForm:
+                case FileShare.Editing when canEdit:
+                case FileShare.FillForms when fileType is FileType.OForm or FileType.Pdf:
                 case FileShare.CustomFilter when canCustomFiltering:
                 case FileShare.Comment when canComment:
                 case FileShare.Review when canReview:

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace ASC.ApiSystem.Classes;
 
-public class CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger) : Microsoft.AspNetCore.Mvc.Filters.ExceptionFilterAttribute
+public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
 {
-    public override void OnException(ExceptionContext context)
+    public ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
-        var exception = context.Exception.GetBaseException();
+        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.Request.Method, context.Request.Path.Value);
 
-        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.HttpContext.Request.Method, context.HttpContext.Request.Path.Value);
+        return ValueTask.FromResult(true);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,10 +67,10 @@ public class MigrationCore(
         eventBus.Publish(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
     }
 
-     public async Task ClearAsync()
-     {
+    public async Task ClearAsync()
+    {
         eventBus.Publish(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
-     }
+    }
 
     public async Task<MigrationOperation> GetStatusAsync()
     {

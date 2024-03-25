@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -145,14 +145,19 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-    IHttpClientFactory clientFactory)
+    IHttpClientFactory clientFactory,
+    IHttpContextAccessor httpContextAccessor)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
         var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
                                                                 + "?" + FilesLinkUtility.Action + "=track"
                                                                 + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
-                                                                + "&" + FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString()));
+                                                                + "&" + FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString())
+                                                                + "&" + "request-x-real-ip" + "=" + HttpUtility.UrlEncode(httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString())
+                                                                + "&" + "request-user-agent" + "=" + HttpUtility.UrlEncode(httpContextAccessor.HttpContext.Request.Headers["User-Agent"])
+                                                               );
+
         callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 
         return callbackUrl;

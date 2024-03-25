@@ -803,7 +803,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Γεια σας!
 
-Σας προσκαλούμε να συμμετάσχετε στο δωμάτιο $Message στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
+Σας προσκαλούμε να συμμετάσχετε στο δωμάτιο DocSpace στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
 
 $OrangeButton
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,8 +34,9 @@ record FileMoveCopyOperationData<T>(
     bool Copy,
     FileConflictResolveType ResolveType,
     bool HoldResult = true,
-    IDictionary<string, string> Headers = null)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
+    IDictionary<string, string> Headers = null,
+    ExternalSessionSnapshot SessionSnapshot = null)
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
 
 [Transient]
 class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
@@ -70,8 +71,10 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
         
-        DaoOperation =  new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
-        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
+        DaoOperation =  new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.DestFolderId, 
+            data.Copy, data.ResolveType, data.HoldResult, data.Headers, data.SessionSnapshot));
+        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, data.TenantId, 
+            data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers, data.SessionSnapshot));
         
         return base.RunJob(distributedTask, cancellationToken);
     }

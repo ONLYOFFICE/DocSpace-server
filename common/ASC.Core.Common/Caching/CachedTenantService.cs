@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -228,22 +228,6 @@ class CachedTenantService() : ITenantService
         if (t == null)
         {
             t = await _service.GetTenantAsync(domain);
-            if (t != null)
-            {
-                tenants.Insert(t);
-            }
-        }
-
-        return t;
-    }
-
-    public Tenant GetTenant(int id)
-    {
-        var tenants = _tenantServiceCache.GetTenantStore();
-        var t = tenants.Get(id);
-        if (t == null)
-        {
-            t = _service.GetTenant(id);
             if (t != null)
             {
                 tenants.Insert(t);

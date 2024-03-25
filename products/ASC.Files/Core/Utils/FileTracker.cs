@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,8 @@ namespace ASC.Web.Files.Utils;
 public class FileTrackerHelper
 {
     private const string Tracker = "filesTracker";
-    private readonly IDistributedCache _distributedCache;
+
+    private readonly ICacheNotify<FileTrackerNotify> _cacheNotify;
     private readonly ICache _cache;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FileTrackerHelper> _logger;
@@ -41,10 +42,13 @@ public class FileTrackerHelper
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Action<object, object, EvictionReason, object> _callbackAction;
 
-    public FileTrackerHelper(IDistributedCache distributedCache, ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
+    public FileTrackerHelper(ICacheNotify<FileTrackerNotify> cacheNotify, ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
     {
-        _distributedCache = distributedCache;
+        _cacheNotify = cacheNotify;
         _cache = cache;
+        _cacheNotify.Subscribe(a => _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout), CacheNotifyAction.InsertOrUpdate);
+        _cacheNotify.Subscribe(a => _cache.Remove(GetCacheKey(a.FileId)), CacheNotifyAction.Remove);
+        
         _serviceProvider = serviceProvider;
         _logger = logger;
         _callbackAction = EvictionCallback();
@@ -183,42 +187,23 @@ public class FileTrackerHelper
             return null;
         }
 
-        var serializedObject = _distributedCache.Get(Tracker + fileId);
-
-        if (serializedObject == null)
-        {
-            return default;
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<FileTracker>(ms);
-
+        return _cache.Get<FileTracker>(GetCacheKey(fileId));
     }
 
     private void SetTracker<T>(T fileId, FileTracker tracker)
     {
-        if (EqualityComparer<T>.Default.Equals(fileId, default) || tracker == null)
+        if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            return;
+            _cache.Insert(GetCacheKey(fileId), tracker with { }, _cacheTimeout, _callbackAction);
+            _cacheNotify.Publish(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
         }
-
-        using var ms = new MemoryStream();
-
-        Serializer.Serialize(ms,  tracker with {});
-        _distributedCache.Set(Tracker + fileId, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            SlidingExpiration = _cacheTimeout
-        });
-        _cache.Insert(Tracker + fileId, tracker with {}, _cacheTimeout, _callbackAction);
     }
     
     private void RemoveTracker<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            _distributedCache.Remove(Tracker + fileId);
-            _cache.Remove(Tracker + fileId);
+            _cacheNotify.Publish(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker() }, CacheNotifyAction.Remove);
         }
     }
 
@@ -277,22 +262,34 @@ public class FileTrackerHelper
             }
         }
     }
+
+    private string GetCacheKey<T>(T fileId)
+    {
+        return Tracker + fileId;
+    }
+}
+
+[ProtoContract]
+public record FileTrackerNotify
+{
+    [ProtoMember(1)]
+    public string FileId { get; set; }
+    
+    [ProtoMember(2)]
+    public FileTracker FileTracker { get; set; }
 }
 
 [ProtoContract]
 public record FileTracker
 {
     [ProtoMember(1)]
-    internal Dictionary<Guid, TrackInfo> EditingBy { get; }
+    public Dictionary<Guid, TrackInfo> EditingBy { get; set; }
 
-    private FileTracker()
-    {
-        
-    }
+    public FileTracker() { }
     
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri)
     {
-        EditingBy = new()
+        EditingBy = new Dictionary<Guid, TrackInfo>
         { 
             {
                 tabId,
@@ -309,7 +306,7 @@ public record FileTracker
     }
 
     [ProtoContract]
-    internal class TrackInfo
+    public class TrackInfo
     {
         [ProtoMember(1)]
         public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;

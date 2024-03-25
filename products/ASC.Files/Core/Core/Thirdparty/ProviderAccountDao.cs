@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -234,6 +234,11 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         if (!string.IsNullOrEmpty(data.Color))
         {
             forUpdate.Color = data.Color;
+        }
+        
+        if (data.CreateBy.HasValue)
+        {
+            forUpdate.UserId = data.CreateBy.Value;
         }
 
         forUpdate.ModifiedOn = DateTime.UtcNow;
@@ -734,6 +739,7 @@ public class ProviderData
     public bool? HasLogo { get; init; }
     public string Color { get; init; }
     public AuthData AuthData { get; init; }
+    public Guid? CreateBy { get; init; }
 }
 
 static file class Queries

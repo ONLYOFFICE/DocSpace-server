@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -440,6 +440,12 @@ public class FileSharingHelper(
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
         {
             return true;
+        }
+
+        if ((entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive) 
+            && (entry is not IFolder folder || !DocSpaceHelper.IsRoom(folder.FolderType)))
+        {
+            return false;
         }
 
         if (await fileSecurity.CanEditAccessAsync(entry))

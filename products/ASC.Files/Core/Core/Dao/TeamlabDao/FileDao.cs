@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,7 @@ internal class FileDao(
               settingsManager,
               authContext,
         serviceProvider), IFileDao<int>
-    {
+{
 
     private const string LockKey = "file";
     private const string FilePathPart = "file_";
@@ -429,12 +429,11 @@ internal class FileDao(
                 var strategy = filesDbContext.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
-                    await using var context = await _dbContextFactory.CreateDbContextAsync();
-                    await using var tx = await context.Database.BeginTransactionAsync();
+                    await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
                     if (file.Id == default)
                     {
-                        file.Id = await Queries.FileAnyAsync(context) ? await Queries.FileMaxIdAsync(context) + 1 : 1;
+                        file.Id = await Queries.FileMaxIdAsync(filesDbContext) + 1;
                         file.Version = 1;
                         file.VersionGroup = 1;
                         isNew = true;
@@ -458,7 +457,7 @@ internal class FileDao(
 
                     if (!isNew)
                     {
-                        await Queries.DisableCurrentVersionAsync(context, tenantId, file.Id);
+                        await Queries.DisableCurrentVersionAsync(filesDbContext, tenantId, file.Id);
                     }
 
                     toInsert = new DbFile
@@ -483,8 +482,16 @@ internal class FileDao(
                         TenantId = tenantId
                     };
 
-                    await context.AddOrUpdateAsync(r => r.Files, toInsert);
-                    await context.SaveChangesAsync();
+                    if (isNew)
+                    {
+                        await filesDbContext.Files.AddAsync(toInsert);
+                    }
+                    else
+                    {                    
+                        await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
+                    }
+                    
+                    await filesDbContext.SaveChangesAsync();
 
                     await tx.CommitAsync();
                 });
@@ -1179,7 +1186,7 @@ internal class FileDao(
 
         if (toFolderRoomId != -1 || oldFolderRoomId != -1)
         {
-            var tenantId = _tenantManager.GetCurrentTenant().Id;
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
             if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
             {
@@ -2361,18 +2368,10 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
-
                     .Select(r => r.Id));
 
-    public static readonly Func<FilesDbContext, Task<bool>> FileAnyAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.Files.Any());
-
     public static readonly Func<FilesDbContext, Task<int>> FileMaxIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.Files.Max(r => r.Id));
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.Files.OrderByDescending(r => r.Id).Select(r=> r.Id).FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DisableCurrentVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
