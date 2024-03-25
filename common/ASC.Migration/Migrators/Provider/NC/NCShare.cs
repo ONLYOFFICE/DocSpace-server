@@ -25,9 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
-internal class NCFileCache
+
+internal class NCShare
 {
-    public int FileId { get; set; }
-    public string Path { get; set; }
-    public List<NCShare> Share { get; set; }
+    public int Id { get; set; }
+    public string ShareWith { get; set; }
+    public int Premissions { get; set; }
 }
+

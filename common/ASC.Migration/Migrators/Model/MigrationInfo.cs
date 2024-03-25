@@ -73,6 +73,10 @@ public class MigrationInfo
             }
             var user = Users[apiUser.Key];
             user.ShouldImport = apiUser.ShouldImport;
+            if (string.IsNullOrEmpty(user.Info.Email))
+            {
+                user.Info.Email = apiUser.Email;
+            }
             user.UserType = apiUser.UserType;
             user.Storage.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
             user.Storage.ShouldImportSharedFiles = apiInfo.ImportSharedFiles;

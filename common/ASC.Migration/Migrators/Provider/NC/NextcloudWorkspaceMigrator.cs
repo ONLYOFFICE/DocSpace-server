@@ -28,9 +28,13 @@
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 
+using ASC.AuditTrail.Types;
 using ASC.Migration.Core.Migrators.Model;
 using ASC.Web.Core.Users;
+using ASC.Web.Files.Services.FFmpegService;
 using ASC.Web.Files.Utils;
+
+using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
 
@@ -389,10 +393,35 @@ public class NextcloudWorkspaceMigrator : Migrator
                 filesAndFolders.Add(new NCFileCache()
                 {
                     FileId = int.Parse(values[0]),
-                    Path = values[2]
+                    Path = values[2],
+                    Share = new List<NCShare>()
                 });
             }
         }
+
+        var shares = GetDumpChunk("oc_share", sqlFile);
+        if (shares != null)
+        {
+            foreach (var share in shares)
+            {
+                var values = share.Split(',')
+                           .Select(s => s.Trim('\'')).ToArray();
+                var fileId = int.Parse(values[10]);
+                var file = filesAndFolders.FirstOrDefault(ff => ff.FileId == fileId);
+                if (file == null)
+                {
+                    continue;
+                }
+
+                file.Share.Add(new NCShare()
+                {
+                    Id = int.Parse(values[0]),
+                    ShareWith = values[2],
+                    Premissions = int.Parse(values[12])
+                });
+            }
+        }
+
         var j = 1;
         foreach (var entry in filesAndFolders)
         {
@@ -425,6 +454,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);
+                        AddShare(user, entry, false);
                     }
                     else
                     {
@@ -439,9 +469,60 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
                         };
                         user.Storage.Files.Add(file);
+                        AddShare(user, entry, true);
                     }
                 }
             }
+        }
+    }
+
+    private void AddShare(MigrationUser user, NCFileCache entry, bool isFile)
+    {
+        if (entry.Share.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var shareInfo in entry.Share)
+        {
+            if (shareInfo.ShareWith == null)
+            {
+                continue;
+            }
+
+            var shareType = GetPortalShare(shareInfo.Premissions, isFile);
+
+            var security = new MigrationSecurity()
+            {
+                Subject = shareInfo.ShareWith,
+                EntryId = entry.FileId,
+                EntryType = isFile ? 2 : 1,
+                Security = (int)shareType
+            };
+
+            user.Storage.Securities.Add(security);
+        }
+    }
+
+    private ASCShare GetPortalShare(int role, bool entryType)
+    {
+        if (entryType)
+        {
+            if (role == 1 || role == 17)
+            {
+                return ASCShare.Read;
+            }
+
+            return ASCShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+        }
+        else
+        {
+            if (Array.Exists(new int[] { 1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27 }, el => el == role))
+            {
+                return ASCShare.Read;
+            }
+
+            return ASCShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
         }
     }
 }
