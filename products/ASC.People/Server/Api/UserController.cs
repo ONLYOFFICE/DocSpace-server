@@ -45,6 +45,7 @@ public class UserController(ICache cache,
         WebItemSecurity webItemSecurity,
         WebItemSecurityCache webItemSecurityCache,
         DisplayUserSettingsHelper displayUserSettingsHelper,
+        UserInvitationSettingsHelper userInvitationSettingsHelper,
         MessageTarget messageTarget,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
@@ -194,6 +195,10 @@ public class UserController(ICache cache,
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+            else
+            {
+                await userInvitationSettingsHelper.IncreaseLimit();
+            }
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -296,11 +301,21 @@ public class UserController(ICache cache,
     [HttpPost("invite")]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto);
+        ArgumentNullException.ThrowIfNull(inDto.Invitations);
+
+        if (inDto.Invitations.Count() > await userInvitationSettingsHelper.GetLimit())
+        {
+            throw new Exception(Resource.ErrorInvitationLimitExceeded);
+        }
+
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         foreach (var invite in inDto.Invitations)
         {
-            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())) ||
+            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenant)) ||
                 !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
             {
                 continue;
@@ -310,7 +325,7 @@ public class UserController(ICache cache,
             var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
+            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
         }
 
         var result = new List<EmployeeDto>();

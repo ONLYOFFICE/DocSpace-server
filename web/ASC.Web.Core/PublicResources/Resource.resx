@@ -1104,4 +1104,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>User space quota exceeded</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Invitation limit is exceeded</value>
+  </data>
 </root>
