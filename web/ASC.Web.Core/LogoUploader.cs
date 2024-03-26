@@ -26,7 +26,7 @@
 
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ASC.Web.Studio.UserControls.CustomNavigation;
+namespace ASC.Web.Core;
 
 public class LogoUploader
 {
