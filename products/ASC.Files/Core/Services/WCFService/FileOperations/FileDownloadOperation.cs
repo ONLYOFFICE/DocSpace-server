@@ -56,17 +56,14 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
 [Transient]
-class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
+public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
 {    
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        var data = Data as FileDownloadOperationData<int>;
-        var thirdPartyData = ThirdPartyData as FileDownloadOperationData<string>;
-        
-        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, data);
-        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, thirdPartyData);
+        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
 
         await base.RunJob(distributedTask, cancellationToken);
 
@@ -80,7 +77,7 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var stream = tempStream.Create();
 
-        var baseUri = data?.BaseUri ?? thirdPartyData?.BaseUri;
+        var baseUri = Data?.BaseUri ?? ThirdPartyData?.BaseUri;
         if (!string.IsNullOrEmpty(baseUri))
         {
             var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();

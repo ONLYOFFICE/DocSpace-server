@@ -60,14 +60,14 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
+public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data as FileDeleteOperationData<int>);
-        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData as FileDeleteOperationData<string>);
+        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData);
 
         return base.RunJob(distributedTask, cancellationToken);
     }

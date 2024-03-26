@@ -80,7 +80,7 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(IServiceScope serviceScope);
 }
 
-internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
+public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
@@ -88,8 +88,8 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
     
-    protected  FileOperationData<string> ThirdPartyData { get; set; }
-    protected  FileOperationData<int> Data { get; set; }
+    protected  T1 ThirdPartyData { get; set; }
+    protected  T2 Data { get; set; }
 
 
     public void Init(bool holdResult)
@@ -98,7 +98,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         this[Hold] = holdResult;
     }
 
-    public void Init(FileOperationData<int> data, FileOperationData<string> thirdPartyData, string taskId)
+    public virtual void Init(T2 data, T1 thirdPartyData, string taskId)
     {
         Data = data;
         ThirdPartyData = thirdPartyData;
@@ -200,8 +200,8 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
 [ProtoInclude(103, typeof(FileMoveCopyOperationData<string>))]
 [ProtoInclude(104, typeof(FileMarkAsReadOperationData<int>))]
 [ProtoInclude(105, typeof(FileMarkAsReadOperationData<string>))]
-[ProtoInclude(104, typeof(FileDownloadOperationData<int>))]
-[ProtoInclude(105, typeof(FileDownloadOperationData<string>))]
+[ProtoInclude(106, typeof(FileDownloadOperationData<int>))]
+[ProtoInclude(107, typeof(FileDownloadOperationData<string>))]
 public record FileOperationData<T>
 {
     [ProtoMember(1)]
@@ -238,7 +238,7 @@ public record FileOperationData<T>
     }
 }
 
-abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
+public abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
     protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }

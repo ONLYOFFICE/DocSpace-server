@@ -129,16 +129,17 @@ public class FileOperationsManager(
     {
         return await fileOperationsManagerHolder.CancelOperations(GetUserId(), id);
     }
-
-    #region MarkAsRead
-
-    public async Task EnqueueMarkAsRead(string taskId, FileMarkAsReadOperationData<int> data, FileMarkAsReadOperationData<string> thirdPartyData)
+    
+    public async Task Enqueue<T, T1, T2>(string taskId, T1 thirdPartyData, T2 data) 
+        where T: ComposeFileOperation<T1, T2>
+        where T1 : FileOperationData<string>
+        where T2 : FileOperationData<int>
     {
-        var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
+        var operation = fileOperationsManagerHolder.GetService<T>();
         operation.Init(data, thirdPartyData, taskId);
         await fileOperationsManagerHolder.Enqueue(operation);
     }
-
+    
     public async Task PublishMarkAsRead(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
     {
         if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
@@ -164,17 +165,6 @@ public class FileOperationsManager(
             Data = data,
             ThirdPartyData = thirdPartyData
         });
-    }
-
-    #endregion
-
-    #region Download
-    
-    public async Task EnqueueDownload(string taskId, FileDownloadOperationData<int> data, FileDownloadOperationData<string> thirdPartyData)
-    {
-        var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        operation.Init(data, thirdPartyData, taskId);
-        await fileOperationsManagerHolder.Enqueue(operation);
     }
     
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
@@ -204,17 +194,6 @@ public class FileOperationsManager(
             Data = data,
             ThirdPartyData = thirdPartyData
         });
-    }
-
-    #endregion
-
-    #region MoveOrCopy
-
-    public async Task EnqueueMoveOrCopy(string taskId, FileMoveCopyOperationData<int> data, FileMoveCopyOperationData<string> thirdPartyData)
-    {
-        var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        operation.Init(data, thirdPartyData, taskId, data?.Copy ?? thirdPartyData?.Copy ?? false);
-        await fileOperationsManagerHolder.Enqueue(operation);
     }
 
     public async Task PublishMoveOrCopyAsync(
@@ -280,17 +259,6 @@ public class FileOperationsManager(
                 fileForContentIds.AddRange(await fileDao.GetFilesAsync(folderId).ToListAsync());
             }
         }
-    }
-
-    #endregion
-
-    #region Delete
-
-    public async Task EnqueueDelete(string taskId, FileDeleteOperationData<int> data, FileDeleteOperationData<string> thirdPartyData)
-    {
-        var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        operation.Init(data, thirdPartyData, taskId);
-        await fileOperationsManagerHolder.Enqueue(operation);
     }
 
     public Task PublishDelete<T>(
@@ -374,8 +342,6 @@ public class FileOperationsManager(
         eventBus.Publish(toPublish);
     }
 
-    #endregion
-
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)
     {
         var (resultInt, resultString) = (new List<int>(), new List<string>());
@@ -403,7 +369,7 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    public static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
+    private static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
     {
         var (resultInt, resultString) = (new List<FilesDownloadOperationItem<int>>(), new List<FilesDownloadOperationItem<string>>());
 

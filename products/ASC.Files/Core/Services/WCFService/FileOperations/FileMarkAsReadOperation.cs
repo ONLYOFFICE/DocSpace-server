@@ -45,15 +45,15 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
+public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
     ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
     
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data as FileMarkAsReadOperationData<int>);
-        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData as FileMarkAsReadOperationData<string>);
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData);
 
         return base.RunJob(distributedTask, cancellationToken);
 

@@ -66,7 +66,7 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
+public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
@@ -80,9 +80,10 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         }
     }
 
-    public void Init(FileOperationData<int> data, FileOperationData<string> thirdPartyData, string taskId, bool copy)
+    public override void Init(FileMoveCopyOperationData<int> data, FileMoveCopyOperationData<string> thirdPartyData, string taskId)
     {
         base.Init(data, thirdPartyData, taskId);
+        var copy = data?.Copy ?? thirdPartyData?.Copy ?? false;
         
         if (!copy)
         {
@@ -92,8 +93,8 @@ class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOpera
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        DaoOperation = new FileMoveCopyOperation<int>(_serviceProvider, Data as FileMoveCopyOperationData<int>);
-        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, ThirdPartyData as FileMoveCopyOperationData<string>);
+        DaoOperation = new FileMoveCopyOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, ThirdPartyData);
 
         return base.RunJob(distributedTask, cancellationToken);
 
