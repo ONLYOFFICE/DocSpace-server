@@ -216,7 +216,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = file.FileStatus;
+        result.FileStatus = await file.GetFileStatus();
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
