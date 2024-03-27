@@ -141,7 +141,7 @@ public abstract class Migrator : IDisposable
             }
             catch(Exception e)
             {
-                Log("can't import user files", e);
+                Log(MigrationResource.CanNotImportUserFiles, e);
             }
         }
 
@@ -149,12 +149,12 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                ReportProgress(80, string.Format(MigrationResource.MigrationCommonFiles));
+                ReportProgress(85, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.CommonStorage);
             }
             catch(Exception e)
             {
-                Log("can't import common files", e);
+                Log(MigrationResource.СanNotImportCommonFiles, e);
             }
         }
 
@@ -162,12 +162,12 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                ReportProgress(90, string.Format(MigrationResource.MigrationCommonFiles));
+                ReportProgress(90, string.Format(MigrationResource.MigrationProjectFiles));
                 await MigrateStorageAsync(MigrationInfo.ProjectStorage);
             }
             catch (Exception e)
             {
-                Log("can't import project files", e);
+                Log(MigrationResource.СanNotImportProjectFiles, e);
             }
         }
 
@@ -238,7 +238,7 @@ public abstract class Migrator : IDisposable
             }
             catch(Exception e)
             {
-                Log("can't import user", e);
+                Log(MigrationResource.CanNotImportUser, e);
                 _failedUsers.Add(user.Info.Email);
                 MigrationInfo.Users.Remove(key);
                 _usersForImport.Remove(key);
@@ -304,7 +304,7 @@ public abstract class Migrator : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Log($"Couldn't to add user {userGuid} to group {group.Info.Name} ", ex);
+                    Log(string.Format(MigrationResource.CanNotAddUserInGroup, userGuid, group.Info.Name), ex);
                 }
             }
         }
@@ -325,7 +325,7 @@ public abstract class Migrator : IDisposable
         var newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                 : await FileStorageService.CreateRoomAsync($"ASC migration {(storage.Type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
-        Log($"create root folder");
+        Log(MigrationResource.СreateRootFolder);
 
         var _matchingFilesIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{storage.RootKey}", newFolder } };
 
@@ -336,7 +336,7 @@ public abstract class Migrator : IDisposable
                 || _matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id != 0)
             {
                 newFolder = await FileStorageService.CreateFolderAsync(_matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
-                Log($"create folder {newFolder.Title}");
+                Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
             }
             else
             {
@@ -368,12 +368,12 @@ public abstract class Migrator : IDisposable
                 if (!_matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     _matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
-                    Log($"create file {file.Title}", null);
+                    Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
             }
             catch (Exception ex)
             {
-                Log($"Couldn't create file {file.Title}", ex);
+                Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
             }
         }
 
@@ -452,7 +452,7 @@ public abstract class Migrator : IDisposable
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
-                        Log($"create share room {room.Title}", null);
+                        Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
 
                         if (user.UserType == EmployeeType.Collaborator)
                         {
@@ -480,7 +480,7 @@ public abstract class Migrator : IDisposable
                         {
                             newFolder = await FileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
-                            Log($"create folder {newFolder.Title}", null);
+                            Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
                         }
                         foreach (var file in storage.Files.Where(f => matchingRoomIds.ContainsKey(f.Folder)))
                         {
@@ -494,7 +494,7 @@ public abstract class Migrator : IDisposable
                             newFile.Version = file.Version;
                             newFile.VersionGroup = file.VersionGroup;
                             newFile = await fileDao.SaveFileAsync(newFile, fs);
-                            Log($"create file {newFile.Title}", null);
+                            Log(string.Format(MigrationResource.CreateFile, newFile.Title));
                         }
                     }
                     if (_usersForImport.ContainsKey(security.Subject) && _currentUser.ID == _usersForImport[security.Subject].Info.Id)
@@ -526,7 +526,7 @@ public abstract class Migrator : IDisposable
             }
             catch (Exception ex)
             {
-                Log($"Couldn't share entry {security.EntryId} to {security.Subject}", ex);
+                Log(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject), ex);
             }
         }
     }

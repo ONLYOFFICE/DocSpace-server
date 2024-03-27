@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
+using net.openstack.Providers.Rackspace.Objects.Databases;
+
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
@@ -114,7 +116,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             catch (Exception ex)
             {
-                Log($"Couldn't to unzip {_takeout}", ex);
+                Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
             }
 
             if (reportProgress)
@@ -187,7 +189,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     }
                     catch (Exception ex)
                     {
-                        Log($"Couldn't parse user {user.Value.Info.DisplayUserName(DisplayUserSettingsHelper)}", ex);
+                        Log(string.Format(MigrationResource.CanNotParseUser, user.Value.Info.DisplayUserName(DisplayUserSettingsHelper)), ex);
                     }
                 }
             }
@@ -197,10 +199,12 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
-        catch (Exception ex)
+        catch
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
-            Log($"Couldn't parse {Path.GetFileNameWithoutExtension(_takeout)} archive", ex);
+            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
+            ReportProgress(_lastProgressUpdate, error);
+            throw new Exception(error);
         }
         if (reportProgress)
         {

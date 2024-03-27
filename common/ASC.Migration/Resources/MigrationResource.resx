@@ -222,4 +222,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migration project files</value>
   </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Couldn't parse {0} archive</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Couldn't parse archives</value>
+  </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Couldn't to add user {0} to group {1}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Couldn't import user</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Couldn't import user files</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Couldn't parse user {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Couldn't to unzip {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Couldn't import common files</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Couldn't import project files</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Create root folder</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Create folder {0}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Couldn't create file {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Couldn't read info file from {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Couldn't share entry {0} to {1}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Create file {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>create share room {0}</value>
+  </data>
 </root>

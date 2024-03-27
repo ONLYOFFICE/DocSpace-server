@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Migration.Core.Resources;
+
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
@@ -172,11 +174,11 @@ public class GoogleWorkspaceMigrator : Migrator
             catch (Exception ex)
             {
                 MigrationInfo.FailedArchives.Add(key);
-                Log($"Couldn't parse user from {key} archive", ex);
+                Log(MigrationResource.CanNotParseArchives, ex);
                 if (MigrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    ReportProgress(_lastProgressUpdate, "Couldn't parse arhives");
-                    throw new Exception("Couldn't parse arhives");
+                    ReportProgress(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
+                    throw new Exception(MigrationResource.CanNotParseArchives);
                 }
             }
             finally
@@ -634,7 +636,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
         catch (Exception ex)
         {
-            Log($"Couldn't read info file for {entry}", ex);
+            Log(string.Format(MigrationResource.CanNotReadInfoFile, entry), ex);
         }
 
         return false;

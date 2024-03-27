@@ -77,7 +77,7 @@ public class WorkspaceMigrator : Migrator
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.StartOfDataProcessing);
+            ReportProgress(5, MigrationResource.Unzipping);
         }
         try
         {
@@ -90,19 +90,19 @@ public class WorkspaceMigrator : Migrator
 
             if (reportProgress)
             {
-                ReportProgress(60, MigrationResource.DataProcessing);
+                ReportProgress(30, MigrationResource.UnzippingFinished);
             }
             await ParseUsersAsync();
 
             if (reportProgress)
             {
-                ReportProgress(80, MigrationResource.StartOfDataProcessing);
+                ReportProgress(70, MigrationResource.DataProcessing);
             }
             ParseGroup();
 
             if (reportProgress)
             {
-                ReportProgress(85, MigrationResource.StartOfDataProcessing);
+                ReportProgress(80, MigrationResource.DataProcessing);
             }
             MigrationInfo.CommonStorage = new()
             {
@@ -112,7 +112,7 @@ public class WorkspaceMigrator : Migrator
 
             if (reportProgress)
             {
-                ReportProgress(90, MigrationResource.StartOfDataProcessing);
+                ReportProgress(90, MigrationResource.DataProcessing);
             }
             MigrationInfo.ProjectStorage = new()
             {
@@ -123,8 +123,9 @@ public class WorkspaceMigrator : Migrator
         catch
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            ReportProgress(_lastProgressUpdate, $"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
-            throw new Exception($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
+            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
+            ReportProgress(_lastProgressUpdate, error);
+            throw new Exception(error);
         }
         if (reportProgress)
         {
