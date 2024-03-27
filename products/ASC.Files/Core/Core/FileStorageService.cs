@@ -1282,7 +1282,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanEditHistoryAsync(file) || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanEditHistoryAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1523,7 +1523,7 @@ public class FileStorageService //: IFileStorageService
         File<T> file;
         if (string.IsNullOrEmpty(url))
         {
-            file = await entryManager.UpdateToVersionFileAsync(fileId, version, doc);
+            file = await entryManager.UpdateToVersionFileAsync(fileId, version);
         }
         else
         {

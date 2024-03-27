@@ -1234,7 +1234,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict)
+                        if (e.Access != FileShare.Restrict && isAuthenticated)
                         {
                             return true;
                         }
@@ -1269,7 +1269,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing)
+                        if (e.Access == FileShare.Editing && isAuthenticated)
                         {
                             return true;
                         }
