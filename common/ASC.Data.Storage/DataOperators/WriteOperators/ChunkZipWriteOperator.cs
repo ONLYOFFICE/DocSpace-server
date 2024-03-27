@@ -120,8 +120,9 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                 }
                     
                 theMemStream.Position = 0;
-                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);
-                _chunkedUploadSession.BytesTotal += theMemStream.Length;
+                var length = theMemStream.Length;
+                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, length, _chunkNumber++);
+                _chunkedUploadSession.BytesTotal += length;
                 _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
             }
             else

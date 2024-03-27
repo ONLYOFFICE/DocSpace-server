@@ -81,6 +81,7 @@ public class FileStorageService //: IFileStorageService
     ExternalShare externalShare,
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
+    CoreBaseSettings coreBaseSettings,
     IDistributedLockProvider distributedLockProvider)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -599,6 +600,17 @@ public class FileStorageService //: IFileStorageService
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < quota)
+                {
+                    throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+                }
+            }
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2260,7 +2272,7 @@ public class FileStorageService //: IFileStorageService
             await folderDao.DeleteFolderAsync(folderIdFromTrash);
         }
 
-        await fileSecurity.RemoveSubjectAsync<T>(userFromId, true);
+        await fileSecurity.RemoveSubjectAsync(userFromId, true);
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
