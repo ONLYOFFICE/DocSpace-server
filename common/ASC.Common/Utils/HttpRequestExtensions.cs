@@ -28,23 +28,11 @@ namespace System.Web;
 
 public static class HttpRequestExtensions
 {
-    public static readonly string RequestTokenHeader = "Request-Token";
+    public const string RequestTokenHeader = "Request-Token";
 
     public static Uri Url(this HttpRequest request)
     {
         return request != null ? new Uri(request.GetDisplayUrl()) : null;
-    }
-
-    public static Uri OriginUrl(this HttpRequest request)
-    {
-        if (request == null)
-        {
-            return null;
-        }
-
-        var origin = request.Headers[HeaderNames.Origin].FirstOrDefault();
-
-        return string.IsNullOrEmpty(origin) ? Url(request) : new Uri(origin);
     }
 
     public static Uri PushRewritenUri(this HttpContext context)

@@ -193,7 +193,8 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     }
 }
 
-abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, bool HoldResult = true);
+abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, ExternalSessionSnapshot SessionSnapshot, 
+    bool HoldResult = true);
 
 abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
@@ -208,21 +209,23 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected internal List<TId> Folders { get; }
     protected internal List<TId> Files { get; }
     protected IDictionary<string, StringValues> Headers { get; }
+    protected ExternalSessionSnapshot SessionSnapshot { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {
-        Files = fileOperationData.Files?.ToList() ?? new List<TId>();
-        Folders = fileOperationData.Folders?.ToList() ?? new List<TId>();
+        Files = fileOperationData.Files?.ToList() ?? [];
+        Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        SessionSnapshot = fileOperationData.SessionSnapshot;
 
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenantAsync(CurrentTenantId).Wait();
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
+        externalShare.Initialize(SessionSnapshot);
 
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
@@ -243,7 +246,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.Init(Headers);
+            externalShare.Initialize(SessionSnapshot);
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -293,7 +296,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(Headers);
+        externalShare.Initialize(SessionSnapshot);
 
         return scope;
     }

@@ -39,9 +39,8 @@ const renamingDuplicateElements = require('../helper/renamingDuplicateElements.j
 function getDomain(ctx) {
     const proto = ctx.headers.headers['x-forwarded-proto']?.split(',').shift();
     const host = ctx.headers.headers['x-forwarded-host']?.split(',').shift();
-	const port = ctx.headers.headers['x-forwarded-port']?.split(',').shift();
 
-    return `${proto}://${host}${port ? `:${port}` : ""}`;
+    return `${proto}://${host}`;
 }
 
 function instanceFunc(ctx, token = null, header = 'application/json', service = 'asc.files') {

@@ -31,11 +31,12 @@ record FileDeleteOperationData<T>(
     IEnumerable<T> Files,
     int TenantId,
     IDictionary<string, string> Headers,
+    ExternalSessionSnapshot SessionSnapshot,
     bool HoldResult = true,
     bool IgnoreException = false,
     bool Immediately = false,
     bool IsEmptyTrash = false)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
+    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
 
 [Transient]
 class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
@@ -47,8 +48,10 @@ class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperati
         var data = JsonSerializer.Deserialize<FileDeleteOperationData<JsonElement>>((string)this[Data]);
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
-        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
+        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, 
+            data.SessionSnapshot, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
+        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, data.TenantId, 
+            data.Headers, data.SessionSnapshot, data.HoldResult, false, data.Immediately, data.IsEmptyTrash));
 
         return base.RunJob(distributedTask, cancellationToken);
     }
@@ -80,7 +83,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(Headers);
+        externalShare.Initialize(SessionSnapshot);
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 

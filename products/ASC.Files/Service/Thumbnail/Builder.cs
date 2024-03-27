@@ -45,7 +45,8 @@ public class Builder<T>(ThumbnailSettings settings,
     TempPath tempPath,
     SocketManager socketManager,
     TempStream tempStream,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    SecurityContext securityContext)
 {
     private readonly ILogger _logger = log.CreateLogger("ASC.Files.ThumbnailBuilder");
     private IDataStore _dataStore;
@@ -58,7 +59,8 @@ public class Builder<T>(ThumbnailSettings settings,
         try
         {
             await tenantManager.SetCurrentTenantAsync(fileData.TenantId);
-
+            await securityContext.AuthenticateMeWithoutCookieAsync(fileData.CreatedBy);
+            
             _dataStore = await storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 
             var fileDao = daoFactory.GetFileDao<T>();

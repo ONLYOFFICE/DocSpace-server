@@ -27,12 +27,13 @@
 namespace ASC.Core.Data;
 
 [Scope]
-public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory,
-        IDbContextFactory<UserDbContext> userDbContextFactory,
-        TenantDomainValidator tenantDomainValidator,
-        MachinePseudoKeys machinePseudoKeys,
-        IMapper mapper,
-        IDbContextFactory<WebstudioDbContext> webstudioDbContextFactory)
+public class DbTenantService(
+    IDbContextFactory<TenantDbContext> dbContextFactory,
+    IDbContextFactory<UserDbContext> userDbContextFactory,
+    TenantDomainValidator tenantDomainValidator,
+    MachinePseudoKeys machinePseudoKeys,
+    IMapper mapper,
+    IDbContextFactory<WebstudioDbContext> webstudioDbContextFactory)
     : ITenantService
 {
     private List<string> _forbiddenDomains;
@@ -166,21 +167,7 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
 
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return await tenantDbContext.Tenants
-            .Where(r => r.Alias == domain || r.MappedDomain == domain)
-            .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
-            .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-    }
-    
-    public Tenant GetTenant(int id)
-    {
-        using var tenantDbContext = dbContextFactory.CreateDbContext();
-        return tenantDbContext.Tenants
-            .Where(r => r.Id == id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
-            .SingleOrDefault();
+        return mapper.Map<Tenant>(await Queries.TenantByDomainAsync(tenantDbContext, domain));
     }
     
     public Tenant GetTenant(string domain)
@@ -460,11 +447,20 @@ public class TenantUserSecurity
 
 static file class Queries
 {
+    public static readonly Func<TenantDbContext, string, Task<DbTenant>> TenantByDomainAsync =
+        EF.CompileAsyncQuery(
+            (TenantDbContext ctx, string domain) =>
+                ctx.Tenants
+                    .Where(r => r.Alias == domain || r.MappedDomain == domain)
+                    .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
+                    .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
+                    .FirstOrDefault());
+    
+    
     public static readonly Func<TenantDbContext, Task<int>> VersionIdAsync =
         EF.CompileAsyncQuery(
             (TenantDbContext ctx) =>
                 ctx.TenantVersion
-                    
                     .Where(r => r.DefaultVersion == 1 || r.Id == 0)
                     .OrderByDescending(r => r.Id)
                     .Select(r => r.Id)

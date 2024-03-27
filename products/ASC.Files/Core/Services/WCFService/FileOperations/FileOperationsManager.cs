@@ -155,9 +155,10 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        op.Init(new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders()));
+        op.Init(new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot));
         
         var taskId = fileOperationsManagerHolder.Publish(op);
         
@@ -192,9 +193,10 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        op.Init(new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), baseUri));
+        op.Init(new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri));
         
         var taskId = fileOperationsManagerHolder.Publish(op);
         
@@ -240,6 +242,7 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var toCopyFolderIds = folderIds;
         var toCopyFilesIds = fileIds;
@@ -261,7 +264,7 @@ public class FileOperationsManager(
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        op.Init(new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders()));
+        op.Init(new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot));
         
         var taskId = fileOperationsManagerHolder.Publish(op);
         
@@ -270,6 +273,8 @@ public class FileOperationsManager(
             TaskId = taskId
         });
         
+        return;
+
         async Task GetContent<T1>(List<T1> folderForContentIds, List<T1> fileForContentIds)
         {
             var copyFolderIds = folderForContentIds.ToList();
@@ -331,9 +336,10 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), holdResult, ignoreException, immediately, isEmptyTrash));
+        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash));
         
         var taskId = fileOperationsManagerHolder.Publish(op);
 

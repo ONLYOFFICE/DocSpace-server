@@ -139,7 +139,7 @@ public class StudioNotifyService(UserManager userManager,
 
     public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -162,7 +162,7 @@ public class StudioNotifyService(UserManager userManager,
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -855,11 +855,11 @@ public class StudioNotifyService(UserManager userManager,
     {
         CultureInfo culture = null;
 
-        if (!string.IsNullOrEmpty(user.CultureName))
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
         {
             culture = user.GetCulture();
         }
 
-        return culture ?? (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture();
+        return culture ?? (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
 }

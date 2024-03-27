@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20240321094617_MigrationContext_Upgrade18")]
+    partial class MigrationContext_Upgrade18
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -717,12 +720,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -2,
-                            Description = "until 01.04.2024",
                             Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
-                            Visible = false
+                            Visible = true
                         },
                         new
                         {
@@ -774,16 +776,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "zoom",
                             Price = 0m,
                             Visible = false
-                        },
-                        new
-                        {
-                            TenantId = -9,
-                            Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1",
-                            Name = "admin",
-                            Price = 20m,
-                            ProductId = "1006",
-                            Visible = true
                         });
                 });
 

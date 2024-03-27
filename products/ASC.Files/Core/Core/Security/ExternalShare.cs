@@ -43,8 +43,6 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
-    private ReadOnlyDictionary<string, StringValues> _headers;
-    private IReadOnlyDictionary<string, string> _cookie;
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -57,8 +55,8 @@ public class ExternalShare(Global global,
                 url = fileUtility.CanWebView(file.Title)
                     ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
                     : file.DownloadUrl;
-
-                url += $"&{FilesLinkUtility.ShareKey}={key}";
+                
+                url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
                 url = $"rooms/share?key={key}";
@@ -104,7 +102,7 @@ public class ExternalShare(Global global,
         
         if (string.IsNullOrEmpty(_passwordKey))
         {
-            _passwordKey = GetFromCookie(CookiesType.ShareLink, record.Subject.ToString());
+            _passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
         }
 
         if (_passwordKey == record.Options.Password)
@@ -142,11 +140,6 @@ public class ExternalShare(Global global,
 
     public string GetKey()
     {
-        if (_headers is { Count: > 0 } && _headers.TryGetValue(HttpRequestExtensions.RequestTokenHeader, out var internalKey))
-        {
-            return internalKey;
-        }
-        
         var key = httpContextAccessor.HttpContext?.Request.Headers[HttpRequestExtensions.RequestTokenHeader].FirstOrDefault();
         if (string.IsNullOrEmpty(key))
         {
@@ -181,10 +174,8 @@ public class ExternalShare(Global global,
         {
             return Guid.Empty;
         }
-        
-        _linkId = linkId;
 
-        return linkId;
+        return _linkId = linkId;
     }
 
     public Guid GetSessionId()
@@ -204,7 +195,7 @@ public class ExternalShare(Global global,
             return _sessionId = anonymous.SessionId;
         }
         
-        var sessionKey = GetFromCookie(CookiesType.AnonymousSessionKey);
+        var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
@@ -216,9 +207,7 @@ public class ExternalShare(Global global,
             return Guid.Empty;
         }
 
-        _sessionId = id;
-
-        return id;
+        return _sessionId = id;
     }
 
     public async Task<string> CreateDownloadSessionKeyAsync()
@@ -264,38 +253,37 @@ public class ExternalShare(Global global,
             : url;
     }
     
-    public async Task<string> CreateShareKeyAsync(Guid linkId)
+    public async Task<ExternalSessionSnapshot> TakeSessionSnapshotAsync()
     {
-        return Signature.Create(linkId, await GetDbKeyAsync());
+        var linkId = await GetLinkIdAsync();
+        var sessionId = await GetSessionIdAsync();
+        var passwordKey = string.IsNullOrEmpty(_passwordKey) 
+            ? cookiesManager.GetCookies(CookiesType.ShareLink, _linkId.ToString(), true) 
+            : _passwordKey;
+
+        return new ExternalSessionSnapshot(linkId, sessionId, passwordKey);
     }
     
-    public void Init(IDictionary<string, StringValues> headers)
+    public void Initialize(ExternalSessionSnapshot snapshot)
     {
-        _headers = headers.AsReadOnly();
-
-        if (!headers.TryGetValue(HeaderNames.Cookie, out var cookie) || string.IsNullOrEmpty(cookie))
+        if (snapshot == null)
         {
             return;
         }
-
-        var split = cookie.FirstOrDefault()?.Split(';');
-
-        if (CookieHeaderValue.TryParseList(split, out var cookieCollection))
-        {
-            _cookie = cookieCollection.ToDictionary(k => k.Name.ToString(), v => v.Value.ToString()).AsReadOnly();
-        }
+        
+        _linkId = snapshot.LinkId;
+        _sessionId = snapshot.SessionId;
+        _passwordKey = snapshot.PasswordKey;
+    }
+    
+    public async Task<string> CreateShareKeyAsync(Guid linkId)
+    {
+        return Signature.Create(linkId, await GetDbKeyAsync());
     }
 
     private async Task<string> GetDbKeyAsync()
     {
         return _dbKey ??= await global.GetDocDbKeyAsync();
-    }
-    
-    private string GetFromCookie(CookiesType type, string itemId = null)
-    {
-        return _cookie is { Count: > 0 } 
-            ? cookiesManager.GetCookies(_cookie, type, itemId) 
-            : cookiesManager.GetCookies(type, itemId, true);
     }
 }
 
@@ -346,14 +334,14 @@ public class ValidationInfo
     public Guid LinkId { get; set; }
 }
 
-public class DownloadSession
+public record DownloadSession
 {
     public Guid Id { get; init; }
     public Guid LinkId { get; init; }
 }
 
-/// <summary>
-/// </summary>
+public record ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey);
+
 public enum Status
 {
     Ok,

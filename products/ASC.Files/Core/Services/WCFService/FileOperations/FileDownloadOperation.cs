@@ -31,9 +31,10 @@ record FileDownloadOperationData<T>(
     IEnumerable<FilesDownloadOperationItem<T>> FilesDownload,
     int TenantId,
     IDictionary<string, string> Headers,
+    ExternalSessionSnapshot SessionSnapshot,
     string BaseUri =  null,
     bool HoldResult = true)
-    : FileOperationData<T>(Folders, FilesDownload.Select(f => f.Id).ToList(), TenantId, Headers, HoldResult);
+    : FileOperationData<T>(Folders, FilesDownload.Select(f => f.Id).ToList(), TenantId, Headers, SessionSnapshot, HoldResult);
 
 public record FilesDownloadOperationItem<T>(T Id, string Ext);
 
@@ -47,8 +48,8 @@ class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOpera
         var data = JsonSerializer.Deserialize<FileDownloadOperationData<JsonElement>>((string)this[Data]);
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.FilesDownload);
-        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers));
-        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers));
+        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.Headers, data.SessionSnapshot));
+        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.Headers, data.SessionSnapshot));
 
         await base.RunJob(distributedTask, cancellationToken);
 
@@ -464,8 +465,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
-            entriesPathId.Add(newtitle, ids);
+            var newTitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
+            entriesPathId.Add(newTitle, ids);
         }
     }
 }

@@ -146,9 +146,20 @@ public class BackupController(
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
+        var canParse = false;
+        if (storageParams.ContainsKey("folderId"))
+        {
+            canParse = int.TryParse(storageParams["folderId"], out _);
+        }
+        if (storageType == BackupStorageType.Documents && !canParse
+            || storageType == BackupStorageType.ThridpartyDocuments && canParse)
+        {
+            throw new ArgumentException("wrong folder type");
+        }
+
         if (!coreBaseSettings.Standalone && inDto.Dump)
         {
-            throw new ArgumentException("backup can not start as dump");
+            throw new ArgumentException("backup can`t start as dump");
         }
 
         if (storageType == BackupStorageType.Documents)

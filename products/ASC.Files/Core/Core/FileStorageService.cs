@@ -3090,8 +3090,10 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
+            
+            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
-            if (folder.ProviderEntry)
+            if (folder.ProviderEntry && !isRoom)
             {
                 continue;
             }
@@ -3116,11 +3118,19 @@ public class FileStorageService //: IFileStorageService
 
                 newFolder.CreateBy = userInfo.Id;
 
-                var newFolderId = await folderDao.SaveFolderAsync(newFolder);
-                newFolder = await folderDao.GetFolderAsync(newFolderId);
-                newFolder.Access = folderAccess;
-
-                await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+                if (folder.ProviderEntry && isRoom)
+                {
+                    var providerDao = daoFactory.ProviderDao;
+                    await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = folder.ProviderId, CreateBy = userInfo.Id });
+                }
+                else 
+                {
+                    var newFolderId = await folderDao.SaveFolderAsync(newFolder);
+                    newFolder = await folderDao.GetFolderAsync(newFolderId);
+                    newFolder.Access = folderAccess;
+                    
+                    await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+                }
 
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
                     newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)

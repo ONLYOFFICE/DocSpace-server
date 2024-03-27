@@ -49,7 +49,7 @@ public class MigrationFileUploadHandler
                 throw new SecurityException("Access denied.");
             }
 
-            var tenantId = tenantManager.GetCurrentTenant().Id;
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
             if (context.Request.Query["Init"].ToString() == "true")
             {
                 

@@ -33,22 +33,16 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory)
     {
         userId = userId == Guid.Empty ? authContext.CurrentAccount.ID : userId;
         var tagDao = daoFactory.GetTagDao<T>();
-        var lockedBy = await FileLockedByAsync(fileId, tagDao);
+        var tagLock = await tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var lockedBy =  tagLock?.Owner ?? Guid.Empty;
 
         return lockedBy != Guid.Empty && lockedBy != userId;
     }
-
-    public async Task<Guid> FileLockedByAsync<T>(T fileId, ITagDao<T> tagDao)
-    {
-        var tags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.Locked);
-        var tagLock = await tags.FirstOrDefaultAsync();
-
-        return tagLock?.Owner ?? Guid.Empty;
     }
-}
 
 [Scope]
-public class BreadCrumbsManager(IDaoFactory daoFactory,
+public class BreadCrumbsManager(
+    IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     GlobalFolderHelper globalFolderHelper,
     AuthContext authContext)
@@ -61,13 +55,8 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
 
         var result = breadcrumbs.Skip(2).Select(r => r.Order.ToString()).ToList();
 
-        if (result.Any())
-        {
-            return result.Aggregate((first, second) => $"{first}.{second}");
+        return result.Count != 0 ? result.Aggregate((first, second) => $"{first}.{second}") : null;
         }
-
-        return null;
-    }
 
     public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId)
     {
@@ -247,7 +236,8 @@ public class EntryManager(IDaoFactory daoFactory,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    IDistributedLockProvider distributedLockProvider)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -983,7 +973,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return await breadCrumbsManager.GetBreadCrumbsAsync(folderId, folderDao);
     }
 
-    public async Task CheckFolderIdAsync<T>(IFolderDao<T> folderDao, IEnumerable<FileEntry<T>> entries)
+    private async Task CheckFolderIdAsync<T>(IFolderDao<T> folderDao, IEnumerable<FileEntry<T>> entries)
     {
         foreach (var entry in entries)
         {
@@ -991,7 +981,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task CheckEntryAsync<T>(IFolderDao<T> folderDao, FileEntry<T> entry)
+    private async Task CheckEntryAsync<T>(IFolderDao<T> folderDao, FileEntry<T> entry)
     {
         if (entry.RootFolderType == FolderType.USER
             && entry.RootCreateBy != authContext.CurrentAccount.ID)
@@ -1010,24 +1000,21 @@ public class EntryManager(IDaoFactory daoFactory,
         return await lockerManager.FileLockedForMeAsync(fileId, userId);
     }
 
-    public async Task<Guid> FileLockedByAsync<T>(T fileId, ITagDao<T> tagDao)
-    {
-        return await lockerManager.FileLockedByAsync(fileId, tagDao);
-    }
-
     public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile)
     {
-        Folder<T> folderIfNew = null;
         if (sourceFile == null)
         {
-            return (null, folderIfNew);
+            return (null, null);
         }
 
+        Folder<T> folderIfNew = null;
         File<T> linkedFile = null;
         var fileDao = daoFactory.GetFileDao<T>();
         var sourceFileDao = daoFactory.GetFileDao<T>();
         var linkDao = daoFactory.GetLinkDao();
 
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(sourceFile.Id + "_draft"))
+        {
         var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
 
         if (linkedId != null)
@@ -1135,6 +1122,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
 
             await socketManager.UpdateFileAsync(sourceFile);
+        }
         }
 
         return (linkedFile, folderIfNew);
@@ -1399,24 +1387,17 @@ public class EntryManager(IDaoFactory daoFactory,
             }
         }
 
-        var fileDao = daoFactory.GetFileDao<T>();
-        var check = await fileShareLink.CheckAsync(doc, false, fileDao);
-        var editLink = check.EditLink;
-        var file = check.File ?? await fileDao.GetFileAsync(fileId);
-
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!editLink
-            && (!await fileSecurity.CanEditAsync(file, userId)
-                && !await fileSecurity.CanCustomFilterEditAsync(file, userId)
-                && !await fileSecurity.CanReviewAsync(file, userId)
-                && !await fileSecurity.CanFillFormsAsync(file, userId)
-                && !await fileSecurity.CanCommentAsync(file, userId)))
+        
+        if (!await CanEditAsync(userId, file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
+        
         if (await FileLockedForMeAsync(file.Id, userId))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
@@ -1434,6 +1415,15 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         return file;
+        
+        async Task<bool> CanEditAsync(Guid guid, FileEntry<T> entry)
+        {
+            return await fileSecurity.CanEditAsync(entry, guid)
+                   || await fileSecurity.CanCustomFilterEditAsync(entry, guid)
+                   || await fileSecurity.CanReviewAsync(entry, guid)
+                   || await fileSecurity.CanFillFormsAsync(entry, guid)
+                   || await fileSecurity.CanCommentAsync(entry, guid);
+    }
     }
 
     public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, string doc = null, bool checkRight = true, bool finalize = false)
