@@ -33,8 +33,11 @@ public class FoldersControllerInternal(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
+    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext, coreBaseSettings, tenantManager);
 
 public class FoldersControllerThirdparty(EntryManager entryManager,
         FoldersControllerHelper foldersControllerHelper,
@@ -42,8 +45,11 @@ public class FoldersControllerThirdparty(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
+    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext, coreBaseSettings, tenantManager);
 
 public abstract class FoldersController<T>(EntryManager entryManager,
         FoldersControllerHelper foldersControllerHelper,
@@ -51,7 +57,10 @@ public abstract class FoldersController<T>(EntryManager entryManager,
         FileOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -239,6 +248,13 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+        }
+
         return await fileStorageService.GetFilesUsedSpace();
     }
 }

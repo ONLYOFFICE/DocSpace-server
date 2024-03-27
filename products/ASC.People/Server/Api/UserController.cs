@@ -53,6 +53,7 @@ public class UserController(ICache cache,
         SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
         IHttpClientFactory httpClientFactory,
@@ -1559,6 +1560,17 @@ public class UserController(ICache cache,
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.Quota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
 
         foreach (var user in users)
             {
@@ -1588,6 +1600,13 @@ public class UserController(ICache cache,
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+        }
+
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
