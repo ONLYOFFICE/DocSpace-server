@@ -1006,4 +1006,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>O último espaço de acesso completo não pode ser excluído</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Arquivo de plugin errado</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>O plug-in já existe</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Extensão de arquivo errada</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>O tamanho do arquivo excede o limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>São proibidas alterações nos plugins do sistema</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nome de plug-in errado</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nenhum arquivo de entrada</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plug-in não encontrado</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Para muitos arquivos de entrada</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota de memória – a cota de memória definida é maior que a cota dos portais.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço da sala excedida</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do usuário excedida</value>
+  </data>
 </root>

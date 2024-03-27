@@ -201,4 +201,25 @@
   <data name="UserSkipped" xml:space="preserve">
     <value>فشل في استيراد المستخدم: {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>ترحيل الملفات الشائعة</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>حدث خطأ أثناء تهيئة {0} الترحيل</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>لا يوجد مزود ترحيل من هذا القبيل</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>لا توجد عملية ترحيل قيد التقدم</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>ترحيل ملفات المشروع</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>التحليل لا يزال قيد التنفيذ</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>الترحيل قيد التنفيذ بالفعل</value>
+  </data>
 </root>

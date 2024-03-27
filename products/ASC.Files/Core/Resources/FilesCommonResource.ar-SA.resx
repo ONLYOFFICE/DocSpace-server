@@ -487,4 +487,46 @@
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>فشلت محاولات إدخال كلمة المرور الخاصة بك، الرجاء المحاولة مرة أخرى لاحقاً</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>مؤلف</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>شركة</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>تم انشاؤه</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>تصدير المؤلف</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>مجلد</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>فِهرِس</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>معدل</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>اسم</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>غرفة</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>فهرس الغرفة</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>الحجم (ميغابايت)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>المجموع</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>النوع</value>
+  </data>
 </root>
