@@ -1699,7 +1699,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
 
-        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, new[] { file })
+        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [file])
             .ToDictionaryAsync(k => k.Name);
 
         if (tags.Count > 0)
@@ -1714,6 +1714,9 @@ public class EntryManager(IDaoFactory daoFactory,
             var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, file);
 
             await tagDao.SaveTagsAsync(tag);
+
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+            await socketManager.CreateFileAsync(file, [userId]);
         }
     }
 
