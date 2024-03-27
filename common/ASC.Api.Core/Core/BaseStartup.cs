@@ -256,7 +256,9 @@ public abstract class BaseStartup
 
             options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
                 var permitLimit = 5;
                 var path = httpContext.Request.Path.ToString();
                 var partitionKey = $"sensitive_api_{userId}|{path}";

@@ -69,7 +69,7 @@ public class MigrationCore(
 
     public async Task<MigrationOperation> GetStatusAsync()
     {
-        return migrationWorker.GetStatus(await tenantManager.GetCurrentTenantIdAsync());
+        return await migrationWorker.GetStatusAsync(await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public static void Register(DIHelper services)

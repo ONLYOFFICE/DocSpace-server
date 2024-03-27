@@ -57,8 +57,8 @@ public abstract class Migrator : IDisposable
 
     protected string TmpFolder { get; set; }
 
-    public event Action<double, string> OnProgressUpdate;
-    
+    public Func<double, string, Task> OnProgressUpdateAsync { get; set; }
+
     public Migrator(SecurityContext securityContext,
         UserManager userManager, 
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
@@ -89,11 +89,14 @@ public abstract class Migrator : IDisposable
     public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
-    protected void ReportProgress(double value, string status)
+    protected async Task ReportProgressAsync(double value, string status)
     {
         _lastProgressUpdate = value;
         _lastStatusUpdate = status;
-        OnProgressUpdate?.Invoke(value, status);
+        if (OnProgressUpdateAsync != null)
+        {
+            await OnProgressUpdateAsync(value, status);
+        }
         MigrationLogger.Log($"{value:0.00} progress: {status}");
     }
 
@@ -114,7 +117,7 @@ public abstract class Migrator : IDisposable
 
     public async Task MigrateAsync(MigrationApiInfo migrationInfo)
     {
-        ReportProgress(0, MigrationResource.PreparingForMigration);
+        await ReportProgressAsync(0, MigrationResource.PreparingForMigration);
         _currentUser = AuthContext.CurrentAccount;
         _importedUsers = new();
         _failedUsers = new();
@@ -136,7 +139,7 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                ReportProgress(_lastProgressUpdate + progressStep, string.Format(MigrationResource.MigratingUserFiles, kv.Value.Info.DisplayUserName(DisplayUserSettingsHelper), i++, _usersForImport.Count));
+                await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.MigratingUserFiles, kv.Value.Info.DisplayUserName(DisplayUserSettingsHelper), i++, _usersForImport.Count));
                 await MigrateStorageAsync(kv.Value.Storage, kv.Value);
             }
             catch(Exception e)
@@ -149,7 +152,7 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                ReportProgress(85, string.Format(MigrationResource.MigrationCommonFiles));
+                await ReportProgressAsync(85, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.CommonStorage);
             }
             catch(Exception e)
@@ -162,7 +165,7 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                ReportProgress(90, string.Format(MigrationResource.MigrationProjectFiles));
+                await ReportProgressAsync(90, string.Format(MigrationResource.MigrationProjectFiles));
                 await MigrateStorageAsync(MigrationInfo.ProjectStorage);
             }
             catch (Exception e)
@@ -178,7 +181,7 @@ public abstract class Migrator : IDisposable
 
         MigrationInfo.FailedUsers = failedUsers.Count;
         MigrationInfo.SuccessedUsers = _usersForImport.Count() - MigrationInfo.FailedUsers;
-        ReportProgress(100, MigrationResource.MigrationCompleted);
+        await ReportProgressAsync(100, MigrationResource.MigrationCompleted);
     }
 
     private async Task MigrateUsersAsync()
@@ -193,7 +196,7 @@ public abstract class Migrator : IDisposable
             {
                 if (user.ShouldImport) 
                 {
-                    ReportProgress(_lastProgressUpdate + progressStep, string.Format(MigrationResource.UserMigration, user.Info.DisplayUserName(DisplayUserSettingsHelper), i++, MigrationInfo.Users.Count));
+                    await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.UserMigration, user.Info.DisplayUserName(DisplayUserSettingsHelper), i++, MigrationInfo.Users.Count));
                 }
                 var saved = await UserManager.GetUserByEmailAsync(user.Info.Email);
 
@@ -267,7 +270,7 @@ public abstract class Migrator : IDisposable
             var key = kv.Key;
             var group = kv.Value;
 
-            ReportProgress(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
+            await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
             
             if (!group.ShouldImport)
             {

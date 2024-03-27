@@ -36,51 +36,43 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
         IIntegrationEventHandler<MigrationCancelIntegrationEvent>,
         IIntegrationEventHandler<MigrationClearIntegrationEvent>
 {
-    public Task Handle(MigrationParseIntegrationEvent @event)
+    public async Task Handle(MigrationParseIntegrationEvent @event)
     {
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration-parse") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration-parse", @event);
 
-            worker.StartParse(@event.TenantId, @event.CreateBy, @event.MigratorName);
-
-            return Task.CompletedTask;
+            await worker.StartParse(@event.TenantId, @event.CreateBy, @event.MigratorName);
         }
     }
 
-    public Task Handle(MigrationIntegrationEvent @event)
+    public async Task Handle(MigrationIntegrationEvent @event)
     {
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
-            worker.StartMigrate(@event.TenantId, @event.CreateBy, @event.ApiInfo);
-
-            return Task.CompletedTask;
+            await worker.StartMigrate(@event.TenantId, @event.CreateBy, @event.ApiInfo);
         }
     }
 
-    public Task Handle(MigrationCancelIntegrationEvent @event)
+    public async Task Handle(MigrationCancelIntegrationEvent @event)
     {
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
-            worker.Stop(@event.TenantId);
-
-            return Task.CompletedTask;
+            await worker.Stop(@event.TenantId);
         }
     }
 
-    public Task Handle(MigrationClearIntegrationEvent @event)
+    public async Task Handle(MigrationClearIntegrationEvent @event)
     {
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
 
-            worker.Clear(@event.TenantId);
-
-            return Task.CompletedTask;
+            await worker.Clear(@event.TenantId);
         }
     }
 }

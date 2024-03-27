@@ -44,7 +44,11 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public long Counter { get; set; }
+    
+    [Ignore]
     public DbRoomSettings Settings { get; set; }
+    
+    [Ignore]
     public DbTenant Tenant { get; set; }
 
     [Ignore]

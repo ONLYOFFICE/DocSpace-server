@@ -51,9 +51,9 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
-    public async Task CreateFileAsync<T>(File<T> file)
+    public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("create-file", file, true);
+        await MakeRequest("create-file", file, true, users);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)

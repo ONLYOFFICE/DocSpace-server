@@ -100,10 +100,10 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
 
-            backupPortalTask.ProgressChanged += (_, args) =>
+            backupPortalTask.ProgressChanged = async (args) =>
             {
                 Percentage = 0.9 * args.Progress;
-                PublishChanges();
+                await PublishChanges();
             };
 
             await backupPortalTask.RunJob();
@@ -149,7 +149,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
 
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
         catch (Exception error)
         {
@@ -161,7 +161,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         {
             try
             {
-                PublishChanges();
+                await PublishChanges();
             }
             catch (Exception error)
             {

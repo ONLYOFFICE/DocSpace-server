@@ -85,7 +85,7 @@ public class GoogleWorkspaceMigrator : Migrator
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.StartOfDataProcessing);
+            ReportProgressAsync(5, MigrationResource.StartOfDataProcessing);
         }
 
         var progressStep = 90 / _takeouts.Length;
@@ -99,7 +99,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
             if (reportProgress)
             {
-                ReportProgress(_lastProgressUpdate + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
+                await ReportProgressAsync(_lastProgressUpdate + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
             }
 
             var tmpFolder = Path.Combine(TmpFolder, Path.GetFileNameWithoutExtension(takeout));
@@ -177,7 +177,7 @@ public class GoogleWorkspaceMigrator : Migrator
                 Log(MigrationResource.CanNotParseArchives, ex);
                 if (MigrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    ReportProgress(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
+                    await ReportProgressAsync(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
                     throw new Exception(MigrationResource.CanNotParseArchives);
                 }
             }
@@ -191,7 +191,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
         if (reportProgress)
         {
-            ReportProgress(100, MigrationResource.DataProcessingCompleted);
+            await ReportProgressAsync(100, MigrationResource.DataProcessingCompleted);
         }
 
         return MigrationInfo.ToApiInfo();

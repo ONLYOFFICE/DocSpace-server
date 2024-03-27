@@ -35,13 +35,12 @@ public class BruteForceLoginManager(
     SetupInfo setupInfo,
     Recaptcha recaptcha, 
     IDistributedLockProvider distributedLockProvider)
-    {
-
+{
     public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
         var blockCacheKey = GetBlockCacheKey(key, requestIp);
         
-        if (GetFromCache<string>(blockCacheKey) != null)
+        if (await GetFromCache<string>(blockCacheKey) != null)
         {
             if (throwException)
             {
@@ -53,14 +52,14 @@ public class BruteForceLoginManager(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            if (GetFromCache<string>(blockCacheKey) != null)
+            if (await GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException(exceptionMessage);
             }
 
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
             var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
-            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+            var history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             var now = DateTime.UtcNow;
             var checkTime = now.Subtract(settings.CheckPeriod);
@@ -72,7 +71,7 @@ public class BruteForceLoginManager(
 
             if (history.Count > settings.AttemptCount)
             {
-                SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
+                await SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
                 await distributedCache.RemoveAsync(historyCacheKey);
 
                 if (throwException)
@@ -83,7 +82,7 @@ public class BruteForceLoginManager(
                 return (false, showRecaptcha);
             }
 
-            SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+            await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
 
             return (true, showRecaptcha);
         }
@@ -95,14 +94,14 @@ public class BruteForceLoginManager(
         {
             var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
-            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+            var history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             if (history.Count > 0)
             {
                 history.RemoveAt(history.Count - 1);
             }
 
-            SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
+            await SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
         }
     }
 
@@ -117,14 +116,14 @@ public class BruteForceLoginManager(
 
         var blockCacheKey = GetBlockCacheKey(login, requestIp);
 
-        if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
+        if (!recaptchaPassed && await GetFromCache<string>(blockCacheKey) != null)
         {
             throw new BruteForceCredentialException();
         }
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, login)))
         {
-            if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
+            if (!recaptchaPassed && await GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException();
             }
@@ -141,18 +140,18 @@ public class BruteForceLoginManager(
                 settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
                 var checkTime = now.Subtract(settings.CheckPeriod);
 
-                history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+                history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
                 history = history.Where(item => item > checkTime).ToList();
                 history.Add(now);
 
                 if (history.Count > settings.AttemptCount)
                 {
-                    SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
+                    await SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
                     await distributedCache.RemoveAsync(historyCacheKey);
                     throw new BruteForceCredentialException();
                 }
 
-                SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+                await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
             user = await getUser();
@@ -169,7 +168,7 @@ public class BruteForceLoginManager(
 
             history.RemoveAt(history.Count - 1);
 
-            SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+            await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
         }
 
         return user;
@@ -194,9 +193,9 @@ public class BruteForceLoginManager(
         return recaptchaPassed;
     }
 
-    private T GetFromCache<T>(string key)
+    private async Task<T> GetFromCache<T>(string key)
     {
-        var serializedObject = distributedCache.Get(key);
+        var serializedObject = await distributedCache.GetAsync(key);
 
         if (serializedObject == null)
         {
@@ -208,15 +207,15 @@ public class BruteForceLoginManager(
         return Serializer.Deserialize<T>(ms);
     }
 
-    private void SetToCache<T>(string key, T value, DateTime ExpirationPeriod)
+    private async Task SetToCache<T>(string key, T value, DateTime expirationPeriod)
     {
         using var ms = new MemoryStream();
 
         Serializer.Serialize(ms, value);
 
-        distributedCache.Set(key, ms.ToArray(), new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
         {
-            AbsoluteExpiration = ExpirationPeriod
+            AbsoluteExpiration = expirationPeriod
         });
     }
 
@@ -224,8 +223,5 @@ public class BruteForceLoginManager(
 
     private static string GetHistoryCacheKey(string login, string requestIp) => $"loginsec/{login.ToLowerInvariant()}/{requestIp}";
 
-    private static string GetLockKey(string ip, string key)
-    {
-        return $"brut_force_{ip}_{key}";
-    }
+    private static string GetLockKey(string ip, string key) => $"brut_force_{ip}_{key}";
 }

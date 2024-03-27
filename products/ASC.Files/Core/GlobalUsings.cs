@@ -105,6 +105,7 @@ global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
 global using ASC.Files.Core.Data;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Exceptions;
 global using ASC.Files.Core.Entries;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;

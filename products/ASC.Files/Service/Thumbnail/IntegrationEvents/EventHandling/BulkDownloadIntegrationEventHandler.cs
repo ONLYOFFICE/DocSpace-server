@@ -45,8 +45,7 @@ public class BulkDownloadIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            
-            fileOperationsManager.EnqueueDownload(@event.TaskId);
+            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

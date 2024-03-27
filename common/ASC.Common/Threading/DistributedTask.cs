@@ -38,7 +38,7 @@ public class DistributedTask
     [ProtoMember(11)]
     protected readonly Dictionary<string, string> _props = new();
 
-    public Action<DistributedTask> Publication { get; set; }
+    public Func<DistributedTask, Task> Publication { get; set; }
 
     /// <summary>Instance ID</summary>
     /// <type>System.Int32, System</type>
@@ -69,14 +69,14 @@ public class DistributedTask
     }
 
 
-    public void PublishChanges()
+    public async Task PublishChanges()
     {
         if (Publication == null)
         {
             throw new InvalidOperationException("Publication not found.");
         }
 
-        Publication(this);
+        await Publication(this);
     }
 
     public dynamic this[string propName]

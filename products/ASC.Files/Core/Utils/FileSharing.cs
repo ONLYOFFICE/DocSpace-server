@@ -620,7 +620,7 @@ public class FileSharing(
             
             if (ace.SubjectType == SubjectType.Group && ace.Id == Constants.LostGroupInfo.ID)
             {
-                await fileSecurity.RemoveSubjectAsync<T>(r.Subject, true);
+                await fileSecurity.RemoveSubjectAsync(r.Subject, true);
                 continue;
             }
 

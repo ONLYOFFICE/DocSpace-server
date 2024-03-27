@@ -81,13 +81,13 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             Percentage = 30;
 
-            PublishChanges();
+            await PublishChanges();
 
             var fileUri = await documentBuilderTask.BuildFileAsync(CancellationToken, _script, _tempFileName);
 
             Percentage = 60;
 
-            PublishChanges();
+            await PublishChanges();
 
             CancellationToken.ThrowIfCancellationRequested();
 
@@ -116,7 +116,7 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
         finally
         {
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 }

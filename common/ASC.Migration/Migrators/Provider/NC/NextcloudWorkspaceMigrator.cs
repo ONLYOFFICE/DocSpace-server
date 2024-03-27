@@ -84,7 +84,7 @@ public class NextcloudWorkspaceMigrator : Migrator
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.Unzipping);
+            await ReportProgressAsync(5, MigrationResource.Unzipping);
         }
         try
         {
@@ -121,7 +121,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
             if (reportProgress)
             {
-                ReportProgress(30, MigrationResource.UnzippingFinished);
+                await ReportProgressAsync(30, MigrationResource.UnzippingFinished);
             }
 
             var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
@@ -131,7 +131,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             if (reportProgress)
             {
-                ReportProgress(40, MigrationResource.DumpParse);
+                await ReportProgressAsync(40, MigrationResource.DumpParse);
             }
             var users = DbExtractUser(dbFile);
             var progress = 40;
@@ -143,7 +143,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 }
                 if (reportProgress)
                 {
-                    ReportProgress(progress, MigrationResource.DataProcessing);
+                    await ReportProgressAsync(progress, MigrationResource.DataProcessing);
                     progress += 30 / users.Count;
                 }
                 if (!string.IsNullOrEmpty(user.Value.Info.FirstName))
@@ -195,7 +195,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             if (reportProgress)
             {
-                ReportProgress(80, MigrationResource.DataProcessing);
+                await ReportProgressAsync(80, MigrationResource.DataProcessing);
             }
             DbExtractGroup(dbFile);
         }
@@ -203,12 +203,12 @@ public class NextcloudWorkspaceMigrator : Migrator
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
-            ReportProgress(_lastProgressUpdate, error);
+            await ReportProgressAsync(_lastProgressUpdate, error);
             throw new Exception(error);
         }
         if (reportProgress)
         {
-            ReportProgress(100, MigrationResource.DataProcessingCompleted);
+            await ReportProgressAsync(100, MigrationResource.DataProcessingCompleted);
         }
         return MigrationInfo.ToApiInfo();
     }
