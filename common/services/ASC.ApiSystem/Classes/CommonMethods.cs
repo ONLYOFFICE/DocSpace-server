@@ -48,7 +48,8 @@ public class CommonMethods(
         return new
         {
             created = t.CreationDateTime,
-            domain = t.GetTenantDomain(coreSettings),
+            domain = t.GetTenantDomain(coreSettings, false),
+            mappedDomain = t.MappedDomain,
             hostedRegion = t.HostedRegion,
             industry = t.Industry,
             language = t.Language,

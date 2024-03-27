@@ -129,8 +129,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime, 
-        FileSecurityCommon fileSecurityCommon,
+        FileDateTime fileDateTime,
         SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager)
@@ -170,16 +169,20 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
 
-            if (folder.CreateBy == authContext.CurrentAccount.ID ||
-                !await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+            if (folder.CreateBy == authContext.CurrentAccount.ID)
             {
                 result.InRoom = true;
+            }
+            else if (folder.ShareRecord is { SubjectType: SubjectType.Group })
+            {
+                result.InRoom = false;
             }
             else
             {
                 currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
 
-                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id));
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.User)
+                    && !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.Group);
             }
 
             if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 

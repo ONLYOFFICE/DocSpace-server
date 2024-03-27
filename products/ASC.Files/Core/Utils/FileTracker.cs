@@ -283,7 +283,7 @@ public record FileTrackerNotify
 public record FileTracker
 {
     [ProtoMember(1)]
-    public Dictionary<Guid, TrackInfo> EditingBy { get; }
+    public Dictionary<Guid, TrackInfo> EditingBy { get; set; }
 
     public FileTracker() { }
     

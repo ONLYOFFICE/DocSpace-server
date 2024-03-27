@@ -1059,12 +1059,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
-            await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
-        {
-            return false;
-        }
-
         var defaultShare =
             e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
             e.RootFolderType == FolderType.USER ? DefaultMyShare :
@@ -1075,6 +1069,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
+        
+        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
+            await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
+        {
+            return false;
+        }
 
         switch (action)
         {
@@ -1234,7 +1234,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict)
+                        if (e.Access != FileShare.Restrict && isAuthenticated)
                         {
                             return true;
                         }
@@ -1269,7 +1269,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing)
+                        if (e.Access == FileShare.Editing && isAuthenticated)
                         {
                             return true;
                         }

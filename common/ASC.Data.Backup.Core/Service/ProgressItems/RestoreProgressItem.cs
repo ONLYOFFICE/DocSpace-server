@@ -152,8 +152,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
             else
             {
-                await _tenantManager.RemoveTenantAsync(tenant.Id);
-
                 var restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
                 restoredTenant.SetStatus(TenantStatus.Active);
                 restoredTenant.Alias = tenant.Alias;
@@ -164,8 +162,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     restoredTenant.MappedDomain = tenant.MappedDomain;
                 }
 
-                await _tenantManager.SaveTenantAsync(restoredTenant);
-                _tenantManager.SetCurrentTenant(restoredTenant);
+                await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
