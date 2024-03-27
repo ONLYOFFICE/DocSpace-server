@@ -26,32 +26,37 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-record FileMarkAsReadOperationData<T>(
-    IEnumerable<T> Folders,
-    IEnumerable<T> Files,
-    int TenantId,
-    IDictionary<string, string> Headers,
-    ExternalSessionSnapshot SessionSnapshot,
-    bool HoldResult = true)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult);
+[ProtoContract]
+public record FileMarkAsReadOperationData<T> : FileOperationData<T>
+{
+    public FileMarkAsReadOperationData()
+    {
+        
+    }
+
+    public FileMarkAsReadOperationData(IEnumerable<T> Folders,
+        IEnumerable<T> Files,
+        int TenantId,
+        IDictionary<string, string> Headers,
+        ExternalSessionSnapshot SessionSnapshot,
+        bool HoldResult = true) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+    {
+    }
+}
 
 [Transient]
-class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
+public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
     ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
     
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        var data = JsonSerializer.Deserialize<FileMarkAsReadOperationData<JsonElement>>((string)this[Data]);
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, data.TenantId, 
-            data.Headers, data.SessionSnapshot, data.HoldResult));
-        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, 
-            data.TenantId, data.Headers, data.SessionSnapshot, data.HoldResult));
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData);
 
         return base.RunJob(distributedTask, cancellationToken);
+
     }
 }
 
@@ -104,7 +109,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
             }
 
-            ProgressStep();
+            await ProgressStep();
         }
 
 

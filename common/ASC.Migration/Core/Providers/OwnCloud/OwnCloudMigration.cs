@@ -64,33 +64,31 @@ public class OwnCloudMigration(
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.Unzipping);
+            await ReportProgress(5, MigrationResource.Unzipping);
         }
         try
         {
             try
             {
-                using (var archive = ZipFile.OpenRead(_takeout))
+                using var archive = ZipFile.OpenRead(_takeout);
+                foreach (var entry in archive.Entries)
                 {
-                    foreach (var entry in archive.Entries)
+                    if (string.IsNullOrEmpty(entry.Name))
                     {
-                        if (string.IsNullOrEmpty(entry.Name))
+                        Directory.CreateDirectory(Path.Combine(_tmpFolder, entry.FullName));
+                    }
+                    else
+                    {
+                        var dir = Path.GetDirectoryName(Path.Combine(_tmpFolder, entry.FullName));
+                        if (!Directory.Exists(dir))
                         {
-                            Directory.CreateDirectory(Path.Combine(_tmpFolder, entry.FullName));
+                            Directory.CreateDirectory(dir);
                         }
-                        else
-                        {
-                            var dir = Path.GetDirectoryName(Path.Combine(_tmpFolder, entry.FullName));
-                            if (!Directory.Exists(dir))
-                            {
-                                Directory.CreateDirectory(dir);
-                            }
-                            entry.ExtractToFile(Path.Combine(_tmpFolder, entry.FullName));
-                        }
-                        if (_cancellationToken.IsCancellationRequested && reportProgress)
-                        {
-                            return null;
-                        }
+                        entry.ExtractToFile(Path.Combine(_tmpFolder, entry.FullName));
+                    }
+                    if (_cancellationToken.IsCancellationRequested && reportProgress)
+                    {
+                        return null;
                     }
                 }
             }
@@ -106,7 +104,7 @@ public class OwnCloudMigration(
 
             if (reportProgress)
             {
-                ReportProgress(30, MigrationResource.UnzippingFinished);
+                await ReportProgress(30, MigrationResource.UnzippingFinished);
             }
             var bdFile = "";
             try
@@ -124,7 +122,7 @@ public class OwnCloudMigration(
             }
             if (reportProgress)
             {
-                ReportProgress(40, MigrationResource.DumpParse);
+                await ReportProgress(40, MigrationResource.DumpParse);
             }
             var users = DbExtractUser(bdFile);
             var progress = 40;
@@ -136,7 +134,7 @@ public class OwnCloudMigration(
                 }
                 if (reportProgress)
                 {
-                    ReportProgress(progress, MigrationResource.DataProcessing);
+                    await ReportProgress(progress, MigrationResource.DataProcessing);
                     progress += 50 / users.Count;
                 }
                 if (u.Data.DisplayName != null)
@@ -173,7 +171,7 @@ public class OwnCloudMigration(
             progress = 80;
             foreach (var item in groups)
             {
-                ReportProgress(progress, MigrationResource.DataProcessing);
+                await ReportProgress(progress, MigrationResource.DataProcessing);
                 progress += 10 / groups.Count;
                 var group = serviceProvider.GetService<OсMigratingGroups>();
                 group.Init(item, Log);
@@ -188,7 +186,7 @@ public class OwnCloudMigration(
         }
         if (reportProgress)
         {
-            ReportProgress(100, MigrationResource.DataProcessingCompleted);
+            await ReportProgress(100, MigrationResource.DataProcessingCompleted);
         }
         return _migrationInfo.ToApiInfo();
     }
@@ -352,7 +350,7 @@ public class OwnCloudMigration(
 
     public override async Task MigrateAsync(MigrationApiInfo migrationApiInfo)
     {
-        ReportProgress(0, MigrationResource.PreparingForMigration);
+        await ReportProgress(0, MigrationResource.PreparingForMigration);
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationApiInfo);
 
@@ -366,7 +364,7 @@ public class OwnCloudMigration(
         var i = 1;
         foreach (var user in usersForImport)
         {
-            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
+            await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
                 var u = migrationApiInfo.Users.Find(element => element.Key == user.Key);
@@ -394,7 +392,7 @@ public class OwnCloudMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
                     group.UsersGuidList = _migrationInfo.Users
@@ -435,7 +433,7 @@ public class OwnCloudMigration(
             }
             finally
             {
-                ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
+                await ReportProgress(GetProgress() + smallStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i, usersCount));
             }
             i++;
         }
@@ -447,6 +445,6 @@ public class OwnCloudMigration(
 
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersForImport.Count() - _migrationInfo.FailedUsers;
-        ReportProgress(100, MigrationResource.MigrationCompleted);
+        await ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 }

@@ -340,7 +340,30 @@ public record DownloadSession
     public Guid LinkId { get; init; }
 }
 
-public record ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey);
+[ProtoContract]
+public class ExternalSessionSnapshot
+{
+    public ExternalSessionSnapshot()
+    {
+        
+    }
+    
+    public ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey)
+    {
+        this.LinkId = LinkId;
+        this.SessionId = SessionId;
+        this.PasswordKey = PasswordKey;
+    }
+
+    [ProtoMember(1)]
+    public Guid LinkId { get; init; }
+    
+    [ProtoMember(2)]
+    public Guid SessionId { get; init; }
+    
+    [ProtoMember(3)]
+    public string PasswordKey { get; init; }
+}
 
 public enum Status
 {

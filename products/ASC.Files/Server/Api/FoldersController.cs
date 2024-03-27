@@ -97,7 +97,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     {
         await fileOperationsManager.PublishDelete(new List<T> { folderId }, new List<T>(), false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }

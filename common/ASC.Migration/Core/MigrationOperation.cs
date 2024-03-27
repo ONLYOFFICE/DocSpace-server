@@ -116,7 +116,7 @@ public class MigrationOperation(
             await tenantManager.SetCurrentTenantAsync(TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             migrator = migrationCore.GetMigrator(_migratorName);
-            migrator.OnProgressUpdate += Migrator_OnProgressUpdate;
+            migrator.OnProgressUpdate = Migrator_OnProgressUpdate;
 
             if (migrator == null)
             {
@@ -144,7 +144,6 @@ public class MigrationOperation(
         {
             if (migrator != null)
             {
-                migrator.OnProgressUpdate -= Migrator_OnProgressUpdate;
                 ImportedUsers = migrator.GetGuidImportedUsers();
                 LogName = migrator.GetLogName();
                 migrator.Dispose();
@@ -152,18 +151,18 @@ public class MigrationOperation(
             if (!CancellationToken.IsCancellationRequested) 
             {
                 IsCompleted = true;
-                PublishChanges();
+                await PublishChanges();
             }
         }
 
-        void Migrator_OnProgressUpdate(double arg1, string arg2)
+        async Task Migrator_OnProgressUpdate(double arg1, string arg2)
         {
             Percentage = arg1;
             if (migrator != null && migrator.ApiInfo != null)
             {
                 MigrationApiInfo = migrator.ApiInfo;
             }
-            PublishChanges();
+            await PublishChanges();
         }
     }
 

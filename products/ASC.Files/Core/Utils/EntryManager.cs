@@ -1086,7 +1086,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
 
                 linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-                linkedFile.FileStatus = sourceFile.FileStatus;
+                linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
                 linkedFile.ConvertedType = sourceFile.ConvertedType;
                 linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;
                 linkedFile.Encrypted = sourceFile.Encrypted;
@@ -1493,7 +1493,7 @@ public class EntryManager(IDaoFactory daoFactory,
             newFile.Version = currFile.Version + 1;
             newFile.VersionGroup = currFile.VersionGroup + 1;
             newFile.Title = FileUtility.ReplaceFileExtension(currFile.Title, FileUtility.GetFileExtension(file.Title));
-            newFile.FileStatus = currFile.FileStatus;
+            newFile.SetFileStatus(await currFile.GetFileStatus());
             newFile.ParentId = currFile.ParentId;
             newFile.CreateBy = currFile.CreateBy;
             newFile.CreateOn = currFile.CreateOn;

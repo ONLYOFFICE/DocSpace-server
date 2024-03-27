@@ -36,7 +36,7 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
                     : FileUtility.ReplaceFileExtension(file.PureTitle, fileUtility.GetInternalExtension(file.PureTitle));
     }
 
-    internal FileStatus GetFileStatus<T>(File<T> file, ref FileStatus currentStatus)
+    internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
         if (fileTracker.IsEditing(file.Id))
         {
@@ -48,7 +48,7 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
             currentStatus |= FileStatus.IsEditingAlone;
         }
 
-        if (fileConverter.IsConverting(file))
+        if (await fileConverter.IsConverting(file))
         {
             currentStatus |= FileStatus.IsConverting;
         }
