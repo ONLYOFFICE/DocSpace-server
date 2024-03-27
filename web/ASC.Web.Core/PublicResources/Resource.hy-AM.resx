@@ -621,9 +621,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Սեփականատեր</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Սկավառակի տարածքի սահմանաչափը գերազանցվել է</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Ամպային տարածք ձեր գրասենյակային փաստաթղթերի համար</value>
   </data>

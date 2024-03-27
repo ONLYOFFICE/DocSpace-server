@@ -903,9 +903,6 @@
   <data name="Owner" xml:space="preserve">
     <value>المالك</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة القرص</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>مساحة سحابية لمستندات مكتبك</value>
   </data>

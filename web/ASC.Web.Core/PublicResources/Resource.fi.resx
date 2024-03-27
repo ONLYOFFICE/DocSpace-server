@@ -946,9 +946,6 @@
   <data name="OrgServerRegion" xml:space="preserve">
     <value>ORG-alue</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Levytilan kiintiö ylitetty</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Pilvitila asiakirjoillesi</value>
   </data>

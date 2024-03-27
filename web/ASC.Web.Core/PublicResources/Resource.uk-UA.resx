@@ -868,9 +868,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Якщо користувач з адресою електронної пошти {0} існує, інструкцію щодо зміни пароля було надіслано на цю адресу.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту дискового простору</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Хмарний простір для ваших офісних документів</value>
   </data>
