@@ -45,7 +45,12 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles, TGroup>(M
     {
         _lastProgressUpdate = value;
         _lastStatusUpdate = status;
-        await OnProgressUpdate(value, status);
+
+        if (OnProgressUpdate != null)
+        {
+            await OnProgressUpdate(value, status);
+        }
+
         _logger.Log($"{value:0.00} progress: {status}");
     }
 

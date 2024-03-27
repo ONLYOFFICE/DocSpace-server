@@ -811,12 +811,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 foreach (var dbUser in groupMembersToRemove)
                 {
-                    await SetProgress(
-                        currentSource: string.Format("({0}/{1}): {2}, {3} ({4}/{5}): {6}", gIndex, gCount,
-                            dbLdapGroup.Name,
-                            _resource.LdapSettingsStatusRemovingGroupUser,
-                            ++index, count,
-                            userFormatter.GetUserName(dbUser)));
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}, {_resource.LdapSettingsStatusRemovingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(dbUser)}");
 
                     await userManager.RemoveUserFromGroupAsync(dbUser.Id, dbLdapGroup.ID);
                 }
@@ -826,22 +821,14 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 foreach (var userInfo in groupMembersToAdd)
                 {
-                    await SetProgress(
-                        currentSource:
-                        string.Format("({0}/{1}): {2}, {3} ({4}/{5}): {6}", gIndex, gCount,
-                            ldapGroup.Name,
-                            _resource.LdapSettingsStatusAddingGroupUser,
-                            ++index, count,
-                            userFormatter.GetUserName(userInfo)));
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
 
-                    await userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID);
-                }
+                    await userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID); }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
                     && groupMembersToAdd.Count == 0)
                 {
-                    await SetProgress(currentSource:
-                        $"({gIndex}/{gCount}): {dbLdapGroup.Name}");
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}");
 
                     await userManager.DeleteGroupAsync(dbLdapGroup.ID);
                 }
@@ -906,10 +893,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         foreach (var userInfo in ldapUsers)
         {
-            await SetProgress(Convert.ToInt32(percentage),
-                currentSource:
-                string.Format("({0}/{1}): {2}", ++index, count,
-                    userFormatter.GetUserName(userInfo)));
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
 
             switch (_operationType)
             {

@@ -192,7 +192,10 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     private async Task OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
-        await ProgressChanged(eventArgs);
+        if (ProgressChanged != null)
+        {
+            await ProgressChanged(eventArgs);
+        }
     }
 
     #endregion

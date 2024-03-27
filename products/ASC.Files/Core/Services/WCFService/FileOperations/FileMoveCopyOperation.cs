@@ -55,13 +55,13 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
         this.ResolveType = ResolveType;
     }
 
-    [ProtoMember(1)]
+    [ProtoMember(7)]
     public string DestFolderId { get; init; }
     
-    [ProtoMember(2)]
+    [ProtoMember(8)]
     public bool Copy { get; init; }
     
-    [ProtoMember(3)]
+    [ProtoMember(9)]
     public FileConflictResolveType ResolveType { get; init; }
 }
 

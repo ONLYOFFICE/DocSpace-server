@@ -46,10 +46,10 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
         BaseUri = baseUri;
     }
 
-    [ProtoMember(1)]
+    [ProtoMember(7)]
     public IEnumerable<FilesDownloadOperationItem<T>> FilesDownload { get; init; }
     
-    [ProtoMember(2)]
+    [ProtoMember(8)]
     public string BaseUri { get; init; }
 }
 
