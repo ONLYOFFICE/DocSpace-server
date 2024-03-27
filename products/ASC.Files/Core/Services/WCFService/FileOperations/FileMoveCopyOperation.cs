@@ -819,7 +819,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 newFile.ConvertedType = file.ConvertedType;
                                 newFile.Comment = FilesCommonResource.CommentOverwrite;
                                 newFile.Encrypted = file.Encrypted;
-                                newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+                                newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry ? Thumbnail.Creating : Thumbnail.Waiting;
 
 
                                 await using (var stream = await FileDao.GetFileStreamAsync(file))
@@ -829,7 +829,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFile = await fileDao.SaveFileAsync(newFile, stream);
                                 }
 
-                                if (file.ThumbnailStatus == Thumbnail.Created)
+                                if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
                                     foreach (var size in _thumbnailSettings.Sizes)
                                     {
