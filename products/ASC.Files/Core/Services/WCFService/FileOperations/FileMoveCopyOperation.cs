@@ -44,13 +44,7 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
         IDictionary<string, string> Headers = null,
         ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
     {
-        this.DestFolderId = DestFolderId.ValueKind switch
-        {
-            JsonValueKind.String => !int.TryParse(DestFolderId.GetString(), out var i) ? DestFolderId.GetString() : i.ToString(),
-            JsonValueKind.Number => DestFolderId.GetInt32().ToString(),
-            _ => this.DestFolderId
-        };
-
+        this.DestFolderId = DestFolderId.ToString();
         this.Copy = Copy;
         this.ResolveType = ResolveType;
     }
