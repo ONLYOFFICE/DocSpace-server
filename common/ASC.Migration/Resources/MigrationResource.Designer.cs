@@ -151,15 +151,6 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clearing temporary data.
-        /// </summary>
-        public static string ClearingTemporaryData {
-            get {
-                return ResourceManager.GetString("ClearingTemporaryData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Create file {0}.
         /// </summary>
         public static string CreateFile {
@@ -214,24 +205,6 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mail`s Contacts.
-        /// </summary>
-        public static string GoogleModuleNameContacts {
-            get {
-                return ResourceManager.GetString("GoogleModuleNameContacts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Google Drive`s Files.
-        /// </summary>
-        public static string GoogleModuleNameDocuments {
-            get {
-                return ResourceManager.GetString("GoogleModuleNameDocuments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Group migration {0} ({1}/{2}).
         /// </summary>
         public static string GroupMigration {
@@ -241,29 +214,11 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Migrating user contacts {0} ({1}/{2}).
-        /// </summary>
-        public static string MigratingUserContacts {
-            get {
-                return ResourceManager.GetString("MigratingUserContacts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Migrating user files {0} ({1}/{2}).
         /// </summary>
         public static string MigratingUserFiles {
             get {
                 return ResourceManager.GetString("MigratingUserFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Migration canceled.
-        /// </summary>
-        public static string MigrationCanceled {
-            get {
-                return ResourceManager.GetString("MigrationCanceled", resourceCulture);
             }
         }
         
@@ -282,15 +237,6 @@ namespace ASC.Migration.Core.Resources {
         public static string MigrationCompleted {
             get {
                 return ResourceManager.GetString("MigrationCompleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error while initializing {0} migrator.
-        /// </summary>
-        public static string MigrationInitException {
-            get {
-                return ResourceManager.GetString("MigrationInitException", resourceCulture);
             }
         }
         
@@ -318,114 +264,6 @@ namespace ASC.Migration.Core.Resources {
         public static string MigrationProjectFiles {
             get {
                 return ResourceManager.GetString("MigrationProjectFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parsing is still in progress.
-        /// </summary>
-        public static string MigrationStartException {
-            get {
-                return ResourceManager.GetString("MigrationStartException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Migration is already in progress.
-        /// </summary>
-        public static string MigrationUploadException {
-            get {
-                return ResourceManager.GetString("MigrationUploadException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Calendar.
-        /// </summary>
-        public static string ModuleNameCalendar {
-            get {
-                return ResourceManager.GetString("ModuleNameCalendar", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Groups.
-        /// </summary>
-        public static string ModuleNameGroups {
-            get {
-                return ResourceManager.GetString("ModuleNameGroups", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mail.
-        /// </summary>
-        public static string ModuleNameMail {
-            get {
-                return ResourceManager.GetString("ModuleNameMail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Users.
-        /// </summary>
-        public static string ModuleNameUsers {
-            get {
-                return ResourceManager.GetString("ModuleNameUsers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Contacts.
-        /// </summary>
-        public static string NextcloudModuleNameContacts {
-            get {
-                return ResourceManager.GetString("NextcloudModuleNameContacts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User`s Files.
-        /// </summary>
-        public static string NextcloudModuleNameDocuments {
-            get {
-                return ResourceManager.GetString("NextcloudModuleNameDocuments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Calendar.
-        /// </summary>
-        public static string OnlyofficeModuleNameCalendar {
-            get {
-                return ResourceManager.GetString("OnlyofficeModuleNameCalendar", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Documents.
-        /// </summary>
-        public static string OnlyofficeModuleNameDocuments {
-            get {
-                return ResourceManager.GetString("OnlyofficeModuleNameDocuments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mail.
-        /// </summary>
-        public static string OnlyofficeModuleNameMail {
-            get {
-                return ResourceManager.GetString("OnlyofficeModuleNameMail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to People.
-        /// </summary>
-        public static string OnlyofficeModuleNamePeople {
-            get {
-                return ResourceManager.GetString("OnlyofficeModuleNamePeople", resourceCulture);
             }
         }
         
@@ -466,29 +304,11 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User calendar migration {0} ({1}/{2}).
-        /// </summary>
-        public static string UserCalendarMigration {
-            get {
-                return ResourceManager.GetString("UserCalendarMigration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to User migration {0} ({1}/{2}).
         /// </summary>
         public static string UserMigration {
             get {
                 return ResourceManager.GetString("UserMigration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to import user: {0} ({1}/{2}).
-        /// </summary>
-        public static string UserSkipped {
-            get {
-                return ResourceManager.GetString("UserSkipped", resourceCulture);
             }
         }
         
