@@ -1907,9 +1907,9 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
 
-    public async Task RemoveSubjectAsync<T>(Guid subject, bool withoutOwner)
+    public Task RemoveSubjectAsync(Guid subject, bool withoutOwner)
     {
-        await daoFactory.GetSecurityDao<T>().RemoveBySubjectAsync(subject, withoutOwner);
+        return daoFactory.GetSecurityDao<int>().RemoveBySubjectAsync(subject, withoutOwner);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)

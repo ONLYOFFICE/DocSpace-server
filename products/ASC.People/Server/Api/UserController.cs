@@ -432,6 +432,7 @@ public class UserController(ICache cache,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
+        await fileSecurity.RemoveSubjectAsync(user.Id, true);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
@@ -819,6 +820,7 @@ public class UserController(ICache cache,
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
+            await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 

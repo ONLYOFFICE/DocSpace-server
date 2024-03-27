@@ -2272,7 +2272,7 @@ public class FileStorageService //: IFileStorageService
             await folderDao.DeleteFolderAsync(folderIdFromTrash);
         }
 
-        await fileSecurity.RemoveSubjectAsync<T>(userFromId, true);
+        await fileSecurity.RemoveSubjectAsync(userFromId, true);
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
