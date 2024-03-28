@@ -149,11 +149,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
-        }
-
         string strError = null;
         if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && await lockerManager.FileLockedForMeAsync(file.Id))
