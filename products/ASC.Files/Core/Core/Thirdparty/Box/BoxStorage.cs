@@ -172,8 +172,18 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
                 Id = parentId
             }
         };
+        
+        if (fileStream.CanSeek)
+        {
+            return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
+        }
+        
+        await using var tempBuffer = tempStream.Create();
+        await fileStream.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(0, SeekOrigin.Begin);
 
-        return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
+        return await _boxClient.FilesManager.UploadAsync(boxFileRequest, tempBuffer, _boxFields, setStreamPositionToZero: false);
     }
 
     public async Task DeleteItemAsync(BoxItem boxItem)
