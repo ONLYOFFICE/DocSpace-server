@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Vymazání dočasných dat</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Zpracování dat ...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Rozbor databáze</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Emailové kontakty</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Soubory na Disku Google</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Migrace skupiny {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migrace kontaktů uživatelů {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migrace uživatelských souborů {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migrace zrušena</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migrace dokončena</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalendář</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Skupiny</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Uživatelé</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kontakty</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Soubory uživatele</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Lidé</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalendář</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Příprava na migraci</value>
@@ -192,13 +147,7 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Rozbalování dokončeno...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Migrace uživatelského kalendáře {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migrace uživatelů {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Nepodařilo se importovat uživatele: {0} ({1}/{2})</value>
   </data>
 </root>

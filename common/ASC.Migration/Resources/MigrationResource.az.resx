@@ -117,41 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Təqvim</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Təqvim</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>İstifadəçilər</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>İstifadəçi Faylları</value>
-  </data>
   <data name="Unzipping" xml:space="preserve">
     <value>Açılır...</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>İnsanlar</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Poçt</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Poçt</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Poçt Əlaqələri</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Sənədlər</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Qruplar</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive Faylları</value>
   </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Məlumatların emalı...</value>
@@ -162,26 +129,11 @@
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>Məlumatların email tamamlandı</value>
   </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Əlaqələr</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Müvəqqəti məlumatların təmizlənməsi</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>İstifadəçi kontaktları köçürülür {0} ({1}/{2})</value>
-  </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>İstifadəçi faylları köçürülür {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Köçürülmə ləğv edildi</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Köçürülmə tamamlandı</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>İstifadəçini daxill etmək alınmadı: {0} ({1}/{2})</value>
   </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Qrup köçürməsi {0} ({1}/{2})</value>
@@ -194,9 +146,6 @@
   </data>
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Açılma tamamlandı...</value>
-  </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>İstifadəçi təqviminin köçürülməsi {0} ({1}/{2})</value>
   </data>
   <data name="UserMigration" xml:space="preserve">
     <value>İstifadəçi köçürülməsi {0} ({1}/{2})</value>

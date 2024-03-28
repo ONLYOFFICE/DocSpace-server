@@ -24,32 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
+namespace ASC.Migration.Core.Migrators.Provider.NC;
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
-
-/// <summary>
-/// 
-/// </summary>
-public class MigrationStatusDto
+internal class NCShare
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public double Progress { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Error { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public MigrationApiInfo ParseResult { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsCompleted { get; set; }
+    public int Id { get; set; }
+    public string ShareWith { get; set; }
+    public int Premissions { get; set; }
 }
+

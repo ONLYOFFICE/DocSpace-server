@@ -96,7 +96,7 @@ public class MigrationWorker(
         }
     }
 
-    public async Task<MigrationOperation> GetStatus(int tenantId)
+    public async Task<MigrationOperation> GetStatusAsync(int tenantId)
     {
         return (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
     }

@@ -63,10 +63,10 @@ public class MigrationOperation(
         }
     }
 
-    private List<Guid> _importedUsers;
-    public List<Guid> ImportedUsers
+    private List<string> _importedUsers;
+    public List<string> ImportedUsers
     {
-        get => _migrationApiInfo ?? System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(this[nameof(_importedUsers)]);
+        get => _importedUsers ?? System.Text.Json.JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
         set
         {
             _importedUsers = value;
@@ -102,7 +102,7 @@ public class MigrationOperation(
 
     protected override async Task DoJob()
     {
-        IMigration migrator = null;
+        Migrator migrator = null;
         try
         {
             var onlyParse = _migrationApiInfo == null;
@@ -116,7 +116,7 @@ public class MigrationOperation(
             await tenantManager.SetCurrentTenantAsync(TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             migrator = migrationCore.GetMigrator(_migratorName);
-            migrator.OnProgressUpdate = Migrator_OnProgressUpdate;
+            migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
 
             if (migrator == null)
             {
@@ -155,12 +155,12 @@ public class MigrationOperation(
             }
         }
 
-        async Task Migrator_OnProgressUpdate(double arg1, string arg2)
+        async Task Migrator_OnProgressUpdateAsync(double arg1, string arg2)
         {
             Percentage = arg1;
-            if (migrator != null && migrator.ApiInfo != null)
+            if (migrator != null && migrator.MigrationInfo != null)
             {
-                MigrationApiInfo = migrator.ApiInfo;
+                MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }
             await PublishChanges();
         }
