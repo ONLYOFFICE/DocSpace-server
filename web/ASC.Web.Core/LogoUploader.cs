@@ -75,7 +75,7 @@ public class LogoUploader
                 _ = reader.Read(data, 0, (int)logo.Length);
                 reader.Close();
 
-                if (logo.ContentType.Contains("image/x-icon"))
+                if (logo.ContentType.Contains("image/x-icon") || logo.ContentType.Contains("image/vnd.microsoft.icon"))
                 {
                     result.Success = true;
                     result.Message = await userPhotoManager.SaveTempPhoto(data, setupInfo.MaxImageUploadSize, "ico");
