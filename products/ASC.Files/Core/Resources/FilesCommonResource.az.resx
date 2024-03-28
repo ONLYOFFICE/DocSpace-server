@@ -181,9 +181,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl kopyalanmayacaq</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0} ölçüsündən böyük fayl redaktə edilməyəcək</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl köçürülməyəcək</value>
   </data>

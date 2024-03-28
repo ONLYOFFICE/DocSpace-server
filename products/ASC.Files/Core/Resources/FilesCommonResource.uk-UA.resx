@@ -157,9 +157,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Файл, більший за {0}, не буде скопійовано</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Файл, більший за {0}, не буде відреаговано</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл, більший за {0}, не буде переміщений</value>
   </data>
