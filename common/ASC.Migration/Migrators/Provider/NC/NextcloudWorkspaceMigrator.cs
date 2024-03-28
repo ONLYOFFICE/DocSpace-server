@@ -88,12 +88,18 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         try
         {
+            double progress = 5;
             try
             {
                 using (var archive = ZipFile.OpenRead(_takeout))
                 {
                     foreach (var entry in archive.Entries)
                     {
+                        if (reportProgress)
+                        {
+                            progress += 45d / archive.Entries.Count;
+                            await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                        }
                         if (string.IsNullOrEmpty(entry.Name))
                         {
                             Directory.CreateDirectory(Path.Combine(TmpFolder, entry.FullName));
@@ -121,7 +127,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
             if (reportProgress)
             {
-                await ReportProgressAsync(30, MigrationResource.UnzippingFinished);
+                await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
             var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
@@ -131,10 +137,10 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             if (reportProgress)
             {
-                await ReportProgressAsync(40, MigrationResource.DumpParse);
+                await ReportProgressAsync(60, MigrationResource.DumpParse);
             }
             var users = DbExtractUser(dbFile);
-            var progress = 40;
+            progress = 60;
             foreach (var user in users)
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -144,7 +150,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 if (reportProgress)
                 {
                     await ReportProgressAsync(progress, MigrationResource.DataProcessing);
-                    progress += 30 / users.Count;
+                    progress += 20 / users.Count;
                 }
                 if (!string.IsNullOrEmpty(user.Value.Info.FirstName))
                 {
@@ -195,7 +201,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             if (reportProgress)
             {
-                await ReportProgressAsync(80, MigrationResource.DataProcessing);
+                await ReportProgressAsync(90, MigrationResource.DataProcessing);
             }
             DbExtractGroup(dbFile);
         }
@@ -203,7 +209,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
-            await ReportProgressAsync(_lastProgressUpdate, error);
+            await ReportProgressAsync(100, error);
             throw new Exception(error);
         }
         if (reportProgress)
@@ -369,6 +375,10 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var drivePath = Directory.Exists(Path.Combine(rootFolder, "data", key, "files")) ?
             Path.Combine(rootFolder, "data", key, "files") : null;
+        if (drivePath == null)
+        {
+            return;
+        }
 
         var sqlFile = File.ReadAllText(dbFile);
 
