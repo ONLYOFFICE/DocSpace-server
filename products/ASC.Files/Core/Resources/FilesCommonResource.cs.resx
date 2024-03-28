@@ -160,9 +160,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Soubor větší než {0} nebude zkopírován</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Soubor větší než {0} nebude upraven</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Soubor větší než {0} nebude přesunut</value>
   </data>
@@ -408,7 +405,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Vyplnitelný dokument PDF je připraven. Je uložen v {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopie OFORM se vytvoří ve složce {0}. Vyplňte formulář a stáhněte si výsledek ve formátu PDF nebo DOCX.</value>
+    <value>Kopie PDF se vytvoří ve složce {0}. Vyplňte formulář a stáhněte si výsledek ve formátu PDF nebo DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Soubor již není návrhem pro vyplnění formuláře.</value>

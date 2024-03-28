@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,9 +65,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
         request.TryGetValue("uid", out var userIdKey);
         Guid.TryParse(userIdKey, out var userId);
 
-        request.TryGetValue("module", out var module);
         request.TryGetValue("first", out var first);
-        request.TryGetValue("sms", out var sms);
 
         return new EmailValidationKeyModel
         {
@@ -76,15 +74,13 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             Key = key,
             Type = cType,
             UiD = userId,
-            Module = module,
-            First = first,
-            Sms = sms
+            First = first
         };
     }
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, module, first, sms) = inDto;
+        var (key, emplType, email, uiD, type, first) = inDto;
 
         ValidationResult checkKeyResult;
 
@@ -155,7 +151,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
             case ConfirmType.Auth:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first + module + sms, key, provider.ValidAuthKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
 
             case ConfirmType.PortalContinue:

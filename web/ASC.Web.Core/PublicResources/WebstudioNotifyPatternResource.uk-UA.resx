@@ -132,19 +132,6 @@ $OrangeButton
 
 *Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни власника порталу протягом цього періоду.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Зміна адреси порталу
-
-Шановний $OwnerName,
-
-Було запропоновано змінити адресу порталу ${__VirtualRootPath}:"${__VirtualRootPath}" на "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Будь ласка, перейдіть за посиланням нижче, щоб підтвердити операцію:
-
-$OrangeButton
-
-*Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни адреси порталу протягом цього періоду.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -451,9 +438,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Зміна власника порталу</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
@@ -1087,7 +1071,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Вітаємо!
 
-Вас запросили приєднатися до кімнати $Message за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
+Вас запросили приєднатися до кімнати DocSpace за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
 
 $OrangeButton
 
@@ -1142,9 +1126,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Настроїти застосунок для аутентифікації</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Підтвердити зміну адреси порталу</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Підтвердити оновлення власника порталу</value>

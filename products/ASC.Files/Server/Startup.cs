@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage;
-using ASC.Web.Core;
 
 namespace ASC.Files;
 
@@ -50,15 +49,11 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(services);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 10;
-        });
+        services.RegisterQueue();
 
         DIHelper.TryAdd<FileHandlerService>();
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();
         DIHelper.TryAdd<DocuSignHandlerService>();
-        DIHelper.TryAdd<ThirdPartyAppHandlerService>();
         DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
@@ -77,6 +72,7 @@ public class Startup : BaseStartup
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
+        services.AddDocumentServiceHttpClient();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -95,13 +91,6 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseChunkedUploaderHandler();
-            });
-
-        app.MapWhen(
-                context => context.Request.Path.ToString().EndsWith("ThirdPartyApp", StringComparison.OrdinalIgnoreCase),
-            appBranch =>
-            {
-                appBranch.UseThirdPartyAppHandler();
             });
 
         app.MapWhen(

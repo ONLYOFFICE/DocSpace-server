@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,9 +41,6 @@ internal static partial class FactoryIndexerLogger
     
     [LoggerMessage(Level = LogLevel.Error, Message = "inner")]
     public static partial void ErrorInner(this ILogger logger, Exception exception);  
-    
-    [LoggerMessage(Level = LogLevel.Error, Message = "IndexAsync")]
-    public static partial void ErrorIndexAsync(this ILogger logger, Exception exception);
     
     [LoggerMessage(Level = LogLevel.Error, Message = "Update")]
     public static partial void ErrorUpdate(this ILogger logger, Exception exception);  

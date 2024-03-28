@@ -353,9 +353,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será copiado</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>O ficheiro é maior que {0}, ele não será editado</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será movido</value>
   </data>
@@ -405,7 +402,7 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
     <value>O documento preenchível PDF está pronto. Está guardado no ficheiro {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>A cópia OFORM foi criada na pasta {0}. Preencha o formulário e descarregue o resultado como ficheiro PDF ou DOCX.</value>
+    <value>A cópia PDF foi criada na pasta {0}. Preencha o formulário e descarregue o resultado como ficheiro PDF ou DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>O ficheiro já não é um rascunho para preencher o formulário.</value>

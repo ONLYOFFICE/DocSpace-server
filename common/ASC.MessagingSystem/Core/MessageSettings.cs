@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using System.Web;
 
 namespace ASC.MessagingSystem;
 
@@ -55,7 +57,7 @@ public class MessageSettings
 
         var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
 
-        if (!headers.TryGetValue(XRealIPHeader, out var header))
+        if (!headers.TryGetValue(XRealIPHeader, out _))
         {
             var remoteIpAddress = GetIP(request);
 
@@ -70,6 +72,13 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
+        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
@@ -90,7 +99,14 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
-        return request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)

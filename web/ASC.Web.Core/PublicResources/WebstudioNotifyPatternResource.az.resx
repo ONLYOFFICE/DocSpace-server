@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Təsdiq edin</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Portal Ünvanının Dəyişdirilməsini Təsdiq Edin</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Portal Sahibinin Yenilənməsini Təsdiq Edin</value>
   </data>
@@ -217,19 +214,6 @@ Salam, $OwnerName,
 $OrangeButton
 
 *Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal sahibinin dəyişdirilməsi prosesini tamamlayın.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Portal ünvanının dəyişdirilməsi
-
-Salam, $OwnerName,
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portal ünvanını "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end olaraq dəyişdirmək üçün sorğu göndərilib.
-
-Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal ünvanının dəyişdirilməsi prosesini tamamlayın.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ə qoşulun
@@ -847,9 +831,6 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Portal sahibinin dəyişdirilməsi</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Portal ünvanının dəyişdirilməsi</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>${__VirtualRootPath}-a qoşulun</value>
@@ -1539,7 +1520,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Salam!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında $Message otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
+"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında DocSpace otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
 $OrangeButton
 

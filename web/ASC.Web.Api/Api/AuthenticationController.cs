@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
@@ -37,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [AllowAnonymous]
+[WebhookDisable]
 public class AuthenticationController(UserManager userManager,
         TenantManager tenantManager,
         SecurityContext securityContext,
@@ -49,12 +52,10 @@ public class AuthenticationController(UserManager userManager,
         ProviderManager providerManager,
         AccountLinker accountLinker,
         CoreBaseSettings coreBaseSettings,
-        PersonalSettingsHelper personalSettingsHelper,
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         UserHelpTourHelper userHelpTourHelper,
         Signature signature,
-        InstanceCrypto instanceCrypto,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         MessageTarget messageTarget,
         StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
@@ -73,6 +74,7 @@ public class AuthenticationController(UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILogger<AuthenticationController> logger,
         InvitationLinkService invitationLinkService,
+        LoginProfileTransport loginProfileTransport,
         IMapper mapper)
     : ControllerBase
 {
@@ -280,7 +282,8 @@ public class AuthenticationController(UserManager userManager,
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
-        await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -294,7 +297,7 @@ public class AuthenticationController(UserManager userManager,
 
         if (!string.IsNullOrEmpty(user.SsoNameId))
         {
-            var settings = settingsManager.Load<SsoSettingsV2>();
+            var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
 
             if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
             {
@@ -409,7 +412,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 var email = inDto.ConfirmData.Email;
 
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First + inDto.ConfirmData.Module + inDto.ConfirmData.Sms, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
@@ -449,9 +452,11 @@ public class AuthenticationController(UserManager userManager,
                     }
                 }
 
-                var requestIp = MessageSettings.GetIP(Request);
-
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
+                    await userManager.GetUsersByPasswordHashAsync(
+                    await tenantManager.GetCurrentTenantIdAsync(),
+                    inDto.UserName,
+                    inDto.PasswordHash));
             }
             else
             {
@@ -462,12 +467,12 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
+                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
-
-                user = await GetUserByThirdParty(thirdPartyProfile);
+                
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
@@ -539,8 +544,7 @@ public class AuthenticationController(UserManager userManager,
                 //}
 
                 await studioNotifyService.UserHasJoinAsync();
-                userHelpTourHelper.IsNewUser = true;
-                personalSettingsHelper.IsNewUser = true;
+                await userHelpTourHelper.SetIsNewUser(true); 
             }
 
             return userInfo;
@@ -554,7 +558,7 @@ public class AuthenticationController(UserManager userManager,
         }
     }
 
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
+        private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
         {
@@ -614,7 +618,6 @@ public class AuthenticationController(UserManager userManager,
 
         return userInfo;
     }
-
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;

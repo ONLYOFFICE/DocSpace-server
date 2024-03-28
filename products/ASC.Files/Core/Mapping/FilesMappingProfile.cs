@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,13 +32,13 @@ public class FilesMappingProfile : Profile
 {
     public FilesMappingProfile()
     {
-        CreateMap(typeof(Configuration<>), typeof(ConfigurationDto<>));
-
         CreateMap<DbFile, File<int>>();
 
         CreateMap<DbFileQuery, File<int>>()
                 .ForMember(r => r.CreateOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.CreateOn))
                 .ForMember(r => r.ModifiedOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.ModifiedOn))
+                .ForMember(r => r.LastOpened, r => r.ConvertUsing<TenantDateTimeConverter, DateTime?>(s => s.LastOpened))
+                .ForMember(r => r.ShareRecord, r => r.MapFrom(f => f.SharedRecord))
                 .IncludeMembers(r => r.File)
                 .ConstructUsingServiceLocator();
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,6 +64,18 @@ public class TimeZoneConverter
         }
 
         return displayName;
+    }
+
+    public string GetIanaTimeZoneId(TimeZoneInfo timeZone)
+    {
+        if (timeZone.HasIanaId)
+        {
+            return timeZone.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZone.Id, out var ianaTimeZoneId)
+            ? ianaTimeZoneId
+            : WindowsTzId2OlsonTzId(timeZone.Id);
     }
 
     public string OlsonTzId2WindowsTzId(string olsonTimeZoneId, bool defaultIfNoMatch = true)

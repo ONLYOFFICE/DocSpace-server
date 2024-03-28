@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,8 +69,11 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to recreate channel, trying again")]
     public static partial void ErrorCreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Recreating RabbitMQ consumer channel")]
-    public static partial void WarningRecreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger, Exception exception);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: Consumer channel callback exception")]
+    public static partial void WarningCallbackException(this ILogger<EventBusRabbitMQ> logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: Recreating consumer channel ")]
+    public static partial void WarningRecreatingChannel(this ILogger<EventBusRabbitMQ> logger);
 
     [LoggerMessage(Level = LogLevel.Trace, Message = "Processing RabbitMQ event: {eventName}")]
     public static partial void TraceProcessingEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
@@ -89,4 +92,7 @@ internal static partial class EventBusRabbitMQLogger
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: nack event: {eventName}")]
     public static partial void DebugNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: model is shutdown: {cause}")]
+    public static partial void WarningModelIsShutdown(this ILogger<EventBusRabbitMQ> logger, string cause, Exception exception);
 }

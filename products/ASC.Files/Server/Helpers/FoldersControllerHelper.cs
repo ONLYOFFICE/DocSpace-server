@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,14 +50,14 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
 {
     public async Task<FolderDto<T>> CreateFolderAsync<T>(T folderId, string title)
     {
-        var folder = await _fileStorageService.CreateNewFolderAsync(folderId, title);
+        var folder = await _fileStorageService.CreateFolderAsync(folderId, title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, string[] extension = null)
+    public async Task<FolderContentDto<T>> GetFolderAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -101,7 +101,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(_apiContext.SortBy, true, out var sortBy))
@@ -111,7 +111,7 @@ public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
 
         var startIndex = Convert.ToInt32(_apiContext.StartIndex);
         var items = await _fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(_apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), _apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
-            roomId: roomId, applyFilterOption: applyFilterOption);
+            roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea);
 
         return await _folderContentDtoHelper.GetAsync(folderId, items, startIndex);
     }

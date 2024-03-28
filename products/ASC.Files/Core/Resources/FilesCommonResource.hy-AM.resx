@@ -252,9 +252,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}-ից մեծ ֆայլը չի պատճենվի</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}-ից մեծ ֆայլը չի խմբագրվի</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}-ից մեծ ֆայլը չի տեղափոխվի</value>
   </data>
@@ -415,7 +412,7 @@
     <value>Լրացվող PDF փաստաթուղթը պատրաստ է: Այն պահվում է {0}-ում</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM-ի պատճենը ստեղծվում է {0} պանակում: Խնդրում ենք լրացնել ձևը և ներբեռնել արդյունքը որպես PDF կամ DOCX ֆայլ.</value>
+    <value>PDF-ի պատճենը ստեղծվում է {0} պանակում: Խնդրում ենք լրացնել ձևը և ներբեռնել արդյունքը որպես PDF կամ DOCX ֆայլ.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Ֆայլն այլևս ձևանմուշ չէ ձևը լրացնելու համար.</value>

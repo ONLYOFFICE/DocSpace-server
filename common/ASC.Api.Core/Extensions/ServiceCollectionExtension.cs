@@ -1,32 +1,33 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Apache.NMS;
-using ASC.EventBus.Serializers;
 
+using ASC.Common.Data;
+using ASC.EventBus.Serializers;
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -39,9 +40,7 @@ public static class ServiceCollectionExtension
 
         if (redisConfiguration != null)
         {
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => {
-                return new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() };
-            });
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
@@ -288,20 +287,44 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+
+    private static readonly List<string> _registeredActivePassiveHostedService = new();
+    private static readonly object _locker = new();
+
     /// <remarks>
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper) where T : class, IHostedService
+    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
+                                                                                          IConfiguration configuration,
+                                                                                          string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
+        var typeName = workerTypeName ?? typeof(T).GetFormattedName();
+
+        lock (_locker)
+        {
+            if (_registeredActivePassiveHostedService.Contains(typeName))
+            {
+                throw new Exception($"Sevice with name '{typeName}' already registered. Please, rename service name");
+            }
+            else
+            {
+                _registeredActivePassiveHostedService.Add(typeName);
+            }
+        }
+
         diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
         diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
-
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
+        services.Configure<InstanceWorkerOptions<T>>(x =>
+        {
+            configuration.GetSection("core:hosting").Bind(x);
+            x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
+        });
+
 
         diHelper.TryAdd<T>();
         services.AddHostedService<T>();
-
     }
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)

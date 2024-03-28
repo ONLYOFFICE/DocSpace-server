@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,6 +90,10 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.String, System</type>
     public string Notes { get; set; }
 
+    /// <summary>Original size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarOriginal { get; set; }
+
     /// <summary>Maximum size avatar</summary>
     /// <type>System.String, System</type>
     public string AvatarMax { get; set; }
@@ -152,12 +156,16 @@ public class EmployeeFullDto : EmployeeDto
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>
-    public long QuotaLimit { get; set; }
+    public long? QuotaLimit { get; set; }
 
     /// <summary>Portal used space</summary>
     /// <type>System.Double, System</type>
-    public double UsedSpace { get; set; }
+    public double? UsedSpace { get; set; }
     public bool? Shared { get; set; }
+
+    /// <summary>Specifies if the user has a custom quota or not.</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsCustomQuota { get; set; }
 
     public static new EmployeeFullDto GetSample()
     {
@@ -166,6 +174,7 @@ public class EmployeeFullDto : EmployeeDto
             Avatar = "url to big avatar",
             AvatarSmall = "url to small avatar",
             AvatarMax = "url to max avatar",
+            AvatarOriginal = "url to original avatar",
             Contacts = [Contact.GetSample()],
             Email = "my@gmail.com",
             FirstName = "Mike",
@@ -196,6 +205,7 @@ public class EmployeeFullDto : EmployeeDto
 public class EmployeeFullDtoHelper(
         ApiContext httpContext,
         UserManager userManager,
+        AuthContext authContext,
         UserPhotoManager userPhotoManager,
         WebItemSecurity webItemSecurity,
         CommonLinkUtility commonLinkUtility,
@@ -205,8 +215,9 @@ public class EmployeeFullDtoHelper(
         SettingsManager settingsManager,
         IQuotaService quotaService,
         TenantManager tenantManager,
+        CoreBaseSettings coreBaseSettings,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
+    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
     public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     {
@@ -253,7 +264,7 @@ public class EmployeeFullDtoHelper(
 
         await FillGroupsAsync(result, userInfo);
 
-        var photoData = await  _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
+        var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
 
         if (photoData != null)
         {
@@ -269,7 +280,7 @@ public class EmployeeFullDtoHelper(
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+
         var result = new EmployeeFullDto
         {
             UserName = userInfo.UserName,
@@ -293,13 +304,20 @@ public class EmployeeFullDtoHelper(
 
         await InitAsync(result, userInfo);
 
-        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-
-        if (quotaSettings.EnableUserQuota)
+        if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || userInfo.Id == _authContext.CurrentAccount.ID))
         {
-            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-            var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-            result.QuotaLimit = userQuotaSettings?.UserQuota ?? quotaSettings.DefaultUserQuota;
+            var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            if (quotaSettings.EnableQuota)
+            {
+                var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
+
+                result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
+
+                result.QuotaLimit = userQuotaSettings != null ?
+                                    userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
+                                    : quotaSettings.DefaultQuota;
+            }
         }
 
         if (userInfo.Sex.HasValue)
@@ -333,6 +351,11 @@ public class EmployeeFullDtoHelper(
         await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
+
+        if (_httpContext.Check("avatarOriginal"))
+        {
+            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        }
 
         if (_httpContext.Check("avatarMax"))
         {

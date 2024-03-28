@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,12 +75,14 @@ public class EmployeeDtoHelper(
     UserPhotoManager userPhotoManager,
     CommonLinkUtility commonLinkUtility,
     UserManager userManager,
+    AuthContext authContext,
     ILogger<EmployeeDtoHelper> logger)
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
     protected readonly ApiContext _httpContext = httpContext;
     protected  readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected  readonly UserManager _userManager = userManager;
+    protected  readonly AuthContext _authContext = authContext;
     
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {

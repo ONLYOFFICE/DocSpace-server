@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,16 +61,23 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
         var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
             key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
-        if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
+        if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
-            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
-                key, emailValidationKeyProvider.ValidEmailKeyInterval);
+            validationResult.Result = commonLinkResult;
+            validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.LinkInvite;
+
+            return validationResult;
         }
+
+        commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
+            key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             validationResult.Result = commonLinkResult;
             validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.EmpInvite;
 
             return validationResult;
         }
@@ -84,6 +91,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
 
         validationResult.Result = individualLinkResult;
         validationResult.LinkType = InvitationLinkType.Individual;
+        validationResult.ConfirmType = ConfirmType.LinkInvite;
 
         return validationResult;
     }
@@ -105,7 +113,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
             return EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var visitMessage = await GetLinkVisitMessageAsync(email, key);
+        var visitMessage = await GetLinkVisitMessageAsync(user.TenantId, email, key);
 
         if (visitMessage == null)
         {
@@ -126,14 +134,14 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
         return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
-    private async Task<DbAuditEvent> GetLinkVisitMessageAsync(string email, string key)
+    private async Task<DbAuditEvent> GetLinkVisitMessageAsync(int tenantId, string email, string key)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var target = messageTarget.Create(email);
         var description = JsonSerializer.Serialize(new[] { key });
 
-        var message = await Queries.AuditEventsAsync(context, target.ToString(), description);
+        var message = await Queries.AuditEventsAsync(context, tenantId, target.ToString(), description);
 
         return message;
     }
@@ -157,14 +165,16 @@ public enum InvitationLinkType
 public class LinkValidationResult
 {
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
+    public ConfirmType? ConfirmType { get; set; }
     public InvitationLinkType LinkType { get; set; }
     public Guid LinkId { get; set; }
 }
 
 static file class Queries
 {
-    public static readonly Func<MessagesContext, string, string, Task<DbAuditEvent>> AuditEventsAsync =
+    public static readonly Func<MessagesContext, int, string, string, Task<DbAuditEvent>> AuditEventsAsync =
         EF.CompileAsyncQuery(
-            (MessagesContext ctx, string target, string description) =>
-                ctx.AuditEvents.FirstOrDefault(a => a.Target == target && a.DescriptionRaw == description));
+            (MessagesContext ctx, int tenantId, string target, string description) =>
+                ctx.AuditEvents.FirstOrDefault(a => 
+                    a.TenantId == tenantId && a.Action == (int)MessageAction.RoomInviteLinkUsed && a.Target == target && a.DescriptionRaw == description));
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class TransferPortalTask(DbFactory dbFactory,
         StorageFactoryConfig storageFactoryConfig,
         ModuleProvider moduleProvider,
         TempStream tempStream,
-        TempPath tempPath)
+        AscDistributedCache cache)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public const string DefaultDirectoryName = "backup";
@@ -81,7 +81,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             var backupTask = serviceProvider.GetService<BackupPortalTask>();
             backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath), false);
             backupTask.ProcessStorage = false;
-            backupTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
+            backupTask.ProgressChanged = (args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 backupTask.IgnoreModule(moduleName);
@@ -92,7 +92,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             var restoreTask = serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
-            restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
+            restoreTask.ProgressChanged = (args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 restoreTask.IgnoreModule(moduleName);
@@ -145,7 +145,7 @@ public class TransferPortalTask(DbFactory dbFactory,
         {
             var baseStorage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
             var destStorage = await StorageFactory.GetStorageAsync(columnMapper.GetTenantMapping(), group.Key, ToRegion);
-            var utility = new CrossModuleTransferUtility(options, tempStream, tempPath, baseStorage, destStorage);
+            var utility = new CrossModuleTransferUtility(options, tempStream, baseStorage, destStorage, cache);
 
             foreach (var file in group)
             {
@@ -168,12 +168,12 @@ public class TransferPortalTask(DbFactory dbFactory,
                     options.WarningCantAdjustFilePath(file.Path);
                 }
             }
-            SetCurrentStepProgress((int)(++groupsProcessed * 100 / (double)fileGroups.Count));
+            await SetCurrentStepProgress((int)(++groupsProcessed * 100 / (double)fileGroups.Count));
         }
 
         if (fileGroups.Count == 0)
         {
-            SetStepCompleted();
+            await SetStepCompleted();
         }
 
         options.DebugEndTransferStorage();

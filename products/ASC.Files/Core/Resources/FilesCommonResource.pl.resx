@@ -157,9 +157,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Pliki większe niż {0} nie będą skopiowane</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Pliki większe niż {0} nie będą edytowane</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Pliki większe niż {0} nie zostaną przeniesione</value>
   </data>
@@ -404,7 +401,7 @@
     <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopia OFORM jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
+    <value>Kopia PDF jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Plik nie jest już wersją roboczą umożliwiającą wypełnienie formularza.</value>

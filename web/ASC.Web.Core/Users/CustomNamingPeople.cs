@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -159,31 +159,28 @@ public class CustomNamingPeople(SettingsManager settingsManager)
 
     private static readonly List<PeopleNamesItem> _items = new();
 
-    public PeopleNamesItem Current
+    public async Task<PeopleNamesItem> GetCurrent()
     {
-        get
-        {
-            var settings = settingsManager.Load<PeopleNamesSettings>();
-            return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
-                settings.Item :
-                GetPeopleNames(settings.ItemId);
-        }
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
+        return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ? 
+            settings.Item : 
+            await GetPeopleNames(settings.ItemId);
     }
 
-    public string Substitute<T>(string resourceKey) where T : class
+    public async Task<string> Substitute<T>(string resourceKey) where T : class
     {
         var prop = typeof(T).GetProperty(resourceKey, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         if (prop != null)
         {
             var text = (string)prop.GetValue(null, null);
-            return Substitute(text);
+            return await Substitute(text);
         }
         return null;
     }
 
-    public string Substitute(string text)
+    private async Task<string> Substitute(string text)
     {
-        return SubstituteGuest(SubstituteUserPost(SubstituteRegDate(SubstituteGroupHead(SubstitutePost(SubstituteGroup(SubstituteUser(text)))))));
+        return await SubstituteGuest(await SubstituteUserPost(await SubstituteRegDate(await SubstituteGroupHead(await SubstitutePost(await SubstituteGroup(await SubstituteUser(text)))))));
     }
 
     public Dictionary<string, string> GetSchemas()
@@ -224,11 +221,11 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return _items.Find(i => i.Id.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private PeopleNamesItem GetPeopleNames(string schemaId)
+    private async Task<PeopleNamesItem> GetPeopleNames(string schemaId)
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = settingsManager.Load<PeopleNamesSettings>();
+            var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
             var result = settings.Item ?? new PeopleNamesItem
             {
                 Id = PeopleNamesItem.CustomID,
@@ -310,9 +307,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         }
     }
 
-    private string SubstituteUser(string text)
+    private async Task<string> SubstituteUser(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -324,9 +321,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstituteGroup(string text)
+    private async Task<string> SubstituteGroup(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -338,9 +335,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstituteGuest(string text)
+    private async Task<string> SubstituteGuest(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -352,9 +349,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstitutePost(string text)
+    private async Task<string> SubstitutePost(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -364,9 +361,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstituteGroupHead(string text)
+    private async Task<string> SubstituteGroupHead(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -376,9 +373,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstituteRegDate(string text)
+    private async Task<string> SubstituteRegDate(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text
@@ -388,9 +385,9 @@ public class CustomNamingPeople(SettingsManager settingsManager)
         return text;
     }
 
-    private string SubstituteUserPost(string text)
+    private async Task<string> SubstituteUserPost(string text)
     {
-        var item = Current;
+        var item = await GetCurrent();
         if (item != null)
         {
             return text

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,7 @@ internal class SharePointDaoBase(
     : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
         dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
 {
+    private readonly TenantManager _tenantManager = tenantManager;
     internal SharePointProviderInfo SharePointProviderInfo { get; private set; }
 
     public void Init(string pathPrefix, IProviderInfo<File, Folder, ClientObject> providerInfo)
@@ -124,6 +125,7 @@ internal class SharePointDaoBase(
             return;
         }
 
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -132,7 +134,7 @@ internal class SharePointDaoBase(
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
 
-            var oldIds = Queries.IdsAsync(dbContext, TenantId, oldValue);
+            var oldIds = Queries.IdsAsync(dbContext, tenantId, oldValue);
 
             await foreach (var oldId in oldIds)
             {
@@ -140,7 +142,7 @@ internal class SharePointDaoBase(
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
                 {
                     TenantId = m.TenantId,
@@ -152,7 +154,7 @@ internal class SharePointDaoBase(
                 await dbContext.AddRangeAsync(mappingForInsert);
 
                 var securityForDelete =
-                    await Queries.DbFilesSecuritiesAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                    await Queries.DbFilesSecuritiesAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
                 {
@@ -169,7 +171,7 @@ internal class SharePointDaoBase(
                 await dbContext.AddRangeAsync(securityForInsert);
 
                 var linkForDelete =
-                    await Queries.DbFilesTagLinksAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                    await Queries.DbFilesTagLinksAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
                 {

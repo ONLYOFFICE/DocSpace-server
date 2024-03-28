@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         SettingsManager settingsManager,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext,
+        ConfigurationConverter<int> configurationConverter)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -48,64 +48,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         SettingsManager settingsManager,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
-        ThirdPartySelector thirdPartySelector,
-        IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
-{
-    /// <summary>
-    /// Opens a third-party file with the ID specified in the request for editing.
-    /// </summary>
-    /// <short>
-    /// Open a third-party file
-    /// </short>
-    /// <category>Third-party integration</category>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Web.Files.Services.DocumentService.Configuration, ASC.Files.Core">Configuration parameters</returns>
-    /// <path>api/2.0/files/file/app-{fileId}/openedit</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
-    [AllowNotPayment]
-    [HttpGet("app-{fileId}/openedit")]
-    public async Task<Configuration<string>> OpenEditThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        var configuration = docParams.Configuration;
-        configuration.Document.Url = app.GetFileStreamUrl(file);
-        configuration.Document.Info.Favorite = null;
-        configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.Desktop;
-
-        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
-        {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
-            if (keyPair != null)
-            {
-                configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
-                {
-                    PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey
-                };
-            }
-        }
-
-        if (!file.Encrypted && !file.ProviderEntry)
-        {
-            await _entryManager.MarkAsRecent(file);
-        }
-
-        configuration.Token = _documentServiceHelper.GetSignature(configuration);
-
-        return configuration;
-    }
-}
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext,
+        ConfigurationConverter<string> configurationConverter)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -113,11 +61,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         SettingsManager settingsManager,
         EntryManager entryManager,
         IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext,
+        ConfigurationConverter<T> configurationConverter)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
@@ -186,6 +134,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.String, System" name="doc">Shared token</param>
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
+    /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type</param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -194,12 +143,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType)
     {
         var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
-        configuration.EditorType = EditorType.Desktop;
+        configuration.EditorType = editorType;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -214,16 +163,23 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        if (!file.Encrypted && !file.ProviderEntry)
+        var result = await configurationConverter.Convert(configuration, file);
+        
+        if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
+            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
         {
-            await _entryManager.MarkAsRecent(file);
+            var linkId = await externalShare.GetLinkIdAsync();
+
+            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
+            {
+                await _entryManager.MarkAsRecentByLink(file, linkId);
+            }
+            else
+            {
+                await _entryManager.MarkAsRecent(file);
+            }
         }
-
-        configuration.Token = _documentServiceHelper.GetSignature(configuration);
-
-        var result = mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
-        result.EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
-        result.File = await _fileDtoHelper.GetAsync(file);
+        
         return result;
     }
 
@@ -315,11 +271,20 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
+        var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
+        var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
+        var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+
+        if (!ValidateUrl(inDto.DocServiceUrl) ||
+            !ValidateUrl(inDto.DocServiceUrlInternal) ||
+            !ValidateUrl(inDto.DocServiceUrlPortal))
+        {
+            throw new Exception("Invalid input urls");
+        }
+
         filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
         filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
         filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
-
-        await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -328,9 +293,34 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
-        await documentServiceConnector.CheckDocServiceUrlAsync();
+        try
+        {        
+            await documentServiceConnector.CheckDocServiceUrlAsync();
+
+            await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+        }
+        catch (Exception)
+        {        
+            filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
+            filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
+            filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+          
+            throw new Exception("Unable to establish a connection with the Document Server.");
+        }
 
         return await GetDocServiceUrlAsync(false);
+
+        bool ValidateUrl(string url)
+        {
+            var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
+
+            if (uri == null || uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
+            {
+                return false;
+            }
+
+            return success;
+        }
     }
 
     /// <summary>

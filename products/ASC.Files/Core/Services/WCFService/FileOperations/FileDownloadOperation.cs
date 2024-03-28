@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,46 +26,62 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
-        IDictionary<string, StringValues> headers,
-        ExternalShareData externalShareData, bool holdResult = true)
-    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+[ProtoContract]
+public record FileDownloadOperationData<T> : FileOperationData<T>
 {
-    public Dictionary<T, string> FilesDownload { get; } = files;
-    public IDictionary<string, StringValues> Headers { get; } = headers;
-}
-
-[Transient]
-class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
-{
-    public FileDownloadOperation(IServiceProvider serviceProvider, TempStream tempStream, string baseUri, FileOperation<FileDownloadOperationData<string>, string> f1, FileOperation<FileDownloadOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
+    public FileDownloadOperationData()
     {
-        _tempStream = tempStream;
-        _baseUri = baseUri;
-        this[OpType] = (int)FileOperationType.Download;
+        
+    }
+    
+    public FileDownloadOperationData(IEnumerable<T> folders,
+        IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
+        int tenantId,
+        IDictionary<string, string> headers,
+        ExternalSessionSnapshot sessionSnapshot,
+        string baseUri =  null,
+        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, headers, sessionSnapshot, holdResult)
+    {
+        FilesDownload = filesDownload;
+        BaseUri = baseUri;
     }
 
-    private readonly TempStream _tempStream;
-    private readonly string _baseUri;
+    [ProtoMember(7)]
+    public IEnumerable<FilesDownloadOperationItem<T>> FilesDownload { get; init; }
+    
+    [ProtoMember(8)]
+    public string BaseUri { get; init; }
+}
 
+public record FilesDownloadOperationItem<T>(T Id, string Ext);
+
+[Transient]
+public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
+{    
+    protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
+    
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
+        DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
+
         await base.RunJob(distributedTask, cancellationToken);
 
-        await using var scope = ThirdPartyOperation.CreateScopeAsync();
+        await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
         var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
         var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
-        var stream = _tempStream.Create();
+        var tempStream = scope.ServiceProvider.GetService<TempStream>();
+        var stream = tempStream.Create();
 
-        if (!string.IsNullOrEmpty(_baseUri))
+        var baseUri = Data?.BaseUri ?? ThirdPartyData?.BaseUri;
+        if (!string.IsNullOrEmpty(baseUri))
         {
             var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
-            commonLinkUtility.ServerUri = _baseUri;
+            commonLinkUtility.ServerUri = baseUri;
         }
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
@@ -79,7 +95,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
-                archiveExtension = zip.ArchiveExtension;
+                archiveExtension = await zip.GetArchiveExtension();
             }
 
             stream.Position = 0;
@@ -89,24 +105,24 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
             if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
-                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
-                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
+                fileName = $@"{(thirdPartyFolderOnly ?
+                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
+                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title)}{archiveExtension}";
             }
             else
             {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
+                fileName = $@"{(await tenantManager.GetCurrentTenantAsync()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
             string path;
             string sessionKey = null;
 
-            var isAuthenticated = _principal.Identity is IAccount;
+            var isAuthenticated = _principal?.Identity is IAccount { IsAuthenticated: true };
 
             if (isAuthenticated)
             {
-                path = string.Format(@"{0}\{1}", ((IAccount)_principal.Identity).ID, fileName);
+                path = $@"{((IAccount)_principal.Identity).ID}\{fileName}";
             }
             else
             {
@@ -143,10 +159,10 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         }
 
         this[Finish] = true;
-        PublishChanges();
+        await PublishChanges();
     }
 
-    public override void PublishChanges(DistributedTask task)
+    protected override async Task PublishChanges(DistributedTask task)
     {
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
@@ -169,8 +185,8 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
         var progress = (int)(this[Process] / (double)progressSteps * 100);
 
-        this[Progress] = progress;
-        PublishChanges();
+        this[Progress] = progress < 100 ? progress : 100;
+        await PublishChanges();
     }
 }
 
@@ -183,8 +199,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
-        _files = fileDownloadOperationData.FilesDownload;
-        _headers = fileDownloadOperationData.Headers;
+        _files = fileDownloadOperationData.FilesDownload.ToDictionary(r => r.Id, r => r.Ext);
+        _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }
 
@@ -213,15 +229,15 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         Total = _entriesPathId.Count;
 
-        PublishChanges();
+        await PublishChanges();
 
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         foreach (var file in filesForSend)
         {
             var key = file.Id;
-            if (_files.ContainsKey(key) && !string.IsNullOrEmpty(_files[key]))
+            if (_files.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
             {
-                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, value);
             }
             else
             {
@@ -347,13 +363,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
         using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
-        compressTo.SetStream(stream);
+        await compressTo.SetStream(stream);
 
         foreach (var path in _entriesPathId.AllKeys)
         {
             if (string.IsNullOrEmpty(path))
             {
-                ProgressStep();
+                await ProgressStep();
                 continue;
             }
 
@@ -403,7 +419,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                 if (!Equals(entryId, default(T)))
                 {
-                    compressTo.CreateEntry(newTitle, file.ModifiedOn);
+                    await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
                         await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
@@ -414,11 +430,11 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                             
                         while (!t.IsCompleted)
                         {
-                            PublishChanges();
+                            await PublishChanges();
                             await Task.Delay(100);
                         }
                         
-                        compressTo.CloseEntry();
+                        await compressTo.CloseEntry();
                     }
                     catch (Exception ex)
                     {
@@ -429,9 +445,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 }
                 else
                 {
-                    compressTo.CreateEntry(newTitle);
-                    compressTo.PutNextEntry();
-                    compressTo.CloseEntry();
+                    await compressTo.CreateEntry(newTitle);
+                    await compressTo.PutNextEntry();
+                    await compressTo.CloseEntry();
                 }
 
                 counter++;
@@ -446,7 +462,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 }
             }
 
-            ProgressStep();
+            await ProgressStep();
         }
     }
 
@@ -464,8 +480,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
-            entriesPathId.Add(newtitle, ids);
+            var newTitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
+            entriesPathId.Add(newTitle, ids);
         }
     }
 }

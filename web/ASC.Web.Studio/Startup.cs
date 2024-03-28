@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.VirtualRooms;
+using ASC.Migration.Core.Models.Api;
 
 namespace ASC.Web.Studio;
+
 public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
@@ -40,6 +41,14 @@ public class Startup : BaseStartup
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
+        
+        if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
+        {
+            var endpoints = new Dictionary<string,string>();
+            _configuration.Bind("openApi:endpoints", endpoints);
+            app.UseOpenApiUI(endpoints);
+        }
+
 
         app.UseRouting();
 
@@ -70,6 +79,8 @@ public class Startup : BaseStartup
         await base.ConfigureServices(services);
 
         services.AddMemoryCache();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        
         DIHelper.TryAdd<Login>();
         DIHelper.TryAdd<PathUtils>();
         DIHelper.TryAdd<StorageFactory>();
@@ -79,6 +90,11 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<SsoHandlerService>();
         DIHelper.TryAdd<RemovePortalIntegrationEventHandler>();
         DIHelper.TryAdd<RoomLogoValidator>();
+        DIHelper.TryAdd<FileValidator>();
+        DIHelper.TryAdd<MigrationIntegrationEventHandler>();
+
+        MigrationCore.Register(DIHelper);
+        services.RegisterQuotaFeature();
         
         services.AddHttpClient();
 

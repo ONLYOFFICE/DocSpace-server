@@ -251,9 +251,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi copiat</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Fișierul mai mare de {0} nu va fi editat</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi deplasat</value>
   </data>
@@ -393,7 +390,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
     <value>Documentul PDF spre completare este gata. A fost salvat în {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Copia fișierului OFORM a fost creată în folderul {0}. Completați formularul și încărcați rezultatul în formatul PDF sau DOCX.</value>
+    <value>Copia fișierului PDF a fost creată în folderul {0}. Completați formularul și încărcați rezultatul în formatul PDF sau DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Nu mai este un fișier schiță pentru completarea formularului.</value>

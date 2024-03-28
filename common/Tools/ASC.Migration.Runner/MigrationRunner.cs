@@ -35,20 +35,39 @@ public class MigrationRunner
         _dbContextActivator = new DbContextActivator(serviceProvider);
     }
 
-    public void RunApplyMigrations(string path, ProviderInfo dbProvider, ProviderInfo teamlabsiteProvider, ConfigurationInfo configurationInfo)
+    public void RunApplyMigrations(string path, ProviderInfo dbProvider, ProviderInfo teamlabsiteProvider, ConfigurationInfo configurationInfo, string targetMigration)
     {
 
         var migrationContext = _dbContextActivator.CreateInstance(typeof(MigrationContext), dbProvider);
-        migrationContext.Database.Migrate();
+        Migrate(migrationContext, targetMigration);
 
         var teamlabContext = _dbContextActivator.CreateInstance(typeof(TeamlabSiteContext), teamlabsiteProvider);
-        teamlabContext.Database.Migrate();
+        Migrate(teamlabContext, targetMigration);
 
         if (configurationInfo == ConfigurationInfo.Standalone)
         {
             migrationContext = _dbContextActivator.CreateInstance(typeof(MigrationContext), dbProvider, ConfigurationInfo.Standalone);
+            Migrate(migrationContext, targetMigration);
+        }
+        Console.WriteLine("Migrations applied");
+    }
+
+    private void Migrate(DbContext migrationContext, string targetMigration)
+    {
+        if (string.IsNullOrEmpty(targetMigration))
+        {
             migrationContext.Database.Migrate();
         }
-        Console.WriteLine("Applied migrations");
+        else
+        {
+            var migrations = migrationContext.Database.GetMigrations();
+            if (migrations.Contains(targetMigration))
+            {
+                Console.WriteLine("Migration to " + targetMigration);
+
+                var migrator = migrationContext.Database.GetService<IMigrator>();
+                migrator?.Migrate(targetMigration);
+            }
+        }
     }
 }

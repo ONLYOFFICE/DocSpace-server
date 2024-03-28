@@ -184,9 +184,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>File più grandi di {0} non saranno copiati</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>File più largo di {0} non verrà editato</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>File maggiori di {0} non saranno spostati</value>
   </data>
@@ -302,7 +299,7 @@
     <value>Il documento compilabile PDF è pronto. È salvato in {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>La copia di OFORM è creata nella cartella {0}. Compila il modulo e scarica il risultato come file PDF o DOCX.</value>
+    <value>La copia di PDF è creata nella cartella {0}. Compila il modulo e scarica il risultato come file PDF o DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Il file non è più una bozza da compilare il modulo.</value>

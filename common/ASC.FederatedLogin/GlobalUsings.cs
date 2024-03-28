@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,6 @@ global using System.Diagnostics;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net.Http.Headers;
 global using System.Reflection;
-global using System.Runtime.Serialization;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Security.Cryptography.Pkcs;
@@ -40,7 +39,6 @@ global using System.Web;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
-global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
@@ -61,7 +59,6 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;

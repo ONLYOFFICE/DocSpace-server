@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,9 +51,9 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
-    public async Task CreateFileAsync<T>(File<T> file)
+    public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("create-file", file, true);
+        await MakeRequest("create-file", file, true, users);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
@@ -114,7 +114,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.ParentId);
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
         var whoCanRead = users ?? await GetWhoCanRead(entry);
 
         if (action != null)
@@ -167,7 +167,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry, true);
         var userIds = whoCanRead
             .Concat(await GetAdmins())
             .Concat(new []{ entry.CreateBy })
@@ -185,7 +185,8 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             return _admins;
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         

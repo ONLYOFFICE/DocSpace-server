@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,7 +113,7 @@ public class StudioNotifyWorker(TenantManager tenantManager,
             item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
             item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
             item.CheckSubsciption,
-            item.Tags
+            item.Tags?
                 .Select(r => (ITagValue)new TagValue(r.Key, r.Value))
                 .ToArray());
     }

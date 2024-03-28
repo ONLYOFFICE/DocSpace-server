@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,11 +36,18 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Utils;
+global using ASC.Core.Common.EF;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.LoginProviders;
+global using ASC.Files.Core.Core;
+global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Security;
+global using ASC.Files.Core.VirtualRooms;
+global using ASC.Migration.Core;
+global using ASC.Migration.Core.Core;
 global using ASC.Web.Core.HttpHandlers;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Studio;

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,8 @@ namespace ASC.FederatedLogin;
 [Scope]
 public class Login(
     IWebHostEnvironment webHostEnvironment,
-    InstanceCrypto instanceCrypto,
-    ProviderManager providerManager)
+    ProviderManager providerManager,
+    LoginProfileTransport loginProfileTransport)
 {
     private string Callback => _params.Get("callback") ?? "loginCallback";
     private string Auth => _params.Get("auth");
@@ -96,15 +96,12 @@ public class Login(
             try
             {
                 var desktop = _params.ContainsKey("desktop") && _params["desktop"] == "true";
-                IDictionary<string, string> additionalStateArgs = null;
+                Dictionary<string, string> additionalStateArgs = null;
 
                 if (desktop)
                 {
                     additionalStateArgs = context.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
-                    if (!additionalStateArgs.ContainsKey("desktop"))
-                    {
-                        additionalStateArgs.Add("desktop", "true");
-                    }
+                    additionalStateArgs.TryAdd("desktop", "true");
                 }
 
                 var profile = providerManager.Process(Auth, context, null, additionalStateArgs);
@@ -119,7 +116,7 @@ public class Login(
             }
             catch (Exception ex)
             {
-                await SendJsCallbackAsync(context, LoginProfile.FromError(ex));
+                await SendJsCallbackAsync(context, new LoginProfile(ex));
             }
         }
         else
@@ -143,7 +140,7 @@ public class Login(
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(
             JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{profile.Transport(instanceCrypto)}\"")
+            .Replace("%PROFILE%", $"\"{await loginProfileTransport.ToString(profile)}\"")
             .Replace("%CALLBACK%", Callback)
             .Replace("%DESKTOP%", (Mode == LoginMode.Redirect).ToString().ToLowerInvariant())
             );

@@ -333,9 +333,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Պատվերով</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Գործողությունը հաստատող հղում է ուղարկվել {0}-ին (պորտալի սեփականատիրոջ էլ. հասցեն).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Սխալ օրինակի ID.</value>
   </data>
@@ -623,9 +620,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>Սեփականատեր</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Սկավառակի տարածքի սահմանաչափը գերազանցվել է</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Ամպային տարածք ձեր գրասենյակային փաստաթղթերի համար</value>

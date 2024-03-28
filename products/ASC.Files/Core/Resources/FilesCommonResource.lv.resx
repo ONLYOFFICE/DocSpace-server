@@ -157,9 +157,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Faili, kas pārsniedz {0} netiks nokopēti</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Faili, kas pārsniedz {0}, netiks rediģēti</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Faili, kas pārsniedz {0}, netiks pārvietoti</value>
   </data>
@@ -408,7 +405,7 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
     <value>Aizpildāmais PDF dokuments ir gatavs. Tas ir saglabāts {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>
+    <value>PDF kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Fails vairs nav melnraksts, kas jāaizpilda veidlapā.</value>

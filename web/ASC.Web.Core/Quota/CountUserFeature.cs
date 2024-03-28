@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,8 +32,11 @@ public class CountUserChecker(ITenantQuotaFeatureStat<CountUserFeature, int> ten
         TenantManager tenantManager, ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_users_exception;
 
+    public override string GetExceptionMessage(long count)
+    {
+        return string.Format(Resource.TariffsFeature_users_exception, count);
+    }
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)

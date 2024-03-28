@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,9 @@ global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
+global using System.Security.Authentication;
 global using System.Text;
+global using System.Text.Encodings.Web;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
@@ -61,15 +63,17 @@ global using ASC.Core.Users;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.Feed.Context;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.EF;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.Security.Cryptography;
+global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
-global using ASC.Web.Files.Services.WCFService;
+global using ASC.Web.Files;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
@@ -83,6 +87,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+global using Microsoft.Extensions.Options;
 
 global using Newtonsoft.Json.Linq;
 

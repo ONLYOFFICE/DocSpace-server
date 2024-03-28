@@ -154,9 +154,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Tiedosto joka on enemmän kuin {0} ei voida kopioida</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0} suurempaa tiedostoa ei voi muokata</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Tiedosto joka on suurempi kuin {0} ei voida siirtää</value>
   </data>
@@ -404,7 +401,7 @@
     <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
+    <value>PDF-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Tiedosto ei ole enää luonnos lomakkeen täyttämiseksi.</value>

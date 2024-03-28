@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,8 @@
 namespace ASC.Web.Studio.UserControls.FirstTime;
 
 [Transient]
-public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
+public class FirstTimeTenantSettings(
+    ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
     SettingsManager settingsManager,
@@ -40,7 +41,8 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
     TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
-    CookiesManager cookiesManager)
+    CookiesManager cookiesManager,
+    CspSettingsHelper cspSettingsHelper)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -93,7 +95,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (tenantExtra.EnableTariffSettings && tenantExtra.Enterprise)
+            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
@@ -109,7 +111,8 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
             tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
             await tenantManager.SaveTenantAsync(tenant);
-
+            await cspSettingsHelper.SaveAsync(null, true);
+            
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
@@ -141,13 +144,11 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
         }
     }
 
-    public bool RequestLicense
+    public async Task<bool> GetRequestLicense()
     {
-        get
-        {
-            return tenantExtra.EnableTariffSettings && tenantExtra.Enterprise
-                && !File.Exists(licenseReader.LicensePath);
-        }
+        return await tenantExtra.GetEnableTariffSettings() && 
+               tenantExtra.Enterprise &&
+               !File.Exists(licenseReader.LicensePath);
     }
 
     private void TrySetLanguage(Tenant tenant, string lng)

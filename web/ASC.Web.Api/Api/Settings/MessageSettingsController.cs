@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,8 +79,9 @@ public class MessageSettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
-    {
-        var result = await cookiesManager.GetLifeTimeAsync(await tenantManager.GetCurrentTenantIdAsync());
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var result = await cookiesManager.GetLifeTimeAsync();
         return new CookieSettingsDto
         {
             Enabled = result.Enabled,
@@ -198,7 +199,7 @@ public class MessageSettingsController(MessageService messageService,
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();

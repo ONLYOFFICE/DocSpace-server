@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Προσαρμογή</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Ένας σύνδεσμος για να επιβεβαιώσετε τη λειτουργία έχει σταλεί στο {0} (η διεύθυνση ηλεκτρονικού ταχυδρομείου του ιδιοκτήτη της δικτυακής πύλης ).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Λανθασμένη διεύθυνση email</value>
   </data>
@@ -954,9 +951,6 @@
   </data>
   <data name="OrgServerRegion" xml:space="preserve">
     <value>Περιοχή ORG</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Υπέρβαση της ποσόστωσης χώρου στον δίσκο</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Χώρος στο νέφος για τα έγγραφα του γραφείου σας</value>

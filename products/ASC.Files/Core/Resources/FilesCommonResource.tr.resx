@@ -181,9 +181,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0} boyutundan büyük dosya kopyalanmayacak</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0} boyutundan büyük dosya düzenlenmeyecek</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} boyutundan büyük dosya taşınmayacak</value>
   </data>
@@ -299,7 +296,7 @@
     <value>Doldurulabilir PDF belgesi hazır. {0} klasörüne kaydedilir</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM kopyası, {0} klasöründe oluşturulur. Lütfen formu doldurun ve sonucu PDF veya DOCX dosyası olarak indirin.</value>
+    <value>PDF kopyası, {0} klasöründe oluşturulur. Lütfen formu doldurun ve sonucu PDF veya DOCX dosyası olarak indirin.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Dosya artık formu doldurmak için bir taslak değildir.</value>

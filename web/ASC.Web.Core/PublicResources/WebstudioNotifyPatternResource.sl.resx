@@ -651,7 +651,7 @@ Ekipa ONLYOFFICE
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Pozdravljeni!
 
-Povabljeni ste, da se pridružite $Message sobi na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
+Povabljeni ste, da se pridružite sobi DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
 $OrangeButton
 
@@ -752,9 +752,6 @@ $TrulyYours</value>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Konfigurirajte zdaj</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Potrdite spremembo naslova portala</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potrdite posodobitev lastnika portala</value>
   </data>
@@ -817,9 +814,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Sprememba lastnika portala</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Sprememba naslova portala</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Dobrodošli v ONLYOFFICE DocSpace!</value>
@@ -1116,19 +1110,6 @@ $OrangeButton</value>
 Dragi $OwnerName,
 
 Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}" lastnika portala na $UserName.
-
-Za potrditev operacije sledite spodnji povezavi:
-
-$OrangeButton
-
-*Opomba*: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek zamenjave lastnika portala v tem obdobju.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Sprememba naslova portala
-
-Dragi $OwnerName,
-
-Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}" naslova portala na "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
 
 Za potrditev operacije sledite spodnji povezavi:
 

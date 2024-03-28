@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,6 @@ public class StudioNotifyHelper
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly TenantManager _tenantManager;
     private readonly TenantExtra _tenantExtra;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly WebImageSupplier _webImageSupplier;
     private readonly IConfiguration _configuration;
     private readonly ILogger<StudioNotifyHelper> _logger;
@@ -66,7 +65,6 @@ public class StudioNotifyHelper
         _commonLinkUtility = commonLinkUtility;
         _tenantManager = tenantManager;
         _tenantExtra = tenantExtra;
-        _coreBaseSettings = coreBaseSettings;
         _webImageSupplier = webImageSupplier;
         _configuration = configuration;
         _subscriptionProvider = NotifySource.GetSubscriptionProvider();//TODO: remove from constructor

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -383,7 +383,7 @@ public class SecurityController(PermissionContext permissionContext,
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
                 }
 
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _))
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || (Encoding.UTF8.GetByteCount(domain) != domain.Length))
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }

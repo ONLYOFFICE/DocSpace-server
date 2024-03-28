@@ -175,9 +175,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet gekopieerd</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Bestand groter dan {0} kan niet worden bewerkt</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet verplaatst</value>
   </data>
@@ -411,7 +408,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Het invulbare PDF document is klaar. Het is opgeslagen in de {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>De OFORM kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
+    <value>De PDF kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Het bestand is niet langer een concept om het formulier in te vullen.</value>

@@ -184,9 +184,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Файл более {0} не будет скопирован</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Файл размером более {0} нельзя отредактировать</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл более {0} не будет перемещен</value>
   </data>
@@ -302,7 +299,7 @@
     <value>Заполняемый документ PDF готов. Он сохранен в папке {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Копия файла OFORM создана в папке {0}. Заполните форму и скачайте результат как файл в формате PDF или DOCX.</value>
+    <value>Копия файла PDF создана в папке {0}. Заполните форму и скачайте результат как файл в формате PDF или DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Файл больше не является черновиком для заполнения формы.</value>

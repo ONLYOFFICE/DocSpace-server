@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,21 +36,28 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
+    public async Task ChangeCustomQuotaUsedValueAsync(int tenantId, string customQuotaFeature, bool enableQuota, long usedSpace, long quotaLimit, List<Guid> userIds)
+    {
+        var room = $"{tenantId}-QUOTA";
+
+        await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
+    }
+
     public async Task ChangeQuotaFeatureValue(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
-    private string GetQuotaRoom()
+    private async Task<string> GetQuotaRoom()
     {
-        var tenantId = tenantManager.GetCurrentTenant().Id;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }

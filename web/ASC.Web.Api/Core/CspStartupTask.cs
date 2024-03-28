@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,7 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
             foreach (var t in tenantService.GetTenantsWithCsp())
             {
                 tenantManager.SetCurrentTenant(t);
-                var current = settingsManager.Load<CspSettings>();
+                var current = await settingsManager.LoadAsync<CspSettings>();
                 await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
             }
 

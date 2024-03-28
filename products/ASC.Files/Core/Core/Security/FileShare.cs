@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,7 +73,7 @@ public static partial class FileShareExtensions
 {
     public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
     {
-        var prefix = useRoomFormat ? "RoleEnum_" : "AceStatusEnum_";
+        var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         switch (fileShare)
         {

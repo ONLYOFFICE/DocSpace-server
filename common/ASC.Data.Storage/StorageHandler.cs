@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    public async ValueTask InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider)
+    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
         var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
@@ -42,7 +42,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         var storageExpire = storage.GetExpire(domain);
 
         if (checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
-            || module == "backup" && !securityContext.IsAuthenticated)
+            || module == "backup" && (!securityContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -67,6 +67,12 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         if (!await storage.IsFileAsync(domain, path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            return;
+        }
+        
+        if (storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
         }
 
@@ -102,12 +108,6 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         //}
 
         //context.Response.Headers.ETag = etag;
-
-        if (securityContext.IsAuthenticated && storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return;
-        }
         
         string encoding = null;
 
@@ -164,10 +164,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         if (context.Request.Headers["Range"] == StringValues.Empty)
         {

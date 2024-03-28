@@ -204,9 +204,6 @@
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>ՀԱՍՏԱՏԵԼ</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Հաստատեք պորտալի հասցեի փոփոխությունը</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Հաստատեք պորտալի սեփականատիրոջ թարմացում</value>
   </data>
@@ -272,9 +269,6 @@
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}: Պորտալի սեփականատիրոջ փոփոխություն</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Բարի գալուստ ONLYOFFICE DocSpace:</value>
@@ -586,19 +580,6 @@ $OrangeButton
 $OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի սեփականատիրոջ փոփոխության գործընթացը այդ ժամանակահատվածում.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1. Պորտալի հասցեի փոփոխություն
-
-Հարգելի $OwnerName,
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի հասցեն փոխելու հարցում է եղել "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
-
-$OrangeButton
-
-*Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի հասցեի փոփոխման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
@@ -1678,7 +1659,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
-Դուք հրավիրված եք միանալու $Message սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
+Դուք հրավիրված եք միանալու DocSpace-ի սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ անցնելով հղումով.
 
 $OrangeButton
 

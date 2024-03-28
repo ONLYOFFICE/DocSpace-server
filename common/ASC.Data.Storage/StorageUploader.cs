@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -33,7 +33,8 @@ public class StorageUploader(
     ICacheNotify<MigrationProgress> cacheMigrationNotify,
     IDistributedTaskQueueFactory queueFactory,
     ILogger<StorageUploader> logger, 
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    AscDistributedCache cache)
 {
     protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
@@ -43,13 +44,13 @@ public class StorageUploader(
         {
             var id = GetCacheKey(tenantId);
 
-            if (_queue.GetAllTasks().Any(x => x.Id == id))
+            if ((await _queue.GetAllTasks()).Any(x => x.Id == id))
             {
                 return;
             }
 
-            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger);
-            _queue.EnqueueTask(migrateOperation);
+            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger, cache);
+            await _queue.EnqueueTask(migrateOperation);
         }
     }
 
@@ -57,15 +58,15 @@ public class StorageUploader(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
-            return _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
+            return await _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        foreach (var task in _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID).Where(r => r.Status == DistributedTaskStatus.Running))
+        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
         {
-            _queue.DequeueTask(task.Id);
+            await _queue.DequeueTask(task.Id);
         }
     }
 
@@ -86,6 +87,7 @@ public class MigrateOperation : DistributedTaskProgress
     private readonly IServiceProvider _serviceProvider;
     private readonly StorageFactoryConfig _storageFactoryConfig;
     private readonly TempStream _tempStream;
+    private readonly AscDistributedCache _cache;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
 
     static MigrateOperation()
@@ -101,7 +103,8 @@ public class MigrateOperation : DistributedTaskProgress
         StorageSettings settings,
         StorageFactoryConfig storageFactoryConfig,
         TempStream tempStream,
-        ILogger<StorageUploader> logger)
+        ILogger<StorageUploader> logger,
+        AscDistributedCache cache)
     {
         Id = id;
         Status = DistributedTaskStatus.Created;
@@ -115,6 +118,7 @@ public class MigrateOperation : DistributedTaskProgress
         _modules = storageFactoryConfig.GetModuleList(_configPath, true);
         StepCount = _modules.Count();
         _logger = logger;
+        _cache = cache;
     }
 
     public object Clone()
@@ -130,7 +134,6 @@ public class MigrateOperation : DistributedTaskProgress
             Status = DistributedTaskStatus.Running;
 
             await using var scope = _serviceProvider.CreateAsyncScope();
-            var tempPath = scope.ServiceProvider.GetService<TempPath>();
             var scopeClass = scope.ServiceProvider.GetService<MigrateOperationScope>();
             var (tenantManager, securityContext, storageFactory, options, storageSettingsHelper, settingsManager) = scopeClass;
             var tenant = await tenantManager.GetTenantAsync(_tenantId);
@@ -144,7 +147,7 @@ public class MigrateOperation : DistributedTaskProgress
                 var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
-                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store);
+                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, oldStore, store, _cache);
 
                 string[] files;
                 foreach (var domain in domains)
@@ -170,7 +173,7 @@ public class MigrateOperation : DistributedTaskProgress
                     await crossModuleTransferUtility.CopyFileAsync("", file, "", file);
                 }
 
-                StepDone();
+                await StepDone();
 
                 MigrationPublish();
             }

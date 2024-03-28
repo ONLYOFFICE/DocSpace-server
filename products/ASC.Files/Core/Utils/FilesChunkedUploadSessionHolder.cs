@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,20 +30,23 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
 {
     private readonly IDaoFactory _daoFactory;
 
-    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, TempPath tempPath, IDataStore dataStore, string domain, long maxChunkUploadSize = 10485760)
-        : base(tempPath, dataStore, domain, maxChunkUploadSize)
+    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, IDataStore dataStore, string domain, AscDistributedCache cache, long maxChunkUploadSize = 10485760)
+        : base(dataStore, domain, cache, maxChunkUploadSize)
     {
         _daoFactory = daoFactory;
         TempDomain = FileConstant.StorageDomainTmp;
     }
-    public override async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length)
+    
+    public override async Task<(string, string)> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int chunkNumber)
     {
         if (uploadSession is ChunkedUploadSession<int>)
         {
-            return (await InternalUploadChunkAsync<int>(uploadSession, stream, length)).ToString();
+            return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length)).ToString(), null);
         }
-
-        return await InternalUploadChunkAsync<string>(uploadSession, stream, length);
+        else
+        {
+            return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
+        }
     }
 
     private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length)
@@ -68,7 +71,6 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
     private async Task<T> InternalFinalizeAsync<T>(CommonChunkedUploadSession commonChunkedUploadSession)
     {
         var chunkedUploadSession = commonChunkedUploadSession as ChunkedUploadSession<T>;
-        chunkedUploadSession.BytesTotal = chunkedUploadSession.BytesUploaded;
         var fileDao = GetFileDao<T>();
         var file = await fileDao.FinalizeUploadSessionAsync(chunkedUploadSession);
         return file.Id;

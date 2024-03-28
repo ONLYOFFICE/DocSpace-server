@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,7 +81,7 @@ public class Client(ILoggerProvider option, Settings settings)
                             _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
                         }
 
-                        if (r.HttpStatusCode != null && r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
+                        if (r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {
                             _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                         }

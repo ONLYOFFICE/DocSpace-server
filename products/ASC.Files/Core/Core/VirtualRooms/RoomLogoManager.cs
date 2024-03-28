@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
     FilesMessageService filesMessageService,
     EmailValidationKeyProvider emailValidationKeyProvider,
     SecurityContext securityContext,
-    FileUtilityConfiguration fileUtilityConfiguration)
+    FileUtilityConfiguration fileUtilityConfiguration, 
+    ExternalShare externalShare)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -53,11 +54,16 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private IDataStore _dataStore;
 
     public bool EnableAudit { get; set; } = true;
-    private int TenantId => tenantManager.GetCurrentTenant().Id;
 
     private async ValueTask<IDataStore> GetDataStoreAsync()
     {
-        return _dataStore ??= await storageFactory.GetStorageAsync(TenantId, ModuleName);
+        if (_dataStore == null)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            _dataStore = await storageFactory.GetStorageAsync(tenantId, ModuleName);
+        }
+
+        return _dataStore;
     }
 
     public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, int width, int height)
@@ -278,7 +284,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 
-        return uri + (secure ? "&" : "?") + $"hash={hash}";
+        return externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
     }
 
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)

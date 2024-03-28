@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,8 +38,12 @@ public class DiscDataStore(TempStream tempStream,
         EncryptionFactory encryptionFactory,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
+        QuotaSocketManager quotaSocketManager,
+        SettingsManager settingsManager,
+        IQuotaService quotaService,
+        UserManager userManager,
+        CustomQuota customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
@@ -127,6 +131,15 @@ public class DiscDataStore(TempStream tempStream,
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
     }
 
+    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
+    {
+        return GetReadStreamAsync(domain, path, offset);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    {
+        return SaveAsync(domain, path, stream, ownerId);
+    }
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream);
@@ -143,13 +156,17 @@ public class DiscDataStore(TempStream tempStream,
 
     public override async Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
+        return await SaveAsync(domain, path, stream, Guid.Empty);
+    }
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    {
         Logger.DebugSavePath(path);
 
-        var buffered = _tempStream.GetBuffered(stream);
+        var buffered = await _tempStream.GetBufferedAsync(stream);
             
         if (EnableQuotaCheck(domain))
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length);
+            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
         }
 
         ArgumentNullException.ThrowIfNull(path);
@@ -180,7 +197,7 @@ public class DiscDataStore(TempStream tempStream,
             fslen = fs.Length;
         }
 
-        await QuotaUsedAddAsync(domain, fslen);
+        await QuotaUsedAddAsync(domain, fslen, ownerId);
 
         _crypt.EncryptFile(target);
 
@@ -202,28 +219,46 @@ public class DiscDataStore(TempStream tempStream,
 
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
-        var target = GetTarget(domain, path);
+        var target = GetTarget(domain, path + "chunks");
         var mode = chunkNumber == 0 ? FileMode.Create : FileMode.Append;
 
-        await using (var fs = new FileStream(target, mode))
+        if (!Directory.Exists(target))
+        {
+            Directory.CreateDirectory(target);
+        }
+
+        await using (var fs = new FileStream(Path.Combine(target, chunkNumber.ToString()), FileMode.Create))
         {
             await stream.CopyToAsync(fs);
         }
 
-        return string.Format("{0}_{1}", chunkNumber, uploadId);
+        return $"{chunkNumber}_{uploadId}";
     }
 
     public override async Task<Uri> FinalizeChunkedUploadAsync(string domain, string path, string uploadId, Dictionary<int, string> eTags)
     {
         var target = GetTarget(domain, path);
 
+        var targetChunks = target + "chunks";
+        if (!Directory.Exists(targetChunks))
+        {
+            throw new FileNotFoundException("file not found " + target);
+        }
+
+        var sortETags = eTags.OrderBy(e => e.Key);
+
+        await using (var fs = new FileStream(target, FileMode.Create))
+        {
+            foreach (var eTag in sortETags)
+            {
+                await using var eTagFs = new FileStream(Path.Combine(targetChunks, eTag.Key.ToString()), FileMode.Open);
+                await eTagFs.CopyToAsync(fs);
+            }
+        }
+        Directory.Delete(Path.Combine(targetChunks), true);
+
         if (QuotaController != null)
         {
-            if (!File.Exists(target))
-            {
-                throw new FileNotFoundException("file not found " + target);
-            }
-
             var size = _crypt.GetFileSize(target);
             await QuotaUsedAddAsync(domain, size);
         }
@@ -235,10 +270,10 @@ public class DiscDataStore(TempStream tempStream,
 
     public override Task AbortChunkedUploadAsync(string domain, string path, string uploadId)
     {
-        var target = GetTarget(domain, path);
-        if (File.Exists(target))
+        var target = GetTarget(domain, path + "chunks");
+        if (Directory.Exists(target))
         {
-            File.Delete(target);
+            Directory.Delete(target);
         }
         return Task.CompletedTask;
     }
@@ -286,6 +321,10 @@ public class DiscDataStore(TempStream tempStream,
 
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive)
     {
+        await DeleteFilesAsync(domain, folderPath, pattern, recursive, Guid.Empty);
+    }
+    public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
+    {
         ArgumentNullException.ThrowIfNull(folderPath);
 
         //Return dirs
@@ -297,7 +336,7 @@ public class DiscDataStore(TempStream tempStream,
             {
                 var size = _crypt.GetFileSize(entry);
                 File.Delete(entry);
-                await QuotaUsedDeleteAsync(domain, size);
+                await QuotaUsedDeleteAsync(domain, size, ownerId);
             }
         }
         else
@@ -350,6 +389,11 @@ public class DiscDataStore(TempStream tempStream,
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
+       return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
+    }
+
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
+    {
         ArgumentNullException.ThrowIfNull(srcPath);
         ArgumentNullException.ThrowIfNull(newPath);
 
@@ -374,7 +418,7 @@ public class DiscDataStore(TempStream tempStream,
             File.Move(target, newtarget);
 
             await QuotaUsedDeleteAsync(srcDomain, flength);
-            await QuotaUsedAddAsync(newDomain, flength, quotaCheckFileSize);
+            await QuotaUsedAddAsync(newDomain, flength, ownerId, quotaCheckFileSize);
         }
         else
         {
@@ -397,6 +441,11 @@ public class DiscDataStore(TempStream tempStream,
     }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
+    {
+        await DeleteDirectoryAsync(domain, path, Guid.Empty);
+    }
+
+    public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -435,7 +484,7 @@ public class DiscDataStore(TempStream tempStream,
 
         Directory.Delete(targetDir, true);
 
-        await QuotaUsedDeleteAsync(domain, size);
+        await QuotaUsedDeleteAsync(domain, size, ownerId);
     }
 
     public override Task<long> GetFileSizeAsync(string domain, string path)
@@ -633,12 +682,7 @@ public class DiscDataStore(TempStream tempStream,
     }
 
 
-    public Stream GetWriteStream(string domain, string path)
-    {
-        return GetWriteStream(domain, path, FileMode.Create);
-    }
-
-    public Stream GetWriteStream(string domain, string path, FileMode fileMode)
+    public Stream GetWriteStream(string domain, string path, FileMode fileMode = FileMode.Create)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -663,7 +707,10 @@ public class DiscDataStore(TempStream tempStream,
             throw new FileNotFoundException("file not found", target);
         }
     }
-
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    {
+        return SaveAsync(domain, path, stream, ownerId);
+    }
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
     {
         return SaveAsync(domain, path, stream);

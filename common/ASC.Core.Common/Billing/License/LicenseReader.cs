@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,7 @@ public class LicenseReader
         await _coreSettings.SaveSettingAsync(CustomerIdKey, value);
     }
 
-    private Stream GetLicenseStream(bool temp = false)
+    private FileStream GetLicenseStream(bool temp = false)
     {
         var path = temp ? _licensePathTemp : LicensePath;
         if (!File.Exists(path))
@@ -201,9 +201,9 @@ public class LicenseReader
             Oauth = true,
             ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,
-            MaxTotalSize = defaultQuota.MaxTotalSize,
             DocsEdition = true,
-            Customization = license.Customization
+            Customization = license.Customization,
+            Statistic = true
         };
 
         await _tenantManager.SaveTenantQuotaAsync(quota);

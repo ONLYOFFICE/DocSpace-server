@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 global using System.Data;
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.Diagnostics;
 global using System.Extensions;
@@ -48,11 +49,6 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
-
-global using AppLimit.CloudComputing.SharpBox;
-global using AppLimit.CloudComputing.SharpBox.Exceptions;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider;
-global using AppLimit.CloudComputing.SharpBox.StorageProvider.DropBox;
 
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
@@ -87,6 +83,7 @@ global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
+global using ASC.Data.Storage.ChunkedUploader;
 global using ASC.Data.Storage.DataOperators;
 global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
@@ -108,6 +105,7 @@ global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
 global using ASC.Files.Core.Data;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Exceptions;
 global using ASC.Files.Core.Entries;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
@@ -118,6 +116,7 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Thirdparty;
+global using ASC.Files.Core.Core.Thirdparty.WebDav;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
@@ -126,7 +125,6 @@ global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
 global using ASC.Files.Thirdparty.ProviderDao;
 global using ASC.Files.Thirdparty.SharePoint;
-global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
@@ -164,6 +162,7 @@ global using ASC.Web.Files.ThirdPartyApp;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
+global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Utility;
 
 global using AutoMapper;
@@ -222,6 +221,8 @@ global using OpenSearch.Client;
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;
+
+global using WebDav;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;

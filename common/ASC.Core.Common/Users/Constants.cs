@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,13 +79,13 @@ public sealed class Constants(IConfiguration configuration)
         Name = AuthConst.Collaborator.Name
     };
 
-    public static readonly GroupInfo[] BuildinGroups =
+    public static readonly GroupInfo[] SystemGroups =
     [
-        GroupEveryone,
-            GroupUser,
-            GroupManager,
-            GroupAdmin,
-            GroupCollaborator
+        GroupEveryone, 
+        GroupUser, 
+        GroupManager, 
+        GroupAdmin, 
+        GroupCollaborator
     ];
 
     public static readonly UserInfo LostUser = new()

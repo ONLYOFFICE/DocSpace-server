@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -212,7 +212,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
                 }
                 else if (e.Response.HttpStatusCode == 429)
                 {
-                    Thread.Sleep(60000);
+                    await Task.Delay(60000);
                     if (retry < 10)
                     {
                         await Index(data.Where(r => r != null).ToList(), immediately, retry + 1);
@@ -247,91 +247,10 @@ public class FactoryIndexer<T>(ILoggerProvider options,
                 }
                 else if (inner.Response.HttpStatusCode == 429)
                 {
-                    Thread.Sleep(60000);
+                    await Task.Delay(60000);
                     if (retry < 10)
                     {
                         await Index(data.Where(r => r != null).ToList(), immediately, retry + 1);
-                        return;
-                    }
-
-                    throw;
-                }
-            }
-            else
-            {
-                throw;
-            }
-        }
-    }
-
-    protected async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || data.Count == 0)
-        {
-            return;
-        }
-
-        try
-        {
-            await _indexer.IndexAsync(data, immediately).ConfigureAwait(false);
-        }
-        catch (OpenSearchClientException e)
-        {
-            Logger.ErrorIndexAsync(e);
-
-            if (e.Response != null)
-            {
-                Logger.Error(e.Response.HttpStatusCode.ToString());
-
-                if (e.Response.HttpStatusCode is 413 or 403 or 408)
-                {
-                    foreach (var r in data.Where(r => r != null))
-                    {
-                        await Index(r, immediately);
-                    }
-                }
-                else if (e.Response.HttpStatusCode == 429)
-                {
-                    await Task.Delay(60000);
-                    if (retry < 10)
-                    {
-                        await IndexAsync(data.Where(r => r != null).ToList(), immediately, retry + 1);
-                        return;
-                    }
-
-                    throw;
-                }
-            }
-        }
-        catch (AggregateException e) //OpenSearchClientException
-        {
-            if (e.InnerExceptions.Count == 0)
-            {
-                throw;
-            }
-
-            var inner = e.InnerExceptions.OfType<OpenSearchClientException>().FirstOrDefault();
-
-
-            if (inner != null)
-            {
-                Logger.ErrorIndexAsync(inner);
-
-                if (inner.Response.HttpStatusCode is 413 or 403)
-                {
-                    Logger.Error(inner.Response.HttpStatusCode.ToString());
-                    foreach (var r in data.Where(r => r != null))
-                    {
-                        await Index(r, immediately);
-                    }
-                }
-                else if (inner.Response.HttpStatusCode == 429)
-                {
-                    await Task.Delay(60000);
-                    if (retry < 10)
-                    {
-                        await IndexAsync(data.Where(r => r != null).ToList(), immediately, retry + 1);
                         return;
                     }
 
@@ -519,7 +438,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
 
     public async Task ReIndexAsync()
     {
-        await _indexer.ReIndrexAsync();
+        await _indexer.ReIndexAsync();
     }
 
     public bool Support(T t)

@@ -184,9 +184,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Fichier de plus de {0} ne sera pas copié</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Fichier de plus de {0} ne sera pas modifié</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fichier de plus de {0} ne sera pas déplacé</value>
   </data>
@@ -302,7 +299,7 @@
     <value>Le document PDF remplissable est prêt. Il est enregistré dans le dossier {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>La copie du fichier OFORM est créée dans le dossier {0}. Veuillez remplir le formulaire et télécharger le résultat sous forme de fichier PDF ou DOCX.</value>
+    <value>La copie du fichier PDF est créée dans le dossier {0}. Veuillez remplir le formulaire et télécharger le résultat sous forme de fichier PDF ou DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Le dossier n'est plus un brouillon pour remplir le formulaire.</value>

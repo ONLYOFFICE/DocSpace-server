@@ -91,9 +91,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>カスタム</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>操作を確認するためのリンクが{0}（ポータル所有者の電子メールアドレス）に送信されました。</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>インスタンスIDが間違っているようです。</value>
   </data>
@@ -213,9 +210,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>所有者</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>ディスク容量制限を超えました</value>
   </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>ポータルでのアクセス</value>

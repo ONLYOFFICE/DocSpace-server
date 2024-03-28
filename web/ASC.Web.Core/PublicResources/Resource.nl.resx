@@ -82,9 +82,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Aangepast</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Een link om de actie te bevestigen is verzonden naar {0}(het e-mailadres van de portaaleigenaar).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Onjuist e-mailadres</value>
   </data>
@@ -966,9 +963,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Als er een gebruiker met het e-mailadres {0} bestaat, is de instructie voor het wijzigen van het wachtwoord naar dit e-mailadres gestuurd.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Schijfruimte quota overschreden</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Cloudruimte voor uw office documenten</value>

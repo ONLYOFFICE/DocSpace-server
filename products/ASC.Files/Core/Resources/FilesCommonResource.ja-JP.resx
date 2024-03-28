@@ -178,9 +178,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}より大きくファイルがコピーされません</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}より大きくファイルが編集されません</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}より大きくファイルが移動されません</value>
   </data>
@@ -411,7 +408,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>記入可能なPDF文書が出来上がりました。{0}に保存されます</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORMのコピーは{0}フォルダーに作成されました。フォームに必要事項を記入し、結果ファイルをPDFまたはDOCXファイルとしてダウンロードしてください。</value>
+    <value>PDFのコピーは{0}フォルダーに作成されました。フォームに必要事項を記入し、結果ファイルをPDFまたはDOCXファイルとしてダウンロードしてください。</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>このファイルは、もはや記入用の下書きではありません。</value>

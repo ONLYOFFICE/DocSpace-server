@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ public class CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator regis
         TenantManager tenantManager, ICache cache)
     : IMobileAppInstallRegistrator
 {
-    private readonly IMobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
+    private readonly MobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));
 
     public CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TenantManager tenantManager, ICache cache)
         : this(registrator, TimeSpan.FromMinutes(30), tenantManager, cache)

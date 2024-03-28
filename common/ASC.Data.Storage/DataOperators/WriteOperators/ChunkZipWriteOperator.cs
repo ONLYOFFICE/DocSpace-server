@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     private readonly SHA256 _sha;
     private Stream _fileStream;
     private readonly TempStream _tempStream;
+    private int _chunkNumber = 1;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -63,7 +64,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _sha = SHA256.Create();
     }
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
@@ -74,7 +75,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
         if (_fileStream == null)
         {
@@ -82,7 +83,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             _gZipOutputStream.baseOutputStream_ = _fileStream;
         }
 
-        await using (var buffered = _tempStream.GetBuffered(stream))
+        await using (var buffered = await _tempStream.GetBufferedAsync(stream))
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
@@ -90,7 +91,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(action);
+            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
         }
 
         if (_fileStream.Length > _sessionHolder.MaxChunkUploadSize)
@@ -113,13 +114,15 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {
-                if (_fileStream.Position == _fileStream.Length && last)
+                if (last)
                 {
-                    _chunkedUploadSession.LastChunk = true;
+                    _chunkedUploadSession.Items["lastChunk"] = "true";
                 }
                     
                 theMemStream.Position = 0;
-                StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
+                var length = theMemStream.Length;
+                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, length, _chunkNumber++);
+                _chunkedUploadSession.BytesTotal += length;
                 _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
             }
             else
@@ -134,6 +137,8 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
         if (last)
         {
+            _chunkedUploadSession.BytesTotal++;
+            StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
             _sha.TransformFinalBlock(buffer, 0, 0);
         }
     }
@@ -143,7 +148,6 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
-        _chunkedUploadSession.BytesTotal = _chunkedUploadSession.BytesUploaded;
         await UploadAsync(true);
         await _fileStream.DisposeAsync();
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -146,6 +146,22 @@ public class StorageFactory(IServiceProvider serviceProvider,
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
         return GetDataStore(tenantPath, module, consumer, tenantQuotaController);
+    }
+
+    public async Task QuotaUsedAddAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
+    {
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
+        tenantQuotaController.Init(tenant.GetValueOrDefault());
+
+        await tenantQuotaController.QuotaUserUsedAddAsync(module, domain, dataTag, size, ownerId);
+    }
+
+    public async Task QuotaUsedDeleteAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
+    {
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
+        tenantQuotaController.Init(tenant.GetValueOrDefault());
+
+        await tenantQuotaController.QuotaUserUsedDeleteAsync(module, domain, dataTag, size, ownerId);
     }
 
     private IDataStore GetDataStore(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")

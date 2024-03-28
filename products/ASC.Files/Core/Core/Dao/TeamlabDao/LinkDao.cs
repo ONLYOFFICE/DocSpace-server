@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,8 +34,6 @@ internal class LinkDao(
     TenantUtil tenantUtil,
     SetupInfo setupInfo,
     MaxTotalSizeStatistic maxTotalSizeStatistic,
-    CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider)
@@ -45,8 +43,6 @@ internal class LinkDao(
         tenantUtil,
         setupInfo,
         maxTotalSizeStatistic,
-        coreBaseSettings,
-        coreConfiguration,
         settingsManager,
         authContext,
         serviceProvider), ILinkDao
@@ -137,7 +133,8 @@ static file class Queries
                 ctx.FilesLink
                     .Where(r => r.TenantId == tenantId && r.SourceId == sourceId && r.LinkedFor == id)
                     .Select(r => r.LinkedId)
-                    .SingleOrDefault());
+                    .OrderByDescending(r => r)
+                    .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, string, Guid, Task<DbFilesLink>> FileLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

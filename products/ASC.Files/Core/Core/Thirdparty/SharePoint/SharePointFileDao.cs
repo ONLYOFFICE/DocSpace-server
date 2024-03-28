@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,8 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
+    private const string BytesTransferredKey = "BytesTransferred";
+    
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharePointProviderInfo.InvalidateStorageAsync();
@@ -174,7 +176,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -279,7 +281,24 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return fileStream;
     }
 
-    public Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    
+    public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
+    {
+        return await GetFileStreamAsync(file, offset);
+    }
+
+    public async Task<long> GetFileSizeAsync(File<string> file)
+    {
+        var fileToDownload = await SharePointProviderInfo.GetFileByIdAsync(file.Id);
+        if (fileToDownload == null)
+        {
+            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
+    }
+    
+    public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
     }
@@ -327,7 +346,10 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     {
         return await SaveFileAsync(file, fileStream);
     }
-
+    public async Task DeleteFileAsync(string fileId,Guid ownerId)
+    {
+        await DeleteFileAsync(fileId);
+    }
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);
@@ -347,22 +369,22 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, sharePointDaoSelector.ConvertId,
@@ -373,7 +395,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return moved.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var newFileId = await SharePointProviderInfo.MoveFileAsync(fileId, toFolderId);
         await UpdatePathInDBAsync(SharePointProviderInfo.MakeId(fileId), newFileId);
@@ -446,22 +468,23 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(new ChunkedUploadSession<string>(FixId(file), contentLength) { UseChunks = false });
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
-        if (!uploadSession.UseChunks)
+        if (uploadSession.UseChunks)
         {
-            if (uploadSession.BytesTotal == 0)
-            {
-                uploadSession.BytesTotal = chunkLength;
-            }
-
-            uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            uploadSession.BytesUploaded = chunkLength;
-
-            return uploadSession.File;
+            throw new NotImplementedException();
         }
 
-        throw new NotImplementedException();
+        if (uploadSession.BytesTotal == 0)
+        {
+            uploadSession.BytesTotal = chunkLength;
+        }
+
+        uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
+            
+        uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
+
+        return uploadSession.File;
     }
 
     public Task<File<string>> FinalizeUploadSessionAsync(ChunkedUploadSession<string> uploadSession)
@@ -498,5 +521,17 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
     public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
     {
         return Task.CompletedTask;
+    }
+
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
+        {
+            transferred = 0;
+        }
+
+        uploadSession.File = FixId(uploadSession.File);
+        
+        return Task.FromResult(transferred);
     }
 }

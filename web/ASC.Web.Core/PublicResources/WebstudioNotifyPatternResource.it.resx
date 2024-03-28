@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Conferma</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Conferma modifica indirizzo del Portale</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Conferma passaggio di proprietà del Portale</value>
   </data>
@@ -204,19 +201,6 @@ Si prega di andare al link riportato qui sotto per confermare l'operazione:
 $OrangeButton
 
 *NOTA*: questo link sarà valido solo per 7 giorni. Si prega di completare l'operazione entro il periodo richiesto.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Cambio dell'indirizzo del portale
-
-Gentile $OwnerName,
-
-C'è stata una richiesta di modifica dell'indirizzo del portale da "${__VirtualRootPath}":"${__VirtualRootPath}" a "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Si prega di seguire il link qui sotto per confermare l'operazione:
-
-$OrangeButton
-
-* Nota *: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Unisciti a &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -695,9 +679,6 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Cambio del proprietario del portale</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Cambio dell'indirizzo del portale</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Unirsi su ${__VirtualRootPath}</value>
@@ -1366,7 +1347,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Salve!
 
-Sei invitato a unirti alla stanza $Message su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
+Sei invitato/ta a unirti alla stanza di DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
 $OrangeButton
 

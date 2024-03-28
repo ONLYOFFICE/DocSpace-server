@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Подтвердить</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Подтвердить изменение адреса портала</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Подтвердить смену владельца портала</value>
   </data>
@@ -218,19 +215,6 @@ $OrangeButton</value>
 $OrangeButton
 
 *Обратите внимание*: эта ссылка действительна только 7 дней. Пожалуйста, выполните смену владельца портала в течение этого времени.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Изменение адреса портала
-
-Здравствуйте, $OwnerName,
-
-Был сделан запрос на изменение адреса портала "${__VirtualRootPath}":"${__VirtualRootPath}" на "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Для подтверждения данной операции перейдите по ссылке:
-
-$OrangeButton
-
-*Обратите внимание*: эта ссылка действительна только 7 дней. Пожалуйста, выполните изменение адреса портала в течение этого времени.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -889,9 +873,6 @@ $OrangeButton
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Смена владельца портала</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Изменение адреса портала</value>
-  </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Стать участником ${__VirtualRootPath}</value>
   </data>
@@ -1542,7 +1523,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Здравствуйте!
  
-Вас пригласили в комнату $Message "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
+Вас пригласили в комнату DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
  
 $OrangeButton
  

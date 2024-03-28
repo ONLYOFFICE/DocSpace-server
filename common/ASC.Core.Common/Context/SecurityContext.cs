@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -143,7 +143,7 @@ public class SecurityContext(UserManager userManager,
 
             if (loginEventId != 0)
             {
-                var loginEventById = await dbLoginEventsManager.GetByIdAsync(loginEventId);
+                var loginEventById = await dbLoginEventsManager.GetByIdAsync(tenant, loginEventId);
                 if (loginEventById == null || !loginEventById.Active)
                 {
                     return false;
@@ -196,11 +196,19 @@ public class SecurityContext(UserManager userManager,
         return cookie;
     }
 
-    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
+    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null, Guid session = default)
     {
         if (account == null || account.Equals(Constants.Guest))
         {
-            throw new InvalidCredentialException("account");
+            if (session == default || session == Constants.Guest.ID)
+            {
+                throw new InvalidCredentialException(nameof(account));
+            }
+
+            var anonymousSession = new AnonymousSession(Constants.Guest.ID, Constants.Guest.Name, session);
+            authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(anonymousSession, []), anonymousSession);
+                
+            return;
         }
 
         var roles = new List<string> { Role.Everyone };
@@ -241,7 +249,7 @@ public class SecurityContext(UserManager userManager,
 
             roles.Add(Role.RoomAdministrators);
 
-            account = new UserAccount(u, await tenantManager.GetCurrentTenantIdAsync(), userFormatter);
+            account = new UserAccount(u, tenant.Id, userFormatter);
         }
 
         var claims = new List<Claim>

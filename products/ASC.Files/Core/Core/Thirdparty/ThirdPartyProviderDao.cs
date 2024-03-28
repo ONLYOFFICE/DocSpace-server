@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -242,8 +242,10 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-    
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
+    public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        throw new NotImplementedException();
+    }    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -255,23 +257,43 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
+    }
+
+    public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+    {
+        return default;
+    }
+
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
-        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
+        bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
+    }
+    public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
+    {
+        throw new NotImplementedException();
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterRoomsAsync(IAsyncEnumerable<Folder<string>> rooms, ProviderFilter provider, FilterType filterType, Guid subjectId,
@@ -317,9 +339,9 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filter = GetProviderTypes(providerFilter);
+        var providerType = GetProviderType(providerFilter);
 
-        return rooms.Where(f => filter.Contains(f.ProviderKey));
+        return rooms.Where(f => f.ProviderKey == providerType);
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
@@ -364,22 +386,23 @@ internal abstract class ThirdPartyProviderDao
 
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
     }
-    
-    internal static string[] GetProviderTypes(ProviderFilter providerFilter)
+
+    internal static string GetProviderType(ProviderFilter providerFilter)
     {
         var filter = providerFilter switch
         {
-            ProviderFilter.WebDav => [ProviderTypes.WebDav.ToStringFast()],
-            ProviderFilter.GoogleDrive => [ProviderTypes.GoogleDrive.ToStringFast()],
-            ProviderFilter.OneDrive => [ProviderTypes.OneDrive.ToStringFast()],
-            ProviderFilter.DropBox => [ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast()],
-            ProviderFilter.kDrive => [ProviderTypes.kDrive.ToStringFast()],
-            ProviderFilter.Yandex => [ProviderTypes.Yandex.ToStringFast()],
-            ProviderFilter.SharePoint => [ProviderTypes.SharePoint.ToStringFast()],
-            ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
+            ProviderFilter.WebDav => ProviderTypes.WebDav,
+            ProviderFilter.GoogleDrive => ProviderTypes.GoogleDrive,
+            ProviderFilter.OneDrive => ProviderTypes.OneDrive,
+            ProviderFilter.DropBox => ProviderTypes.DropboxV2,
+            ProviderFilter.kDrive => ProviderTypes.kDrive,
+            ProviderFilter.Yandex => ProviderTypes.Yandex,
+            ProviderFilter.SharePoint => ProviderTypes.SharePoint,
+            ProviderFilter.Box => ProviderTypes.Box,
             _ => throw new NotImplementedException()
         };
-        return filter;
+        
+        return filter.ToStringFast();
     }
     
     internal static FolderType GetRoomFolderType(FilterType filterType)
@@ -414,7 +437,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
     where TFolder : class, TItem
     where TItem : class
 {
-    protected int TenantId => tenantManager.GetCurrentTenant().Id;
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly UserManager _userManager = userManager;
     protected readonly TenantUtil _tenantUtil = tenantUtil;
@@ -434,7 +456,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         {
             return null;
         }
-
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         string result;
@@ -452,7 +475,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             {
                 Id = id,
                 HashId = result,
-                TenantId = TenantId
+                TenantId = tenantId
             };
 
             await filesDbContext.ThirdpartyIdMapping.AddAsync(newMapping);
@@ -528,16 +551,17 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         fileEntry.Error = entry.Error;
     }
 
-    protected void SetFolderType(Folder<string> folder, bool isRoot)
+    protected void ProcessFolderAsRoom(Folder<string> folder)
     {
-        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        folder.ProviderMapped = !string.IsNullOrEmpty(ProviderInfo.FolderId);
+        
+        if (ProviderInfo.FolderId != folder.Id)
         {
-            folder.FolderType = ProviderInfo.RootFolderType;
+            return;
         }
-        else if (ProviderInfo.FolderId == folder.Id)
-        {
-            folder.FolderType = ProviderInfo.FolderType;
-        }
+
+        folder.FolderType = ProviderInfo.FolderType;
+        folder.Title = ProviderInfo.CustomerTitle;
     }
 
     public bool CheckInvalidFilter(FilterType filterType)
@@ -554,7 +578,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             FilterType.ArchiveOnly or
             FilterType.MediaOnly;
     }
-    
+
     public async Task UpdateIdAsync(string oldValue, string newValue)
     {
         if (oldValue.Equals(newValue))
@@ -562,6 +586,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             return;
         }
 
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -569,7 +595,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-            var oldIds = Queries.IdsAsync(dbContext, TenantId, oldValue);
+            var oldIds = Queries.IdsAsync(dbContext, tenantId, oldValue);
 
             await foreach (var oldId in oldIds)
             {
@@ -577,7 +603,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
                 {
@@ -589,7 +615,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(mappingForDelete);
                 await dbContext.AddRangeAsync(mappingForInsert);
 
-                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
                 {
@@ -607,7 +633,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(securityForDelete);
                 await dbContext.AddRangeAsync(securityForInsert);
 
-                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
                 {
@@ -624,7 +650,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 await dbContext.AddRangeAsync(linkForInsert);
 
 
-                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var filesSourceForInsert = filesSourceForDelete.Select(l => new DbFilesLink
                 {
@@ -637,7 +663,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                 dbContext.RemoveRange(filesSourceForDelete);
                 await dbContext.AddRangeAsync(filesSourceForInsert);
 
-                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, TenantId, oldHashId).ToListAsync();
+                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
                 var filesLinkedForInsert = filesLinkedForDelete.Select(l => new DbFilesLink
                 {

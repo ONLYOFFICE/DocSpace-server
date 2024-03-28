@@ -649,7 +649,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>안녕하세요!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}"에서 $Message 방에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
+"${__VirtualRootPath}":"${__VirtualRootPath}"에서 DocSpace 방에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
 $OrangeButton
 
@@ -867,9 +867,6 @@ $TrulyYours</value>
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>DocSpace 초대 확인</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>포털 주소 변경 확인</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>포털 소유자 업데이트 확인</value>
   </data>
@@ -935,9 +932,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. 포털 소유자 변경</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. 포털 주소 변경</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>관리자에게 보내는 사용자의 메시지</value>
@@ -1156,19 +1150,6 @@ $OwnerName님,
 $OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 소유자 변경 프로세스를 완료하세요.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.포털 주소 변경
-
-$OwnerName님,
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" 포털 주소를 "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )로 변경할 것을 요청 받았습니다#end.
-
-아래 링크를 따라 작업을 확인해주세요.
-
-$OrangeButton
-
-*알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 주소 변경 프로세스를 완료하세요.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace 가입

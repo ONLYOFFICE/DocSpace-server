@@ -612,9 +612,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>تخصيص</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>تم إرسال رابط لتأكيد العملية إلى {0} (عنوان البريد الإلكتروني لمالك البوابة).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>هوية غير صحيحة.</value>
   </data>
@@ -905,9 +902,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>المالك</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة القرص</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>مساحة سحابية لمستندات مكتبك</value>

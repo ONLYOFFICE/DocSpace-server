@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,46 +32,23 @@ namespace ASC.Files.ThumbnailBuilder;
 
 [Singleton(Additional = typeof(FileConverterQueueExtension))]
 internal class FileConverterService<T>(
-        IServiceScopeFactory serviceScopeFactory,
+        IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
-    : BackgroundService
+     : ActivePassiveBackgroundService<FileConverterService<T>>(logger, scopeFactory)
+ {
+    private static readonly int _timerDelay = 1000;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(_timerDelay);
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-    private readonly int _timerDelay = 1000;
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        logger.DebugFileConverterServiceRuning();
-
-        stoppingToken.Register(logger.DebugFileConverterServiceStopping);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<FileConverterService<T>>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<FileConverterService<T>>.InstanceId))
-            {
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ExecuteCheckFileConverterStatusAsync(serviceScope);
-
-            await Task.Delay(_timerDelay, stoppingToken);
-        }
-    }
-
-    private async Task ExecuteCheckFileConverterStatusAsync(IServiceScope scope)
-    {
-        var logger = scope.ServiceProvider.GetService<ILogger<FileConverterQueue>>();
-
         try
         {
-            var fileConverterQueue = scope.ServiceProvider.GetService<FileConverterQueue>();
+            await using var serviceScope = _scopeFactory.CreateAsyncScope();
 
-            var conversionQueue = fileConverterQueue.GetAllTask<T>().ToList();
+            var fileConverterQueue = serviceScope.ServiceProvider.GetService<FileConverterQueue>();
+
+            var conversionQueue = (await fileConverterQueue.GetAllTaskAsync<T>()).ToList();
 
             if (conversionQueue.Count > 0)
             {
@@ -94,10 +71,10 @@ internal class FileConverterService<T>(
                 int operationResultProgress;
                 var password = converter.Password;
 
-                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                var commonLinkUtility = serviceScope.ServiceProvider.GetService<CommonLinkUtility>();
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
-                var scopeClass = scope.ServiceProvider.GetService<FileConverterQueueScope>();
+                var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
                 var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
@@ -112,13 +89,6 @@ internal class FileConverterService<T>(
 
                 try
                 {
-                    var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-
-                    if (!string.IsNullOrEmpty(converter.ExternalShareData))
-                    {
-                        externalShare.SetCurrentShareData(JsonSerializer.Deserialize<ExternalShareData>(converter.ExternalShareData));
-                    }
-
                     var user = await userManager.GetUsersAsync(converter.Account);
 
                     var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
@@ -143,7 +113,7 @@ internal class FileConverterService<T>(
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-                    fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
+                    fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
                     (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, true);
                 }
                 catch (Exception exception)
@@ -224,7 +194,7 @@ internal class FileConverterService<T>(
                             var folder = await folderDao.GetFolderAsync(newFile.ParentId);
                             var folderTitle = await fileSecurity.CanReadAsync(folder) ? folder.Title : null;
 
-                            converter.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
+                            converter.Result = await fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle);
                         }
 
                         converter.Progress = 100;
@@ -241,7 +211,7 @@ internal class FileConverterService<T>(
                 logger.DebugCheckConvertFilesStatusIterationEnd();
             }
 
-            fileConverterQueue.SetAllTask<T>(conversionQueue);
+            await fileConverterQueue.SetAllTask<T>(conversionQueue);
 
         }
         catch (Exception exception)

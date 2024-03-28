@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,38 +30,6 @@ namespace ASC.Web.Files.ThirdPartyApp;
 public class Token(OAuth20Token oAuth20Token, string app) : OAuth20Token(oAuth20Token)
 {
     public string App { get; private set; } = app;
-
-    public async Task<string> GetRefreshedTokenAsync(TokenHelper tokenHelper, OAuth20TokenHelper oAuth20TokenHelper, ThirdPartySelector thirdPartySelector)
-    {
-        if (IsExpired)
-        {
-            var app = thirdPartySelector.GetApp(App);
-            try
-            {
-                tokenHelper.Logger.DebugRefreshToken(App);
-
-                var refreshUrl = app.GetRefreshUrl();
-
-                var refreshed = oAuth20TokenHelper.RefreshToken(refreshUrl, this);
-
-                if (refreshed != null)
-                {
-                    AccessToken = refreshed.AccessToken;
-                    RefreshToken = refreshed.RefreshToken;
-                    ExpiresIn = refreshed.ExpiresIn;
-                    Timestamp = DateTime.UtcNow;
-
-                    await tokenHelper.SaveTokenAsync(this);
-                }
-            }
-            catch (Exception ex)
-            {
-                tokenHelper.Logger.ErrorRefreshToken(App, ex);
-            }
-        }
-
-        return AccessToken;
-    }
 }
 
 [Scope]

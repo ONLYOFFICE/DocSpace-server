@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,7 @@ public class ProductEntryPoint : Product
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FileSecurity _fileSecurity;
     private readonly GlobalFolder _globalFolder;
+    private readonly ILogger<ProductEntryPoint> _logger;
 
     //public SubscriptionManager SubscriptionManager { get; }
 
@@ -64,7 +65,8 @@ public class ProductEntryPoint : Product
         FilesLinkUtility filesLinkUtility,
         FileSecurity fileSecurity,
         GlobalFolder globalFolder,
-        CommonLinkUtility commonLinkUtility
+        CommonLinkUtility commonLinkUtility,
+        ILogger<ProductEntryPoint> logger
         //            SubscriptionManager subscriptionManager
         )
     {
@@ -82,6 +84,7 @@ public class ProductEntryPoint : Product
         _fileSecurity = fileSecurity;
         _globalFolder = globalFolder;
         _commonLinkUtility = commonLinkUtility;
+        _logger = logger;
         //SubscriptionManager = subscriptionManager;
     }
 
@@ -121,10 +124,13 @@ public class ProductEntryPoint : Product
             : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
     }
 
-    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
+    public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType, CultureInfo cultureInfo)
     {
         IEnumerable<AuditEvent> events;
         _tenantManager.SetCurrentTenant(tenant);
+
+        CultureInfo.CurrentCulture = cultureInfo;
+        CultureInfo.CurrentUICulture = cultureInfo;
 
         if (whatsNewType == WhatsNewType.RoomsActivity)
         {
@@ -147,7 +153,7 @@ public class ProductEntryPoint : Product
 
         var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
 
-        var disabledRooms = _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUser();
+        var disabledRooms = await _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
 
         var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
 
@@ -175,8 +181,17 @@ public class ProductEntryPoint : Product
                     break;
             }
 
-            var obj = e.Description.LastOrDefault();
-            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
+            AdditionalNotificationInfo<JsonElement> additionalInfo;
+
+            try
+            {
+                additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(e.Description.LastOrDefault()!);
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorDeserializingAuditEvent(e.Id, ex);
+                continue;
+            }
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
@@ -202,7 +217,12 @@ public class ProductEntryPoint : Product
                     }
             }
 
-            var roomId = additionalInfo.RoomId;
+            var roomId = additionalInfo.RoomId.ValueKind switch
+            {
+                JsonValueKind.String when int.TryParse(additionalInfo.RoomId.GetString(), out var id) => id,
+                JsonValueKind.Number => additionalInfo.RoomId.GetInt32(),
+                _ => 0
+            };
 
             if (e.Action != (int)MessageAction.RoomCreated)
             {
@@ -233,6 +253,7 @@ public class ProductEntryPoint : Product
 
             result.Add(activityInfo);
         }
+        
         return result;
     }
 
