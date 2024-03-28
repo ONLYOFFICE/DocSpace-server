@@ -54,7 +54,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileMarker fileMarker,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
     Global global,
     EmailValidationKeyProvider emailValidationKeyProvider,
@@ -78,11 +77,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ExternalShare externalShare,
     EntryManager entryManager)
 {
-    public string FileHandlerPath
-    {
-        get { return filesLinkUtility.FileHandlerPath; }
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         if (await tenantExtra.IsNotPaidAsync())

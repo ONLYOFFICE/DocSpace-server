@@ -199,8 +199,7 @@ public enum Accessibility
 public class FileUtility(
     FileUtilityConfiguration fileUtilityConfiguration,
     FilesLinkUtility filesLinkUtility,
-    IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo)
+    IDbContextFactory<FilesDbContext> dbContextFactory)
 {
     #region method
 

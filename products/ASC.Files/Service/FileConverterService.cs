@@ -75,7 +75,7 @@ internal class FileConverterService<T>(
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
                 var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
-                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
+                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
 
@@ -232,7 +232,6 @@ public record FileConverterQueueScope(
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     PathProvider PathProvider,
-    SetupInfo SetupInfo,
     FileUtility FileUtility,
     DocumentServiceHelper DocumentServiceHelper,
     DocumentServiceConnector DocumentServiceConnector,

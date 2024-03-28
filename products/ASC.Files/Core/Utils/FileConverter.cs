@@ -255,65 +255,31 @@ public class FileJsonSerializerData<T>
 }
 
 [Scope(Additional = typeof(FileConverterExtension))]
-public class FileConverter(FileUtility fileUtility,
-        FilesLinkUtility filesLinkUtility,
-        IDaoFactory daoFactory,
-        SetupInfo setupInfo,
-        PathProvider pathProvider,
-        FileSecurity fileSecurity,
-        FileMarker fileMarker,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        EntryManager entryManager,
-        FilesSettingsHelper filesSettingsHelper,
-        GlobalFolderHelper globalFolderHelper,
-        FilesMessageService filesMessageService,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        DocumentServiceConnector documentServiceConnector,
-        FileTrackerHelper fileTracker,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider,
-        IHttpClientFactory clientFactory,
-        SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
-    {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public FileConverter(
-        FileUtility fileUtility,
-        FilesLinkUtility filesLinkUtility,
-        IDaoFactory daoFactory,
-        SetupInfo setupInfo,
-        PathProvider pathProvider,
-        FileSecurity fileSecurity,
-        FileMarker fileMarker,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        EntryManager entryManager,
-        FilesSettingsHelper filesSettingsHelper,
-        GlobalFolderHelper globalFolderHelper,
-        FilesMessageService filesMessageService,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        DocumentServiceConnector documentServiceConnector,
-        FileTrackerHelper fileTracker,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider,
-        IHttpContextAccessor httpContextAccessor,
-        IHttpClientFactory clientFactory,
-        SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
-        : this(fileUtility, filesLinkUtility, daoFactory, setupInfo, pathProvider, fileSecurity,
-              fileMarker, tenantManager, authContext, entryManager, filesSettingsHelper,
-              globalFolderHelper, filesMessageService, fileShareLink, documentServiceHelper, documentServiceConnector, fileTracker,
-              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
+public class FileConverter(
+    FileUtility fileUtility,
+    FilesLinkUtility filesLinkUtility,
+    IDaoFactory daoFactory,
+    PathProvider pathProvider,
+    FileSecurity fileSecurity,
+    FileMarker fileMarker,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    EntryManager entryManager,
+    FilesSettingsHelper filesSettingsHelper,
+    GlobalFolderHelper globalFolderHelper,
+    FilesMessageService filesMessageService,
+    FileShareLink fileShareLink,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    FileTrackerHelper fileTracker,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    EntryStatusManager entryStatusManager,
+    IServiceProvider serviceProvider,
+    IHttpClientFactory clientFactory,
+    SocketManager socketManager,
+    FileConverterQueue fileConverterQueue,
+    IHttpContextAccessor httpContextAccessor)
+{
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
     public bool MustConvert<T>(File<T> file)
@@ -330,7 +296,7 @@ public class FileConverter(FileUtility fileUtility,
 
     private Dictionary<string, string> GetHttpHeaders()
     {
-        var request = _httpContextAccessor?.HttpContext?.Request;
+        var request = httpContextAccessor?.HttpContext?.Request;
 
         return MessageSettings.GetHttpHeaders(request)?
             .ToDictionary(x => x.Key, x => x.Value.ToString());
@@ -435,7 +401,7 @@ public class FileConverter(FileUtility fileUtility,
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
-            Url = _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
+            Url = httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             Password = null,
             ServerRootPath = baseCommonLinkUtility.ServerRootPath,
             Headers = GetHttpHeaders()
@@ -481,7 +447,7 @@ public class FileConverter(FileUtility fileUtility,
         await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
-            _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
+            httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             baseCommonLinkUtility.ServerRootPath, 
             updateIfExist,
             GetHttpHeaders());
