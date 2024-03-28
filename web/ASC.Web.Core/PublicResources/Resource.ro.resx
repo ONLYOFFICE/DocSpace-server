@@ -330,9 +330,6 @@
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Dezactivarea profilelor vechi de utilizator care au fost încărcate anterior prin LDAP</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Cota spaţiului de stocare a fost depășită</value>
-  </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
   </data>

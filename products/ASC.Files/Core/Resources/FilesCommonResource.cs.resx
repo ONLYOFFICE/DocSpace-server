@@ -160,9 +160,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Soubor větší než {0} nebude zkopírován</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Soubor větší než {0} nebude upraven</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Soubor větší než {0} nebude přesunut</value>
   </data>

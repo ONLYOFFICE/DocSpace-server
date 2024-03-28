@@ -181,9 +181,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Arquivo maior que {0} não será copiado</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Arquivo maior que {0} não será editado</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Arquivo maior que {0} não será movido</value>
   </data>

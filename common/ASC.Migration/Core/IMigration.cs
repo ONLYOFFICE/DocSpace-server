@@ -29,7 +29,7 @@ namespace ASC.Migration.Core;
 [Scope]
 public interface IMigration : IDisposable
 {
-    event Action<double, string> OnProgressUpdate;
+    Func<double, string, Task> OnProgressUpdate { get; set; }
 
     double GetProgress();
     string GetProgressStatus();

@@ -166,7 +166,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public Guid GetFileQuotaOwner()
     {
         return
-            DocSpaceHelper.IsRoom(RootFolderType) ?
+            RootFolderType == FolderType.VirtualRooms ?
                 ASC.Core.Configuration.Constants.CoreSystem.ID :
 
                 RootFolderType == FolderType.USER || RootFolderType == FolderType.DEFAULT || RootFolderType == FolderType.TRASH ?

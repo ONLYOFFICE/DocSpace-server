@@ -1031,7 +1031,7 @@ internal class FileDao(
         if (file != null)
         {
             var copy = _serviceProvider.GetService<File<int>>();
-            copy.FileStatus = file.FileStatus;
+            copy.SetFileStatus(await file.GetFileStatus());
             copy.ParentId = toFolderId;
             copy.Title = file.Title;
             copy.ConvertedType = file.ConvertedType;

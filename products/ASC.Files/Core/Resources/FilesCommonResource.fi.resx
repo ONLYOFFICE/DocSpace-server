@@ -154,9 +154,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Tiedosto joka on enemmän kuin {0} ei voida kopioida</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0} suurempaa tiedostoa ei voi muokata</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Tiedosto joka on suurempi kuin {0} ei voida siirtää</value>
   </data>

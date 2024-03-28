@@ -53,7 +53,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = queueWorkerRemove.GetProgressItemStatus(tenant.Id, userId);
+        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, userId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -133,6 +133,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
+        await queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
     }
 }

@@ -373,9 +373,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo kopirana</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Datoteka, ki je večja od {0}, ne bo urejena</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo premaknjena</value>
   </data>

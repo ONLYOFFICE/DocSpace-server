@@ -967,9 +967,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Ja lietotājs ar e-pasta adresi {0} pastāv, paroles maiņas instrukcija tiek nosūtīta uz šo e-pasta adresi.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Pārsniegta diska vietas kvota</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Mākoņa telpa jūsu biroja dokumentiem</value>
   </data>

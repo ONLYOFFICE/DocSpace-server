@@ -26,10 +26,10 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singleton(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
+[Singleton(Additional = typeof(DocumentBuilderTaskManagerHelperExtension))]
 public class DocumentBuilderTaskManager
 {
-    private readonly object _synchRoot = new();
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly DistributedTaskQueue _queue;
 
@@ -43,37 +43,38 @@ public class DocumentBuilderTaskManager
         return $"DocumentBuilderTask_{tenantId}_{userId}";
     }
 
-    public DistributedTaskProgress GetTask(int tenantId, Guid userId)
+    public async Task<DistributedTaskProgress> GetTask(int tenantId, Guid userId)
     {
         var taskId = GetTaskId(tenantId, userId);
 
-        return GetTask(taskId);
+        return await GetTask(taskId);
     }
 
-    public DistributedTaskProgress GetTask(string taskId)
+    private async Task<DistributedTaskProgress> GetTask(string taskId)
     {
-        return _queue.PeekTask<DistributedTaskProgress>(taskId);
+        return await _queue.PeekTask<DistributedTaskProgress>(taskId);
     }
 
-    public void TerminateTask(int tenantId, Guid userId)
+    public async Task TerminateTask(int tenantId, Guid userId)
     {
-        var task = GetTask(tenantId, userId);
+        var task = await GetTask(tenantId, userId);
 
         if (task != null)
         {
-            _queue.DequeueTask(task.Id);
+            await _queue.DequeueTask(task.Id);
         }
     }
 
-    public DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask, bool enqueueTask = true)
+    public async Task<DistributedTaskProgress> StartTask<T>(DocumentBuilderTask<T> newTask, bool enqueueTask = true)
     {
-        lock (_synchRoot)
+        try
         {
-            var task = GetTask(newTask.Id);
+            await _semaphore.WaitAsync();
+            var task = await GetTask(newTask.Id);
 
             if (task is { IsCompleted: true })
             {
-                _queue.DequeueTask(task.Id);
+                await _queue.DequeueTask(task.Id);
                 task = null;
             }
 
@@ -83,20 +84,24 @@ public class DocumentBuilderTaskManager
 
                 if (enqueueTask)
                 {
-                    _queue.EnqueueTask(task);
+                    await _queue.EnqueueTask(task);
                 }
                 else
                 {
-                    _queue.PublishTask(task);
+                    await _queue.PublishTask(task);
                 }
             }
 
             return task;
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 }
 
-public static class DocumentBuilderTaskManagerHelperExtention
+public static class DocumentBuilderTaskManagerHelperExtension
 {
     public static void Register(DIHelper services)
     {

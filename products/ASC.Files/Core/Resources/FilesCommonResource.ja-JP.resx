@@ -178,9 +178,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}より大きくファイルがコピーされません</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}より大きくファイルが編集されません</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}より大きくファイルが移動されません</value>
   </data>

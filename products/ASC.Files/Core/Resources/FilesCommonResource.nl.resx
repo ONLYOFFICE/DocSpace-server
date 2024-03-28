@@ -175,9 +175,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet gekopieerd</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Bestand groter dan {0} kan niet worden bewerkt</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet verplaatst</value>
   </data>

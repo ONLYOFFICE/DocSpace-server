@@ -86,22 +86,22 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
             Percentage = 5;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
 
             Percentage = 10;
-            PublishChanges();
+            await PublishChanges();
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
             Percentage = 30;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
 
             Percentage = 95;
-            PublishChanges();
+            await PublishChanges();
 
             //_mailEraser.ClearUserMail(_userId);
             //await DeleteTalkStorage(storageFactory);
@@ -127,7 +127,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         {
             logger.LogInformation("data deletion is complete");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 

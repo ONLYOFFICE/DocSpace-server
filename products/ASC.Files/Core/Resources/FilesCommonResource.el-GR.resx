@@ -157,9 +157,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο από {0} δε θα αντιγραφεί</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Αρχείο μεγαλύτερο από {0} δε θα τροποποιηθεί</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο {0} από δε θα μετακινηθεί</value>
   </data>

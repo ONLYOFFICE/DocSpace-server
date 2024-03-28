@@ -157,9 +157,6 @@
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Faili, kas pārsniedz {0} netiks nokopēti</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Faili, kas pārsniedz {0}, netiks rediģēti</value>
-  </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Faili, kas pārsniedz {0}, netiks pārvietoti</value>
   </data>

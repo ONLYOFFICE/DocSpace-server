@@ -38,4 +38,10 @@ public record BulkDownloadIntegrationEvent : IntegrationEvent
 
     [ProtoMember(1)]
     public string TaskId { get; set; }
+    
+    [ProtoMember(2)]
+    public FileDownloadOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileDownloadOperationData<string> ThirdPartyData { get; set; }
 }
