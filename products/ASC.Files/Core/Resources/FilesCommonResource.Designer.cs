@@ -465,15 +465,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File larger than {0} will not be converted.
-        /// </summary>
-        public static string ErrorMessage_FileSizeConvert {
-            get {
-                return ResourceManager.GetString("ErrorMessage_FileSizeConvert", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be copied.
         /// </summary>
         public static string ErrorMessage_FileSizeCopy {

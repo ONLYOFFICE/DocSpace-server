@@ -102,11 +102,6 @@ internal class FileConverterService<T>(
                         throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
                     }
 
-                    if (file.ContentLength > setupInfo.AvailableFileSize)
-                    {
-                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
-                    }
-
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
 
                     var toExtension = fileUtility.GetInternalConvertExtension(file.Title);

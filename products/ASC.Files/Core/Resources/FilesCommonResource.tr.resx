@@ -175,9 +175,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Gerekli dosya bulunamadı</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}'dan büyük dosya çevrilmeyecektir</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0} boyutundan büyük dosya kopyalanmayacak</value>
   </data>

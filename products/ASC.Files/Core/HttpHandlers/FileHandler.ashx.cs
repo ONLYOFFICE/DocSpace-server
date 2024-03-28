@@ -348,8 +348,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 {
                     var title = file.Title;
 
-                    if (file.ContentLength <= setupInfo.AvailableFileSize)
-                    {
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
@@ -415,26 +413,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
 
                         flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
-                    else
-                    {
-                        if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
-                        {
-                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
-                            
-                            context.Response.Redirect(url, true);
 
-                            return;
-                        }
-                        
-                        var fullLength = await fileDao.GetFileSizeAsync(file);
-            
-                        long offset = 0;
-                        var length = ProcessRangeHeader(context, fullLength, ref offset);
-                        fileStream = await fileDao.GetFileStreamAsync(file, offset, length);
-            
-                        flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
                 }
                 catch (ThreadAbortException tae)
                 {

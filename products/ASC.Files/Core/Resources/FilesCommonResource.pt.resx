@@ -347,9 +347,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>O ficheiro foi aberto para edição por {0}. Atualmente, a função de coedição não é suportada para este formato de ficheiro.</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Ficheiro maior que {0}, não será convertido</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será copiado</value>
   </data>

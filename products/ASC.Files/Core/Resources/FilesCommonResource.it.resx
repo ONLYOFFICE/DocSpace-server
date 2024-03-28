@@ -178,9 +178,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Il file richiesto non è trovato</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Il file superiore a {0} non sarà convertito</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>File più grandi di {0} non saranno copiati</value>
   </data>

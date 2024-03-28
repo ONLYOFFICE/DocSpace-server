@@ -151,9 +151,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Το απαιτούμενο αρχείο δεν βρέθηκε</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Αρχείο μεγαλύτερο από {0} δε θα μετατραπεί</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Αρχείο μεγαλύτερο από {0} δε θα αντιγραφεί</value>
   </data>

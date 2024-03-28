@@ -151,9 +151,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Pieprasīts fails netika atrasts</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Fails, kas lielāks par {0} netiks konvertēts</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Faili, kas pārsniedz {0} netiks nokopēti</value>
   </data>

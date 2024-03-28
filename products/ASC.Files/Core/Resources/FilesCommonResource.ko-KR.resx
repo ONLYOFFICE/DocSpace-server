@@ -371,9 +371,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}보다 큰 파일은 복사되지 않습니다</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}보다 큰 파일은 변환되지 않습니다</value>
-  </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>파일 편집 시작 오류</value>
   </data>

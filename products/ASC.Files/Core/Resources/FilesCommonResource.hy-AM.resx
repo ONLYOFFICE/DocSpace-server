@@ -246,9 +246,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Պահանջվող ֆայլը չի գտնվել</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}-ից մեծ ֆայլը չի փոխարկվի</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}-ից մեծ ֆայլը չի պատճենվի</value>
   </data>

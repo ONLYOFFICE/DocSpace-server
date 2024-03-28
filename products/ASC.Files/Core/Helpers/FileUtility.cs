@@ -405,7 +405,7 @@ public class FileUtility(
     public async Task<bool> CanConvert<T>(File<T> file)
     {
         var ext = GetFileExtension(file.Title);
-        return (await GetExtsConvertibleAsync()).ContainsKey(ext) && file.ContentLength <= setupInfo.AvailableFileSize;
+        return (await GetExtsConvertibleAsync()).ContainsKey(ext);
     }
 
     public bool MustConvert(string fileName)

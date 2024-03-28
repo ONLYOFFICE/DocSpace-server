@@ -377,11 +377,6 @@ public class FileConverter(FileUtility fileUtility,
             return await fileDao.GetFileStreamAsync(file);
         }
 
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
-        }
-
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);

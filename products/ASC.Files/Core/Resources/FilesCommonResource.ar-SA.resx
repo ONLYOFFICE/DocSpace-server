@@ -246,9 +246,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>لم يتم العثور على الملف المطلوب</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>لن يتم تحويل الملف إذا تجاوز حجمه {0}</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>لن يتم نسخ الملف إذا تجاوز حجمه {0}</value>
   </data>
