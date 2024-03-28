@@ -27,7 +27,7 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
+public class FileSizeComment(SetupInfo setupInfo)
 {
     public string FileImageSizeExceptionString
     {
@@ -39,36 +39,19 @@ public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
         return $"{Resource.FileSizeMaxExceed} ({FilesSizeToString(size)}).";
     }
 
-    public static string GetPersonalFreeSpaceExceptionString(long size)
-    {
-        return $"{Resource.PersonalFreeSpaceException} ({FilesSizeToString(size)}).";
-    }
-
-    public static string GetRoomFreeSpaceExceptionString(long size)
+    private static string GetRoomFreeSpaceExceptionString(long size)
     {
         return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
     }
-    public static string GetUserFreeSpaceExceptionString(long size)
+
+    private static string GetUserFreeSpaceExceptionString(long size)
     {
         return $"{Resource.UserFreeSpaceException} ({FilesSizeToString(size)}).";
-    }
-
-    /// <summary>
-    /// The maximum file size is exceeded (1 MB).
-    /// </summary>
-    public Exception FileImageSizeException
-    {
-        get { return new TenantQuotaException(FileImageSizeExceptionString); }
     }
 
     public static Exception GetFileSizeException(long size)
     {
         return new TenantQuotaException(GetFileSizeExceptionString(size));
-    }
-
-    public static Exception GetPersonalFreeSpaceException(long size)
-    {
-        return new TenantQuotaException(GetPersonalFreeSpaceExceptionString(size));
     }
 
     public static Exception GetRoomFreeSpaceException(long size)
@@ -80,68 +63,7 @@ public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
     {
         return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
     }
-
-    /// <summary>
-    /// The maximum file size is exceeded (25 MB).
-    /// </summary>
-    public async Task<Exception> GetFileSizeExceptionAsync()
-    {
-        return new TenantQuotaException(await GetFileSizeExceptionStringAsync());
-    }
-
-    public async Task<string> GetFileSizeExceptionStringAsync()
-    {
-        return GetFileSizeExceptionString(await tenantExtra.GetMaxUploadSizeAsync());
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync()
-    {
-        return await GetFileSizeNoteAsync(true);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync(bool withHtmlStrong)
-    {
-        return await GetFileSizeNoteAsync(Resource.FileSizeNote, withHtmlStrong);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <param name="note">Resource fromat of note</param>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync(string note, bool withHtmlStrong)
-    {
-        return
-            string.Format(note,
-                          FilesSizeToString(await tenantExtra.GetMaxUploadSizeAsync()),
-                          withHtmlStrong ? "<strong>" : string.Empty,
-                          withHtmlStrong ? "</strong>" : string.Empty);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size of image
-    /// </summary>
-    /// <param name="note">Resource fromat of note</param>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 1 MB</returns>
-    public string GetFileImageSizeNote(string note, bool withHtmlStrong)
-    {
-        return
-            string.Format(note,
-                          FilesSizeToString(setupInfo.MaxImageUploadSize),
-                          withHtmlStrong ? "<strong>" : string.Empty,
-                          withHtmlStrong ? "</strong>" : string.Empty);
-    }
+    
 
     /// <summary>
     /// Generates a string the file size
@@ -161,6 +83,6 @@ public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
             power = power < sizeNames.Length ? power : sizeNames.Length - 1;
             resultSize /= Math.Pow(1024d, power);
         }
-        return string.Format("{0:#,0.##} {1}", resultSize, sizeNames[power]);
+        return $"{resultSize:#,0.##} {sizeNames[power]}";
     }
 }

@@ -73,11 +73,11 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            SetPercentageAndCheckCancellation(5, true);
+            await SetPercentageAndCheckCancellation(5, true);
 
             await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            SetPercentageAndCheckCancellation(10, true);
+            await SetPercentageAndCheckCancellation(10, true);
 
             List<int> personalFolderIds = null;
 
@@ -90,30 +90,30 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
                 personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
             }
 
-            SetPercentageAndCheckCancellation(30, true);
+            await SetPercentageAndCheckCancellation(30, true);
 
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
-            SetPercentageAndCheckCancellation(50, true);
+            await SetPercentageAndCheckCancellation(50, true);
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
-            SetPercentageAndCheckCancellation(70, true);
+            await SetPercentageAndCheckCancellation(70, true);
 
             await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
-            SetPercentageAndCheckCancellation(90, true);
+            await SetPercentageAndCheckCancellation(90, true);
 
             await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, messageTarget, displayUserSettingsHelper);
 
-            SetPercentageAndCheckCancellation(95, true);
+            await SetPercentageAndCheckCancellation(95, true);
 
             if (_deleteProfile)
             {
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, displayUserSettingsHelper);
             }
 
-            SetPercentageAndCheckCancellation(100, false);
+            await SetPercentageAndCheckCancellation(100, false);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -133,7 +133,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         {
             logger.LogInformation($"data reassignment {Status.ToString().ToLowerInvariant()}");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 
@@ -142,13 +142,13 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         return MemberwiseClone();
     }
 
-    private void SetPercentageAndCheckCancellation(double percentage, bool publish)
+    private async Task SetPercentageAndCheckCancellation(double percentage, bool publish)
     {
         Percentage = percentage;
 
         if (publish)
         {
-            PublishChanges();
+            await PublishChanges();
         }
 
         CancellationToken.ThrowIfCancellationRequested();

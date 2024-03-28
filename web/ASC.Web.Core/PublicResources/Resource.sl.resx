@@ -952,9 +952,6 @@
   <data name="OrgServerRegion" xml:space="preserve">
     <value>ORG Regija</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Kvota prostora na disku je presežena</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Prostor v oblaku za vaše pisarniške dokumente</value>
   </data>

@@ -53,6 +53,7 @@ public class UserController(ICache cache,
         SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
         IHttpClientFactory httpClientFactory,
@@ -431,6 +432,7 @@ public class UserController(ICache cache,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
+        await fileSecurity.RemoveSubjectAsync(user.Id, true);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
@@ -818,6 +820,7 @@ public class UserController(ICache cache,
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
+            await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
@@ -1508,7 +1511,7 @@ public class UserController(ICache cache,
     public async Task RecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1526,7 +1529,7 @@ public class UserController(ICache cache,
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        return usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1553,15 +1556,26 @@ public class UserController(ICache cache,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
         
         if (maxTotalSize < inDto.Quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.Quota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
 
         foreach (var user in users)
-            {
+        {
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
@@ -1571,8 +1585,8 @@ public class UserController(ICache cache,
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
-                }
-            }
+        }
+    }
 
     /// <summary>
     /// Reset a user quota limit with the ID specified in the request from the portal.
@@ -1588,6 +1602,13 @@ public class UserController(ICache cache,
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+        }
+
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
@@ -1600,8 +1621,8 @@ public class UserController(ICache cache,
             {
                 throw new SecurityException();
             }
-            var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
-            await settingsManager.SaveAsync(defaulSettings, user);
+            var defaultSettings = settingsManager.GetDefault<UserQuotaSettings>();
+            await settingsManager.SaveAsync(defaultSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();

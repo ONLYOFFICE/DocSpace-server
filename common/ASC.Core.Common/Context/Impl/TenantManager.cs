@@ -166,6 +166,14 @@ public class TenantManager(
 
         return newTenant;
     }
+    
+    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant)
+    {
+        newTenant = await tenantService.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        SetCurrentTenant(newTenant);
+
+        return newTenant;
+    }
 
     public async Task RemoveTenantAsync(int tenantId, bool auto = false)
     {

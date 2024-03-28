@@ -40,7 +40,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -135,6 +136,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && !await fileSecurity.CanReadAsync(file))
         {
+            if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
+            {
+                throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+            
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 

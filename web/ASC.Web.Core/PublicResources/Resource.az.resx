@@ -235,9 +235,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Sahib</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk sahəsi kvotası keçildi</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Portala Giriş</value>
   </data>
