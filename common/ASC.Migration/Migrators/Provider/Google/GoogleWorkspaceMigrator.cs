@@ -85,7 +85,7 @@ public class GoogleWorkspaceMigrator : Migrator
     {
         if (reportProgress)
         {
-            ReportProgressAsync(5, MigrationResource.StartOfDataProcessing);
+            await ReportProgressAsync(5, MigrationResource.StartOfDataProcessing);
         }
 
         var progressStep = 90 / _takeouts.Length;
