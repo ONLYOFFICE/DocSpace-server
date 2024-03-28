@@ -80,6 +80,13 @@ public class Startup : BaseStartup
             });
 
         app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("logo.ashx"),
+            appBranch =>
+            {
+                appBranch.UseLogoHandler();
+            });
+
+        app.MapWhen(
             context => context.Request.Path.ToString().EndsWith("payment.ashx"),
             appBranch =>
             {

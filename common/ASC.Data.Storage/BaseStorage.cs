@@ -407,6 +407,15 @@ public abstract class BaseStorage(TempStream tempStream,
 
     public abstract Task<string> GetFileEtagAsync(string domain, string path);
 
+    public async Task<string> GetUrlWithHashAsync(string domain, string path)
+    {
+        var uri = (await GetUriAsync(domain, path)).ToString();
+
+        var hash = (await GetFileEtagAsync(domain, path)).Trim('"');
+
+        return QueryHelpers.AddQueryString(uri, Constants.QueryHash, hash);
+    }
+
     private sealed class MonoUri : Uri
     {
         public MonoUri(Uri baseUri, string relativeUri)

@@ -363,4 +363,6 @@ public interface IDataStore
                          string contentDisposition);
 
     Task<string> GetFileEtagAsync(string domain, string path);
+
+    Task<string> GetUrlWithHashAsync(string domain, string path);
 }

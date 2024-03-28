@@ -598,7 +598,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
         if (await store.IsFileAsync(fileName))
         {
-            return (await store.GetUriAsync(fileName)).ToString();
+            return await store.GetUrlWithHashAsync(string.Empty, fileName);
         }
         return await GetAbsoluteDefaultLogoPathAsync(type, dark);
     }
@@ -645,7 +645,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUriAsync(logoPath)).ToString() : null;
+        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
     }
 
     #endregion
