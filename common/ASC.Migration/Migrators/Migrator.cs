@@ -257,7 +257,7 @@ public abstract class Migrator : IDisposable
         }
         if (user.Info.LastName == null)
         {
-            user.Info.LastName = "NOTPROVIDED";
+            user.Info.LastName = user.Info.FirstName;
         }
     }
 
