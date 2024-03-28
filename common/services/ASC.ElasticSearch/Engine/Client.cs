@@ -27,11 +27,10 @@
 namespace ASC.ElasticSearch;
 
 [Singleton]
-public class Client(ILoggerProvider option, Settings settings)
+public class Client(ILogger<Client> logger, Settings settings)
 {
     private volatile OpenSearchClient _client;
     private static readonly object _locker = new();
-    private readonly ILogger _logger = option.CreateLogger("ASC.Indexer");
 
     public OpenSearchClient Instance
     {
@@ -54,7 +53,7 @@ public class Client(ILoggerProvider option, Settings settings)
                     return null;
                 }
 
-                var uri = new Uri(string.Format("{0}://{1}:{2}", settings.Scheme, settings.Host, settings.Port));
+                var uri = new Uri($"{settings.Scheme}://{settings.Host}:{settings.Port}");
                 var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
@@ -70,20 +69,20 @@ public class Client(ILoggerProvider option, Settings settings)
                     connectionSettings.ApiKeyAuthentication(settings.ApiKey.Id, settings.ApiKey.Value);
                 }
 
-                if (_logger.IsEnabled(LogLevel.Trace))
+                if (logger.IsEnabled(LogLevel.Trace))
                 {
                     connectionSettings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
-                        _logger.Debug(r.DebugInformation);
-
-                        if (r.RequestBodyInBytes != null)
-                        {
-                            _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
-                        }
+                        // _logger.Debug(r.DebugInformation);
+                        //
+                        // if (r.RequestBodyInBytes != null)
+                        // {
+                        //     _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
+                        // }
 
                         if (r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {
-                            _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
+                            logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                         }
                     });
                 }
@@ -93,21 +92,20 @@ public class Client(ILoggerProvider option, Settings settings)
                     var client = new OpenSearchClient(connectionSettings);
                     if (Ping(client))
                     {
+                        client.Ingest.PutPipeline("attachments", p => p.Processors(pp => pp.Attachment<Attachment>(a => a.Field("document.data").TargetField("document.attachment"))));
+                        
                         _client = client;
-
-                        _client.Ingest.PutPipeline("attachments", p => p
-                        .Processors(pp => pp
-                            .Attachment<Attachment>(a => a.Field("document.data").TargetField("document.attachment"))
-                        ));
                     }
+
+                    return client;
 
                 }
                 catch (Exception e)
                 {
-                    _logger.ErrorClient(e);
+                    logger.ErrorClient(e);
                 }
 
-                return _client;
+                return null;
             }
         }
     }
@@ -126,7 +124,7 @@ public class Client(ILoggerProvider option, Settings settings)
 
         var result = elasticClient.Ping(new PingRequest());
 
-        _logger.DebugPing(result.DebugInformation);
+        logger.DebugPing(result.DebugInformation);
 
         return result.IsValid;
     }

@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="6.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="8.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="8.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.0" />
