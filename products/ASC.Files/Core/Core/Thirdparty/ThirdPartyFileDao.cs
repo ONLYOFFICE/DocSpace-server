@@ -787,6 +787,16 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         return Task.FromResult(nativeSession.BytesTransferred);
     }
+
+    public Task MarkFileAsRemovedAsync(File<string> file)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

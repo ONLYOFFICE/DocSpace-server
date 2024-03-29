@@ -412,6 +412,10 @@ public interface IFolderDao<T>
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
-    
+
+    Task MarkFolderAsRemovedAsync(Folder<T> folder);
+
+    Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds);
+
     #endregion
 }

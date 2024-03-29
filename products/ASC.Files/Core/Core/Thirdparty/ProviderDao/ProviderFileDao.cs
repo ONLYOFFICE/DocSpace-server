@@ -556,4 +556,31 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     }
 
     #endregion
+
+    public async Task MarkFileAsRemovedAsync(File<string> file)
+    {
+        var selector = _selectorFactory.GetSelector(file.Id);
+        var fileDao = selector.GetFileDao(file.Id);
+        await fileDao.MarkFileAsRemovedAsync(file);
+    }
+
+    public async Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
+    {
+        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        {
+            var selectorLocal = group.Key;
+            if (selectorLocal == null)
+            {
+                continue;
+            }
+            var matchedIds = group.Value;
+
+            foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
+            {
+                var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
+
+                await fileDao.MarkFilesAsRemovedAsync(matchedId.Select(selectorLocal.ConvertId).ToList());
+            }
+        }
+    }
 }

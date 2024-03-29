@@ -1701,6 +1701,24 @@ internal class FileDao(
         await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
     }
 
+    public async Task MarkFileAsRemovedAsync(File<int> file)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, [file.Id]);
+    }
+
+    public async Task MarkFilesAsRemovedAsync(IEnumerable<int> fileIds)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, fileIds);
+    }
+
     #endregion
 
     private Func<Selector<DbFile>, Selector<DbFile>> GetFuncForSearch(int? parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
@@ -2693,4 +2711,12 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
                     .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> MarkDbFilesAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.Id))
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
 }

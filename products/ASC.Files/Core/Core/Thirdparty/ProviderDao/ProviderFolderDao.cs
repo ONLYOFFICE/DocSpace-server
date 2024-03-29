@@ -651,7 +651,34 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    
+
+    public async Task MarkFolderAsRemovedAsync(Folder<string> folder)
+    {
+        var selector = _selectorFactory.GetSelector(folder.Id);
+        var folderDao = selector.GetFolderDao(folder.Id);
+        await folderDao.MarkFolderAsRemovedAsync(folder);
+    }
+
+    public async Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
+    {
+        foreach (var group in _selectorFactory.GetSelectors(folderIds))
+        {
+            var selectorLocal = group.Key;
+            if (selectorLocal == null)
+            {
+                continue;
+            }
+            var matchedIds = group.Value;
+
+            foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
+            {
+                var fileDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
+
+                await fileDao.MarkFoldersAsRemovedAsync(matchedId.Select(selectorLocal.ConvertId).ToList());
+            }
+        }
+    }
+
     private class RoomProviderQuery
     {
         public DbFilesThirdpartyAccount Account { get; init; }

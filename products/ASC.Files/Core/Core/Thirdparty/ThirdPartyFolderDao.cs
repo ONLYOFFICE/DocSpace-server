@@ -686,6 +686,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
     {
         throw new NotImplementedException();
     }
+
+    public Task MarkFolderAsRemovedAsync(Folder<string> folder)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 internal abstract class BaseFolderDao

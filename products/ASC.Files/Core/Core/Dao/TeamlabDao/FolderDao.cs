@@ -1393,6 +1393,24 @@ internal class FolderDao(
         }
     }
 
+    public async Task MarkFolderAsRemovedAsync(Folder<int> folder)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, [folder.Id]);
+    }
+
+    public async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, folderIds);
+    }
+
     #endregion
 
     private async Task<IQueryable<DbFolder>> GetFolderQuery(FilesDbContext filesDbContext, Expression<Func<DbFolder, bool>> where = null)
@@ -2500,4 +2518,11 @@ static file class Queries
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
 
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> MarkFoldersAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => folderIds.Contains(r.Id))
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
 }
