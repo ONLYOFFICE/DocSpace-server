@@ -324,6 +324,10 @@ public abstract class Migrator : IDisposable
         {
             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
         }
+        else
+        {
+            await SecurityContext.AuthenticateMeAsync(_currentUser);
+        }
 
         var newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
