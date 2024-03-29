@@ -269,7 +269,8 @@ public class FileOperationsManager(
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        bool hiddenOperation = false)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -279,7 +280,7 @@ public class FileOperationsManager(
         var folderIds = (folders.OfType<int>(), folders.OfType<string>());
         var fileIds = (files.OfType<int>(), files.OfType<string>());
         
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation);
     }
 
     public Task PublishDelete(
@@ -288,7 +289,8 @@ public class FileOperationsManager(
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        bool hiddenOperation = false)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -298,7 +300,7 @@ public class FileOperationsManager(
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
 
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation);
     }
 
     private async Task PublishDelete(
@@ -319,8 +321,8 @@ public class FileOperationsManager(
         var taskId = await fileOperationsManagerHolder.Publish(op);
 
         var headers = GetHttpHeaders();
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash, hiddenOperation); 
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash, hiddenOperation);
         
         IntegrationEvent toPublish;
         if (isEmptyTrash)
