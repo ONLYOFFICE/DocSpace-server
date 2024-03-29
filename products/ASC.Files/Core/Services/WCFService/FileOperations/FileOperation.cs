@@ -39,6 +39,7 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
+    public const string Hidden = "Hidden";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -92,10 +93,11 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
     protected  T2 Data { get; set; }
 
 
-    public void Init(bool holdResult)
+    public void Init(bool holdResult, bool hiddenOperation)
     {
         this[OpType] = (int)FileOperationType;
         this[Hold] = holdResult;
+        this[Hidden] = hiddenOperation;
     }
 
     public virtual void Init(T2 data, T1 thirdPartyData, string taskId)
@@ -103,7 +105,7 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         Data = data;
         ThirdPartyData = thirdPartyData;
         Id = taskId;
-        Init(data.HoldResult);
+        Init(data.HoldResult, data.HiddenOperation);
     }
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
@@ -222,12 +224,15 @@ public record FileOperationData<T>
     [ProtoMember(6)]
     public bool HoldResult { get; set; }
 
+    [ProtoMember(7)]
+    public bool HiddenOperation { get; set; }
+
     public FileOperationData()
     {
         
     }
 
-    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
+    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true, bool hiddenOperation = false)
     {
         Folders = folders;
         Files = files;
@@ -235,6 +240,7 @@ public record FileOperationData<T>
         Headers = headers;
         SessionSnapshot = sessionSnapshot;
         HoldResult = holdResult;
+        HiddenOperation = hiddenOperation;
     }
 }
 
@@ -258,6 +264,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         Files = fileOperationData.Files?.ToList() ?? [];
         Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
+        this[Hidden] = fileOperationData.HiddenOperation;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         SessionSnapshot = fileOperationData.SessionSnapshot;

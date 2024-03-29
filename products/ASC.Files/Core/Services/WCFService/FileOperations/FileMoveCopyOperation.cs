@@ -49,13 +49,13 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
         this.ResolveType = ResolveType;
     }
 
-    [ProtoMember(7)]
+    [ProtoMember(8)]
     public string DestFolderId { get; init; }
     
-    [ProtoMember(8)]
+    [ProtoMember(9)]
     public bool Copy { get; init; }
     
-    [ProtoMember(9)]
+    [ProtoMember(10)]
     public FileConflictResolveType ResolveType { get; init; }
 }
 
@@ -64,9 +64,9 @@ public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFi
 {
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
-    public void Init(bool holdResult, bool copy)
+    public void Init(bool holdResult, bool copy, bool hiddenOperation)
     {
-        base.Init(holdResult);
+        base.Init(holdResult, hiddenOperation);
         
         if (!copy)
         {

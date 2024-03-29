@@ -49,7 +49,7 @@ public class FileOperationsManagerHolder(
         }
 
         var results = operations
-            .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
+            .Where(o => (o[FileOperation.Hold] || o[FileOperation.Progress] != 100) && !o[FileOperation.Hidden])
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,
@@ -149,7 +149,7 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        op.Init(true);
+        op.Init(true, false);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
@@ -177,7 +177,7 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        op.Init(true);
+        op.Init(true, false);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         var (folderIntIds, folderStringIds) = GetIds(folders);
@@ -226,7 +226,7 @@ public class FileOperationsManager(
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        op.Init(holdResult, copy);
+        op.Init(holdResult, copy, false);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
@@ -303,14 +303,15 @@ public class FileOperationsManager(
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        bool hiddenOperation = false)
     {        
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(holdResult);
+        op.Init(holdResult, hiddenOperation);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         
