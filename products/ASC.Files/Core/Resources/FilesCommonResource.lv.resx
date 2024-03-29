@@ -428,4 +428,46 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Jūs pārāk daudz reižu mēģinājāt ievadīt savu paroli. Mēģiniet vēlreiz vēlāk</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autors</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Uzņēmums</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Izveidots</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Ģenerēšanas datums</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Eksportēt autoru</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Mape</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Indekss</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modificēts</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Vārds, uzvārds</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Telpa</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Telpas indekss</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Izmērs (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Kopā</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tips</value>
+  </data>
 </root>

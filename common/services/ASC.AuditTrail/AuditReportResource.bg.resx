@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Актуализиран външен линк: {0}. Роля: {1}</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Порталът е преименуван</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Файл, отворен за промяна: {0}</value>
+  </data>
 </root>

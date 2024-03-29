@@ -201,4 +201,25 @@
   <data name="UserSkipped" xml:space="preserve">
     <value>Nie udało się zaimportować użytkownika: {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migracja wspólnych plików</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Błąd podczas inicjowania migratora {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nie ma takiego dostawcy migracji</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Brak migracji w toku</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migracja plików z projektów</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsowanie jest nadal w toku</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migracja jest już w toku</value>
+  </data>
 </root>

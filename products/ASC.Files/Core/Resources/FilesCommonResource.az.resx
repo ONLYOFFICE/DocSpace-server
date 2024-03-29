@@ -428,4 +428,46 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Müəllif</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Şirkət</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Yaradılıb</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Yaradılma tarixi</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>İxrac Müəllifi</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Qovluq</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>İndeks</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Dəyişdirilib</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Otaq</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Otaq indeksi</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Həcm (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Ümumi</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Növ</value>
+  </data>
 </root>

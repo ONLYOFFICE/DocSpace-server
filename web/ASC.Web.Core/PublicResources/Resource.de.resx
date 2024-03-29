@@ -1006,4 +1006,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Zu viele Anmeldeversuche. Bitte versuchen Sie es später noch einmal</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Der letzte DocSpace mit Vollzugriff kann nicht gelöscht werden</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Falsches Plugin-Archiv</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin existiert bereits</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Falsche Dateierweiterung</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Dateigröße überschreitet Limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Änderungen an System-Plugins sind verboten</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Falscher Name des Plugins</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Keine Eingabedatei</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin nicht gefunden</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Zu viele Eingabedateien</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Das Speicherkontingent konnte nicht festgelegt werden - das von Ihnen festgelegte Speicherkontingent ist größer als das Portalkontingent.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Raumkontingent überschritten</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Benutzerkontingent überschritten</value>
+  </data>
 </root>

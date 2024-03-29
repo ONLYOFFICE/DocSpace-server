@@ -201,4 +201,25 @@
   <data name="ModuleNameUsers" xml:space="preserve">
     <value>Χρήστες</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Κοινά αρχεία μετάβασης</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Σφάλμα κατά την αρχικοποίηση {0} υπεύθυνου μετάβασης</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Δεν υπάρχει τέτοιος πάροχος μετάβασης</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Δεν υπάρχει μετάβαση σε εξέλιξη</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Αρχεία έργου μετάβασης</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Η ανάλυση βρίσκεται ακόμα σε εξέλιξη</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Η μετάβαση βρίσκεται ήδη σε εξέλιξη</value>
+  </data>
 </root>

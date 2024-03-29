@@ -428,4 +428,43 @@
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Προσπαθήσατε πάρα πολλές φορές να εισαγάγετε τον κωδικό πρόσβασής σας. Προσπαθήστε ξανά αργότερα</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Συντάκτης</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Εταιρεία</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Δημιουργήθηκε</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Ημερομηνία δημιουργίας</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Εξαγωγή συντάκτη</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Φάκελος</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Ευρετήριο</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Τροποποιήθηκε</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Όνομα</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Δωμάτιο</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Ευρετήριο δωματίου</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Μέγεθος (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Σύνολο</value>
+  </data>
 </root>

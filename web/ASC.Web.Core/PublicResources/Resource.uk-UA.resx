@@ -1006,4 +1006,40 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Забагато спроб входу. Повторіть пізніше</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Останній простір повного доступу не може бути видалений</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Неправильний архів плагінів</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Плагін вже існує</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Неправильне розширення файлу</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Розмір файлу перевищує обмеження</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Зміни системних плагінів заборонені</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Неправильне ім’я плагіна</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Немає вхідного файлу</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Плагін не знайдено</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Забагато вхідних файлів</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося встановити квоту пам’яті: установлена вами квота пам’яті перевищує квоту порталу.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору кімнати</value>
+  </data>
 </root>

@@ -201,4 +201,22 @@
   <data name="UserSkipped" xml:space="preserve">
     <value>Importieren des Benutzers fehlgeschlagen: {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migration gemeinsamer Dateien</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Fehler beim Initialisieren des {0}-Migrators</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Kein solcher Migrationsanbieter</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Es ist keine Migration im Gange</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migration von Projektdateien</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsing ist noch im Gange</value>
+  </data>
 </root>
