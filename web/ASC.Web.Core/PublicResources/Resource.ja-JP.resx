@@ -211,9 +211,6 @@
   <data name="Owner" xml:space="preserve">
     <value>所有者</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>ディスク容量制限を超えました</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>ポータルでのアクセス</value>
   </data>

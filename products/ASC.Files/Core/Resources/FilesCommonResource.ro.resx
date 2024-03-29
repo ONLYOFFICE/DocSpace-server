@@ -245,14 +245,8 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Fișierul solicitat nu a fost găsit</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Fișierul mai mare de {0} nu va fi convertit</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi copiat</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Fișierul mai mare de {0} nu va fi editat</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi deplasat</value>

@@ -31,7 +31,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
         FileSecurity fileSecurity,
-        SetupInfo setupInfo,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
@@ -147,11 +146,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.TRASH)
         {
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         string strError = null;

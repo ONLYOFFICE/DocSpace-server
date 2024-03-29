@@ -211,12 +211,12 @@ global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
 
-global using Nest;
-
 global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
+
+global using OpenSearch.Client;
 
 global using ProtoBuf;
 

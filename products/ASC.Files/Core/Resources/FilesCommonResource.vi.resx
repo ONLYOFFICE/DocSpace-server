@@ -151,14 +151,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Không tìm thấy file yêu cầu</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Không thể chuyển đổi file lớn hơn {0}</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Không thể sao chép file lớn hơn {0}</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Không thể sửa file lớn hơn {0}</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Không thể di chuyển file lớn hơn {0}</value>
