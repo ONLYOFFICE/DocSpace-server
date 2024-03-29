@@ -187,14 +187,15 @@ public abstract class Migrator : IDisposable
     private async Task MigrateUsersAsync()
     {
         var i = 0;
-        var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
+        var users = _usersForImport.Where(u => u.Value.ShouldImport);
+        var progressStep = users.Count() == 0 ? 30 : 30 / users.Count();
         foreach (var kv in MigrationInfo.Users)
         {
             var key = kv.Key;
             var user = kv.Value;
             try
             {
-                if (user.ShouldImport) 
+                if (user.ShouldImport)
                 {
                     await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.UserMigration, user.Info.DisplayUserName(DisplayUserSettingsHelper), i++, MigrationInfo.Users.Count));
                 }
