@@ -134,7 +134,7 @@ public abstract class Migrator : IDisposable
         await MigrateGroupAsync();
 
         var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
-        var i = 0;
+        var i = 1;
         foreach (var kv in _usersForImport)
         {
             try
@@ -186,7 +186,7 @@ public abstract class Migrator : IDisposable
 
     private async Task MigrateUsersAsync()
     {
-        var i = 0;
+        var i = 1;
         var users = _usersForImport.Where(u => u.Value.ShouldImport);
         var progressStep = users.Count() == 0 ? 30 : 30 / users.Count();
         foreach (var kv in MigrationInfo.Users)
@@ -264,7 +264,7 @@ public abstract class Migrator : IDisposable
 
     private async Task MigrateGroupAsync()
     {
-        var i = 0;
+        var i = 1;
         var progressStep = MigrationInfo.Groups.Count == 0 ? 20 : 20 / MigrationInfo.Groups.Count;
         foreach (var kv in MigrationInfo.Groups)
         {
