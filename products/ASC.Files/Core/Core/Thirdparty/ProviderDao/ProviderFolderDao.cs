@@ -158,11 +158,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return GetFoldersAsync(parentId);
     }
     
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
-        var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId));
+        var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId), includeRemoved);
 
         await foreach (var folder in folders.Where(r => r != null))
         {

@@ -132,9 +132,9 @@ internal class FolderDao(
         }
 
     }
-    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
+    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, bool includeRemoved = false)
     {
-        return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
+        return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty, includeRemoved: includeRemoved);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
@@ -233,16 +233,24 @@ internal class FolderDao(
 
         if (filterType == FilterType.None && subjectId == default && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == default)
         {
-            return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
+            return await Queries.CountChildFoldersAsync(filesDbContext, parentId);
         }
 
         var q = await GetFoldersQueryWithFilters(parentId, null, subjectGroup, subjectId, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
 
+        q = q.Where(r => !r.Removed);
+
         return await q.CountAsync();
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
+    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
         bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default)
+    {
+        return GetFoldersAsync(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, offset, count, roomId, false);
+    }
+
+    private async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool includeRemoved = false)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -252,6 +260,11 @@ internal class FolderDao(
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
+
+        if (!includeRemoved)
+        {
+            q = q.Where(r => !r.Removed);
+        }
 
         q = q.Skip(offset);
 
@@ -2331,6 +2344,13 @@ static file class Queries
                 ctx.Tree
                     .Join(ctx.Folders, tree => tree.FolderId, folder => folder.Id, (tree, folder) => tree)
                     .Count(r => r.ParentId == parentId && r.Level > 0));
+
+    public static readonly Func<FilesDbContext, int, Task<int>> CountChildFoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int parentId) =>
+                ctx.Tree
+                    .Join(ctx.Folders, tree => tree.FolderId, folder => folder.Id, (tree, folder) => new { tree, folder })
+                    .Count(r => r.tree.ParentId == parentId && r.tree.Level == 1 && !r.folder.Removed));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> CountFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

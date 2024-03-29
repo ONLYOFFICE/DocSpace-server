@@ -247,13 +247,13 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<int> GetFilesAsync(int parentId)
+    public async IAsyncEnumerable<int> GetFilesAsync(int parentId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await foreach (var e in Queries.FileIdsAsync(filesDbContext, tenantId, parentId))
+        await foreach (var e in Queries.FileIdsAsync(filesDbContext, tenantId, parentId, includeRemoved))
         {
             yield return e;
         }
@@ -271,7 +271,7 @@ internal class FileDao(
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
 
-        q = q.Skip(offset);
+        q = q.Where(r => !r.Removed).Skip(offset);
 
         if (count > 0)
         {
@@ -571,8 +571,11 @@ internal class FileDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext))
-            .CountAsync();
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
+
+        q = q.Where(r => !r.Removed);
+
+        return await q.CountAsync();
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -2380,12 +2383,13 @@ static file class Queries
                             ).FirstOrDefault()
                     }));
 
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, IAsyncEnumerable<int>> FileIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentId) =>
+            (FilesDbContext ctx, int tenantId, int parentId, bool includeRemoved) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, Task<int>> FileMaxIdAsync =
