@@ -71,7 +71,7 @@ public class WorkspaceMigration(
     {
         if (reportProgress)
         {
-            ReportProgress(5, MigrationResource.StartOfDataProcessing);
+            await ReportProgress(5, MigrationResource.StartOfDataProcessing);
         }
         try
         {
@@ -110,7 +110,7 @@ public class WorkspaceMigration(
                 };
                 if (reportProgress)
                 {
-                    ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing);
+                    await ReportProgress(GetProgress() + progressStep, MigrationResource.DataProcessing);
                 }
 
                 var user = serviceProvider.GetService<WorkspaceMigratingUser>();
@@ -137,7 +137,7 @@ public class WorkspaceMigration(
                 progress += 20 / groups.Count;
                 if (reportProgress)
                 {
-                    ReportProgress(progress, MigrationResource.DataProcessing);
+                    await ReportProgress(progress, MigrationResource.DataProcessing);
                 }
                 
                 var group = serviceProvider.GetService<WorkspaceMigrationGroups>();
@@ -148,7 +148,7 @@ public class WorkspaceMigration(
 
             if (reportProgress)
             {
-                ReportProgress(80, MigrationResource.DataProcessing);
+                await ReportProgress(80, MigrationResource.DataProcessing);
             }
 
             var storage = new WorkspaceStorage
@@ -163,7 +163,7 @@ public class WorkspaceMigration(
             {
                 if (reportProgress)
                 {
-                    ReportProgress(90, MigrationResource.DataProcessing);
+                    await ReportProgress(90, MigrationResource.DataProcessing);
                 }
                 storage = new WorkspaceStorage
                 {
@@ -181,12 +181,12 @@ public class WorkspaceMigration(
         catch
         {
             _migrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            ReportProgress(GetProgress(), $"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
+            await ReportProgress(GetProgress(), $"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
             throw new Exception($"Couldn't parse {Path.GetFileNameWithoutExtension(_backup)} archive");
         }
         if (reportProgress)
         {
-            ReportProgress(100, MigrationResource.DataProcessingCompleted);
+            await ReportProgress(100, MigrationResource.DataProcessingCompleted);
         }
         return _migrationInfo.ToApiInfo();
     }
@@ -239,7 +239,7 @@ public class WorkspaceMigration(
 
     public override async Task MigrateAsync(MigrationApiInfo migrationInfo)
     {
-        ReportProgress(0, MigrationResource.PreparingForMigration);
+        await ReportProgress(0, MigrationResource.PreparingForMigration);
         var currentUser = securityContext.CurrentAccount;
         _importedUsers = new List<Guid>();
         _migrationInfo.Merge(migrationInfo);
@@ -257,7 +257,7 @@ public class WorkspaceMigration(
         {
             var key = kv.Key;
             var user = kv.Value;
-            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
+            await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserMigration, user.DisplayName, i++, usersCount));
             try
             {
                 await user.MigrateAsync();
@@ -289,7 +289,7 @@ public class WorkspaceMigration(
             i = 1;
             foreach (var group in groupsForImport)
             {
-                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
                 try
                 {
                     var key = group.Guid.ToString();
@@ -316,7 +316,7 @@ public class WorkspaceMigration(
         foreach (var kv in usersForImport)
         {
             var user = kv.Value;
-            ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
+            await ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.MigratingUserFiles, user.DisplayName, i++, usersCount));
             try
             {
                 await user.MigratingFiles.MigrateAsync();
@@ -328,11 +328,11 @@ public class WorkspaceMigration(
         }
 
         await securityContext.AuthenticateMeAsync(currentUser);
-        ReportProgress(70, string.Format(MigrationResource.MigrationCommonFiles));
+        await ReportProgress(70, string.Format(MigrationResource.MigrationCommonFiles));
         await migratingCommonFiles.MigrateAsync();
         if (migratingProjectFiles != null)
         {
-            ReportProgress(80, string.Format(MigrationResource.MigrationProjectFiles));
+            await ReportProgress(80, string.Format(MigrationResource.MigrationProjectFiles));
             await migratingProjectFiles.MigrateAsync();
         }
 
@@ -343,6 +343,6 @@ public class WorkspaceMigration(
 
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersForImport.Where(u => u.Value.ShouldImport).Count() - _migrationInfo.FailedUsers;
-        ReportProgress(100, MigrationResource.MigrationCompleted);
+        await ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 }

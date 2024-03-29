@@ -376,9 +376,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Proprietário</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço em disco excedida</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Acesso ao portal</value>
   </data>

@@ -31,7 +31,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
         FileSecurity fileSecurity,
-        SetupInfo setupInfo,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
@@ -136,17 +135,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && !await fileSecurity.CanReadAsync(file))
         {
+            if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
+            {
+                throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+            
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         string strError = null;

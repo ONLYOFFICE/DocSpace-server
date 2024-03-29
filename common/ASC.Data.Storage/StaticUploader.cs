@@ -47,7 +47,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
         _tokenSource = new CancellationTokenSource();
     }
 
-    public async Task<string> UploadFileAsync(string relativePath, string mappedPath, Action<string> onComplete = null)
+    public async Task<string> UploadFileAsync(string relativePath, string mappedPath, Func<string, Task> onComplete = null)
     {
         if (_tokenSource.Token.IsCancellationRequested)
         {
@@ -77,7 +77,10 @@ public class StaticUploader(IServiceProvider serviceProvider,
         }
 
         await uploadOperation.DoJobAsync(tenantId, relativePath, mappedPath);
-        onComplete?.Invoke(uploadOperation.Result);
+        if (onComplete != null)
+        {
+            await onComplete(uploadOperation.Result);
+        }
 
         lock (_locker)
         {
@@ -104,14 +107,14 @@ public class StaticUploader(IServiceProvider serviceProvider,
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            if (_queue.GetAllTasks().Any(x => x.Id != key))
+            if ((await _queue.GetAllTasks()).Any(x => x.Id != key))
             {
                 return;
             }
 
             var uploadOperation = new UploadOperationProgress(serviceProvider, key, tenant.Id, relativePath, mappedPath);
 
-            _queue.EnqueueTask(uploadOperation);
+            await _queue.EnqueueTask(uploadOperation);
         }
     }
 
@@ -137,7 +140,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
         {
             var key = typeof(UploadOperationProgress).FullName + tenantId;
 
-            return _queue.PeekTask<UploadOperationProgress>(key);
+            return await _queue.PeekTask<UploadOperationProgress>(key);
         }
     }
 
@@ -230,12 +233,12 @@ public class UploadOperationProgress : DistributedTaskProgress
 
         tenant.SetStatus(TenantStatus.Migrating);
         await tenantManager.SaveTenantAsync(tenant);
-        PublishChanges();
+        await PublishChanges();
 
         foreach (var file in _directoryFiles)
         {
             var filePath = file[_mappedPath.TrimEnd('/').Length..];
-            await staticUploader.UploadFileAsync(CrossPlatform.PathCombine(_relativePath, filePath), file, _ => StepDone());
+            await staticUploader.UploadFileAsync(CrossPlatform.PathCombine(_relativePath, filePath), file, async _ => await StepDone());
         }
 
         tenant.SetStatus(TenantStatus.Active);

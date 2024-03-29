@@ -174,9 +174,9 @@ public class SmtpSettingsController(
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        smtpOperation.StartSmtpJob(settings, tenant, securityContext.CurrentAccount.ID);
+        await smtpOperation.StartSmtpJob(settings, tenant, securityContext.CurrentAccount.ID);
 
-        return smtpOperation.GetStatus(tenant);
+        return await smtpOperation.GetStatus(tenant);
     }
 
     // <summary>
@@ -194,7 +194,7 @@ public class SmtpSettingsController(
     {
         await CheckSmtpPermissionsAsync();
 
-        return smtpOperation.GetStatus(await tenantManager.GetCurrentTenantAsync());
+        return await smtpOperation.GetStatus(await tenantManager.GetCurrentTenantAsync());
     }
 
     private async Task CheckSmtpPermissionsAsync()

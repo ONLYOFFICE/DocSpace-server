@@ -967,9 +967,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Ak existuje užívateľ s e-mailom {0}, na túto e-mailovú adresu bol odoslaný pokyn na zmenu hesla.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Prekročenie kapacity priestoru na disku</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Priestor v cloude pre vaše pracovné dokumenty</value>
   </data>

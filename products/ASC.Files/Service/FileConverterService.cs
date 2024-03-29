@@ -48,7 +48,7 @@ internal class FileConverterService<T>(
 
             var fileConverterQueue = serviceScope.ServiceProvider.GetService<FileConverterQueue>();
 
-            var conversionQueue = fileConverterQueue.GetAllTask<T>().ToList();
+            var conversionQueue = (await fileConverterQueue.GetAllTaskAsync<T>()).ToList();
 
             if (conversionQueue.Count > 0)
             {
@@ -75,7 +75,7 @@ internal class FileConverterService<T>(
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
                 var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
-                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
+                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
 
@@ -100,11 +100,6 @@ internal class FileConverterService<T>(
                     {
                         //No rights in CRM after upload before attach
                         throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-                    }
-
-                    if (file.ContentLength > setupInfo.AvailableFileSize)
-                    {
-                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
                     }
 
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -194,7 +189,7 @@ internal class FileConverterService<T>(
                             var folder = await folderDao.GetFolderAsync(newFile.ParentId);
                             var folderTitle = await fileSecurity.CanReadAsync(folder) ? folder.Title : null;
 
-                            converter.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
+                            converter.Result = await fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle);
                         }
 
                         converter.Progress = 100;
@@ -211,7 +206,7 @@ internal class FileConverterService<T>(
                 logger.DebugCheckConvertFilesStatusIterationEnd();
             }
 
-            fileConverterQueue.SetAllTask<T>(conversionQueue);
+            await fileConverterQueue.SetAllTask<T>(conversionQueue);
 
         }
         catch (Exception exception)
@@ -237,7 +232,6 @@ public record FileConverterQueueScope(
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     PathProvider PathProvider,
-    SetupInfo SetupInfo,
     FileUtility FileUtility,
     DocumentServiceHelper DocumentServiceHelper,
     DocumentServiceConnector DocumentServiceConnector,

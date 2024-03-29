@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class SettingsController(MessageService messageService,
+public partial class SettingsController(MessageService messageService,
         ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
@@ -69,7 +69,8 @@ public class SettingsController(MessageService messageService,
         QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
-
+    [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
+    private static partial Regex EmailDomainRegex();
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -233,7 +234,7 @@ public class SettingsController(MessageService messageService,
             tenant.TrustedDomains.Clear();
             foreach (var d in inDto.Domains.Select(domain => (domain ?? "").Trim().ToLower()))
             {
-                if (!(!string.IsNullOrEmpty(d) && new Regex("^[a-z0-9]([a-z0-9-.]){1,98}[a-z0-9]$").IsMatch(d)))
+                if (!(!string.IsNullOrEmpty(d) && EmailDomainRegex().IsMatch(d)))
                 {
                     return Resource.ErrorNotCorrectTrustedDomain;
                 }
@@ -290,16 +291,28 @@ public class SettingsController(MessageService messageService,
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
 
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
         quotaSettings.DefaultQuota = inDto.DefaultQuota;
@@ -312,6 +325,8 @@ public class SettingsController(MessageService messageService,
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
+        await DemandStatisticPermissionAsync();
+
         return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
     }
 
@@ -329,14 +344,26 @@ public class SettingsController(MessageService messageService,
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
         }
 
         var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
@@ -362,7 +389,7 @@ public class SettingsController(MessageService messageService,
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
 
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || !coreBaseSettings.Standalone)
         {
@@ -491,8 +518,9 @@ public class SettingsController(MessageService messageService,
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await DemandStatisticPermissionAsync();
+
+        await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -509,8 +537,9 @@ public class SettingsController(MessageService messageService,
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        return quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await DemandStatisticPermissionAsync();
+
+        return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1121,5 +1150,16 @@ public class SettingsController(MessageService messageService,
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
+    }
+
+    private async Task DemandStatisticPermissionAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+        }
     }
 }

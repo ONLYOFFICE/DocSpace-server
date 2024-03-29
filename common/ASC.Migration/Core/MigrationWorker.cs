@@ -31,30 +31,31 @@ public class MigrationWorker(
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider)
 {
-    private readonly object _locker = new();
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1);
     private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
 
-    public void StartParse(int tenantId, Guid userId, string migratorName)
+    public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {
-        Start(tenantId, (item) => item.InitParse(tenantId, userId, migratorName));
+        await Start(tenantId, (item) => item.InitParse(tenantId, userId, migratorName));
     }
 
-    public void StartMigrate(int tenantId, Guid userId, MigrationApiInfo migrationApiInfo)
+    public async Task StartMigrate(int tenantId, Guid userId, MigrationApiInfo migrationApiInfo)
     {
-        Start(tenantId, (item) => item.InitMigrate(tenantId, userId, migrationApiInfo));
+        await Start(tenantId, (item) => item.InitMigrate(tenantId, userId, migrationApiInfo));
     }
 
-    private void Start(int tenantId, Action<MigrationOperation> init)
+    private async Task Start(int tenantId, Action<MigrationOperation> init)
     {
-        lock (_locker)
+        try
         {
-            var item = _queue.GetAllTasks<MigrationOperation>().FirstOrDefault(t => t.TenantId == tenantId);
+            await _semaphoreSlim.WaitAsync();
+            var item = (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
-                _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
 
@@ -64,36 +65,40 @@ public class MigrationWorker(
 
                 init(item);
 
-                _queue.EnqueueTask(item);
+                await _queue.EnqueueTask(item);
             }
 
-            item.PublishChanges();
+            await item.PublishChanges();
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
 
-    public void Stop(int tenantId)
+    public async Task Stop(int tenantId)
     {
-        var tasks = _queue.GetAllTasks<MigrationOperation>().Where(t => t.MigrationApiInfo.Operation == "parse" && t.TenantId == tenantId);
+        var tasks = (await _queue.GetAllTasks<MigrationOperation>()).Where(t => t.MigrationApiInfo.Operation == "parse" && t.TenantId == tenantId);
 
         foreach (var t in tasks)
         {
-            _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask(t.Id);
         }
     }
 
-    public void Clear(int tenantId)
+    public async Task Clear(int tenantId)
     {
-        var tasks = _queue.GetAllTasks<MigrationOperation>().Where(t => t.MigrationApiInfo.Operation == "migration" && t.TenantId == tenantId && t.IsCompleted);
+        var tasks = (await _queue.GetAllTasks<MigrationOperation>()).Where(t => t.MigrationApiInfo.Operation == "migration" && t.TenantId == tenantId && t.IsCompleted);
 
         foreach (var t in tasks)
         {
-            _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask(t.Id);
         }
     }
 
-    public MigrationOperation GetStatus(int tenantId)
+    public async Task<MigrationOperation> GetStatus(int tenantId)
     {
-        return _queue.GetAllTasks<MigrationOperation>().FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 }
 

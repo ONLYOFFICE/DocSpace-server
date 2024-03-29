@@ -964,9 +964,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Als er een gebruiker met het e-mailadres {0} bestaat, is de instructie voor het wijzigen van het wachtwoord naar dit e-mailadres gestuurd.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Schijfruimte quota overschreden</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Cloudruimte voor uw office documenten</value>
   </data>

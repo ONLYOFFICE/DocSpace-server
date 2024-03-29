@@ -205,6 +205,14 @@ class CachedTenantService() : ITenantService
         return await _service.GetTenantsAsync(ids);
     }
 
+    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings)
+    {
+        newTenant = await _service.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = oldId }, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = newTenant.Id }, CacheNotifyAction.InsertOrUpdate);
+        return newTenant;
+    }
+
     public async Task<Tenant> GetTenantAsync(int id)
     {
         var tenants = _tenantServiceCache.GetTenantStore();

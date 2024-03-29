@@ -83,10 +83,10 @@ public class TransferProgressItem : BaseBackupProgressItem
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
-            transferProgressItem.ProgressChanged += (_, args) =>
+            transferProgressItem.ProgressChanged = async (args) =>
             {
                 Percentage = args.Progress;
-                PublishChanges();
+                await PublishChanges();
             };
 
             await transferProgressItem.RunJob();
@@ -94,7 +94,7 @@ public class TransferProgressItem : BaseBackupProgressItem
             Link = GetLink(alias, false);
             await _notifyHelper.SendAboutTransferCompleteAsync(tenant, TargetRegion, Link, !Notify, transferProgressItem.ToTenantId);
 
-            PublishChanges();
+            await PublishChanges();
         }
         catch (Exception error)
         {
@@ -108,7 +108,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         {
             try
             {
-                PublishChanges();
+                await PublishChanges();
             }
             catch (Exception error)
             {

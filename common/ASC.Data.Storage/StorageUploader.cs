@@ -44,13 +44,13 @@ public class StorageUploader(
         {
             var id = GetCacheKey(tenantId);
 
-            if (_queue.GetAllTasks().Any(x => x.Id == id))
+            if ((await _queue.GetAllTasks()).Any(x => x.Id == id))
             {
                 return;
             }
 
             var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger, cache);
-            _queue.EnqueueTask(migrateOperation);
+            await _queue.EnqueueTask(migrateOperation);
         }
     }
 
@@ -58,15 +58,15 @@ public class StorageUploader(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
-            return _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
+            return await _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        foreach (var task in _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID).Where(r => r.Status == DistributedTaskStatus.Running))
+        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
         {
-            _queue.DequeueTask(task.Id);
+            await _queue.DequeueTask(task.Id);
         }
     }
 
@@ -173,7 +173,7 @@ public class MigrateOperation : DistributedTaskProgress
                     await crossModuleTransferUtility.CopyFileAsync("", file, "", file);
                 }
 
-                StepDone();
+                await StepDone();
 
                 MigrationPublish();
             }

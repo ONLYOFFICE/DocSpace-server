@@ -931,9 +931,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Proprietário</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>A Quota de espaço em disco foi excedida</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>O espaço na nuvem para os seus documentos de escritório</value>
   </data>

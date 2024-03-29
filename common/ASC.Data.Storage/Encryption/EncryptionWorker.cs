@@ -39,11 +39,11 @@ public class EncryptionWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
+            var item = (await _queue.GetAllTasks<EncryptionOperation>()).SingleOrDefault();
 
             if (item is { IsCompleted: true })
             {
-                _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
 
@@ -52,14 +52,14 @@ public class EncryptionWorker(
                 var encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
                 encryptionOperation.Init(encryptionSettings, GetCacheId(), serverRootPath);
 
-                _queue.EnqueueTask(encryptionOperation);
+                await _queue.EnqueueTask(encryptionOperation);
             }
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        _queue.DequeueTask(GetCacheId());
+        await _queue.DequeueTask(GetCacheId());
     }
 
     private string GetCacheId()
@@ -67,9 +67,9 @@ public class EncryptionWorker(
         return typeof(EncryptionOperation).FullName;
     }
 
-    public double? GetEncryptionProgress()
+    public async Task<double?> GetEncryptionProgress()
     {
-        var progress = _queue.GetAllTasks<EncryptionOperation>().FirstOrDefault();
+        var progress = (await _queue.GetAllTasks<EncryptionOperation>()).FirstOrDefault();
 
         return progress?.Percentage;
     }

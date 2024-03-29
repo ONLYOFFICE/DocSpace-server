@@ -166,28 +166,11 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
-        if (file.RootFolderType == FolderType.USER
-            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        
+        if (file.RootFolderType == FolderType.USER && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
-            result.RootFolderType = FolderType.SHARE;
-            var folderDao = daoFactory.GetFolderDao<T>();
-
-            if (folders != null)
-            {
-                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
-                if (folderWithRight == null || !folderWithRight.Item2)
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
-            else
-            {
-                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
-                if (!await _fileSecurity.CanReadAsync(parentFolder))
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
+            result.RootFolderType = FolderType.Recent;
+            result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
@@ -216,7 +199,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = file.FileStatus;
+        result.FileStatus = await file.GetFileStatus();
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;

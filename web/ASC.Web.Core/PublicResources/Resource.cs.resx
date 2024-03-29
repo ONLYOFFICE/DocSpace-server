@@ -985,9 +985,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Pokud existuje uživatel s e-mailovou adresou {0}, byl na tuto e-mailovou adresu zaslán pokyn ke změně hesla.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Překročena kvóta místa na disku</value>
-  </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
   </data>

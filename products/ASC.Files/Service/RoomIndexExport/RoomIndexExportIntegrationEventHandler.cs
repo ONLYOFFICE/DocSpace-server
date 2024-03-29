@@ -70,7 +70,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
             {
                 if (@event.Terminate)
                 {
-                    _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
                     return;
                 }
 
@@ -91,7 +91,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
                 task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
 
-                _documentBuilderTaskManager.StartTask(task);
+                await _documentBuilderTaskManager.StartTask(task);
             }
             catch (Exception ex)
             {

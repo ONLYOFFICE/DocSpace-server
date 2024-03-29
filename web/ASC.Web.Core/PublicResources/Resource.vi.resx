@@ -967,9 +967,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Nếu tồn tại người dùng có email {0}, hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email này.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Vượt quá không gian đĩa được phép</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Không gian đám mây cho tài liệu văn phòng của bạn</value>
   </data>

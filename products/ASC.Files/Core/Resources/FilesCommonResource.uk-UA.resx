@@ -151,14 +151,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Потрібний файл не знайдено</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Файл більше {0} не буде сконвертовано</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Файл, більший за {0}, не буде скопійовано</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Файл, більший за {0}, не буде відреаговано</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл, більший за {0}, не буде переміщений</value>

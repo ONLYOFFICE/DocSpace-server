@@ -766,9 +766,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Besitzer</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Der verfügbare Speicherplatz ist überschritten</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Zugang zum Portal</value>
   </data>

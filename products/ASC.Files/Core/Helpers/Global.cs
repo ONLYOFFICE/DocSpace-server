@@ -739,6 +739,12 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         return IdConverter.Convert<T>(await FolderShareAsync);
     }
+
+    public async ValueTask<T> GetFolderRecentAsync<T>()
+    {
+        return IdConverter.Convert<T>(await FolderRecentAsync);
+    }
+    
     public ValueTask<int> FolderShareAsync => globalFolder.GetFolderShareAsync(daoFactory);
 
     public async Task SetFolderTrashAsync(object value)

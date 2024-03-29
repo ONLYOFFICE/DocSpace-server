@@ -69,7 +69,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _sha = SHA256.Create();
     }
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
@@ -80,7 +80,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
         if (_fileStream == null)
         {
@@ -96,7 +96,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(action);
+            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
         }
 
         if (_fileStream.Length > _sessionHolder.MaxChunkUploadSize)

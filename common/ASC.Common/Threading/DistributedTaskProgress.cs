@@ -66,13 +66,13 @@ public class DistributedTaskProgress : DistributedTask
 
     protected virtual Task DoJob() { return Task.CompletedTask; }
 
-    protected void StepDone()
+    protected async Task StepDone()
     {
         if (StepCount > 0)
         {
             Percentage += 100.0 / StepCount;
         }
 
-        PublishChanges();
+        await PublishChanges();
     }
 }
