@@ -43,6 +43,7 @@ public abstract class Migrator : IDisposable
     protected MigrationLogger MigrationLogger { get; }
     protected AuthContext AuthContext { get; }
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; }
+    protected UserManagerWrapper UserManagerWrapper { get; }
 
     public MigrationInfo MigrationInfo { get; set; }
     protected IAccount _currentUser;
@@ -70,7 +71,8 @@ public abstract class Migrator : IDisposable
         EntryManager entryManager,
         MigrationLogger migrationLogger, 
         AuthContext authContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        UserManagerWrapper userManagerWrapper)
     {
         SecurityContext = securityContext;
         UserManager = userManager;
@@ -84,6 +86,7 @@ public abstract class Migrator : IDisposable
         MigrationLogger = migrationLogger;
         AuthContext = authContext;
         DisplayUserSettingsHelper = displayUserSettingsHelper;
+        UserManagerWrapper = userManagerWrapper;
     }
     
     public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
@@ -127,15 +130,13 @@ public abstract class Migrator : IDisposable
 
         _usersForImport = MigrationInfo.Users.Where(u => u.Value.ShouldImport).ToDictionary();
 
-        var failedUsers = new List<string>();
-
         await MigrateUsersAsync();
 
         await MigrateGroupAsync();
 
         var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
         var i = 1;
-        foreach (var kv in _usersForImport)
+        foreach (var kv in _usersForImport.Where(u=> !_failedUsers.Contains(u.Value.Info.Email)))
         {
             try
             {
@@ -179,7 +180,7 @@ public abstract class Migrator : IDisposable
             Directory.Delete(TmpFolder, true);
         }
 
-        MigrationInfo.FailedUsers = failedUsers.Count;
+        MigrationInfo.FailedUsers = _failedUsers.Count;
         MigrationInfo.SuccessedUsers = _usersForImport.Count() - MigrationInfo.FailedUsers;
         await ReportProgressAsync(100, MigrationResource.MigrationCompleted);
     }
@@ -187,8 +188,7 @@ public abstract class Migrator : IDisposable
     private async Task MigrateUsersAsync()
     {
         var i = 1;
-        var users = _usersForImport.Where(u => u.Value.ShouldImport);
-        var progressStep = users.Count() == 0 ? 30 : 30 / users.Count();
+        var progressStep = _usersForImport.Count() == 0 ? 30 : 30 / _usersForImport.Count();
         foreach (var kv in MigrationInfo.Users)
         {
             var key = kv.Key;
@@ -204,6 +204,7 @@ public abstract class Migrator : IDisposable
                 if (user.ShouldImport && (saved.Equals(Constants.LostUser) || saved.Removed))
                 {
                     DataСhange(user);
+                    user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {
@@ -245,7 +246,6 @@ public abstract class Migrator : IDisposable
                 Log(MigrationResource.CanNotImportUser, e);
                 _failedUsers.Add(user.Info.Email);
                 MigrationInfo.Users.Remove(key);
-                _usersForImport.Remove(key);
             }
         }
     }

@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using net.openstack.Providers.Rackspace.Objects.Databases;
-
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
@@ -51,7 +49,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper)
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
     {
         MigrationInfo = new MigrationInfo() { Name = "Nextcloud" };
     }
