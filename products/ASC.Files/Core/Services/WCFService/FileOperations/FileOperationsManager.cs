@@ -154,8 +154,10 @@ public class FileOperationsManager(
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
-        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
-        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+
+        var headers = GetHttpHeaders();
+        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, headers, sessionSnapshot);
+        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, headers, sessionSnapshot);
         
         eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
@@ -182,9 +184,10 @@ public class FileOperationsManager(
         
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
-        
-        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
-        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
+
+        var headers = GetHttpHeaders();
+        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, headers, sessionSnapshot, baseUri);
+        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, headers, sessionSnapshot, baseUri);
         
         eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
@@ -228,9 +231,10 @@ public class FileOperationsManager(
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
         op.Init(holdResult, copy, false);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
-        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
-        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
+
+        var headers = GetHttpHeaders();
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, headers, sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, headers, sessionSnapshot);
         
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
@@ -313,10 +317,10 @@ public class FileOperationsManager(
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
         op.Init(holdResult, hiddenOperation);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
-        
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+
+        var headers = GetHttpHeaders();
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         
         IntegrationEvent toPublish;
         if (isEmptyTrash)
