@@ -141,8 +141,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             return;
         }
 
-        await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_hiddenOperation, checkPermissions: !_hiddenOperation);
-        await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_hiddenOperation, checkPermissions: !_hiddenOperation);
+        await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_hiddenOperation);
+        await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_hiddenOperation);
     }
 
     private async Task MarkFilesAsRemovedAsync(SocketManager socketManager, IEnumerable<T> filesIds)
@@ -194,7 +194,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     }
 
 
-    private async Task DeleteFoldersAsync(IEnumerable<T> folderIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
+    private async Task DeleteFoldersAsync(IEnumerable<T> folderIds, IServiceScope scope, bool isNeedSendActions = false)
     {
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -210,30 +210,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
-
-            var canDelete = await FilesSecurity.CanDeleteAsync(folder);
-            checkPermissions = isRoom ? !canDelete : checkPermissions;
 
             T canCalculate = default;
             if (folder == null)
             {
                 this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
-            else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType))
-            {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
-            }
-            else if (!_ignoreException && checkPermissions && !canDelete)
-            {
-                canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
-
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
-            }
             else
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
+
+                var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
                 if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
@@ -247,7 +234,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             var providerInfo = await ProviderDao.GetProviderInfoAsync(folder.ProviderId);
                             if (providerInfo.FolderId != null)
                             {
-                                await roomLogoManager.DeleteAsync(providerInfo.FolderId, checkPermissions);
+                                await roomLogoManager.DeleteAsync(providerInfo.FolderId, checkPermissions: false);
                             }
                             
                             aces = await fileSharing.GetSharedInfoAsync(folder);
@@ -275,10 +262,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     if (immediately && FolderDao.UseRecursiveOperation(folder.Id, default(T)))
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, true).ToListAsync();
-                        await DeleteFilesAsync(files, scope, checkPermissions: checkPermissions);
+                        await DeleteFilesAsync(files, scope);
 
                         var folders = await FolderDao.GetFoldersAsync(folder.Id, true).ToListAsync();
-                        await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope, checkPermissions: checkPermissions);
+                        await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope);
 
                         if (await FolderDao.IsEmptyAsync(folder.Id))
                         {
@@ -286,7 +273,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             if (isRoom)
                             {
-                                await roomLogoManager.DeleteAsync(folder.Id, checkPermissions);
+                                await roomLogoManager.DeleteAsync(folder.Id, checkPermissions: false);
                                 aces = await fileSharing.GetSharedInfoAsync(folder);
                             }
 
@@ -315,58 +302,51 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     else
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                        var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
-                        if (!_ignoreException && isError)
+
+                        if (immediately)
                         {
-                            this[Err] = message;
-                        }
-                        else
-                        {
-                            if (immediately)
+                            var aces = new List<AceWrapper>();
+
+                            if (isRoom)
                             {
-                                var aces = new List<AceWrapper>();
+                                var room = await roomLogoManager.DeleteAsync(folder.Id, checkPermissions: false);
+                                await socketManager.UpdateFolderAsync(room);
+                                aces = await fileSharing.GetSharedInfoAsync(folder);
+                            }
 
-                                if (isRoom)
-                                {
-                                    var room = await roomLogoManager.DeleteAsync(folder.Id, checkPermissions);
-                                    await socketManager.UpdateFolderAsync(room);
-                                    aces = await fileSharing.GetSharedInfoAsync(folder);
-                                }
-
-                                if (_hiddenOperation)
-                                {
-                                    await FolderDao.DeleteFolderAsync(folder.Id);
-                                }
-                                else
-                                {
-                                    await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
-                                }
-
-                                if (isNeedSendActions)
-                                {
-                                    if (isRoom)
-                                    {
-                                        await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                        await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, Headers, folder.Title);
-                                    }
-                                    else
-                                    {
-                                        await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, Headers, folder.Title);
-                                    }
-                                }
+                            if (_hiddenOperation)
+                            {
+                                await FolderDao.DeleteFolderAsync(folder.Id);
                             }
                             else
                             {
-                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
-
-                                if (isNeedSendActions)
-                                {
-                                    await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, Headers, folder.Title);
-                                }
+                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
                             }
 
-                            ProcessedFolder(folderId);
+                            if (isNeedSendActions)
+                            {
+                                if (isRoom)
+                                {
+                                    await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
+                                    await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, Headers, folder.Title);
+                                }
+                                else
+                                {
+                                    await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, Headers, folder.Title);
+                                }
+                            }
                         }
+                        else
+                        {
+                            await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
+
+                            if (isNeedSendActions)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, Headers, folder.Title);
+                            }
+                        }
+
+                        ProcessedFolder(folderId);
                     }
                 }
             }
@@ -374,7 +354,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
     }
 
-    private async Task DeleteFilesAsync(IEnumerable<T> fileIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
+    private async Task DeleteFilesAsync(IEnumerable<T> fileIds, IServiceScope scope, bool isNeedSendActions = false)
     {
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -385,14 +365,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var (isError, message) = await WithErrorAsync(scope, new[] { file }, false, checkPermissions);
             if (file == null)
             {
                 this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
-            }
-            else if (!_ignoreException && isError)
-            {
-                this[Err] = message;
             }
             else
             {
@@ -470,7 +445,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
     }
 
-    private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
+    private async Task<(bool isError, string message)> WithErrorAsync1(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
     {
         var entryManager = scope.ServiceProvider.GetService<EntryManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();

@@ -263,6 +263,103 @@ public class FileOperationsManager(
         }
     }
 
+    public async Task DemandDeleteAsync<T>(IEnumerable<T> folderIds, IEnumerable<T> fileIds)
+    {
+        var folderDao = serviceProvider.GetService<IFolderDao<T>>();
+        var fileDao = serviceProvider.GetService<IFileDao<T>>();
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+        var entryManager = serviceProvider.GetService<EntryManager>();
+        var fileTracker = serviceProvider.GetService<FileTrackerHelper>();
+
+        await DemandDeleteFilesAsync(fileIds, false);
+
+        foreach (var folderId in folderIds)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            await DemandDeleteFolderAsync(folder);
+        }
+
+
+        async Task DemandDeleteFilesAsync(IEnumerable<T> fileIds, bool isFolderCheck)
+        {
+            if (!fileIds.Any())
+            {
+                return;
+            }
+
+            var files = fileDao.GetFilesAsync(fileIds);
+
+            await foreach (var file in files)
+            {
+                if (file == null)
+                {
+                    throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+                }
+
+                if (!await fileSecurity.CanDeleteAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFile);
+                }
+
+                //can't edit files in trash\archive
+                if (file.RootFolderType == FolderType.TRASH || file.RootFolderType == FolderType.Archive)
+                {
+                    return;
+                }
+
+                if (await entryManager.FileLockedForMeAsync(file.Id))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_LockedFile);
+                }
+
+                if (fileTracker.IsEditing(file.Id))
+                {
+                    throw new SecurityException(isFolderCheck
+                        ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder
+                        : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile);
+                }
+            }
+        }
+
+        async Task DemandDeleteFolderAsync(Folder<T> folder)
+        {
+            if (folder == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            if (folder.FolderType != FolderType.DEFAULT &&
+                folder.FolderType != FolderType.BUNCH &&
+                !DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            if (!await fileSecurity.CanDeleteAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            //check parent only in trash\archive
+            if (folder.RootFolderType == FolderType.TRASH || folder.RootFolderType == FolderType.Archive)
+            {
+                return;
+            }
+
+            var fileIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+
+            await DemandDeleteFilesAsync(fileIds, true);
+
+            var subfolders = folderDao.GetFoldersAsync(folder.Id);
+
+            await foreach (var subfolder in subfolders)
+            {
+                await DemandDeleteFolderAsync(subfolder);
+            }
+        }
+    }
+
     public Task PublishDelete<T>(
         IEnumerable<T> folders, 
         IEnumerable<T> files, 
@@ -314,8 +411,10 @@ public class FileOperationsManager(
         bool isEmptyTrash = false,
         bool hiddenOperation = false,
         Dictionary<string, string> headers = null)
-    {        
-        
+    {
+        await DemandDeleteAsync(folders.Item1, files.Item1);
+        await DemandDeleteAsync(folders.Item2, files.Item2);
+
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
