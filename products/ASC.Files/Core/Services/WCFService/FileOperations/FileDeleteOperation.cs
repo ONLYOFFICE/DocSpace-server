@@ -104,6 +104,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 
+        var canMarkAsRemoved = false;
         Folder<T> root = null;
         if (0 < Folders.Count)
         {
@@ -116,34 +117,30 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         if (root != null)
         {
             this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
+            canMarkAsRemoved = FolderDao.CanMarkFolderAsRemoved(root.Id);
         }
-        if (_isEmptyTrash)
-        {
-            if (_hiddenOperation)
-            {
-                await DeleteFilesAsync(Files, serviceScope, false, false);
-                await DeleteFoldersAsync(Folders, serviceScope, false, false);
-            }
-            else
-            {
-                var fileOperationsManager = serviceScope.ServiceProvider.GetService<FileOperationsManager>();
-                var socketManager = serviceScope.ServiceProvider.GetService<SocketManager>();
 
+        if (!_hiddenOperation && _immediately && canMarkAsRemoved)
+        {
+            var fileOperationsManager = serviceScope.ServiceProvider.GetService<FileOperationsManager>();
+            var socketManager = serviceScope.ServiceProvider.GetService<SocketManager>();
+
+            await MarkFilesAsRemovedAsync(socketManager, Files);
+            await MarkFoldersAsRemovedAsync(socketManager, Folders, recursive: !_isEmptyTrash);
+
+            await fileOperationsManager.PublishDelete(Folders, Files, true, false, true, _isEmptyTrash, true);
+
+            if (_isEmptyTrash)
+            {
                 var trash = await folderDao.GetFolderAsync(_trashId);
-
-                await MarkFilesAsRemovedAsync(socketManager, Files);
-                await MarkFoldersAsRemovedAsync(socketManager, Folders);
-
                 await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, Headers);
-
-                await fileOperationsManager.PublishDelete(Folders, Files, true, false, true, true, true);
             }
+
+            return;
         }
-        else
-        {
-            await DeleteFilesAsync(Files, serviceScope, true);
-            await DeleteFoldersAsync(Folders, serviceScope, true);
-        }
+
+        await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_hiddenOperation, checkPermissions: !_hiddenOperation);
+        await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_hiddenOperation, checkPermissions: !_hiddenOperation);
     }
 
     private async Task MarkFilesAsRemovedAsync(SocketManager socketManager, IEnumerable<T> filesIds)
@@ -161,9 +158,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
     }
 
-    private async Task MarkFoldersAsRemovedAsync(SocketManager socketManager, IEnumerable<T> folderIds)
+    private async Task MarkFoldersAsRemovedAsync(SocketManager socketManager, IEnumerable<T> folderIds, bool recursive)
     {
-        if (folderIds.Any())
+        if (!folderIds.Any())
         {
             return;
         }
@@ -175,6 +172,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var folder = await FolderDao.GetFolderAsync(folderId);
 
             await socketManager.DeleteFolder(folder);
+
+            if (recursive)
+            {
+                await MarkFolderContentAsRemovedAsync(socketManager, folder);
+            }
         }
     }
 
@@ -184,16 +186,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
         await MarkFilesAsRemovedAsync(socketManager, filesIds);
 
-        var subfolders = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
+        var subfolderIds = await FolderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
 
-        await MarkFoldersAsRemovedAsync(socketManager, subfolders.Select(x=>x.Id));
-
-        foreach (var subfolder in subfolders)
-        {
-            await socketManager.DeleteFolder(subfolder);
-
-            await MarkFolderContentAsRemovedAsync(socketManager, subfolder);
-        }
+        await MarkFoldersAsRemovedAsync(socketManager, subfolderIds, true);
     }
 
 

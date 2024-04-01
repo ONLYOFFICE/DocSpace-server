@@ -117,7 +117,7 @@ public class OperationController(
     {
         var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
         
-        await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
+        await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, true, true);
 
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
