@@ -1196,6 +1196,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             await socketManager.CreateFileAsync(file);
+
+            if (FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf && folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                await socketManager.CreateFormAsync(file, new List<Guid>() { securityContext.CurrentAccount.ID });
+            }
         }
         catch (Exception ex)
         {

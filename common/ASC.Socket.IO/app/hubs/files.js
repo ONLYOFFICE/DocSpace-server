@@ -151,6 +151,16 @@
     filesIO.to(room).emit("s:modify-folder", { cmd, id, type, data });
   }
 
+  function createForm({ id, room, data, userIds } = {}) {
+    logger.info(`create new form ${id} in room ${room}`);
+      if (userIds) {
+          userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "create-form", id, "file", data));
+      }
+      else {
+          modifyFolder(room, "create-form", id, "file", data);
+      }
+  }
+
   function createFile({ id, room, data, userIds } = {}) {
     logger.info(`create new file ${id} in room ${room}`);
 
@@ -284,6 +294,7 @@
     startEdit,
     stopEdit,
     createFile,
+    createForm,
     createFolder,
     deleteFile,
     deleteFolder,
