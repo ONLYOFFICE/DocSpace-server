@@ -59,7 +59,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect);
+            var token = Auth(context, out var redirect);
 
             if (redirect)
             {

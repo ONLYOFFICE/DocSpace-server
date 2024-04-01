@@ -66,7 +66,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out _, @params, additionalStateArgs);
+            var token = Auth(context, out _, @params, additionalStateArgs);
             var claims = ValidateIdToken(JObject.Parse(token.OriginJson).Value<string>("id_token"));
             return GetProfileFromClaims(claims);
         }
