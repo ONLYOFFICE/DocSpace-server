@@ -1332,8 +1332,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 };
 
                 var httpClient = clientFactory.CreateClient();
-                using var response = await httpClient.SendAsync(request);
-                await using var editedFileStream = new ResponseStream(response);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }
             tmpStream.Position = 0;
