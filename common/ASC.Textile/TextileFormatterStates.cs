@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,8 @@ public partial class TextileFormatter
 {
     #region State Registration
 
-    private static readonly List<Type> _registeredStates = new();
-    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new();
+    private static readonly List<Type> _registeredStates = [];
+    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = [];
 
     public static void RegisterFormatterState(Type formatterStateType)
     {
@@ -39,7 +39,7 @@ public partial class TextileFormatter
             throw new ArgumentException("The formatter state must be a sub-public class of FormatterStateBase.");
         }
 
-        if (formatterStateType.GetConstructor(new[] { typeof(TextileFormatter) }) == null)
+        if (formatterStateType.GetConstructor([typeof(TextileFormatter)]) == null)
         {
             throw new ArgumentException("The formatter state must have a constructor that takes a TextileFormatter reference.");
         }
@@ -58,7 +58,7 @@ public partial class TextileFormatter
 
     #region State Management
 
-    private readonly List<Type> _disabledFormatterStates = new();
+    private readonly List<Type> _disabledFormatterStates = [];
     private readonly Stack<FormatterState> _stackOfStates = new();
 
     private bool IsFormatterStateEnabled(Type type)

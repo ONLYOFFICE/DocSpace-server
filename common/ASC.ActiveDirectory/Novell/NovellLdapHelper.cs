@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -144,7 +144,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
 
     public override bool CheckUserDn(string userDn)
     {
-        string[] attributes = { LdapConstants.ADSchemaAttributes.OBJECT_CLASS };
+        string[] attributes = [LdapConstants.ADSchemaAttributes.OBJECT_CLASS];
 
         var searchResult = novellLdapSearcher.Search(userDn, NovellLdapSearcher.LdapScope.Base,
             LdapConstants.OBJECT_FILTER, attributes, 1);
@@ -160,7 +160,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
 
     public override bool CheckGroupDn(string groupDn)
     {
-        string[] attributes = { LdapConstants.ADSchemaAttributes.OBJECT_CLASS };
+        string[] attributes = [LdapConstants.ADSchemaAttributes.OBJECT_CLASS];
 
         var searchResult = novellLdapSearcher.Search(groupDn, NovellLdapSearcher.LdapScope.Base,
             LdapConstants.OBJECT_FILTER, attributes, 1);

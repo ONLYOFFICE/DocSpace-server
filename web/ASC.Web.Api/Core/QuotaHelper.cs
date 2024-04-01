@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,9 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings)
+public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings, SettingsManager settingsManager,
+        UserManager userManager,
+        AuthContext authContext)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
@@ -50,7 +52,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
     {
         var features = await GetFeatures(quota, getUsed).ToListAsync();
 
-        return new QuotaDto
+        var result =  new QuotaDto
         {
             Id = quota.TenantId,
             Title = Resource.ResourceManager.GetString($"Tariffs_{quota.Name}"),
@@ -67,6 +69,21 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
 
             Features = features
         };
+
+        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
+
+            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
+
+            result.UsersQuota = await tenantUserQuotaSettingsTask;
+            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
+            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+        }
+
+        return result;
     }
 
     private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, bool getUsed)
@@ -74,16 +91,16 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
         var assembly = GetType().Assembly;
 
         foreach (var feature in quota.TenantQuotaFeatures.
-                     Where(r =>
-                     {
-                         if (r.Standalone)
-                         {
-                             return coreBaseSettings.Standalone;
-                         }
+                    Where(r =>
+                        {
+                            if (r.Standalone)
+                            {
+                                return coreBaseSettings.Standalone;
+                            }
 
-                         return r.Visible;
-                     })
-                     .OrderBy(r => r.Order))
+                            return r.Visible;
+                        })
+                    .OrderBy(r => r.Order))
         {
             var result = new TenantQuotaFeatureDto
             {
@@ -98,6 +115,8 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
             result.Id = feature.Name;
 
             object used = null;
+            var currentUserId = authContext.CurrentAccount.ID;
+            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && !await userManager.IsCollaboratorAsync(currentUserId);
 
             if (feature is TenantQuotaFeatureSize size)
             {
@@ -126,7 +145,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
                 {
                     result.Used = new FeatureUsedDto
                     {
-                        Value = used,
+                        Value = isUsedAvailable ? used : null,
                         Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{feature.Name}")
                     };
                 }

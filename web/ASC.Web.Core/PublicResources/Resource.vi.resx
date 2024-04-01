@@ -82,9 +82,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Tuỳ chỉnh</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Một liên kết xác nhận hoạt động này đã được gửi đến {0} (địa chỉ email của người sở hữu cổng).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Địa chỉ email không chính xác</value>
   </data>
@@ -969,9 +966,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Nếu tồn tại người dùng có email {0}, hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email này.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Vượt quá không gian đĩa được phép</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Không gian đám mây cho tài liệu văn phòng của bạn</value>

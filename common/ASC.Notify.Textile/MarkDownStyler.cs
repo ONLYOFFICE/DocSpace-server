@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,7 @@ public class MarkDownStyler : IPatternStyler
             return;
         }
 
-        var lines = message.Body.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+        var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
         for (var i = 0; i < lines.Length - 1; i++)
         {
             if (string.IsNullOrEmpty(lines[i])) { body += Environment.NewLine; continue; }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,8 +33,9 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _tableRelations;
 
-    private readonly TableInfo[] _tables = {
-            new("tenants_quota", "tenant"),
+    private readonly TableInfo[] _tables =
+    [
+        new("tenants_quota", "tenant"),
             new("tenants_tariff", "tenant", "id"),
             new("tenants_tenants", "id", "id")
             {
@@ -45,19 +46,20 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
             new("core_user", "tenant", "id", IdType.Guid)
             {
                 DateColumns = new Dictionary<string, bool> {{"workfromdate", false}, {"terminateddate", false}, {"last_modified", false}},
-                UserIDColumns = new[] { "id" }
+                UserIDColumns = ["id"]
             },
             new("core_group", "tenant", "id", IdType.Guid),
             new("tenants_iprestrictions", "tenant", "id")
-        };
+    ];
 
-    private readonly RelationInfo[] _tableRelations = {
-            new("tenants_tenants", "id", "tenants_quota", "tenant"),
+    private readonly RelationInfo[] _tableRelations =
+    [
+        new("tenants_tenants", "id", "tenants_quota", "tenant"),
             new("tenants_tenants", "id", "tenants_tariff", "tenant"),
             new("tenants_tenants", "id", "tenants_tariff", "tariff"),
             new("tenants_tariff", "id", "tenants_tariffrow", "tariff_id"),
             new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
-        };
+    ];
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
         TableInfo table, DataRowInfo row)

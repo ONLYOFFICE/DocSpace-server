@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -226,6 +226,16 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _ssoFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _statisticFeature;
+
+    /// <summary>Specifies if the statistic settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Statistic
+    {
+        get => _statisticFeature.Value;
+        set => _statisticFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
 
     /// <summary>Specifies if the white label settings are available or not</summary>
@@ -321,6 +331,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9 };
+        _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -344,7 +355,8 @@ public class TenantQuota : IMapFrom<DbQuota>
             _autoBackupRestoreFeature,
             _oauthFeature,
             _contentSearchFeature,
-            _thirdPartyFeature
+            _thirdPartyFeature,
+            _statisticFeature
         };
     }
 

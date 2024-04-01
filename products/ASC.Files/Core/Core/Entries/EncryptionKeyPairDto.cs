@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -104,12 +104,12 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!await fileSecurity.CanEditAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var locatedInPrivateRoom = file.RootFolderType == FolderType.VirtualRooms
@@ -122,9 +122,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
 
         var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup
-                                        && !share.Id.Equals(FileConstant.ShareLinkId)
-                                        && share.Access == FileShare.ReadWrite).ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
 
         var tasks = fileShares.Select(async share =>
         {

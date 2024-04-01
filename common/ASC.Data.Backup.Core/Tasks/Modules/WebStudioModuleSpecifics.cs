@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,12 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _relations;
 
-    private readonly TableInfo[] _tables = {
-            new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
-            new("webstudio_settings", "TenantID") {UserIDColumns = new[] {"UserID"}},
+    private readonly TableInfo[] _tables =
+    [
+        new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
+            new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
             new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
-        };
+    ];
 
     private readonly RelationInfo[] _relations = Array.Empty<RelationInfo>();
 

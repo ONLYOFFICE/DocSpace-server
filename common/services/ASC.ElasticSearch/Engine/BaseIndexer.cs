@@ -1,30 +1,29 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-// 
+// (c) Copyright Ascensio System SIA 2009-2024
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.EntityFrameworkCore;
 
 namespace ASC.ElasticSearch;
 
@@ -60,14 +59,14 @@ public class BaseIndexerHelper
 
 [Scope]
 public class BaseIndexer<T>(Client client,
-    ILogger<BaseIndexer<T>> logger,
-    IDbContextFactory<WebstudioDbContext> dbContextFactory,
-    TenantManager tenantManager,
-    BaseIndexerHelper baseIndexerHelper,
-    Settings settings,
-    IServiceProvider serviceProvider)
+        ILogger<BaseIndexer<T>> logger,
+        IDbContextFactory<WebstudioDbContext> dbContextFactory,
+        TenantManager tenantManager,
+        BaseIndexerHelper baseIndexerHelper,
+        Settings settings,
+        IServiceProvider serviceProvider)
     where T : class, ISearchItem
-{
+    {
     public const int QueryLimit = 10000;
 
     protected internal T Wrapper => serviceProvider.GetService<T>();
@@ -78,14 +77,17 @@ public class BaseIndexer<T>(Client client,
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly object _locker = new();
 
-    public async Task<IEnumerable<List<T>>> IndexAllAsync(
+    public async IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
-        var now = DateTime.UtcNow;
-        var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
+        DateTime lastIndexed;
+
+        await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName);
+        }
 
         if (lastIndexed.Equals(DateTime.MinValue))
         {
@@ -99,25 +101,29 @@ public class BaseIndexer<T>(Client client,
         ids.AddRange(getIds(lastIndexed));
         ids.Add(max);
 
-        await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
-        {
-            IndexName = Wrapper.IndexName,
-            LastModified = now
-        });
-
-        await webstudioDbContext.SaveChangesAsync();
-
-        _logger.DebugIndexCompleted(Wrapper.IndexName);
-
-        var list = new List<List<T>>();
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            list.Add(getData(ids[i], ids[i + 1], lastIndexed));
+            yield return getData(ids[i], ids[i + 1], lastIndexed);
         }
-        return list;
     }
 
-    public async Task ReIndrexAsync()
+    public async Task OnComplete(DateTime lastModified)
+    {
+        await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
+            {
+            IndexName = Wrapper.IndexName,
+                LastModified = lastModified
+        });
+
+            await webStudioDbContext.SaveChangesAsync();
+        }
+
+        _logger.DebugIndexCompleted(Wrapper.IndexName);
+    }
+
+    public async Task ReIndexAsync()
     {
         await ClearAsync();
     }
@@ -235,7 +241,7 @@ public class BaseIndexer<T>(Client client,
                         {
                             await IndexAsync(t, immediately);
                         }
-                        catch (ElasticsearchClientException e)
+                        catch (OpenSearchClientException e)
                         {
                             if (e.Response.HttpStatusCode == 429)
                             {
@@ -431,7 +437,7 @@ public class BaseIndexer<T>(Client client,
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         if (data is ISearchItemDocument)
@@ -468,7 +474,7 @@ public class BaseIndexer<T>(Client client,
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;
@@ -528,7 +534,7 @@ public class BaseIndexer<T>(Client client,
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;
@@ -592,8 +598,8 @@ public class BaseIndexer<T>(Client client,
         member = expr as MemberExpression;
         if (member == null && expr is UnaryExpression unary)
         {
-            member = unary.Operand as MemberExpression;
-        }
+                member = unary.Operand as MemberExpression;
+            }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
     }
@@ -603,7 +609,7 @@ public class BaseIndexer<T>(Client client,
         var result = request.Index(IndexName);
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;

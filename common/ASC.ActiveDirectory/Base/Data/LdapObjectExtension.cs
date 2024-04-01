@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -137,7 +137,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         var skype = GetContacts(ldapUser, Mapping.Skype, settings);
 
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultUserQuota;
+        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultQuota;
 
         if (string.IsNullOrEmpty(userName))
         {

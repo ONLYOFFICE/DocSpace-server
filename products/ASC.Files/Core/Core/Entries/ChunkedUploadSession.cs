@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,21 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Id} into {FolderId}")]
-public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChunkedUploadSession(bytesTotal)
+public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 {
     public T FolderId { get; set; }
-    public File<T> File { get; set; } = file;
+    public File<T> File { get; set; }
     public bool Encrypted { get; set; }
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
     [NonSerialized]
     public bool CheckQuota = true;
+    
+    public ChunkedUploadSession(File<T> file, long bytesTotal) : base(bytesTotal)
+    {
+        File = file;
+    }
 
     public override object Clone()
     {
@@ -44,23 +49,6 @@ public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChun
         clone.File = (File<T>)File.Clone();
 
         return clone;
-    }
-
-    public override Stream Serialize()
-    {
-        var str = JsonSerializer.Serialize(this);
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(str));
-
-        return stream;
-    }
-
-    public static ChunkedUploadSession<T> Deserialize(Stream stream, FileHelper fileHelper)
-    {
-        var chunkedUploadSession = JsonSerializer.Deserialize<ChunkedUploadSession<T>>(stream);
-        chunkedUploadSession.File.FileHelper = fileHelper; //TODO
-        chunkedUploadSession.TransformItems();
-
-        return chunkedUploadSession;
     }
 }
 
@@ -101,7 +89,6 @@ public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logg
             created = session.Created,
             expired = session.Expired,
             location = session.Location,
-            bytes_uploaded = session.BytesUploaded,
             bytes_total = session.BytesTotal
         };
     }

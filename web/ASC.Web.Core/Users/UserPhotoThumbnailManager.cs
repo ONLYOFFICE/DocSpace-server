@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -209,34 +209,18 @@ public class ThumbnailsData(Guid userId, UserPhotoManager userPhotoManager)
 
     public async Task<List<ThumbnailItem>> ThumbnailList()
     {
-        return new List<ThumbnailItem>
-                {
-                    new()
-                    {
-                            Size = UserPhotoManager.RetinaFotoSize,
-                            ImgUrl = await userPhotoManager.GetRetinaPhotoURL(userId)
-                        },
-                    new()
-                    {
-                            Size = UserPhotoManager.MaxFotoSize,
-                            ImgUrl = await userPhotoManager.GetMaxPhotoURL(userId)
-                        },
-                    new()
-                    {
-                            Size = UserPhotoManager.BigFotoSize,
-                            ImgUrl = await userPhotoManager.GetBigPhotoURL(userId)
-                        },
-                    new()
-                    {
-                            Size = UserPhotoManager.MediumFotoSize,
-                            ImgUrl = await userPhotoManager.GetMediumPhotoURL(userId)
-                        },
-                    new()
-                    {
-                            Size = UserPhotoManager.SmallFotoSize,
-                            ImgUrl = await userPhotoManager.GetSmallPhotoURL(userId)
-                        }
-            };
+        return
+        [
+            new() { Size = UserPhotoManager.RetinaFotoSize, ImgUrl = await userPhotoManager.GetRetinaPhotoURL(userId) },
+
+            new() { Size = UserPhotoManager.MaxFotoSize, ImgUrl = await userPhotoManager.GetMaxPhotoURL(userId) },
+
+            new() { Size = UserPhotoManager.BigFotoSize, ImgUrl = await userPhotoManager.GetBigPhotoURL(userId) },
+
+            new() { Size = UserPhotoManager.MediumFotoSize, ImgUrl = await userPhotoManager.GetMediumPhotoURL(userId) },
+
+            new() { Size = UserPhotoManager.SmallFotoSize, ImgUrl = await userPhotoManager.GetSmallPhotoURL(userId) }
+        ];
     }
 
     public async Task SaveAsync(List<ThumbnailItem> bitmaps)

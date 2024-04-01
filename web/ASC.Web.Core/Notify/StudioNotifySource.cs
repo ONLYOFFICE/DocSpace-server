@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,6 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.PortalDeactivate,
                 Actions.PortalDelete,
                 Actions.PortalDeleteSuccessV1,
-                Actions.DnsChange,
                 Actions.ConfirmOwnerChange,
                 Actions.EmailChangeV115,
                 Actions.PasswordChangeV115,
@@ -80,24 +79,8 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
                 Actions.SaasAdminModulesV1,
 
-                Actions.PersonalActivate,
-                Actions.PersonalAfterRegistration1,
-                Actions.PersonalAfterRegistration14V1,
-                Actions.PersonalConfirmation,
-                Actions.PersonalPasswordChangeV115,
-                Actions.PersonalEmailChangeV115,
-                Actions.PersonalProfileDelete,
-                Actions.PersonalAlreadyExist,
-
                 Actions.MailboxCreated,
                 Actions.MailboxWithoutSettingsCreated,
-
-                Actions.PersonalCustomModeAfterRegistration1,
-                Actions.PersonalCustomModeConfirmation,
-                Actions.PersonalCustomModePasswordChangeV115,
-                Actions.PersonalCustomModeEmailChangeV115,
-                Actions.PersonalCustomModeProfileDelete,
-                Actions.PersonalCustomModeAlreadyExist,
 
                 Actions.SaasCustomModeRegData,
 
@@ -143,7 +126,9 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
-                Actions.SaasOwnerPaymentWarningGracePeriodExpired
+                Actions.SaasOwnerPaymentWarningGracePeriodExpired,
+
+                Actions.ZoomWelcome
             );
     }
 

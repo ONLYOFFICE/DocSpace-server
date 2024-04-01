@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,5 +55,5 @@ public class FileConverterOperationResult : FileOperationResult
     public string ServerRootPath { get; set; }
     
     [ProtoMember(9)]
-    public string ExternalShareData { get; set; }
+    public IDictionary<string, string> Headers { get; set; }
 }

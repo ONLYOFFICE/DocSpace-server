@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,7 @@ public class BillingClient
 
     public string GetAccountLink(string portalId, string backUrl)
     {
-        var result = Request("GetAccountLink", portalId, new[] { Tuple.Create("BackRef", backUrl) });
+        var result = Request("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
         var link = JsonConvert.DeserializeObject<string>(result);
         return link;
     }
@@ -264,7 +264,7 @@ public class BillingClient
 
         if (!string.IsNullOrEmpty(portalId))
         {
-            data.Add("PortalId", new List<string> { portalId });
+            data.Add("PortalId", [portalId]);
         }
 
         if (parameters != null)
@@ -273,7 +273,7 @@ public class BillingClient
             {
                 if (!data.ContainsKey(parameter.Item1))
                 {
-                    data.Add(parameter.Item1, new List<string> { parameter.Item2 });
+                    data.Add(parameter.Item1, [parameter.Item2]);
                 }
                 else
                 {

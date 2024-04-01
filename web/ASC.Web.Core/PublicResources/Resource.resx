@@ -612,9 +612,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Custom</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>A link to confirm the operation has been sent to {0} (the email address of the portal owner).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Incorrect Instance id.</value>
   </data>
@@ -906,9 +903,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Owner</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk space quota exceeded</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Cloud space for your office docs</value>
   </data>
@@ -1068,6 +1062,9 @@
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
   </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Failed to set the memory quota - the memory quota you set is greater than portals quota.</value>
+  </data>
   <data name="ErrorWebPluginArchive" xml:space="preserve">
     <value>Wrong plugin archive</value>
   </data>
@@ -1097,5 +1094,11 @@
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
     <value>The last full access space cannot be deleted</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Room space quota exceeded</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>User space quota exceeded</value>
   </data>
 </root>

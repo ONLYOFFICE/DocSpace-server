@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,8 +79,23 @@ public class FolderDto<T> : FileEntryDto<T>
     public bool Private { get; set; }
     public bool Indexing { get; set; }
 
+    /// <summary>Folder type</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    public FolderType? Type { get; set; }
+
     public bool? InRoom { get; set; }
 
+    /// <summary>Quota</summary>
+    /// <type>System.Int32, System</type>
+    public long? QuotaLimit { get; set; }
+
+    /// <summary>Specifies if the room has a custom quota or not.</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsCustomQuota { get; set; }
+
+    /// <summary>Counter</summary>
+    /// <type>System.Int32, System</type>
+    public long? UsedSpace { get; set; }
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>
@@ -115,10 +130,14 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime,
+        SettingsManager settingsManager,
+        CoreBaseSettings coreBaseSettings,
+        TenantManager tenantManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
-{
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
+    {
+
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -129,7 +148,6 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
             }
             else
@@ -138,19 +156,50 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             }
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
-            result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
+            result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
 
-            if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
+            if (folder.ProviderEntry)
             {
-                result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
+                result.ParentId = folder.RootFolderType switch
+                {
+                    FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
+                    FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
+                    _ => result.ParentId
+                };
             }
 
-            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            result.Mute = await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(result.Id.ToString());
+
+            if (folder.CreateBy == authContext.CurrentAccount.ID)
             {
-                result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+                result.InRoom = true;
+            }
+            else if (folder.ShareRecord is { SubjectType: SubjectType.Group })
+            {
+                result.InRoom = false;
+            }
+            else
+            {
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
+
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.User)
+                    && !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.Group);
+            }
+
+            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
+                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
+                     ((result.RootFolderType == FolderType.Archive || result.RootFolderType == FolderType.TRASH) && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            {
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                result.UsedSpace = folder.Counter;
+
+                if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
+                {
+                    result.IsCustomQuota = folder.SettingsQuota > -2;
+                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
+                }
             }
         }
-
         if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
@@ -179,6 +228,14 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (folder.Order != 0)
         {
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
+        }
+
+        if (folder.FolderType == FolderType.InProcessFormFolder || 
+            folder.FolderType == FolderType.ReadyFormFolder || 
+            folder.FolderType == FolderType.FormFillingFolderDone || 
+            folder.FolderType == FolderType.FormFillingFolderInProgress)
+        {
+            result.Type = folder.FolderType;
         }
 
         return result;

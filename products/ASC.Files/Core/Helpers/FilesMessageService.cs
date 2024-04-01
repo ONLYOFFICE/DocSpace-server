@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,9 @@ public class FilesMessageService(ILoggerProvider options,
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.Messaging");
     private readonly IHttpContextAccessor _httpContextAccessor;
+
+    private static readonly JsonSerializerOptions _serializerOptions = 
+        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public FilesMessageService(
         ILoggerProvider options,
@@ -71,9 +74,9 @@ public class FilesMessageService(ILoggerProvider options,
         await SendAsync(action, entry, null, userId, FileShare.None, description);
     }
 
-    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, params string[] description)
+    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
     {
-        description = description.Append(FileShareExtensions.GetAccessString(userRole)).ToArray();
+        description = description.Append(FileShareExtensions.GetAccessString(userRole, useRoomFormat)).ToArray();
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
@@ -203,32 +206,27 @@ public class FilesMessageService(ILoggerProvider options,
 
     private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
-        var info = new AdditionalNotificationInfo
+        var info = new AdditionalNotificationInfo<T>
         {
-            RoomId = roomInfo.RoomId,
-            RoomTitle = roomInfo.RoomTitle
+            RoomTitle = roomInfo.RoomTitle, 
+            RoomId = roomInfo.RoomId
         };
 
-        if (action == MessageAction.RoomRenamed && !string.IsNullOrEmpty(oldTitle))
+        switch (action)
         {
-            info.RoomOldTitle = oldTitle;
-        }
-
-        if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
-            && userid != Guid.Empty)
-        {
-            info.UserIds = new List<Guid> { userid };
-        }
-
-        if (action == MessageAction.RoomUpdateAccessForUser
-            && (userRole != FileShare.None)
-            && userid != Guid.Empty)
-        {
-            info.UserIds = new List<Guid> { userid };
-            info.UserRole = (int)userRole;
+            case MessageAction.RoomRenamed when !string.IsNullOrEmpty(oldTitle):
+                info.RoomOldTitle = oldTitle;
+                break;
+            case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:
+                info.UserIds = [userid];
+                break;
+            case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:
+                info.UserIds = [userid];
+                info.UserRole = (int)userRole;
+                break;
         }
 
         info.RootFolderTitle = entry.RootFolderType switch
@@ -238,7 +236,7 @@ public class FilesMessageService(ILoggerProvider options,
             _ => string.Empty
         };
 
-        var serializedParam = JsonSerializer.Serialize(info, new JsonSerializerOptions{ DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+        var serializedParam = JsonSerializer.Serialize(info, _serializerOptions);
 
         return serializedParam;
     }

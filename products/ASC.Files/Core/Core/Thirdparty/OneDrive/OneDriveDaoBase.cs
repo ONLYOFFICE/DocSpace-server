@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -139,13 +139,13 @@ internal class OneDriveDaoBase(
 
         folder.Id = MakeId(isRoot ? string.Empty : onedriveFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
+        folder.Title = MakeFolderTitle(onedriveFolder);
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
-
-        folder.Title = MakeFolderTitle(onedriveFolder);
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         return folder;
     }
@@ -208,7 +208,6 @@ internal class OneDriveDaoBase(
         file.CreateOn = onedriveFile.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.CreatedDateTime.Value.DateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(onedriveFile));
         file.ModifiedOn = onedriveFile.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.LastModifiedDateTime.Value.DateTime) : default;
-        file.NativeAccessor = onedriveFile;
         file.Title = MakeFileTitle(onedriveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;

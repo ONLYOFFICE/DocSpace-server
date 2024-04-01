@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,11 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationExtention))]
+[Scope(Additional = typeof(ConfigurationFilesExtension))]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
         FileSecurity fileSecurity,
-        SetupInfo setupInfo,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
@@ -76,7 +75,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         if (file == null)
         {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         if (!string.IsNullOrEmpty(file.Error))
@@ -137,17 +136,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && !await fileSecurity.CanReadAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+            if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
+            {
+                throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
-        }
-
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         string strError = null;
@@ -156,7 +155,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (tryEdit)
             {
-                strError = FilesCommonResource.ErrorMassage_LockedFile;
+                strError = FilesCommonResource.ErrorMessage_LockedFile;
             }
 
             rightToRename = false;
@@ -195,7 +194,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!editPossible && !fileUtility.CanWebView(file.Title))
         {
-            throw new Exception($"{FilesCommonResource.ErrorMassage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
+            throw new Exception($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
         }
 
         if (reviewPossible &&
@@ -231,8 +230,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 {
                     var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
                     strError = string.Format(!coauth
-                                                 ? FilesCommonResource.ErrorMassage_EditingCoauth
-                                                 : FilesCommonResource.ErrorMassage_EditingMobile,
+                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
+                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
                                              await global.GetUserNameAsync(editingBy, true));
                 }
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
@@ -256,36 +255,31 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var rightToDownload = await CanDownloadAsync(fileSecurity, file, linkRight);
 
-        var configuration = new Configuration<T>(file, serviceProvider)
+        var configuration = serviceProvider.GetService<Configuration<T>>();
+        configuration.Document.Key = docKey;
+        configuration.Document.Permissions = new PermissionsConfig
         {
-            Document =
-                {
-                    Key = docKey,
-                    Permissions =
-                    {
-                        Edit = rightToEdit && lastVersion,
-                        Rename = rightToRename && lastVersion && !file.ProviderEntry,
-                        Review = rightToReview && lastVersion,
-                        FillForms = rightToFillForms && lastVersion,
-                        Comment = rightToComment && lastVersion,
-                        ChangeHistory = rightChangeHistory,
-                        ModifyFilter = rightModifyFilter,
-                        Print = rightToDownload,
-                        Download = rightToDownload,
-                        Copy = rightToDownload
-                    },
-                    Options = options,
-            },
-            EditorConfig =
-                {
-                    ModeWrite = modeWrite
-                },
-            ErrorMessage = strError
+            Edit = rightToEdit && lastVersion,
+            Rename = rightToRename && lastVersion && !file.ProviderEntry,
+            Review = rightToReview && lastVersion,
+            FillForms = rightToFillForms && lastVersion,
+            Comment = rightToComment && lastVersion,
+            ChangeHistory = rightChangeHistory,
+            ModifyFilter = rightModifyFilter,
+            Print = rightToDownload,
+            Download = rightToDownload,
+            Copy = rightToDownload,
+            Protect = authContext.IsAuthenticated,
+            Chat = file.Access != FileShare.Read   
         };
+        
+        configuration.Document.Options = options;
+        configuration.EditorConfig.ModeWrite = modeWrite;
+        configuration.Error = strError;
 
         if (!lastVersion)
         {
-            configuration.Document.Title += $" ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -408,18 +402,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
     {
-        var sharedLink =
-            await fileSecurity.CanEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCustomFilterEditAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanReviewAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanFillFormsAsync(file, FileConstant.ShareLinkId)
-            || await fileSecurity.CanCommentAsync(file, FileConstant.ShareLinkId);
-
         var usersDrop = new List<string>();
 
         foreach (var uid in fileTracker.GetEditingBy(file.Id))
         {
-            if (!await userManager.UserExistsAsync(uid) && !sharedLink)
+            if (!await userManager.UserExistsAsync(uid))
             {
                 usersDrop.Add(uid.ToString());
                 continue;

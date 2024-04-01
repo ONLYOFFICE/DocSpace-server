@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,16 +51,10 @@ public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
 [Scope]
 public class UserHelpTourHelper(SettingsManager settingsManager)
 {
-    private SettingsManager SettingsManager { get; } = settingsManager;
-
-    public bool IsNewUser
+    public async Task SetIsNewUser(bool value)
     {
-        get { return SettingsManager.LoadForCurrentUser<UserHelpTourSettings>().IsNewUser; }
-        set
-        {
-            var settings = SettingsManager.LoadForCurrentUser<UserHelpTourSettings>();
-            settings.IsNewUser = value;
-            SettingsManager.SaveForCurrentUser(settings);
-        }
+        var settings = await settingsManager.LoadForCurrentUserAsync<UserHelpTourSettings>();
+        settings.IsNewUser = value;
+        await settingsManager.SaveForCurrentUserAsync(settings);
     }
 }

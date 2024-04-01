@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,
         SettingsManager settingsManager,
-        ILogger<CapabilitiesController> logger)
+        ILogger<CapabilitiesController> logger,
+        CommonLinkUtility commonLinkUtility)
     : ControllerBase
 {
     private readonly ILogger _log = logger;
@@ -115,7 +116,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
 
                 if (settings.EnableSso.GetValueOrDefault())
                 {
-                    result.SsoUrl = settings.IdpSettings.SsoUrl;
+                    result.SsoUrl = commonLinkUtility.GetFullAbsolutePath("/sso/login"); //TODO: get it from config
                     result.SsoLabel = settings.SpLoginLabel;
                 }
             }

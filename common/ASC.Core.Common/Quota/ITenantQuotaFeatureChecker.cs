@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,8 @@ namespace ASC.Core.Common.Quota;
 public interface ITenantQuotaFeatureChecker
 {
     public Task CheckUsed(TenantQuota value);
-    string Exception { get; }
+
+    public string GetExceptionMessage(long size);
 }
 
 
@@ -40,7 +41,7 @@ public abstract class TenantQuotaFeatureChecker<T, T1>(ITenantQuotaFeatureStat<T
 {
     protected readonly ITenantQuotaFeatureStat<T, T1> _tenantQuotaFeatureStatistic = tenantQuotaFeatureStatistic;
 
-    public abstract string Exception { get; }
+    public abstract string GetExceptionMessage(long size);
 
     public async Task CheckUsed(TenantQuota quota)
     {
@@ -65,7 +66,7 @@ public abstract class TenantQuotaFeatureChecker<T, T1>(ITenantQuotaFeatureStat<T
 
         if (newValue.CompareTo(val) > 0)
         {
-            throw new TenantQuotaException(string.Format(Exception, val));
+            throw new TenantQuotaException(GetExceptionMessage((long)Convert.ChangeType(val, typeof(long))));
         }
     }
 }

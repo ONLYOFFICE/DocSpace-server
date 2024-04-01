@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,7 +90,7 @@ public class WebPathSettings
             {
                 var query = string.Empty;
                 //Rel path
-                if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
+                if (relativePath.IndexOfAny(['?', '=', '&']) != -1)
                 {
                     //Cut it
                     query = relativePath[relativePath.IndexOf('?')..];
@@ -134,7 +134,7 @@ public class WebPath(WebPathSettings webPathSettings,
     ILoggerProvider options,
     IHttpClientFactory clientFactory)
 {
-    private static readonly IDictionary<string, bool> _existing = new ConcurrentDictionary<string, bool>();
+    private static readonly ConcurrentDictionary<string, bool> _existing = new();
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public WebPath(

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -160,9 +160,9 @@ public class LicenseController(ILoggerProvider option,
             CountUser = curQuota.CountUser,
             MaxFileSize = curQuota.MaxFileSize,
             MaxTotalSize = curQuota.MaxTotalSize,
-            Features = curQuota.Features
+            Features = curQuota.Features,
+            Trial = true
         };
-        quota.Trial = true;
 
         await tenantManager.SaveTenantQuotaAsync(quota);
 
@@ -170,11 +170,11 @@ public class LicenseController(ILoggerProvider option,
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
+            Quotas = [new(quota.TenantId, 1)],
             DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
         };
 
-        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
 
         await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
@@ -195,9 +195,9 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public bool RequestLicense()
+    public async Task<bool> RequestLicense()
     {
-        return firstTimeTenantSettings.RequestLicense;
+        return await firstTimeTenantSettings.GetRequestLicense();
     }
 
 

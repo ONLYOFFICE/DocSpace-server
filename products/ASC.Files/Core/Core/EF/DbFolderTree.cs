@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.EF;
 
-[ElasticsearchType(RelationName = Tables.Tree)]
+[OpenSearchType(RelationName = Tables.Tree)]
 public class DbFolderTree : BaseEntity
 {
     public int FolderId { get; set; }
@@ -37,7 +37,7 @@ public class DbFolderTree : BaseEntity
 
     public override object[] GetKeys()
     {
-        return new object[] { ParentId, FolderId };
+        return [ParentId, FolderId];
     }
 }
 

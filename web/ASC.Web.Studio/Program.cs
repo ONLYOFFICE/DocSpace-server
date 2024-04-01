@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,6 +67,10 @@ try
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
     eventBus.Subscribe<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
+    eventBus.Subscribe<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,8 @@ public class ConnectionsController(UserManager userManager,
         MessageTarget messageTarget,
         CookiesManager cookiesManager,
         CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper)
+        GeolocationHelper geolocationHelper,
+        ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -60,7 +61,7 @@ public class ConnectionsController(UserManager userManager,
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("")]
-    public async Task<object> GetAllActiveConnections()
+    public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
@@ -100,12 +101,25 @@ public class ConnectionsController(UserManager userManager,
             }
         }
 
-        var result = new
+        return new ActiveConnectionsDto
         {
-            Items = listLoginEvents,
-            LoginEvent = loginEventId
+            LoginEvent = loginEventId,
+            Items = listLoginEvents.Select(q => new ActiveConnectionsItemDto
+            {
+                Id = q.Id,
+                Browser = q.Browser,
+                City = q.City,
+                Country = q.Country,
+                Date = apiDateTimeHelper.Get(q.Date),
+                Ip = q.IP,
+                Mobile = q.Mobile,
+                Page = q.Page,
+                TenantId = q.TenantId,
+                Platform = q.Platform,
+                UserId = q.UserId,
+                
+            }).ToList()
         };
-        return result;
     }
 
     /// <summary>
@@ -161,8 +175,10 @@ public class ConnectionsController(UserManager userManager,
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)
-            && !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID))
+        var currentUserId = securityContext.CurrentAccount.ID;
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
         {
             throw new SecurityException("Method not available");
         }
@@ -217,10 +233,24 @@ public class ConnectionsController(UserManager userManager,
     {
         try
         {
-            var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+            var currentUserId = securityContext.CurrentAccount.ID;
+            var user = await userManager.GetUsersAsync(currentUserId);
+
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+
+            if (loginEvent == null)
+            {
+                return false;
+            }
+
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(user))
+            {
+                throw new SecurityException("Method not available");
+            }
+
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-            await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+            await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;

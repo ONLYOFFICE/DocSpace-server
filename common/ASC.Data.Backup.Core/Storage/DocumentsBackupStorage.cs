@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         IDaoFactory daoFactory,
         StorageFactory storageFactory,
         IServiceProvider serviceProvider,
-        TempPath tempPath)
+        AscDistributedCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private int _tenantId;
@@ -43,7 +43,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
     {
         _tenantId = tenantId;
         var store = await storageFactory.GetStorageAsync(_tenantId, "files");
-        _sessionHolder = new FilesChunkedUploadSessionHolder(daoFactory, tempPath, store, "", setupInfo.ChunkUploadSize);
+        _sessionHolder = new FilesChunkedUploadSessionHolder(daoFactory, store, "", cache, setupInfo.ChunkUploadSize);
     }
 
     public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)

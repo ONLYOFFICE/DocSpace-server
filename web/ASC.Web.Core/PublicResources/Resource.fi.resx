@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Mukautettu</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Vahvistuslinkki on lähetetty sivuston omistajan sähköpostiosoitteeseen {0}.</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Virheellinen sähköpostiosoite</value>
   </data>
@@ -948,9 +945,6 @@
   </data>
   <data name="OrgServerRegion" xml:space="preserve">
     <value>ORG-alue</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Levytilan kiintiö ylitetty</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Pilvitila asiakirjoillesi</value>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,9 +38,9 @@ public class NotifyEngine(Context context,
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
-    internal readonly List<SendMethodWrapper> SendMethods = new();
+    internal readonly List<SendMethodWrapper> SendMethods = [];
     private readonly Dictionary<string, IPatternStyler> _stylers = new();
-    private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
+    private readonly ReplacePatternFormatter _sysTagFormatter = new(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions = new List<Type>();
 
     public void AddAction<T>() where T : INotifyEngineAction
@@ -199,7 +199,7 @@ public class NotifyEngine(Context context,
         catch (Exception ex)
         {
             responses.Add(new SendResponse(request.NotifyAction, null, request.Recipient, SendResult.Impossible));
-            _logger.ErrorPrepare(ex);
+            _logger.ErrorPrepare(ex, request.NotifyAction, request.Recipient);
         }
 
         if (request._senderNames is { Length: > 0 })
@@ -302,14 +302,13 @@ public class NotifyEngine(Context context,
         {
             formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
-                noticeMessage, 
-                new ITagValue[]
-               {
-                       new TagValue(Context.SysRecipientId, request.Recipient.ID),
+                noticeMessage,
+                [
+                    new TagValue(Context.SysRecipientId, request.Recipient.ID),
                        new TagValue(Context.SysRecipientName, request.Recipient.Name),
                        new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
-               }
-                );
+                ]
+            );
             //Do styling here
             if (!string.IsNullOrEmpty(pattern.Styler))
             {

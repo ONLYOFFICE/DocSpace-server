@@ -442,9 +442,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizzato</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Un collegamento per confermare l'operazione è stato inviato all'indirizzo {0} (l'indirizzo email del proprietario del portale).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>ID istanza errato.</value>
   </data>
@@ -726,9 +723,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>Proprietario</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Quota di spazio su disco superata</value>
   </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Accesso al portale</value>

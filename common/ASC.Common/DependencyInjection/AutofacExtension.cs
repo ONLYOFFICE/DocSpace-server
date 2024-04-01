@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,33 +26,16 @@
 
 namespace ASC.Common.DependencyInjection;
 
-internal class AutofacComponent
-{
-    public string Type { get; set; }
-    public IEnumerable<AutofacService> Services { get; set; }
-}
-
-internal class AutofacService
-{
-    public string Type { get; set; }
-}
-
 public static class AutofacExtension
 {
-    public static void Register(this ContainerBuilder builder, IConfiguration configuration,
-        bool loadproducts = true, bool loadconsumers = true, params string[] intern)
+    public static void Register(this ContainerBuilder builder, IConfiguration configuration, bool loadConsumers = true, params string[] intern)
     {
         var modules = new List<(bool, string)>
             {
                 (true, "autofac.json")
             };
 
-        if (loadproducts)
-        {
-            modules.Add((true, "autofac.products.json"));
-        }
-
-        if (loadconsumers)
+        if (loadConsumers)
         {
             modules.Add((true, "autofac.consumers.json"));
         }
@@ -77,99 +60,5 @@ public static class AutofacExtension
             var module = new ConfigurationModule(root);
             builder.RegisterModule(module);
         }
-    }
-
-    public static List<string> FindAndLoad(IConfiguration configuration, string currentDir, string section = "autofac.products.json")
-    {
-        var config = new ConfigurationBuilder();
-        config.SetBasePath(configuration["pathToConf"]);
-        config.AddJsonFile(section);
-        var root = config.Build();
-
-        var sectionSettings = root.GetSection("components");
-
-        var folder = configuration["core:products:folder"];
-        var subfolder = configuration["core:products:subfolder"];
-        string productsDir;
-
-        if (!Path.IsPathRooted(folder))
-        {
-            if (currentDir.TrimEnd('\\').EndsWith(CrossPlatform.PathCombine(Path.GetFileName(folder), Assembly.GetEntryAssembly().GetName().Name, subfolder)))
-            {
-                productsDir = Path.GetFullPath(CrossPlatform.PathCombine("..", ".."));
-            }
-            else
-            {
-                productsDir = Path.GetFullPath(CrossPlatform.PathCombine(currentDir, folder));
-            }
-        }
-        else
-        {
-            productsDir = folder;
-        }
-
-        var cs = new List<AutofacComponent>();
-        sectionSettings.Bind(cs);
-
-        var types = new List<string>();
-
-        foreach (var component in cs.Select(r=> r.Type))
-        {
-            try
-            {
-                LoadAssembly(component);
-                types.Add(component);
-            }
-            catch (Exception)
-            {
-                //TODO
-            }
-        }
-
-        return types;
-
-        void LoadAssembly(string type)
-        {
-            var dll = type[(type.IndexOf(',') + 1)..].Trim();
-            var path = GetFullPath(dll);
-
-            if (!string.IsNullOrEmpty(path))
-            {
-                AssemblyLoadContext.Default.Resolving += new Resolver(path).Resolving;
-            }
-        }
-
-        string GetFullPath(string n)
-        {
-            var productPath = CrossPlatform.PathCombine(productsDir, n, subfolder);
-
-            return GetPath(CrossPlatform.PathCombine(productPath, "bin"), n, SearchOption.AllDirectories)
-                ?? GetPath(productPath, n, SearchOption.TopDirectoryOnly);
-        }
-
-        static string GetPath(string dirPath, string dll, SearchOption searchOption)
-        {
-            if (!Directory.Exists(dirPath))
-            {
-                return null;
-            }
-
-            return Directory.GetFiles(dirPath, $"{dll}.dll", searchOption).FirstOrDefault();
-        }
-    }
-}
-
-class Resolver(string assemblyPath)
-{
-    public Assembly Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
-    {
-        var path = CrossPlatform.PathCombine(Path.GetDirectoryName(assemblyPath), $"{assemblyName.Name}.dll");
-
-        if (!File.Exists(path))
-        {
-            return null;
-        }
-
-        return context.LoadFromAssemblyPath(path);
     }
 }

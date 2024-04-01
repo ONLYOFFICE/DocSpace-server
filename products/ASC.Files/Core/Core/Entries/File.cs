@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,7 +55,7 @@ public class File<T> : FileEntry<T>
 
     public File(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Version = 1;
         VersionGroup = 1;
@@ -105,11 +105,13 @@ public class File<T> : FileEntry<T>
         }
     }
 
-    public FileStatus FileStatus
+    public async Task<FileStatus> GetFileStatus()
     {
-        get => FileHelper.GetFileStatus(this, ref _status);
-        set => _status = value;
+        _status = await FileHelper.GetFileStatus(this, _status);
+        return _status;
     }
+
+    public void SetFileStatus(FileStatus value) => _status = value;
 
     public override string UniqID => $"file_{Id}";
 
@@ -200,8 +202,6 @@ public class File<T> : FileEntry<T>
             };
         }
     }
-
-    public object NativeAccessor { get; set; }
+    
+    public DateTime? LastOpened { get; set; }
 }
-
-

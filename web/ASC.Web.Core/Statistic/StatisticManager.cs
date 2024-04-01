@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ public class StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFac
 {
     private static DateTime _lastSave = DateTime.UtcNow;
     private static readonly TimeSpan _cacheTime = TimeSpan.FromMinutes(2);
-    private static readonly IDictionary<string, UserVisit> _cache = new Dictionary<string, UserVisit>();
+    private static readonly Dictionary<string, UserVisit> _cache = new();
 
     public async ValueTask SaveUserVisitAsync(int tenantId, Guid userId, Guid productId)
     {
@@ -83,7 +83,7 @@ public class StatisticManager(IDbContextFactory<WebstudioDbContext> dbContextFac
         List<UserVisit> visits;
         lock (_cache)
         {
-            visits = new List<UserVisit>(_cache.Values);
+            visits = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
         }

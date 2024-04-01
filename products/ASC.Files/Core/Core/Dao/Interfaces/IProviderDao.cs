@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,10 +35,9 @@ public interface IProviderDao
     IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(FolderType folderType, string searchText = null);
     IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(Guid userId);
     Task<int> SaveProviderInfoAsync(string providerKey, string customerTitle, AuthData authData, FolderType folderType);
-    Task<bool> UpdateProviderInfoAsync(int linkId, FolderType rootFolderType);
-    Task<bool> UpdateProviderInfoAsync(int linkId, bool hasLogo);
-    Task<bool> UpdateProviderInfoAsync(int linkId, string title, string folderId, FolderType folderType, bool @private);
     Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData authData, FolderType folderType, Guid? userId = null);
     Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData authData);
+    Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data);
     Task RemoveProviderInfoAsync(int linkId);
+    IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input);
 }

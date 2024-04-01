@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -131,7 +131,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 stream.Position = 0;
                 scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
             }
-            scriptUrl = await ReplaceCommunityAdressAsync(scriptUrl);
+            scriptUrl = await ReplaceCommunityAddressAsync(scriptUrl);
             requestKey = null;
         }
 
@@ -218,7 +218,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var toExtension = fileUtility.GetInternalExtension(fileExtension);
                 var url = pathProvider.GetEmptyFileUrl(fileExtension);
 
-                var fileUri = await ReplaceCommunityAdressAsync(url);
+                var fileUri = await ReplaceCommunityAddressAsync(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
                 var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory);
@@ -276,7 +276,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var storeTemplate = await globalStore.GetStoreTemplateAsync();
                 var scriptUri = await storeTemplate.GetUriAsync("", "test.docbuilder");
                 var scriptUrl = baseCommonLinkUtility.GetFullAbsolutePath(scriptUri.ToString());
-                scriptUrl = await ReplaceCommunityAdressAsync(scriptUrl);
+                scriptUrl = await ReplaceCommunityAddressAsync(scriptUrl);
 
                 await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestAsync(fileUtility, filesLinkUtility.DocServiceDocbuilderUrl, null, scriptUrl, false, fileUtility.SignatureSecret, clientFactory);
             }
@@ -289,47 +289,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
     }
 
-    public string ReplaceCommunityAdress(string url)
-    {
-        var docServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
-
-        if (string.IsNullOrEmpty(url))
-        {
-            return url;
-        }
-
-        if (string.IsNullOrEmpty(docServicePortalUrl))
-        {
-            var tenant = tenantManager.GetCurrentTenant();
-            if (!tenantExtra.Saas
-                || string.IsNullOrEmpty(tenant.MappedDomain)
-                || !url.StartsWith("https://" + tenant.MappedDomain))
-            {
-                return url;
-            }
-
-            docServicePortalUrl = "https://" + tenant.GetTenantDomain(coreSettings, false);
-        }
-
-        var uri = new UriBuilder(url);
-        if (new UriBuilder(baseCommonLinkUtility.ServerRootPath).Host != uri.Host)
-        {
-            return url;
-        }
-
-        var query = HttpUtility.ParseQueryString(uri.Query);
-        //        query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
-        uri.Query = query.ToString();
-
-        var communityUrl = new UriBuilder(docServicePortalUrl);
-        uri.Scheme = communityUrl.Scheme;
-        uri.Host = communityUrl.Host;
-        uri.Port = communityUrl.Port;
-
-        return uri.ToString();
-    }
-
-    public async Task<string> ReplaceCommunityAdressAsync(string url)
+    public async Task<string> ReplaceCommunityAddressAsync(string url)
     {
         var docServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
 
@@ -369,7 +329,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         return uri.ToString();
     }
 
-    public string ReplaceDocumentAdress(string url)
+    public string ReplaceDocumentAddress(string url)
     {
         if (string.IsNullOrEmpty(url))
         {
@@ -391,7 +351,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     private Exception CustomizeError(Exception ex)
     {
-        var error = FilesCommonResource.ErrorMassage_DocServiceException;
+        var error = FilesCommonResource.ErrorMessage_DocServiceException;
         if (!string.IsNullOrEmpty(ex.Message))
         {
             error += $" ({ex.Message})";

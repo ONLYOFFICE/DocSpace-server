@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,33 +54,16 @@ public class SettingsManager(IServiceProvider serviceProvider,
     IDbContextFactory<WebstudioDbContext> dbContextFactory)
 {
     private readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
-
     private readonly ICache _cache = dbSettingsManagerCache.Cache;
-
-    private int TenantID
+    private readonly JsonSerializerOptions  _options = new()
     {
-        get
-        {
-            return tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
-    private Guid CurrentUserID
-    {
-        get
-        {
-            return authContext.CurrentAccount.ID;
-        }
-    }
+        PropertyNameCaseInsensitive = true
+    };
+    
 
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        await ClearCacheAsync<T>(tenantId);
-    }
-
-    public async Task ClearCacheAsync<T>(int tenantId) where T : class, ISettings<T>
-    {
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
         var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
@@ -92,22 +75,7 @@ public class SettingsManager(IServiceProvider serviceProvider,
         var settingsInstance = ActivatorUtilities.CreateInstance<T>(serviceProvider);
         return settingsInstance.GetDefault();
     }
-    
-    public T Load<T>() where T : class, ISettings<T>
-    {
-        return Load<T>(TenantID, Guid.Empty);
-    }
 
-    public T Load<T>(Guid userId) where T : class, ISettings<T>
-    {
-        return Load<T>(TenantID, userId);
-    }
-    
-    public T Load<T>(int tenantId) where T : class, ISettings<T>
-    {
-        return Load<T>(tenantId, Guid.Empty);
-    }
-    
     public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -126,29 +94,19 @@ public class SettingsManager(IServiceProvider serviceProvider,
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
-    public async Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
+    public Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(tenantId, Guid.Empty);
+        return LoadAsync<T>(tenantId, Guid.Empty);
     }
 
-    public async Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
+    public Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(Tenant.DefaultTenant);
+        return LoadAsync<T>(Tenant.DefaultTenant);
     }
 
-    public T LoadForDefaultTenant<T>() where T : class, ISettings<T>
+    public Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
     {
-        return Load<T>(Tenant.DefaultTenant);
-    }
-
-    public async Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
-    {
-        return await LoadAsync<T>(CurrentUserID);
-    }
-
-    public T LoadForCurrentUser<T>() where T : class, ISettings<T>
-    {
-        return Load<T>(CurrentUserID);
+        return LoadAsync<T>(authContext.CurrentAccount.ID);
     }
 
     public async Task<bool> SaveAsync<T>(T data) where T : class, ISettings<T>
@@ -157,7 +115,6 @@ public class SettingsManager(IServiceProvider serviceProvider,
         return await SaveAsync(data, tenantId, Guid.Empty);
     }
     
-
     public async Task<bool> SaveAsync<T>(T data, Guid userId) where T : class, ISettings<T>
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -170,34 +127,19 @@ public class SettingsManager(IServiceProvider serviceProvider,
         return await SaveAsync(data, tenantId, user.Id);
     }
 
-    public async Task<bool> SaveAsync<T>(T data, int tenantId) where T : class, ISettings<T>
+    public Task<bool> SaveAsync<T>(T data, int tenantId) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, tenantId, Guid.Empty);
-    }
-
-    public bool Save<T>(T data) where T : class, ISettings<T>
-    {
-        return Save(data, TenantID, Guid.Empty);
+        return SaveAsync(data, tenantId, Guid.Empty);
     }
     
-    public bool Save<T>(T data, Guid userId) where T : class, ISettings<T>
+    public Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
     {
-        return Save(data, TenantID, userId);
-    }
-    
-    public async Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
-    {
-        return await SaveAsync(data, Tenant.DefaultTenant);
+        return SaveAsync(data, Tenant.DefaultTenant);
     }
 
-    public async Task<bool> SaveForCurrentUserAsync<T>(T data) where T : class, ISettings<T>
+    public Task<bool> SaveForCurrentUserAsync<T>(T data) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, CurrentUserID);
-    }
-
-    public bool SaveForCurrentUser<T>(T data) where T : class, ISettings<T>
-    {
-        return Save(data, CurrentUserID);
+        return SaveAsync(data, authContext.CurrentAccount.ID);
     }
 
     public async Task<bool> ManageAsync<T>(Action<T> action) where T : class, ISettings<T>
@@ -207,14 +149,7 @@ public class SettingsManager(IServiceProvider serviceProvider,
         return await SaveAsync(settings);
     }
 
-    public bool ManageForCurrentUser<T>(Action<T> action) where T : class, ISettings<T>
-    {
-        var settings = LoadForCurrentUser<T>();
-        action(settings);
-        return SaveForCurrentUser(settings);
-    }
-
-    internal async ValueTask<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    internal Task<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
@@ -224,54 +159,29 @@ public class SettingsManager(IServiceProvider serviceProvider,
             var settings = _cache.Get<T>(key);
             if (settings != null)
             {
-                return settings;
+                return Task.FromResult(settings);
             }
 
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
-
-            settings = result != null ? Deserialize<T>(result) : def;
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return settings;
+            return LoadАFromDbAsync(tenantId, userId, def, key);
         }
         catch (Exception ex)
         {
             logger.ErrorLoadSettingsFor(ex);
         }
 
-        return def;
+        return Task.FromResult(def);
     }
 
-    private T Load<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    private async Task<T> LoadАFromDbAsync<T>(int tenantId, Guid userId, T def, string key) where T : class, ISettings<T>
     {
-        var def = GetDefault<T>();
-        var key = def.ID.ToString() + tenantId + userId;
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
 
-        try
-        {
-            var settings = _cache.Get<T>(key);
-            if (settings != null)
-            {
-                return settings;
-            }
+        var settings = result != null ? Deserialize<T>(result) : def;
 
-            using var context = dbContextFactory.CreateDbContext();
-            var result = Queries.Data(context, tenantId, def.ID, userId);
+        _cache.Insert(key, settings, _expirationTimeout);
 
-            settings = result != null ? Deserialize<T>(result) : def;
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return settings;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorLoadSettingsFor(ex);
-        }
-
-        return def;
+        return settings;
     }
 
     private async Task<bool> SaveAsync<T>(T settings, int tenantId, Guid userId) where T : class, ISettings<T>
@@ -328,68 +238,9 @@ public class SettingsManager(IServiceProvider serviceProvider,
         }
     }
 
-    private bool Save<T>(T settings, int tenantId, Guid userId) where T : class, ISettings<T>
-    {
-        ArgumentNullException.ThrowIfNull(settings);
-
-        using var context = dbContextFactory.CreateDbContext();
-
-        try
-        {
-            var key = settings.ID.ToString() + tenantId + userId;
-            var data = Serialize(settings);
-            var def = GetDefault<T>();
-
-            var defaultData = Serialize(def);
-
-            if (data.SequenceEqual(defaultData))
-            {
-                var s = Queries.WebStudioSettings(context, tenantId, settings.ID, userId);
-
-                if (s != null)
-                {
-                    context.WebstudioSettings.Remove(s);
-                }
-
-                context.SaveChanges();
-            }
-            else
-            {
-                var s = new DbWebstudioSettings
-                {
-                    Id = settings.ID,
-                    UserId = userId,
-                    TenantId = tenantId,
-                    Data = data
-                };
-
-                context.AddOrUpdate(context.WebstudioSettings, s);
-
-                context.SaveChanges();
-            }
-
-            dbSettingsManagerCache.Remove(key);
-
-            _cache.Insert(key, settings, _expirationTimeout);
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorSaveSettingsFor(ex);
-
-            return false;
-        }
-    }
-
     private T Deserialize<T>(string data)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
-        return JsonSerializer.Deserialize<T>(data, options);
+        return JsonSerializer.Deserialize<T>(data, _options);
     }
 
     private string Serialize<T>(T settings)

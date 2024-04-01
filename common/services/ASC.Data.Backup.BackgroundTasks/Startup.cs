@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,8 +69,8 @@ public class Startup : BaseStartup
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper);
+        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper, _configuration);
+        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper, _configuration);
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();

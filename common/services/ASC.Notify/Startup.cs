@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,8 +39,6 @@ public class Startup : BaseWorkerStartup
     {
         await base.ConfigureServices(services);
 
-        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
-
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 
         DIHelper.TryAdd<NotifySenderService>();
@@ -56,8 +54,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
         DIHelper.TryAdd<NotifySendMessageRequestedIntegrationEventHandler>();
 
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
-        services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper);
+        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, Configuration);
+        services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
     }

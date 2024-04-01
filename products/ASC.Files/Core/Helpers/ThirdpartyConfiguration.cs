@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,8 @@ namespace ASC.Web.Files.Helpers;
 public class ThirdpartyConfigurationData(IConfiguration configuration)
 {
     private List<string> _thirdPartyProviders;
-    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ?? new List<string>();
+    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ??
+                                                                        [];
 }
 
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
@@ -87,42 +88,42 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         if (SupportBoxInclusion)
         {
-            result.Add(new List<string> { "Box", _boxLoginProvider.Value.ClientID, _boxLoginProvider.Value.RedirectUri });
+            result.Add(["Box", _boxLoginProvider.Value.ClientID, _boxLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportDropboxInclusion)
         {
-            result.Add(new List<string> { "DropboxV2", _dropboxLoginProvider.Value.ClientID, _dropboxLoginProvider.Value.RedirectUri });
+            result.Add(["DropboxV2", _dropboxLoginProvider.Value.ClientID, _dropboxLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportGoogleDriveInclusion)
         {
-            result.Add(new List<string> { "GoogleDrive", _googleLoginProvider.Value.ClientID, _googleLoginProvider.Value.RedirectUri });
+            result.Add(["GoogleDrive", _googleLoginProvider.Value.ClientID, _googleLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportOneDriveInclusion)
         {
-            result.Add(new List<string> { "OneDrive", _oneDriveLoginProvider.Value.ClientID, _oneDriveLoginProvider.Value.RedirectUri });
+            result.Add(["OneDrive", _oneDriveLoginProvider.Value.ClientID, _oneDriveLoginProvider.Value.RedirectUri]);
         }
 
         if (SupportSharePointInclusion)
         {
-            result.Add(new List<string> { "SharePoint" });
+            result.Add(["SharePoint"]);
         }
 
         if (SupportkDriveInclusion)
         {
-            result.Add(new List<string> { "kDrive" });
+            result.Add(["kDrive"]);
         }
 
         if (SupportYandexInclusion)
         {
-            result.Add(new List<string> { "Yandex" });
+            result.Add(["Yandex"]);
         }
 
         if (SupportWebDavInclusion)
         {
-            result.Add(new List<string> { "WebDav" });
+            result.Add(["WebDav"]);
         }
 
         //Obsolete BoxNet, DropBox, Google, SkyDrive,

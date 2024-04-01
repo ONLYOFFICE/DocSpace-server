@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -44,10 +43,13 @@ public class CommonMethods(
 {
     public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
+        var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
+        var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
         return new
         {
             created = t.CreationDateTime,
-            domain = t.GetTenantDomain(coreSettings),
+            domain = t.GetTenantDomain(coreSettings, false),
+            mappedDomain = t.MappedDomain,
             hostedRegion = t.HostedRegion,
             industry = t.Industry,
             language = t.Language,
@@ -59,14 +61,17 @@ public class CommonMethods(
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
+            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
+                    tenantQuotaSettings.Quota :
+                    tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
             owner
         };
     }
 
-    public string CreateReference(int tenantId, string requestUriScheme, string tenantDomain, string email, bool first = false, string module = "", bool sms = false)
+    public string CreateReference(int tenantId, string requestUriScheme, string tenantDomain, string email, bool first = false)
     {
-        var url = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, (first ? "true" : "") + module + (sms ? "true" : ""));
-        return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}{(string.IsNullOrEmpty(module) ? "" : "&module=" + module)}{(sms ? "&sms=true" : "")}";
+        var url = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, first ? "true" : "");
+        return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}";
     }
 
     public bool SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome, out string url)

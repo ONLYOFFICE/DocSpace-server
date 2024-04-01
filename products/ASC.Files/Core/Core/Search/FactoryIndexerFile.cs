@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,8 +46,7 @@ public class BaseIndexerFile(Client client,
 
         if (daoFactory.GetFileDao<int>() is FileDao fileDao)
         {
-            await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-            await fileDao.InitDocumentAsync(data);
+            await fileDao.InitDocumentAsync(data, data.TenantId);
         }
 
         return true;
@@ -74,8 +73,9 @@ public class FactoryIndexerFile(ILoggerProvider options,
         {
             var j = 0;
             var tasks = new List<Task>();
-
-            foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            var now = DateTime.UtcNow;
+            
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (settings.Threads == 1)
                 {
@@ -83,7 +83,7 @@ public class FactoryIndexerFile(ILoggerProvider options,
                 }
                 else
                 {
-                    tasks.Add(IndexAsync(data));
+                    tasks.Add(Index(data));
                     j++;
                     if (j >= settings.Threads)
                     {
@@ -98,12 +98,16 @@ public class FactoryIndexerFile(ILoggerProvider options,
             {
                 Task.WaitAll(tasks.ToArray());
             }
+
+            await _indexer.OnComplete(now);
         }
         catch (Exception e)
         {
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+
+        return;
 
         List<int> GetIds(DateTime lastIndexed)
         {

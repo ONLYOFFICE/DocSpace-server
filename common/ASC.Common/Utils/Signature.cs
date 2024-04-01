@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,7 @@ public class Signature(MachinePseudoKeys machinePseudoKeys)
         {
             signatureResolver?.Invoke(signature);
 
-            var payloadParts = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(signature)).Split('?');
+            var payloadParts = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(signature)).Split('?', 2);
 
             if (GetHashBase64(payloadParts[1].Trim() + secret) == payloadParts[0])
             {

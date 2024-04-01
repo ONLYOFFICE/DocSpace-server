@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,15 +32,17 @@ namespace ASC.Data.Backup.Tasks.Modules;
 [Scope]
 public class Helpers(InstanceCrypto instanceCrypto)
 {
-    private readonly Guid[] _systemUsers = {
-            Guid.Empty,
+    private readonly Guid[] _systemUsers =
+    [
+        Guid.Empty,
             ConfigurationConstants.CoreSystem.ID,
             ConfigurationConstants.Guest.ID,
             UserConstants.LostUser.Id
-    };
+    ];
 
-    private readonly Guid[] _systemGroups = {
-            Guid.Empty,
+    private readonly Guid[] _systemGroups =
+    [
+        Guid.Empty,
             UserConstants.LostGroupInfo.ID,
             UserConstants.GroupAdmin.ID,
             UserConstants.GroupEveryone.ID,
@@ -56,7 +58,7 @@ public class Helpers(InstanceCrypto instanceCrypto)
             new("{32D24CB5-7ECE-4606-9C94-19216BA42086}"), //calendar product
             new("{37620AE5-C40B-45ce-855A-39DD7D76A1FA}"), //birthdays product
             new("{BF88953E-3C43-4850-A3FB-B1E43AD53A3E}")  //talk product
-    };
+    ];
 
     public bool IsEmptyOrSystemUser(string id)
     {

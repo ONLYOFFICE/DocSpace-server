@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,355 +113,357 @@ public class FilesSettings : ISettings<FilesSettings>
 }
 
 [Scope]
-public class FilesSettingsHelper(SettingsManager settingsManager,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        FilesLinkUtility filesLinkUtility,
-        SearchSettingsHelper searchSettingsHelper,
-        AuthContext authContext)
-    {
+public class FilesSettingsHelper(
+    Global global,
+    MessageService messageService,
+    SettingsManager settingsManager,
+    AuthContext authContext)
+{
     private static readonly FilesSettings _emptySettings = new();
 
-    public List<string> ExtsImagePreviewed => fileUtility.ExtsImagePreviewed;
-    public List<string> ExtsMediaPreviewed => fileUtility.ExtsMediaPreviewed;
-    public List<string> ExtsWebPreviewed => fileUtility.ExtsWebPreviewed;
-    public List<string> ExtsWebEdited => fileUtility.ExtsWebEdited;
-    public List<string> ExtsWebEncrypt => fileUtility.ExtsWebEncrypt;
-    public List<string> ExtsWebReviewed => fileUtility.ExtsWebReviewed;
-    public List<string> ExtsWebCustomFilterEditing => fileUtility.ExtsWebCustomFilterEditing;
-    public List<string> ExtsWebRestrictedEditing => fileUtility.ExtsWebRestrictedEditing;
-    public List<string> ExtsWebCommented => fileUtility.ExtsWebCommented;
-    public List<string> ExtsWebTemplate => fileUtility.ExtsWebTemplate;
-    public List<string> ExtsCoAuthoring => fileUtility.ExtsCoAuthoring;
-    public List<string> ExtsMustConvert => fileUtility.ExtsMustConvert;
-    public IDictionary<string, List<string>> ExtsConvertible => fileUtility.GetExtsConvertibleAsync().Result;
-    public List<string> ExtsUploadable => fileUtility.ExtsUploadable;
-    public ImmutableList<string> ExtsArchive => FileUtility.ExtsArchive;
-    public ImmutableList<string> ExtsVideo => FileUtility.ExtsVideo;
-    public ImmutableList<string> ExtsAudio => FileUtility.ExtsAudio;
-    public ImmutableList<string> ExtsImage => FileUtility.ExtsImage;
-    public ImmutableList<string> ExtsSpreadsheet => FileUtility.ExtsSpreadsheet;
-    public ImmutableList<string> ExtsPresentation => FileUtility.ExtsPresentation;
-    public ImmutableList<string> ExtsDocument => FileUtility.ExtsDocument;
-    public Dictionary<FileType, string> InternalFormats => fileUtility.InternalExtension;
-    public string MasterFormExtension => fileUtility.MasterFormExtension;
-    public string ParamVersion => FilesLinkUtility.Version;
-    public string ParamOutType => FilesLinkUtility.OutType;
-    public string FileDownloadUrlString => filesLinkUtility.FileDownloadUrlString;
-    public string FileWebViewerUrlString => filesLinkUtility.FileWebViewerUrlString;
-    public string FileWebViewerExternalUrlString => filesLinkUtility.FileWebViewerExternalUrlString;
-    public string FileWebEditorUrlString => filesLinkUtility.FileWebEditorUrlString;
-    public string FileWebEditorExternalUrlString => filesLinkUtility.FileWebEditorExternalUrlString;
-    public string FileRedirectPreviewUrlString => filesLinkUtility.FileRedirectPreviewUrlString;
-    public string FileThumbnailUrlString => filesLinkUtility.FileThumbnailUrlString;
+    public async Task<bool> GetConfirmDelete() => !(await LoadForCurrentUser()).FastDeleteSetting;
 
-    public bool ConfirmDelete
+    public async Task SetConfirmDelete(bool value)
     {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.FastDeleteSetting = !value;
-            SaveForCurrentUser(setting);
-        }
-        get => !LoadForCurrentUser().FastDeleteSetting;
+        var setting = await LoadForCurrentUser();
+        setting.FastDeleteSetting = !value;
+        await SaveForCurrentUser(setting);
     }
 
-    public bool EnableThirdParty
-    {
-        set
+    public async Task<bool> GetEnableThirdParty() => (await settingsManager.LoadAsync<FilesSettings>()).EnableThirdpartySetting;
+
+    public async Task SetEnableThirdParty(bool value)
+    {        
+        if (!await global.IsDocSpaceAdministratorAsync)
         {
-            var setting = settingsManager.Load<FilesSettings>();
-            setting.EnableThirdpartySetting = value;
-            settingsManager.Save(setting);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        get => settingsManager.Load<FilesSettings>().EnableThirdpartySetting;
+        
+        var setting = await settingsManager.LoadAsync<FilesSettings>();
+        setting.EnableThirdpartySetting = value;
+        await settingsManager.SaveAsync(setting);
+        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsThirdPartySettingsUpdated);
     }
 
-    public bool ExternalShare
+    public async Task<bool> GetExternalShare()
     {
-        set
-        {
-            var settings = Load();
-            settings.DisableShareLinkSetting = !value;
-            Save(settings);
-        }
-        get { return !Load().DisableShareLinkSetting; }
+        return !(await Load()).DisableShareLinkSetting;
     }
 
-    public bool ExternalShareSocialMedia
+    public async Task SetExternalShare(bool value)
     {
-        set
+        var settings = await Load();
+        settings.DisableShareLinkSetting = !value;
+        await Save(settings);
+    }
+
+    public async Task<bool> GetExternalShareSocialMedia()
+    {
+        var setting = await Load();
+        return !setting.DisableShareLinkSetting && !setting.DisableShareSocialMediaSetting;
+    }
+
+    public async Task SetExternalShareSocialMedia(bool value)
+    {
+        var settings = await Load();
+        settings.DisableShareSocialMediaSetting = !value;
+        await Save(settings);
+    }
+    
+    public async Task<bool> ChangeExternalShareSettingsAsync(bool enable)
+    {
+        if (!await global.IsDocSpaceAdministratorAsync)
         {
-            var settings = Load();
-            settings.DisableShareSocialMediaSetting = !value;
-            Save(settings);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        get
+
+        await SetExternalShare(enable);
+
+        if (!enable)
         {
-            var setting = Load();
-            return !setting.DisableShareLinkSetting && !setting.DisableShareSocialMediaSetting;
+            await SetExternalShareSocialMedia(false);
+        }
+
+        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+
+        return await GetExternalShare();
+    }
+    
+    public async Task<bool> ChangeExternalShareSocialMediaSettingsAsync(bool enable)
+    {
+        if (!await global.IsDocSpaceAdministratorAsync)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        await SetExternalShareSocialMedia(await GetExternalShare() && enable);
+
+        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+
+        return await GetExternalShareSocialMedia();
+    }
+    
+    public async Task<bool> GetStoreOriginalFiles() => (await LoadForCurrentUser()).StoreOriginalFilesSetting;
+
+    public async Task SetStoreOriginalFiles(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.StoreOriginalFilesSetting = value;
+        await SaveForCurrentUser(setting);
+        
+        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
+    }
+
+    public async Task<bool> GetKeepNewFileName() => (await LoadForCurrentUser()).KeepNewFileName;
+
+    public async Task<bool> SetKeepNewFileName(bool value)
+    {        
+        var current = await LoadForCurrentUser();
+        if (current.KeepNewFileName != value)
+        {
+            current.KeepNewFileName = value;
+            await SaveForCurrentUser(current);
+            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
+        }
+
+        return current.KeepNewFileName;
+    }
+
+    public async Task<bool> GetConvertNotify() => (await LoadForCurrentUser()).ConvertNotifySetting;
+
+    public async Task SetConvertNotify(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.ConvertNotifySetting = value;
+        await SaveForCurrentUser(setting);
+    }
+
+    public async Task<bool> GetHideConfirmConvertSave() => (await LoadForCurrentUser()).HideConfirmConvertSaveSetting;
+
+    private async Task SetHideConfirmConvertSave(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.HideConfirmConvertSaveSetting = value;
+        await SaveForCurrentUser(setting);
+    }
+
+    public async Task<bool> GetHideConfirmConvertOpen() => (await LoadForCurrentUser()).HideConfirmConvertOpenSetting;
+
+    private async Task SetHideConfirmConvertOpen(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.HideConfirmConvertOpenSetting = value;
+        await SaveForCurrentUser(setting);
+    }
+
+    public async Task<bool> HideConfirmConvert(bool isForSave)
+    {
+        if (isForSave)
+        {
+            await SetHideConfirmConvertSave(true);
+        }
+        else
+        {
+            await SetHideConfirmConvertOpen(true);
+        }
+
+        return true;
+    }
+    
+    public async Task<OrderBy> GetDefaultOrder()
+    {
+        var setting = await LoadForCurrentUser();
+
+        return new OrderBy(setting.DefaultSortedBySetting, setting.DefaultSortedAscSetting);
+    }
+
+    public async Task SetDefaultOrder(OrderBy value)
+    {
+        var setting = await LoadForCurrentUser();
+        if (setting.DefaultSortedBySetting != value.SortedBy || setting.DefaultSortedAscSetting != value.IsAsc)
+        {
+            setting.DefaultSortedBySetting = value.SortedBy;
+            setting.DefaultSortedAscSetting = value.IsAsc;
+            await SaveForCurrentUser(setting);
         }
     }
 
-    public bool StoreOriginalFiles
+    public bool GetForcesave() => true;
+
+    public void SetForcesave(bool value)
     {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.StoreOriginalFilesSetting = value;
-            SaveForCurrentUser(setting);
-        }
-        get => LoadForCurrentUser().StoreOriginalFilesSetting;
+        //var setting = await LoadForCurrentUser();
+        //setting.ForcesaveSetting = value;
+        //await SaveForCurrentUser(setting);
+        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
     }
 
-    public bool KeepNewFileName
+    public bool GetStoreForcesave() => false;
+
+    public void SetStoreForcesave(bool value)
     {
-        set => settingsManager.ManageForCurrentUser<FilesSettings>(setting => setting.KeepNewFileName = value);
-        get => LoadForCurrentUser().KeepNewFileName;
+        //     if (!await global.IsDocSpaceAdministratorAsync)
+        //     {
+        //         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        //     }
+        //var setting = _settingsManager.Load<FilesSettings>();
+        //setting.StoreForcesaveSetting = value;
+        //_settingsManager.Save(setting);
+        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
     }
 
-    public bool ConvertNotify
-    {
-        set
+    public async Task<bool> GetRecentSection() => !(await LoadForCurrentUser()).HideRecentSetting;
+
+    public async Task SetRecentSection(bool value)
+    {        
+        if (!authContext.IsAuthenticated)
         {
-            var setting = LoadForCurrentUser();
-            setting.ConvertNotifySetting = value;
-            SaveForCurrentUser(setting);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        get => LoadForCurrentUser().ConvertNotifySetting;
+
+        var setting = await LoadForCurrentUser();
+        setting.HideRecentSetting = !value;
+        await SaveForCurrentUser(setting);
     }
 
-    public bool HideConfirmConvertSave
-    {
-        set
+    public async Task<bool> GetFavoritesSection() => !(await LoadForCurrentUser()).HideFavoritesSetting;
+
+    public async Task SetFavoritesSection(bool value)
+    {        
+        if (!authContext.IsAuthenticated)
         {
-            var setting = LoadForCurrentUser();
-            setting.HideConfirmConvertSaveSetting = value;
-            SaveForCurrentUser(setting);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        get => LoadForCurrentUser().HideConfirmConvertSaveSetting;
+        
+        var setting = await LoadForCurrentUser();
+        setting.HideFavoritesSetting = !value;
+        await SaveForCurrentUser(setting);
     }
 
-    public bool HideConfirmConvertOpen
-    {
-        set
+    public async Task<bool> GetTemplatesSection() => !(await LoadForCurrentUser()).HideTemplatesSetting;
+
+    public async Task SetTemplatesSection(bool value)
+    {        
+        if (!authContext.IsAuthenticated)
         {
-            var setting = LoadForCurrentUser();
-            setting.HideConfirmConvertOpenSetting = value;
-            SaveForCurrentUser(setting);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        get => LoadForCurrentUser().HideConfirmConvertOpenSetting;
+        var setting = await LoadForCurrentUser();
+        setting.HideTemplatesSetting = !value;
+        await SaveForCurrentUser(setting);
     }
 
-    public OrderBy DefaultOrder
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            if (setting.DefaultSortedBySetting != value.SortedBy || setting.DefaultSortedAscSetting != value.IsAsc)
-            {
-                setting.DefaultSortedBySetting = value.SortedBy;
-                setting.DefaultSortedAscSetting = value.IsAsc;
-                SaveForCurrentUser(setting);
-            }
-        }
-        get
-        {
-            var setting = LoadForCurrentUser();
+    public async Task<bool> GetDownloadTarGz() => (await LoadForCurrentUser()).DownloadTarGzSetting;
 
-            return new OrderBy(setting.DefaultSortedBySetting, setting.DefaultSortedAscSetting);
-        }
+    public async Task SetDownloadTarGz(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.DownloadTarGzSetting = value;
+        await SaveForCurrentUser(setting);
     }
 
-    public bool Forcesave
+    public async Task<AutoCleanUpData> GetAutomaticallyCleanUp()
     {
-        set
+        var setting = (await LoadForCurrentUser()).AutomaticallyCleanUpSetting;
+
+        if (setting != null)
         {
-            //var setting = LoadForCurrentUser();
-            //setting.ForcesaveSetting = value;
-            //SaveForCurrentUser(setting);
-        }
-        get => true;//LoadForCurrentUser().ForcesaveSetting;
-    }
-
-    public bool StoreForcesave
-    {
-        set
-        {
-            //if (_coreBaseSettings.Personal)
-            //{
-            //    throw new NotSupportedException();
-            //}
-
-            //var setting = _settingsManager.Load<FilesSettings>();
-            //setting.StoreForcesaveSetting = value;
-            //_settingsManager.Save(setting);
-        }
-        get => false;//!_coreBaseSettings.Personal && _settingsManager.Load<FilesSettings>().StoreForcesaveSetting;
-    }
-
-    public bool RecentSection
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.HideRecentSetting = !value;
-            SaveForCurrentUser(setting);
-        }
-        get => !LoadForCurrentUser().HideRecentSetting;
-    }
-
-    public bool FavoritesSection
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.HideFavoritesSetting = !value;
-            SaveForCurrentUser(setting);
-        }
-        get => !LoadForCurrentUser().HideFavoritesSetting;
-    }
-
-    public bool TemplatesSection
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.HideTemplatesSetting = !value;
-            SaveForCurrentUser(setting);
-        }
-        get => !LoadForCurrentUser().HideTemplatesSetting;
-    }
-
-    public bool DownloadTarGz
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.DownloadTarGzSetting = value;
-            SaveForCurrentUser(setting);
-        }
-        get => LoadForCurrentUser().DownloadTarGzSetting;
-    }
-    public AutoCleanUpData AutomaticallyCleanUp
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.AutomaticallyCleanUpSetting = value;
-            SaveForCurrentUser(setting);
-        }
-        get
-        {
-            var setting = LoadForCurrentUser().AutomaticallyCleanUpSetting;
-
-            if (setting != null)
-            {
-                return setting;
-            }
-
-            setting = new AutoCleanUpData { IsAutoCleanUp = true, Gap = DateToAutoCleanUp.ThirtyDays };
-            AutomaticallyCleanUp = setting;
-
             return setting;
         }
+
+        setting = new AutoCleanUpData { IsAutoCleanUp = true, Gap = DateToAutoCleanUp.ThirtyDays };
+        await SetAutomaticallyCleanUp(setting);
+
+        return setting;
     }
 
-    public bool CanSearchByContent
+    public async Task SetAutomaticallyCleanUp(AutoCleanUpData value)
     {
-        get
-        {
-            return searchSettingsHelper.CanSearchByContentAsync<DbFile>().Result;
-        }
+        var setting = await LoadForCurrentUser();
+        setting.AutomaticallyCleanUpSetting = value;
+        await SaveForCurrentUser(setting);
     }
 
-    public List<FileShare> DefaultSharingAccessRights
+    public async Task<List<FileShare>> GetDefaultSharingAccessRights()
     {
-        set
+        var setting = (await LoadForCurrentUser()).DefaultSharingAccessRightsSetting;
+        return setting ?? [FileShare.Read];
+    }
+
+    public async Task SetDefaultSharingAccessRights(List<FileShare> value)
+    {
+        List<FileShare> GetNormalizedList(List<FileShare> src)
         {
-            List<FileShare> GetNormalizedList(List<FileShare> src)
+            if (src == null || !src.Any())
             {
-                if (src == null || !src.Any())
-                {
-                    return null;
-                }
+                return null;
+            }
 
-                var res = new List<FileShare>();
+            var res = new List<FileShare>();
 
-                if (src.Contains(FileShare.FillForms))
-                {
-                    res.Add(FileShare.FillForms);
-                }
+            if (src.Contains(FileShare.FillForms))
+            {
+                res.Add(FileShare.FillForms);
+            }
 
-                if (src.Contains(FileShare.CustomFilter))
-                {
-                    res.Add(FileShare.CustomFilter);
-                }
+            if (src.Contains(FileShare.CustomFilter))
+            {
+                res.Add(FileShare.CustomFilter);
+            }
 
-                if (src.Contains(FileShare.Review))
-                {
-                    res.Add(FileShare.Review);
-                }
+            if (src.Contains(FileShare.Review))
+            {
+                res.Add(FileShare.Review);
+            }
 
-                if (src.Contains(FileShare.ReadWrite))
-                {
-                    res.Add(FileShare.ReadWrite);
-                    return res;
-                }
-
-                if (src.Contains(FileShare.Comment))
-                {
-                    res.Add(FileShare.Comment);
-                    return res;
-                }
-
-                res.Add(FileShare.Read);
+            if (src.Contains(FileShare.ReadWrite))
+            {
+                res.Add(FileShare.ReadWrite);
                 return res;
             }
 
-            var setting = LoadForCurrentUser();
-            setting.DefaultSharingAccessRightsSetting = GetNormalizedList(value);
-            SaveForCurrentUser(setting);
+            if (src.Contains(FileShare.Comment))
+            {
+                res.Add(FileShare.Comment);
+                return res;
+            }
+
+            res.Add(FileShare.Read);
+            return res;
         }
-        get
-        {
-            var setting = LoadForCurrentUser().DefaultSharingAccessRightsSetting;
-            return setting ?? new List<FileShare> { FileShare.Read };
-        }
+
+        var setting = await LoadForCurrentUser();
+        setting.DefaultSharingAccessRightsSetting = GetNormalizedList(value);
+        await SaveForCurrentUser(setting);
     }
 
-    public long ChunkUploadSize
+    private async Task<FilesSettings> Load()
     {
-        get => setupInfo.ChunkUploadSize;
+        return !authContext.IsAuthenticated ? _emptySettings : await settingsManager.LoadAsync<FilesSettings>();
     }
 
-    private FilesSettings Load()
-    {
-        return !authContext.IsAuthenticated ? _emptySettings : settingsManager.Load<FilesSettings>();
-    }
-
-    private void Save(FilesSettings settings)
+    private async Task Save(FilesSettings settings)
     {
         if (!authContext.IsAuthenticated)
         {
             return;
         }
 
-        settingsManager.Save(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
-    private FilesSettings LoadForCurrentUser()
+    private async Task<FilesSettings> LoadForCurrentUser()
     {
-        return !authContext.IsAuthenticated ? _emptySettings : settingsManager.LoadForCurrentUser<FilesSettings>();
+        return !authContext.IsAuthenticated ? _emptySettings : await settingsManager.LoadForCurrentUserAsync<FilesSettings>();
     }
 
-    private void SaveForCurrentUser(FilesSettings settings)
+    private async Task SaveForCurrentUser(FilesSettings settings)
     {
         if (!authContext.IsAuthenticated)
         {
             return;
         }
 
-        settingsManager.SaveForCurrentUser(settings);
+        await settingsManager.SaveForCurrentUserAsync(settings);
     }
 }

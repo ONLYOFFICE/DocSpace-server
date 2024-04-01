@@ -154,136 +154,130 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Aufgehoben</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Ungültige Anfrage.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Man kann diesen Benutzer nicht auswählen</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Umwandlung dauert zu viel Zeit.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Fehler in Dokumnetendienstleistungen aufgetreten</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Die Datei ird zur Bearbeitung von{0}geöffnet. Derzeit wird die Zusammenbearbeitung für dieses Dateiformat nicht unterstützt.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0} öffnetet die Datei zum Bearbeiten mit der mobilen Anwendung</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Leere Datei</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Die angefragte Datei wurde nicht gefunden</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
-    <value>Die Datei mit der Größe höher als {0} wird nicht konvertiert</value>
-  </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Datei größer als {0} wird nicht kopiert</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
-    <value>Datei größer als {0} wird nicht bearbeitet</value>
-  </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datei größer als {0} wird nicht verschoben</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Unmöglich das Verzeichnis in sein Unterverzeichnis zu kopieren</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Der angefragte Ordner wurde nicht gefunden</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>ungültiger Titel</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Die Datei ist vom anderen Benutzer gesperrt</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Mindestens {0} E-Mail-Mitteilungen konnten nicht gesendet werden. Gehen Sie in das Modul "E-Mail", um zu erfahren, was der Grund für den Fehler sein könnte.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Zu viele Dateien werden heruntergeladen.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Das Dateiformat wird nicht unterstützt</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Der Autor der Speicherung ist unbekannt</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Die Datei wurde beim Versuch der Speicherung beschädigt</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Erhaltung der Datei für die Speicherung ist fehlgeschlagen</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Sie haben keine Berechtigung, diese Operation durchzuführen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Authentifizierung bei Provider {0} mit den gegebenen Zugangsdaten nicht möglich.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Sie haben keine Berechtigung zum Erstellen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Datei kann nicht gelöscht werden, weil sie gerade bearbeitet wird</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Ordner kann nicht gelöscht werden, weil eine der Dateien gerade bearbeitet wird</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Sie haben keine Berechtigung, die Datei zu löschen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Ordner zu löschen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Keine Bearbeitungsberechtigung für diese Datei</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Dieses Dokument wird von Ihnen in einer anderen Registerkarte bearbeitet</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Sie haben keine Berechtigung, die Datei zu verschieben</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Ordner zu verschieben</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Sie haben keine Berechtigung, die Datei durchzusehen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Inhalt des Ordners zu sehen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Sie haben keine Berechtigung, die Datei umzubenennen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Ordner umzubenennen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Datei kann nicht aktualisiert werden, weil sie gerade bearbeitet wird</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Inhalt des Ordners zu sehen</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Der Inhalt der Drittanbietersordner ist nicht verfügbar. Versuchen Sie das Konto wieder zu verbinden.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Fehler beim Starten der Dateibearbeitung</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Unmöglich Dateien zu aktualisieren, die für die Bearbeitung geöffnet sind</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Benutzer wurde nicht gefunden</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Unmöglich Elemente im Papierkorb durchzusehen</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -299,10 +293,10 @@
     <value>Die Datei wurde im Ordner"{0}"erstellt</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Die ausfüllbare OFORM-Datei ist fertig und im Ordner {0} zugänglich</value>
+    <value>Die ausfüllbare PDF-Datei ist fertig und im Ordner {0} zugänglich</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Die Kopie der OFORM-Datei ist im Ordner {0} erstellt. Füllen Sie bitte das Formular aus und laden Sie es danach als eine PDF- oder DOCX-Datei herunter.</value>
+    <value>Die Kopie der PDF-Datei ist im Ordner {0} erstellt. Füllen Sie bitte das Formular aus und laden Sie es danach als eine PDF- oder DOCX-Datei herunter.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Die Datei ist kein Entwurf zum Ausfüllen von Formularen mehr.</value>
@@ -371,13 +365,13 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
     <value>Administrator des Raums</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Die neue Version kann nicht mit der aktuellen identisch sein</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Sie haben keine ausreichende Berechtigungen, um die Datei zu kopieren</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Sie haben keine ausreichende  Berechtigungen, um den Ordner zu kopieren</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">

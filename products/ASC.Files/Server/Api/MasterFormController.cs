@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,6 +52,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <returns type="System.Object, System">Link to the form</returns>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <httpMethod>POST</httpMethod>
+    [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
     {

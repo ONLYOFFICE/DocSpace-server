@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,55 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2020
- *
- * This program is freeware. You can redistribute it and/or modify it under the terms of the GNU 
- * General Public License (GPL) version 3 as published by the Free Software Foundation (https://www.gnu.org/copyleft/gpl.html). 
- * In accordance with Section 7(a) of the GNU GPL its Section 15 shall be amended to the effect that 
- * Ascensio System SIA expressly excludes the warranty of non-infringement of any third-party rights.
- *
- * THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
- * FITNESS FOR A PARTICULAR PURPOSE. For more details, see GNU GPL at https://www.gnu.org/copyleft/gpl.html
- *
- * You can contact Ascensio System SIA by email at sales@onlyoffice.com
- *
- * The interactive user interfaces in modified source and object code versions of ONLYOFFICE must display 
- * Appropriate Legal Notices, as required under Section 5 of the GNU GPL version 3.
- *
- * Pursuant to Section 7 § 3(b) of the GNU GPL you must retain the original ONLYOFFICE logo which contains 
- * relevant author attributions when distributing the software. If the display of the logo in its graphic 
- * form is not reasonably feasible for technical reasons, you must include the words "Powered by ONLYOFFICE" 
- * in every copy of the program you distribute. 
- * Pursuant to Section 7 § 3(e) we decline to grant you any rights under trademark law for use of our trademarks.
- *
-*/
-
 namespace ASC.Data.Encryption;
 
 internal sealed class StreamWrapper : Stream
 {
-    private readonly Stream stream;
-    private readonly CryptoStream cryptoStream;
-    private readonly SymmetricAlgorithm symmetricAlgorithm;
-    private readonly ICryptoTransform cryptoTransform;
-    private readonly long fileSize;
-    private readonly long metadataLength;
+    private readonly Stream _stream;
+    private readonly CryptoStreamWrapper _cryptoStream;
+    private readonly SymmetricAlgorithm _symmetricAlgorithm;
+    private readonly ICryptoTransform _cryptoTransform;
+    private readonly long _fileSize;
+    private readonly long _metadataLength;
 
     public StreamWrapper(Stream fileStream, Metadata metadata)
     {
-        stream = fileStream;
-        symmetricAlgorithm = metadata.GetCryptographyAlgorithm();
-        cryptoTransform = symmetricAlgorithm.CreateDecryptor();
-        cryptoStream = new CryptoStreamWrapper(stream, cryptoTransform, CryptoStreamMode.Read);
-        fileSize = metadata.GetFileSize();
-        metadataLength = metadata.GetMetadataLength();
+        _stream = fileStream;
+        _symmetricAlgorithm = metadata.GetCryptographyAlgorithm();
+        _cryptoTransform = _symmetricAlgorithm.CreateDecryptor();
+        _cryptoStream = new CryptoStreamWrapper(_stream, _cryptoTransform, CryptoStreamMode.Read);
+        _fileSize = metadata.GetFileSize();
+        _metadataLength = metadata.GetMetadataLength();
     }
 
     public override bool CanRead
     {
-        get { return stream.CanRead; }
+        get { return _stream.CanRead; }
     }
 
     public override bool CanSeek
@@ -87,23 +62,23 @@ internal sealed class StreamWrapper : Stream
 
     public override long Length
     {
-        get { return fileSize; }
+        get { return _fileSize; }
     }
 
     public override long Position
     {
         get
         {
-            return stream.Position - metadataLength;
+            return _stream.Position - _metadataLength;
         }
         set
         {
-            if (value < 0 || value > fileSize)
+            if (value < 0 || value > _fileSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(Position));
             }
 
-            stream.Position = value + metadataLength;
+            _stream.Position = value + _metadataLength;
         }
     }
 
@@ -113,7 +88,7 @@ internal sealed class StreamWrapper : Stream
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        return cryptoStream.Read(buffer, offset, count);
+        return _cryptoStream.Read(buffer, offset, count);
     }
 
     public override long Seek(long offset, SeekOrigin origin)
@@ -133,9 +108,9 @@ internal sealed class StreamWrapper : Stream
 
     public override void Close()
     {
-        cryptoStream.Dispose();
-        stream.Dispose();
-        symmetricAlgorithm.Dispose();
-        cryptoTransform.Dispose();
+        _cryptoStream.Dispose();
+        _stream.Dispose();
+        _symmetricAlgorithm.Dispose();
+        _cryptoTransform.Dispose();
     }
 }

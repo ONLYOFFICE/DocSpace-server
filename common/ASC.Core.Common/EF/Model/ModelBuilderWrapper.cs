@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,12 +109,14 @@ public class ModelBuilderWrapper
         {
             case Provider.MySql:
                 ModelBuilder
-                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex), new[] { typeof(string), typeof(char), typeof(int) })!)
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
+                        [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SUBSTRING_INDEX");
                 break;
             case Provider.PostgreSql:
                 ModelBuilder
-                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex), new[] { typeof(string), typeof(char), typeof(int) })!)
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
+                        [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SPLIT_PART");
                 break;
             default:

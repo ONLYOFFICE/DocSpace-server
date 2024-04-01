@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -91,7 +91,6 @@ public static class FilesConvertsExtension
            new FilesConverts { Input = ".docxf", Output = ".docx" },
            new FilesConverts { Input = ".docxf", Output = ".dotm" },
            new FilesConverts { Input = ".docxf", Output = ".odt" },
-           new FilesConverts { Input = ".docxf", Output = ".oform" },
            new FilesConverts { Input = ".docxf", Output = ".pdf" },
            new FilesConverts { Input = ".docxf", Output = ".rtf" },
            new FilesConverts { Input = ".docxf", Output = ".txt" },

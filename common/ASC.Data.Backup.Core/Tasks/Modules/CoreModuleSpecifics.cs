@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,13 +34,14 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
     private readonly RelationInfo[] _tableRelations;
     private readonly Helpers _helpers;
-    private readonly TableInfo[] _tables = {
-            new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
+    private readonly TableInfo[] _tables =
+    [
+        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
             new("core_subscription", "tenant"),
             new("core_subscriptionmethod", "tenant"),
-            new("core_userphoto", "tenant") {UserIDColumns = new[] {"userid"}},
-            new("core_usersecurity", "tenant") {UserIDColumns = new[] {"userid"}},
-            new("core_usergroup", "tenant") {UserIDColumns = new[] {"userid"}},
+            new("core_userphoto", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] },
+            new("core_usergroup", "tenant") {UserIDColumns = ["userid"] },
             new("feed_aggregate", "tenant")
             {
                 InsertMethod = InsertMethod.None,
@@ -54,14 +55,14 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
             new("feed_users") {InsertMethod = InsertMethod.None},
             new("backup_schedule", "tenant_id"),
             new("core_settings", "tenant")
-        };
+    ];
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)
     {
         _helpers = helpers;
-        _tableRelations = new[]
-        {
-                new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
+        _tableRelations =
+        [
+            new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_user", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
                 new RelationInfo("core_group", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
@@ -74,7 +75,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
                 new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
                                  x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
-        };
+        ];
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

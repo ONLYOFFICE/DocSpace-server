@@ -88,9 +88,6 @@
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Конфигурирайте точно сега</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Потвърдете промяната на адреса на портала</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Потвърдете актуализацията на собственика на портала</value>
   </data>
@@ -181,19 +178,6 @@ $OrangeButton
 
 *Забележка*: този линк е валиден само 7 дни. Моля, завършете процеса на смяна на собственика на портала в рамките на този период.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Промяна на адреса на портала
-
-Уважаеми $OwnerName,
-
-Имало е искане за промяна на адреса на портала "${__VirtualRootPath}":"${__VirtualRootPath}" на "$PortalAddress":"$PortalAddress" #if($PortalDns != "")("$PortalDns":"$PortalDns")#end.
-
-Моля, следвайте връзката по-долу, за да потвърдите операцията:
-
-$OrangeButton
-
-*Забележка*: тази връзка е валидна само за 7 дни. Моля, завършете процеса на промяна на адреса на портала в рамките на този период.</value>
-</data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -208,7 +192,7 @@ $OrangeButton
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -230,7 +214,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -252,7 +236,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -274,7 +258,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -373,67 +357,6 @@ $TrulyYours
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Здравейте, $UserName
-Успешно сте се регистрирали в ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Свържете любимото си облачно хранилище: Dropbox, Google Диск, OneDrive или Box, за да създадете едно работно пространство за документите, достъпни от всяко място.
-
-Научете повече за ONLYOFFICE Personal в "нашия блог":"$TagBlogLink".
-
-Радваме се, че сте тук. Останете на линия!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Добре дошли в ONLYOFFICE Personal
-
-Току-що създадохте своя личен офис в облака.
-
-h3. Това е виртуално работно пространство, където можете да редактирате и съхранявате документи, да работите с тях отвсякъде, осигурявайки достъп на вашите приятели или колеги.
-
-h3. За бърз старт, ето какво можете да правите в ONLYOFFICE:
-
-- Създавайте, преглеждайте и редактирайте текстови документи, електронни таблици, презентации.
-
-- Работа с всички популярни формати. Най-широката съвместимост с MS Office файлове.
-
-- Създавайте и редактирайте съвместно "готови за попълване формуляри":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Споделяйте и работете съвместно върху документи онлайн.
-
-- Използвайте различни плъгини, за да прилагате допълнителни функции.
-
-- Лесен достъп до личния ви облак чрез "разширение за Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=bg".
-
-Можете също така да редактирате документи офлайн с нашите безплатни "десктоп редактори":"https://www.onlyoffice.com/download-desktop.aspx" или да получите мобилен пакет за редакции за вашите "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" или "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" устройства.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Здравейте,
-
-Току-що сте регистрирали профил в решението ONLYOFFICE за лична употреба. Кликнете "тук":"$InviteLink", за да потвърдите регистрацията и да създадете парола.
-
-Ако не можете да отворите връзката, моля копирайте следното "$InviteLink":"$InviteLink" и го поставете в адресната лента на браузъра.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Вие поискахте прекратяване на профила си на адрес personal.onlyoffice.com. Следвайте връзката, за да завършите заявката (връзката е активна за период от 7 дни):
-
-$OrangeButton
-
-*Забележка*: След изтриването, профилът ви и всички данни, свързани с него, ще бъдат изтрити за постоянно в съответствие с нашата "Декларация за поверителност":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Прочетете повече за прекратяването на акаунта":"${__HelpLink}/administration/configuration.aspx"
-
-Игнорирайте този имейл, ако не искате да продължите.
-
-Ако имате някакви въпроси, моля свържете се с нас на адрес "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Деактивиране на портал "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -522,7 +445,7 @@ $OrangeButton
 
 Процесът на премахване на данни от потребител "$FromUserName":"$FromUserLink" е завършен успешно.
 
-Изтриването на лични данни е разрешено $DocsSpace</value>
+Изтриването на лични данни позволява освобождаването на $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Уважаеми $UserName,
@@ -669,9 +592,6 @@ $TrulyYours</value>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Промяна на собственика на портала</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Промяна на адреса на портала</value>
-  </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Добре дошли в ONLYOFFICE DocSpace!</value>
   </data>
@@ -704,18 +624,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_success" xml:space="preserve">
     <value>${LetterLogoText}. Друга миграция на портал за региони успешно приключи</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Добре дошли в ONLYOFFICE за лична употреба!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Добре дошли в ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Лични. Моля, активирайте имейл адреса си</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Прекратяване на личен акаунт</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивиране на портала ${__VirtualRootPath}</value>
@@ -869,9 +777,9 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Ефективно съавторство.&lt;/b&gt; &lt;br/&gt;Работете съвместно върху документи с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сътрудничете сигурно.&lt;/b&gt; &lt;br/&gt;Настройте фино достъпа до цялото пространство или отделни стаи с гъвкави разрешения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сигурно сътрудничество.&lt;/b&gt; &lt;br/&gt;Направете прецизна настройка на достъпа до цялото пространство или на отделните стаи с гъвкави позволения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин за AI.&lt;/b&gt;&lt;br/&gt; Резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин с изкуствен интелект.&lt;/b&gt;&lt;br/&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -891,9 +799,9 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Ефективно съавторство.&lt;/b&gt; &lt;br/&gt;Работете съвместно върху документи с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сътрудничете сигурно.&lt;/b&gt; &lt;br/&gt;Настройте фино достъпа до цялото пространство или отделни стаи с гъвкави разрешения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сигурно сътрудничество.&lt;/b&gt; &lt;br/&gt;Направете прецизна настройка на достъпа до цялото пространство или на отделните стаи с гъвкави позволения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин за AI.&lt;/b&gt;&lt;br/&gt; Резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин с изкуствен интелект.&lt;/b&gt;&lt;br/&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -913,9 +821,9 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Ефективно съавторство.&lt;/b&gt; &lt;br/&gt;Работете съвместно върху документи с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сътрудничете сигурно.&lt;/b&gt; &lt;br/&gt;Настройте фино достъпа до цялото пространство или отделни стаи с гъвкави разрешения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сигурно сътрудничество.&lt;/b&gt; &lt;br/&gt;Направете прецизна настройка на достъпа до цялото пространство или на отделните стаи с гъвкави позволения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин за AI.&lt;/b&gt;&lt;br/&gt; Резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин с изкуствен интелект.&lt;/b&gt;&lt;br/&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -935,9 +843,9 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Ефективно съавторство.&lt;/b&gt; &lt;br/&gt;Работете съвместно върху документи с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сътрудничете сигурно.&lt;/b&gt; &lt;br/&gt;Настройте фино достъпа до цялото пространство или отделни стаи с гъвкави разрешения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сигурно сътрудничество.&lt;/b&gt; &lt;br/&gt;Направете прецизна настройка на достъпа до цялото пространство или на отделните стаи с гъвкави позволения и потребителски роли. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин за AI.&lt;/b&gt;&lt;br/&gt; Резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Използвайте помощния плъгин с изкуствен интелект.&lt;/b&gt;&lt;br/&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -1097,7 +1005,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -1119,7 +1027,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -1141,7 +1049,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -1163,7 +1071,7 @@ $TrulyYours</value>
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работете заедно с други върху документи&lt;/b&gt; с два режима на съвместно редактиране: в реално време или със заключване на параграфи. Следете промените, общувайте в реално време, като използвате вградения чат или чрез аудио и видео разговори.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Използвайте помощния плъгин за AI:&lt;/b&gt; резюмирайте и превеждайте текстове, генерирайте изображения и ключови думи, анализирайте думи и т.н.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt; Използвайте помощния плъгин с изкуствен интелект:&lt;/b&gt; Обобщавайте и превеждайте текстове, генерирайте изображения и клавиатури, анализирайте думи и др.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -1180,20 +1088,6 @@ $TrulyYours</value>
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Възползвайте се от &lt;span style="color:#FF6F3D;"&gt;безплатните&lt;/span&gt; ONLYOFFICE приложения
-
-
-Здравей, $UserName!
-
-Възползвайте се от безплатното ONLYOFFICE приложение, за да работите с документи от всяко от вашите устройства.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;За да работите върху документи офлайн, изтеглете ONLYOFFICE Desktop Editors за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;За да редактирате документи на мобилни устройства, вземете приложението ONLYOFFICE Documents за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Възползвайте се от &lt;span style="color:#FF6F3D;"&gt;безплатните&lt;/span&gt; ONLYOFFICE приложения
 
@@ -1207,24 +1101,6 @@ $TrulyYours</value>
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;За да редактирате документи на мобилни устройства, вземете приложението ONLYOFFICE Documents за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Привет!
-Имаше опит за регистриране на нов акаунт "ONLYOFFICE Personal":"$PortalUrl" чрез този имейл. Ако сте били вие, искаме да Ви информираме, че акаунтът вече съществува — продължете към ONLYOFFICE Personal и влезте.
-Ако сте загубили паролата си, можете да я възстановите на "страницата за възстановяване на парола":"$LinkToRecovery".
-Ако не сте се опитали да регистрирате нов акаунт, вероятно някой друг го е направил по погрешка. В този случай, моля, игнорирайте този имейл.
-
-Приятен ден!
-Екипът на ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Искате ли да промените паролата на вашия ONLYOFFICE Personal акаунт? Кликнете бутона по-долу, за да потвърдите.
-
-$OrangeButton 
-
-Линкът е валиден 7 дни.
-
-Не искате да променяте паролата си? Просто игнорирайте това съобщение.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace е &lt;span style="color:#FF6F3D;"&gt;деактивиран&lt;/span&gt;
@@ -1329,7 +1205,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Здравейте!
 
-Поканени сте да се присъедините към $Message room на адрес "${__VirtualRootPath}":"${__VirtualRootPath}". Приемете поканата, като щракнете върху линка:
+Поканени сте да се присъедините към стая на DocSpace на адрес "${__VirtualRootPath}":"${__VirtualRootPath}". Приемете поканата, като щракнете върху линка:
 
 $OrangeButton
 
@@ -1382,9 +1258,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Възползвайте се от безплатните ONLYOFFICE приложения</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Възползвайте се от безплатните ONLYOFFICE приложения</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Гратисният период за вашия ONLYOFFICE DocSpace изтече</value>
   </data>
@@ -1402,9 +1275,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Потвърдете промяната на паролата си</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Влезте в личния си ONLYOFFICE акаунт</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Открийте бизнес абонамента на ONLYOFFICE DocSpace</value>
@@ -1557,19 +1427,6 @@ $OrangeButton
 Линка е валиден само 7 дни.
 
 Ще получите още съвети как да използвате своя уеб офис. Можете да отмените абонаментите на страницата на вашия профил по всяко време, както и да ги активирате отново.</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Искате ли да промените имейла на вашия ONLYOFFICE акаунт?
-
-Кликнете върху бутона по-долу и влезте* в облака си.
-
-$OrangeButton
-
-Линкът е валиден 7 дни.
-
-*Ако не сте влезли в ONLYOFFICE в този браузър, ще трябва да използвате стария си имейл за потвърждение.
-
-Не искате да променяте имейла си? Просто игнорирайте това съобщение.</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Деактивиране на портала [${__VirtualRootPath}](${__VirtualRootPath})

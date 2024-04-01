@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,7 +86,21 @@ internal class DropboxDaoBase(
 
     public string MakeThirdId(object entryId)
     {
-        return Convert.ToString(entryId, CultureInfo.InvariantCulture);
+        var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
+
+        if (string.IsNullOrEmpty(id) || id.StartsWith('/'))
+        {
+            return id;
+        }
+
+        try
+        {
+            return Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(id));
+        }
+        catch
+        {
+            return id;
+        }
     }
 
     public string MakeId(Metadata dropboxItem)
@@ -96,9 +110,12 @@ internal class DropboxDaoBase(
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "/" ? "" : ("-" + path.Replace('/', '|'));
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            return PathPrefix;
+        }
 
-        return $"{PathPrefix}{p}";
+        return path.StartsWith('/') ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(FolderMetadata dropboxFolder)
@@ -141,11 +158,12 @@ internal class DropboxDaoBase(
         folder.Id = MakeId(dropboxFolder);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(dropboxFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : default;
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : default;
         folder.Title = MakeFolderTitle(dropboxFolder);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -213,7 +231,6 @@ internal class DropboxDaoBase(
         file.CreateOn = _tenantUtil.DateTimeFromUtc(dropboxFile.ServerModified);
         file.ParentId = MakeId(GetParentFolderId(dropboxFile));
         file.ModifiedOn = _tenantUtil.DateTimeFromUtc(dropboxFile.ServerModified);
-        file.NativeAccessor = dropboxFile;
         file.Title = MakeFileTitle(dropboxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;

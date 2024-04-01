@@ -532,20 +532,6 @@ Email: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Dobite &lt;span style="color:#FF6F3D;"&gt;brezplačne&lt;/span&gt; ONLYOFFICE aplikacije
-
-
-Pozdravljeni, $UserName!
-
-Pridobite brezplačne aplikacije ONLYOFFICE za delo z dokumenti s katero koli od vaših naprav.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; Za delo z dokumenti brez povezave prenesite ONLYOFFICE Desktop upravljalce za&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Za urejanje dokumentov na mobilnih napravah prenesite aplikacijo Dokumenti ONLYOFFICE za&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Dobite &lt;span style="color:#FF6F3D;"&gt;brezplačne&lt;/span&gt; ONLYOFFICE aplikacije
 
@@ -559,24 +545,6 @@ Pridobite brezplačne aplikacije ONLYOFFICE za delo z dokumenti s katero koli od
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Za urejanje dokumentov na mobilnih napravah prenesite aplikacijo Dokumenti ONLYOFFICE za&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Pozdravljeni!
-Prišlo je do poskusa registracije novega "ONLYOFFICE Osebno":"$PortalUrl" računa z uporabo tega email naslova. Če ste bili vi, vas želimo obvestiti, da račun že obstaja — nadaljujte na ONLYOFFICE osebnem računu in se prijavite.
-Če ste izgubili geslo, ga lahko obnovite na "strani za obnovo gesla":"$LinkToRecovery".
-Če niste poskusili registrirati novega računa, je to verjetno pomotoma storil nekdo drug. V tem primeru prezrite ta email.
-
-Želimo vam lep dan!
-Ekipa ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Želite spremeniti geslo na svojem osebnem računu ONLYOFFICE? Kliknite spodnji gumb za potrditev.
-
-$OrangeButton 
-
-Povezava je veljavna 7 dni.
-
-Ne želite spremeniti gesla? Prezrite to sporočilo.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace je &lt;span style="color:#FF6F3D;"&gt;deaktiviran&lt;/span&gt;
@@ -683,7 +651,7 @@ Ekipa ONLYOFFICE
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Pozdravljeni!
 
-Povabljeni ste, da se pridružite $Message sobi na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
+Povabljeni ste, da se pridružite sobi DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
 $OrangeButton
 
@@ -784,9 +752,6 @@ $TrulyYours</value>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Konfigurirajte zdaj</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Potrdite spremembo naslova portala</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potrdite posodobitev lastnika portala</value>
   </data>
@@ -850,16 +815,10 @@ $TrulyYours</value>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Sprememba lastnika portala</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Sprememba naslova portala</value>
-  </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Dobrodošli v ONLYOFFICE DocSpace!</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Dobite brezplačne ONLYOFFICE aplikacije</value>
-  </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
     <value>Dobite brezplačne ONLYOFFICE aplikacije</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
@@ -966,21 +925,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
     <value>Dobrodošli v ONLYOFFICE DocSpace!</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Dobrodošli v ONLYOFFICE za osebno rabo!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Dobrodošli v ONLYOFFICE Osebno</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Prijavite se v vaš ONLYOFFICE Osebni račun</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Osebno. Aktivirajte svoj email naslov</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Ukinitev računa ONLYOFFICE Osebno</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivacija portala ${__VirtualRootPath}</value>
@@ -1166,19 +1110,6 @@ $OrangeButton</value>
 Dragi $OwnerName,
 
 Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}" lastnika portala na $UserName.
-
-Za potrditev operacije sledite spodnji povezavi:
-
-$OrangeButton
-
-*Opomba*: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek zamenjave lastnika portala v tem obdobju.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Sprememba naslova portala
-
-Dragi $OwnerName,
-
-Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}" naslova portala na "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
 
 Za potrditev operacije sledite spodnji povezavi:
 
@@ -1402,80 +1333,6 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 $OrangeButton
 
 Če potrebujete pomoč, pobrskajte po našem "Centru za pomoč":"${__HelpLink}" ali vprašajte našo "ekipo za podporo":"${__SupportLink}".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Pozdravljeni, $UserName
-Uspešno ste bili registrirani v ONLYOFFICE Osebno "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Povežite svojo najljubšo shrambo v oblaku: Dropbox, Google Drive, OneDrive ali Box in ustvarite enotni delovni prostor za svoje dokumente, dostopne od koder koli.
-
-Izvedite več o ONLYOFFICE Osebno v "našem spletnem dnevniku":"$TagBlogLink".
-
-Veseli nas, da ste tukaj. Ostanite na zvezi!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Dobrodošli v ONLYOFFICE Osebno
-
-Pravkar ste ustvarili svojo osebno pisarno v oblaku.
-
-h3.To je navidezni delovni prostor, kjer lahko urejate in shranjujete dokumente, delate z njimi od koder koli in omogočate dostop vašim prijateljem ali sodelavcem.
-
-h3. Za hiter začetek nekaj opravil, ki jih lahko opravljate v ONLYOFFICE:
-
-- Ustvarite, preglejte in uredite besedilne dokumente, preglednice, predstavitve.
-
-- Delajte z vsemi priljubljenimi formati. Najvišja združljivost z datotekami MS Office.
-
-- Ustvarite in souredite "obrazce, pripravljene za izpolnjevanje":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Delite dokumente in sodelujte pri njih preko spleta.
-
-- Za uporabo dodatnih funkcij uporabite različne vtičnike.
-
-- Enostavno dostopajte do osebnega oblaka prek "Chrome razširitve":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=sl".
-
-Dokumente lahko urejate tudi brez povezave z našimi brezplačnimi "desktop urejevalniki":"https://www.onlyoffice.com/download-desktop.aspx" ali pridobite program za mobilno urejanje za vašo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ali "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" napravo.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Želite spremeniti email naslov na svojem računu ONLYOFFICE?
-
-Kliknite spodnji gumb in se prijavite* v svoj oblak.
-
-$OrangeButton
-
-Povezava velja 7 dni.
-
-*Če v tem brskalniku niste prijavljeni v ONLYOFFICE, boste morali za potrditev uporabiti svoj stari email naslov.
-
-Ne želite spremeniti emaila? Prezrite to sporočilo.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Pozdravljeni,
-
-Pravkar ste registrirali račun pri ONLYOFFICE za osebno uporabo. Kliknite "tukaj":"$InviteLink", da potrdite registracijo in ustvarite geslo.
-
-Če ne morete odpreti povezave, kopirajte povezavo "$InviteLink":"$InviteLink" in jo prilepite v naslovno vrstico brskalnika.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Zahtevali ste ukinitev vašega računa na personal.onlyoffice.com. Sledite povezavi za dokončanje zahteve (povezava je aktivna 7 dni): 
-
-$OrangeButton
-
-*Opomba*: Po izbrisu bodo vaš račun in vsi podatki, povezani z njim, trajno izbrisani v skladu z našo "Izjavo o zasebnosti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Preberite več o ukinitvi računa":"${__HelpLink}/administration/configuration.aspx"
-
-Prezrite ta email, če ne želite nadaljevati.
-
-Če imate kakršna koli vprašanja, nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>

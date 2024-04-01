@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     public override string ClientSecret { get { return this["twitterSecret"]; } }
     public override string CodeUrl { get { return "https://api.twitter.com/oauth/request_token"; } }
 
-    private static readonly IAuthenticationRequestStore _myAuthRequestStore = new LocalAuthenticationRequestStore();
+    private static readonly LocalAuthenticationRequestStore _myAuthRequestStore = new();
 
     public override bool IsEnabled
     {
@@ -70,7 +70,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     {
         if (!string.IsNullOrEmpty(context.Request.Query["denied"]))
         {
-            return LoginProfile.FromError(new Exception("Canceled at provider"));
+            return new LoginProfile(new Exception("Canceled at provider"));
         }
 
         var appClient = new TwitterClient(ClientID, ClientSecret);

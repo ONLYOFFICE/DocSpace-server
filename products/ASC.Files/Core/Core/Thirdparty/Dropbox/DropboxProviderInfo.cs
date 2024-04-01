@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,4 +33,5 @@ internal class DropboxProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper
 {
     public override Selector Selector { get; } = Selectors.Dropbox;
     public override ProviderFilter ProviderFilter { get; } = ProviderFilter.DropBox;
+    public override bool MutableEntityId => true;
 }

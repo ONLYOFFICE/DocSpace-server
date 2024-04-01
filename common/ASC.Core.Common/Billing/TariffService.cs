@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -292,11 +292,11 @@ public class TariffService : ITariffService
 
                 tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new(quota.TenantId, 1) },
+                    Quotas = [new(quota.TenantId, 1)],
                     DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
                 };
 
-                await SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+                await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
                 UpdateCache(tariff.Id);
             }
         }
@@ -440,7 +440,7 @@ public class TariffService : ITariffService
         var payments = _cache.Get<List<PaymentInfo>>(key);
         if (payments == null)
         {
-            payments = new List<PaymentInfo>();
+            payments = [];
             if (_billingClient.Configured)
             {
                 try
@@ -470,7 +470,7 @@ public class TariffService : ITariffService
 
     public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
     {
-        List<TenantQuota> newQuotas = new();
+        List<TenantQuota> newQuotas = [];
 
         if (_billingClient.Configured)
         {
@@ -796,10 +796,7 @@ public class TariffService : ITariffService
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>
-                {
-                    new(defaultQuota.TenantId, 1)
-                };
+                unlimTariff.Quotas = [new(defaultQuota.TenantId, 1)];
 
                 tariff = unlimTariff;
             }
@@ -824,7 +821,7 @@ public class TariffService : ITariffService
             DelayDueDate = DateTime.MaxValue,
             LicenseDate = DateTime.MaxValue,
             CustomerId = "",
-            Quotas = new List<Quota>()
+            Quotas = []
         };
 
         if (!empty)

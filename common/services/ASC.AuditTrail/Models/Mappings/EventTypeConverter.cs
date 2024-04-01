@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Core.Tenants;
 
 using Constants = ASC.Core.Configuration.Constants;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -141,10 +139,10 @@ internal class EventTypeConverter(UserFormatter userFormatter,
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         if (!string.IsNullOrEmpty(result.IP))
         {
-            var ipSplited = result.IP.Split(':');
-            if (ipSplited.Length > 1)
+            var splitIp = result.IP.Split(':');
+            if (splitIp.Length > 1)
             {
-                result.IP = ipSplited[0];
+                result.IP = splitIp[0];
             }
         }
 
@@ -154,7 +152,7 @@ internal class EventTypeConverter(UserFormatter userFormatter,
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
-                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
+                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(rawNotificationInfo);
 
                 result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;

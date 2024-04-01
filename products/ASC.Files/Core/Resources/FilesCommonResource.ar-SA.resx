@@ -222,145 +222,139 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>ملغى</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>طلب غير صالح.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>لا يمكنك تحديد هذا المستخدم</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>تستغرق عملية التحويل أكثر من اللازم.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>خطأ في خدمة المستندات</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>تم فتح المستند للتعديل بواسطة{0}. النسخة الحالية للملف لا تدعم خاصية التعديل المزدوج.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>تم فتح المستند للتعديل من خلال تطبيق هاتف محمول بواسطة {0}</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>ملف فارغ</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>لم يتم العثور على الملف المطلوب</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
-    <value>لن يتم تحويل الملف إذا تجاوز حجمه {0}</value>
-  </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>لن يتم نسخ الملف إذا تجاوز حجمه {0}</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
-    <value>لن يتم تعديل الملف إذا تجاوز حجمه {0}</value>
-  </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>لن يتم نقل الملف إذا تجاوز حجمه {0}</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>النسخة الجديدة لا يمكن أن تكون مماثلة للنسخة الحالية</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>لا يمكن نسخ المجلد للمجلد الفرعي الخاص به</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>لم يتم العثور على المجلد المطلوب</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>عنوان غير صحيح</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>الملف مقفل حالياً بواسطة مستخدم آخر</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>على الأقل سيتم عدم إرسال {0} بريد. الرجاء زيارة نموذج البريد لمعرفة سبب فشل الارسال.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>عدد كبير من التنزيلات.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>نأسف، صيغة الملف غير مدعومة</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>مؤلف الملف المحفوظ غير معروف</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>تم اتلاف المستند عند محاولة حفظه</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>فشل في استرداد الملف لحفظه</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>لا تمتلك حق الوصول للقيام بالإجراء</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>لا يمكن المصادقة مع المزود {0} من خلال بيانات الدخول.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>ليس لديك الأذونات لنسخ الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لنسخ المجلد</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>ليس لديك الأذونات للانشاء</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>لا يمكن حذف الملف لأنه مفتوح للتعديل</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>لا يمكن حذف المجلد لأنه مفتوح للتعديل</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>ليس لديك الأذونات لحذف الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لحذف المجلد</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>ليس لديك الأذونات لتعديل الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>يتم تعديل الملف بواسطتك في علامة  تبويب آخر</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>ليس لديك الأذونات لنقل الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لنقل المجلد</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>ليس لديك الأذونات لمعاينة الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لمعاينة محتوى المجلد</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>ليس لديك الأذونات لإعادة تسمية الملف</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لإعادة تسمية المجلد</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>لا يمكنك تحديث الملف لأنه مفتوح للتعديل</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لمعاينة محتوى المجلد</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>محتوى مجلد الطرف الثالث غير متوفر. حاول إعادة اتصال الحساب.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>خطأ في بدء تعديل الملف</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>لا يمكنك تعديل الملف المفتوح للتعديل</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>لا يمكن العثور على الملف</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>لا يمكنك معاينة الملفات في سلة القمامة</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -412,10 +406,10 @@
     <value>تم انشاء الملف في المجلد "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>المستند القابل للملئ OFORM جاهز. الملف محفوظ في {0}</value>
+    <value>المستند القابل للملئ PDF جاهز. الملف محفوظ في {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>تم انشاء نسخة من OFORM في المجلد {0}. يرجى ملئ النموذج وتنزيل النتائج كملف بصيغة  PDF أو DOCX.</value>
+    <value>تم انشاء نسخة من PDF في المجلد {0}. يرجى ملئ النموذج وتنزيل النتائج كملف بصيغة  PDF أو DOCX.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>الملف لم يعد مسودة للقيام بتعبئة النموذج.</value>

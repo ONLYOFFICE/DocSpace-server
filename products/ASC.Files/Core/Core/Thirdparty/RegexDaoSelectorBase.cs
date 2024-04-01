@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -145,11 +145,12 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         provider.UpdateTitle(newTitle); //This will update cached version too
     }
 
-    public async Task UpdateProviderFolderId(IProviderInfo<TFile, TFolder, TItem> provider, string id)
+    public async Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId)
     {
         var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
-        await dbDao.UpdateProviderInfoAsync(provider.ProviderId, provider.CustomerTitle, id, provider.FolderType, provider.Private);
-        provider.FolderId = id;
+        await dbDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = provider.ProviderId, Title = newTitle, FolderId = folderId });
+        provider.FolderId = folderId;
+        provider.CustomerTitle = newTitle;
     }
 
     protected IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)

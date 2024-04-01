@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,6 +51,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     public void Init(int tenantId)
     {
         TenantId = tenantId;
+        IgnoreTable("hosting_instance_registration");
     }
 
     public void IgnoreModule(ModuleName moduleName)
@@ -134,7 +135,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     #region Progress
 
-    public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+    public Func<ProgressChangedEventArgs, Task> ProgressChanged;
 
     private int _stepsCount = 1;
     private volatile int _stepsCompleted;
@@ -149,7 +150,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         Logger.DebugCountSteps(+_stepsCount);
     }
 
-    protected void SetStepCompleted(int increment = 1)
+    protected async Task SetStepCompleted(int increment = 1)
     {
         if (_stepsCount == 1)
         {
@@ -160,10 +161,10 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             throw new InvalidOperationException("All steps completed.");
         }
         _stepsCompleted += increment;
-        SetProgress(100 * _stepsCompleted / _stepsCount);
+        await SetProgress(100 * _stepsCompleted / _stepsCount);
     }
 
-    protected void SetCurrentStepProgress(int value)
+    protected async Task SetCurrentStepProgress(int value)
     {
         if (value is < 0 or > 100)
         {
@@ -171,27 +172,30 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         }
         if (value == 100)
         {
-            SetStepCompleted();
+            await SetStepCompleted();
         }
         else
         {
-            SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+            await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
         }
     }
 
-    protected void SetProgress(int value)
+    private async Task SetProgress(int value)
     {
         if (value is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
         Progress = value;
-        OnProgressChanged(new ProgressChangedEventArgs(value));
+        await OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
-    protected void OnProgressChanged(ProgressChangedEventArgs eventArgs)
+    private async Task OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
-        ProgressChanged?.Invoke(this, eventArgs);
+        if (ProgressChanged != null)
+        {
+            await ProgressChanged(eventArgs);
+        }
     }
 
     #endregion
@@ -277,19 +281,25 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             while ((commandText = await reader.ReadLineAsync()) != null)
             {
                 var sb = new StringBuilder(commandText);
-                while (!commandText.EndsWith(delimiter))
+                if (!commandText.EndsWith(delimiter))
                 {
-                    var newline = await reader.ReadLineAsync();
-                    if (newline == null)
+                    var newline = "";
+                    while (!newline.EndsWith(delimiter))
                     {
+                        newline = await reader.ReadLineAsync();
+                        if (string.IsNullOrEmpty(newline))
+                        {
                         break;
                     }
+
                     sb.Append(newline);
                 }
+
                 commandText = sb.ToString();
+                }
+
                 try
                 {
-                    commandText = commandText.Replace("\\r", "\r").Replace("\\n", "\n");
                     command = connection.CreateCommand();
                     command.CommandText = commandText;
                     await command.ExecuteNonQueryAsync();
@@ -298,75 +308,11 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                 {
                     try
                     {
-                        if (commandText.StartsWith("REPLACE INTO"))
-                        {
-                            var innerValues = commandText.Split(',').ToList();
-                            for (var i = 0; i < innerValues.Count; i++)
-                            {
-                                var flag1 = false;
-                                var flag2 = false;
-                                if (innerValues[i].StartsWith("("))
-                                {
-                                    flag1 = true;
-                                    innerValues[i] = innerValues[i].TrimStart('(');
-                                }
-                                else if (innerValues[i].EndsWith(")") && !innerValues[i].StartsWith("'")
-                                    || innerValues[i].EndsWith("')") && innerValues[i] != "')")
-                                {
-                                    flag2 = true;
-                                    innerValues[i] = innerValues[i].TrimEnd(')');
-                                }
-                                if (i == innerValues.Count - 1)
-                                {
-                                    innerValues[i] = innerValues[i].Remove(innerValues[i].Length - 2, 2);
-                                }
-                                if (innerValues[i].StartsWith("\'") && ((!innerValues[i].EndsWith("\'") || innerValues[i] == "'")
-                                    || i != innerValues.Count - 1 && (!innerValues[i + 1].StartsWith("\'") && innerValues[i + 1].EndsWith("\'") && !innerValues[i + 1].StartsWith("(\'") || innerValues[i + 1] == "'")))
-                                {
-                                    innerValues[i] += "," + innerValues[i + 1];
-                                    innerValues.RemoveAt(i + 1);
-                                }
-                                if (innerValues[i].StartsWith("\'") && innerValues[i].EndsWith("\'"))
-                                {
-                                    if (innerValues[i] != "''")
-                                    {
-                                        var sw = new StringWriter();
-                                        await sw.WriteAsync("0x");
-                                        foreach (var b in Encoding.UTF8.GetBytes(innerValues[i].Trim('\'')))
-                                        {
-                                            sw.Write("{0:x2}", b);
-                                        }
-
-                                        innerValues[i] = string.Format("CONVERT({0} USING utf8)", sw);
-                                    }
-                                }
-                                if (flag1)
-                                {
-                                    innerValues[i] = "(" + innerValues[i];
-                                }
-                                else if (flag2)
-                                {
-                                    innerValues[i] += ")";
-                                }
-                                if (i == innerValues.Count - 1)
-                                {
-                                    innerValues[i] += ");";
-                                }
-                            }
-
-                            commandText = string.Join(",", innerValues);
+                        Thread.Sleep(2000);//avoiding deadlock
                             command = connection.CreateCommand();
                             command.CommandText = commandText;
                             await command.ExecuteNonQueryAsync();
                         }
-                        else
-                        {
-                            await Task.Delay(1000);//avoiding deadlock
-                            command = connection.CreateCommand();
-                            command.CommandText = commandText;
-                            await command.ExecuteNonQueryAsync();
-                        }
-                    }
                     catch (Exception ex)
                     {
                         Logger.ErrorRestore(ex);

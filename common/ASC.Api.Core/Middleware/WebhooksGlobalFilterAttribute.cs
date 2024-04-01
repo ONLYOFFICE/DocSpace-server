@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,24 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Concurrent;
+
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
-        ILogger<WebhooksGlobalFilterAttribute> logger,
-        SettingsManager settingsManager,
-        DbWorker dbWorker)
+public class WebhooksGlobalFilterAttribute(
+    IWebhookPublisher webhookPublisher,
+    ILogger<WebhooksGlobalFilterAttribute> logger,
+    SettingsManager settingsManager,
+    DbWorker dbWorker)
     : ResultFilterAttribute, IDisposable
 {
-    private readonly MemoryStream _stream = new();
+    private static readonly ConcurrentDictionary<string, Webhook> _webhooks = new();
+    private MemoryStream _stream;
     private Stream _bodyStream;
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var skip = await SkipAsync(context.HttpContext);
+        var webhook = await GetWebhookAsync(context.HttpContext);
+        var skip = webhook == null;
 
         if (!skip)
         {
+            _stream = new MemoryStream();
             _bodyStream = context.HttpContext.Response.Body;
             context.HttpContext.Response.Body = _stream;
         }
@@ -61,11 +67,7 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
 
             try
             {
-                var (method, routePattern) = GetData(context.HttpContext);
-
                 var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
-
-                var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
 
                 await webhookPublisher.PublishAsync(webhook.Id, resultContent);
             }
@@ -81,35 +83,43 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
         _stream?.Dispose();
     }
 
-    private (string, string) GetData(HttpContext context)
+    private async Task<Webhook> GetWebhookAsync(HttpContext context)
     {
         var method = context.Request.Method;
         var endpoint = (RouteEndpoint)context.GetEndpoint();
         var routePattern = endpoint?.RoutePattern.RawText;
-
-        return (method, routePattern);
-    }
-
-    private async Task<bool> SkipAsync(HttpContext context)
-    {
-        var (method, routePattern) = GetData(context);
+        var disabled = endpoint?.Metadata.OfType<WebhookDisableAttribute>().FirstOrDefault();
 
         if (routePattern == null)
         {
-            return true;
+            return null;
         }
-
+        
+        if (disabled != null)
+        {
+            return null;
+        }
+        
         if (!DbWorker.MethodList.Contains(method))
         {
-            return true;
+            return null;
         }
 
-        var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
+        var key = $"{method}{routePattern}";
+        if (!_webhooks.TryGetValue(key, out var webhook))
+        {
+            webhook = await dbWorker.GetWebhookAsync(method, routePattern);
+            if (webhook != null)
+            {
+                _webhooks.TryAdd(key, webhook);
+            }
+        }
+        
         if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
         {
-            return true;
+            return null;
         }
 
-        return false;
+        return webhook;
     }
 }

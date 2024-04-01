@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,22 +107,22 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
             {
                 if (senderName == Configuration.Constants.NotifyEMailSenderSysName)
                 {
-                    return new[] { user.Email };
+                    return [user.Email];
                 }
 
                 if (senderName == Configuration.Constants.NotifyMessengerSenderSysName)
                 {
-                    return new[] { user.UserName };
+                    return [user.UserName];
                 }
 
                 if (senderName == Configuration.Constants.NotifyPushSenderSysName)
                 {
-                    return new[] { user.UserName };
+                    return [user.UserName];
                 }
 
                 if (senderName == Configuration.Constants.NotifyTelegramSenderSysName)
                 {
-                    return new[] { user.Id.ToString() };
+                    return [user.Id.ToString()];
                 }
             }
         }

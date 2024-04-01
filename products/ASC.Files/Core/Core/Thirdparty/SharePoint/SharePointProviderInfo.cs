@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,15 +45,18 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public FolderType RootFolderType { get; set; }
     public FolderType FolderType { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public string CustomerTitle { get; set; }
     public string RootFolderId => $"{Selector.Id}-{ID}";
     public string SpRootFolderId { get; set; } = "/Shared Documents";
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    public string Color { get; set; }
 
     public Selector Selector { get; } = Selectors.SharePoint;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.SharePoint;
+    public bool MutableEntityId => true;
 
     public Task<bool> CheckAccessAsync()
     {
@@ -307,7 +310,6 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.ParentId = MakeId(GetParentFolderId(file.ServerRelativeUrl));
         result.ModifiedBy = Owner;
         result.ModifiedOn = file.TimeLastModified.Kind == DateTimeKind.Utc ? tenantUtil.DateTimeFromUtc(file.TimeLastModified) : file.TimeLastModified;
-        result.NativeAccessor = file;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.Title = MakeTitle(file.Name);
@@ -566,6 +568,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             result.Error = errorFolder.Error;
             result.SettingsPrivate = Private;
             result.SettingsHasLogo = HasLogo;
+            result.SettingsColor = Color;
 
             return result;
         }
@@ -578,7 +581,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.CreateOn = CreateOn;
         result.FolderType = FolderType.DEFAULT;
         result.ModifiedBy = Owner;
-        result.ModifiedOn = CreateOn;
+        result.ModifiedOn = ModifiedOn;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.RootCreateBy = Owner;
@@ -590,7 +593,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.FoldersCount = 0;
         result.SettingsPrivate = Private;
         result.SettingsHasLogo = HasLogo;
-
+        
         SetFolderType(result, isRoot);
 
         return result;

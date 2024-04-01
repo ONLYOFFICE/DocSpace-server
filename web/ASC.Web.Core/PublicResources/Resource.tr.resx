@@ -82,9 +82,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Özel</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>İşlemi onaylamak için bir bağlantı {0} adresine gönderildi. (portal sahibinin e-posta adresi).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Yanlış eposta adresi</value>
   </data>
@@ -981,9 +978,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>{0} e-posta adresli bir kullanıcı varsa, şifre değiştirme talimatı bu e-posta adresine gönderilmiştir.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk alanı kotası aşılı</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Ofis belgeleriniz için bulut alanı</value>

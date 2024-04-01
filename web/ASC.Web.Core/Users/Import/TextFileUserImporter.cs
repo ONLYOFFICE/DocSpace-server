@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         var fileLines = new List<string>();
         using (var reader = new StreamReader(stream, Encoding, true))
         {
-            fileLines.AddRange(reader.ReadToEnd().Split(new[] { Environment.NewLine, "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
+            fileLines.AddRange(reader.ReadToEnd().Split([Environment.NewLine, "\n", "\r\n"], StringSplitOptions.RemoveEmptyEntries));
         }
 
         if (!string.IsNullOrEmpty(DefaultHeader))

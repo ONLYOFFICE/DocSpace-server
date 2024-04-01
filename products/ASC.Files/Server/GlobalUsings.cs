@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,8 +63,11 @@ global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
 global using ASC.Files.Helpers;
 global using ASC.Files.Log;
+global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
+global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
+global using ASC.Web.Core;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files;

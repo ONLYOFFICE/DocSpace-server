@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.Net.Http.Headers;
 
 namespace ASC.Web.Files.HttpHandlers;
 
@@ -74,7 +76,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!await TryAuthorizeAsync(request))
+            if (!(await TryAuthorizeAsync(request)))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
@@ -103,31 +105,74 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
 
                 case ChunkedRequestType.Upload:
-                    var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
-
-                    if (resumedSession.BytesUploaded == resumedSession.BytesTotal)
                     {
-                        await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                        await filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize());
+                        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+                        
+                        var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
+                        if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
+                        {
+                            if (resumedSession.UseChunks)
+                            {
+                                resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                            }
 
-                        await socketManager.CreateFileAsync(resumedSession.File);
+                            await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
+                            _ = filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+
+                            await socketManager.CreateFileAsync(resumedSession.File);
+                        }
+                        else
+                        {
+                            await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        }
+
+                        return;
                     }
-                    else
+
+                case ChunkedRequestType.UploadAsync:
                     {
-                        await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        var boundary = MultipartRequestHelper.GetBoundary(
+                            Microsoft.Net.Http.Headers.MediaTypeHeaderValue.Parse(context.Request.ContentType),
+                            100);
+                        var reader = new MultipartReader(boundary, context.Request.Body);
+                        var section = await reader.ReadNextSectionAsync();
+                        var headersLength = 0;
+                        boundary = HeaderUtilities.RemoveQuotes(new StringSegment(boundary)).ToString();
+                        var boundaryLength = Encoding.UTF8.GetBytes("\r\n--" + boundary).Length + 2;
+                        foreach (var h in section.Headers)
+                        {
+                            headersLength += h.Value.Sum(r => r.Length) + h.Key.Length + "\n\n".Length;
+                        }
+                       
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
+                        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+                        await WriteSuccess(context,
+                            await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        return;
+                    }
+                case ChunkedRequestType.Finalize:
+                    var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);
+                    if (session.UseChunks)
+                    {
+                        session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                     }
 
-                    return;
+                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
+                    _ = filesMessageService.SendAsync(MessageAction.FileUploaded, session.File, session.File.Title);
 
-                default:
-                    await WriteError(context, "Unknown request type.");
+                    await socketManager.CreateFileAsync(session.File);
                     return;
             }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            throw;
         }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
-            await WriteError(context, FilesCommonResource.ErrorMassage_FileNotFound);
+            await WriteError(context, FilesCommonResource.ErrorMessage_FileNotFound);
         }
         catch (Exception error)
         {
@@ -203,7 +248,9 @@ public enum ChunkedRequestType
     None,
     Initiate,
     Abort,
-    Upload
+    Upload,
+    UploadAsync,
+    Finalize
 }
 
 [DebuggerDisplay("{Type} ({UploadId})")]
@@ -224,6 +271,16 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
         if (_request.Query["abort"] == "true" && !string.IsNullOrEmpty(UploadId))
         {
             return ChunkedRequestType.Abort;
+        }
+
+        if (_request.Query["finalize"] == "true" && !string.IsNullOrEmpty(UploadId))
+        {
+            return ChunkedRequestType.Finalize;
+        }
+
+        if (_request.Query["upload"] == "true" && !string.IsNullOrEmpty(UploadId))
+        {
+            return ChunkedRequestType.UploadAsync;
         }
 
         return !string.IsNullOrEmpty(UploadId)
@@ -299,26 +356,37 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
         }
     }
 
-    public long ChunkSize => File.Length;
+    public async Task<long> ChunkSize() => (await File()).Length;
 
-    public Stream ChunkStream => File.OpenReadStream();
+    public async Task<Stream> ChunkStream() => (await File()).OpenReadStream();
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
-    private IFormFile File
+    private int? _chunkNumber;
+    public int? ChunkNumber
     {
         get
         {
-            if (_file != null)
+            if (!_chunkNumber.HasValue)
             {
-                return _file;
+                var result = int.TryParse(_request.Query["chunkNumber"], out var i);
+                if (result)
+                {
+                    _chunkNumber = i;
+                }
             }
+            return _chunkNumber;
+        }
+    }
 
-            if (_request.Form.Files.Count > 0)
-            {
-                return _file = _request.Form.Files[0];
-            }
-
+    private async Task<IFormFile> File()
+    {
+        try
+        {
+            return _file ??= (await _request.ReadFormAsync(CancellationToken.None)).Files[0];
+        }
+        catch
+        {
             throw new Exception("HttpRequest.Files is empty");
         }
     }
@@ -326,6 +394,26 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
     private bool IsFileDataSet()
     {
         return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default);
+    }
+}
+
+public static class MultipartRequestHelper
+{
+    public static string GetBoundary(Microsoft.Net.Http.Headers.MediaTypeHeaderValue contentType, int lengthLimit)
+    {
+        var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
+
+        if (string.IsNullOrWhiteSpace(boundary))
+        {
+            throw new InvalidDataException("Missing content-type boundary.");
+        }
+
+        if (boundary.Length > lengthLimit)
+        {
+            throw new InvalidDataException($"Multipart boundary length limit {lengthLimit} exceeded.");
+        }
+
+        return boundary;
     }
 }
 

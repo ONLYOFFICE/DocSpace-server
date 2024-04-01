@@ -481,9 +481,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personnel</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Un lien pour confirmer l'opération a été envoyé à {0}(l'adresse e-mail du propriétaire du portail).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Identifiant de l'instance n'est pas valide.</value>
   </data>
@@ -768,9 +765,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>Propriétaire</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Quota d'espace disque est dépassé</value>
   </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Accès au portail</value>

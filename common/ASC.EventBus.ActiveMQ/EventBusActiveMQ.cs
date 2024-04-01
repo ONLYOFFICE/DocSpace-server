@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,6 @@ namespace ASC.EventBus.ActiveMQ;
 
 public class EventBusActiveMQ : IEventBus, IDisposable
 {
-    const string EXCHANGE_NAME = "asc_event_bus";
     const string AUTOFAC_SCOPE_NAME = "asc_event_bus";
 
     private readonly ILogger<EventBusActiveMQ> _logger;
@@ -63,7 +62,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _rejectedEvents = new ConcurrentQueue<Guid>();
         _consumerSession = CreateConsumerSession();
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
-        _consumers = new List<IMessageConsumer>();
+        _consumers = [];
     }
 
     private void SubsManager_OnEventRemoved(object sender, string eventName)
@@ -329,7 +328,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
                     var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
 
                     await Task.Yield();
-                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
                 }
             }
         }

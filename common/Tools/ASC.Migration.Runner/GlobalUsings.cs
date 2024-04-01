@@ -33,6 +33,8 @@ global using ASC.Migrations.Core.Models;
 global using ASC.Migrations.Core.Utils;
 
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+global using Microsoft.EntityFrameworkCore.Migrations;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Migration.Runner;

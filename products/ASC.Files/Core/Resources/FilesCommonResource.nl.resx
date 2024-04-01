@@ -145,136 +145,130 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Niet geldig</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Onjuiste aanvraag.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>U kunt deze gebruiker niet selecteren</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Conversie kost teveel tijd.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Er is een fout opgetreden in de Documenten Service</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Het bestand wordt geopend voor bewerking door {0}. Momenteel wordt de functionaliteit voor samen bewerken niet ondersteund voor dit bestandsformaat.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Het bestand is geopend voor bewerken in een mobiele applicatie door {0}</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Leeg bestand</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Het vereiste bestand is niet gevonden</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
-    <value>Bestand groter dan {0} zullen niet worden geconverteerd</value>
-  </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet gekopieerd</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
-    <value>Bestand groter dan {0} kan niet worden bewerkt</value>
-  </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet verplaatst</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>U kunt de map niet kopiëren naar de submap</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>De vereiste map is niet gevonden</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Onjuiste titel</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Het bestand is momenteel vergrendeld door een andere gebruiker</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Ten minste {0} mail berichten.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Te veel downloads.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Sorry, deze bestandsindeling wordt niet ondersteund</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Auteur van het bestand is onbekend</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Het bestand werd beschadigd toen je het probeerde op te slaan</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Het opslaan van het bestand is mislukt</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>U heeft onvoldoende rechten om deze bewerking uit te voeren</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Met de verstrekte logingegevens werd geen toegang verleend tot {0}.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>U heeft geen voldoende aanmaak rechten</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Kan het bestand niet verwijderen omdat deze geopend is om te bewerken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Kan de map niet verwijderen omdat een van de bestanden geopend is om te bewerken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>U heeft onvoldoende machtigingen om een bestand te verwijderen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om een map te verwijderen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>U heeft niet voldoende rechten om het bestand te bewerken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Dit document wordt al bewerkt door jou in een ander tabblad</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>U heeft onvoldoende machtiging om het bestand te verplaatsen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>U heeft onvoldoende machtiging om de map te verplaatsen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>U heeft onvoldoende rechten om het bestand te bekijken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om de inhoud te bekijken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>U heeft niet voldoende rechten om een bestand te hernoemen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om de map te hernoemen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Kan het bestand niet updaten omdat deze is geopend om te bewerken</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om de inhoud te bekijken</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>De inhoud van de externe map is niet beschikbaar. Probeer het account opnieuw te verbinden.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Fout bij bewerken van het bestand</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>U kunt een bestand welke geopend is voor bewerking niet bijwerken</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Gebruiker kon niet gevonden worden</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Het is niet toegestaan om elementen in de prullenbak te bekijken</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -347,13 +341,13 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Ingezonden formulier</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>De nieuwe versie kan niet hetzelfde zijn als de huidige</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>U heeft geen toestemming om het bestand te kopiëren</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>U heeft geen toestemming om de map te kopiëren</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -408,10 +402,10 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Gemaakt om het formulier in te vullen</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Het invulbare OFORM document is klaar. Het is opgeslagen in de {0}</value>
+    <value>Het invulbare PDF document is klaar. Het is opgeslagen in de {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>De OFORM kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
+    <value>De PDF kopie wordt gemaakt in de map {0}. Vul het formulier in en download het resultaat als PDF- of DOCX-bestand.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Het bestand is niet langer een concept om het formulier in te vullen.</value>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,14 +102,16 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 {
     public const string UserField = "userId";
 
-    private static readonly List<string> _supportedFormats = new()
-    {
-            ".as", ".asl", ".doc", ".docm", ".docx", ".dot", ".dotm", ".dotx", ".htm", ".html", ".msg", ".pdf", ".pdx", ".rtf", ".txt", ".wpd", ".wps", ".wpt", ".xps",
-            ".emz", ".svg", ".svgz", ".vdx", ".vss", ".vst",
-            ".bmp", ".cdr", ".dcx", ".gif", ".ico", ".jpg", ".jpeg", ".pct", ".pic", ".png", ".rgb", ".sam", ".tga", ".tif", ".tiff", ".wpg",
-            ".dps", ".dpt", ".pot", ".potx", ".pps", ".ppt", ".pptm", ".pptx",
-            ".csv", ".et", ".ett", ".xls", ".xlsm", ".xlsx", ".xlt"
-        };
+    private static readonly List<string> _supportedFormats =
+    [
+        ".as", ".asl", ".doc", ".docm", ".docx", ".dot", ".dotm", ".dotx", ".htm", ".html", ".msg", ".pdf", ".pdx",
+        ".rtf", ".txt", ".wpd", ".wps", ".wpt", ".xps",
+        ".emz", ".svg", ".svgz", ".vdx", ".vss", ".vst",
+        ".bmp", ".cdr", ".dcx", ".gif", ".ico", ".jpg", ".jpeg", ".pct", ".pic", ".png", ".rgb", ".sam", ".tga", ".tif",
+        ".tiff", ".wpg",
+        ".dps", ".dpt", ".pot", ".potx", ".pps", ".ppt", ".pptm", ".pptx",
+        ".csv", ".et", ".ett", ".xls", ".xlsm", ".xlsx", ".xlt"
+    ];
 
     public static readonly long MaxFileSize = 25L * 1024L * 1024L;
 
@@ -178,15 +180,15 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         var file = await fileDao.GetFileAsync(fileId);
         if (file == null)
         {
-            throw new Exception(FilesCommonResource.ErrorMassage_FileNotFound);
+            throw new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         if (!await fileSecurity.CanReadAsync(file))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         if (!_supportedFormats.Contains(FileUtility.GetFileExtension(file.Title)))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
         if (file.ContentLength > MaxFileSize)
         {
@@ -215,11 +217,11 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         var document = new Document
         {
             DocumentBase64 = Convert.ToBase64String(fileBytes),
-            DocumentFields = new List<NameValue>
-                            {
-                                new() {Name = FilesLinkUtility.FolderId, Value = folderId},
-                                new() {Name = FilesLinkUtility.FileTitle, Value = file.Title}
-                            },
+            DocumentFields =
+            [
+                new() { Name = FilesLinkUtility.FolderId, Value = folderId },
+                new() { Name = FilesLinkUtility.FileTitle, Value = file.Title }
+            ],
             DocumentId = "1", //file.ID.ToString(),
             FileExtension = FileUtility.GetFileExtension(file.Title),
             Name = documentName
@@ -232,14 +234,12 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
     {
         var eventNotification = new EventNotification
         {
-            EnvelopeEvents = new List<EnvelopeEvent>
-                {
-                            //new EnvelopeEvent {EnvelopeEventStatusCode = DocuSignStatus.Sent.ToString()},
-                            //new EnvelopeEvent {EnvelopeEventStatusCode = DocuSignStatus.Delivered.ToString()},
-                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed)},
-                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined)},
-                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided)}
-                },
+            EnvelopeEvents =
+            [
+                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed) },
+                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined) },
+                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided) }
+            ],
             IncludeDocumentFields = "true",
             //RecipientEvents = new List<RecipientEvent>
             //    {
@@ -279,12 +279,9 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         {
             CustomFields = new CustomFields
             {
-                TextCustomFields = new List<TextCustomField>
-                    {
-                        new() {Name = UserField, Value = authContext.CurrentAccount.ID.ToString()}
-                    }
+                TextCustomFields = [new() { Name = UserField, Value = authContext.CurrentAccount.ID.ToString() }]
             },
-            Documents = new List<Document> { document },
+            Documents = [document],
             EmailBlurb = docuSignData.Message,
             EmailSubject = docuSignData.Name,
             EventNotification = eventNotification,
@@ -338,7 +335,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             }
             else
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
         }
 

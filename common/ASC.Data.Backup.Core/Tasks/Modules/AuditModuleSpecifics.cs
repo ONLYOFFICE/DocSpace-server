@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,14 +33,15 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => Enumerable.Empty<RelationInfo>();
 
-    private readonly TableInfo[] _tables = {
-            new("audit_events", "tenant_id", "id")
+    private readonly TableInfo[] _tables =
+    [
+        new("audit_events", "tenant_id", "id")
             {
-                UserIDColumns = new[] {"user_id"}
+                UserIDColumns = ["user_id"]
             },
             new("login_events", "tenant_id", "id")
             {
-                UserIDColumns = new[] {"user_id"}
+                UserIDColumns = ["user_id"]
             }
-        };
+    ];
 }

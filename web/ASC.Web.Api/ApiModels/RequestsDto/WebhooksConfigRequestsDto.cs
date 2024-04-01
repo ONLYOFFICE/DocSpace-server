@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
@@ -40,6 +42,7 @@ public class WebhooksConfigRequestsDto
 
     /// <summary>URI</summary>
     /// <type>System.String, System</type>
+    [Url]
     public string Uri { get; set; }
 
     /// <summary>Secret key</summary>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,17 +34,20 @@ public interface IProviderInfo : IDisposable
     FolderType RootFolderType { get; }
     FolderType FolderType { get; }
     DateTime CreateOn { get; }
-    string CustomerTitle { get; }
+    DateTime ModifiedOn { get; }
+    string CustomerTitle { get; internal set; }
     string RootFolderId { get; }
     string FolderId { get; set; }
     bool Private { get; }
     bool HasLogo { get; }
+    string Color { get; }
     Task<bool> CheckAccessAsync();
     Task InvalidateStorageAsync();
     Task CacheResetAsync(string id = null, bool? isFile = null);
     void UpdateTitle(string newtitle);
     Selector Selector { get; }
     ProviderFilter ProviderFilter { get; }
+    bool MutableEntityId { get; }
 }
 
 [Transient]

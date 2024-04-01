@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -196,24 +196,12 @@ public enum Accessibility
 }
 
 [Scope]
-public class FileUtility
-{
-
-    public FileUtility(
+public class FileUtility(
         FileUtilityConfiguration fileUtilityConfiguration,
         FilesLinkUtility filesLinkUtility,
         IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
         DaoFactory daoFactory)
     {
-        _fileUtilityConfiguration = fileUtilityConfiguration;
-        _filesLinkUtility = filesLinkUtility;
-        _dbContextFactory = dbContextFactory;
-        _setupInfo = setupInfo;
-        _daoFactory = daoFactory;
-        CanForcesave = GetCanForcesave();
-    }
-
     #region method
 
     public static string GetFileExtension(string fileName)
@@ -276,6 +264,11 @@ public class FileUtility
     public static FileType GetFileTypeByExtention(string extension)
     {
         extension = extension.ToLower();
+
+        if (ExtsPdf.Contains(extension))
+        {
+            return FileType.Pdf;
+        }
 
         if (ExtsDocument.Contains(extension))
         {
@@ -411,13 +404,13 @@ public class FileUtility
     
     public async Task<bool> CanConvert<T>(File<T> file)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             return false;
         }
         var ext = GetFileExtension(file.Title);
-        return (await GetExtsConvertibleAsync()).ContainsKey(ext) && file.ContentLength <= _setupInfo.AvailableFileSize;
+        return (await GetExtsConvertibleAsync()).ContainsKey(ext);
     }
 
     public bool MustConvert(string fileName)
@@ -449,12 +442,12 @@ public class FileUtility
         await _semaphoreSlim.WaitAsync();
         
         _extsConvertible = new ConcurrentDictionary<string, List<string>>();
-        if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
+        if (string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl))
         {
             return _extsConvertible;
         }
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
 
         foreach (var item in list)
@@ -498,22 +491,22 @@ public class FileUtility
         }
     }
 
-    private List<string> ExtsIndexing { get => _fileUtilityConfiguration.ExtsIndexing; }
+    private List<string> ExtsIndexing { get => fileUtilityConfiguration.ExtsIndexing; }
 
-    public List<string> ExtsImagePreviewed { get => _fileUtilityConfiguration.ExtsImagePreviewed; }
+    public List<string> ExtsImagePreviewed { get => fileUtilityConfiguration.ExtsImagePreviewed; }
 
-    public List<string> ExtsMediaPreviewed { get => _fileUtilityConfiguration.ExtsMediaPreviewed; }
+    public List<string> ExtsMediaPreviewed { get => fileUtilityConfiguration.ExtsMediaPreviewed; }
 
     public List<string> ExtsWebPreviewed
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebPreviewed;
+            return fileUtilityConfiguration.ExtsWebPreviewed;
         }
     }
 
@@ -521,27 +514,27 @@ public class FileUtility
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebEdited;
+            return fileUtilityConfiguration.ExtsWebEdited;
         }
     }
 
-    public List<string> ExtsWebEncrypt { get => _fileUtilityConfiguration.ExtsWebEncrypt; }
+    public List<string> ExtsWebEncrypt { get => fileUtilityConfiguration.ExtsWebEncrypt; }
 
     public List<string> ExtsWebReviewed
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebReviewed;
+            return fileUtilityConfiguration.ExtsWebReviewed;
         }
     }
 
@@ -549,12 +542,12 @@ public class FileUtility
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebCustomFilterEditing;
+            return fileUtilityConfiguration.ExtsWebCustomFilterEditing;
         }
     }
 
@@ -562,12 +555,12 @@ public class FileUtility
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebRestrictedEditing;
+            return fileUtilityConfiguration.ExtsWebRestrictedEditing;
         }
     }
 
@@ -575,43 +568,37 @@ public class FileUtility
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsWebCommented;
+            return fileUtilityConfiguration.ExtsWebCommented;
         }
     }
 
     public List<string> ExtsWebTemplate
     {
-        get => _fileUtilityConfiguration.ExtsWebTemplate;
+        get => fileUtilityConfiguration.ExtsWebTemplate;
     }
 
     public List<string> ExtsMustConvert
     {
         get
         {
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
+            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl))
             {
                 return new List<string>();
             }
 
-            return _fileUtilityConfiguration.ExtsMustConvert;
+            return fileUtilityConfiguration.ExtsMustConvert;
         }
     }
 
     public List<string> ExtsCoAuthoring
     {
-        get => _fileUtilityConfiguration.ExtsCoAuthoring;
+        get => fileUtilityConfiguration.ExtsCoAuthoring;
     }
-
-    private readonly FileUtilityConfiguration _fileUtilityConfiguration;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly SetupInfo _setupInfo;
-    private readonly DaoFactory _daoFactory;
 
     public static readonly ImmutableList<string> ExtsArchive =  new List<string>
     {
@@ -691,6 +678,11 @@ public class FileUtility
                 ".oform"
             }.ToImmutableList();
 
+    public static readonly ImmutableList<string> ExtsPdf = new List<string>
+    {
+                ".pdf"
+            }.ToImmutableList();
+
     public static readonly ImmutableList<string> ExtsTemplate = new List<string>
     {
                 ".ott", ".ots", ".otp",
@@ -701,9 +693,9 @@ public class FileUtility
 
     public const string WatermarkedDocumentExt = ".pdf";
 
-    public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
+    public Dictionary<FileType, string> InternalExtension => fileUtilityConfiguration.InternalExtension;
 
-    public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }
+    public string MasterFormExtension { get => fileUtilityConfiguration.MasterFormExtension; }
     public enum CsvDelimiter
     {
         None = 0,
@@ -716,13 +708,11 @@ public class FileUtility
     public string SignatureSecret { get => GetSignatureSecret(); }
     public string SignatureHeader { get => GetSignatureHeader(); }
 
-    private string GetSignatureSecret() => _fileUtilityConfiguration.GetSignatureSecret();
+    private string GetSignatureSecret() => fileUtilityConfiguration.GetSignatureSecret();
 
-    private string GetSignatureHeader() => _fileUtilityConfiguration.GetSignatureHeader();
+    private string GetSignatureHeader() => fileUtilityConfiguration.GetSignatureHeader();
 
-    public readonly bool CanForcesave;
-
-    private bool GetCanForcesave() => _fileUtilityConfiguration.GetCanForcesave();
+    public bool GetCanForcesave() => fileUtilityConfiguration.GetCanForcesave();
 
     #endregion
 }

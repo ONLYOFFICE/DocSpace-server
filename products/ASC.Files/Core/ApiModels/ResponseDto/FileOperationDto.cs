@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,8 +78,8 @@ public class FileOperationDto
             //Result = "folder_1,file_1",
             Error = "",
             Processed = "1",
-            Files = new List<FileEntryDto> { FileDto<int>.GetSample() },
-            Folders = new List<FileEntryDto> { FolderDto<int>.GetSample() }
+            Files = [FileDto<int>.GetSample()],
+            Folders = [FolderDto<int>.GetSample()]
         };
     }
 }
@@ -134,7 +134,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
                 var internalFolders = GetFoldersAsync(fInt).ToListAsync();
                 var thirdPartyFolders = GetFoldersAsync(fString).ToListAsync();
 
-                result.Folders = new List<FileEntryDto>();
+                result.Folders = [];
                 foreach (var f in await Task.WhenAll(internalFolders.AsTask(), thirdPartyFolders.AsTask()))
                 {
                     result.Folders.AddRange(f);
@@ -166,7 +166,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
                 var internalFiles = GetFilesAsync(fInt).ToListAsync();
                 var thirdPartyFiles = GetFilesAsync(fString).ToListAsync();
 
-                result.Files = new List<FileEntryDto>();
+                result.Files = [];
 
                 foreach (var f in await Task.WhenAll(internalFiles.AsTask(), thirdPartyFiles.AsTask()))
                 {

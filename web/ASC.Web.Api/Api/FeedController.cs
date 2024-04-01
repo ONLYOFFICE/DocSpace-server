@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ namespace ASC.Web.Api.Controllers;
 /// Feed API.
 /// </summary>
 /// <name>feed</name>
+/// <visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -188,12 +189,12 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
 
             if (entry == null)
             {
-                throw new ItemNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
             if (!await fileSecurity.CanReadAsync(entry))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
         }
     }

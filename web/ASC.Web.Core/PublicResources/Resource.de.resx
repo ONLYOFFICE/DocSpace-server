@@ -481,9 +481,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Einstellbar</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Der Link zum Bestätigen der Operation wurde an {0} verschickt (die E-Mail-Adresse des Portalbesitzers).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Falsche Instanz-ID.</value>
   </data>
@@ -768,9 +765,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>Besitzer</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Der verfügbare Speicherplatz ist überschritten</value>
   </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Zugang zum Portal</value>

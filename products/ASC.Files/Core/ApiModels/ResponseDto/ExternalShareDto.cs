@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,11 +60,15 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
+    
+    /// <summary>Link ID</summary>
+    /// <type>System.Guid, System</type>
+    public Guid LinkId { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<ValidationInfo, ExternalShareDto>()
             .ForMember(dest => dest.RoomType, opt =>
-                opt.MapFrom(source => DocSpaceHelper.GetRoomType(source.FolderType)));
+                opt.MapFrom(source => DocSpaceHelper.MapToRoomType(source.FolderType)));
     }
 }

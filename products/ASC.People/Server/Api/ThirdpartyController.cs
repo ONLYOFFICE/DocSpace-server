@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,9 +34,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         IHttpClientFactory httpClientFactory,
-        InstanceCrypto instanceCrypto,
         MobileDetector mobileDetector,
-        PersonalSettingsHelper personalSettingsHelper,
         ProviderManager providerManager,
         UserHelpTourHelper userHelpTourHelper,
         UserManagerWrapper userManagerWrapper,
@@ -51,7 +49,8 @@ public class ThirdpartyController(AccountLinker accountLinker,
         InvitationLinkService invitationLinkService,
         FileSecurity fileSecurity,
         UsersInRoomChecker usersInRoomChecker, 
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        LoginProfileTransport loginProfileTransport)
     : ApiControllerBase
     {
     
@@ -74,7 +73,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
     {
-        ICollection<AccountInfoDto> infos = new List<AccountInfoDto>();
+        var infos = new List<AccountInfoDto>();
         IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
@@ -125,7 +124,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
-        var profile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
+        var profile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -134,7 +133,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
-            await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID.ToString(), profile);
+            await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID, profile);
             await messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
@@ -171,7 +170,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             mustChangePassword = true;
         }
 
-        var thirdPartyProfile = LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile);
+        var thirdPartyProfile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
             // ignore cancellation
@@ -213,7 +212,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
                 await SaveContactImage(userId, thirdPartyProfile.Avatar);
             }
 
-            await accountLinker.AddLinkAsync(userId.ToString(), thirdPartyProfile);
+            await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
         }
         finally
         {
@@ -231,11 +230,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             await studioNotifyService.UserPasswordChangeAsync(user);
         }
 
-        userHelpTourHelper.IsNewUser = true;
-        if (coreBaseSettings.Personal)
-        {
-            personalSettingsHelper.IsNewUser = true;
-        }
+        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
@@ -299,12 +294,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
-        if (coreBaseSettings.Personal)
-        {
-            user.ActivationStatus = EmployeeActivationStatus.Activated;
-            user.CultureName = coreBaseSettings.CustomMode ? "ru-RU" : CultureInfo.CurrentUICulture.Name;
-        }
 
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }

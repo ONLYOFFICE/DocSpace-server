@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,7 @@ namespace ASC.AuditTrail.Mappers;
 internal class OthersActionsMapper : IProductActionMapper
 {
     public ProductType Product { get; } = ProductType.Others;
-    public List<IModuleActionMapper> Mappers { get; } = new()
-    {
-        new OthersNoneModuleActionMapper()
-    };
+    public List<IModuleActionMapper> Mappers { get; } = [new OthersNoneModuleActionMapper()];
 }
 
 internal class OthersNoneModuleActionMapper : IModuleActionMapper

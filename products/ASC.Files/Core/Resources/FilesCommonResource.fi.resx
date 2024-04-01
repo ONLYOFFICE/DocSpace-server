@@ -124,127 +124,121 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Mitätöity</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Virheellinen pyyntö.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Et voi valita tätä käyttäjää</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Muutos vie liian paljon aikaa.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Virhe asiakirjapalvelussa. Ihan outo</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Tiedosto on avattu muokkausta varten, muokkaaja: {0}. Tällä hetkellä yhteistä muokkausta ei ole tuettu tälle tiedostomuodolle.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0} muokkasi tiedostoa mobiilisovelluksella</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Tyhjä tiedosto</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Tarvittavaa tiedostoa ei löydy. Ei sitten mistään</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
-    <value>Suurempaa kuin {0} tiedostoa ei muunneta</value>
-  </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Tiedosto joka on enemmän kuin {0} ei voida kopioida</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
-    <value>{0} suurempaa tiedostoa ei voi muokata</value>
-  </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Tiedosto joka on suurempi kuin {0} ei voida siirtää</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Kansiota ei voi kopioida sen alikansioon. Vähän niin kuin yrittäisi syödä oman päänsä</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Vaadittua kansiota ei löydy</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Outo otsikko</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Asiakirja on lukittuna toiselle käyttäjälle</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Vähintään {0} sähköpostiviestiä ei voitu lähettää. Ole hyvä ja siirry Sähköposti moduuliin tarkistamaan mikä voisi olla epäonnistumisen syy.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Liian monta ladattavaa tiedostoa. Tässähän sekoaa täysin.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Tätä tiedostomuotoa ei tueta. Ei sitten niin mitenkään</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Tallennuksen tekijä tuntematon</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Tiedosto sekosi totaalisesti kun yritit tallettaa sen</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Tiedoston noutaminen epäonnistui</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Oikeutesi eivät riitä toiminnon suorittamiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Tunnistautuminen palveluntarjoajaan {0} ei onnistu annetuilla tunnuksilla.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Sinulla ei ole riittävästi oikeuksia luoda</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Tiedostoa ei voi poistaa, koska se on avattu muokkaamista varten</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Kansiota ei voi poistaa, koska jokin sen tiedostoista on avattu muokattavaksi. Loogista, eiks je</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Oikeutesi eivät riitä tiedoston poistamiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Oikeutesi eivät riitä kansion poistamiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Sinulla ei ole riittäviä oikeuksia tiedoston muokkaamiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Olet jo muokkaamassa tätä asiakirjaa toisella välilehdellä. Nyt menee hankalaksi</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Oikeutesi eivät riitä tiedoston tarkastelemiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Oikeutesi eivät riitä kansion sisällön tarkastelemiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Oikeutesi eivät riitä tiedoston uudelleennimeämiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Oikeutesi eivät riitä kansion uudelleennimeämiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Tiedostoa ei voi päivittää, koska se on  avattu muokkaamista varten</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Oikeutesi eivät riitä kansion sisällön tarkastelemiseen</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Kolmannen osapuolen kansiohässäkkää ei löydy. Yritin kyllä. Kokeile jotain outoa uudelleenkytkentää tiliisi. Tai jotain.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Editorin käynnistysvirhe. Liekö akku tyhjentynyt</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Et voi päivittää tiedostoa, joka on avoinna muokkausta varten. Tietokone ei siihen pysty</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Et voi esikatsella osia Roskakorissa. Ne ovat jo liian pilaantuneita</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -304,13 +298,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Lähetetty lomake</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Uusi versio ei voi olla sama kuin nykyinen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Sinulla ei ole tarpeeksi oikeuksia tiedoston kopioimiseen</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Sinulla ei ole tarpeeksi oikeuksia kansion kopioimiseen</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -385,13 +379,13 @@
   <data name="CommentOverwrite" xml:space="preserve">
     <value>Päällekirjoitettu</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Sinulla ei ole tarpeeksi oikeuksia tiedostoon siirtoa varten</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Sinulla ei ole tarpeeksi oikeuksia kansion siirtoa varten</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Käyttäjää ei löytynyt</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
@@ -401,10 +395,10 @@
     <value>Tiedosto luotu kansiossa "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Täytettävä OFORM-asiakirja on valmis. Se on tallennettu {0}:aan</value>
+    <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>OFORM-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
+    <value>PDF-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Tiedosto ei ole enää luonnos lomakkeen täyttämiseksi.</value>

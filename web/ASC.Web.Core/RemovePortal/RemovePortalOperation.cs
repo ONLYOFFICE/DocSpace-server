@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public class RemovePortalOperation(StorageFactory storageFactory,
             foreach (var module in modules)
             {
                 Percentage += 100 / (modules.Count() + 1);
-                PublishChanges();
+                await PublishChanges();
                 logger.DebugRemoveModule(module);
                 var storage = await storageFactory.GetStorageAsync(TenantId, module);
                 foreach (var domain in storageFactoryConfig.GetDomainList(module))
@@ -81,7 +81,7 @@ public class RemovePortalOperation(StorageFactory storageFactory,
         finally
         {
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 }

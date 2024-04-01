@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,9 @@ public enum TagType
     Template = 32,
     Custom = 64,
     Pin = 128,
-    Origin = 256
+    Origin = 256,
+    RecentByLink = 512,
+    FromRoom = 1024
 }
 
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
@@ -114,6 +116,15 @@ public sealed class Tag : IMapFrom<DbFilesTag>
         return new Tag("pin", TagType.Pin, owner, 0).AddEntry(entry);
     }
 
+    public static Tag FromRoom<T>(T entryId, FileEntryType type, Guid owner)
+    {
+        return new Tag("fromroom", TagType.FromRoom, owner, 0)
+        {
+            EntryId = entryId,
+            EntryType = type
+        };
+    }
+
     public static Tag Origin<T>(T entryId, FileEntryType type, T originId, Guid owner)
     {
         return new Tag(originId.ToString(), TagType.Origin, owner, 0)
@@ -121,6 +132,11 @@ public sealed class Tag : IMapFrom<DbFilesTag>
             EntryId = entryId,
             EntryType = type
         };
+    }
+
+    public static Tag RecentByLink<T>(Guid owner, Guid linkId, File<T> file)
+    {
+        return new Tag(linkId.ToString(), TagType.RecentByLink, owner, 0).AddEntry(file);
     }
 
     public override bool Equals(object obj)

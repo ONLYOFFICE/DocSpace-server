@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,12 +70,12 @@ public class DocuSignHandlerService(ILogger<DocuSignHandlerService> logger,
                     await WebhookAsync(context);
                     break;
                 default:
-                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMassage_BadRequest);
+                    throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
             }
         }
         catch (InvalidOperationException e)
         {
-            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMassage_BadRequest, e);
+            throw new HttpException((int)HttpStatusCode.InternalServerError, FilesCommonResource.ErrorMessage_BadRequest, e);
         }
     }
 

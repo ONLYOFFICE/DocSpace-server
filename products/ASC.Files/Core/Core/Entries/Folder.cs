@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,7 +50,12 @@ public enum FolderType
     Archive = 20,
     ThirdpartyBackup = 21,
     PublicRoom = 22,
-    VirtualDataRoom = 28
+    FormRoom = 24,
+    ReadyFormFolder = 25,
+    InProcessFormFolder = 26,
+    FormFillingFolderDone = 27,
+    FormFillingFolderInProgress = 28,
+    VirtualDataRoom = 29
 }
 
 public interface IFolder
@@ -81,6 +86,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     public string SettingsColor { get; set; }
     public string SettingsWatermark { get; set; }
     public bool SettingsIndexing { get; set; }
+    public long SettingsQuota { get; set; }
+    public long Counter { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);
@@ -88,6 +95,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public bool IsFavorite { get; set; }
+    public bool ProviderMapped { get; set; }
 
     public Folder()
     {
@@ -97,7 +105,8 @@ public class Folder<T> : FileEntry<T>, IFolder
 
     public Folder(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

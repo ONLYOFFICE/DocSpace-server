@@ -76,9 +76,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Po meri</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Povezava za potrditev operacije je bila poslana na {0} (e-naslov lastnika portala).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Nepravilen e-naslov</value>
   </data>
@@ -954,9 +951,6 @@
   </data>
   <data name="OrgServerRegion" xml:space="preserve">
     <value>ORG Regija</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Kvota prostora na disku je presežena</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Prostor v oblaku za vaše pisarniške dokumente</value>

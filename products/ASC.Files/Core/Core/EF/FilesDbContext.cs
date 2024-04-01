@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,6 +47,8 @@ public class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) :
     public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public DbSet<DbGroup> Groups { get; set; }
+    public DbSet<UserGroup> UserGroup { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +71,8 @@ public class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) :
             .AddDbFileOrder()
             .AddUser()
             .AddDbRoomSettings()
+            .AddDbGroup()
+            .AddUserGroup()
             .AddDbFunctions();
     }
 }

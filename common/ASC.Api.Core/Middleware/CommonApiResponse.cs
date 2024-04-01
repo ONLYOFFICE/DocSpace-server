@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -115,14 +115,10 @@ public class SuccessApiResponse : CommonApiResponse
         _httpContext = httpContext;
         Response = response;
 
-        Links = new List<Link>(1)
-        {
-            new()
-            {
-                Href = httpContext.Request.GetDisplayUrl(),
-                Action = httpContext.Request.Method
-            }
-        };
+        Links =
+        [
+            new() { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
+        ];
     }
 }
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -145,7 +145,7 @@ public class FilesLinkUtility
                 }
             }
 
-            SetUrlSetting(InternalUrlKey, value);
+            SetUrlSetting(InternalUrlKey, DocServiceUrlInternal != value ? value : null);
         }
     }
 
@@ -453,7 +453,12 @@ public class FilesLinkUtility
 
     private string GetDefaultUrlSetting(string key)
     {
-        return _configuration[$"files:docservice:url:{key}"];
+        var value = _configuration[$"files:docservice:url:{key}"];
+        if (!string.IsNullOrEmpty(value))
+        {
+            value = value.TrimEnd('/') + "/";
+        }
+        return value;
     }
 
     private void SetUrlSetting(string key, string value)

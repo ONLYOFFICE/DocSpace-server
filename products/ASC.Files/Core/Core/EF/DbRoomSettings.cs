@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,7 @@ public class DbRoomSettings
     public bool HasLogo { get; set; }
     public string Color { get; set; }
     public bool Indexing { get; set; }
+    public long Quota { get; set; }
     public string Watermark { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
@@ -82,6 +83,10 @@ public static class DbRoomSettingsExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+            entity.Property(e => e.Quota)
+                .HasColumnName("quota")
+                .HasDefaultValueSql("'-2'");
         });
     }
 

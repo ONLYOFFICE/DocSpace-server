@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,7 +109,7 @@ public class TariffController(CommonMethods commonMethods,
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
+            Quotas = [new(quota.TenantId, 1)],
             DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1)
         };
 

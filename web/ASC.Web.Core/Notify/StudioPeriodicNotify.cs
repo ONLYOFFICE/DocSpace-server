@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,8 +42,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        AuthManager authManager,
-        SecurityContext securityContext,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider)
 {
@@ -343,8 +341,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
-                        new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),
@@ -393,10 +391,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDate = actualEndDate.Date;
-
-                var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
-                var delayDueDate = tariff.DelayDueDate.Date;
+                // var dueDate = actualEndDate.Date;
+                //
+                // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
+                // var delayDueDate = tariff.DelayDueDate.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -489,8 +487,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
-                        new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),
@@ -589,92 +587,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         }
 
         _log.InformationEndSendOpensourceTariffLetters();
-    }
-
-    public async Task SendPersonalLettersAsync(string senderName, DateTime scheduleDate)
-    {
-        _log.InformationStartSendLettersPersonal();
-
-        var activeTenants = await tenantManager.GetTenantsAsync();
-
-        foreach (var tenant in activeTenants)
-        {
-            try
-            {
-                var orangeButtonText = string.Empty;
-                var orangeButtonUrl = string.Empty;
-
-                var sendCount = 0;
-
-                await tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
-
-                _log.InformationCurrentTenant(tenant.Id);
-
-                var users = await userManager.GetUsersAsync(EmployeeStatus.Active);
-
-                await foreach (var user in users.ToAsyncEnumerable().WhereAwait(async u => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
-                {
-                    INotifyAction action;
-
-                    await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(tenant.Id, user.Id));
-
-                    var culture = tenant.GetCulture();
-                    if (!string.IsNullOrEmpty(user.CultureName))
-                    {
-                        try
-                        {
-                            culture = user.GetCulture();
-                        }
-                        catch (CultureNotFoundException exception)
-                        {
-
-                            _log.ErrorSendPersonalLetters(exception);
-                        }
-                    }
-
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = culture;
-
-                    var dayAfterRegister = (int)scheduleDate.Date.Subtract(user.CreateDate.Date).TotalDays;
-
-                    switch (dayAfterRegister)
-                    {
-                        case 14:
-                            action = Actions.PersonalAfterRegistration14V1;
-                            break;
-                        default:
-                            continue;
-                    }
-
-                    if (action == null)
-                    {
-                        continue;
-                    }
-
-                    _log.InformationSendLetterPersonal(action.ID, user.Email, culture, tenant.Id, user.GetCulture(), user.CreateDate, scheduleDate.Date);
-
-                    sendCount++;
-
-                    await client.SendNoticeToAsync(
-                      action,
-                      await studioNotifyHelper.RecipientFromEmailAsync(user.Email, true),
-                      new[] { senderName },
-                      TagValues.PersonalHeaderStart(),
-                      TagValues.PersonalHeaderEnd(),
-                      TagValues.OrangeButton(orangeButtonText, orangeButtonUrl),
-                      new TagValue(CommonTags.Footer, coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"));
-                }
-
-                _log.InformationTotalSendCount(sendCount);
-            }
-            catch (Exception err)
-            {
-                _log.ErrorSendPersonalLetters(err);
-            }
-        }
-
-        _log.InformationEndSendLettersPersonal();
     }
 
     public static async Task<bool> ChangeSubscriptionAsync(Guid userId, StudioNotifyHelper studioNotifyHelper)

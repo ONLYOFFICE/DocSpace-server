@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -110,24 +110,17 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
     {
         string logoImg;
 
-        if (coreBaseSettings.Personal && !coreBaseSettings.CustomMode)
+        logoImg = configuration["web:logo:mail"];
+        if (string.IsNullOrEmpty(logoImg))
         {
-            logoImg = imagePath + "/mail_logo.png";
-        }
-        else
-        {
-            logoImg = configuration["web:logo:mail"];
-            if (string.IsNullOrEmpty(logoImg))
+            var logo = message.GetArgument("LetterLogo");
+            if (logo != null && ((string)logo.Value).Length != 0)
             {
-                var logo = message.GetArgument("LetterLogo");
-                if (logo != null && ((string)logo.Value).Length != 0)
-                {
-                    logoImg = (string)logo.Value;
-                }
-                else
-                {
-                    logoImg = imagePath + "/mail_logo.png";
-                }
+                logoImg = (string)logo.Value;
+            }
+            else
+            {
+                logoImg = imagePath + "/mail_logo.png";
             }
         }
 
@@ -187,11 +180,6 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 break;
             case "social":
                 InitSocialFooter(settings, out footerSocialContent);
-                break;
-            case "personal":
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
-                break;
-            case "personalCustomMode":
                 break;
             case "opensource":
                 footerContent = NotifyTemplateResource.FooterOpensourceV10;
@@ -269,9 +257,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             return string.Empty;
         }
 
-        var unsubscribeLink = coreBaseSettings.CustomMode && coreBaseSettings.Personal
-                                  ? GetSiteUnsubscribeLink(message, settings)
-                                  : GetPortalUnsubscribeLink(message, settings);
+        var unsubscribeLink = GetPortalUnsubscribeLink(message, settings);
 
         if (string.IsNullOrEmpty(unsubscribeLink))
         {

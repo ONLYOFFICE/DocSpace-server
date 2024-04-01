@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,10 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Api.Core.Core;
+
+using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
 
@@ -166,6 +170,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -208,6 +213,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         return Math.Round(
             (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
@@ -229,7 +235,7 @@ public class PortalController(ILogger<PortalController> logger,
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
-        return coreBaseSettings.Personal ? 1 : (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
+        return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
     /// <summary>
@@ -320,6 +326,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("thumb")]
     public FileResult GetThumb(string url)
     {
@@ -382,6 +389,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -426,11 +434,6 @@ public class PortalController(ILogger<PortalController> logger,
             throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
         }
 
-        if (coreBaseSettings.Personal)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
-
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
@@ -444,7 +447,7 @@ public class PortalController(ILogger<PortalController> logger,
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -464,6 +467,7 @@ public class PortalController(ILogger<PortalController> logger,
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
 
+            await messageService.SendAsync(MessageAction.PortalRenamed, messageTarget.Create(tenant.Id), oldAlias, newAlias);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -522,7 +526,6 @@ public class PortalController(ILogger<PortalController> logger,
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
@@ -540,6 +543,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("suspend")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -567,6 +571,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("delete")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -582,8 +587,6 @@ public class PortalController(ILogger<PortalController> logger,
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
-
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -666,9 +669,6 @@ public class PortalController(ILogger<PortalController> logger,
                 await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
-
-            await messageService.SendAsync(MessageAction.PortalDeleted);
-
         }
         finally
         {
@@ -713,11 +713,11 @@ public class PortalController(ILogger<PortalController> logger,
                 {
                     if (setupInfo.TfaRegistration == "sms")
                     {
-                        studioSmsNotificationSettingsHelper.Enable = true;
+                        await studioSmsNotificationSettingsHelper.SetEnable(true);
                     }
                     else if (setupInfo.TfaRegistration == "code")
                     {
-                        tfaAppAuthSettingsHelper.Enable = true;
+                        await tfaAppAuthSettingsHelper.SetEnable(true);
                     }
                 }
                 break;

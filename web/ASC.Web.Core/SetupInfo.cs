@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,14 +38,13 @@ public class SetupInfo
     public string DemoOrder { get; private set; }
     public string RequestTraining { get; private set; }
     public string ZendeskKey { get; private set; }
+    public string TagManagerId { get; private set; }
     public string BookTrainingEmail { get; private set; }
     public string DocumentationEmail { get; private set; }
     public string UserVoiceURL { get; private set; }
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
     public List<CultureInfo> EnabledCultures { get; private set; }
-    private List<CultureInfo> EnabledCulturesPersonal { get; set; }
-    public List<KeyValuePair<string, CultureInfo>> PersonalCultures { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -56,12 +55,7 @@ public class SetupInfo
         return Math.Min(AvailableFileSize, await MaxChunkedUploadSize(tenantManager, maxTotalSizeStatistic));
     }
 
-    public long AvailableFileSize
-    {
-        get;
-        private set;
-    }
-
+    public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
@@ -122,6 +116,7 @@ public class SetupInfo
         UserVoiceURL = GetAppSettings("web.uservoice", string.Empty);
         DemoOrder = GetAppSettings("web.demo-order", string.Empty);
         ZendeskKey = GetAppSettings("web:zendesk-key", string.Empty);
+        TagManagerId = GetAppSettings("web:tagmanager-id", string.Empty);
         BookTrainingEmail = GetAppSettings("web:book-training-email", string.Empty);
         DocumentationEmail = GetAppSettings("web:documentation-email", string.Empty);
         RequestTraining = GetAppSettings("web.request-training", string.Empty);
@@ -138,16 +133,8 @@ public class SetupInfo
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
             .ToList();
 
-        EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
-            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .ToList();
-
-        PersonalCultures = GetPersonalCultures();
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
-        AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
@@ -242,46 +229,5 @@ public class SetupInfo
             }
         }
         return defaultValue;
-    }
-
-    private List<KeyValuePair<string, CultureInfo>> GetPersonalCultures()
-    {
-        var result = new Dictionary<string, CultureInfo>();
-
-        foreach (var culture in EnabledCulturesPersonal)
-        {
-            result.Add(
-                result.ContainsKey(culture.TwoLetterISOLanguageName) ? culture.Name : culture.TwoLetterISOLanguageName,
-                culture);
-        }
-
-        return result.OrderBy(item => item.Value.DisplayName).ToList();
-    }
-
-    public KeyValuePair<string, CultureInfo> GetPersonalCulture(string lang)
-    {
-        foreach (var item in PersonalCultures)
-        {
-            if (string.Equals(item.Key, lang, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return item;
-            }
-        }
-
-        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase)) ??
-                          EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
-
-        if (cultureInfo != null)
-        {
-            foreach (var item in PersonalCultures)
-            {
-                if (Equals(item.Value, cultureInfo))
-                {
-                    return item;
-                }
-            }
-        }
-
-        return new KeyValuePair<string, CultureInfo>(lang, cultureInfo);
     }
 }

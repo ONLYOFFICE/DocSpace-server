@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,8 @@ public enum RoomType
     ReadOnlyRoom = 4,
     CustomRoom = 5,
     PublicRoom = 6,
-    VirtualDataRoom = 8,
+    FormRoom = 7,
+    VirtualDataRoom = 8
 }
 
 /// <summary>
@@ -66,6 +67,10 @@ public class CreateRoomRequestDto
     /// <summary>Message to send when notifying about the shared room</summary>
     /// <type>System.String, System</type>
     public string SharingMessage { get; set; }
+    
+    /// <summary>Room quota</summary>
+    /// <type>System.Int64, System</type>
+    public long Quota { get; set; }
     
     public bool Indexing { get; set; }
 }

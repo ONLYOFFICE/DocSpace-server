@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public override string ClientSecret => this["googleClientSecret"];
     public override string Scopes => "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 
-    public static readonly string[] GoogleDriveExt = { ".gdoc", ".gsheet", ".gslides", ".gdraw" };
+    public static readonly string[] GoogleDriveExt = [".gdoc", ".gsheet", ".gslides", ".gdraw"];
     public static readonly string GoogleDriveMimeTypeFolder = "application/vnd.google-apps.folder";
     public static readonly string FilesFields = "id,name,mimeType,parents,createdTime,modifiedTime,owners/displayName,lastModifyingUser/displayName,capabilities/canEdit,size";
     public static readonly string ProfileFields = "emailAddresses,genders,names";

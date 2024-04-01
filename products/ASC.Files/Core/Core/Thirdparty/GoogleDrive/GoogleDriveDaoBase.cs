@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -152,13 +152,13 @@ internal class GoogleDriveDaoBase(
 
         folder.Id = MakeId(driveEntry);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(driveEntry));
+        folder.Title = MakeFolderTitle(driveEntry);
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
-
-        folder.Title = MakeFolderTitle(driveEntry);
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -231,7 +231,6 @@ internal class GoogleDriveDaoBase(
         file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
-        file.NativeAccessor = driveFile;
         file.Title = MakeFileTitle(driveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;

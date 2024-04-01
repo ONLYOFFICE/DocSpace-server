@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,24 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, IServiceScopeFactory serviceScopeFactory,
-        ILoggerProvider options)
-    : BackgroundService
+public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, 
+                                  IServiceScopeFactory scopeFactory,
+                                  ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
+
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.NotifyCleaner");
+    private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
+    private readonly ILogger<NotifyCleanerService> _logger = logger;
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
-    private readonly TimeSpan _waitingPeriod = TimeSpan.FromHours(8);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(1000);
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        _logger.InformationNotifyCleanerRunning();
-
-        stoppingToken.Register(() => _logger.Debug("NotifyCleanerService background task is stopping."));
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifyCleanerService>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<NotifyCleanerService>.InstanceId))
-            {
-                _logger.Debug($"Notify Clean Service background task with instance id {RegisterInstanceWorkerService<NotifyCleanerService>.InstanceId} is't active.");
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ClearAsync();
-
-            await Task.Delay(_waitingPeriod, stoppingToken);
-        }
-
-        _logger.InformationNotifyCleanerStopping();
-    }
-
-    private async Task ClearAsync()
-    {
-        try
+         try
         {
             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
-            using var scope = serviceScopeFactory.CreateScope();
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             await Queries.DeleteNotifyInfosAsync(dbContext, date);

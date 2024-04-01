@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,6 @@ public class StudioNotifyHelper
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly TenantManager _tenantManager;
     private readonly TenantExtra _tenantExtra;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly WebImageSupplier _webImageSupplier;
     private readonly IConfiguration _configuration;
     private readonly ILogger<StudioNotifyHelper> _logger;
@@ -66,7 +65,6 @@ public class StudioNotifyHelper
         _commonLinkUtility = commonLinkUtility;
         _tenantManager = tenantManager;
         _tenantExtra = tenantExtra;
-        _coreBaseSettings = coreBaseSettings;
         _webImageSupplier = webImageSupplier;
         _configuration = configuration;
         _subscriptionProvider = NotifySource.GetSubscriptionProvider();//TODO: remove from constructor
@@ -125,7 +123,7 @@ public class StudioNotifyHelper
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
     {
-        return await RecipientFromEmailAsync(new List<string> { email }, checkActivation);
+        return await RecipientFromEmailAsync([email], checkActivation);
     }
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(List<string> emails, bool checkActivation)
@@ -139,12 +137,12 @@ public class StudioNotifyHelper
 
         res.AddRange(emails.
                          Select(email => email.ToLower()).
-                         Select(e => new DirectRecipient(e, null, new[] { e }, checkActivation)));
+                         Select(e => new DirectRecipient(e, null, [e], checkActivation)));
 
         int.TryParse(_configuration["core:notify:countspam"], out var countMailsToNotActivated);
         if (!checkActivation
             && countMailsToNotActivated > 0
-            && _tenantExtra.Saas && !_coreBaseSettings.Personal)
+            && _tenantExtra.Saas)
         {
             var tenant = await _tenantManager.GetCurrentTenantAsync();
             var tariff = await _tenantManager.GetTenantQuotaAsync(tenant.Id);

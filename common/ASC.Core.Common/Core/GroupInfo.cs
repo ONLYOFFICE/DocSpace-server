@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.Core.Users;
 
-public class GroupInfo : IRole, IRecipientsGroup
+public class GroupInfo : IRole, IRecipientsGroup, IMapFrom<DbGroup>
 {
-    public Guid ID { get; internal init; }
+    public Guid ID { get; init; }
     public string Name { get; set; }
     public Guid CategoryID { get; init; }
     public GroupInfo Parent { get; internal set; }

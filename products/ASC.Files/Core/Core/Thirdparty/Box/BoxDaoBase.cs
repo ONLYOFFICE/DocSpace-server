@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -132,14 +132,15 @@ internal class BoxDaoBase(
         folder.Id = MakeId(boxFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(boxFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.CreatedAt?.UtcDateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.ModifiedAt?.UtcDateTime ?? default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (boxFolder.ModifiedAt?.UtcDateTime ?? default);
 
         folder.Title = MakeFolderTitle(boxFolder);
         folder.FilesCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFile) : 0;
         folder.FoldersCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFolder) : 0;
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -207,7 +208,6 @@ internal class BoxDaoBase(
         file.CreateOn = boxFile.CreatedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.CreatedAt.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(boxFile));
         file.ModifiedOn = boxFile.ModifiedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.ModifiedAt.Value.UtcDateTime) : default;
-        file.NativeAccessor = boxFile;
         file.Title = MakeFileTitle(boxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
@@ -326,7 +326,7 @@ internal class BoxDaoBase(
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
         }
 
-        while (!await isExist(requestTitle, parentFolderId))
+        while (await isExist(requestTitle, parentFolderId))
         {
             requestTitle = re.Replace(requestTitle, MatchEvaluator);
         }

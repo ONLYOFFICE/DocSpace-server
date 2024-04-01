@@ -82,9 +82,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Niestandardowy</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Link potwierdzający operację został wysłany do {0} (adres e-mail właściciela portalu).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Nieprawidłowy adres e-mail</value>
   </data>
@@ -969,9 +966,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Jeśli użytkownik o adresie e-mail {0} istnieje, instrukcje dot. zmiany hasła zostały wysłane na ten e-mail.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Przekroczono dostępne miejsce na dysku</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Pamięć w chmurze dla Twoich dokumentów biurowych</value>

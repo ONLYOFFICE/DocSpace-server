@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,14 +51,14 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
-    public async Task CreateFileAsync<T>(File<T> file)
+    public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("create-file", file, true);
+        await MakeRequest("create-file", file, true, users);
     }
 
-    public async Task CreateFolderAsync<T>(Folder<T> folder)
+    public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("create-folder", folder, true);
+        await MakeRequest("create-folder", folder, true, users);
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
@@ -71,14 +71,14 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("update-folder", folder, true);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
     {
-        await MakeRequest("delete-file", file);
+        await MakeRequest("delete-file", file, action: action);
     }
 
-    public async Task DeleteFolder<T>(Folder<T> folder)
+    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
-        await MakeRequest("delete-folder", folder);
+        await MakeRequest("delete-folder", folder, users: users, action: action);
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
@@ -112,10 +112,16 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         SendNotAwaitableRequest("mark-as-new-folder", result);
     }
 
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false)
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.ParentId);
-        var whoCanRead = await GetWhoCanRead(entry);
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
+        var whoCanRead = users ?? await GetWhoCanRead(entry);
+
+        if (action != null)
+        {
+            await action();
+        }
+        
         var data = "";
 
         if (withData)
@@ -159,6 +165,18 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         };
     }
 
+    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry, true);
+        var userIds = whoCanRead
+            .Concat(await GetAdmins())
+            .Concat(new []{ entry.CreateBy })
+            .Distinct()
+            .ToList();
+
+        return userIds;
+    }
+    
     private List<Guid> _admins;
     private async Task<IEnumerable<Guid>> GetAdmins()
     {
@@ -167,7 +185,8 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             return _admins;
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         
@@ -175,15 +194,4 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
         return _admins;
 }
-    
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
-    {
-        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
-        var userIds = whoCanRead
-            .Concat(await GetAdmins())
-            .Distinct()
-            .ToList();
-
-        return userIds;
     }
-}

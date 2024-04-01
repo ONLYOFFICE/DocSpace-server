@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,7 +84,7 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         if (settings.TrustedIps != null && settings.TrustedIps.Any())
         {
             var requestIP = MessageSettings.GetIP(httpContextAccessor.HttpContext.Request);
-            if (!string.IsNullOrWhiteSpace(requestIP) && settings.TrustedIps.Any(trustedIp => IPSecurity.IPSecurity.MatchIPs(requestIP, trustedIp)))
+            if (!string.IsNullOrWhiteSpace(requestIP) && settings.TrustedIps.Any(trustedIp => IPAddressRange.MatchIPs(requestIP, trustedIp)))
             {
                 return false;
             }
@@ -98,22 +98,24 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         get { return SetupInfo.IsVisibleSettings<T>(); }
     }
 
-    public virtual bool Enable
+    public virtual async Task<bool> GetEnable()
     {
-        get { return settingsManager.Load<T>().EnableSetting; }
-        set
+        return (await settingsManager.LoadAsync<T>()).EnableSetting;
+    }
+
+    public async Task SetEnable(bool value)
+    {
+        T settings;
+        if (value)
         {
-            T settings;
-            if (value)
-            {
-                settings = settingsManager.Load<T>();
-                settings.EnableSetting = true;
-            }
-            else
-            {
-                settings = new T();
-            }
-            settingsManager.Save(settings);
+            settings = await settingsManager.LoadAsync<T>();
+            settings.EnableSetting = true;
         }
+        else
+        {
+            settings = new T();
+        }
+
+        await settingsManager.SaveAsync(settings);
     }
 }

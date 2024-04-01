@@ -1,69 +1,76 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASCShare = ASC.Files.Core.Security.FileShare;
 using File = System.IO.File;
+using FileShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.NextcloudWorkspace.Models.Parse;
 
-public class NCMigratingFiles : MigratingFiles
+[Transient]
+public class NcMigratingFiles : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
-
     public override int FilesCount => _filesCount;
-
     public override long BytesTotal => _bytesTotal;
-
-    public override string ModuleName => MigrationResource.NextcloudModuleNameDocuments;
 
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
     private readonly FileStorageService _fileStorageService;
-    private readonly NCMigratingUser _user;
-    private readonly string _rootFolder;
+    private readonly IServiceProvider _serviceProvider;
+
+    private NcMigratingUser _user;
+    private string _rootFolder;
     private List<NCFileCache> _files;
     private List<NCFileCache> _folders;
     private int _foldersCount;
     private int _filesCount;
     private long _bytesTotal;
-    private readonly NCStorages _storages;
-    private Dictionary<string, NCMigratingUser> _users;
-    private Dictionary<string, NCMigratingGroups> _groups;
-    private Dictionary<object, int> _matchingFileId;
+    private NCStorages _storages;
+    private Dictionary<string, NcMigratingUser> _users;
+    private Dictionary<string, NcMigratingGroups> _groups;
     private string _folderCreation;
-    public NCMigratingFiles(GlobalFolderHelper globalFolderHelper, IDaoFactory daoFactory, FileSecurity fileSecurity, FileStorageService fileStorageService, NCMigratingUser user, NCStorages storages, string rootFolder, Action<string, Exception> log) : base(log)
+    private readonly Dictionary<object, int> _matchingFileId = new();
+
+    public NcMigratingFiles(GlobalFolderHelper globalFolderHelper,
+        IDaoFactory daoFactory,
+        FileStorageService fileStorageService,
+        IServiceProvider serviceProvider)
     {
         _globalFolderHelper = globalFolderHelper;
         _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
         _fileStorageService = fileStorageService;
-        _user = user;
+        _serviceProvider = serviceProvider;
+    }
+
+    public void Init(string rootFolder, NcMigratingUser user, NCStorages storages, Action<string, Exception> log)
+    {
         _rootFolder = rootFolder;
+        _user = user;
         _storages = storages;
+        Log = log;
     }
 
     public override void Parse()
@@ -77,7 +84,7 @@ public class NCMigratingFiles : MigratingFiles
 
         _files = new List<NCFileCache>();
         _folders = new List<NCFileCache>();
-        _folderCreation = _folderCreation != null ? _folderCreation : DateTime.Now.ToString("dd.MM.yyyy");
+        _folderCreation = _folderCreation ?? DateTime.Now.ToString("dd.MM.yyyy");
         foreach (var entry in _storages.FileCache)
         {
             var paths = entry.Path.Split('/');
@@ -130,7 +137,6 @@ public class NCMigratingFiles : MigratingFiles
             return;
         }
 
-        _matchingFileId = new Dictionary<object, int>();
         var foldersDict = new Dictionary<string, Folder<int>>();
         if (_folders != null)
         {
@@ -148,7 +154,7 @@ public class NCMigratingFiles : MigratingFiles
                     var parentId = i == 0 ? await _globalFolderHelper.FolderMyAsync : foldersDict[string.Join(Path.DirectorySeparatorChar.ToString(), split.Take(i))].Id;
                     try
                     {
-                        var newFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
+                        var newFolder = await _fileStorageService.CreateFolderAsync(parentId, split[i]);
                         foldersDict.Add(path, newFolder);
                         _matchingFileId.Add(newFolder.Id, folder.FileId);
                     }
@@ -174,22 +180,11 @@ public class NCMigratingFiles : MigratingFiles
                 try
                 {
                     var realPath = Path.Combine(drivePath, maskPath);
-                    using var fs = new FileStream(realPath, FileMode.Open);
-                    var fileDao = _daoFactory.GetFileDao<int>();
                     var folderDao = _daoFactory.GetFolderDao<int>();
-                    {
-                        var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
 
-                        var newFile = new File<int>
-                        {
-                            ParentId = parentFolder.Id,
-                            Comment = FilesCommonResource.CommentCreate,
-                            Title = Path.GetFileName(file.Path),
-                            ContentLength = fs.Length
-                        };
-                        newFile = await fileDao.SaveFileAsync(newFile, fs);
-                        _matchingFileId.Add(newFile.Id, file.FileId);
-                    }
+                    var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
+                    var newFile = await AddFileAsync(realPath, parentFolder.Id, Path.GetFileName(file.Path));
+                    _matchingFileId.Add(newFile.Id, file.FileId);
                 }
                 catch (Exception ex)
                 {
@@ -197,11 +192,20 @@ public class NCMigratingFiles : MigratingFiles
                 }
             }
         }
-
+        
+        if (!ShouldImportSharedFiles && !ShouldImportSharedFolders)
+        {
+            return;
+        }
+        
         foreach (var item in _matchingFileId)
         {
             var list = new List<AceWrapper>();
-            var entryIsFile = _files.Exists(el => el.FileId == item.Value) ? true : false;
+            var entryIsFile = _files.Exists(el => el.FileId == item.Value);
+            if (entryIsFile && !ShouldImportSharedFiles || !entryIsFile && !ShouldImportSharedFolders)
+            {
+                continue;
+            }
             var entry = entryIsFile ? _files.Find(el => el.FileId == item.Value) : _folders.Find(el => el.FileId == item.Value);
             if (entry.Share.Count == 0)
             {
@@ -221,7 +225,7 @@ public class NCMigratingFiles : MigratingFiles
 
                 if (userToShare != null || groupToShare != null)
                 {
-                    var entryGuid = userToShare == null ? groupToShare.Guid : userToShare.Guid;
+                    var entryGuid = userToShare?.Guid ?? groupToShare.Guid;
                     list.Add(new AceWrapper
                     {
                         Access = shareType.Value,
@@ -230,27 +234,18 @@ public class NCMigratingFiles : MigratingFiles
                     });
                 }
             }
-            if (!list.Any())
+            if (list.Count == 0)
             {
                 continue;
             }
 
             var aceCollection = new AceCollection<int>
             {
-                Files = new List<int>(),
-                Folders = new List<int>(),
+                Files = entryIsFile ? new List<int> { (int)item.Key } : [],
+                Folders = entryIsFile ? [] : new List<int> { (int)item.Key },
                 Aces = list,
                 Message = null
             };
-
-            if (entryIsFile)
-            {
-                aceCollection.Files = new List<int>() { (int)item.Key };
-            }
-            else
-            {
-                aceCollection.Folders = new List<int>() { (int)item.Key };
-            }
 
             try
             {
@@ -263,35 +258,48 @@ public class NCMigratingFiles : MigratingFiles
         }
     }
 
-    public void SetUsersDict(IEnumerable<NCMigratingUser> users)
+
+    private async Task<File<int>> AddFileAsync(string realPath, int folderId, string fileTitle)
     {
-        this._users = users.ToDictionary(user => user.Key, user => user);
+        await using var fs = new FileStream(realPath, FileMode.Open);
+        var fileDao = _daoFactory.GetFileDao<int>();
+
+        var newFile = _serviceProvider.GetService<File<int>>();
+        newFile.ParentId = folderId;
+        newFile.Comment = FilesCommonResource.CommentCreate;
+        newFile.Title = fileTitle;
+        newFile.ContentLength = fs.Length;
+        return await fileDao.SaveFileAsync(newFile, fs);
     }
 
-    public void SetGroupsDict(IEnumerable<NCMigratingGroups> groups)
+    public void SetUsersDict(IEnumerable<NcMigratingUser> users)
     {
-        this._groups = groups.ToDictionary(group => group.GroupName, group => group);
+        _users = users.ToDictionary(user => user.Key, user => user);
     }
-
-    private ASCShare? GetPortalShare(int role, bool entryType)
+    public void SetGroupsDict(IEnumerable<NcMigratingGroups> groups)
+    {
+        _groups = groups.ToDictionary(group => group.GroupName, group => group);
+    }
+    
+    private FileShare? GetPortalShare(int role, bool entryType)
     {
         if (entryType)
         {
             if (role == 1 || role == 17)
             {
-                return ASCShare.Read;
+                return FileShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+            return FileShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; FileShare.ReadWrite
         }
         else
         {
             if (Array.Exists(new int[] { 1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27 }, el => el == role))
             {
-                return ASCShare.Read;
+                return FileShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
+            return FileShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; FileShare.ReadWrite
         }
     }
 }

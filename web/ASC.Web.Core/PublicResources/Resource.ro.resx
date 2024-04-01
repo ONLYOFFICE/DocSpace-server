@@ -132,9 +132,6 @@
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>Linkul de confirmare a operaţiei a fost trimis către: e-mail (adresa de e-mail a proprietarului portalului).</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Linkul de confirmare a operaţiei a fost trimis către {0} (adresa de email a proprietarului portalului).</value>
-  </data>
   <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
     <value>Este necesară o metodă de autentificare mai securizată. Trebuie să utilizaţi o conexiune criptată sau să activați autentificarea simplă pe server-ul.</value>
   </data>
@@ -332,9 +329,6 @@
   </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Dezactivarea profilelor vechi de utilizator care au fost încărcate anterior prin LDAP</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Cota spaţiului de stocare a fost depășită</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
