@@ -249,11 +249,6 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        if (!coreBaseSettings.Standalone
-            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
-        {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
-        }
 
         return await fileStorageService.GetFilesUsedSpace();
     }
