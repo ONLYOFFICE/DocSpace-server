@@ -244,7 +244,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.EditAccess,
                     FilesSecurityActions.Duplicate,
                     FilesSecurityActions.Download,
-                    FilesSecurityActions.CopySharedLink
+                    FilesSecurityActions.CopySharedLink,
+                    FilesSecurityActions.Reconnect
                 }
             }
     }.ToFrozenDictionary();
@@ -828,6 +829,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
         {
             return true;
+        }
+
+        if (action == FilesSecurityActions.Reconnect)
+        {
+            return isRoom && e.ProviderEntry && e.CreateBy == userId;
         }
 
         if (e.FileEntryType == FileEntryType.Folder)
@@ -2144,6 +2150,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         Download,
         Convert,
         CopySharedLink,
-        ReadLinks
+        ReadLinks,
+        Reconnect
     }
 }

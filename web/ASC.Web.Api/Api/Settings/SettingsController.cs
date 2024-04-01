@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class SettingsController(MessageService messageService,
+public partial class SettingsController(MessageService messageService,
         ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
@@ -69,7 +69,8 @@ public class SettingsController(MessageService messageService,
         QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
-
+    [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
+    private static partial Regex EmailDomainRegex();
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -233,7 +234,7 @@ public class SettingsController(MessageService messageService,
             tenant.TrustedDomains.Clear();
             foreach (var d in inDto.Domains.Select(domain => (domain ?? "").Trim().ToLower()))
             {
-                if (!(!string.IsNullOrEmpty(d) && new Regex("^[a-z0-9]([a-z0-9-.]){1,98}[a-z0-9]$").IsMatch(d)))
+                if (!(!string.IsNullOrEmpty(d) && EmailDomainRegex().IsMatch(d)))
                 {
                     return Resource.ErrorNotCorrectTrustedDomain;
                 }
@@ -1161,5 +1162,4 @@ public class SettingsController(MessageService messageService,
             throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
         }
     }
-
 }

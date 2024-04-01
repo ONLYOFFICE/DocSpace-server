@@ -154,14 +154,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Požadovaný súbor nebol nájdený</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Súbor väčší než {0} nebude konvertovaný</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Súbor väčší než {0} nebude skopírovaný</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Súbor väčší než {0} nebude upravený</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Súbor väčší než {0} nebude presunutý</value>

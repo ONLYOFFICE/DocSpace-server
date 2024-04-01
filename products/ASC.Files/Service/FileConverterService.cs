@@ -75,7 +75,7 @@ internal class FileConverterService<T>(
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
                 var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
-                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
+                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
 
@@ -100,11 +100,6 @@ internal class FileConverterService<T>(
                     {
                         //No rights in CRM after upload before attach
                         throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-                    }
-
-                    if (file.ContentLength > setupInfo.AvailableFileSize)
-                    {
-                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
                     }
 
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -237,7 +232,6 @@ public record FileConverterQueueScope(
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     PathProvider PathProvider,
-    SetupInfo SetupInfo,
     FileUtility FileUtility,
     DocumentServiceHelper DocumentServiceHelper,
     DocumentServiceConnector DocumentServiceConnector,

@@ -199,7 +199,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
-        _files = fileDownloadOperationData.FilesDownload.ToDictionary(r => r.Id, r => r.Ext);
+        _files = fileDownloadOperationData.FilesDownload?.ToDictionary(r => r.Id, r => r.Ext) ?? new Dictionary<T, string>();
         _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }

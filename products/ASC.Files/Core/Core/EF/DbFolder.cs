@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.EF;
 
 [Transient]
-[ElasticsearchType(RelationName = Tables.Folder)]
+[OpenSearchType(RelationName = Tables.Folder)]
 public class DbFolder : IDbFile, IDbSearch, ISearchItem
 {
     public int Id { get; set; }
