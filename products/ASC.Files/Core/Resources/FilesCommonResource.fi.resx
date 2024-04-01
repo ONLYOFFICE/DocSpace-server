@@ -428,4 +428,46 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Olet yrittänyt syöttää salasanasi liian monta kertaa. Ole hyvä ja yritä myöhemmin uudelleen</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Tekijä</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Luotu</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Luontipäivämäärä</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Viennin tekijä</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Kansio</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Indeksi</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Muokattu</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Nimi</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Huone</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Huoneindeksi</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Koko (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Yhteensä</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tyyppi</value>
+  </data>
 </root>

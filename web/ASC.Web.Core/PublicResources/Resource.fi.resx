@@ -1006,4 +1006,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Liian monta kirjautumisyritystä. Ole hyvä ja yritä myöhemmin uudelleen</value>
   </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Lisäosa on jo olemassa</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Väärä lisäosa-arkisto</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Väärä tiedostopääte</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Tiedostokoko ylittää rajan</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Systeemin lisäosien muutokset ovat kiellettyjä</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Viimeistä täysien oikeuksien tilaa ei voida poistaa</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Väärä lisäosan nimi</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Ei syöttötiedostoa</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Lisäosaa ei löytynyt</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Liian monta syöttötiedostoa</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Muistikiintiön asetus epäonnistui – asettamasi muistikiintiö on suurempi kuin portaalin kiintiö.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Huonetilakiintiö ylitetty</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Käyttäjätilakiintiö ylitetty</value>
+  </data>
 </root>

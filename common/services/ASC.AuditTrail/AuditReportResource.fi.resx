@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Ulkoinen linkki päivitetty: {0}. Rooli: {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Kansio avattu muutosta varten: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portaali nimetty uudelleen</value>
+  </data>
 </root>
