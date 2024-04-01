@@ -161,7 +161,7 @@ internal class FolderDao(
         var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
+        var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId) && !r.Removed);
 
         q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter)
             : await BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
