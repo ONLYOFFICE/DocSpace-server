@@ -462,6 +462,11 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.CompletedTask;
     }
 
+    public bool CanMarkFolderAsRemoved(string entryId)
+    {
+        return false;
+    }
+
     public Task MarkFolderAsRemovedAsync(Folder<string> folder)
     {
         return Task.CompletedTask;

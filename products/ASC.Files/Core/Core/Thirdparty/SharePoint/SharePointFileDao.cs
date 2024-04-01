@@ -535,6 +535,11 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(transferred);
     }
 
+    public bool CanMarkFileAsRemoved(string entryId)
+    {
+        return false;
+    }
+
     public Task MarkFileAsRemovedAsync(File<string> file)
     {
         return Task.CompletedTask;

@@ -414,6 +414,8 @@ public interface IFolderDao<T>
 
     Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
 
+    bool CanMarkFolderAsRemoved(T entryId);
+
     Task MarkFolderAsRemovedAsync(Folder<T> folder);
 
     Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds);

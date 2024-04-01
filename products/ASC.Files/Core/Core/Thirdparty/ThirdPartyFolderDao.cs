@@ -687,6 +687,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         throw new NotImplementedException();
     }
 
+    public bool CanMarkFolderAsRemoved(string entryId)
+    {
+        return false;
+    }
+
     public Task MarkFolderAsRemovedAsync(Folder<string> folder)
     {
         return Task.CompletedTask;
