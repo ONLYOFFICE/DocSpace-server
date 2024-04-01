@@ -270,7 +270,8 @@ public class FileOperationsManager(
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        bool hiddenOperation = false)
+        bool hiddenOperation = false,
+        Dictionary<string, string> headers = null)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -280,7 +281,7 @@ public class FileOperationsManager(
         var folderIds = (folders.OfType<int>(), folders.OfType<string>());
         var fileIds = (files.OfType<int>(), files.OfType<string>());
         
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation, headers);
     }
 
     public Task PublishDelete(
@@ -290,7 +291,8 @@ public class FileOperationsManager(
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        bool hiddenOperation = false)
+        bool hiddenOperation = false,
+        Dictionary<string, string> headers = null)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -300,7 +302,7 @@ public class FileOperationsManager(
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
 
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, hiddenOperation, headers);
     }
 
     private async Task PublishDelete(
@@ -310,7 +312,8 @@ public class FileOperationsManager(
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        bool hiddenOperation = false)
+        bool hiddenOperation = false,
+        Dictionary<string, string> headers = null)
     {        
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -320,7 +323,7 @@ public class FileOperationsManager(
         op.Init(holdResult, hiddenOperation);
         var taskId = await fileOperationsManagerHolder.Publish(op);
 
-        var headers = GetHttpHeaders();
+        headers ??= GetHttpHeaders();
         var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash, hiddenOperation); 
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash, hiddenOperation);
         

@@ -128,7 +128,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             await MarkFilesAsRemovedAsync(socketManager, Files);
             await MarkFoldersAsRemovedAsync(socketManager, Folders, recursive: !_isEmptyTrash);
 
-            await fileOperationsManager.PublishDelete(Folders, Files, true, false, true, _isEmptyTrash, true);
+            var headers = Headers.ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            await fileOperationsManager.PublishDelete(Folders, Files, true, false, true, _isEmptyTrash, true, headers);
 
             if (_isEmptyTrash)
             {

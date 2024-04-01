@@ -266,7 +266,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         this[Hold] = fileOperationData.HoldResult;
         this[Hidden] = fileOperationData.HiddenOperation;
         CurrentTenantId = fileOperationData.TenantId;
-        Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        Headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         SessionSnapshot = fileOperationData.SessionSnapshot;
 
         using var scope = _serviceProvider.CreateScope();
