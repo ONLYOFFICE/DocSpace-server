@@ -421,7 +421,6 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             googleDriveSession.BytesTransferred += chunkLength;
             googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
             var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
