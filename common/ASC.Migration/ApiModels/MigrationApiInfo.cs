@@ -73,4 +73,6 @@ public class MigrationApiInfo
     public int FailedUsers { get; set; }
     [ProtoMember(16)]
     public List<string> Files { get; set; }
+    [ProtoMember(17)]
+    public List<string> Errors { get; set; }
 }

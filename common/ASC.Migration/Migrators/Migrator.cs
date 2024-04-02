@@ -146,6 +146,7 @@ public abstract class Migrator : IDisposable
             catch(Exception e)
             {
                 Log(MigrationResource.CanNotImportUserFiles, e);
+                MigrationInfo.Errors.Add($"{kv.Key} - {MigrationResource.CanNotImportUserFiles}"); 
             }
         }
 
@@ -159,6 +160,7 @@ public abstract class Migrator : IDisposable
             catch(Exception e)
             {
                 Log(MigrationResource.СanNotImportCommonFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
             }
         }
 
@@ -172,6 +174,7 @@ public abstract class Migrator : IDisposable
             catch (Exception e)
             {
                 Log(MigrationResource.СanNotImportProjectFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.СanNotImportProjectFiles);
             }
         }
 
@@ -244,6 +247,7 @@ public abstract class Migrator : IDisposable
             catch(Exception e)
             {
                 Log(MigrationResource.CanNotImportUser, e);
+                MigrationInfo.Errors.Add($"{key} - {MigrationResource.CanNotImportUser}");
                 _failedUsers.Add(user.Info.Email);
                 MigrationInfo.Users.Remove(key);
             }
@@ -309,6 +313,7 @@ public abstract class Migrator : IDisposable
                 catch (Exception ex)
                 {
                     Log(string.Format(MigrationResource.CanNotAddUserInGroup, userGuid, group.Info.Name), ex);
+                    MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotAddUserInGroup, userGuid, group.Info.Name));
                 }
             }
         }
@@ -382,6 +387,7 @@ public abstract class Migrator : IDisposable
             catch (Exception ex)
             {
                 Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
+                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, file.Title));
             }
         }
 
@@ -535,6 +541,7 @@ public abstract class Migrator : IDisposable
             catch (Exception ex)
             {
                 Log(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject), ex);
+                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject));
             }
         }
     }

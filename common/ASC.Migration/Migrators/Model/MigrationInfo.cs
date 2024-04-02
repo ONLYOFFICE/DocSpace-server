@@ -41,6 +41,7 @@ public class MigrationInfo
 
     public int SuccessedUsers { get; set; }
     public int FailedUsers { get; set; }
+    public List<string> Errors { get; set; } = new List<string>();
 
     public virtual MigrationApiInfo ToApiInfo()
     {
@@ -53,9 +54,10 @@ public class MigrationInfo
             FailedArchives = FailedArchives,
             SuccessedUsers = SuccessedUsers,
             FailedUsers = FailedUsers,
+            Errors = Errors,
             Groups = Groups.Select(g => g.Value.ToApiInfo()).ToList(),
             Operation = Operation.ToString().ToLower(),
-            Files = Files,
+            Files = Files
         };
     }
 
