@@ -232,7 +232,7 @@ internal class GoogleDriveDaoBase(
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.Title = MakeFileTitle(driveFile);
-        file.ThumbnailStatus = Thumbnail.Created;
+        file.ThumbnailStatus = driveFile.HasThumbnail.HasValue && driveFile.HasThumbnail.Value ? Thumbnail.Created : Thumbnail.Creating;
         file.Encrypted = ProviderInfo.Private;
 
         return file;
