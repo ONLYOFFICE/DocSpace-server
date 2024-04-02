@@ -627,9 +627,11 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
         var fileName = BuildLogoFileName(type, ext, dark);
 
-        var version = configuration["version:number"] ?? "";
+        var version = configuration["version:number"];
 
-        return webImageSupplier.GetAbsoluteWebPath($"{path}{fileName}?{Data.Storage.Constants.QueryHash}={version}");
+        var hash = string.IsNullOrEmpty(version) ? string.Empty : $"?{Data.Storage.Constants.QueryHash}={version}";
+
+        return webImageSupplier.GetAbsoluteWebPath($"{path}{fileName}{hash}");
     }
 
     private async Task<string> GetPartnerStorageLogoPathAsync(WhiteLabelLogoType type, bool dark)
