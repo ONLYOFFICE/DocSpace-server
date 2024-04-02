@@ -299,7 +299,7 @@ public abstract class Migrator : IDisposable
                     var user = _usersForImport.ContainsKey(userGuid) ? _usersForImport[userGuid].Info : Constants.LostUser;
                     if (user.Equals(Constants.LostUser))
                     {
-                        throw new ArgumentNullException();
+                        continue;
                     }
                     if (!await UserManager.IsUserInGroupAsync(user.Id, group.Info.ID))
                     {
