@@ -45,6 +45,7 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Folder<string> ToFolder(TFolder folder);
     File<string> ToFile(TFile file);
     Task<Folder<string>> GetRootFolderAsync();
+    Task<TFolder> CreateFolderAsync(string title, string folderId);
     Task<TFolder> GetFolderAsync(string folderId);
     Task<TFile> GetFileAsync(string fileId);
     Task<IEnumerable<string>> GetChildrenAsync(string folderId);
