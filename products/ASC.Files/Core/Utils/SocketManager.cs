@@ -120,7 +120,8 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
         var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
-        var whoCanRead = users ?? await GetWhoCanRead(entry);
+        var whoCanRead = await GetWhoCanRead(entry);
+        var usersList = users ?? whoCanRead;
 
         if (action != null)
         {
@@ -131,10 +132,19 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
         if (withData)
         {
-            data = await Serialize(entry);
+            if(method == "create-form")
+            {
+                var form = await Serialize(entry);
+                data = $"{{\"form\": \"{form}\", \"isOneMember\": {!(whoCanRead.Count() > 1)}}}";
+            }
+            else
+            {
+                data = await Serialize(entry);
+            }
+            
         }
-        
-        foreach (var userIds in whoCanRead.Chunk(1000))
+
+        foreach (var userIds in usersList.Chunk(1000))
         {             
             await base.MakeRequest(method, new
             {
