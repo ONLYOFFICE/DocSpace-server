@@ -126,10 +126,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         //}
 
         using var response = await httpClient.SendAsync(request);
-        await using var responseStream = await response.Content.ReadAsStreamAsync();
-        using var streamReader = new StreamReader(responseStream);
-
-        var responseAsString = await streamReader.ReadToEndAsync();
+        var responseAsString = await response.Content.ReadAsStringAsync();
         var jObject = JObject.Parse(responseAsString); //result is json string
 
         var result = new

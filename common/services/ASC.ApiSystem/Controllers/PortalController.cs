@@ -146,7 +146,9 @@ public class PortalController(
             });
         }
 
-        if (!CheckRecaptcha(model, clientIP, sw, out error))
+        error = await GetRecaptchaError(model, clientIP, sw);
+            
+        if (error != null)
         {
             return BadRequest(error);
         }
@@ -262,7 +264,8 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            isFirst = !commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome, out sendCongratulationsAddress);
+            sendCongratulationsAddress = await commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome);
+            isFirst = sendCongratulationsAddress != null;
         }
         else if (configuration["core:base-domain"] == "localhost")
         {
@@ -575,35 +578,32 @@ public class PortalController(
 
     #region Recaptcha
 
-    private bool CheckRecaptcha(TenantModel model, string clientIP, Stopwatch sw, out object error)
+    private async Task<object> GetRecaptchaError(TenantModel model, string clientIP, Stopwatch sw)
     {
-        error = null;
-        if (commonConstants.RecaptchaRequired
-            && !commonMethods.IsTestEmail(model.Email))
+        if (commonConstants.RecaptchaRequired && !commonMethods.IsTestEmail(model.Email))
         {
             if (!string.IsNullOrEmpty(model.AppKey) && commonConstants.AppSecretKeys.Contains(model.AppKey))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha via app key: {1}. {2}", model.PortalName, model.AppKey, sw.ElapsedMilliseconds);
-                return true;
+                return null;
             }
 
             var data = $"{model.PortalName} {model.FirstName} {model.LastName} {model.Email} {model.Phone} {model.RecaptchaType}";
 
             /*** validate recaptcha ***/
-            if (!commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
+            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                error = new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
-                return false;
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
 
             }
 
             option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
         }
 
-        return true;
+        return null;
     }
 
     #endregion
