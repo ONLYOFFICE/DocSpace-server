@@ -320,6 +320,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
     WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
     SettingsManager settingsManager,
+    IConfiguration configuration,
     ILogger<TenantWhiteLabelSettingsHelper> logger)
 {
     private const string ModuleName = "whitelabel";
@@ -624,7 +625,11 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             _ => "logo/"
         };
 
-        return webImageSupplier.GetAbsoluteWebPath(path + BuildLogoFileName(type, ext, dark));
+        var fileName = BuildLogoFileName(type, ext, dark);
+
+        var version = configuration["version:number"] ?? "";
+
+        return webImageSupplier.GetAbsoluteWebPath($"{path}{fileName}?{Data.Storage.Constants.QueryHash}={version}");
     }
 
     private async Task<string> GetPartnerStorageLogoPathAsync(WhiteLabelLogoType type, bool dark)
