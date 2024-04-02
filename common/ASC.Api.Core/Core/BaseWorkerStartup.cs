@@ -66,7 +66,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.AddMemoryCache();
         
-        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(Configuration, GetType().Namespace);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
