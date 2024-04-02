@@ -88,22 +88,27 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
     
-    protected async Task IncrementFilesCountAsync(FilesDbContext filesDbContext, int folderId)
+    protected async Task IncrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
     {
-        await ChangeFilesCountAsync(filesDbContext, folderId, 1);
+        await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, 1);
     }
     
-    protected async Task DecrementFilesCountAsync(FilesDbContext filesDbContext, int folderId)
+    protected async Task DecrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId,FileEntryType fileEntryType)
     {
-        await ChangeFilesCountAsync(filesDbContext, folderId, -1);
+        await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, -1);
     }
     
-    private async Task ChangeFilesCountAsync(FilesDbContext filesDbContext, int folderId, int counter)
+    private async Task ChangeCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType, int counter)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        if (fileEntryType == FileEntryType.File)
+        {
+            await Queries.ChangeFilesCountAsync(filesDbContext, tenantId, folderId, counter);
+        }
+        else
+        {
+            await Queries.ChangeFoldersCountAsync(filesDbContext, tenantId, folderId, counter);
+        }
 
-        await Queries.ChangeFilesCountAsync(filesDbContext, tenantId, folderId, counter);
-        
         await filesDbContext.SaveChangesAsync();
     }
 
@@ -470,4 +475,11 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
+    
+    public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                    .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
 }
