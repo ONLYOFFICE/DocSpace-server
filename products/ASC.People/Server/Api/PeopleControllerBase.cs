@@ -99,9 +99,7 @@ public abstract class PeopleControllerBase(UserManager userManager,
 
         var httpClient = _httpClientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
-        await using var inputStream = await response.Content.ReadAsStreamAsync();
-        using var br = new BinaryReader(inputStream);
-        var imageByteArray = br.ReadBytes((int)inputStream.Length);
+        var imageByteArray = await response.Content.ReadAsByteArrayAsync();
 
         await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
     }

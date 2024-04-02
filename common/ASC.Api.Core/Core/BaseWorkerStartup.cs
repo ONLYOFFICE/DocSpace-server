@@ -66,22 +66,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.AddMemoryCache();
         
-        var redisConfiguration = Configuration.GetSection("Redis").Get<RedisConfiguration>();
-        IConnectionMultiplexer connectionMultiplexer = null;
-
-        if (redisConfiguration != null)
-        {
-            var configurationOption = redisConfiguration?.ConfigurationOptions;
-
-            configurationOption.ClientName = GetType().Namespace;
-
-            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
-
-            services.AddSingleton(redisConfiguration)
-                    .AddSingleton(redisConnection);
-
-            connectionMultiplexer = redisConnection?.GetConnection();
-        }
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(Configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(Configuration)

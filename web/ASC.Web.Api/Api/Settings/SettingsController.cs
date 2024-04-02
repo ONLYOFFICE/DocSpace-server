@@ -291,7 +291,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -537,7 +537,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }

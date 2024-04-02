@@ -56,7 +56,7 @@ try
 
     builder.Host.ConfigureDefault();
 
-    builder.Services.AddClearEventsServices(builder.Configuration);
+    await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
@@ -64,7 +64,7 @@ try
 
         if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
         {
-            context.Configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+            context.Configuration["RabbitMQ:ClientProvidedName"] = AppName;
         }
     });
 
