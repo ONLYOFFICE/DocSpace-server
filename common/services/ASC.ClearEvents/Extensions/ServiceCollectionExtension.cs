@@ -42,7 +42,7 @@ public static class ServiceCollectionExtension
 
         services.AddCustomHealthCheck(configuration);
         
-        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(configuration, @namespace);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
         services.AddDistributedCache(connectionMultiplexer);
             

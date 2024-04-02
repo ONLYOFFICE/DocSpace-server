@@ -46,31 +46,11 @@ public class FileSharingAceHelper(
     IDistributedLockProvider distributedLockProvider,
     TenantManager tenantManager,
     SocketManager socketManager,
-    IConfiguration configuration)
+    FilesLinkUtility filesLinkUtility)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
-
-    private TimeSpan _defaultLinkLifeTime;
-
-    private TimeSpan DefaultLinkLifeTime
-    {
-        get
-        {
-            if (_defaultLinkLifeTime != default)
-            {
-                return _defaultLinkLifeTime;
-            }
-
-            if (!TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime))
-            {
-                defaultLifetime = TimeSpan.FromDays(7);
-            }
-
-            return _defaultLinkLifeTime = defaultLifetime;
-        }
-    }
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
         AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true)
@@ -147,7 +127,7 @@ public class FileSharingAceHelper(
 
                 if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
                 {
-                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(DefaultLinkLifeTime);
+                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime);
                 }
             }
 
@@ -777,7 +757,7 @@ public class FileSharing(
         var meAce = result.Find(ace => ace.Id == authContext.CurrentAccount.ID);
         result.Remove(meAce);
 
-        result.Sort((x, y) => string.Compare(x.SubjectName, y.SubjectName));
+        result.Sort((x, y) => String.CompareOrdinal(x.SubjectName, y.SubjectName));
 
         if (ownerAce != null)
         {
