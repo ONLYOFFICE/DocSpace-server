@@ -132,27 +132,33 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
 
         if (withData)
         {
-            if(method == "create-form")
-            {
-                var form = await Serialize(entry);
-                data = $"{{\"form\": \"{form}\", \"isOneMember\": {!(whoCanRead.Count() > 1)}}}";
-            }
-            else
-            {
-                data = await Serialize(entry);
-            }
-            
+            data = await Serialize(entry);
         }
 
         foreach (var userIds in usersList.Chunk(1000))
-        {             
-            await base.MakeRequest(method, new
+        {   
+            if(method == "create-form")
             {
-                room, 
-                entry.Id,
-                data,
-                userIds,
-            });
+                var isOneMember = whoCanRead.Count() <= 1;
+                await base.MakeRequest(method, new
+                {
+                    room,
+                    entry.Id,
+                    data,
+                    userIds,
+                    isOneMember
+                });
+            }
+            else
+            {
+                await base.MakeRequest(method, new
+                {
+                    room,
+                    entry.Id,
+                    data,
+                    userIds
+                });
+            }
         }
     }
 
