@@ -74,7 +74,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     {
         var folder = await fileStorageService.CreateFolderAsync(folderId, inDto.Title);
 
-        return await folderDtoHelper.GetAsync(folder);
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
