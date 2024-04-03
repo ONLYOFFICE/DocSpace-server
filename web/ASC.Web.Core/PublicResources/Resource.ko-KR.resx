@@ -190,9 +190,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} 저장 공간</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>최대 사용 저장 공간은 {0}입니다</value>
   </data>

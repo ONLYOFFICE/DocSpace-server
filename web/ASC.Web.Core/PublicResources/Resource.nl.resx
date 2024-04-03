@@ -385,9 +385,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} opslagruimte</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>De gebruikte opslagruimte mag niet groter zijn dan {0}</value>
   </data>
