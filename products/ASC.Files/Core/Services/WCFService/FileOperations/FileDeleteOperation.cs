@@ -349,7 +349,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
 
                             await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
-                            await folderDao.ChangeTreeFolderSizeAsync(virtualRoomsId, file.ContentLength);
 
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
