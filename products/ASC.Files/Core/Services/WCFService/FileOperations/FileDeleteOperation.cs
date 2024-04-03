@@ -29,11 +29,14 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [ProtoContract]
 public record FileDeleteOperationData<T> : FileOperationData<T>
 {
-    [ProtoMember(8)]
+    [ProtoMember(7)]
     public bool Immediately { get; set; }
     
-    [ProtoMember(9)]
+    [ProtoMember(8)]
     public bool IsEmptyTrash { get; set; }
+
+    [ProtoMember(9)]
+    public bool HiddenOperation { get; set; }
 
     public FileDeleteOperationData()
     {
@@ -48,10 +51,11 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         bool holdResult = true,
         bool immediately = false,
         bool isEmptyTrash = false,
-        bool hiddenOperation = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult, hiddenOperation)
+        bool hiddenOperation = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
     {
         Immediately = immediately;
         IsEmptyTrash = isEmptyTrash;
+        HiddenOperation = hiddenOperation;
     }
 }
 
@@ -59,6 +63,20 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
+
+    public void Init(bool holdResult, bool hiddenOperation)
+    {
+        base.Init(holdResult);
+
+        this[Hidden] = hiddenOperation;
+    }
+
+    public override void Init(FileDeleteOperationData<int> data, FileDeleteOperationData<string> thirdPartyData, string taskId)
+    {
+        base.Init(data, thirdPartyData, taskId);
+
+        this[Hidden] = data?.HiddenOperation ?? false;
+    }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
@@ -83,6 +101,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _hiddenOperation = fileOperationData.HiddenOperation;
         this[OpType] = (int)FileOperationType.Delete;
+        this[Hidden] = _hiddenOperation;
     }
 
     protected override async Task DoJob(IServiceScope serviceScope)

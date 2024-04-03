@@ -49,7 +49,7 @@ public class FileOperationsManagerHolder(
         }
 
         var results = operations
-            .Where(o => (o[FileOperation.Hold] || o[FileOperation.Progress] != 100) && !o[FileOperation.Hidden])
+            .Where(o => (o[FileOperation.Hold] || o[FileOperation.Progress] != 100) && !(o.HasProperty(FileOperation.Hidden) && o[FileOperation.Hidden]))
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,
@@ -149,7 +149,7 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        op.Init(true, false);
+        op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
@@ -179,7 +179,7 @@ public class FileOperationsManager(
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        op.Init(true, false);
+        op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
         var (folderIntIds, folderStringIds) = GetIds(folders);
@@ -229,7 +229,7 @@ public class FileOperationsManager(
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        op.Init(holdResult, copy, false);
+        op.Init(holdResult, copy);
         var taskId = await fileOperationsManagerHolder.Publish(op);
 
         var headers = GetHttpHeaders();

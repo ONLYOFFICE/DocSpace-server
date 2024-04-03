@@ -110,4 +110,9 @@ public class DistributedTask
     {
         return Id.GetHashCode();
     }
+
+    public bool HasProperty(string propName)
+    {
+        return _props.ContainsKey(propName);
+    }
 }
