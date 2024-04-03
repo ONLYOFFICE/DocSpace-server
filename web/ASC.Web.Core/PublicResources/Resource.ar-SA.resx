@@ -990,9 +990,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>بوابة الدخول الموحد</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} مساحة تخزين</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>لا ينبغي أن يتجاوز حجم التخزين المستخدم {0}</value>
   </data>

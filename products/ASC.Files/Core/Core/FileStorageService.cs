@@ -373,7 +373,7 @@ public class FileStorageService //: IFileStorageService
     {
         var folder = await InternalCreateFolderAsync(parentId, title);
         
-        await socketManager.CreateFolderAsync(folder);
+        _ = socketManager.CreateFolderAsync(folder);
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;
@@ -504,8 +504,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, 
-        long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
