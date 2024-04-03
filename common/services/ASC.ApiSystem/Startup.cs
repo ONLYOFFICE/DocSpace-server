@@ -124,22 +124,7 @@ public class Startup
             });
         }
 
-        var redisConfiguration = _configuration.GetSection("Redis").Get<RedisConfiguration>();
-        IConnectionMultiplexer connectionMultiplexer = null;
-
-        if (redisConfiguration != null)
-        {
-            var configurationOption = redisConfiguration?.ConfigurationOptions;
-
-            configurationOption.ClientName = GetType().Namespace;
-
-            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
-
-            services.AddSingleton(redisConfiguration)
-                    .AddSingleton(redisConnection);
-
-            connectionMultiplexer = redisConnection?.GetConnection();
-        }
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(_configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(_configuration)

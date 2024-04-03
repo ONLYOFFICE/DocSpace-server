@@ -355,9 +355,9 @@ public class FileConverter(
         };
 
         var httpClient = clientFactory.CreateClient();
-        var response = await httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-        return new ResponseStream(response);
+        return await ResponseStream.FromMessageAsync(response);
     }
 
     public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
@@ -544,8 +544,8 @@ public class FileConverter(
 
         try
         {
-            using var response = await httpClient.SendAsync(request);
-            await using var convertedFileStream = new ResponseStream(response);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
 

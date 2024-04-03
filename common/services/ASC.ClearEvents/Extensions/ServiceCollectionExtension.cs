@@ -30,7 +30,7 @@ using ASC.Common.Logging;
 namespace ASC.ClearEvents.Extensions;
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection AddClearEventsServices(this IServiceCollection services, IConfiguration configuration)
+    public static async Task<IServiceCollection> AddClearEventsServices(this IServiceCollection services, IConfiguration configuration, string @namespace)
     {
         var diHelper = new DIHelper(services);
 
@@ -41,7 +41,11 @@ public static class ServiceCollectionExtension
         services.AddBaseDbContextPool<MessagesContext>();
 
         services.AddCustomHealthCheck(configuration);
+        
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(configuration, @namespace);
 
+        services.AddDistributedCache(connectionMultiplexer);
+            
         return services;
 
     }
