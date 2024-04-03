@@ -49,18 +49,6 @@ public class DbTenantService(
     {
         tenantDomainValidator.ValidateTenantName(name);
     }
-
-    public IEnumerable<Tenant> GetTenantsWithCsp()
-    {
-        var cspSettingsId = new CspSettings().ID;
-        using var webstudioDbContext = webstudioDbContextFactory.CreateDbContext();
-        var q = webstudioDbContext.Tenants
-            .Join(webstudioDbContext.WebstudioSettings.DefaultIfEmpty(), r => r.Id, r => r.TenantId, (tenant, settings) => new { settings, tenant })
-            .Where(r => r.settings.Id == cspSettingsId)
-            .Select(r => r.tenant);
-
-        return q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToList();
-    }
     
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true)
     {
