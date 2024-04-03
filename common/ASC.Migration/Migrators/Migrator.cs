@@ -237,7 +237,14 @@ public abstract class Migrator : IDisposable
                         await UserManager.SaveUserPhotoAsync(user.Info.Id, ms.ToArray());
                     }
                 }
-                user.Info = saved;
+                if (saved.Equals(Constants.LostUser))
+                {
+                    MigrationInfo.Users.Remove(key);
+                }
+                else
+                {
+                    user.Info = saved;
+                }
 
                 if (user.ShouldImport)
                 {
@@ -402,7 +409,11 @@ public abstract class Migrator : IDisposable
         {
             try
             {
-                var entryIsFile = security.EntryType == 2;
+                if (!MigrationInfo.Users.ContainsKey(security.Subject) && !MigrationInfo.Groups.ContainsKey(security.Subject))
+                {
+                    continue;
+                }
+                    var entryIsFile = security.EntryType == 2;
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{_fileKey}-{security.EntryId}";
@@ -428,8 +439,13 @@ public abstract class Migrator : IDisposable
                     }
                     if (ace != null)
                     {
-                        var userForShare = await UserManager.GetUsersAsync(MigrationInfo.Users[security.Subject].Info.Id);
-                        if (userForShare.Id == Constants.LostUser.Id)
+                        if (MigrationInfo.Users.ContainsKey(security.Subject))
+                        {
+                            var userForShare = await UserManager.GetUsersAsync(MigrationInfo.Users[security.Subject].Info.Id);
+                            await SecurityContext.AuthenticateMeAsync(userForShare.Id);
+                            await EntryManager.MarkAsRecentByLink(_matchingFilesIds[key] as File<int>, ace.Id);
+                        }
+                        else
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
                                 new List<List<Guid>> { new List<Guid> { MigrationInfo.Groups[security.Subject].Info.ID } },
@@ -440,11 +456,6 @@ public abstract class Migrator : IDisposable
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
                                 await EntryManager.MarkAsRecentByLink(_matchingFilesIds[key] as File<int>, ace.Id);
                             }
-                        }
-                        else
-                        {
-                            await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecentByLink(_matchingFilesIds[key] as File<int>, ace.Id);
                         }
                     }
                 }
