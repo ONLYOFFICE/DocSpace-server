@@ -32,8 +32,7 @@ public class DbTenantService(
     IDbContextFactory<UserDbContext> userDbContextFactory,
     TenantDomainValidator tenantDomainValidator,
     MachinePseudoKeys machinePseudoKeys,
-    IMapper mapper,
-    IDbContextFactory<WebstudioDbContext> webstudioDbContextFactory)
+    IMapper mapper)
     : ITenantService
 {
     private List<string> _forbiddenDomains;
