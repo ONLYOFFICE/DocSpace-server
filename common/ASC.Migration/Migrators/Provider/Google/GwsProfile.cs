@@ -24,32 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
+namespace ASC.Migration.Core.Migrators.Provider.Google;
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
-
-/// <summary>
-/// 
-/// </summary>
-public class MigrationStatusDto
+public class GwsProfile
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public double Progress { get; set; }
+    public GwsName Name { get; set; }
+    public string DisplayName { get; set; }
+    public List<GwsEmail> Emails { get; set; }
+    public DateTimeOffset? Birthday { get; set; }
+    public GwsGender Gender { get; set; }
+}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Error { get; set; }
+public class GwsEmail
+{
+    public string Value { get; set; }
+}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public MigrationApiInfo ParseResult { get; set; }
+public class GwsGender
+{
+    public string Type { get; set; }
+}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsCompleted { get; set; }
+public class GwsName
+{
+    public string GivenName { get; set; }
+    public string FamilyName { get; set; }
+    public string FormattedName { get; set; }
 }

@@ -24,32 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
-
-namespace ASC.Web.Api.ApiModels.ResponseDto;
-
-/// <summary>
-/// 
-/// </summary>
-public class MigrationStatusDto
+namespace ASC.Migration.Core.Migrators.Model;
+public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public double Progress { get; set; }
+    public UserInfo Info { get; set; }
+    public EmployeeType UserType { get; set; } = EmployeeType.Collaborator;
+    public MigrationStorage Storage { get; set; }
+    public bool ShouldImport { get; set; }
+    public bool HasPhoto { get; set; }
+    public string PathToPhoto { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Error { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public MigrationApiInfo ParseResult { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsCompleted { get; set; }
+    public virtual MigratingApiUser ToApiInfo(string key)
+    {
+        return new MigratingApiUser()
+        {
+            Key = key,
+            Email = Info.Email,
+            DisplayName = Info.DisplayUserName(displayUserSettingsHelper),
+            UserType = UserType,
+            MigratingFiles = Storage.ToApiInfo(),
+        };
+    }
 }

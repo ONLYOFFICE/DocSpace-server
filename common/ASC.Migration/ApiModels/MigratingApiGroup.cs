@@ -24,32 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Migration.Core.Models;
+namespace ASC.Migration.Core.Models.Api;
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// 
-/// </summary>
-public class MigrationStatusDto
+[ProtoContract]
+public class MigratingApiGroup : ImportableApiEntity
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public double Progress { get; set; }
+    [ProtoMember(2)]
+    public string GroupName { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Error { get; set; }
+    [ProtoMember(3)]
+    public string ModuleName { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public MigrationApiInfo ParseResult { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsCompleted { get; set; }
+    [ProtoMember(4)]
+    public List<string> UserUidList { get; set; }
 }
