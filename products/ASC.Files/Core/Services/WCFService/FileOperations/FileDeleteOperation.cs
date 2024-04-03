@@ -30,12 +30,9 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 public record FileDeleteOperationData<T> : FileOperationData<T>
 {
     [ProtoMember(8)]
-    public bool IgnoreException { get; set; }
-    
-    [ProtoMember(9)]
     public bool Immediately { get; set; }
     
-    [ProtoMember(10)]
+    [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
     public FileDeleteOperationData()
@@ -49,12 +46,10 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         bool holdResult = true,
-        bool ignoreException = false,
         bool immediately = false,
         bool isEmptyTrash = false,
         bool hiddenOperation = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult, hiddenOperation)
     {
-        IgnoreException = ignoreException;
         Immediately = immediately;
         IsEmptyTrash = isEmptyTrash;
     }
@@ -77,7 +72,6 @@ public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFile
 class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 {
     private int _trashId;
-    private readonly bool _ignoreException;
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
     private readonly bool _hiddenOperation;
@@ -85,7 +79,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
-        _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _hiddenOperation = fileOperationData.HiddenOperation;
@@ -130,7 +123,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
             var headers = Headers.ToDictionary(x => x.Key, x => x.Value.ToString());
 
-            await fileOperationsManager.PublishDelete(Folders, Files, true, false, true, _isEmptyTrash, true, headers);
+            await fileOperationsManager.PublishHiddenDelete(Folders, Files, _isEmptyTrash, headers);
 
             if (_isEmptyTrash)
             {
@@ -141,8 +134,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             return;
         }
 
-        await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_hiddenOperation);
-        await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_hiddenOperation);
+        await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_isEmptyTrash);
+        await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_isEmptyTrash);
     }
 
     private async Task MarkFilesAsRemovedAsync(SocketManager socketManager, IEnumerable<T> filesIds)
@@ -443,37 +436,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
             await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
         }
-    }
-
-    private async Task<(bool isError, string message)> WithErrorAsync1(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
-    {
-        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
-        var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
-
-        foreach (var file in files)
-        {
-            string error;
-            if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
-            {
-                error = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
-
-                return (true, error);
-            }
-            if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
-            {
-                error = FilesCommonResource.ErrorMessage_LockedFile;
-
-                return (true, error);
-            }
-            if (fileTracker.IsEditing(file.Id))
-            {
-                error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
-
-                return (true, error);
-            }
-        }
-
-        return (false, null);
     }
 }
 

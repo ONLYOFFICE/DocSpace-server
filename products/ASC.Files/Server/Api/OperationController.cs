@@ -95,7 +95,7 @@ public class OperationController(
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
+        await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, !inDto.DeleteAfter, inDto.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -117,7 +117,7 @@ public class OperationController(
     {
         var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
         
-        await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, true, true);
+        await fileOperationsManager.PublishDelete(foldersId, filesId, true, true, true);
 
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {

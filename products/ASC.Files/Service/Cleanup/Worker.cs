@@ -111,7 +111,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true);
             
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 
