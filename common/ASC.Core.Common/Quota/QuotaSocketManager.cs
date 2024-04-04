@@ -24,13 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
 namespace ASC.Core.Common.Quota;
-public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
-        IHttpClientFactory clientFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        TenantManager tenantManager,
-        IConfiguration configuration)
-    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+public class QuotaSocketManager(
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration,
+    TenantManager tenantManager)
+    : SocketServiceClient(channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 

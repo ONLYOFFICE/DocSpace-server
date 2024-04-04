@@ -24,30 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
 namespace ASC.Web.Files.Utils;
 
-public class SocketManager(ILogger<SocketServiceClient> logger,
-        IHttpClientFactory clientFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        IConfiguration configuration,
-        FileDtoHelper filesWrapperHelper,
-        TenantManager tenantManager,
-        FolderDtoHelper folderDtoHelper,
-        FileSecurity fileSecurity,
-        UserManager userManager)
-    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+public class SocketManager(
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration,
+    FileDtoHelper filesWrapperHelper,
+    TenantManager tenantManager,
+    FolderDtoHelper folderDtoHelper,
+    FileSecurity fileSecurity,
+    UserManager userManager)
+    : SocketServiceClient(channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 
     public async Task StartEditAsync<T>(T fileId)
     {
-        var room = await GetFileRoomAsync(fileId);
+        var room = await FileRoomAsync(fileId);
         await MakeRequest("start-edit", new { room, fileId });
     }
 
     public async Task StopEditAsync<T>(T fileId)
     {
-        var room = await GetFileRoomAsync(fileId);
+        var room = await FileRoomAsync(fileId);
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
@@ -87,11 +89,11 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await GetFileRoomAsync(g.Key);
+            var room = await FileRoomAsync(g.Key);
             result.Add(new { room, fileId = g.Key });
         }
         
-        SendNotAwaitableRequest("mark-as-new-file", result);
+        await MakeRequest("mark-as-new-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
@@ -100,7 +102,7 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await GetFolderRoomAsync(g.Key);
+            var room = await FolderRoomAsync(g.Key);
             result.Add(             
                 new {
                     room,
@@ -109,13 +111,13 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
                 });
         }
         
-        SendNotAwaitableRequest("mark-as-new-folder", result);
+        await MakeRequest("mark-as-new-folder", result);
     }
 
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
-        var whoCanRead = users ?? await GetWhoCanRead(entry);
+        var room = await FolderRoomAsync(entry.FolderIdDisplay);
+        var whoCanRead = users ?? await WhoCanRead(entry);
 
         if (action != null)
         {
@@ -141,14 +143,14 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         }
     }
 
-    private async Task<string> GetFileRoomAsync<T>(T fileId)
+    private async Task<string> FileRoomAsync<T>(T fileId)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
-    private async Task<string> GetFolderRoomAsync<T>(T folderId)
+    private async Task<string> FolderRoomAsync<T>(T folderId)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
@@ -165,11 +167,15 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         };
     }
 
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanRead = await fileSecurity.WhoCanReadAsync(entry, true);
+        var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
+        var adminsTask = Admins();
+
+        var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
+        
         var userIds = whoCanRead
-            .Concat(await GetAdmins())
+            .SelectMany(r => r)
             .Concat(new []{ entry.CreateBy })
             .Distinct()
             .ToList();
@@ -178,20 +184,24 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
     }
     
     private List<Guid> _admins;
-    private async Task<IEnumerable<Guid>> GetAdmins()
+    private Task<IEnumerable<Guid>> Admins()
     {
         if (_admins != null)
         {
-            return _admins;
+            return Task.FromResult<IEnumerable<Guid>>(_admins);
         }
 
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
-                null, null, null, false, null, true, 0, 0)
+        return AdminsFromDb();
+    }
+    
+    private async Task<IEnumerable<Guid>> AdminsFromDb()
+    {
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         
         _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-}
     }
+}
