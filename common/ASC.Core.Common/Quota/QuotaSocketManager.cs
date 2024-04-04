@@ -60,7 +60,7 @@ public class QuotaSocketManager(
 
     private async Task<string> GetQuotaRoom()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }
