@@ -136,7 +136,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, List<FileShareRecord> currentUserRecords = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -187,7 +187,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     ((result.RootFolderType == FolderType.Archive || result.RootFolderType == FolderType.TRASH) && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
@@ -199,40 +199,13 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 }
             }
         }
-        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
-        {
-            result.RootFolderType = FolderType.SHARE;
-
-            var folderDao = daoFactory.GetFolderDao<T>();
-
-            if (folders != null)
-            {
-                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(folder.ParentId));
-                if (folderWithRight is not { Item2: true })
-                {
-                    result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
-            else
-            {
-                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(folder.ParentId);
-                var canRead = await _fileSecurity.CanReadAsync(parentFolder);
-                if (!canRead)
-                {
-                    result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
-        }
 
         if (folder.Order != 0)
         {
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
-        if (folder.FolderType == FolderType.InProcessFormFolder || 
-            folder.FolderType == FolderType.ReadyFormFolder || 
-            folder.FolderType == FolderType.FormFillingFolderDone || 
-            folder.FolderType == FolderType.FormFillingFolderInProgress)
+        if (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
         {
             result.Type = folder.FolderType;
         }

@@ -325,7 +325,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
     }
@@ -518,7 +518,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
