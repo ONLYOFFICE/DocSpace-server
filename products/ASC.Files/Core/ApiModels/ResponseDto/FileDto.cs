@@ -161,7 +161,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
@@ -184,8 +184,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
-        var fileExst = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
 
         if (fileType == FileType.Pdf)
         {
@@ -194,7 +194,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.HasDraft = linkedId != null;
         }
         
-        result.FileExst = fileExst;
+        result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;

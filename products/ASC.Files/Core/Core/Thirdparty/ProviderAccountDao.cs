@@ -30,9 +30,7 @@ namespace ASC.Files.Thirdparty;
 public enum ProviderTypes
 {
     Box,
-    BoxNet,
     DropboxV2,
-    Google,
     GoogleDrive,
     OneDrive,
     SharePoint,

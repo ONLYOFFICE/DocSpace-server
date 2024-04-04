@@ -90,7 +90,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
             var parentDriveId = googleDriveSession.FolderId;
             if (parentDriveId != null)
             {
-                await ProviderInfo.CacheResetAsync(parentDriveId, false);
+                await ProviderInfo.CacheResetAsync(parentDriveId);
             }
 
             return Dao.ToFile(await Dao.GetFileAsync(googleDriveSession.FileId));

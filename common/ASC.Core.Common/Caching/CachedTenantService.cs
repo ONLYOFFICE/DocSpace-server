@@ -366,9 +366,4 @@ class CachedTenantService() : ITenantService
     {
         return $"settings/{tenant}/{key.ToLowerInvariant()}";
     }
-
-    public IEnumerable<Tenant> GetTenantsWithCsp()
-    {
-        return _service.GetTenantsWithCsp();
-    }
 }

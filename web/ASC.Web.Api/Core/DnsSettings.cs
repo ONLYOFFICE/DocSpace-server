@@ -50,18 +50,20 @@ public class DnsSettings(PermissionContext permissionContext,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
+        dnsName = dnsName?.Trim().ToLowerInvariant();
+
         if (!enableDns || string.IsNullOrEmpty(dnsName))
         {
             dnsName = null;
         }
 
-        if (dnsName == null || await CheckCustomDomainAsync(dnsName))
+        if (dnsName == null || await CheckCustomDomainAsync(tenant.Alias, dnsName))
         {
             var oldDomain = tenant.GetTenantDomain(coreSettings);
 
             tenant.MappedDomain = dnsName;
             await tenantManager.SaveTenantAsync(tenant);
-            await messageService.SendAsync(MessageAction.DnsSettingsUpdated, oldDomain, new[] { dnsName });
+            await messageService.SendAsync(MessageAction.DnsSettingsUpdated, oldDomain, [dnsName]);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
             return null;
         }
@@ -69,14 +71,18 @@ public class DnsSettings(PermissionContext permissionContext,
         throw new Exception(Resource.ErrorNotCorrectTrustedDomain);
     }
 
-    private async Task<bool> CheckCustomDomainAsync(string domain)
+    private async Task<bool> CheckCustomDomainAsync(string alias, string domain)
     {
         if (string.IsNullOrEmpty(domain))
         {
             return false;
         }
-
         var tenantBaseDomain = TenantBaseDomain;
+
+        if (domain.Equals($"{alias}{tenantBaseDomain}", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return true;
+        }
 
         if (!string.IsNullOrEmpty(tenantBaseDomain) &&
             (domain.EndsWith(tenantBaseDomain, StringComparison.InvariantCultureIgnoreCase) || domain.Equals(tenantBaseDomain.TrimStart('.'), StringComparison.InvariantCultureIgnoreCase)))

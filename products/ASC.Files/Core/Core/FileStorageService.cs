@@ -379,7 +379,7 @@ public class FileStorageService //: IFileStorageService
     {
         var folder = await InternalCreateFolderAsync(parentId, title);
 
-        await socketManager.CreateFolderAsync(folder);
+        _ = socketManager.CreateFolderAsync(folder);
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;
@@ -510,8 +510,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, 
-        long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -2535,8 +2534,7 @@ public class FileStorageService //: IFileStorageService
         {
             var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
 
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-                .FirstOrDefaultAsync();
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
             if (parentLink == null)
             {
                 throw new ItemNotFoundException();
@@ -2548,12 +2546,16 @@ public class FileStorageService //: IFileStorageService
             return parentLink;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-            .FirstOrDefaultAsync();
-
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
             return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        }
+
+        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
+        {
+            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
+                DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
         }
 
         return link;
@@ -3425,7 +3427,16 @@ public class FileStorageService //: IFileStorageService
             linkId = Guid.NewGuid();
         }
 
-        var aces = new List<AceWrapper> { new() { Access = share, Id = linkId, SubjectType = subjectType, FileShareOptions = options } };
+        var aces = new List<AceWrapper>
+        {
+            new()
+            {
+                Access = share,
+                Id = linkId,
+                SubjectType = subjectType,
+                FileShareOptions = options
+            }
+        };
 
         try
         {
@@ -3436,16 +3447,18 @@ public class FileStorageService //: IFileStorageService
                 throw GenerateException(new InvalidOperationException(result.Warning));
             }
 
-            if (result.Changed)
+            if (!result.Changed)
             {
+                return result.HandledAces[0];
+            }
+
                 var (eventType, ace) = result.HandledAces[0];
                 var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
 
                 await filesMessageService.SendAsync(messageActions[eventType], entry, ace.Id, ace.FileShareOptions?.Title,
                     FileShareExtensions.GetAccessString(ace.Access, isRoom));
-            }
 
-            return result.HandledAces.FirstOrDefault();
+            return result.HandledAces[0];
         }
         catch (Exception e)
         {

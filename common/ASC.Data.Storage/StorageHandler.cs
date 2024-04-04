@@ -83,7 +83,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         if (storage.IsSupportInternalUri && bigSize < fileSize)
         {
-            var uri = await storage.GetInternalUriAsync(domain, path, TimeSpan.FromMinutes(15), headers);
+            var uri = await storage.GetInternalUriAsync(domain, path, TimeSpan.FromSeconds(15), headers);
 
             //TODO
             //context.Response.Cache.SetAllowResponseInBrowserHistory(false);
