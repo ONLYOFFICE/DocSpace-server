@@ -467,4 +467,7 @@
   <data name="RoomIndex_Total" xml:space="preserve">
     <value>Итого</value>
   </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Тип</value>
+  </data>
 </root>
