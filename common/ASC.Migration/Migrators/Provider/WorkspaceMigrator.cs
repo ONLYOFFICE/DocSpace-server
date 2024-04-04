@@ -151,7 +151,6 @@ public class WorkspaceMigrator : Migrator
                     UserName = row["email"].ToString().Split('@').First(),
                     FirstName = row["firstname"].ToString(),
                     LastName = row["lastname"].ToString(),
-                    ActivationStatus = EmployeeActivationStatus.Activated,
                     Email = row["email"].ToString(),
                 }
             };

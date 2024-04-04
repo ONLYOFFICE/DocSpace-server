@@ -247,7 +247,6 @@ public class GoogleWorkspaceMigrator : Migrator
         {
             user.Info.FirstName = user.Info.Email.Split('@').First();
         }
-        user.Info.ActivationStatus = EmployeeActivationStatus.Activated;
 
         ParseStorage(tmpFolder, user);
 
