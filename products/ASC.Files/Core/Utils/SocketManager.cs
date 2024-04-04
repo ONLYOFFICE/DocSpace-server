@@ -26,18 +26,21 @@
 
 using System.Threading.Channels;
 
+using ASC.Core.Billing;
+
 namespace ASC.Web.Files.Utils;
 
 public class SocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
     IConfiguration configuration,
     FileDtoHelper filesWrapperHelper,
-    TenantManager tenantManager,
     FolderDtoHelper folderDtoHelper,
     FileSecurity fileSecurity,
     UserManager userManager)
-    : SocketServiceClient(channelWriter, machinePseudoKeys, configuration)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 
@@ -145,14 +148,14 @@ public class SocketManager(
 
     private async Task<string> FileRoomAsync<T>(T fileId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
     private async Task<string> FolderRoomAsync<T>(T folderId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-DIR-{folderId}";
     }
@@ -200,7 +203,7 @@ public class SocketManager(
             .Select(r=> r.Id)
             .ToListAsync();
         
-        _admins.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+        _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
     }

@@ -28,11 +28,12 @@ using System.Threading.Channels;
 
 namespace ASC.Core.Common.Quota;
 public class QuotaSocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
-    IConfiguration configuration,
-    TenantManager tenantManager)
-    : SocketServiceClient(channelWriter, machinePseudoKeys, configuration)
+    IConfiguration configuration)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 

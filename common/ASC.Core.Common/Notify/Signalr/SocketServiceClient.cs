@@ -32,10 +32,13 @@ namespace ASC.Core.Notify.Socket;
 
 [Scope]
 public class SocketServiceClient(
+    ITariffService tariffService,
+    TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
     IConfiguration configuration)
 {
+    protected readonly TenantManager _tenantManager = tenantManager;
     private byte[] SKey => machinePseudoKeys.GetMachineConstant();
     private string Url =>  configuration["web:hub:internal"];
 
@@ -55,8 +58,9 @@ public class SocketServiceClient(
 
         var request = GenerateRequest(method, data);
         if (await channelWriter.WaitToWriteAsync())
-        {
-            await channelWriter.WriteAsync(new SocketData(request, TariffState.Paid));
+        {            
+            var tariff = await tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync());
+            await channelWriter.WriteAsync(new SocketData(request, tariff.State));
         }
     }
     
