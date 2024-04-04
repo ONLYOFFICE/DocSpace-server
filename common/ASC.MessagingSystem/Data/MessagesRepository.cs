@@ -113,8 +113,6 @@ public class MessagesRepository : IDisposable
 
         var now = DateTime.UtcNow;
         var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
-        
-        _logger.LogDebug("AddToCache: {key}, semaphore current {CurrentCount}", key, _semaphore.CurrentCount);
 
         try
         {
