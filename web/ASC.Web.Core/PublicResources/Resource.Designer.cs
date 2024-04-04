@@ -2841,6 +2841,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Storage quotas &amp; statistic.
+        /// </summary>
+        public static string TariffsFeature_statistic {
+            get {
+                return ResourceManager.GetString("TariffsFeature_statistic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Third-party integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
@@ -2850,7 +2859,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} storage space.
+        ///   Looks up a localized string similar to {0} per admin/power user and ability to add space on request.
         /// </summary>
         public static string TariffsFeature_total_size {
             get {

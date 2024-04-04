@@ -124,7 +124,7 @@ public class Startup
             });
         }
 
-        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(_configuration, GetType().Namespace);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(_configuration)

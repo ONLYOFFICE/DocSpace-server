@@ -338,7 +338,7 @@ public static class ServiceCollectionExtension
         return services;
     }
 
-    public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexer(this IServiceCollection services, IConfiguration configuration, string clientName)
+    public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 

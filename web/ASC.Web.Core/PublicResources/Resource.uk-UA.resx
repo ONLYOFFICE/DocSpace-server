@@ -277,9 +277,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>Єдиний вхід</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>Обсяг сховища: {0}</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Використаний обсяг сховища не повинен перевищувати {0}</value>
   </data>

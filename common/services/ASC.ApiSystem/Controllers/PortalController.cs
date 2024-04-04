@@ -212,7 +212,7 @@ public class PortalController(
 
             tenantManager.SetCurrentTenant(t);
 
-            await cspSettingsHelper.SaveAsync(null, true);
+            await cspSettingsHelper.SaveAsync(null);
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             { 

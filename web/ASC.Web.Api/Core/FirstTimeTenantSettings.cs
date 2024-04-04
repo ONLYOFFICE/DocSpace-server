@@ -111,7 +111,7 @@ public class FirstTimeTenantSettings(
             tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
             await tenantManager.SaveTenantAsync(tenant);
-            await cspSettingsHelper.SaveAsync(null, true);
+            await cspSettingsHelper.SaveAsync(null);
             
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);

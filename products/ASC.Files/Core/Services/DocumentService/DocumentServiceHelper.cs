@@ -191,7 +191,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!editPossible && !fileUtility.CanWebView(file.Title))
         {
-            throw new Exception($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
+            throw new NotSupportedException($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
         }
 
         if (reviewPossible &&

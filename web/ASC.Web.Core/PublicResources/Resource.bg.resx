@@ -451,9 +451,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>Единично вписване</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} пространство в хранилището</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Използваното пространство в хранилището не трябва да надвишава {0}</value>
   </data>

@@ -114,7 +114,7 @@ public abstract class BaseStartup
             }
         });
 
-        var connectionMultiplexer = await services.GetRedisConnectionMultiplexer(_configuration, GetType().Namespace);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddRateLimiter(options =>
         {
