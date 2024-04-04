@@ -518,7 +518,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
