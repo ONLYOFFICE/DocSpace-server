@@ -383,6 +383,11 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
     {
         return Task.FromResult(MaxChunkedUploadFileSize);
     }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
+    }
 }
 
 public class OneDriveAuthProvider(string accessToken) : IAuthenticationProvider
