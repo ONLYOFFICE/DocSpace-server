@@ -169,6 +169,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         await foreach (var file in FileDao.GetFilesAsync(filesIds))
         {
             await socketManager.DeleteFileAsync(file);
+            await ProgressStep();
         }
     }
 
@@ -186,6 +187,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var folder = await FolderDao.GetFolderAsync(folderId, true);
 
             await socketManager.DeleteFolder(folder);
+            await ProgressStep();
 
             if (folder.RootFolderType != FolderType.TRASH)
             {
