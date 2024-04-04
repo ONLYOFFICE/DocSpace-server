@@ -274,7 +274,6 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             Method = HttpMethod.Put
         };
         
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
 
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(oneDriveSession.BytesTransferred,
