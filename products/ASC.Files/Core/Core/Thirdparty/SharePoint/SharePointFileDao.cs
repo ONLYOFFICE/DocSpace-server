@@ -52,7 +52,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         await SharePointProviderInfo.InvalidateStorageAsync();
     }
 
-    public async Task<File<string>> GetFileAsync(string fileId)
+    public async Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         return await GetFileAsync(fileId, 1);
     }

@@ -168,7 +168,11 @@ public class FileStorageService //: IFileStorageService
         try
         {
             parent = await folderDao.GetFolderAsync(parentId);
-            if (parent != null && !string.IsNullOrEmpty(parent.Error))
+            if (parent == null)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+            if (!string.IsNullOrEmpty(parent.Error))
             {
                 throw new Exception(parent.Error);
             }
@@ -185,11 +189,6 @@ public class FileStorageService //: IFileStorageService
             }
 
             throw GenerateException(e);
-        }
-
-        if (parent == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(parent))

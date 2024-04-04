@@ -42,12 +42,12 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         await fileDao.InvalidateCacheAsync(selector.ConvertId(fileId));
     }
 
-    public async Task<File<string>> GetFileAsync(string fileId)
+    public async Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(fileId);
 
         var fileDao = selector.GetFileDao(fileId);
-        var result = await fileDao.GetFileAsync(selector.ConvertId(fileId));
+        var result = await fileDao.GetFileAsync(selector.ConvertId(fileId), includeRemoved);
 
         return result;
     }

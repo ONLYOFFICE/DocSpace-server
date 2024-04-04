@@ -51,7 +51,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         _providerInfo = providerInfo;
     }
 
-    public async Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
 

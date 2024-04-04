@@ -68,13 +68,13 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
 
-    public async Task<Folder<int>> GetFolderAsync(int folderId)
+    public async Task<Folder<int>> GetFolderAsync(int folderId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFolder = await Queries.DbFolderQueryWithSharedAsync(filesDbContext, tenantId, folderId);
+        var dbFolder = await Queries.DbFolderQueryWithSharedAsync(filesDbContext, tenantId, folderId, includeRemoved);
 
         return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
@@ -2034,12 +2034,13 @@ static file class Queries
                         }
                     ).SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, Task<DbFolderQuery>> DbFolderQueryWithSharedAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, Task<DbFolderQuery>> DbFolderQueryWithSharedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId) =>
+            (FilesDbContext ctx, int tenantId, int folderId, bool includeRemoved) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r =>
                         new DbFolderQuery
                         {

@@ -48,7 +48,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     {
         private readonly TenantManager _tenantManager1 = tenantManager;
 
-        public async Task<Folder<string>> GetFolderAsync(string folderId)
+        public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         
         var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));

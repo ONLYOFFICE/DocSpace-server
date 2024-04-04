@@ -39,7 +39,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         SelectorFactory selectorFactory)
     : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFolderDao<string>
 {
-    public async Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(folderId);
         if (selector == null)
@@ -48,7 +48,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
 
         var folderDao = selector.GetFolderDao(folderId);
-        var result = await folderDao.GetFolderAsync(selector.ConvertId(folderId));
+        var result = await folderDao.GetFolderAsync(selector.ConvertId(folderId), includeRemoved);
 
         return await ResolveParentAsync(result);
     }

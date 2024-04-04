@@ -66,7 +66,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public Task<File<string>> GetFileAsync(string fileId)
+    public Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         return GetFileAsync(fileId, 1);
     }

@@ -110,7 +110,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
     public async Task<Folder<T>> DeleteAsync<T>(T id, bool checkPermissions = true)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetFolderAsync(id);
+        var room = await folderDao.GetFolderAsync(id, true);
 
         if (checkPermissions && !await fileSecurity.CanEditRoomAsync(room))
         {

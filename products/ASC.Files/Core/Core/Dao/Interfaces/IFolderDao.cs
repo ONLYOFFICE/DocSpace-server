@@ -33,8 +33,9 @@ public interface IFolderDao<T>
     ///     Get folder by id.
     /// </summary>
     /// <param name="folderId">folder id</param>
+    /// <param name="includeRemoved"></param>
     /// <returns>folder</returns>
-    Task<Folder<T>> GetFolderAsync(T folderId);
+    Task<Folder<T>> GetFolderAsync(T folderId, bool includeRemoved = false);
 
     /// <summary>
     ///     Returns the folder with the given name and id of the root

@@ -138,7 +138,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var socketManager = serviceScope.ServiceProvider.GetService<SocketManager>();
 
             await MarkFilesAsRemovedAsync(socketManager, Files);
-            await MarkFoldersAsRemovedAsync(socketManager, Folders, recursive: !_isEmptyTrash);
+            await MarkFoldersAsRemovedAsync(socketManager, Folders);
 
             var headers = Headers.ToDictionary(x => x.Key, x => x.Value.ToString());
 
@@ -172,7 +172,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
     }
 
-    private async Task MarkFoldersAsRemovedAsync(SocketManager socketManager, IEnumerable<T> folderIds, bool recursive)
+    private async Task MarkFoldersAsRemovedAsync(SocketManager socketManager, IEnumerable<T> folderIds)
     {
         if (!folderIds.Any())
         {
@@ -183,11 +183,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
         foreach (var folderId in folderIds)
         {
-            var folder = await FolderDao.GetFolderAsync(folderId);
+            var folder = await FolderDao.GetFolderAsync(folderId, true);
 
             await socketManager.DeleteFolder(folder);
 
-            if (recursive)
+            if (folder.RootFolderType != FolderType.TRASH)
             {
                 await MarkFolderContentAsRemovedAsync(socketManager, folder);
             }
@@ -202,7 +202,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
         var subfolderIds = await FolderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
 
-        await MarkFoldersAsRemovedAsync(socketManager, subfolderIds, true);
+        await MarkFoldersAsRemovedAsync(socketManager, subfolderIds);
     }
 
 
@@ -221,7 +221,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            var folder = await FolderDao.GetFolderAsync(folderId);
+            var folder = await FolderDao.GetFolderAsync(folderId, true);
 
             T canCalculate = default;
             if (folder == null)
@@ -376,7 +376,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            var file = await FileDao.GetFileAsync(fileId);
+            var file = await FileDao.GetFileAsync(fileId, true);
             if (file == null)
             {
                 this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;

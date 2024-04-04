@@ -80,13 +80,13 @@ internal class FileDao(
         return Task.CompletedTask;
     }
 
-    public async Task<File<int>> GetFileAsync(int fileId)
+    public async Task<File<int>> GetFileAsync(int fileId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFile = await Queries.DbFileQueryAsync(filesDbContext, tenantId, fileId);
+        var dbFile = await Queries.DbFileQueryAsync(filesDbContext, tenantId, fileId, includeRemoved);
 
         return mapper.Map<DbFileQuery, File<int>>(dbFile);
     }
@@ -2242,13 +2242,13 @@ public class DbFileQueryWithSecurity
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, int, int, Task<DbFileQuery>> DbFileQueryAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, Task<DbFileQuery>> DbFileQueryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
+            (FilesDbContext ctx, int tenantId, int fileId, bool includeRemoved) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
-
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r => new DbFileQuery
                     {
                         File = r,

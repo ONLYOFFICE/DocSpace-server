@@ -37,8 +37,9 @@ public interface IFileDao<T>
     ///     Receive file
     /// </summary>
     /// <param name="fileId">file id</param>
+    /// <param name="includeRemoved"></param>
     /// <returns></returns>
-    Task<File<T>> GetFileAsync(T fileId);
+    Task<File<T>> GetFileAsync(T fileId, bool includeRemoved = false);
 
     /// <summary>
     ///     Receive file
