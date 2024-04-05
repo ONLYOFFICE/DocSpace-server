@@ -273,13 +273,13 @@ public class FileSharingAceHelper(
 
             if (socket && room != null)
             {
-                if (share == FileShare.None)
+                if (share == FileShare.None && !await userManager.IsDocSpaceAdminAsync(w.Id))
                 {
-                    await socketManager.DeleteFolder(room, new[] { w.Id });
+                    await socketManager.DeleteFolder(room, [w.Id]);
                 }
                 else if (existedShare == null)
                 {
-                    await socketManager.CreateFolderAsync(room, new[] { w.Id });
+                    await socketManager.CreateFolderAsync(room, [w.Id]);
                 }
             }
 

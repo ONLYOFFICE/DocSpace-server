@@ -593,4 +593,9 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         return request.ResponseBody;
     }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
+    }
 }

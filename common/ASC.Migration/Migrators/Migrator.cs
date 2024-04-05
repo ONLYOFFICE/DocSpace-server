@@ -208,6 +208,7 @@ public abstract class Migrator : IDisposable
                 {
                     DataСhange(user);
                     user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
+                    user.Info.ActivationStatus = EmployeeActivationStatus.Pending;
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {

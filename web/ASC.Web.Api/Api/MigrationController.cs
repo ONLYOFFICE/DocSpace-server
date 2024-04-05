@@ -128,10 +128,14 @@ public class MigrationController(
             {
                 throw new Exception(MigrationResource.MigrationProgressException);
             }
-            var guidUsers = status.ImportedUsers;
-            foreach (var gu in guidUsers)
+            var emails = status.ImportedUsers;
+            foreach (var email in emails)
             {
-                var u = await userManager.GetUserByEmailAsync(gu);
+                var u = await userManager.GetUserByEmailAsync(email);
+                if (u.IsActive)
+                {
+                    continue;
+                }
                 await studioNotifyService.UserInfoActivationAsync(u);
             }
         }

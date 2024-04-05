@@ -333,4 +333,9 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     {
         _dropboxClient?.Dispose();
     }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
+    }
 }
