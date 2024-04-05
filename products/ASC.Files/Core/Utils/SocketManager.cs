@@ -56,9 +56,9 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("create-file", file, true, users);
     }
 
-    public async Task CreateFormAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    public async Task CreateFormAsync<T>(File<T> file, Guid user, bool isOneMember)
     {
-        await MakeRequest("create-form", file, true, users);
+        await MakeCreateFormRequest("create-form", file, user, isOneMember);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
@@ -116,18 +116,30 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         
         SendNotAwaitableRequest("mark-as-new-folder", result);
     }
-
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
-    {        
+    private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, Guid user, bool isOneMember)
+    {
         var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
-        var whoCanRead = await GetWhoCanRead(entry);
-        var usersList = users ?? whoCanRead;
+        var data = await Serialize(entry);
+
+        await base.MakeRequest(method, new
+        {
+            room,
+            entry.Id,
+            data,
+            user,
+            isOneMember
+        });
+    }
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
+    {
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
+        var whoCanRead = users ?? await GetWhoCanRead(entry);
 
         if (action != null)
         {
             await action();
         }
-        
+
         var data = "";
 
         if (withData)
@@ -135,30 +147,15 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
             data = await Serialize(entry);
         }
 
-        foreach (var userIds in usersList.Chunk(1000))
-        {   
-            if(method == "create-form")
+        foreach (var userIds in whoCanRead.Chunk(1000))
+        {
+            await base.MakeRequest(method, new
             {
-                var isOneMember = whoCanRead.Count() <= 1;
-                await base.MakeRequest(method, new
-                {
-                    room,
-                    entry.Id,
-                    data,
-                    userIds,
-                    isOneMember
-                });
-            }
-            else
-            {
-                await base.MakeRequest(method, new
-                {
-                    room,
-                    entry.Id,
-                    data,
-                    userIds
-                });
-            }
+                room,
+                entry.Id,
+                data,
+                userIds,
+            });
         }
     }
 

@@ -286,7 +286,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             var folder = await folderDao.GetFolderAsync(form.ParentId);
             if (folder.FolderType == FolderType.FillingFormsRoom)
             {
-                await _socketManager.CreateFormAsync(form, new List<Guid>() { securityContext.CurrentAccount.ID });
+                var count = await _fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                await _socketManager.CreateFormAsync(form, securityContext.CurrentAccount.ID, count <= 1);
             }
         }
         return resultFile;
