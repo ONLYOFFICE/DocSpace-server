@@ -73,7 +73,8 @@ public class GoogleWorkspaceMigrator : Migrator
         TmpFolder = path;
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
-            throw new Exception("Folder must not be empty and should contain .zip files.");
+            MigrationInfo.FailedArchives = files.ToList();
+            throw new Exception("Archives must be .zip");
         }
 
         _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();

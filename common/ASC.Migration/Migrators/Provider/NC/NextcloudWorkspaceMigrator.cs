@@ -65,7 +65,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
-            throw new Exception("Folder must not be empty and should contain only .zip files.");
+            MigrationInfo.FailedArchives = files.ToList();
+            throw new Exception("Archive must be .zip");
         }
         foreach (var t in files)
         {
