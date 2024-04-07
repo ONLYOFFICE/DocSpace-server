@@ -75,7 +75,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ThumbnailSettings thumbnailSettings,
     ExternalLinkHelper externalLinkHelper,
     ExternalShare externalShare,
-    EntryManager entryManager)
+    EntryManager entryManager,
+    FileStorageService fileStorageService)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -1196,6 +1197,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             await socketManager.CreateFileAsync(file);
+
+            if (FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf && folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                var count = await fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+            }
         }
         catch (Exception ex)
         {

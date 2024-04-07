@@ -56,6 +56,11 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         await MakeRequest("create-file", file, true, users);
     }
 
+    public async Task CreateFormAsync<T>(File<T> file, Guid user, bool isOneMember)
+    {
+        await MakeCreateFormRequest("create-form", file, user, isOneMember);
+    }
+
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
         await MakeRequest("create-folder", folder, true, users);
@@ -111,9 +116,22 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         
         SendNotAwaitableRequest("mark-as-new-folder", result);
     }
+    private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, Guid user, bool isOneMember)
+    {
+        var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
+        var data = await Serialize(entry);
 
+        await base.MakeRequest(method, new
+        {
+            room,
+            entry.Id,
+            data,
+            user,
+            isOneMember
+        });
+    }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
-    {        
+    {
         var room = await GetFolderRoomAsync(entry.FolderIdDisplay);
         var whoCanRead = users ?? await GetWhoCanRead(entry);
 
@@ -121,19 +139,19 @@ public class SocketManager(ILogger<SocketServiceClient> logger,
         {
             await action();
         }
-        
+
         var data = "";
 
         if (withData)
         {
             data = await Serialize(entry);
         }
-        
+
         foreach (var userIds in whoCanRead.Chunk(1000))
-        {             
+        {
             await base.MakeRequest(method, new
             {
-                room, 
+                room,
                 entry.Id,
                 data,
                 userIds,

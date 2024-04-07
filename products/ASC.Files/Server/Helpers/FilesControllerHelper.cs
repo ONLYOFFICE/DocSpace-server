@@ -41,7 +41,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        IDaoFactory daoFactory,
+        SecurityContext securityContext)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -273,6 +275,21 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
-            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+        var resultFile = await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+
+        if (FileUtility.GetFileTypeByFileName(resultFile.Title) == FileType.Pdf)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+
+            var form = await fileDao.GetFileAsync((T)Convert.ChangeType(resultFile.Id, typeof(T)));
+            var folder = await folderDao.GetFolderAsync(form.ParentId);
+            if (folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                var count = await _fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                await _socketManager.CreateFormAsync(form, securityContext.CurrentAccount.ID, count <= 1);
+            }
         }
+        return resultFile;
     }
+}

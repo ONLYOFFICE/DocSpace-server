@@ -233,6 +233,7 @@ public class EntryManager(IDaoFactory daoFactory,
     ThumbnailSettings thumbnailSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     SocketManager socketManager,
+    FilesMessageService filesMessageService,
     BaseCommonLinkUtility commonLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
@@ -1060,6 +1061,16 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (inProcessFormFolder == null && readyFormFolder == null)
                 {
                     (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folderId, folderDao);
+                    var systemFormFillingFolders = new List<Folder<T>>()
+                    {
+                        await folderDao.GetFolderAsync(readyFormFolderId),
+                        await folderDao.GetFolderAsync(inProcessFormFolderId)
+                    };
+                    foreach (var formFolder in systemFormFillingFolders)
+                    {
+                        await socketManager.CreateFolderAsync(formFolder);
+                        await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
+                    }
                 }
                 else
                 {
