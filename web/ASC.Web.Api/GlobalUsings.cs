@@ -146,7 +146,6 @@ global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Core.SMS;
 global using ASC.Web.Studio.Core.Statistic;
 global using ASC.Web.Studio.Core.TFA;
-global using ASC.Web.Studio.UserControls.CustomNavigation;
 global using ASC.Web.Studio.UserControls.FirstTime;
 global using ASC.Web.Studio.UserControls.Management;
 global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;

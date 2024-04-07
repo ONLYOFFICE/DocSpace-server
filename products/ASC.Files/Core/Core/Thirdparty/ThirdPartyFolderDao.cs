@@ -481,9 +481,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         return chunkedUpload ? storageMaxUploadSize : Math.Min(storageMaxUploadSize, setupInfo.AvailableFileSize);
     }
 
-    public Task<IDataWriteOperator> CreateDataWriteOperatorAsync(string folderId, CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    public async Task<IDataWriteOperator> CreateDataWriteOperatorAsync(string folderId, CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
     {
-        return Task.FromResult<IDataWriteOperator>(new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder));
+        var storage = await _providerInfo.StorageAsync;
+        return storage.CreateDataWriteOperator(chunkedUploadSession, sessionHolder);
     }
 
     public Task<string> GetBackupExtensionAsync(string folderId)

@@ -63,7 +63,8 @@ public class WorkspaceMigrator : Migrator
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".gz") || f.EndsWith(".tar")))
         {
-            throw new Exception("Folder must not be empty and should contain only .gz or .tar files.");
+            MigrationInfo.FailedArchives = files.ToList();
+            throw new Exception("Archive must be .gz or .tar");
         }
 
         _backup = files.First(f => f.EndsWith(".gz") || f.EndsWith(".tar"));
@@ -151,7 +152,6 @@ public class WorkspaceMigrator : Migrator
                     UserName = row["email"].ToString().Split('@').First(),
                     FirstName = row["firstname"].ToString(),
                     LastName = row["lastname"].ToString(),
-                    ActivationStatus = EmployeeActivationStatus.Activated,
                     Email = row["email"].ToString(),
                 }
             };
