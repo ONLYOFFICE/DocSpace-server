@@ -137,8 +137,10 @@ public class MigrationOperation(
         {
             Exception = e;
             logger.ErrorWithException(e);
-            
-            IsCompleted = true;
+            if (migrator != null && migrator.MigrationInfo != null)
+            {
+                MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
+            }
         }
         finally
         {
