@@ -29,7 +29,7 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 namespace ASC.Files.Thirdparty.Dropbox;
 
 [Transient]
-internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
     IDisposable
 {
     public bool IsOpened { get; private set; }
@@ -44,8 +44,14 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         {
             return;
         }
+        
+        var httpClient = httpClientFactory.CreateClient();
 
-        _dropboxClient = new DropboxClient(authData.Token.AccessToken);
+        _dropboxClient = new DropboxClient(authData.Token.AccessToken, config: new DropboxClientConfig
+        {
+            HttpClient = httpClient,
+            LongPollHttpClient = httpClient
+        });
 
         IsOpened = true;
     }
@@ -326,5 +332,10 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     public void Dispose()
     {
         _dropboxClient?.Dispose();
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }

@@ -72,7 +72,9 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolderAsync(T folderId, CreateFolderRequestDto inDto)
     {
-        return await foldersControllerHelper.CreateFolderAsync(folderId, inDto.Title);
+        var folder = await fileStorageService.CreateFolderAsync(folderId, inDto.Title);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>

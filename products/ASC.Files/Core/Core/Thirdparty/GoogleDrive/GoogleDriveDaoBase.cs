@@ -73,7 +73,7 @@ internal class GoogleDriveDaoBase(
 
     public string GetParentFolderId(DriveFile driveEntry)
     {
-        return driveEntry == null || driveEntry.Parents == null || driveEntry.Parents.Count == 0
+        return driveEntry?.Parents == null || driveEntry.Parents.Count == 0
                    ? null
                    : driveEntry.Parents[0];
     }
@@ -116,13 +116,15 @@ internal class GoogleDriveDaoBase(
         var title = driveFile.Name;
 
         var gExt = MimeMapping.GetExtention(driveFile.MimeType);
-        if (GoogleLoginProvider.GoogleDriveExt.Contains(gExt))
+        if (!GoogleLoginProvider.GoogleDriveExt.Contains(gExt))
         {
-            var downloadableExtension = _fileUtility.GetGoogleDownloadableExtension(gExt);
-            if (!downloadableExtension.Equals(FileUtility.GetFileExtension(title)))
-            {
-                title += downloadableExtension;
-            }
+            return Global.ReplaceInvalidCharsAndTruncate(title);
+        }
+
+        var downloadableExtension = _fileUtility.GetGoogleDownloadableExtension(gExt);
+        if (!downloadableExtension.Equals(FileUtility.GetFileExtension(title)))
+        {
+            title += downloadableExtension;
         }
 
         return Global.ReplaceInvalidCharsAndTruncate(title);
@@ -130,15 +132,12 @@ internal class GoogleDriveDaoBase(
 
     public Folder<string> ToFolder(DriveFile driveEntry)
     {
-        if (driveEntry == null)
+        switch (driveEntry)
         {
-            return null;
-        }
-
-        if (driveEntry is ErrorDriveEntry entry)
-        {
-            //Return error entry
-            return ToErrorFolder(entry);
+            case null:
+                return null;
+            case ErrorDriveEntry entry:
+                return ToErrorFolder(entry);
         }
 
         if (driveEntry.MimeType != GoogleLoginProvider.GoogleDriveMimeTypeFolder)
@@ -178,7 +177,7 @@ internal class GoogleDriveDaoBase(
         return IsDriveFolder(driveFolder) && GetParentFolderId(driveFolder) == null;
     }
 
-    private bool IsDriveFolder(DriveFile driveFolder)
+    private static bool IsDriveFolder(DriveFile driveFolder)
     {
         return driveFolder != null && driveFolder.MimeType == GoogleLoginProvider.GoogleDriveMimeTypeFolder;
     }
@@ -213,15 +212,12 @@ internal class GoogleDriveDaoBase(
 
     public File<string> ToFile(DriveFile driveFile)
     {
-        if (driveFile == null)
+        switch (driveFile)
         {
-            return null;
-        }
-
-        if (driveFile is ErrorDriveEntry entry)
-        {
-            //Return error entry
-            return ToErrorFile(entry);
+            case null:
+                return null;
+            case ErrorDriveEntry entry:
+                return ToErrorFile(entry);
         }
 
         var file = GetFile();
@@ -232,7 +228,7 @@ internal class GoogleDriveDaoBase(
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.Title = MakeFileTitle(driveFile);
-        file.ThumbnailStatus = Thumbnail.Created;
+        file.ThumbnailStatus = driveFile.HasThumbnail.HasValue && driveFile.HasThumbnail.Value ? Thumbnail.Created : Thumbnail.Creating;
         file.Encrypted = ProviderInfo.Private;
 
         return file;
@@ -256,6 +252,11 @@ internal class GoogleDriveDaoBase(
         {
             return new ErrorDriveEntry(ex, driveId);
         }
+    }
+    
+    public async Task<DriveFile> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<DriveFile> GetFolderAsync(string entryId)
@@ -296,10 +297,10 @@ internal class GoogleDriveDaoBase(
         return Task.FromResult(requestTitle);
     }
 
-    protected sealed class ErrorDriveEntry : DriveFile, IErrorItem
+    private sealed class ErrorDriveEntry : DriveFile, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorDriveEntry(Exception e, object id)
         {

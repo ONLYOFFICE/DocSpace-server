@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-using ASC.Core.Common.Notify.Engine;
-using ASC.Migration.Core.Core;
-
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Web.Api;
@@ -77,6 +73,13 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseLogoUploader();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("logo.ashx"),
+            appBranch =>
+            {
+                appBranch.UseLogoHandler();
             });
 
         app.MapWhen(

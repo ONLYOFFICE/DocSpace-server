@@ -274,7 +274,6 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             Method = HttpMethod.Put
         };
         
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
 
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(oneDriveSession.BytesTransferred,
@@ -383,6 +382,11 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
     public Task<long> GetMaxUploadSizeAsync()
     {
         return Task.FromResult(MaxChunkedUploadFileSize);
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }
 

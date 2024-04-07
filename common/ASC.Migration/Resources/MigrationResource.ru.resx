@@ -117,50 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Календарь</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Календарь</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Удаление временных данных</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Контакты</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Группы</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Пользователи</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Люди</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Файлы пользователя</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Документы</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Файлы Google Drive</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Миграция группы {0} ({1}/{2})</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Почта</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Почта</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Контакты почты</value>
-  </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Миграция отменена</value>
   </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Миграция завершена</value>
@@ -170,9 +128,6 @@
   </data>
   <data name="Unzipping" xml:space="preserve">
     <value>Разархивирование...</value>
-  </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Миграция календаря пользователя {0} ({1}/{2})</value>
   </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Миграция пользователя {0} ({1}/{2})</value>
@@ -185,12 +140,6 @@
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Миграция файлов пользователя {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Миграция контактов пользователя {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Не удалось импортировать пользователя: {0} ({1}/{2})</value>
   </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Обработка данных...</value>

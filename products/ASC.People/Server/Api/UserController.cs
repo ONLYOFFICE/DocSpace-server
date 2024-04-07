@@ -385,10 +385,10 @@ public class UserController(ICache cache,
             await securityContext.SetUserPasswordHashAsync(userid, inDto.PasswordHash);
             await messageService.SendAsync(MessageAction.UserUpdatedPassword);
 
-            await cookiesManager.ResetUserCookieAsync(userid);
+            await cookiesManager.ResetUserCookieAsync(userid, false);
             await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-        
+
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
@@ -1115,7 +1115,8 @@ public class UserController(ICache cache,
         var error = await userManagerWrapper.SendUserPasswordAsync(inDto.Email);
         if (string.IsNullOrEmpty(error))
         {
-            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+            var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
+            return string.Format(pattern, inDto.Email);
         }
 
         logger.ErrorPasswordRecovery(inDto.Email, error);

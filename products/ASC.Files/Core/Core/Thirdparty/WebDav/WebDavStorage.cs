@@ -356,4 +356,8 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var index = path.LastIndexOf('/');
         return index <= 0 ? string.Empty : path[..index];
     }
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
+    }
 }

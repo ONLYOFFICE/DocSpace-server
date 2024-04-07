@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>清除临时数据</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>处理数据...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>解析数据库</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>邮件联系人</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive 文件</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>群组迁移 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>迁移用户联系人 {0} {1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>迁移用户文件 {0} {1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>迁移已取消</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>迁移已完成</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>日历</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>日历</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>群组</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>邮件</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>邮件</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>用户</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>联系人</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>用户文件</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>文档</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>人脉</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>准备迁移</value>
@@ -192,13 +147,7 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>解压已完成...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>用户日历迁移 {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>用户迁移 {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>导入用户失败：{0} ({1}/{2})</value>
   </data>
 </root>
