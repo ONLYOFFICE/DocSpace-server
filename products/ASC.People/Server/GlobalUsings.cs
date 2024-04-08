@@ -29,6 +29,7 @@ global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
 global using System.ServiceModel.Security;
+global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
