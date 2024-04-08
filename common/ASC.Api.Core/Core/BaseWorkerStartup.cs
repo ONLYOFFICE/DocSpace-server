@@ -39,7 +39,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();

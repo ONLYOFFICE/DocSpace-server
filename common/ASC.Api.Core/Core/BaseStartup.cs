@@ -267,7 +267,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
                 .AddBaseDbContextPool<CoreDbContext>()

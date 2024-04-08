@@ -58,7 +58,7 @@ public class Startup
         services.AddExceptionHandler<Classes.CustomExceptionHandler>();
         services.AddProblemDetails();
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
