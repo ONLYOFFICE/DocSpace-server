@@ -24,19 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
+using ASC.Common.Threading;
+
 namespace ASC.Core.Notify.Socket;
 
 [Scope]
-public class SocketServiceClient
+public class SocketServiceClient(
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration)
 {
-    private readonly TimeSpan _timeout = TimeSpan.FromSeconds(1);
-    private DateTime _lastErrorTime;
-
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly ILogger<SocketServiceClient> _logger;
-    private readonly bool _enableSocket;
-    private readonly byte[] _sKey;
-    private readonly string _url;
+    protected readonly TenantManager _tenantManager = tenantManager;
+    private byte[] SKey => machinePseudoKeys.GetMachineConstant();
+    private string Url =>  configuration["web:hub:internal"];
 
     private static readonly JsonSerializerOptions _options = new()
     {
@@ -45,53 +49,19 @@ public class SocketServiceClient
     
     protected virtual string Hub { get => "default"; }
 
-    public SocketServiceClient(
-        ILogger<SocketServiceClient> logger,
-        IHttpClientFactory clientFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        IConfiguration configuration)
-    {
-        _logger = logger;
-        _clientFactory = clientFactory;
-        _sKey = machinePseudoKeys.GetMachineConstant();
-        _url = configuration["web:hub:internal"];
-        _enableSocket = !string.IsNullOrEmpty(_url);
-    }
-
     public async Task MakeRequest(string method, object data)
     {
-        if (!IsAvailable())
+        if (string.IsNullOrEmpty(Url))
         {
             return;
         }
-        try
-        {
-            var request = GenerateRequest(method, data);
-            var httpClient = _clientFactory.CreateClient();
-            await httpClient.SendAsync(request);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorService(e);
 
-            if (e is HttpRequestException)
-            {
-                _lastErrorTime = DateTime.Now;
-            }
-        }
-    }
-    
-    protected void SendNotAwaitableRequest(string method, object data)
-    {
         var request = GenerateRequest(method, data);
-        var httpClient = _clientFactory.CreateClient();
-        
-        _ = httpClient.SendAsync(request);
-    }
-
-    private bool IsAvailable()
-    {
-        return _enableSocket && _lastErrorTime + _timeout < DateTime.Now;
+        if (await channelWriter.WaitToWriteAsync())
+        {            
+            var tariff = await tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync());
+            await channelWriter.WriteAsync(new SocketData(request, tariff.State));
+        }
     }
     
     private HttpRequestMessage GenerateRequest(string method, object data)
@@ -100,26 +70,73 @@ public class SocketServiceClient
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post, 
-            RequestUri = new Uri(GetMethod(method)),
+            RequestUri = new Uri(Method(method)),
             Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
         };
         
         request.Headers.Add("Authorization", CreateAuthToken());
-        
         return request;
     }
 
-    private string GetMethod(string method)
+    private string Method(string method)
     {
-        return $"{_url.TrimEnd('/')}/controller/{Hub}/{method}";
+        return $"{Url.TrimEnd('/')}/controller/{Hub}/{method}";
     }
 
     private string CreateAuthToken(string pkey = "socketio")
     {
-        using var hasher = new HMACSHA1(_sKey);
+        using var hasher = new HMACSHA1(SKey);
         var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = Convert.ToBase64String(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
-
         return $"ASC {pkey}:{now}:{hash}";
     }
 }
+
+[Singleton]
+public class SocketService(
+    ILogger<SocketServiceClient> logger,
+    IHttpClientFactory clientFactory,
+    ChannelReader<SocketData> channelReader,
+    IConfiguration configuration
+) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    { 
+        if(!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+        {
+            maxDegreeOfParallelism = 10;
+        }
+
+        List<ChannelReader<SocketData>> readers = [channelReader];
+
+        if (((int)(maxDegreeOfParallelism * 0.3)) > 0)
+        {
+            var splitter = channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
+            var premiumChannels = splitter[0].Split((int)(maxDegreeOfParallelism * 0.7), null, stoppingToken);
+            var freeChannel = splitter[1].Split((int)(maxDegreeOfParallelism * 0.3), null, stoppingToken);
+            readers = premiumChannels.Union(freeChannel).ToList();
+        }
+
+        var tasks = readers.Select(reader1 => Task.Run(async () =>
+            {
+                await foreach (var socketData in reader1.ReadAllAsync(stoppingToken))
+                {        
+                    try
+                    {
+                        var httpClient = clientFactory.CreateClient();
+                        await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorService(e);
+                    }
+
+                }
+            }, stoppingToken))
+            .ToList();
+
+        await Task.WhenAll(tasks);
+    }
+}
+
+public record SocketData(HttpRequestMessage RequestMessage, TariffState TariffState);

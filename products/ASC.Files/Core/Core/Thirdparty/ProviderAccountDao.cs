@@ -40,15 +40,16 @@ public enum ProviderTypes
 }
 
 [Scope]
-internal class ProviderAccountDao(IServiceProvider serviceProvider,
-        TenantUtil tenantUtil,
-        TenantManager tenantManager,
-        InstanceCrypto instanceCrypto,
-        SecurityContext securityContext,
-        ConsumerFactory consumerFactory,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        OAuth20TokenHelper oAuth20TokenHelper,
-        ILoggerProvider options)
+internal class ProviderAccountDao(
+    IServiceProvider serviceProvider,
+    TenantUtil tenantUtil,
+    TenantManager tenantManager,
+    InstanceCrypto instanceCrypto,
+    SecurityContext securityContext,
+    ConsumerFactory consumerFactory,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    OAuth20TokenHelper oAuth20TokenHelper,
+    ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
     private int TenantID
@@ -58,8 +59,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             return tenantManager.GetCurrentTenant().Id;
         }
     }
-
-    private readonly ILogger _logger = options.CreateLogger("ASC.Files");
 
     public virtual Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
@@ -102,7 +101,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorGetProvidersInfoInternalUser(userId, e);
+            logger.ErrorGetProvidersInfoInternalUser(userId, e);
 
             return new List<IProviderInfo>().ToAsyncEnumerable();
         }
@@ -118,7 +117,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorGetProvidersInfoInternal(linkId, folderType, securityContext.CurrentAccount.ID, e);
+            logger.ErrorGetProvidersInfoInternal(linkId, folderType, securityContext.CurrentAccount.ID, e);
             return new List<IProviderInfo>().ToAsyncEnumerable();
         }
     }
@@ -275,7 +274,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             }
             catch (Exception e)
             {
-                _logger.ErrorUpdateProviderInfo(linkId, securityContext.CurrentAccount.ID, e);
+                logger.ErrorUpdateProviderInfo(linkId, securityContext.CurrentAccount.ID, e);
                 throw;
             }
 
@@ -350,7 +349,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorUpdateBackupProviderInfo(securityContext.CurrentAccount.ID, e);
+            logger.ErrorUpdateBackupProviderInfo(securityContext.CurrentAccount.ID, e);
             throw;
         }
 
@@ -694,7 +693,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorDecryptPassword(id, securityContext.CurrentAccount.ID, e);
+            logger.ErrorDecryptPassword(id, securityContext.CurrentAccount.ID, e);
             return null;
         }
     }

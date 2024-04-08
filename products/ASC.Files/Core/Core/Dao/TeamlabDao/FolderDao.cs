@@ -525,15 +525,7 @@ internal class FolderDao(
             ];
             
             //full path to root
-            treeToAdd.AddRange(filesDbContext.Tree
-                .Where(r => r.FolderId == folder.ParentId)
-                .Select(o =>  new DbFolderTree
-                {
-                    FolderId = folder.Id,
-                    ParentId = o.ParentId,
-                    Level = o.Level + 1
-                }));
-
+            treeToAdd.AddRange(await Queries.FolderTreeAsync(filesDbContext, folder.Id, folder.ParentId).ToListAsync());
             await filesDbContext.AddRangeAsync(treeToAdd);
             await filesDbContext.SaveChangesAsync();
         }
@@ -2099,10 +2091,17 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int id) =>
                 ctx.Folders.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
 
-    public static readonly Func<FilesDbContext, int, int, Task<bool>> FolderIsExistAsync =
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFolderTree>> FolderTreeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int id) =>
-                ctx.Folders.Any(r => r.Id == id && r.TenantId == tenantId));
+            (FilesDbContext ctx, int id, int parentId) =>
+                ctx.Tree
+                    .Where(r => r.FolderId == parentId)
+                    .Select(o =>  new DbFolderTree
+                    {
+                        FolderId = id,
+                        ParentId = o.ParentId,
+                        Level = o.Level + 1
+                    }));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> SubfolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
