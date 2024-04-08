@@ -315,7 +315,7 @@ public partial class SettingsController(MessageService messageService,
         }
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota;
+        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
 
@@ -368,7 +368,7 @@ public partial class SettingsController(MessageService messageService,
 
         var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota;
+        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
 
