@@ -30,9 +30,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class UpdateRoomsQuotaRequestDto<T>
 {
-    /// <summary>List of rooms Id</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic</type>
-    public IEnumerable<T> RoomIds { get; set; }
+    /// <summary>List of room IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 
     /// <summary>Room quota</summary>
     /// <type>System.Int64, System</type>
