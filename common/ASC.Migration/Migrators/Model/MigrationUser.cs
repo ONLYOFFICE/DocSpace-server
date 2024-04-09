@@ -41,6 +41,8 @@ public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
             Key = key,
             Email = Info.Email,
             DisplayName = Info.DisplayUserName(displayUserSettingsHelper),
+            FirstName = Info.FirstName,
+            LastName = Info.LastName,
             UserType = UserType,
             MigratingFiles = Storage.ToApiInfo(),
         };

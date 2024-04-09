@@ -373,7 +373,7 @@ public class FileStorageService //: IFileStorageService
     {
         var folder = await InternalCreateFolderAsync(parentId, title);
         
-        _ = socketManager.CreateFolderAsync(folder);
+        await socketManager.CreateFolderAsync(folder);
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;

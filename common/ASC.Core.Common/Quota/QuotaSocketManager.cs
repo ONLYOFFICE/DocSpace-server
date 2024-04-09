@@ -24,13 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
 namespace ASC.Core.Common.Quota;
-public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
-        IHttpClientFactory clientFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        TenantManager tenantManager,
-        IConfiguration configuration)
-    : SocketServiceClient(logger, clientFactory, machinePseudoKeys, configuration)
+public class QuotaSocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 
@@ -57,7 +60,7 @@ public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
 
     private async Task<string> GetQuotaRoom()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }

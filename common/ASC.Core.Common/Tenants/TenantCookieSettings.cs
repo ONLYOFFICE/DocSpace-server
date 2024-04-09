@@ -59,11 +59,17 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 [Scope]
 public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsManager settingsManager)
 {
-    public bool IsVisibleSettings { get; internal set; } = !(configuration["web:hide-settings"] ?? string.Empty)
-        .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-        .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
-
-
+    private bool? _isVisibleSettings;
+    private bool IsVisibleSettings
+    {
+        get
+        {
+            return _isVisibleSettings ??= !(configuration["web:hide-settings"] ?? string.Empty)
+                .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
+        }
+    }
+    
     public async Task<TenantCookieSettings> GetForTenantAsync(int tenantId)
     {
         return IsVisibleSettings
