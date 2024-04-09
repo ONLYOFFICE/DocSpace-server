@@ -145,7 +145,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         string strError = null;

@@ -27,27 +27,14 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class FilesMessageService(ILoggerProvider options,
+public class FilesMessageService(
+    ILogger<FilesMessageService> logger,
     MessageTarget messageTarget,
     MessageService messageService,
+    IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Messaging");
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    private static readonly JsonSerializerOptions _serializerOptions = 
-        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
-
-    public FilesMessageService(
-        ILoggerProvider options,
-        MessageTarget messageTarget,
-        MessageService messageService,
-        IHttpContextAccessor httpContextAccessor,
-        IDaoFactory daoFactory)
-        : this(options, messageTarget, messageService, daoFactory)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public async Task SendAsync(MessageAction action, params string[] description)
     {
@@ -96,7 +83,7 @@ public class FilesMessageService(ILoggerProvider options,
 
         if (headers == null)//todo check need if
         {
-            _logger.DebugEmptyRequestHeaders(action);
+            logger.DebugEmptyRequestHeaders(action);
 
             return;
         }
@@ -137,7 +124,7 @@ public class FilesMessageService(ILoggerProvider options,
 
         if (headers == null)//todo check need if
         {
-            _logger.DebugEmptyRequestHeaders(action);
+            logger.DebugEmptyRequestHeaders(action);
 
             return;
         }
@@ -152,9 +139,9 @@ public class FilesMessageService(ILoggerProvider options,
             return;
         }
 
-        if (_httpContextAccessor == null)
+        if (httpContextAccessor == null)
         {
-            _logger.DebugEmptyHttpRequest(action);
+            logger.DebugEmptyHttpRequest(action);
 
             return;
         }
@@ -178,9 +165,9 @@ public class FilesMessageService(ILoggerProvider options,
             return;
         }
 
-        if (_httpContextAccessor == null)
+        if (httpContextAccessor == null)
         {
-            _logger.DebugEmptyHttpRequest(action);
+            logger.DebugEmptyHttpRequest(action);
             return;
         }
 

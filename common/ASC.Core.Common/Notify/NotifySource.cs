@@ -28,8 +28,8 @@ namespace ASC.Core.Notify;
 
 public abstract class NotifySource : INotifySource
 {
-    private readonly Dictionary<CultureInfo, IActionProvider> _actions = new();
-    private readonly Dictionary<CultureInfo, IPatternProvider> _patterns = new();
+    private static readonly Dictionary<CultureInfo, IActionProvider> _actions = new();
+    private static readonly Dictionary<CultureInfo, IPatternProvider> _patterns = new();
 
     private readonly IRecipientProvider _recipientsProvider;
     public string Id { get; }
