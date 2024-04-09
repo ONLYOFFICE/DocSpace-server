@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Configuration;
+using System.Threading.Channels;
+
+using ASC.Core.Notify.Socket;
 
 namespace ASC.ApiSystem;
 
@@ -146,6 +147,11 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        _diHelper.TryAdd<SocketService>();
         
         services
             .AddAuthentication()
