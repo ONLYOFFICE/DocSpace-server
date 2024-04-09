@@ -219,4 +219,7 @@
   <data name="MigrationStartException" xml:space="preserve">
     <value>Parsing ist noch im Gange</value>
   </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migration ist bereits in Bearbeitung</value>
+  </data>
 </root>

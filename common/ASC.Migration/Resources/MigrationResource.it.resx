@@ -201,4 +201,25 @@
   <data name="UserSkipped" xml:space="preserve">
     <value>Impossibile importare l'utente: {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>File comuni di migrazione</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nessun fornitore di migrazione di questo tipo</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Non è in corso alcuna migrazione</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>File di progetto di migrazione</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsing è ancora in corso</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>La migrazione è già in corso</value>
+  </data>
 </root>
