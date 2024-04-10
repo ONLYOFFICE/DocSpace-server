@@ -45,7 +45,7 @@ public class MigrationInfo
 
     public virtual MigrationApiInfo ToApiInfo()
     {
-        return new MigrationApiInfo()
+        return new MigrationApiInfo
         {
             Users = Users.Select(u => u.Value.ToApiInfo(u.Key)).ToList(),
             ExistUsers = ExistUsers.Select(u => u.Value.ToApiInfo(u.Key)).ToList(),

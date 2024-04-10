@@ -290,8 +290,7 @@ public class ProviderInfoHelper
 }
 
 [Transient(Additional = typeof(DisposableWrapperExtension))]
-public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider,
-        OAuth20TokenHelper oAuth20TokenHelper)
+public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     : IDisposable
 {
     private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
@@ -341,7 +340,7 @@ public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider
             return token;
         }
 
-        token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
+        token = oAuth20TokenHelper.RefreshToken<T>(token);
 
         var dbDao = serviceProvider.GetService<ProviderAccountDao>();
         await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));

@@ -28,16 +28,16 @@ namespace ASC.Files.Core.Core.Thirdparty;
 
 /// <inheritdoc />
 [Scope]
-internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDbContext> dbContextFactory,
-        UserManager userManager,
-        CrossDao crossDao,
-        IDaoSelector<TFile, TFolder, TItem> daoSelector,
-        IFileDao<int> fileDao,
-        IFolderDao<int> folderDao,
-        TempStream tempStream,
-        SetupInfo setupInfo,
-        IDaoBase<TFile, TFolder, TItem> dao,
-        TenantManager tenantManager)
+internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    UserManager userManager,
+    CrossDao crossDao,
+    IDaoSelector<TFile, TFolder, TItem> daoSelector,
+    IFileDao<int> fileDao,
+    IFolderDao<int> folderDao,
+    SetupInfo setupInfo,
+    IDaoBase<TFile, TFolder, TItem> dao,
+    TenantManager tenantManager)
     : BaseFolderDao, IFolderDao<string>
     where TFile : class, TItem
     where TFolder : class, TItem

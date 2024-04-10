@@ -103,7 +103,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     public async Task RecalculateFoldersUsedSpace(int TenantId)
     {
-        await using var filesDbContext = dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var queryGroup = filesDbContext.Folders
                     .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
