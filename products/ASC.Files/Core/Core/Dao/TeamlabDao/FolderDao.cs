@@ -150,7 +150,7 @@ internal class FolderDao(
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
     {
-        if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
+        if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
             yield break;
         }

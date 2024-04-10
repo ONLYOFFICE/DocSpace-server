@@ -443,7 +443,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (parent.FolderType != FolderType.Recent)
             {
-                data = await SortEntries<T>(data, orderBy);
+                data = await SortEntries<T>(data, orderBy, provider != ProviderFilter.Storage);
             }
 
             if (0 < from)
@@ -464,7 +464,7 @@ public class EntryManager(IDaoFactory daoFactory,
         //sorting after marking
         if (orderBy.SortedBy == SortedByType.New)
         {
-            data = await SortEntries<T>(data, orderBy);
+            data = await SortEntries<T>(data, orderBy, provider != ProviderFilter.Storage);
 
             if (0 < from)
             {
@@ -790,7 +790,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return entries;
     }
 
-    public async Task<IEnumerable<FileEntry>> SortEntries<T>(IEnumerable<FileEntry> entries, OrderBy orderBy)
+    public async Task<IEnumerable<FileEntry>> SortEntries<T>(IEnumerable<FileEntry> entries, OrderBy orderBy, bool pinOnTop = true)
     {
         if (entries == null || !entries.Any())
         {
@@ -922,32 +922,47 @@ public class EntryManager(IDaoFactory daoFactory,
         if (orderBy.SortedBy != SortedByType.New)
         {
             var rooms = entries.Where(r => r.FileEntryType == FileEntryType.Folder && DocSpaceHelper.IsRoom(((IFolder)r).FolderType));
-            var pinnedRooms = rooms.Where(r => ((IFolder)r).Pinned);
-            var thirdpartyRooms = rooms.Where(r => r.ProviderEntry);
 
-            if (orderBy.SortedBy == SortedByType.UsedSpace)
+            if (pinOnTop)
             {
-                rooms = rooms.Except(thirdpartyRooms).Except(pinnedRooms);
+                var pinnedRooms = rooms.Where(r => ((IFolder)r).Pinned);
+                var thirdpartyRooms = rooms.Where(r => r.ProviderEntry);
+
+                if (orderBy.SortedBy == SortedByType.UsedSpace)
+                {
+                    rooms = rooms.Except(thirdpartyRooms).Except(pinnedRooms);
+                }
+                else
+                {
+                    rooms = rooms.Except(pinnedRooms);
+                }
+
+                var folders = orderBy.SortedBy == SortedByType.UsedSpace ?
+                    entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(thirdpartyRooms).Except(rooms) :
+                    entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
+                var files = entries.Where(r => r.FileEntryType == FileEntryType.File);
+                pinnedRooms = pinnedRooms.OrderBy(r => r, comparer);
+                rooms = rooms.OrderBy(r => r, comparer);
+                folders = folders.OrderBy(r => r, comparer);
+                files = files.OrderBy(r => r, comparer);
+
+                if (orderBy.SortedBy == SortedByType.UsedSpace)
+                {
+                    return pinnedRooms.Concat(thirdpartyRooms).Concat(rooms).Concat(folders).Concat(files);
+                }
+                return pinnedRooms.Concat(rooms).Concat(folders).Concat(files);
             }
             else
             {
-                rooms = rooms.Except(pinnedRooms);
-            }
-            
-            var folders = orderBy.SortedBy == SortedByType.UsedSpace ? 
-                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(thirdpartyRooms).Except(rooms) :
-                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
-            var files = entries.Where(r => r.FileEntryType == FileEntryType.File);
-            pinnedRooms = pinnedRooms.OrderBy(r => r, comparer);
-            rooms = rooms.OrderBy(r => r, comparer);
-            folders = folders.OrderBy(r => r, comparer);
-            files = files.OrderBy(r => r, comparer);
+                var folders = entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(rooms);
+                var files = entries.Where(r => r.FileEntryType == FileEntryType.File);
 
-            if (orderBy.SortedBy == SortedByType.UsedSpace)
-            {
-                return pinnedRooms.Concat(thirdpartyRooms).Concat(rooms).Concat(folders).Concat(files);
+                rooms = rooms.OrderBy(r => r, comparer);
+                folders = folders.OrderBy(r => r, comparer);
+                files = files.OrderBy(r => r, comparer);
+
+                return rooms.Concat(folders).Concat(files);
             }
-            return pinnedRooms.Concat(rooms).Concat(folders).Concat(files);
         }
 
         return entries.OrderBy(r => r, comparer);
