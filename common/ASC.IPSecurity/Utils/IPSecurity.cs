@@ -118,7 +118,7 @@ public class IPSecurity(
             }
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
-                          ? Array.Empty<string>()
+                          ? []
                           : requestIps.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
             var isDocSpaceAdmin = await userManager.IsUserInGroupAsync(authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);

@@ -797,7 +797,7 @@ public class PluginsConfig()
 
             //return plugins.ToArray();
 
-            return Array.Empty<string>();
+            return [];
         }
     }
 }
