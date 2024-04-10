@@ -219,4 +219,7 @@
   <data name="MigrationStartException" xml:space="preserve">
     <value>Jäsentäminen on vielä käynnissä</value>
   </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Siirto on jo käynnissä</value>
+  </data>
 </root>

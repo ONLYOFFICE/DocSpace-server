@@ -219,4 +219,7 @@
   <data name="MigrationStartException" xml:space="preserve">
     <value>Parsovanie stále prebieha</value>
   </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrácia už prebieha</value>
+  </data>
 </root>

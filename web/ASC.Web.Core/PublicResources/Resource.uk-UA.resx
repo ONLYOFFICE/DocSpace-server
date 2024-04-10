@@ -1042,4 +1042,7 @@
   <data name="RoomFreeSpaceException" xml:space="preserve">
     <value>Перевищено квоту простору кімнати</value>
   </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору кімнати</value>
+  </data>
 </root>

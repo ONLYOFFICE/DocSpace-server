@@ -467,4 +467,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="RoomIndex_Total" xml:space="preserve">
     <value>トータル</value>
   </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
 </root>
