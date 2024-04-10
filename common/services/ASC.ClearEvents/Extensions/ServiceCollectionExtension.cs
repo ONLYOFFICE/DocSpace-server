@@ -34,7 +34,7 @@ public static class ServiceCollectionExtension
     {
         var diHelper = new DIHelper(services);
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddHostedService<ClearEventsService>();
         diHelper.TryAdd<ClearEventsService>();

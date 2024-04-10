@@ -288,7 +288,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         IAsyncEnumerable<Object> objToDel;
 
@@ -400,7 +400,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var srcKey = MakePath(srcDomain, srcPath);
         var dstKey = MakePath(newDomain, newPath);
@@ -431,20 +431,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         return GetObjectsAsync(domain, path, recursive)
                .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
-
-    private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
-    {
-        using var storage = GetStorage();
-
-        var items = storage.ListObjects(_bucket, MakePath(domain, path));
-
-        if (recursive)
-        {
-            return items;
-        }
-
-        return items.Where(x => x.Name.IndexOf('/', MakePath(domain, path + "/").Length) == -1);
-    }
+    
 
     private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
@@ -486,10 +473,9 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
     public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
-        var objToDel = storage
-                          .ListObjectsAsync(_bucket, MakePath(domain, path));
+        var objToDel = storage.ListObjectsAsync(_bucket, MakePath(domain, path));
 
         await foreach (var obj in objToDel)
         {

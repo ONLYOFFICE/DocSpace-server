@@ -267,37 +267,37 @@ internal class FolderDao(
     }
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType>() { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var result = new FilesStatisticsResultDto() { };
+        var result = new FilesStatisticsResultDto { };
         await foreach (var rootFolder in Queries.FolderTypeUsedSpaceAsync(filesDbContext, tenantId, fileRootFolders))
         {
             switch (rootFolder.FolderType)
             {
                 case FolderType.USER:
-                    result.MyDocumentsUsedSpace = new FilesStatisticsFolder()
+                    result.MyDocumentsUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.MyFiles,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.Archive:
-                    result.ArchiveUsedSpace = new FilesStatisticsFolder()
+                    result.ArchiveUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.Archive,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.TRASH:
-                    result.TrashUsedSpace = new FilesStatisticsFolder()
+                    result.TrashUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.Trash,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.VirtualRooms:
-                    result.RoomsUsedSpace = new FilesStatisticsFolder()
+                    result.RoomsUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.VirtualRooms,
                         UsedSpace = rootFolder.UsedSpace
@@ -525,15 +525,7 @@ internal class FolderDao(
             ];
             
             //full path to root
-            treeToAdd.AddRange(filesDbContext.Tree
-                .Where(r => r.FolderId == folder.ParentId)
-                .Select(o =>  new DbFolderTree
-                {
-                    FolderId = folder.Id,
-                    ParentId = o.ParentId,
-                    Level = o.Level + 1
-                }));
-
+            treeToAdd.AddRange(await Queries.FolderTreeAsync(filesDbContext, folder.Id, folder.ParentId).ToListAsync());
             await filesDbContext.AddRangeAsync(treeToAdd);
             await filesDbContext.SaveChangesAsync();
         }
@@ -881,14 +873,14 @@ internal class FolderDao(
     public async Task<int> ChangeTreeFolderSizeAsync(int folderId, long size)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         await Queries.UpdateTreeFolderCounterAsync(filesDbContext, tenantId, folderId, size);
         return folderId;
     }
     public async Task<int> ChangeFolderQuotaAsync(Folder<int> folder, long quota)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var toUpdate = await Queries.FolderForUpdateAsync(filesDbContext, tenantId, folder.Id);
 
@@ -2114,10 +2106,17 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int id) =>
                 ctx.Folders.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
 
-    public static readonly Func<FilesDbContext, int, int, Task<bool>> FolderIsExistAsync =
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFolderTree>> FolderTreeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int id) =>
-                ctx.Folders.Any(r => r.Id == id && r.TenantId == tenantId));
+            (FilesDbContext ctx, int id, int parentId) =>
+                ctx.Tree
+                    .Where(r => r.FolderId == parentId)
+                    .Select(o =>  new DbFolderTree
+                    {
+                        FolderId = id,
+                        ParentId = o.ParentId,
+                        Level = o.Level + 1
+                    }));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> SubfolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

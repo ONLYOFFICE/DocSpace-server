@@ -59,7 +59,7 @@ public class GoogleWorkspaceMigrator : Migrator
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
     {
-        MigrationInfo = new MigrationInfo() { Name = "GoogleWorkspace" };
+        MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
@@ -206,7 +206,7 @@ public class GoogleWorkspaceMigrator : Migrator
     }
     private void ParseGroup(string tmpFolder)
     {
-        var group = new MigrationGroup() { Info = new(), UserKeys = new HashSet<string>() };
+        var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
         var groupsFolder = Path.Combine(tmpFolder, "Groups");
         var groupInfo = Path.Combine(groupsFolder, "info.csv");
         using (var sr = new StreamReader(groupInfo))
@@ -299,7 +299,7 @@ public class GoogleWorkspaceMigrator : Migrator
                 {
                     ParseFolders(path, foldersdictionary, i);
                 }
-                var file = new MigrationFile()
+                var file = new MigrationFile
                 {
                     Id = i++,
                     Folder = split.Count() == 1 ? 0 : foldersdictionary[path].Id,
@@ -340,7 +340,7 @@ public class GoogleWorkspaceMigrator : Migrator
                     continue;
                 }
 
-                var security = new MigrationSecurity()
+                var security = new MigrationSecurity
                 {
                     Subject = subject,
                     EntryId = id,

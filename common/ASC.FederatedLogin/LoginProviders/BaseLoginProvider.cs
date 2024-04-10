@@ -132,7 +132,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
         redirect = false;
 
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, code);
+        return _oAuth20TokenHelper.GetAccessToken<T>(code);
     }
 
     public virtual LoginProfile GetLoginProfile(OAuth20Token token)
@@ -142,7 +142,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
     public OAuth20Token GetToken(string codeOAuth)
     {
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, codeOAuth);
+        return _oAuth20TokenHelper.GetAccessToken<T>(codeOAuth);
     }
 }
 

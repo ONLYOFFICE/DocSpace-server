@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Notify.Socket;
+
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
@@ -67,9 +69,9 @@ public abstract class BaseStartup
         services.AddHttpClient();
         services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
         {
-            return new HttpClientHandler()
+            return new HttpClientHandler
             {
-                AllowAutoRedirect = false,
+                AllowAutoRedirect = false
             };
         });
 
@@ -265,7 +267,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
                 .AddBaseDbContextPool<CoreDbContext>()
@@ -447,6 +449,13 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        services.AddHostedService<SocketService>();
+        DIHelper.TryAdd<SocketService>();
+
 
         if (!_hostEnvironment.IsDevelopment())
         {

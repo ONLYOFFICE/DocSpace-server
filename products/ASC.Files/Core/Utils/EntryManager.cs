@@ -923,15 +923,30 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var rooms = entries.Where(r => r.FileEntryType == FileEntryType.Folder && DocSpaceHelper.IsRoom(((IFolder)r).FolderType));
             var pinnedRooms = rooms.Where(r => ((IFolder)r).Pinned);
-            rooms = rooms.Except(pinnedRooms);
+            var thirdpartyRooms = rooms.Where(r => r.ProviderEntry);
 
-            var folders = entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
+            if (orderBy.SortedBy == SortedByType.UsedSpace)
+            {
+                rooms = rooms.Except(thirdpartyRooms).Except(pinnedRooms);
+            }
+            else
+            {
+                rooms = rooms.Except(pinnedRooms);
+            }
+            
+            var folders = orderBy.SortedBy == SortedByType.UsedSpace ? 
+                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(thirdpartyRooms).Except(rooms) :
+                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
             var files = entries.Where(r => r.FileEntryType == FileEntryType.File);
             pinnedRooms = pinnedRooms.OrderBy(r => r, comparer);
             rooms = rooms.OrderBy(r => r, comparer);
             folders = folders.OrderBy(r => r, comparer);
             files = files.OrderBy(r => r, comparer);
 
+            if (orderBy.SortedBy == SortedByType.UsedSpace)
+            {
+                return pinnedRooms.Concat(thirdpartyRooms).Concat(rooms).Concat(folders).Concat(files);
+            }
             return pinnedRooms.Concat(rooms).Concat(folders).Concat(files);
         }
 
