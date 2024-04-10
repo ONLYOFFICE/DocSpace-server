@@ -48,6 +48,7 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Migration.Core;
 global using ASC.Migration.Core.Core;
+global using ASC.Migration.Core.Models.Api;
 global using ASC.Web.Core.HttpHandlers;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Studio;

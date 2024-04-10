@@ -248,10 +248,8 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
         var httpClient = clientFactory.CreateClient();
         
         using (var response = await httpClient.SendAsync(request))
-        await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            using var readStream = new StreamReader(responseStream);
-            var responseString = await readStream.ReadToEndAsync();
+            var responseString = await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
             uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
@@ -276,7 +274,6 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             Method = HttpMethod.Put
         };
         
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
 
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(oneDriveSession.BytesTransferred,
@@ -295,11 +292,8 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             oneDriveSession.BytesTransferred += chunkLength;
             
             oneDriveSession.Status = RenewableUploadSessionStatus.Completed;
-
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-
-            using var readStream = new StreamReader(responseStream);
-            var responseString = await readStream.ReadToEndAsync();
+            
+            var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             oneDriveSession.FileId = responseJson.Value<string>("id");
@@ -388,6 +382,11 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
     public Task<long> GetMaxUploadSizeAsync()
     {
         return Task.FromResult(MaxChunkedUploadFileSize);
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }
 

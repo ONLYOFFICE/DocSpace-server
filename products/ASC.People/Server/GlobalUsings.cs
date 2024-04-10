@@ -29,6 +29,7 @@ global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
 global using System.ServiceModel.Security;
+global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
@@ -47,6 +48,7 @@ global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;

@@ -903,9 +903,6 @@
   <data name="Owner" xml:space="preserve">
     <value>المالك</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة القرص</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>مساحة سحابية لمستندات مكتبك</value>
   </data>
@@ -992,9 +989,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>بوابة الدخول الموحد</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} مساحة تخزين</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>لا ينبغي أن يتجاوز حجم التخزين المستخدم {0}</value>

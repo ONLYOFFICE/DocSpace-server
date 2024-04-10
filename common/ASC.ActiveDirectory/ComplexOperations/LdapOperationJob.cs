@@ -126,7 +126,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                     logger.InfoStartOperation(Enum.GetName(typeof(LdapOperationType), _operationType));
 
-                    SetProgress(1, _resource.LdapSettingsStatusCheckingLdapSettings);
+                    await SetProgress(1, _resource.LdapSettingsStatusCheckingLdapSettings);
 
                     logger.DebugPrepareSettings();
 
@@ -144,7 +144,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                     {
                         novellLdapSettingsChecker.Init(novellLdapUserImporter);
 
-                        SetProgress(5, _resource.LdapSettingsStatusLoadingBaseInfo);
+                        await SetProgress(5, _resource.LdapSettingsStatusLoadingBaseInfo);
 
                         var result = novellLdapSettingsChecker.CheckSettings();
 
@@ -204,7 +204,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             try
             {
                 this[LdapTaskProperty.FINISHED] = true;
-                PublishTaskInfo();
+                await PublishTaskInfo();
                 securityContext.Logout();
             }
             catch (Exception ex)
@@ -220,7 +220,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         {
             if (_operationType == LdapOperationType.Save)
             {
-                SetProgress(10, _resource.LdapSettingsStatusSavingSettings);
+                await SetProgress(10, _resource.LdapSettingsStatusSavingSettings);
 
                 _ldapSettings.IsDefault = _ldapSettings.Equals(_ldapSettings.GetDefault());
 
@@ -270,8 +270,8 @@ public class LdapOperationJob(TenantManager tenantManager,
                 var ldapCurrentUserPhotos = (await settingsManager.LoadAsync<LdapCurrentUserPhotos>()).GetDefault();
                 await settingsManager.SaveAsync(ldapCurrentUserPhotos);
 
-                var ldapCurrentAcccessSettings = (await settingsManager.LoadAsync<LdapCurrentAcccessSettings>()).GetDefault();
-                await settingsManager.SaveAsync(ldapCurrentAcccessSettings);
+                var ldapCurrentAccessSettings = (await settingsManager.LoadAsync<LdapCurrentAcccessSettings>()).GetDefault();
+                await settingsManager.SaveAsync(ldapCurrentAccessSettings);
                 // don't remove permissions on shutdown
                 //var rights = new List<LdapSettings.AccessRight>();
                 //TakeUsersRights(rights);
@@ -307,10 +307,10 @@ public class LdapOperationJob(TenantManager tenantManager,
         }
         finally
         {
-            SetProgress(99, _resource.LdapSettingsStatusDisconnecting, "");
+            await SetProgress(99, _resource.LdapSettingsStatusDisconnecting, "");
         }
 
-        SetProgress(100, _operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
+        await SetProgress(100, _operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
             ? JsonSerializer.Serialize(ldapChanges)
             : "", "");
     }
@@ -319,7 +319,7 @@ public class LdapOperationJob(TenantManager tenantManager,
     {
         const double percents = 48;
 
-        SetProgress((int)percents, _resource.LdapSettingsModifyLdapUsers);
+        await SetProgress((int)percents, _resource.LdapSettingsModifyLdapUsers);
 
         var existingLDAPUsers = (await userManager.GetUsersAsync(EmployeeStatus.All)).Where(u => u.Sid != null).ToList();
 
@@ -332,10 +332,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         foreach (var existingLDAPUser in existingLDAPUsers)
         {
-            SetProgress(Convert.ToInt32(percentage),
-                currentSource:
-                    string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(existingLDAPUser)));
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {userFormatter.GetUserName(existingLDAPUser)}");
 
             switch (_operationType)
             {
@@ -390,7 +387,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private async Task SyncLdapAvatarAsync()
     {
-        SetProgress(90, _resource.LdapSettingsStatusUpdatingUserPhotos);
+        await SetProgress(90, _resource.LdapSettingsStatusUpdatingUserPhotos);
 
         if (!_ldapSettings.LdapMapping.ContainsKey(LdapSettings.MappingFields.AvatarAttribute))
         {
@@ -447,8 +444,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
             try
             {
-                SetProgress((int)(currentPercent += step),
-                    string.Format("{0}: {1}", _resource.LdapSettingsStatusSavingUserPhoto, userFormatter.GetUserName(user)));
+                await SetProgress((int)(currentPercent += step), $"{_resource.LdapSettingsStatusSavingUserPhoto}: {userFormatter.GetUserName(user)}");
 
                 await userPhotoManager.SyncPhotoAsync(user.Id, (byte[])image);
 
@@ -469,7 +465,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private async Task SyncLdapAccessRights()
     {
-        SetProgress(95, _resource.LdapSettingsStatusUpdatingAccessRights);
+        await SetProgress(95, _resource.LdapSettingsStatusUpdatingAccessRights);
 
         var currentUserRights = new List<LdapSettings.AccessRight>();
         await TakeUsersRightsAsync(_currentUser != null ? currentUserRights : null);
@@ -497,7 +493,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             return;
         }
 
-        SetProgress(95, _resource.LdapSettingsStatusRemovingOldRights);
+        await SetProgress(95, _resource.LdapSettingsStatusRemovingOldRights);
         foreach (var right in current.CurrentAccessRights)
         {
             foreach (var user in right.Value)
@@ -587,8 +583,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                         }
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
-                        SetProgress((int)currentPercent,
-                            string.Format(_resource.LdapSettingsStatusGivingRights, userFormatter.GetUserName(user), access.Key));
+                        await SetProgress((int)currentPercent, string.Format(_resource.LdapSettingsStatusGivingRights, userFormatter.GetUserName(user), access.Key));
                         await webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[access.Key], user.Id, true);
 
                         if (currentUserRights != null && currentUserRights.Contains(access.Key))
@@ -606,7 +601,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private async Task SyncLDAPUsersAsync()
     {
-        SetProgress(15, _resource.LdapSettingsStatusGettingUsersFromLdap);
+        await SetProgress(15, _resource.LdapSettingsStatusGettingUsersFromLdap);
 
         var ldapUsers = await novellLdapUserImporter.GetDiscoveredUsersByAttributesAsync();
 
@@ -618,11 +613,11 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         logger.DebugGetDiscoveredUsersByAttributes(novellLdapUserImporter.AllDomainUsers.Count);
 
-        SetProgress(20, _resource.LdapSettingsStatusRemovingOldUsers, "");
+        await SetProgress(20, _resource.LdapSettingsStatusRemovingOldUsers, "");
 
         ldapUsers = await RemoveOldDbUsersAsync(ldapUsers);
 
-        SetProgress(30,
+        await SetProgress(30,
             _operationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? _resource.LdapSettingsStatusSavingUsers
                 : _resource.LdapSettingsStatusSyncingUsers,
@@ -630,14 +625,14 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         await SyncDbUsers(ldapUsers);
 
-        SetProgress(70, _resource.LdapSettingsStatusRemovingOldGroups, "");
+        await SetProgress(70, _resource.LdapSettingsStatusRemovingOldGroups, "");
 
         await RemoveOldDbGroupsAsync(new List<GroupInfo>()); // Remove all db groups with sid
     }
 
     private async Task SyncLDAPUsersInGroupsAsync()
     {
-        SetProgress(15, _resource.LdapSettingsStatusGettingGroupsFromLdap);
+        await SetProgress(15, _resource.LdapSettingsStatusGettingGroupsFromLdap);
 
         var ldapGroups = novellLdapUserImporter.GetDiscoveredGroupsByAttributes();
 
@@ -649,7 +644,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         logger.DebugGetDiscoveredGroupsByAttributes(novellLdapUserImporter.AllDomainGroups.Count);
 
-        SetProgress(20, _resource.LdapSettingsStatusGettingUsersFromLdap);
+        await SetProgress(20, _resource.LdapSettingsStatusGettingUsersFromLdap);
 
         var (ldapGroupsUsers, uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
 
@@ -661,7 +656,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         logger.DebugGetGroupsUsers(novellLdapUserImporter.AllDomainUsers.Count);
 
-        SetProgress(30,
+        await SetProgress(30,
             _operationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? _resource.LdapSettingsStatusSavingUsers
                 : _resource.LdapSettingsStatusSyncingUsers,
@@ -669,15 +664,15 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var newUniqueLdapGroupUsers = await SyncGroupsUsers(uniqueLdapGroupUsers);
 
-        SetProgress(60, _resource.LdapSettingsStatusSavingGroups, "");
+        await SetProgress(60, _resource.LdapSettingsStatusSavingGroups, "");
 
         await SyncDbGroups(ldapGroupsUsers);
 
-        SetProgress(80, _resource.LdapSettingsStatusRemovingOldGroups, "");
+        await SetProgress(80, _resource.LdapSettingsStatusRemovingOldGroups, "");
 
         await RemoveOldDbGroupsAsync(ldapGroups);
 
-        SetProgress(90, _resource.LdapSettingsStatusRemovingOldUsers, "");
+        await SetProgress(90, _resource.LdapSettingsStatusRemovingOldUsers, "");
 
         await RemoveOldDbUsersAsync(newUniqueLdapGroupUsers);
     }
@@ -706,10 +701,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
             ++gIndex;
 
-            SetProgress(Convert.ToInt32(percentage),
-                currentSource:
-                    string.Format("({0}/{1}): {2}", gIndex,
-                        gCount, ldapGroup.Name));
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}");
 
             var dbLdapGroup = await userManager.GetGroupInfoBySidAsync(ldapGroup.Sid);
 
@@ -755,13 +747,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                     foreach (var userBySid in groupMembersToAdd)
                     {
-                        SetProgress(
-                            currentSource:
-                                string.Format("({0}/{1}): {2}, {3} ({4}/{5}): {6}", gIndex,
-                                    gCount, ldapGroup.Name,
-                                    _resource.LdapSettingsStatusAddingGroupUser,
-                                    ++index, count,
-                                    userFormatter.GetUserName(userBySid)));
+                        await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(userBySid)}");
 
                         await userManager.AddUserIntoGroupAsync(userBySid.Id, ldapGroup.ID);
                     }
@@ -793,20 +779,16 @@ public class LdapOperationJob(TenantManager tenantManager,
         return needUpdate;
     }
 
-    private async Task UpdateDbGroupAsync(GroupInfo dbLdapGroup, GroupInfo ldapGroup, List<UserInfo> ldapGroupUsers, int gIndex,
-        int gCount)
+    private async Task UpdateDbGroupAsync(GroupInfo dbLdapGroup, GroupInfo ldapGroup, List<UserInfo> ldapGroupUsers, int gIndex, int gCount)
     {
-        SetProgress(currentSource:
-            string.Format("({0}/{1}): {2}", gIndex, gCount, ldapGroup.Name));
+        await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}");
 
         var dbGroupMembers =
                     (await userManager.GetUsersByGroupAsync(dbLdapGroup.ID, EmployeeStatus.All))
                         .Where(u => u.Sid != null)
                         .ToList();
 
-        var groupMembersToRemove =
-            dbGroupMembers.Where(
-                dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
+        var groupMembersToRemove = dbGroupMembers.Where(dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
         var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
             .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Core.Users.Constants.LostUser)).ToListAsync();
@@ -829,13 +811,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 foreach (var dbUser in groupMembersToRemove)
                 {
-                    SetProgress(
-                        currentSource:
-                            string.Format("({0}/{1}): {2}, {3} ({4}/{5}): {6}", gIndex, gCount,
-                                dbLdapGroup.Name,
-                                _resource.LdapSettingsStatusRemovingGroupUser,
-                                ++index, count,
-                                userFormatter.GetUserName(dbUser)));
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}, {_resource.LdapSettingsStatusRemovingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(dbUser)}");
 
                     await userManager.RemoveUserFromGroupAsync(dbUser.Id, dbLdapGroup.ID);
                 }
@@ -845,22 +821,14 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 foreach (var userInfo in groupMembersToAdd)
                 {
-                    SetProgress(
-                        currentSource:
-                            string.Format("({0}/{1}): {2}, {3} ({4}/{5}): {6}", gIndex, gCount,
-                                ldapGroup.Name,
-                                _resource.LdapSettingsStatusAddingGroupUser,
-                                ++index, count,
-                                userFormatter.GetUserName(userInfo)));
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
 
-                    await userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID);
-                }
+                    await userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID); }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
                     && groupMembersToAdd.Count == 0)
                 {
-                    SetProgress(currentSource:
-                        string.Format("({0}/{1}): {2}", gIndex, gCount, dbLdapGroup.Name));
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}");
 
                     await userManager.DeleteGroupAsync(dbLdapGroup.ID);
                 }
@@ -925,10 +893,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         foreach (var userInfo in ldapUsers)
         {
-            SetProgress(Convert.ToInt32(percentage),
-                currentSource:
-                    string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(userInfo)));
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
 
             switch (_operationType)
             {
@@ -981,10 +946,9 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         foreach (var removedUser in removedUsers)
         {
-            SetProgress(Convert.ToInt32(percentage),
+            await SetProgress(Convert.ToInt32(percentage),
                 currentSource:
-                    string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(removedUser)));
+                $"({++index}/{count}): {userFormatter.GetUserName(removedUser)}");
 
             switch (_operationType)
             {
@@ -1048,8 +1012,8 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         foreach (var groupInfo in removedDbLdapGroups)
         {
-            SetProgress(Convert.ToInt32(percentage),
-                currentSource: string.Format("({0}/{1}): {2}", ++index, count, groupInfo.Name));
+            await SetProgress(Convert.ToInt32(percentage),
+                currentSource: $"({++index}/{count}): {groupInfo.Name}");
 
             switch (_operationType)
             {
@@ -1087,10 +1051,9 @@ public class LdapOperationJob(TenantManager tenantManager,
         {
             var ldapGroupUser = uniqueLdapGroupUsers[i];
 
-            SetProgress(Convert.ToInt32(percentage),
+            await SetProgress(Convert.ToInt32(percentage),
                 currentSource:
-                    string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(ldapGroupUser)));
+                $"({++index}/{count}): {userFormatter.GetUserName(ldapGroupUser)}");
 
             UserInfo user;
             switch (_operationType)
@@ -1153,7 +1116,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         return Percentage;
     }
 
-    private void SetProgress(int? currentPercent = null, string currentStatus = null, string currentSource = null)
+    private async Task SetProgress(int? currentPercent = null, string currentStatus = null, string currentSource = null)
     {
         if (!currentPercent.HasValue && currentStatus == null && currentSource == null)
         {
@@ -1177,12 +1140,13 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         logger.InfoProgress(Percentage, _jobStatus, _source);
 
-        PublishTaskInfo();
+        await PublishTaskInfo();
     }
-    private void PublishTaskInfo()
+    
+    private async Task PublishTaskInfo()
     {
         FillDistributedTask();
-        PublishChanges();
+        await PublishChanges();
     }
 
     private void InitDisturbedTask()

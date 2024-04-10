@@ -376,9 +376,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Proprietário</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço em disco excedida</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Acesso ao portal</value>
   </data>
@@ -474,9 +471,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} espaço de armazenamento</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>O tamanho de armazenamento usado não deve exceder {0}</value>

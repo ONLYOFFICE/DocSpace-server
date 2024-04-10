@@ -328,7 +328,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     [HttpGet("thumb")]
-    public FileResult GetThumb(string url)
+    public async Task<FileResult> GetThumb(string url)
     {
         if (!securityContext.IsAuthenticated || configuration["bookmarking:thumbnail-url"] == null)
         {
@@ -344,10 +344,8 @@ public class PortalController(ILogger<PortalController> logger,
         };
 
         var httpClient = clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
-        using var stream = response.Content.ReadAsStream();
-        var bytes = new byte[stream.Length];
-        _ = stream.Read(bytes, 0, (int)stream.Length);
+        using var response = await httpClient.SendAsync(request);
+        var bytes = await response.Content.ReadAsByteArrayAsync();
 
         var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);

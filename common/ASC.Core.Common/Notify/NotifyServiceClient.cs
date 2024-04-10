@@ -27,11 +27,11 @@
 namespace ASC.Core.Notify;
 
 [Singleton]
-public class NotifyServiceClient(IEventBus eventBus, SecurityContext securityContext) : INotifyService
+public class NotifyServiceClient(IEventBus eventBus) : INotifyService
 {
     public void SendNotifyMessage(NotifyMessage m)
     {       
-        eventBus.Publish(new NotifySendMessageRequestedIntegrationEvent(securityContext.CurrentAccount.ID, m.TenantId)
+        eventBus.Publish(new NotifySendMessageRequestedIntegrationEvent(Guid.Empty,  m.TenantId)
         {
             NotifyMessage = m
         });
@@ -39,7 +39,7 @@ public class NotifyServiceClient(IEventBus eventBus, SecurityContext securityCon
 
     public void InvokeSendMethod(NotifyInvoke notifyInvoke)
     {
-        eventBus.Publish(new NotifyInvokeSendMethodRequestedIntegrationEvent(securityContext.CurrentAccount.ID, notifyInvoke.Tenant)
+        eventBus.Publish(new NotifyInvokeSendMethodRequestedIntegrationEvent(Guid.Empty, notifyInvoke.Tenant)
         {
             NotifyInvoke = notifyInvoke
         });

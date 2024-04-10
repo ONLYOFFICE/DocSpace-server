@@ -88,9 +88,6 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Potrebne datoteke ni bilo mogoče najti</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Datoteka večja od {0} ne bo pretvorjena</value>
-  </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Te mape ne morete kopirati v podmapo</value>
   </data>
@@ -372,9 +369,6 @@
   </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo kopirana</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Datoteka, ki je večja od {0}, ne bo urejena</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo premaknjena</value>

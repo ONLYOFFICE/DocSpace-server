@@ -33,6 +33,7 @@
       <None Remove="img\total_size.svg" />
       <None Remove="img\users.svg" />
       <None Remove="img\whitelabel.svg" />
+	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="img\audit.svg" />
@@ -43,6 +44,7 @@
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\whitelabel.svg" />
+      <EmbeddedResource Include="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />

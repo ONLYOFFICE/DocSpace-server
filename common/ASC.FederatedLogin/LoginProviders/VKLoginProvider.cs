@@ -61,7 +61,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, context.Request.Query["access_type"] == "offline"
+            var token = Auth(context, out var redirect, context.Request.Query["access_type"] == "offline"
                 ? new Dictionary<string, string>
                 {
                         { "revoke", "1" }

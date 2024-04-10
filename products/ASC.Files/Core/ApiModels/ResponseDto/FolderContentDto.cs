@@ -84,7 +84,6 @@ public class FolderContentDto<T>
 
 [Scope]
 public class FolderContentDtoHelper(FileSecurity fileSecurity,
-    IDaoFactory daoFactory,
     FileDtoHelper fileWrapperHelper,
     FolderDtoHelper folderWrapperHelper,
     BadgesSettingsHelper badgesSettingsHelper,
@@ -94,46 +93,23 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
-        var parentInternalIds = new HashSet<int>();
-        var parentThirdPartyIds = new HashSet<string>();
-
         var files = new List<FileEntry>();
         var folders = new List<FileEntry>();
 
         foreach (var e in folderItems.Entries)
         {
-            if (e.FileEntryType == FileEntryType.File)
+            switch (e.FileEntryType)
             {
-                files.Add(e);
-            }
-            else if (e.FileEntryType == FileEntryType.Folder)
-            {
-                folders.Add(e);
-            }
-
-            if (e is FileEntry<int> internalEntry)
-            {
-                parentInternalIds.Add(internalEntry.ParentId);
-            }
-            else if (e is FileEntry<string> thirdParty)
-            {
-                if (int.TryParse(thirdParty.ParentId, out var pId))
-                {
-                    parentInternalIds.Add(pId);
-                }
-                else
-                {
-                    parentThirdPartyIds.Add(thirdParty.ParentId);
-                }
+                case FileEntryType.File:
+                    files.Add(e);
+                    break;
+                case FileEntryType.Folder:
+                    folders.Add(e);
+                    break;
             }
         }
 
         var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
-        var foldersIntWithRightsTask = GetFoldersWithRightsAsync(parentInternalIds).ToListAsync();
-        var foldersStringWithRightsTask = GetFoldersWithRightsAsync(parentThirdPartyIds).ToListAsync();
-
-        var foldersIntWithRights = await foldersIntWithRightsTask;
-        var foldersStringWithRights = await foldersStringWithRightsTask;
 
         var foldersTask = await GetFoldersDto(folders, order).ToListAsync();
         var filesTask = await GetFilesDto(files, foldersTask.Count, order).ToListAsync();
@@ -155,17 +131,6 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
 
         return result;
 
-        IAsyncEnumerable<Tuple<FileEntry<T1>, bool>> GetFoldersWithRightsAsync<T1>(IEnumerable<T1> ids)
-        {
-            if (!ids.Any())
-            {
-                return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
-            }
-
-            var folderDao = daoFactory.GetFolderDao<T1>();
-            return fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
-        }
-
         async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string entriesOrder)
         {
             foreach (var r in fileEntries)
@@ -173,10 +138,10 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                 switch (r)
                 {
                     case File<int> fol1:
-                        yield return await fileWrapperHelper.GetAsync(fol1, foldersIntWithRights, foldersCount, entriesOrder);
+                        yield return await fileWrapperHelper.GetAsync(fol1, foldersCount, entriesOrder);
                         break;
                     case File<string> fol2:
-                    yield return await fileWrapperHelper.GetAsync(fol2, foldersStringWithRights, foldersCount, entriesOrder);
+                    yield return await fileWrapperHelper.GetAsync(fol2, foldersCount, entriesOrder);
                         break;
                 }
             }
@@ -191,17 +156,17 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                 switch (r)
                 {
                     case Folder<int> fol1:
-                        yield return await GetFolder(fol1, foldersIntWithRights, entriesOrder);
+                        yield return await GetFolder(fol1, entriesOrder);
                         break;
                     case Folder<string> fol2:
-                    yield return await GetFolder(fol2, foldersStringWithRights, entriesOrder);
+                    yield return await GetFolder(fol2, entriesOrder);
                         break;
                 }
             }
 
             yield break;
 
-            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights, string order1)
+            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, string order1)
             {
                 if (currentUsersRecords == null && 
                     DocSpaceHelper.IsRoom(fol1.FolderType) && 
@@ -210,7 +175,7 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                     currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
                 }
                 
-                return await folderWrapperHelper.GetAsync(fol1, foldersWithRights, currentUsersRecords, order1);
+                return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, order1);
             }
         }
     }

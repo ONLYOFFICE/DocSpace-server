@@ -515,7 +515,7 @@ internal class FileDao(
 
             if (isNew)
             {
-                await IncrementFilesCountAsync(filesDbContext, file.ParentId);
+                await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
             }
         }
         
@@ -776,7 +776,7 @@ internal class FileDao(
 
             foreach (var folderId in fromFolders)
             {                
-                await DecrementFilesCountAsync(context, folderId);
+                await DecrementCountAsync(context, folderId, tenantId, FileEntryType.File);
             }
 
             if (deleteFolder)
@@ -967,7 +967,7 @@ internal class FileDao(
                 
                 foreach (var f in fromFolders)
                 {
-                    await DecrementFilesCountAsync(context, f);
+                    await DecrementCountAsync(context, f, tenantId, FileEntryType.File);
                 }
                 
 
@@ -982,7 +982,7 @@ internal class FileDao(
                         trashId);
                 }
                 
-                await IncrementFilesCountAsync(context, toFolderId);
+                await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
             var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
@@ -1031,7 +1031,7 @@ internal class FileDao(
         if (file != null)
         {
             var copy = _serviceProvider.GetService<File<int>>();
-            copy.FileStatus = file.FileStatus;
+            copy.SetFileStatus(await file.GetFileStatus());
             copy.ParentId = toFolderId;
             copy.Title = file.Title;
             copy.ConvertedType = file.ConvertedType;

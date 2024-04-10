@@ -40,11 +40,11 @@ public class RemovePortalWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _queue.GetAllTasks<RemovePortalOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
-                _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null)
@@ -53,20 +53,20 @@ public class RemovePortalWorker(
 
                 item.Init(tenantId);
 
-                _queue.EnqueueTask(item);
+                await _queue.EnqueueTask(item);
             }
 
-            item.PublishChanges();
+            await item.PublishChanges();
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        var tasks = _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
 
         foreach (var t in tasks)
         {
-            _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask(t.Id);
         }
     }
 }

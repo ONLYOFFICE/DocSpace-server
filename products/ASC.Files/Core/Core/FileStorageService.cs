@@ -81,6 +81,7 @@ public class FileStorageService //: IFileStorageService
     ExternalShare externalShare,
     TenantUtil tenantUtil,
     RoomLogoManager roomLogoManager,
+    CoreBaseSettings coreBaseSettings,
     IDistributedLockProvider distributedLockProvider)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -248,22 +249,22 @@ public class FileStorageService //: IFileStorageService
         var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
         if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
         {
-                if (prevVisible is Folder<string> f1)
-                {
-                    parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
-                }
-                else if (prevVisible is Folder<int> f2)
-                {
-                    parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
-                }
+            if (prevVisible is Folder<string> f1)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
             }
+            else if (prevVisible is Folder<int> f2)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
+            }
+        }
 
         parent.Shareable =
             parent.FolderType == FolderType.SHARE ||
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
 
-        entries = entries.Where(x =>
+        entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
         {
             if (x.FileEntryType == FileEntryType.Folder)
             {
@@ -272,11 +273,11 @@ public class FileStorageService //: IFileStorageService
 
             if (x is File<string> f1)
             {
-                return !fileConverter.IsConverting(f1);
+                return !await fileConverter.IsConverting(f1);
             }
 
-            return x is File<int> f2 && !fileConverter.IsConverting(f2);
-        });
+            return x is File<int> f2 && !await fileConverter.IsConverting(f2);
+        }).ToEnumerable();
 
         var result = new DataWrapper<T>
         {
@@ -503,8 +504,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, 
-        long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -599,6 +599,17 @@ public class FileStorageService //: IFileStorageService
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < quota)
+                {
+                    throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+                }
+            }
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -1282,7 +1293,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanEditHistoryAsync(file) || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanEditHistoryAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1523,7 +1534,7 @@ public class FileStorageService //: IFileStorageService
         File<T> file;
         if (string.IsNullOrEmpty(url))
         {
-            file = await entryManager.UpdateToVersionFileAsync(fileId, version, doc);
+            file = await entryManager.UpdateToVersionFileAsync(fileId, version);
         }
         else
         {
@@ -2260,7 +2271,7 @@ public class FileStorageService //: IFileStorageService
             await folderDao.DeleteFolderAsync(folderIdFromTrash);
         }
 
-        await fileSecurity.RemoveSubjectAsync<T>(userFromId, true);
+        await fileSecurity.RemoveSubjectAsync(userFromId, true);
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
@@ -2517,8 +2528,7 @@ public class FileStorageService //: IFileStorageService
         {
             var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
 
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-                .FirstOrDefaultAsync();
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
             if (parentLink == null)
             {
                 throw new ItemNotFoundException();
@@ -2530,12 +2540,16 @@ public class FileStorageService //: IFileStorageService
             return parentLink;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-            .FirstOrDefaultAsync();
-
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
             return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        }
+
+        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
+        {
+            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
+                DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
         }
 
         return link;
@@ -3071,7 +3085,7 @@ public class FileStorageService //: IFileStorageService
                 newFile.Version = file.Version + 1;
                 newFile.VersionGroup = file.VersionGroup + 1;
                 newFile.Title = file.Title;
-                newFile.FileStatus = file.FileStatus;
+                newFile.SetFileStatus(await file.GetFileStatus());
                 newFile.ParentId = file.ParentId;
                 newFile.CreateBy = userInfo.Id;
                 newFile.CreateOn = file.CreateOn;
@@ -3318,7 +3332,16 @@ public class FileStorageService //: IFileStorageService
             linkId = Guid.NewGuid();
         }
 
-        var aces = new List<AceWrapper> { new() { Access = share, Id = linkId, SubjectType = subjectType, FileShareOptions = options } };
+        var aces = new List<AceWrapper>
+        {
+            new()
+            {
+                Access = share,
+                Id = linkId,
+                SubjectType = subjectType,
+                FileShareOptions = options
+            }
+        };
 
         try
         {
@@ -3329,16 +3352,18 @@ public class FileStorageService //: IFileStorageService
                 throw GenerateException(new InvalidOperationException(result.Warning));
             }
 
-            if (result.Changed)
+            if (!result.Changed)
             {
-                var (eventType, ace) = result.HandledAces[0];
-                var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
-
-                await filesMessageService.SendAsync(messageActions[eventType], entry, ace.Id, ace.FileShareOptions?.Title,
-                    FileShareExtensions.GetAccessString(ace.Access, isRoom));
+                return result.HandledAces[0];
             }
 
-            return result.HandledAces.FirstOrDefault();
+            var (eventType, ace) = result.HandledAces[0];
+            var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
+
+            await filesMessageService.SendAsync(messageActions[eventType], entry, ace.Id, ace.FileShareOptions?.Title,
+                FileShareExtensions.GetAccessString(ace.Access, isRoom));
+
+            return result.HandledAces[0];
         }
         catch (Exception e)
         {

@@ -394,9 +394,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} úložného prostoru</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Velikost použitého úložiště by neměla překročit {0}</value>
   </data>
@@ -984,9 +981,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Pokud existuje uživatel s e-mailovou adresou {0}, byl na tuto e-mailovou adresu zaslán pokyn ke změně hesla.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Překročena kvóta místa na disku</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>

@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Configuration;
+using System.Threading.Channels;
+
+using ASC.Core.Notify.Socket;
 
 namespace ASC.ApiSystem;
 
@@ -58,7 +59,7 @@ public class Startup
         services.AddExceptionHandler<Classes.CustomExceptionHandler>();
         services.AddProblemDetails();
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
@@ -124,22 +125,7 @@ public class Startup
             });
         }
 
-        var redisConfiguration = _configuration.GetSection("Redis").Get<RedisConfiguration>();
-        IConnectionMultiplexer connectionMultiplexer = null;
-
-        if (redisConfiguration != null)
-        {
-            var configurationOption = redisConfiguration?.ConfigurationOptions;
-
-            configurationOption.ClientName = GetType().Namespace;
-
-            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
-
-            services.AddSingleton(redisConfiguration)
-                    .AddSingleton(redisConnection);
-
-            connectionMultiplexer = redisConnection?.GetConnection();
-        }
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
@@ -161,6 +147,11 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        _diHelper.TryAdd<SocketService>();
         
         services
             .AddAuthentication()

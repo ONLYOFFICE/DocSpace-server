@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Notify.Socket;
+
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
@@ -114,22 +116,7 @@ public abstract class BaseStartup
             }
         });
 
-        var redisConfiguration = _configuration.GetSection("Redis").Get<RedisConfiguration>();
-        IConnectionMultiplexer connectionMultiplexer = null;
-
-        if (redisConfiguration != null)
-        {
-            var configurationOption = redisConfiguration?.ConfigurationOptions;
-
-            configurationOption.ClientName = GetType().Namespace;
-
-            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
-
-            services.AddSingleton(redisConfiguration)
-                    .AddSingleton(redisConnection);
-
-            connectionMultiplexer = redisConnection?.GetConnection();
-        }
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddRateLimiter(options =>
         {
@@ -256,7 +243,9 @@ public abstract class BaseStartup
 
             options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
                 var permitLimit = 5;
                 var path = httpContext.Request.Path.ToString();
                 var partitionKey = $"sensitive_api_{userId}|{path}";
@@ -278,7 +267,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
                 .AddBaseDbContextPool<CoreDbContext>()
@@ -460,6 +449,13 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        services.AddHostedService<SocketService>();
+        DIHelper.TryAdd<SocketService>();
+
 
         if (!_hostEnvironment.IsDevelopment())
         {

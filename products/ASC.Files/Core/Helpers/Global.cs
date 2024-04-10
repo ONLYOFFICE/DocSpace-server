@@ -96,59 +96,68 @@ public enum DocThumbnailExtension
 }
 
 [Scope]
-public class Global
+public class Global(
+    IConfiguration configuration,
+    AuthContext authContext,
+    UserManager userManager,
+    CoreSettings coreSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CustomNamingPeople customNamingPeople,
+    FileSecurityCommon fileSecurityCommon)
 {
-    private readonly IConfiguration _configuration;
-    private readonly AuthContext _authContext;
-    private readonly UserManager _userManager;
-    private readonly CoreSettings _coreSettings;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly CustomNamingPeople _customNamingPeople;
-    private readonly FileSecurityCommon _fileSecurityCommon;
-
-    public Global(
-        IConfiguration configuration,
-        AuthContext authContext,
-        UserManager userManager,
-        CoreSettings coreSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        CustomNamingPeople customNamingPeople,
-        FileSecurityCommon fileSecurityCommon)
-    {
-        _configuration = configuration;
-        _authContext = authContext;
-        _userManager = userManager;
-        _coreSettings = coreSettings;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _customNamingPeople = customNamingPeople;
-        _fileSecurityCommon = fileSecurityCommon;
-
-        if (!DocThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:docs-exts"] ?? "jpg", true, out DocThumbnailExtension))
-        {
-            DocThumbnailExtension = DocThumbnailExtension.jpg;
-        }
-        if (!ThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:exts"] ?? "webp", true, out ThumbnailExtension))
-        {
-            ThumbnailExtension = ThumbnailExtension.jpg;
-        }
-    }
-
     #region Property
 
-    public readonly DocThumbnailExtension DocThumbnailExtension;
-    public readonly ThumbnailExtension ThumbnailExtension;
+    private DocThumbnailExtension? _docThumbnailExtension;
+    public DocThumbnailExtension DocThumbnailExtension
+    {
+        get
+        {
+            if (_docThumbnailExtension.HasValue)
+            {
+                return _docThumbnailExtension.Value;
+            }
+            
+            if (!DocThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:docs-exts"] ?? "jpg", true, out var fromConfig))
+            {
+                fromConfig = DocThumbnailExtension.jpg;
+            }
+
+            _docThumbnailExtension = fromConfig;
+            return fromConfig;
+        }
+    }
+    
+    private ThumbnailExtension? _thumbnailExtension;
+    public ThumbnailExtension ThumbnailExtension
+    {
+        get
+        {
+            if (_thumbnailExtension.HasValue)
+            {
+                return _thumbnailExtension.Value;
+            }
+            
+            if (!ThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:exts"] ?? "webp", true,  out var fromConfig))
+            {
+                fromConfig = ThumbnailExtension.jpg;
+            }
+            
+            _thumbnailExtension = fromConfig;
+            return fromConfig;
+        }
+    }
 
     private const int MaxTitle = 170;
 
     private static readonly Regex _invalidTitleChars = new("[\t*\\+:\"<>?|\\\\/\\p{Cs}]");
 
-    public bool EnableUploadFilter => bool.TrueString.Equals(_configuration["files:upload-filter"] ?? "false", StringComparison.InvariantCultureIgnoreCase);
+    public bool EnableUploadFilter => bool.TrueString.Equals(configuration["files:upload-filter"] ?? "false", StringComparison.InvariantCultureIgnoreCase);
 
     public TimeSpan StreamUrlExpire
     {
         get
         {
-            int.TryParse(_configuration["files:stream-url-minute"], out var validateTimespan);
+            int.TryParse(configuration["files:stream-url-minute"], out var validateTimespan);
             if (validateTimespan <= 0)
             {
                 validateTimespan = 16;
@@ -158,12 +167,12 @@ public class Global
         }
     }
 
-    public Task<bool> IsDocSpaceAdministratorAsync => _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID);
+    public Task<bool> IsDocSpaceAdministratorAsync => fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
     public async Task<string> GetDocDbKeyAsync()
     {
         const string dbKey = "UniqueDocument";
-        var resultKey = await _coreSettings.GetSettingAsync(dbKey);
+        var resultKey = await coreSettings.GetSettingAsync(dbKey);
 
         if (!string.IsNullOrEmpty(resultKey))
         {
@@ -171,7 +180,7 @@ public class Global
         }
 
         resultKey = Guid.NewGuid().ToString();
-        await _coreSettings.SaveSettingAsync(dbKey, resultKey);
+        await coreSettings.SaveSettingAsync(dbKey, resultKey);
 
         return resultKey;
     }
@@ -204,7 +213,7 @@ public class Global
 
     public async Task<string> GetUserNameAsync(Guid userId, bool alive = false)
     {
-        if (userId.Equals(_authContext.CurrentAccount.ID))
+        if (userId.Equals(authContext.CurrentAccount.ID))
         {
             return FilesCommonResource.Author_Me;
         }
@@ -214,13 +223,13 @@ public class Global
             return FilesCommonResource.Guest;
         }
 
-        var userInfo = await _userManager.GetUsersAsync(userId);
+        var userInfo = await userManager.GetUsersAsync(userId);
         if (userInfo.Equals(Constants.LostUser))
         {
-            return alive ? FilesCommonResource.Guest : await _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
+            return alive ? FilesCommonResource.Guest : await customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
         }
 
-        return userInfo.DisplayUserName(false, _displayUserSettingsHelper);
+        return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
 }
 
@@ -260,13 +269,10 @@ public class GlobalFolder(
     TenantManager tenantManager,
     UserManager userManager,
     SettingsManager settingsManager,
-    ILoggerProvider options,
+    ILogger<GlobalFolder> logger,
     IServiceProvider serviceProvider)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Files");
-
-    internal static readonly IDictionary<int, int> ProjectsRootFolderCache =
-        new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
+    internal static readonly IDictionary<int, int> ProjectsRootFolderCache = new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
 
     public async ValueTask<int> GetFolderProjectsAsync(IDaoFactory daoFactory)
     {
@@ -617,7 +623,7 @@ public class GlobalFolder(
         }
         catch (Exception e)
         {
-            _logger.ErrorCreateSampleDocuments(e);
+            logger.ErrorCreateSampleDocuments(e);
         }
     }
     
@@ -628,7 +634,7 @@ public class GlobalFolder(
             .Where(f => FileUtility.GetFileTypeByFileName(f) is not (FileType.Audio or FileType.Video))
             .ToListAsync();
         
-        _logger.Debug($"Found {files.Count} sample documents. Path: {path}");
+        logger.Debug($"Found {files.Count} sample documents. Path: {path}");
         
         foreach (var file in files)
         {
@@ -652,7 +658,7 @@ public class GlobalFolder(
             }
             catch (Exception e)
             {
-                _logger.ErrorSaveSampleFolder(e);
+                logger.ErrorSaveSampleFolder(e);
             }   
         }
     }
@@ -690,7 +696,7 @@ public class GlobalFolder(
         }
         catch (Exception e)
         {
-            _logger.ErrorSaveSampleFile(e);
+            logger.ErrorSaveSampleFile(e);
         }
     }
 
@@ -739,6 +745,12 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         return IdConverter.Convert<T>(await FolderShareAsync);
     }
+
+    public async ValueTask<T> GetFolderRecentAsync<T>()
+    {
+        return IdConverter.Convert<T>(await FolderRecentAsync);
+    }
+    
     public ValueTask<int> FolderShareAsync => globalFolder.GetFolderShareAsync(daoFactory);
 
     public async Task SetFolderTrashAsync(object value)

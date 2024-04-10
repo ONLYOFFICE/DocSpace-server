@@ -110,7 +110,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
                         
                         var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
-                        if (transferredBytes == resumedSession.BytesTotal)
+                        if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
                         {
                             if (resumedSession.UseChunks)
                             {

@@ -36,7 +36,7 @@ public static class Tables
 }
 
 [Transient]
-[ElasticsearchType(RelationName = Tables.File)]
+[OpenSearchType(RelationName = Tables.File)]
 public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 {
     public int Id { get; set; }

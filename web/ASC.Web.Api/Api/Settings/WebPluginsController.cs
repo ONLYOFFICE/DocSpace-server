@@ -141,6 +141,6 @@ public class WebPluginsController(ApiContext apiContext,
             _ = currentDomains.RemoveAll(x => domains.Contains(x));
         }
 
-        _ = await cspSettingsHelper.SaveAsync(currentDomains.Distinct(), settings.SetDefaultIfEmpty);
+        _ = await cspSettingsHelper.SaveAsync(currentDomains.Distinct());
     }
 }

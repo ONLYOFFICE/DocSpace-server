@@ -37,6 +37,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public const string GoogleUrlFile = "https://www.googleapis.com/drive/v3/files/";
     public const string GoogleUrlFileUpload = "https://www.googleapis.com/upload/drive/v3/files";
     public const string GoogleUrlProfile = "https://people.googleapis.com/v1/people/me";
+    public static readonly Dictionary<string, string> GoogleAdditionalArgs = new() { { "access_type", "offline" }, { "prompt", "consent" } };
 
     public override string AccessTokenUrl => "https://www.googleapis.com/oauth2/v4/token";
     public override string CodeUrl => "https://accounts.google.com/o/oauth2/v2/auth";
@@ -47,7 +48,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
     public static readonly string[] GoogleDriveExt = [".gdoc", ".gsheet", ".gslides", ".gdraw"];
     public static readonly string GoogleDriveMimeTypeFolder = "application/vnd.google-apps.folder";
-    public static readonly string FilesFields = "id,name,mimeType,parents,createdTime,modifiedTime,owners/displayName,lastModifyingUser/displayName,capabilities/canEdit,size";
+    public static readonly string FilesFields = "id,name,mimeType,parents,createdTime,modifiedTime,owners/displayName,lastModifyingUser/displayName,capabilities/canEdit,size,hasThumbnail";
     public static readonly string ProfileFields = "emailAddresses,genders,names";
 
     private readonly RequestHelper _requestHelper;
@@ -68,6 +69,11 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         _requestHelper = requestHelper;
     }
 
+    protected override OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+    {
+        return base.Auth(context, out redirect, (additionalArgs ?? new Dictionary<string, string>()).Union(GoogleAdditionalArgs).DistinctBy(r => r.Key).ToDictionary(r=> r.Key, r=> r.Value), additionalStateArgs);
+    }
+
     public override LoginProfile GetLoginProfile(string accessToken)
     {
         if (string.IsNullOrEmpty(accessToken))
@@ -77,18 +83,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
         return RequestProfile(accessToken);
     }
-
-    public OAuth20Token Auth(HttpContext context)
-    {
-        return Auth(context, GoogleScopeContacts, out _, (context.Request.Query["access_type"].ToString()) == "offline"
-            ? new Dictionary<string, string>
-            {
-                    { "access_type", "offline" },
-                    { "prompt", "consent" }
-            }
-            : null);
-    }
-
+    
     private LoginProfile RequestProfile(string accessToken)
     {
         var googleProfile = _requestHelper.PerformRequest(GoogleUrlProfile + "?personFields=" + HttpUtility.UrlEncode(ProfileFields), headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });

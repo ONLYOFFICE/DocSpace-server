@@ -922,15 +922,30 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var rooms = entries.Where(r => r.FileEntryType == FileEntryType.Folder && DocSpaceHelper.IsRoom(((IFolder)r).FolderType));
             var pinnedRooms = rooms.Where(r => ((IFolder)r).Pinned);
-            rooms = rooms.Except(pinnedRooms);
+            var thirdpartyRooms = rooms.Where(r => r.ProviderEntry);
 
-            var folders = entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
+            if (orderBy.SortedBy == SortedByType.UsedSpace)
+            {
+                rooms = rooms.Except(thirdpartyRooms).Except(pinnedRooms);
+            }
+            else
+            {
+                rooms = rooms.Except(pinnedRooms);
+            }
+            
+            var folders = orderBy.SortedBy == SortedByType.UsedSpace ? 
+                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(thirdpartyRooms).Except(rooms) :
+                entries.Where(r => r.FileEntryType == FileEntryType.Folder).Except(pinnedRooms).Except(rooms);
             var files = entries.Where(r => r.FileEntryType == FileEntryType.File);
             pinnedRooms = pinnedRooms.OrderBy(r => r, comparer);
             rooms = rooms.OrderBy(r => r, comparer);
             folders = folders.OrderBy(r => r, comparer);
             files = files.OrderBy(r => r, comparer);
 
+            if (orderBy.SortedBy == SortedByType.UsedSpace)
+            {
+                return pinnedRooms.Concat(thirdpartyRooms).Concat(rooms).Concat(folders).Concat(files);
+            }
             return pinnedRooms.Concat(rooms).Concat(folders).Concat(files);
         }
 
@@ -1086,7 +1101,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
 
                 linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-                linkedFile.FileStatus = sourceFile.FileStatus;
+                linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
                 linkedFile.ConvertedType = sourceFile.ConvertedType;
                 linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;
                 linkedFile.Encrypted = sourceFile.Encrypted;
@@ -1332,8 +1347,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 };
 
                 var httpClient = clientFactory.CreateClient();
-                using var response = await httpClient.SendAsync(request);
-                await using var editedFileStream = new ResponseStream(response);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }
             tmpStream.Position = 0;
@@ -1414,7 +1429,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, string doc = null, bool checkRight = true, bool finalize = false)
+    public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, bool checkRight = true, bool finalize = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         if (version < 1)
@@ -1422,18 +1437,16 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new ArgumentNullException(nameof(version));
         }
 
-        var (editLink, fromFile, _) = await fileShareLink.CheckAsync(doc, false, fileDao);
+        var file = await fileDao.GetFileAsync(fileId);
 
-        fromFile ??= await fileDao.GetFileAsync(fileId);
-
-        if (fromFile == null)
+        if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (fromFile.Version != version)
+        if (file.Version != version)
         {
-            fromFile = await fileDao.GetFileAsync(fromFile.Id, Math.Min(fromFile.Version, version));
+            file = await fileDao.GetFileAsync(file.Id, Math.Min(file.Version, version));
         }
         else
         {
@@ -1443,37 +1456,37 @@ public class EntryManager(IDaoFactory daoFactory,
             }
         }
 
-        if (fromFile == null)
+        if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (checkRight && !editLink && (!await fileSecurity.CanEditHistoryAsync(fromFile) || await userManager.IsUserAsync(authContext.CurrentAccount.ID)))
+        if (checkRight && !await fileSecurity.CanEditHistoryAsync(file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        if (await FileLockedForMeAsync(fromFile.Id))
+        if (await FileLockedForMeAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && fileTracker.IsEditing(fromFile.Id))
+        if (checkRight && fileTracker.IsEditing(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
-        if (fromFile.RootFolderType == FolderType.TRASH)
+        if (file.RootFolderType == FolderType.TRASH)
         {
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        if (fromFile.ProviderEntry)
+        if (file.ProviderEntry)
         {
             throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        if (fromFile.Encrypted)
+        if (file.Encrypted)
         {
             throw new Exception(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
@@ -1491,28 +1504,28 @@ public class EntryManager(IDaoFactory daoFactory,
             var currFile = await fileDao.GetFileAsync(fileId);
             var newFile = serviceProvider.GetService<File<T>>();
 
-            newFile.Id = fromFile.Id;
+            newFile.Id = file.Id;
             newFile.Version = currFile.Version + 1;
             newFile.VersionGroup = currFile.VersionGroup + 1;
-            newFile.Title = FileUtility.ReplaceFileExtension(currFile.Title, FileUtility.GetFileExtension(fromFile.Title));
-            newFile.FileStatus = currFile.FileStatus;
+            newFile.Title = FileUtility.ReplaceFileExtension(currFile.Title, FileUtility.GetFileExtension(file.Title));
+            newFile.SetFileStatus(await currFile.GetFileStatus());
             newFile.ParentId = currFile.ParentId;
             newFile.CreateBy = currFile.CreateBy;
             newFile.CreateOn = currFile.CreateOn;
-            newFile.ModifiedBy = fromFile.ModifiedBy;
-            newFile.ModifiedOn = fromFile.ModifiedOn;
-            newFile.ConvertedType = fromFile.ConvertedType;
-            newFile.Comment = string.Format(FilesCommonResource.CommentRevert, fromFile.ModifiedOnString);
-            newFile.Encrypted = fromFile.Encrypted;
-            newFile.ThumbnailStatus = fromFile.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+            newFile.ModifiedBy = file.ModifiedBy;
+            newFile.ModifiedOn = file.ModifiedOn;
+            newFile.ConvertedType = file.ConvertedType;
+            newFile.Comment = string.Format(FilesCommonResource.CommentRevert, file.ModifiedOnString);
+            newFile.Encrypted = file.Encrypted;
+            newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
 
-            await using (var stream = await fileDao.GetFileStreamAsync(fromFile))
+            await using (var stream = await fileDao.GetFileStreamAsync(file))
             {
-                newFile.ContentLength = stream.CanSeek ? stream.Length : fromFile.ContentLength;
+                newFile.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
                 newFile = await fileDao.SaveFileAsync(newFile, stream);
             }
 
-            if (fromFile.ThumbnailStatus == Thumbnail.Created)
+            if (file.ThumbnailStatus == Thumbnail.Created)
             {
                 var CopyThumbnailsAsync = async () =>
                 {
@@ -1523,7 +1536,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         foreach (var size in thumbnailSettings.Sizes)
                         {
                             await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                                                                    _fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
                                                                     String.Empty,
                                                                     _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
                         }
@@ -1542,7 +1555,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             await entryStatusManager.SetFileStatusAsync(newFile);
 
-            newFile.Access = fromFile.Access;
+            newFile.Access = file.Access;
 
             if (newFile.IsTemplate
                 && !fileUtility.ExtsWebTemplate.Contains(FileUtility.GetFileExtension(newFile.Title), StringComparer.CurrentCultureIgnoreCase))
@@ -1565,7 +1578,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         finally
         {
-            cache.Remove(UpdateList + fromFile.Id);
+            cache.Remove(UpdateList + file.Id);
         }
     }
 
@@ -1580,7 +1593,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (checkRight && (!await fileSecurity.CanEditHistoryAsync(fileVersion) || await userManager.IsUserAsync(authContext.CurrentAccount.ID)))
+        if (checkRight && !await fileSecurity.CanEditHistoryAsync(fileVersion))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1614,7 +1627,7 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (!fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
-                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
+                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
                 //lastVersionFile.VersionGroup++;
             }
@@ -1701,7 +1714,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
 
-        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, new[] { file })
+        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [file])
             .ToDictionaryAsync(k => k.Name);
 
         if (tags.Count > 0)
@@ -1716,6 +1729,9 @@ public class EntryManager(IDaoFactory daoFactory,
             var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, file);
 
             await tagDao.SaveTagsAsync(tag);
+
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+            await socketManager.CreateFileAsync(file, [userId]);
         }
     }
 

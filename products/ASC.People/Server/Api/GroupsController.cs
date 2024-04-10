@@ -213,7 +213,7 @@ public class GroupController(UserManager userManager,
         var group = await GetGroupInfoAsync(id);
 
         await userManager.DeleteGroupAsync(id);
-        await fileSecurity.RemoveSubjectAsync<int>(id, false);
+        await fileSecurity.RemoveSubjectAsync(id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
 

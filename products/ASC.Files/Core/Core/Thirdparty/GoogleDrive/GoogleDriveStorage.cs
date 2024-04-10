@@ -421,13 +421,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             googleDriveSession.BytesTransferred += chunkLength;
             googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-
-            string responseString;
-            using (var readStream = new StreamReader(responseStream))
-            {
-                responseString = await readStream.ReadToEndAsync();
-            }
+            var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             googleDriveSession.FileId = responseJson.Value<string>("id");
@@ -598,5 +592,10 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
     }
 }

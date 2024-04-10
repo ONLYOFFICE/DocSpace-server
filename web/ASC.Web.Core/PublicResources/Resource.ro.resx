@@ -120,9 +120,6 @@
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
     <value>Adresă de email {!User} este înregistrată deja</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} spaţiu de stocare</value>
-  </data>
   <data name="ConsumersappleIdTeamId" xml:space="preserve">
     <value>ID echipă contului de dezvoltator de 10 caractere</value>
   </data>
@@ -329,9 +326,6 @@
   </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Dezactivarea profilelor vechi de utilizator care au fost încărcate anterior prin LDAP</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Cota spaţiului de stocare a fost depășită</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
