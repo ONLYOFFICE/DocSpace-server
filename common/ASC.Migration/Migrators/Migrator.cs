@@ -215,7 +215,7 @@ public abstract class Migrator : IDisposable
                         EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
                         EmployeeType.RoomAdmin => Constants.GroupManager.ID,
-                        _ => Guid.Empty,
+                        _ => Guid.Empty
                     };
 
                     if (groupId != Guid.Empty)
@@ -382,6 +382,11 @@ public abstract class Migrator : IDisposable
                 newFile.ContentLength = fs.Length;
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
+                newFile.Comment = file.Comment;
+                if (_matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                {
+                    newFile.Id = _matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                }
                 if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) || newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);

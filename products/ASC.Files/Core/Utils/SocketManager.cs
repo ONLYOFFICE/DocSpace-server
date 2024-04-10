@@ -141,7 +141,7 @@ public class SocketManager(
                 room, 
                 entry.Id,
                 data,
-                userIds,
+                userIds
             });
         }
     }

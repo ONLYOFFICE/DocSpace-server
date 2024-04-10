@@ -78,8 +78,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
-        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
-                {
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
+        {
                     {
                 FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
         {

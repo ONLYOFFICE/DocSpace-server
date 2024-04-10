@@ -46,7 +46,6 @@ internal class ProviderAccountDao(
     TenantManager tenantManager,
     InstanceCrypto instanceCrypto,
     SecurityContext securityContext,
-    ConsumerFactory consumerFactory,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     OAuth20TokenHelper oAuth20TokenHelper,
     ILogger<ProviderAccountDao> logger)
@@ -627,7 +626,7 @@ internal class ProviderAccountDao(
         {
             case ProviderTypes.GoogleDrive:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<GoogleLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<GoogleLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -638,7 +637,7 @@ internal class ProviderAccountDao(
 
             case ProviderTypes.Box:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<BoxLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<BoxLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -649,7 +648,7 @@ internal class ProviderAccountDao(
 
             case ProviderTypes.DropboxV2:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<DropboxLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<DropboxLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -660,7 +659,7 @@ internal class ProviderAccountDao(
 
             case ProviderTypes.OneDrive:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(code);
 
                 if (token == null)
                 {
