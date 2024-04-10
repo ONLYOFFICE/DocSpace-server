@@ -193,7 +193,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = entry.OriginRoomTitle,
-            AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null,
+            AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }
 

@@ -215,7 +215,7 @@ public abstract class Migrator : IDisposable
                         EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
                         EmployeeType.RoomAdmin => Constants.GroupManager.ID,
-                        _ => Guid.Empty,
+                        _ => Guid.Empty
                     };
 
                     if (groupId != Guid.Empty)

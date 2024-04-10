@@ -69,9 +69,9 @@ public abstract class BaseStartup
         services.AddHttpClient();
         services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
         {
-            return new HttpClientHandler()
+            return new HttpClientHandler
             {
-                AllowAutoRedirect = false,
+                AllowAutoRedirect = false
             };
         });
 

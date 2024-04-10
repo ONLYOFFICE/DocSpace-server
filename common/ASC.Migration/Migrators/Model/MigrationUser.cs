@@ -36,7 +36,7 @@ public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
 
     public virtual MigratingApiUser ToApiInfo(string key)
     {
-        return new MigratingApiUser()
+        return new MigratingApiUser
         {
             Key = key,
             Email = Info.Email,
@@ -44,7 +44,7 @@ public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
             FirstName = Info.FirstName,
             LastName = Info.LastName,
             UserType = UserType,
-            MigratingFiles = Storage.ToApiInfo(),
+            MigratingFiles = Storage.ToApiInfo()
         };
     }
 }

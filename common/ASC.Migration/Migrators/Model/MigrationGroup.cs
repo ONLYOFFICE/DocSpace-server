@@ -33,7 +33,7 @@ public class MigrationGroup
     public bool ShouldImport { get; set; }
     public virtual MigratingApiGroup ToApiInfo()
     {
-        return new MigratingApiGroup()
+        return new MigratingApiGroup
         {
             GroupName = Info.Name,
             UserUidList = UserKeys.ToList()

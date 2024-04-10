@@ -1059,7 +1059,7 @@ static file class Queries
                 .Select(r => new TagLinkData 
                 { 
                     Tag = r, 
-                    Link = (from f in ctx.TagLink where f.TagId == r.Id select f).FirstOrDefault(),
+                    Link = (from f in ctx.TagLink where f.TagId == r.Id select f).FirstOrDefault()
                 }));
 
     public static readonly Func<FilesDbContext, int, DateTime, IAsyncEnumerable<TagLinkData>> MustBeDeletedFilesAsync =

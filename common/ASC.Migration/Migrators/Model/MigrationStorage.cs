@@ -40,7 +40,7 @@ public class MigrationStorage
 
     public virtual MigratingApiFiles ToApiInfo()
     {
-        return new MigratingApiFiles()
+        return new MigratingApiFiles
         {
             BytesTotal = BytesTotal,
             FilesCount = Files.Count(),

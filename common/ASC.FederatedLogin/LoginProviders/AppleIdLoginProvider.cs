@@ -87,7 +87,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
             throw new Exception("Login failed");
         }
 
-        var token = _oAuth20TokenHelper.GetAccessToken<AppleIdLoginProvider>(ConsumerFactory, authCode);
+        var token = _oAuth20TokenHelper.GetAccessToken<AppleIdLoginProvider>(authCode);
         var claims = ValidateIdToken(JObject.Parse(token.OriginJson).Value<string>("id_token"));
         return GetProfileFromClaims(claims);
     }

@@ -267,37 +267,37 @@ internal class FolderDao(
     }
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType>() { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var result = new FilesStatisticsResultDto() { };
+        var result = new FilesStatisticsResultDto { };
         await foreach (var rootFolder in Queries.FolderTypeUsedSpaceAsync(filesDbContext, tenantId, fileRootFolders))
         {
             switch (rootFolder.FolderType)
             {
                 case FolderType.USER:
-                    result.MyDocumentsUsedSpace = new FilesStatisticsFolder()
+                    result.MyDocumentsUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.MyFiles,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.Archive:
-                    result.ArchiveUsedSpace = new FilesStatisticsFolder()
+                    result.ArchiveUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.Archive,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.TRASH:
-                    result.TrashUsedSpace = new FilesStatisticsFolder()
+                    result.TrashUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.Trash,
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
                 case FolderType.VirtualRooms:
-                    result.RoomsUsedSpace = new FilesStatisticsFolder()
+                    result.RoomsUsedSpace = new FilesStatisticsFolder
                     {
                         Title = FilesUCResource.VirtualRooms,
                         UsedSpace = rootFolder.UsedSpace
@@ -873,14 +873,14 @@ internal class FolderDao(
     public async Task<int> ChangeTreeFolderSizeAsync(int folderId, long size)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         await Queries.UpdateTreeFolderCounterAsync(filesDbContext, tenantId, folderId, size);
         return folderId;
     }
     public async Task<int> ChangeFolderQuotaAsync(Folder<int> folder, long quota)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var toUpdate = await Queries.FolderForUpdateAsync(filesDbContext, tenantId, folder.Id);
 

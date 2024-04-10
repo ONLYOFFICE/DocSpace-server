@@ -250,7 +250,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             await entryStatusManager.SetFileStatusAsync(file);
         }
 
-        var rightToDownload = await CanDownloadAsync(fileSecurity, file, linkRight);
+        var rightToDownload = await CanDownloadAsync(file, linkRight);
 
         var configuration = serviceProvider.GetService<Configuration<T>>();
         configuration.Document.Key = docKey;
@@ -294,7 +294,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return (file, configuration, locatedInPrivateRoom);
     }
 
-    private async Task<bool> CanDownloadAsync<T>(FileSecurity fileSecurity, File<T> file, FileShare linkRight)
+    private async Task<bool> CanDownloadAsync<T>(File<T> file, FileShare linkRight)
     {
         var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
 

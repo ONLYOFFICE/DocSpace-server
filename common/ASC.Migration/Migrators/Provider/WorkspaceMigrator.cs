@@ -49,7 +49,7 @@ public class WorkspaceMigrator : Migrator
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
     {
-        MigrationInfo = new MigrationInfo() { Name = "Workspace" };
+        MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
@@ -147,12 +147,12 @@ public class WorkspaceMigrator : Migrator
             var key = row["id"].ToString();
             var u = new MigrationUser(DisplayUserSettingsHelper)
             {
-                Info = new UserInfo()
+                Info = new UserInfo
                 {
                     UserName = row["email"].ToString().Split('@').First(),
                     FirstName = row["firstname"].ToString(),
                     LastName = row["lastname"].ToString(),
-                    Email = row["email"].ToString(),
+                    Email = row["email"].ToString()
                 }
             };
 
@@ -274,7 +274,7 @@ public class WorkspaceMigrator : Migrator
         {
             if (folderTree.ContainsKey(row["folder_id"].ToString()))
             {
-                var file = new MigrationFile()
+                var file = new MigrationFile
                 {
                     Id = int.Parse(row["id"].ToString()),
                     Folder = int.Parse(row["folder_id"].ToString()),
@@ -306,7 +306,7 @@ public class WorkspaceMigrator : Migrator
             var id = int.Parse(row["entry_id"].ToString());
             if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
             {
-                var security = new MigrationSecurity()
+                var security = new MigrationSecurity
                 {
                     Subject = row["subject"].ToString(),
                     EntryId = id,
