@@ -30,6 +30,7 @@ namespace ASC.Files.Core;
 public enum ProviderFilter
 {
     None,
+    Storage,
     Box,
     DropBox,
     GoogleDrive,
