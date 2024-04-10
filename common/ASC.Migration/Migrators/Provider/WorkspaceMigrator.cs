@@ -140,7 +140,7 @@ public class WorkspaceMigrator : Migrator
         var progressStep = 50 / data.Rows.Count;
         foreach (var row in data.Rows.Cast<DataRow>())
         {
-            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "true")
+            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "True")
             {
                 continue;
             }
@@ -280,7 +280,8 @@ public class WorkspaceMigrator : Migrator
                     Folder = int.Parse(row["folder_id"].ToString()),
                     Title = row["title"].ToString(),
                     Version = int.Parse(row["version"].ToString()),
-                    VersionGroup = int.Parse(row["version_group"].ToString())
+                    VersionGroup = int.Parse(row["version_group"].ToString()),
+                    Comment = row["comment"].ToString()
                 };
                 file.Path = Path.Combine(_dataReader.GetFolder(),$"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
@@ -346,17 +347,18 @@ public class WorkspaceMigrator : Migrator
 
         foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
         {
-            if (int.Parse(row["removed"].ToString()) == 0)
+            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "True")
             {
-                var groupId = row["groupid"].ToString();
-                if (MigrationInfo.Groups.ContainsKey(groupId))
+                continue;
+            }
+            var groupId = row["groupid"].ToString();
+            if (MigrationInfo.Groups.ContainsKey(groupId))
+            {
+                var g = MigrationInfo.Groups[groupId];
+                g.UserKeys.Add(row["userid"].ToString());
+                if (string.Equals(row["ref_type"].ToString(), "1"))
                 {
-                    var g = MigrationInfo.Groups[groupId];
-                    g.UserKeys.Add(row["userid"].ToString());
-                    if (string.Equals(row["ref_type"].ToString(), "1"))
-                    {
-                        g.ManagerKey = row["userid"].ToString();
-                    }
+                    g.ManagerKey = row["userid"].ToString();
                 }
             }
         }
