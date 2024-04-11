@@ -140,7 +140,7 @@ public abstract class LdapHelper(ILogger<LdapHelper> logger,
         }
         catch (Exception)
         {
-            passwordBytes = Array.Empty<byte>();
+            passwordBytes = [];
         }
 
         return passwordBytes;
