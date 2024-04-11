@@ -36,7 +36,6 @@
     <PackageReference Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageReference Include="JWT" Version="10.1.1" />
-    <PackageReference Include="log4net" Version="2.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
