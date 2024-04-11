@@ -792,4 +792,10 @@
   <data name="RoomsModule" xml:space="preserve">
     <value>Săli</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fișierul este deschis pentru modificare: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portalul a fost redenumit</value>
+  </data>
 </root>

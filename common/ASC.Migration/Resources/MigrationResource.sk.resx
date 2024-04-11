@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Presun používateľov {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrácia spoločných súborov</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Chyba pri inicializácii {0} migrátora</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Žiadny takýto poskytovateľ migrácie</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Neprebieha žiadna migrácia</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Súbory projektu migrácie</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsovanie stále prebieha</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrácia už prebieha</value>
+  </data>
 </root>

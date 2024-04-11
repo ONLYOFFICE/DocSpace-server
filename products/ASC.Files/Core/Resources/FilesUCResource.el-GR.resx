@@ -97,4 +97,10 @@
   <data name="Personal" xml:space="preserve">
     <value>Προσωπικά</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Σε εξέλιξη</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Έτοιμο</value>
+  </data>
 </root>

@@ -97,4 +97,10 @@
   <data name="Personal" xml:space="preserve">
     <value>个人</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>正在处理中</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>已就绪</value>
+  </data>
 </root>

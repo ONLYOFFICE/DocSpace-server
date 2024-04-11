@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>用户迁移 {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>迁移通用文件</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>初始化 {0} 迁移器时出错</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>没有这样的迁移提供方</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>没有正在进行的迁移</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>迁移项目文件</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>解析仍在进行中</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>迁移已在进行中</value>
+  </data>
 </root>

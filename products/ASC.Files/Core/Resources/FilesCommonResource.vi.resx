@@ -422,4 +422,46 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Bạn đã cố gắng nhập mật khẩu quá nhiều lần. Xin vui lòng thử lại sau</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Tác giả</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Công ty</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Đã tạo</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Ngày Tạo</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Xuất Tác giả</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Thư Mục</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Danh mục</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Đã Sửa Đổi</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Phòng</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Chí số phòng</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Kích thước (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Tổng</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Loại</value>
+  </data>
 </root>
