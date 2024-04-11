@@ -44,6 +44,7 @@ public class PortalController(ILogger<PortalController> logger,
         CommonLinkUtility commonLinkUtility,
         IUrlShortener urlShortener,
         AuthContext authContext,
+        CookiesManager cookiesManager,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -482,13 +483,19 @@ public class PortalController(ILogger<PortalController> logger,
         }
 
         var rewriter = httpContextAccessor.HttpContext.Request.Url();
-        return string.Format("{0}{1}{2}{3}/{4}",
+        var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
                                 commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
-               );
+        );
+
+        cookiesManager.ClearCookies(CookiesType.AuthKey);
+        cookiesManager.ClearCookies(CookiesType.SocketIO);
+        securityContext.Logout();
+
+        return confirmUrl;
     }
 
     /// <summary>
