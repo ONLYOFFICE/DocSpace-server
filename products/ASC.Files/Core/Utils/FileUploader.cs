@@ -28,24 +28,24 @@ namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class FileUploader(
-        FileUtility fileUtility,
-        UserManager userManager,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        FileMarker fileMarker,
-        FileConverter fileConverter,
-        IDaoFactory daoFactory,
-        Global global,
-        FilesLinkUtility filesLinkUtility,
-        FilesMessageService filesMessageService,
-        FileSecurity fileSecurity,
-        EntryManager entryManager,
-        IServiceProvider serviceProvider,
-        ChunkedUploadSessionHolder chunkedUploadSessionHolder,
-        FileTrackerHelper fileTracker,
-        SocketManager socketManager)
+    FileUtility fileUtility,
+    UserManager userManager,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    FileMarker fileMarker,
+    FileConverter fileConverter,
+    IDaoFactory daoFactory,
+    Global global,
+    FilesLinkUtility filesLinkUtility,
+    FilesMessageService filesMessageService,
+    FileSecurity fileSecurity,
+    LockerManager lockerManager,
+    IServiceProvider serviceProvider,
+    ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+    FileTrackerHelper fileTracker,
+    SocketManager socketManager)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -131,7 +131,7 @@ public class FileUploader(
         return file != null
                && await fileSecurity.CanEditAsync(file)
                && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
-               && !await entryManager.FileLockedForMeAsync(file.Id)
+               && !await lockerManager.FileLockedForMeAsync(file.Id)
                && !fileTracker.IsEditing(file.Id)
                && file.RootFolderType != FolderType.TRASH
                && !file.Encrypted;

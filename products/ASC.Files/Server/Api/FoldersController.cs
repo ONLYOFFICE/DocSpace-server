@@ -27,34 +27,37 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class FoldersControllerInternal(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        PermissionContext permissionContext)
-    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+public class FoldersControllerInternal(
+    BreadCrumbsManager breadCrumbsManager,
+    FoldersControllerHelper foldersControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
+    : FoldersController<int>(breadCrumbsManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
 
-public class FoldersControllerThirdparty(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        PermissionContext permissionContext)
-    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+public class FoldersControllerThirdparty(
+    BreadCrumbsManager breadCrumbsManager,
+    FoldersControllerHelper foldersControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
+    : FoldersController<string>(breadCrumbsManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
 
-public abstract class FoldersController<T>(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        PermissionContext permissionContext)
+public abstract class FoldersController<T>(
+    BreadCrumbsManager breadCrumbsManager,
+    FoldersControllerHelper foldersControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -166,7 +169,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(T folderId)
     {
-        var breadCrumbs = await entryManager.GetBreadCrumbsAsync(folderId);
+        var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(folderId);
 
         foreach (var e in breadCrumbs)
         {
