@@ -57,7 +57,7 @@ public class RemovePortalOperation(StorageFactory storageFactory,
             foreach (var module in modules)
             {
                 Percentage += 100 / (modules.Count() + 1);
-                PublishChanges();
+                await PublishChanges();
                 logger.DebugRemoveModule(module);
                 var storage = await storageFactory.GetStorageAsync(TenantId, module);
                 foreach (var domain in storageFactoryConfig.GetDomainList(module))
@@ -81,7 +81,7 @@ public class RemovePortalOperation(StorageFactory storageFactory,
         finally
         {
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 }

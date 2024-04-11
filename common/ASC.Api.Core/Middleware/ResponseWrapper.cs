@@ -76,6 +76,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;
                 break;
+            case NotSupportedException:
+                status = HttpStatusCode.UnsupportedMediaType;
+                withStackTrace = false;
+                break;
         }
 
         logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.Request.Method, context.Request.Path.Value);

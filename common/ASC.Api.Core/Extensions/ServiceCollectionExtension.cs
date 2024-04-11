@@ -343,4 +343,27 @@ public static class ServiceCollectionExtension
 
         return services;
     }
+
+    public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
+    {
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+
+        if (redisConfiguration == null)
+        {
+            return null;
+        }
+
+        var configurationOption = redisConfiguration.ConfigurationOptions;
+
+        configurationOption.ClientName = clientName;
+
+        var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+        services
+            .AddSingleton(redisConfiguration)
+            .AddSingleton(redisConnection);
+
+        return redisConnection.GetConnection();
+
+    }
 }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Serializer = ProtoBuf.Serializer;
-
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
@@ -283,7 +281,7 @@ public record FileTrackerNotify
 public record FileTracker
 {
     [ProtoMember(1)]
-    public Dictionary<Guid, TrackInfo> EditingBy { get; }
+    public Dictionary<Guid, TrackInfo> EditingBy { get; set; }
 
     public FileTracker() { }
     

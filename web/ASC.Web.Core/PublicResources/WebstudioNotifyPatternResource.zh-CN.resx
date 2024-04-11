@@ -292,7 +292,7 @@ $TrulyYours
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"门户停用
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户停用
 
 亲爱的$OwnerName,
 
@@ -303,14 +303,14 @@ $OrangeButton
 *注意*：此链接仅7天有效。请在此期限内完成门户停用流程。
 
 您可以随时点击以下链接重新激活门户：
-p=. "重新激活门户":"$ActivateUrl"（此链接无时间限制）
+p=. "重新激活门户":"$ActivateUrl" （此链接无时间限制）
 
 如果您有任何问题或需要帮助，请随时联系"${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}"门户
+    <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}" 门户
 
 亲爱的$OwnerName,
 
@@ -1045,7 +1045,7 @@ $TrulyYours</value>
 
 您好！
 
-您受邀加入在"${__VirtualRootPath}":"${__VirtualRootPath}"的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
+您受邀加入在"${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
 $OrangeButton
 

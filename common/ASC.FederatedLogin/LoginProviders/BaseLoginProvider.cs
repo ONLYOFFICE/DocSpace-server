@@ -87,7 +87,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, @params, additionalStateArgs);
+            var token = Auth(context, out var redirect, @params, additionalStateArgs);
 
             if (redirect)
             {
@@ -108,7 +108,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
     public abstract LoginProfile GetLoginProfile(string accessToken);
 
-    protected virtual OAuth20Token Auth(HttpContext context, string scopes, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+    protected virtual OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
     {
         var error = context.Request.Query["error"];
         if (!string.IsNullOrEmpty(error))
@@ -124,7 +124,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         var code = context.Request.Query["code"];
         if (string.IsNullOrEmpty(code))
         {
-            context.Response.Redirect(_oAuth20TokenHelper.RequestCode<T>(scopes, additionalArgs, additionalStateArgs));
+            context.Response.Redirect(_oAuth20TokenHelper.RequestCode<T>(Scopes, additionalArgs, additionalStateArgs));
             redirect = true;
 
             return null;
@@ -132,7 +132,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
         redirect = false;
 
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, code);
+        return _oAuth20TokenHelper.GetAccessToken<T>(code);
     }
 
     public virtual LoginProfile GetLoginProfile(OAuth20Token token)
@@ -142,7 +142,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
     public OAuth20Token GetToken(string codeOAuth)
     {
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, codeOAuth);
+        return _oAuth20TokenHelper.GetAccessToken<T>(codeOAuth);
     }
 }
 

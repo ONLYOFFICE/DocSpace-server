@@ -396,7 +396,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid>() { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid> { user.Id });
         }
     }
 
@@ -406,6 +406,15 @@ public abstract class BaseStorage(TempStream tempStream,
     }
 
     public abstract Task<string> GetFileEtagAsync(string domain, string path);
+
+    public async Task<string> GetUrlWithHashAsync(string domain, string path)
+    {
+        var uri = (await GetUriAsync(domain, path)).ToString();
+
+        var hash = (await GetFileEtagAsync(domain, path)).Trim('"');
+
+        return QueryHelpers.AddQueryString(uri, Constants.QueryHash, hash);
+    }
 
     private sealed class MonoUri : Uri
     {

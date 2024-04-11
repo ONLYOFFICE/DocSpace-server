@@ -145,14 +145,29 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-    IHttpClientFactory clientFactory)
+    IHttpClientFactory clientFactory,
+    IHttpContextAccessor httpContextAccessor)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
-                                                                + "?" + FilesLinkUtility.Action + "=track"
-                                                                + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
-                                                                + "&" + FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString()));
+        var queryParams = HttpUtility.ParseQueryString(String.Empty);
+
+        queryParams[FilesLinkUtility.Action] = "track";
+        queryParams[FilesLinkUtility.FileId] = fileId.ToString();
+        queryParams[FilesLinkUtility.AuthKey] = await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString());
+
+        if (httpContextAccessor?.HttpContext != null)
+        {
+            queryParams["request-x-real-ip"] = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+
+            if (httpContextAccessor.HttpContext.Request.Headers.TryGetValue("User-Agent", out var header))
+            {
+                queryParams["request-user-agent"] = header.First();
+            }
+        }
+        
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams.ToString()}"); 
+
         callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 
         return callbackUrl;
@@ -240,7 +255,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
-                logger.ErrorDocServiceDropFailed(usersDrop);
+            logger.ErrorDocServiceDropFailed(usersDrop);
         }
 
         foreach (var removeUserId in users)
@@ -276,7 +291,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         {
             userId = Guid.Empty;
         }
-        
+
         var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
@@ -476,8 +491,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
                     await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
-                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
-                            message = await reader.ReadToEndAsync();
+                        using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                        message = await reader.ReadToEndAsync();
                     }
 
                     break;
@@ -586,10 +601,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             };
 
             var httpClient = clientFactory.CreateClient();
-            using var response = await httpClient.SendAsync(request);
-            await using var stream = await response.Content.ReadAsStreamAsync();
-
-            await using var differenceStream = new ResponseStream(stream, stream.Length);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);
         }
         catch (Exception ex)

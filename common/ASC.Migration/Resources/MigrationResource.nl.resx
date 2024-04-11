@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Agenda</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Agenda</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Tijdelijke gegevens wissen</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Contacten</value>
-  </data>
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>Gegevensverwerking voltooid</value>
   </data>
@@ -138,41 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Database parsing</value>
   </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Documenten</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive`s Bestanden</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Groepsmigratie {0} ({1}/{2})</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Groepen</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Mail`s Contactpersonen</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migreren van gebruikerscontacten {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migratie van gebruikersbestanden {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migratie geannuleerd</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migratie voltooid</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Personen</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Voorbereiding van de migratie</value>
@@ -186,20 +147,8 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Uitpakken voltooid...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Gebruikerskalender migratie {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Gebruikersmigratie {0} ({1}/{2})</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Gebruikersbestanden</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Gebruikers</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Gebruiker niet geïmporteerd: {0} ({1}/{2})</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Algemene bestanden voor migratie</value>

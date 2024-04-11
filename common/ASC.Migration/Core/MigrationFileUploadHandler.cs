@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security;
-
 namespace ASC.Migration.Core.Core;
 public class MigrationFileUploadHandler
 {
@@ -46,7 +44,7 @@ public class MigrationFileUploadHandler
         {
             if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
-                throw new SecurityException("Access denied.");
+                throw new System.Security.SecurityException("Access denied.");
             }
 
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -89,7 +87,7 @@ public class MigrationFileUploadHandler
             result = Error(error.Message);
         }
 
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions()
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }));

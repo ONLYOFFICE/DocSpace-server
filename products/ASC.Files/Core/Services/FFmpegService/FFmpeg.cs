@@ -97,7 +97,7 @@ public class FFmpegService
         var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
         _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
-        _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? Array.Empty<string>()).ToList();
+        _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? []).ToList();
 
         if (string.IsNullOrEmpty(_fFmpegPath))
         {

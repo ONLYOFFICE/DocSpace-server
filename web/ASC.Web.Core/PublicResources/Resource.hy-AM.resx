@@ -150,9 +150,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} պահեստային տարածք</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Օգտագործված պահեստի չափը չպետք է գերազանցի {0}-ը</value>
   </data>
@@ -620,9 +617,6 @@
   </data>
   <data name="Owner" xml:space="preserve">
     <value>Սեփականատեր</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Սկավառակի տարածքի սահմանաչափը գերազանցվել է</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Ամպային տարածք ձեր գրասենյակային փաստաթղթերի համար</value>

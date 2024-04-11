@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Collections.ObjectModel;
-
-using Microsoft.Net.Http.Headers;
-
 namespace ASC.Files.Core.Security;
 
 [Scope]
@@ -340,7 +336,30 @@ public record DownloadSession
     public Guid LinkId { get; init; }
 }
 
-public record ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey);
+[ProtoContract]
+public class ExternalSessionSnapshot
+{
+    public ExternalSessionSnapshot()
+    {
+        
+    }
+    
+    public ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey)
+    {
+        this.LinkId = LinkId;
+        this.SessionId = SessionId;
+        this.PasswordKey = PasswordKey;
+    }
+
+    [ProtoMember(1)]
+    public Guid LinkId { get; init; }
+    
+    [ProtoMember(2)]
+    public Guid SessionId { get; init; }
+    
+    [ProtoMember(3)]
+    public string PasswordKey { get; init; }
+}
 
 public enum Status
 {

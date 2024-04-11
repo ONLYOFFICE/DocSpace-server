@@ -59,7 +59,7 @@ public sealed class UserManagerWrapper(
         return Equals(await userManager.GetUserByUserNameAsync(uniqueName), Constants.LostUser);
     }
 
-    private async Task<string> MakeUniqueNameAsync(UserInfo userInfo)
+    public async Task<string> MakeUniqueNameAsync(UserInfo userInfo)
     {
         if (string.IsNullOrEmpty(userInfo.Email))
         {

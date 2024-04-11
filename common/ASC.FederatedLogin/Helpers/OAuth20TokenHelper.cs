@@ -27,7 +27,10 @@
 namespace ASC.FederatedLogin.Helpers;
 
 [Scope]
-public class OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, ConsumerFactory consumerFactory, RequestHelper requestHelper)
+public class OAuth20TokenHelper(
+    IHttpContextAccessor httpContextAccessor,
+    ConsumerFactory consumerFactory,
+    RequestHelper requestHelper)
 {
     public string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
         where T : Consumer, IOAuthProvider, new()
@@ -91,7 +94,7 @@ public class OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, Consum
         return uriBuilder.Uri + "?" + query;
     }
 
-    public OAuth20Token GetAccessToken<T>(ConsumerFactory consumerFactory, string authCode) where T : Consumer, IOAuthProvider, new()
+    public OAuth20Token GetAccessToken<T>(string authCode) where T : Consumer, IOAuthProvider, new()
     {
         var loginProvider = consumerFactory.Get<T>();
         var requestUrl = loginProvider.AccessTokenUrl;
@@ -137,7 +140,7 @@ public class OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, Consum
         return null;
     }
 
-    public OAuth20Token RefreshToken<T>(ConsumerFactory consumerFactory, OAuth20Token token) where T : Consumer, IOAuthProvider, new()
+    public OAuth20Token RefreshToken<T>(OAuth20Token token) where T : Consumer, IOAuthProvider, new()
     {
         var loginProvider = consumerFactory.Get<T>();
 

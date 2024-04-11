@@ -78,8 +78,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
-        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
-                {
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
+        {
                     {
                 FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
         {
@@ -244,7 +244,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.EditAccess,
                     FilesSecurityActions.Duplicate,
                     FilesSecurityActions.Download,
-                    FilesSecurityActions.CopySharedLink
+                    FilesSecurityActions.CopySharedLink,
+                    FilesSecurityActions.Reconnect
                 }
             }
     }.ToFrozenDictionary();
@@ -830,6 +831,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             return true;
         }
 
+        if (action == FilesSecurityActions.Reconnect)
+        {
+            return isRoom && e.ProviderEntry && e.CreateBy == userId;
+        }
+
         if (e.FileEntryType == FileEntryType.Folder)
         {
             if (folder == null)
@@ -1059,12 +1065,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
-            await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
-        {
-            return false;
-        }
-
         var defaultShare =
             e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
             e.RootFolderType == FolderType.USER ? DefaultMyShare :
@@ -1075,6 +1075,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
+        
+        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
+            await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
+        {
+            return false;
+        }
 
         switch (action)
         {
@@ -1234,7 +1240,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict)
+                        if (e.Access != FileShare.Restrict && isAuthenticated)
                         {
                             return true;
                         }
@@ -1269,7 +1275,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing)
+                        if (e.Access == FileShare.Editing && isAuthenticated)
                         {
                             return true;
                         }
@@ -1907,9 +1913,9 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
 
-    public async Task RemoveSubjectAsync<T>(Guid subject, bool withoutOwner)
+    public Task RemoveSubjectAsync(Guid subject, bool withoutOwner)
     {
-        await daoFactory.GetSecurityDao<T>().RemoveBySubjectAsync(subject, withoutOwner);
+        return daoFactory.GetSecurityDao<int>().RemoveBySubjectAsync(subject, withoutOwner);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)
@@ -2144,6 +2150,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         Download,
         Convert,
         CopySharedLink,
-        ReadLinks
+        ReadLinks,
+        Reconnect
     }
 }

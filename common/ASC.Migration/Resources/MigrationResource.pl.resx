@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Czyszczenie danych tymczasowych</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Przetwarzanie danych...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Analizowanie bazy danych</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Kontakty z poczty</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Pliki Google Drive</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Migracja grupy {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migrowanie kontaktów użytkownika {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migrowanie plików użytkownika {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migracja została anulowana</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migracja została zakończona</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalendarz</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Grupy</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Użytkownicy</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kontakty</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Pliki użytkownika</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalendarz</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Ludzie</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Przygotowanie do migracji</value>
@@ -192,14 +147,8 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Rozpakowywanie zakończone...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Migracja kalendarza użytkownika {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migracja użytkownika {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Nie udało się zaimportować użytkownika: {0} ({1}/{2})</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migracja wspólnych plików</value>

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Notify.Socket;
+
 namespace ASC.Api.Core;
 
 public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
@@ -37,7 +39,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
@@ -66,22 +68,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.AddMemoryCache();
         
-        var redisConfiguration = Configuration.GetSection("Redis").Get<RedisConfiguration>();
-        IConnectionMultiplexer connectionMultiplexer = null;
-
-        if (redisConfiguration != null)
-        {
-            var configurationOption = redisConfiguration?.ConfigurationOptions;
-
-            configurationOption.ClientName = GetType().Namespace;
-
-            var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
-
-            services.AddSingleton(redisConfiguration)
-                    .AddSingleton(redisConnection);
-
-            connectionMultiplexer = redisConnection?.GetConnection();
-        }
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
         services.AddDistributedCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
@@ -96,6 +83,12 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        services.AddHostedService<SocketService>();
+        DIHelper.TryAdd<SocketService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

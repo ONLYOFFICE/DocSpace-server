@@ -39,7 +39,7 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
             new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
     ];
 
-    private readonly RelationInfo[] _relations = Array.Empty<RelationInfo>();
+    private readonly RelationInfo[] _relations = [];
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

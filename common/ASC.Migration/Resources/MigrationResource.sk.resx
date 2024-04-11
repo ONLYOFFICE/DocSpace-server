@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalendár</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalendár</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kontakty</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Vymazanie dočasných údajov</value>
-  </data>
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>Spracovanie údajov dokončené</value>
   </data>
@@ -138,44 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Spracovanie databázy</value>
   </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Nepodarilo sa importovať používateľa: {0} ({1}/{2})</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Súbory na disku Google</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Presun skupín {0} ({1}/{2})</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Skupiny</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Kontakty poštovej schránky</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Presun kontaktov používateľov {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Presun používateľských súborov {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Presun zrušený</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Presun dokončený</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Ľudia</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Príprava na presun</value>
@@ -189,17 +147,8 @@
   <data name="Unzipping" xml:space="preserve">
     <value>Rozbaľovanie...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Presun kalendára používateľa {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Presun používateľov {0} ({1}/{2})</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Súbory používateľa</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Používatelia</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrácia spoločných súborov</value>

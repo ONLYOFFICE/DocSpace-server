@@ -60,7 +60,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
         Percentage = 10;
-        PublishChanges();
+        await PublishChanges();
 
         try
         {
@@ -77,7 +77,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             }
 
             Percentage = 30;
-            PublishChanges();
+            await PublishChanges();
 
             foreach (var tenant in _tenants)
             {
@@ -95,7 +95,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             }
 
             Percentage = 70;
-            PublishChanges();
+            await PublishChanges();
 
             if (!_hasErrors)
             {
@@ -104,20 +104,20 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             }
 
             Percentage = 90;
-            PublishChanges();
+            await PublishChanges();
             await ActivateTenantsAsync(tenantManager, log, notifyHelper);
 
             Percentage = 100;
 
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
         catch (Exception e)
         {
             Exception = e;
             log.ErrorEncryptionOperation(e);
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 
@@ -138,7 +138,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             EncryptFiles(store, domain, files, logParent, log);
         }
 
-        StepDone();
+        await StepDone();
 
         log.DebugPercentage(Percentage);
     }

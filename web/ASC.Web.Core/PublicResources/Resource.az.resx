@@ -235,9 +235,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Sahib</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk sahəsi kvotası keçildi</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Portala Giriş</value>
   </data>
@@ -333,9 +330,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} yaddaş sahəsi</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>İstifadə olunan yaddaş ölçüsü {0}-dan çox olmamalıdır</value>

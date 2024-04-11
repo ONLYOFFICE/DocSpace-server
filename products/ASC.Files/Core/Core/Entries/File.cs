@@ -105,11 +105,13 @@ public class File<T> : FileEntry<T>
         }
     }
 
-    public FileStatus FileStatus
+    public async Task<FileStatus> GetFileStatus()
     {
-        get => FileHelper.GetFileStatus(this, ref _status);
-        set => _status = value;
+        _status = await FileHelper.GetFileStatus(this, _status);
+        return _status;
     }
+
+    public void SetFileStatus(FileStatus value) => _status = value;
 
     public override string UniqID => $"file_{Id}";
 

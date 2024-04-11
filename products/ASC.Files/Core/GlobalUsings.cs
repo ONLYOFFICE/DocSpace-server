@@ -105,6 +105,7 @@ global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
 global using ASC.Files.Core.Data;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Exceptions;
 global using ASC.Files.Core.Entries;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
@@ -210,12 +211,12 @@ global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
 
-global using Nest;
-
 global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
+
+global using OpenSearch.Client;
 
 global using ProtoBuf;
 

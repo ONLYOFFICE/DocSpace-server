@@ -90,7 +90,7 @@ internal class DropboxFileDao(UserManager userManager,
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));
-            await ProviderInfo.CacheResetAsync(Dao.GetParentFolderId(dropboxFile), false);
+            await ProviderInfo.CacheResetAsync(Dao.GetParentFolderId(dropboxFile));
 
             return Dao.ToFile(dropboxFile.AsFile);
         }

@@ -66,7 +66,7 @@ public class CalDavController(CommonMethods commonMethods,
         {
             var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, change + ConfirmType.Auth);
 
-            SendToApi(Request.Scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
+            await SendToApi(Request.Scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
@@ -96,7 +96,7 @@ public class CalDavController(CommonMethods commonMethods,
         {
             var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, eventInfo + ConfirmType.Auth);
 
-            SendToApi(Request.Scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
+            await SendToApi(Request.Scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
@@ -150,7 +150,7 @@ public class CalDavController(CommonMethods commonMethods,
 
             var authData = $"userName={HttpUtility.UrlEncode(email)}&password={HttpUtility.UrlEncode(userPassword.Password)}&key={HttpUtility.UrlEncode(validationKey)}";
 
-            SendToApi(Request.Scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
+            await SendToApi(Request.Scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
 
             return Ok(new
             {
@@ -280,12 +280,13 @@ public class CalDavController(CommonMethods commonMethods,
         return (true, email, tenant, null);
     }
 
-    private void SendToApi(string requestUriScheme,
-                            Tenant tenant,
-                            string path,
-                            IEnumerable<KeyValuePair<string, string>> args = null,
-                            string httpMethod = WebRequestMethods.Http.Get,
-                            string data = null)
+    private async Task SendToApi(
+        string requestUriScheme,
+        Tenant tenant,
+        string path,
+        IEnumerable<KeyValuePair<string, string>> args = null,
+        string httpMethod = WebRequestMethods.Http.Get,
+        string data = null)
     {
         var query = args == null
                         ? null
@@ -309,7 +310,7 @@ public class CalDavController(CommonMethods commonMethods,
             request.Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
         }
 
-        httpClient.Send(request);
+        await httpClient.SendAsync(request);
     }
 
     #endregion

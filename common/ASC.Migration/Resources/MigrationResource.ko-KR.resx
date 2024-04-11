@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>캘린더</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>캘린더</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>임시 데이터 삭제 중</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>연락처</value>
-  </data>
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>데이터 처리가 완료되었습니다</value>
   </data>
@@ -138,44 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>데이터베이스 파싱 중</value>
   </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>문서</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>사용자 가져오기에 실패했습니다: {0} ({1}/{2})</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google 드라이브의 파일</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>그룹 마이그레이션 {0} ({1}/{2})</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>그룹</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>메일</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>메일</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>메일의 연락처</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>사용자 연락처 마이그레이션 중 {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>사용자 파일 마이그레이션 중 {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>마이그레이션이 취소되었습니다</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>마이그레이션이 완료되었습니다</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>사람</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>마이그레이션 준비 중</value>
@@ -189,17 +147,8 @@
   <data name="Unzipping" xml:space="preserve">
     <value>압축 해제 중...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>사용자 캘린더 마이그레이션 {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>사용자 마이그레이션 {0} ({1}/{2})</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>사용자의 파일</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>사용자</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>마이그레이션 공통 파일</value>

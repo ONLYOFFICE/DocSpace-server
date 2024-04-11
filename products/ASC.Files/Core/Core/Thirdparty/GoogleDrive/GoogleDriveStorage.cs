@@ -29,7 +29,7 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Transient]
-internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
+internal class GoogleDriveStorage(
         FileUtility fileUtility,
         ILoggerProvider monitor,
         TempStream tempStream,
@@ -50,7 +50,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
             if (_token.IsExpired)
             {
-                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(consumerFactory, _token);
+                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(_token);
             }
 
             return _token.AccessToken;
@@ -193,7 +193,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
-            Method = HttpMethod.Get,
+            Method = HttpMethod.Get
         };
         
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
@@ -421,13 +421,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             googleDriveSession.BytesTransferred += chunkLength;
             googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-
-            string responseString;
-            using (var readStream = new StreamReader(responseStream))
-            {
-                responseString = await readStream.ReadToEndAsync();
-            }
+            var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             googleDriveSession.FileId = responseJson.Value<string>("id");
@@ -598,5 +592,10 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
     }
 }

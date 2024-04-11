@@ -232,9 +232,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>Χώρος αποθήκευσης {0}</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Το μέγεθος του χρησιμοποιούμενου αποθηκευτικού χώρου πρέπει να είναι ίσο ή μικρότερο από {0}</value>
   </data>
@@ -951,9 +948,6 @@
   </data>
   <data name="OrgServerRegion" xml:space="preserve">
     <value>Περιοχή ORG</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Υπέρβαση της ποσόστωσης χώρου στον δίσκο</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Χώρος στο νέφος για τα έγγραφα του γραφείου σας</value>

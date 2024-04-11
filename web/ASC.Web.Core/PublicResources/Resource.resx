@@ -903,9 +903,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Owner</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk space quota exceeded</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Cloud space for your office docs</value>
   </data>
@@ -994,7 +991,7 @@
     <value>SSO</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} storage space</value>
+    <value>{0} per admin/power user and ability to add space on request</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>The used storage size should not exceed {0}</value>
@@ -1103,5 +1100,8 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>User space quota exceeded</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Storage quotas &amp; statistic</value>
   </data>
 </root>

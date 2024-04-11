@@ -31,7 +31,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
         FileSecurity fileSecurity,
-        SetupInfo setupInfo,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
@@ -40,7 +39,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -135,17 +135,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
             && !await fileSecurity.CanReadAsync(file))
         {
+            if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
+            {
+                throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+            
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeEdit, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         string strError = null;
@@ -191,7 +191,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!editPossible && !fileUtility.CanWebView(file.Title))
         {
-            throw new Exception($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
+            throw new NotSupportedException($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
         }
 
         if (reviewPossible &&
@@ -250,7 +250,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             await entryStatusManager.SetFileStatusAsync(file);
         }
 
-        var rightToDownload = await CanDownloadAsync(fileSecurity, file, linkRight);
+        var rightToDownload = await CanDownloadAsync(file, linkRight);
 
         var configuration = serviceProvider.GetService<Configuration<T>>();
         configuration.Document.Key = docKey;
@@ -294,7 +294,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return (file, configuration, locatedInPrivateRoom);
     }
 
-    private async Task<bool> CanDownloadAsync<T>(FileSecurity fileSecurity, File<T> file, FileShare linkRight)
+    private async Task<bool> CanDownloadAsync<T>(File<T> file, FileShare linkRight)
     {
         var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
 

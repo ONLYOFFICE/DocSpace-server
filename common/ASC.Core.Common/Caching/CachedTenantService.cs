@@ -168,7 +168,7 @@ class CachedTenantService() : ITenantService
     private readonly ICacheNotify<TenantSetting> _cacheNotifySettings;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
-    private readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
     private readonly ICache _cache;
 
     public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache) : this()
@@ -203,6 +203,14 @@ class CachedTenantService() : ITenantService
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         return await _service.GetTenantsAsync(ids);
+    }
+
+    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings)
+    {
+        newTenant = await _service.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = oldId }, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = newTenant.Id }, CacheNotifyAction.InsertOrUpdate);
+        return newTenant;
     }
 
     public async Task<Tenant> GetTenantAsync(int id)
@@ -318,7 +326,7 @@ class CachedTenantService() : ITenantService
         {
             data = await _service.GetTenantSettingsAsync(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;
@@ -332,7 +340,7 @@ class CachedTenantService() : ITenantService
         {
             data = _service.GetTenantSettings(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;
@@ -357,10 +365,5 @@ class CachedTenantService() : ITenantService
     private string GetCacheKey(int tenant, string key)
     {
         return $"settings/{tenant}/{key.ToLowerInvariant()}";
-    }
-
-    public IEnumerable<Tenant> GetTenantsWithCsp()
-    {
-        return _service.GetTenantsWithCsp();
     }
 }

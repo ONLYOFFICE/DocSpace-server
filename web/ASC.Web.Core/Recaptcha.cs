@@ -56,8 +56,7 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 
             var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
-            using var reader = new StreamReader(await httpClientResponse.Content.ReadAsStreamAsync());
-            var resp = await reader.ReadToEndAsync();
+            var resp = await httpClientResponse.Content.ReadAsStringAsync();
             var resObj = JObject.Parse(resp);
 
             if (resObj["success"] != null && resObj.Value<bool>("success"))

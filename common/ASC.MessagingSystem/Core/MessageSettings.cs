@@ -70,6 +70,13 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
+        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
@@ -90,6 +97,13 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
+        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 

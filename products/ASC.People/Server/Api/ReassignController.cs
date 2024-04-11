@@ -52,7 +52,7 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
+        var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -113,11 +113,11 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
+        var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         if (progressItem != null)
         {
-            queueWorkerReassign.Terminate(tenant.Id, inDto.UserId);
+            await queueWorkerReassign.Terminate(tenant.Id, inDto.UserId);
 
             progressItem.Status = DistributedTaskStatus.Canceled;
             progressItem.IsCompleted = true;

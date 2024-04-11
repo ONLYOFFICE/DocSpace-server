@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Löschung temporärer Daten</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Datenverarbeitung...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Datenbank-Parsing</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Mail-Kontakte</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Dateien von Google Drive</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Gruppenmigration {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migration von Nutzerkontakten {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migration von Nutzerdateien {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migration abgebrochen</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migration abgeschlossen</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalender</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalender</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Gruppen</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Benutzer</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kontakte</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Dateien der Benutzer</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Dokumente</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Personen</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Vorbereitungen für die Migration</value>
@@ -192,14 +147,8 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Entpacken abgeschlossen...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Benutzerkalendermigration {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Benutzer-Migration {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Importieren des Benutzers fehlgeschlagen: {0} ({1}/{2})</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migration gemeinsamer Dateien</value>

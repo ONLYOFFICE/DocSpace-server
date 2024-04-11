@@ -300,7 +300,6 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using var memstream = new MemoryStream();
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url)
@@ -308,15 +307,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
         var httpClient = httpClientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        var buffer = new byte[512];
-        int bytesRead;
-        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-        {
-            memstream.Write(buffer, 0, bytesRead);
-        }
-
-        var bytes = memstream.ToArray();
+        var bytes = await response.Content.ReadAsByteArrayAsync();
 
         await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
     }

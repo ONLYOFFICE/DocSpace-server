@@ -36,10 +36,10 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
-        var item = _progressQueue.GetAllTasks<LdapOperationJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<LdapOperationJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
         if (item == null)
@@ -47,19 +47,19 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
             using var scope = serviceProvider.CreateScope();
             item = scope.ServiceProvider.GetRequiredService<LdapOperationJob>();
             await item.InitJobAsync(settings, tenant, operationType, resource, userId);
-            _progressQueue.EnqueueTask(item);
+            await _progressQueue.EnqueueTask(item);
         }
 
-        item.PublishChanges();
+        await item.PublishChanges();
     }
 
     public async Task<LdapOperationStatus> TestLdapSaveAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
-        var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
+        var (hasStarted, operations) = await HasStartedForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
 
         if (hasStarted)
         {
-            return ToLdapOperationStatus(tenant.Id);
+            return await ToLdapOperationStatus(tenant.Id);
         }
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
@@ -71,12 +71,12 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         ldapLocalization.Init(Resource.ResourceManager);
 
         await RunJobAsync(ldapSettings, tenant, LdapOperationType.SaveTest, ldapLocalization, userId);
-        return ToLdapOperationStatus(tenant.Id);
+        return await ToLdapOperationStatus(tenant.Id);
     }
 
     public async Task<LdapOperationStatus> SaveLdapSettingsAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
-        var operations = GetOperationsForTenant(tenant.Id);
+        var operations = await GetOperationsForTenant(tenant.Id);
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
@@ -95,16 +95,16 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         ldapLocalization.Init(Resource.ResourceManager, WebstudioNotifyPatternResource.ResourceManager);
 
         await RunJobAsync(ldapSettings, tenant, LdapOperationType.Save, ldapLocalization, userId);
-        return ToLdapOperationStatus(tenant.Id);
+        return await ToLdapOperationStatus(tenant.Id);
     }
 
     public async Task<LdapOperationStatus> SyncLdapAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
-        var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.Sync, LdapOperationType.Save);
+        var (hasStarted, operations) = await HasStartedForTenant(tenant.Id, LdapOperationType.Sync, LdapOperationType.Save);
 
         if (hasStarted)
         {
-            return ToLdapOperationStatus(tenant.Id);
+            return await ToLdapOperationStatus(tenant.Id);
         }
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
@@ -116,16 +116,16 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         ldapLocalization.Init(Resource.ResourceManager);
 
         await RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync, ldapLocalization, userId);
-        return ToLdapOperationStatus(tenant.Id);
+        return await ToLdapOperationStatus(tenant.Id);
     }
 
     public async Task<LdapOperationStatus> TestLdapSyncAsync(LdapSettings ldapSettings, Tenant tenant)
     {
-        var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
+        var (hasStarted, operations) = await HasStartedForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
 
         if (hasStarted)
         {
-            return ToLdapOperationStatus(tenant.Id);
+            return await ToLdapOperationStatus(tenant.Id);
         }
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
@@ -137,12 +137,12 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         ldapLocalization.Init(Resource.ResourceManager);
 
         await RunJobAsync(ldapSettings, tenant, LdapOperationType.SyncTest, ldapLocalization);
-        return ToLdapOperationStatus(tenant.Id);
+        return await ToLdapOperationStatus(tenant.Id);
     }
 
-    public LdapOperationStatus ToLdapOperationStatus(int tenantId)
+    public async Task<LdapOperationStatus> ToLdapOperationStatus(int tenantId)
     {
-        var operations = _progressQueue.GetAllTasks<LdapOperationJob>().ToList();
+        var operations = (await _progressQueue.GetAllTasks<LdapOperationJob>()).ToList();
 
         foreach (var o in operations)
         {
@@ -152,7 +152,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
             }
 
             o[LdapTaskProperty.PROGRESS] = 100;
-            _progressQueue.DequeueTask(o.Id);
+            await _progressQueue.DequeueTask(o.Id);
         }
 
         var operation =
@@ -167,7 +167,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         if (DistributedTaskStatus.Running < operation.Status)
         {
             operation[LdapTaskProperty.PROGRESS] = 100;
-            _progressQueue.DequeueTask(operation.Id);
+            await _progressQueue.DequeueTask(operation.Id);
         }
 
         var result = new LdapOperationStatus
@@ -207,9 +207,9 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         return result;
     }
 
-    private (bool hasStarted, List<LdapOperationJob> operations) HasStarterdForTenant(int tenantId, LdapOperationType arg1, LdapOperationType arg2)
+    private async Task<(bool hasStarted, List<LdapOperationJob> operations)> HasStartedForTenant(int tenantId, LdapOperationType arg1, LdapOperationType arg2)
     {
-        var operations = GetOperationsForTenant(tenantId);
+        var operations = await GetOperationsForTenant(tenantId);
 
         var hasStarted = operations.Any(o =>
         {
@@ -222,9 +222,9 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         return (hasStarted, operations);
     }
 
-    private List<LdapOperationJob> GetOperationsForTenant(int tenantId)
+    private async Task<List<LdapOperationJob>> GetOperationsForTenant(int tenantId)
     {
-        return _progressQueue.GetAllTasks<LdapOperationJob>()
+        return (await _progressQueue.GetAllTasks<LdapOperationJob>())
             .Where(t => t[LdapTaskProperty.OWNER] == tenantId)
             .ToList();
     }

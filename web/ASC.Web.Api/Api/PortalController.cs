@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -46,6 +44,7 @@ public class PortalController(ILogger<PortalController> logger,
         CommonLinkUtility commonLinkUtility,
         IUrlShortener urlShortener,
         AuthContext authContext,
+        CookiesManager cookiesManager,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -328,7 +327,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     [HttpGet("thumb")]
-    public FileResult GetThumb(string url)
+    public async Task<FileResult> GetThumb(string url)
     {
         if (!securityContext.IsAuthenticated || configuration["bookmarking:thumbnail-url"] == null)
         {
@@ -344,10 +343,8 @@ public class PortalController(ILogger<PortalController> logger,
         };
 
         var httpClient = clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
-        using var stream = response.Content.ReadAsStream();
-        var bytes = new byte[stream.Length];
-        _ = stream.Read(bytes, 0, (int)stream.Length);
+        using var response = await httpClient.SendAsync(request);
+        var bytes = await response.Content.ReadAsByteArrayAsync();
 
         var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);
@@ -486,13 +483,19 @@ public class PortalController(ILogger<PortalController> logger,
         }
 
         var rewriter = httpContextAccessor.HttpContext.Request.Url();
-        return string.Format("{0}{1}{2}{3}/{4}",
+        var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
                                 commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
-               );
+        );
+
+        cookiesManager.ClearCookies(CookiesType.AuthKey);
+        cookiesManager.ClearCookies(CookiesType.SocketIO);
+        securityContext.Logout();
+
+        return confirmUrl;
     }
 
     /// <summary>

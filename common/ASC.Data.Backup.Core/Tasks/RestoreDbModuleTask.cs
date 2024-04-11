@@ -79,7 +79,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                     onAttemptFailure: _ => _columnMapper.Rollback(),
                     onFailure: error => throw ThrowHelper.CantRestoreTable(table.Name, error));
 
-                SetStepCompleted();
+                await SetStepCompleted();
                 _logger.DebugRowsInserted(transactionData.RowsInserted, table.Name);
             }
         }

@@ -394,9 +394,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} depolama alanı</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Kullanılan depolama boyutu {0} değerini geçmemelidir</value>
   </data>
@@ -978,9 +975,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>{0} e-posta adresli bir kullanıcı varsa, şifre değiştirme talimatı bu e-posta adresine gönderilmiştir.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Disk alanı kotası aşılı</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Ofis belgeleriniz için bulut alanı</value>

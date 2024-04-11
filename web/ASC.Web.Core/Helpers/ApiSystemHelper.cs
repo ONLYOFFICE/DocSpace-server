@@ -261,9 +261,7 @@ public class ApiSystemHelper
 
         var httpClient = _clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-        return await reader.ReadToEndAsync();
+        return await response.Content.ReadAsStringAsync();
     }
 }
 

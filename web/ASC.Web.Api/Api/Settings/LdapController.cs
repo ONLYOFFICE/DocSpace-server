@@ -28,18 +28,19 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 /// <visible>false</visible>
 [DefaultRoute("ldap")]
-public class LdapController(ApiContext apiContext,
-        WebItemManager webItemManager,
-        IMemoryCache memoryCache,
-        SettingsManager settingsManager,
-        TenantManager tenantManager,
-        LdapNotifyService ldapNotifyHelper,
-        LdapSaveSyncOperation ldapSaveSyncOperation,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        CoreBaseSettings coreBaseSettings,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper)
+public class LdapController(
+    ApiContext apiContext,
+    WebItemManager webItemManager,
+    IMemoryCache memoryCache,
+    SettingsManager settingsManager,
+    TenantManager tenantManager,
+    LdapNotifyService ldapNotifyHelper,
+    LdapSaveSyncOperation ldapSaveSyncOperation,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    CoreBaseSettings coreBaseSettings,
+    IHttpContextAccessor httpContextAccessor,
+    IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -141,12 +142,7 @@ public class LdapController(ApiContext apiContext,
             }
         }
 
-        var settings = await settingsManager.LoadAsync<LdapCronSettings>();
-
-        if (settings == null)
-        {
-            settings = new LdapCronSettings();
-        }
+        var settings = await settingsManager.LoadAsync<LdapCronSettings>() ?? new LdapCronSettings();
 
         settings.Cron = cron;
         await settingsManager.SaveAsync(settings);
@@ -292,7 +288,7 @@ public class LdapController(ApiContext apiContext,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         
-        var result = ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
+        var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
         return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }

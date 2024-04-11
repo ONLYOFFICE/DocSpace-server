@@ -361,9 +361,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Собственик</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Превишена е квотата за дисково пространство</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Достъп до портала</value>
   </data>
@@ -453,9 +450,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>Единично вписване</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} пространство в хранилището</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Използваното пространство в хранилището не трябва да надвишава {0}</value>

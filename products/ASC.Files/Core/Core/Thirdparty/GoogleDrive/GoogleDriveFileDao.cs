@@ -90,7 +90,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
             var parentDriveId = googleDriveSession.FolderId;
             if (parentDriveId != null)
             {
-                await ProviderInfo.CacheResetAsync(parentDriveId, false);
+                await ProviderInfo.CacheResetAsync(parentDriveId);
             }
 
             return Dao.ToFile(await Dao.GetFileAsync(googleDriveSession.FileId));
@@ -129,7 +129,7 @@ internal class GoogleDriveFileDao(UserManager userManager,
     {
         var googleDriveSession = uploadSession.GetItemOrDefault<RenewableUploadSession>(UploadSessionKey);
         var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-        var lastChunk = uploadSession.Items.ContainsKey("lastChunk");
+        var lastChunk = uploadSession.Items.ContainsKey("lastChunk") || googleDriveSession.BytesTransferred + chunkLength == googleDriveSession.BytesToTransfer;
         await storage.TransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
     }
 }

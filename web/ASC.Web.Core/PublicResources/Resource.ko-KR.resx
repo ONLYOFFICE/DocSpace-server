@@ -190,9 +190,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} 저장 공간</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>최대 사용 저장 공간은 {0}입니다</value>
   </data>
@@ -792,9 +789,6 @@
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>디스크 공간 할당량을 초과했습니다</value>
   </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>이전에 LDAP를 통해 로드된 오래된 사용자 프로필 비활성화 중</value>

@@ -46,8 +46,8 @@ public class MessageService(
             return _enabled.Value ? sender : null;
         }
     }
-
-    private readonly HttpRequest _request = httpContextAccessor?.HttpContext?.Request;
+    
+    private HttpRequest Request => httpContextAccessor?.HttpContext?.Request;
 
     private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
@@ -140,14 +140,14 @@ public class MessageService(
             return;
         }
 
-        if (_request == null)
+        if (Request == null)
         {
             logger.DebugEmptyHttpRequest(action);
 
             return;
         }
 
-        var message = await messageFactory.CreateAsync(_request, loginName, dateTime, action, target, description);
+        var message = await messageFactory.CreateAsync(Request, loginName, dateTime, action, target, description);
         if (!messagePolicy.Check(message))
         {
             return;
@@ -184,9 +184,9 @@ public class MessageService(
             return;
         }
 
-        if (httpHeaders == null && _request != null)
+        if (httpHeaders == null && Request != null)
         {
-            httpHeaders = _request.Headers.ToDictionary(k => k.Key, v => v.Value);
+            httpHeaders = Request.Headers.ToDictionary(k => k.Key, v => v.Value);
         }
 
         var message = await messageFactory.CreateAsync(httpHeaders, action, target, description);
@@ -225,7 +225,7 @@ public class MessageService(
             return;
         }
 
-        var message = await messageFactory.CreateAsync(_request, initiator, null, action, target, description);
+        var message = await messageFactory.CreateAsync(Request, initiator, null, action, target, description);
         if (!messagePolicy.Check(message))
         {
             return;
@@ -240,7 +240,7 @@ public class MessageService(
             return 0;
         }
 
-        var message = await messageFactory.CreateAsync(_request, userData, action);
+        var message = await messageFactory.CreateAsync(Request, userData, action);
         if (!messagePolicy.Check(message))
         {
             return 0;

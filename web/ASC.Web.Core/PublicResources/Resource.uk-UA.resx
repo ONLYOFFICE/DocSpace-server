@@ -277,9 +277,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>Єдиний вхід</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>Обсяг сховища: {0}</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Використаний обсяг сховища не повинен перевищувати {0}</value>
   </data>
@@ -867,9 +864,6 @@
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Якщо користувач з адресою електронної пошти {0} існує, інструкцію щодо зміни пароля було надіслано на цю адресу.</value>
-  </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту дискового простору</value>
   </data>
   <data name="PortalName" xml:space="preserve">
     <value>Хмарний простір для ваших офісних документів</value>

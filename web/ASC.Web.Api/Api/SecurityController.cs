@@ -390,7 +390,7 @@ public class SecurityController(PermissionContext permissionContext,
             }
         }
 
-        var header = await cspSettingsHelper.SaveAsync(request.Domains, request.SetDefaultIfEmpty);
+        var header = await cspSettingsHelper.SaveAsync(request.Domains);
 
         return new CspDto { Domains = request.Domains, Header = header };
     }
@@ -404,7 +404,7 @@ public class SecurityController(PermissionContext permissionContext,
         return new CspDto
         {
             Domains = settings.Domains,
-            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains, settings.SetDefaultIfEmpty)
+            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
         };
     }
 

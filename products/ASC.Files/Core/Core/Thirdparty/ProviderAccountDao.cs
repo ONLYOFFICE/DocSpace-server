@@ -30,9 +30,7 @@ namespace ASC.Files.Thirdparty;
 public enum ProviderTypes
 {
     Box,
-    BoxNet,
     DropboxV2,
-    Google,
     GoogleDrive,
     OneDrive,
     SharePoint,
@@ -42,15 +40,15 @@ public enum ProviderTypes
 }
 
 [Scope]
-internal class ProviderAccountDao(IServiceProvider serviceProvider,
-        TenantUtil tenantUtil,
-        TenantManager tenantManager,
-        InstanceCrypto instanceCrypto,
-        SecurityContext securityContext,
-        ConsumerFactory consumerFactory,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        OAuth20TokenHelper oAuth20TokenHelper,
-        ILoggerProvider options)
+internal class ProviderAccountDao(
+    IServiceProvider serviceProvider,
+    TenantUtil tenantUtil,
+    TenantManager tenantManager,
+    InstanceCrypto instanceCrypto,
+    SecurityContext securityContext,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    OAuth20TokenHelper oAuth20TokenHelper,
+    ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
     private int TenantID
@@ -60,8 +58,6 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             return tenantManager.GetCurrentTenant().Id;
         }
     }
-
-    private readonly ILogger _logger = options.CreateLogger("ASC.Files");
 
     public virtual Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
@@ -104,7 +100,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorGetProvidersInfoInternalUser(userId, e);
+            logger.ErrorGetProvidersInfoInternalUser(userId, e);
 
             return new List<IProviderInfo>().ToAsyncEnumerable();
         }
@@ -120,7 +116,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorGetProvidersInfoInternal(linkId, folderType, securityContext.CurrentAccount.ID, e);
+            logger.ErrorGetProvidersInfoInternal(linkId, folderType, securityContext.CurrentAccount.ID, e);
             return new List<IProviderInfo>().ToAsyncEnumerable();
         }
     }
@@ -277,7 +273,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             }
             catch (Exception e)
             {
-                _logger.ErrorUpdateProviderInfo(linkId, securityContext.CurrentAccount.ID, e);
+                logger.ErrorUpdateProviderInfo(linkId, securityContext.CurrentAccount.ID, e);
                 throw;
             }
 
@@ -352,7 +348,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorUpdateBackupProviderInfo(securityContext.CurrentAccount.ID, e);
+            logger.ErrorUpdateBackupProviderInfo(securityContext.CurrentAccount.ID, e);
             throw;
         }
 
@@ -630,7 +626,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         {
             case ProviderTypes.GoogleDrive:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<GoogleLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<GoogleLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -641,7 +637,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             case ProviderTypes.Box:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<BoxLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<BoxLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -652,7 +648,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             case ProviderTypes.DropboxV2:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<DropboxLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<DropboxLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -663,7 +659,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
 
             case ProviderTypes.OneDrive:
                 code = authData.RawToken;
-                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(consumerFactory, code);
+                token = oAuth20TokenHelper.GetAccessToken<OneDriveLoginProvider>(code);
 
                 if (token == null)
                 {
@@ -696,7 +692,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         }
         catch (Exception e)
         {
-            _logger.ErrorDecryptPassword(id, securityContext.CurrentAccount.ID, e);
+            logger.ErrorDecryptPassword(id, securityContext.CurrentAccount.ID, e);
             return null;
         }
     }
