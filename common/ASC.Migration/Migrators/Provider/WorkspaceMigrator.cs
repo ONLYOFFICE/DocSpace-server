@@ -227,15 +227,30 @@ public class WorkspaceMigrator : Migrator
         var projectTitle = new Dictionary<string, string>();
         if (storage.Type == FolderType.BUNCH)
         {
+            var projectProjects = new Dictionary<string, string>();
             using var streamProject = _dataReader.GetEntry("databases/projects/projects_projects");
             var dataProject = new DataTable();
             dataProject.ReadXml(streamProject);
             foreach (var row in dataProject.Rows.Cast<DataRow>())
             {
-                projectTitle.Add(row["id"].ToString(), row["title"].ToString());
+                projectProjects.Add(row["id"].ToString(), row["title"].ToString());
             }
             storage.RootKey = "0";
             folderTree.Add("0", -1);
+
+
+            using var streamBunch = _dataReader.GetEntry("databases/files/files_bunch_objects");
+
+            dataProject = new DataTable();
+            dataProject.ReadXml(streamBunch);
+            foreach (var row in dataProject.Rows.Cast<DataRow>())
+            {
+                if (row["right_node"].ToString().StartsWith("projects/project/"))
+                {
+                    var split = row["right_node"].ToString().Split('/');
+                    projectTitle.Add(row["left_node"].ToString(), projectProjects[split.Last()]);
+                }
+            }
         }
         else
         {
@@ -247,15 +262,15 @@ public class WorkspaceMigrator : Migrator
             if (folderTree.ContainsKey(row["id"].ToString()) && row["id"].ToString() != storage.RootKey)
             {
                 var title = row["title"].ToString();
+                var id = row["id"].ToString();
                 if (storage.Type == FolderType.BUNCH)
                 {
                     if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
                     {
                         var split = row["title"].ToString().Split('_');
-                        title = projectTitle[split.Last()];
+                        title = projectTitle[id];
                     }
                 }
-                var id = row["id"].ToString();
                 var folder = new MigrationFolder
                 {
                     Id = int.Parse(id),
