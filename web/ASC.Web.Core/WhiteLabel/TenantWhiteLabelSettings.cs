@@ -575,7 +575,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             stream.CopyTo(memoryStream);
             return memoryStream.ToArray();
         }
-        return Array.Empty<byte>();
+        return [];
     }
 
     #endregion
