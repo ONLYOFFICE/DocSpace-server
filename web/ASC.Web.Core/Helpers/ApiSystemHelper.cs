@@ -58,8 +58,7 @@ public class ApiSystemHelper
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
-        IHttpClientFactory clientFactory,
-        TenantDomainValidator tenantDomainValidator)
+        IHttpClientFactory clientFactory)
     {
         ApiSystemUrl = configuration["web:api-system"];
         _commonLinkUtility = commonLinkUtility;
