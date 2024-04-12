@@ -50,7 +50,6 @@ public class UserController(ICache cache,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
         AuthContext authContext,
-        SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
         CoreBaseSettings coreBaseSettings,
@@ -1195,27 +1194,9 @@ public class UserController(ICache cache,
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var curLng = user.CultureName;
-
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
-        {
-            user.CultureName = inDto.CultureName;
-
-            try
-            {
-                await _userManager.UpdateUserInfoAsync(user);
-            }
-            catch
-            {
-                user.CultureName = curLng;
-                throw;
-            }
-
-            await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
-        }
-
+        await _userManager.ChangeUserCulture(user, inDto.CultureName);
+        await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 

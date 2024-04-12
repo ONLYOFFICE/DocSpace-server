@@ -65,7 +65,8 @@ public class UserManager(
     UserFormatter userFormatter,
     QuotaSocketManager quotaSocketManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    CoreBaseSettings coreBaseSettings)
 {    
     private IDictionary<Guid, UserInfo> SystemUsers => userManagerConstants.SystemUsers;
 
@@ -760,6 +761,25 @@ public class UserManager(
         new HttpRequestDictionary<List<Guid>>(httpContextAccessor?.HttpContext, "GroupInfoID").Reset(userID.ToString());
     }
 
+    public async Task ChangeUserCulture(UserInfo user, string cultureName)
+    {        
+        var curLng = user.CultureName;
+         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != cultureName)
+         {
+             user.CultureName = cultureName;
+        
+             try
+             {
+                 await UpdateUserInfoAsync(user);
+             }
+             catch
+             {
+                 user.CultureName = curLng;
+                 throw;
+             }
+         }
+    }
+    
     #endregion Users
 
 

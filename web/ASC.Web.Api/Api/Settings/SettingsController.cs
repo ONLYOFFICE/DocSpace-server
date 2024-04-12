@@ -433,7 +433,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("cultures")]
     public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
+        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -767,7 +767,7 @@ public partial class SettingsController(MessageService messageService,
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var changelng = false;
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
             tenant.Language = culture.Name;
             changelng = true;
