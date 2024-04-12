@@ -32,13 +32,14 @@ public class InviteUsersRequestDto
 {
     /// <summary>List of user invitations</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.People.ApiModels.RequestDto.UserInvitation}, System.Collections.Generic</type>
+    [MaxInvitationsCount]
     public IEnumerable<UserInvitation> Invitations { get; set; }
     public string Culture { get; set; }
 }
 
 /// <summary>
 /// </summary>
-public class UserInvitation
+public class UserInvitation : IUserInvitation
 {
     /// <summary>Email address</summary>
     /// <type>System.String, System</type>

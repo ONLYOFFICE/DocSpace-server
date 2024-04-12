@@ -29,7 +29,6 @@ namespace ASC.Files.Api;
 [ConstraintRoute("int")]
 public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        UserInvitationSettingsHelper userInvitationSettingsHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
@@ -42,7 +41,6 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
     fileOperationDtoHelper,
-    userInvitationSettingsHelper,
     customTagsService,
     roomLogoManager,
     fileOperationsManager,
@@ -74,7 +72,6 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
 
 public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
-        UserInvitationSettingsHelper userInvitationSettingsHelper,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
@@ -87,7 +84,6 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
     fileOperationDtoHelper,
-    userInvitationSettingsHelper,
     customTagsService,
     roomLogoManager,
     fileOperationsManager,
@@ -122,7 +118,6 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
-    UserInvitationSettingsHelper userInvitationSettingsHelper,
     CustomTagsService customTagsService,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
@@ -301,12 +296,6 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.Invitations == null || !inDto.Invitations.Any())
         {
             return result;
-        }
-
-        var invitationsCount = inDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
-        if (invitationsCount > await userInvitationSettingsHelper.GetLimit())
-        {
-            throw new Exception(Resource.ErrorInvitationLimitExceeded);
         }
 
         var wrappers = mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);

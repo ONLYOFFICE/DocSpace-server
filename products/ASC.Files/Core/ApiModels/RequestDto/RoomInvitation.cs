@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
 /// </summary>
-public class RoomInvitation
+public class RoomInvitation : IUserInvitation
 {
     /// <summary>ID of the user with whom we want to share a room</summary>
     public Guid Id { get; set; }

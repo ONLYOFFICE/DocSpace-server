@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,24 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// </summary>
-public class RoomInvitationRequestDto
+namespace ASC.Web.Api.Models;
+
+public interface IUserInvitation
 {
-    /// <summary>Collection of invitation parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.RequestDto.RoomInvitation}, System.Collections.Generic</type>
-    [MaxInvitationsCount]
-    public IEnumerable<RoomInvitation> Invitations { get; set; }
+    string Email { get; set; }
+}
 
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
+public class MaxInvitationsCountAttribute : ValidationAttribute
+{
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        if (value is IEnumerable<IUserInvitation> invitations)
+        {
+            var cout = invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+            var helper = (UserInvitationSettingsHelper)validationContext.GetService(typeof(UserInvitationSettingsHelper));
+            var limit = helper.GetLimit().Result;
 
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string Message { get; set; }
+            if (cout > limit)
+            {
+                return new ValidationResult(Resource.ErrorInvitationLimitExceeded);
+            }
+        }
 
-    public string Culture { get; set; }
+        return ValidationResult.Success;
+    }
 }

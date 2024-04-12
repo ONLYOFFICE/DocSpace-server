@@ -305,11 +305,6 @@ public class UserController(ICache cache,
         ArgumentNullException.ThrowIfNull(inDto);
         ArgumentNullException.ThrowIfNull(inDto.Invitations);
 
-        if (inDto.Invitations.Count() > await userInvitationSettingsHelper.GetLimit())
-        {
-            throw new Exception(Resource.ErrorInvitationLimitExceeded);
-        }
-
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
