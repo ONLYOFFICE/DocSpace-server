@@ -34,13 +34,13 @@
     <None Update="DocStore\new\az-Latn-AZ\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\az-Latn-AZ\docxf.png">
+    <None Update="DocStore\new\az-Latn-AZ\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\az-Latn-AZ\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\az-Latn-AZ\new.docxf">
+    <None Update="DocStore\new\az-Latn-AZ\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\az-Latn-AZ\new.pptx">
@@ -58,13 +58,13 @@
     <None Update="DocStore\new\bg-BG\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\bg-BG\docxf.png">
+    <None Update="DocStore\new\bg-BG\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\bg-BG\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\bg-BG\new.docxf">
+    <None Update="DocStore\new\bg-BG\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\bg-BG\new.pptx">
@@ -82,13 +82,13 @@
     <None Update="DocStore\new\cs-CZ\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\cs-CZ\docxf.png">
+    <None Update="DocStore\new\cs-CZ\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\cs-CZ\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\cs-CZ\new.docxf">
+    <None Update="DocStore\new\cs-CZ\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\cs-CZ\new.pptx">
@@ -106,13 +106,13 @@
     <None Update="DocStore\new\de-DE\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\de-DE\docxf.png">
+    <None Update="DocStore\new\de-DE\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\de-DE\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\de-DE\new.docxf">
+    <None Update="DocStore\new\de-DE\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\de-DE\new.pptx">
@@ -130,13 +130,13 @@
     <None Update="DocStore\new\el-GR\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\el-GR\docxf.png">
+    <None Update="DocStore\new\el-GR\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\el-GR\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\el-GR\new.docxf">
+    <None Update="DocStore\new\el-GR\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\el-GR\new.pptx">
@@ -154,13 +154,13 @@
     <None Update="DocStore\new\en-GB\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\en-GB\docxf.png">
+    <None Update="DocStore\new\en-GB\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\en-GB\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\en-GB\new.docxf">
+    <None Update="DocStore\new\en-GB\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\en-GB\new.pptx">
@@ -178,13 +178,13 @@
     <None Update="DocStore\new\en-US\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\en-US\docxf.png">
+    <None Update="DocStore\new\en-US\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\en-US\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\en-US\new.docxf">
+    <None Update="DocStore\new\en-US\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\en-US\new.pptx">
@@ -202,13 +202,13 @@
     <None Update="DocStore\new\es-ES\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\es-ES\docxf.png">
+    <None Update="DocStore\new\es-ES\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\es-ES\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\es-ES\new.docxf">
+    <None Update="DocStore\new\es-ES\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\es-ES\new.pptx">
@@ -226,13 +226,13 @@
     <None Update="DocStore\new\fr-FR\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\fr-FR\docxf.png">
+    <None Update="DocStore\new\fr-FR\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\fr-FR\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\fr-FR\new.docxf">
+    <None Update="DocStore\new\fr-FR\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\fr-FR\new.pptx">
@@ -250,13 +250,13 @@
     <None Update="DocStore\new\it-IT\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\it-IT\docxf.png">
+    <None Update="DocStore\new\it-IT\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\it-IT\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\it-IT\new.docxf">
+    <None Update="DocStore\new\it-IT\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\it-IT\new.pptx">
@@ -274,13 +274,13 @@
     <None Update="DocStore\new\ja-JP\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ja-JP\docxf.png">
+    <None Update="DocStore\new\ja-JP\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ja-JP\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ja-JP\new.docxf">
+    <None Update="DocStore\new\ja-JP\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ja-JP\new.pptx">
@@ -298,13 +298,13 @@
     <None Update="DocStore\new\ko-KR\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ko-KR\docxf.png">
+    <None Update="DocStore\new\ko-KR\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ko-KR\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ko-KR\new.docxf">
+    <None Update="DocStore\new\ko-KR\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ko-KR\new.pptx">
@@ -322,13 +322,13 @@
     <None Update="DocStore\new\lv-LV\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\lv-LV\docxf.png">
+    <None Update="DocStore\new\lv-LV\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\lv-LV\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\lv-LV\new.docxf">
+    <None Update="DocStore\new\lv-LV\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\lv-LV\new.pptx">
@@ -346,13 +346,13 @@
     <None Update="DocStore\new\nl-NL\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\nl-NL\docxf.png">
+    <None Update="DocStore\new\nl-NL\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\nl-NL\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\nl-NL\new.docxf">
+    <None Update="DocStore\new\nl-NL\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\nl-NL\new.pptx">
@@ -370,13 +370,13 @@
     <None Update="DocStore\new\pl-PL\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pl-PL\docxf.png">
+    <None Update="DocStore\new\pl-PL\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pl-PL\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pl-PL\new.docxf">
+    <None Update="DocStore\new\pl-PL\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pl-PL\new.pptx">
@@ -394,13 +394,13 @@
     <None Update="DocStore\new\pt-BR\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pt-BR\docxf.png">
+    <None Update="DocStore\new\pt-BR\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pt-BR\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pt-BR\new.docxf">
+    <None Update="DocStore\new\pt-BR\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pt-BR\new.pptx">
@@ -418,13 +418,13 @@
     <None Update="DocStore\new\pt-PT\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pt-PT\docxf.png">
+    <None Update="DocStore\new\pt-PT\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pt-PT\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\pt-PT\new.docxf">
+    <None Update="DocStore\new\pt-PT\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\pt-PT\new.pptx">
@@ -442,13 +442,13 @@
     <None Update="DocStore\new\ru-RU\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ru-RU\docxf.png">
+    <None Update="DocStore\new\ru-RU\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ru-RU\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\ru-RU\new.docxf">
+    <None Update="DocStore\new\ru-RU\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\ru-RU\new.pptx">
@@ -466,13 +466,13 @@
     <None Update="DocStore\new\sk-SK\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\sk-SK\docxf.png">
+    <None Update="DocStore\new\sk-SK\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\sk-SK\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\sk-SK\new.docxf">
+    <None Update="DocStore\new\sk-SK\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\sk-SK\new.pptx">
@@ -490,13 +490,13 @@
     <None Update="DocStore\new\sv-SE\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\sv-SE\docxf.png">
+    <None Update="DocStore\new\sv-SE\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\sv-SE\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\sv-SE\new.docxf">
+    <None Update="DocStore\new\sv-SE\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\sv-SE\new.pptx">
@@ -514,13 +514,13 @@
     <None Update="DocStore\new\tr-TR\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\tr-TR\docxf.png">
+    <None Update="DocStore\new\tr-TR\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\tr-TR\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\tr-TR\new.docxf">
+    <None Update="DocStore\new\tr-TR\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\tr-TR\new.pptx">
@@ -538,13 +538,13 @@
     <None Update="DocStore\new\uk-UA\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\uk-UA\docxf.png">
+    <None Update="DocStore\new\uk-UA\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\uk-UA\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\uk-UA\new.docxf">
+    <None Update="DocStore\new\uk-UA\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\uk-UA\new.pptx">
@@ -562,13 +562,13 @@
     <None Update="DocStore\new\vi-VN\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\vi-VN\docxf.png">
+    <None Update="DocStore\new\vi-VN\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\vi-VN\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\vi-VN\new.docxf">
+    <None Update="DocStore\new\vi-VN\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\vi-VN\new.pptx">
@@ -586,13 +586,13 @@
     <None Update="DocStore\new\zh-CN\docx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\zh-CN\docxf.png">
+    <None Update="DocStore\new\zh-CN\pdf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\zh-CN\new.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\new\zh-CN\new.docxf">
+    <None Update="DocStore\new\zh-CN\new.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\new\zh-CN\new.pptx">
@@ -607,7 +607,7 @@
     <None Update="DocStore\new\zh-CN\xlsx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\de-DE\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\de-DE\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\de-DE\my\ONLYOFFICE Sample Form.oform">
@@ -637,7 +637,7 @@
     <None Update="DocStore\sample\en-US\my\ONLYOFFICE Sample Document.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\en-US\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\en-US\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\en-US\my\ONLYOFFICE Sample Form.oform">
@@ -658,7 +658,7 @@
     <None Update="DocStore\sample\es-ES\my\ONLYOFFICE Sample Document.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\es-ES\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\es-ES\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\es-ES\my\ONLYOFFICE Sample Form.oform">
@@ -679,7 +679,7 @@
     <None Update="DocStore\sample\fr-FR\my\ONLYOFFICE Sample Document.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\fr-FR\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\fr-FR\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\fr-FR\my\ONLYOFFICE Sample Form.oform">
@@ -700,7 +700,7 @@
     <None Update="DocStore\sample\it-IT\my\ONLYOFFICE Sample Document.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\it-IT\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\it-IT\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\it-IT\my\ONLYOFFICE Sample Form.oform">
@@ -721,7 +721,7 @@
     <None Update="DocStore\sample\ru-RU\my\ONLYOFFICE Sample Document.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DocStore\sample\ru-RU\my\ONLYOFFICE Sample Form Template.docxf">
+    <None Update="DocStore\sample\ru-RU\my\ONLYOFFICE Sample Form Template.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DocStore\sample\ru-RU\my\ONLYOFFICE Sample Form.oform">

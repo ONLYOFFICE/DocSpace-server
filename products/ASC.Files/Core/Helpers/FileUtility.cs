@@ -122,7 +122,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
     private string _masterFormExtension;
     public string MasterFormExtension
     {
-        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".docxf";
+        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".pdf";
     }
 
     private List<LogoColor> _logoColors;
