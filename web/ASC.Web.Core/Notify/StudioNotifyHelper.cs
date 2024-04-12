@@ -33,7 +33,6 @@ public class StudioNotifyHelper(
     StudioNotifySource studioNotifySource,
     UserManager userManager,
     SettingsManager settingsManager,
-    MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
@@ -41,7 +40,7 @@ public class StudioNotifyHelper(
     IConfiguration configuration,
     ILogger<StudioNotifyHelper> logger)
 {
-    public string SiteLink => commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
+    public string SiteLink => commonLinkUtility.GetSiteLink();
     
     private ISubscriptionProvider _subscriptionProvider;
     private ISubscriptionProvider SubscriptionProvider => _subscriptionProvider ??= NotifySource.GetSubscriptionProvider();
