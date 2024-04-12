@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,7 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Transient]
-internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFactory clientFactory,
-        OAuth20TokenHelper oAuth20TokenHelper)
+internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
     : IThirdPartyStorage<Item, Item, Item>
 {
     private OAuth20Token _token;
@@ -49,7 +48,7 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
                 return _token.AccessToken;
             }
 
-            _token = oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(consumerFactory, _token);
+            _token = oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(_token);
             _onedriveClientCache = null;
 
             return _token.AccessToken;
@@ -208,9 +207,9 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             .PutAsync<Item>(fileStream);
     }
 
-    public long GetFileSize(Item file)
+    public Task<long> GetFileSizeAsync(Item file)
     {
-        return file.Size ?? 0;
+        return Task.FromResult(file.Size ?? 0);
     }
     
     private IItemRequestBuilder GetItemRequest(string itemId)
@@ -248,10 +247,8 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
         var httpClient = clientFactory.CreateClient();
         
         using (var response = await httpClient.SendAsync(request))
-        await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            using var readStream = new StreamReader(responseStream);
-            var responseString = await readStream.ReadToEndAsync();
+            var responseString = await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
             uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
@@ -276,7 +273,6 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             Method = HttpMethod.Put
         };
         
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
 
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(oneDriveSession.BytesTransferred,
@@ -295,11 +291,8 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             oneDriveSession.BytesTransferred += chunkLength;
             
             oneDriveSession.Status = RenewableUploadSessionStatus.Completed;
-
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-
-            using var readStream = new StreamReader(responseStream);
-            var responseString = await readStream.ReadToEndAsync();
+            
+            var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             oneDriveSession.FileId = responseJson.Value<string>("id");
@@ -388,6 +381,11 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
     public Task<long> GetMaxUploadSizeAsync()
     {
         return Task.FromResult(MaxChunkedUploadFileSize);
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }
 

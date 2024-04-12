@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,6 +109,13 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 
         return await ProviderInfoHelper.GetFileAsync(storage, ProviderId, fileId, Selector.Id);
     }
+    
+    public async Task<TFolder> CreateFolderAsync(string title, string folderId, Func<TFolder, string> idSelector)
+    {
+        var storage = await StorageAsync;
+
+        return await ProviderInfoHelper.CreateFolderAsync(storage, ProviderId, title, folderId, Selector.Id, idSelector);
+    }
 
     public async Task<TFolder> GetFolderAsync(string folderId)
     {
@@ -172,9 +179,9 @@ public class ProviderInfoHelper
         }
     }
 
-    internal async Task CacheResetAsync(int ThitdId, string id = null, bool? isFile = null)
+    internal async Task CacheResetAsync(int thirdId, string id = null, bool? isFile = null)
     {
-        var key = ThitdId + "-";
+        var key = thirdId + "-";
         if (id == null)
         {
             await _cacheNotify.PublishAsync(new BoxCacheItem { ResetAll = true, Key = key }, CacheNotifyAction.Remove);
@@ -191,32 +198,56 @@ public class ProviderInfoHelper
     {
         var key = $"{selector}f-" + id + "-" + fileId;
         var file = _cache.Get<TFile>(key);
-        if (file == null)
+        if (file != null)
         {
-            file = await storage.GetFileAsync(fileId);
-            if (file != null)
-            {
-                _cache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-                _cacheKeys.TryAdd(key, null);
-            }
+            return file;
         }
 
+        file = await storage.GetFileAsync(fileId);
+        if (file == null)
+        {
+            return null;
+        }
+
+        _cache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
+
         return file;
+    }
+    
+    internal async Task<TFolder> CreateFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string title, string folderId, string selector, 
+        Func<TFolder, string> idSelector) where TFolder : class
+    {
+        var folder = await storage.CreateFolderAsync(title, folderId);
+        if (folder == null)
+        {
+            return null;
+        }
+
+        var key = $"{selector}d-" + id + "-" + idSelector(folder);
+        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
+
+        return folder;
     }
 
     internal async Task<TFolder> GetFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string folderId, string selector) where TFolder : class
     {
         var key = $"{selector}d-" + id + "-" + folderId;
         var folder = _cache.Get<TFolder>(key);
+        if (folder != null)
+        {
+            return folder;
+        }
+
+        folder = await storage.GetFolderAsync(folderId);
         if (folder == null)
         {
-            folder = await storage.GetFolderAsync(folderId);
-            if (folder != null)
-            {
-                _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-                _cacheKeys.TryAdd(key, null);
-            }
+            return null;
         }
+
+        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
 
         return folder;
     }
@@ -259,8 +290,7 @@ public class ProviderInfoHelper
 }
 
 [Transient(Additional = typeof(DisposableWrapperExtension))]
-public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider,
-        OAuth20TokenHelper oAuth20TokenHelper)
+public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     : IDisposable
 {
     private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
@@ -310,7 +340,7 @@ public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider
             return token;
         }
 
-        token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
+        token = oAuth20TokenHelper.RefreshToken<T>(token);
 
         var dbDao = serviceProvider.GetService<ProviderAccountDao>();
         await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));

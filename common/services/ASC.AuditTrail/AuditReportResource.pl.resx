@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Sukces logowania</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Zaloguj się za pomocą konta społecznościowego</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">

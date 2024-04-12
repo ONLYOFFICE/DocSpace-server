@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public interface IThirdPartyFileStorage<TFile> : IThirdPartyStorage
     public Task<TFile> CopyFileAsync(string fileId, string newFileName, string toFolderId);
     public Task<TFile> RenameFileAsync(string fileId, string newName);
     public Task<TFile> SaveStreamAsync(string fileId, Stream fileStream);
-    public long GetFileSize(TFile file);
+    public Task<long> GetFileSizeAsync(TFile file);
 }
 
 public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
@@ -70,4 +70,7 @@ public interface IThirdPartyFolderStorage<TFolder> : IThirdPartyStorage
 }
 
 [Transient]
-public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>;
+public interface IThirdPartyStorage<TFile, TFolder, TItem> : IThirdPartyFileStorage<TFile>, IThirdPartyFolderStorage<TFolder>, IThirdPartyItemStorage<TItem>
+{
+    IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder);
+}

@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Clearing temporary data</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Data processing...</value>
   </data>
@@ -129,56 +126,20 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Database parsing</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Mail`s Contacts</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive`s Files</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Group migration {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migrating user contacts {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migrating user files {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migration canceled</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migration completed</value>
   </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Calendar</value>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>No such migration provider</value>
   </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Groups</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Users</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Contacts</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>User`s Files</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Calendar</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Documents</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>People</value>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>No migration is in progress</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Preparing for migration</value>
@@ -192,13 +153,61 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Unzipping completed...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>User calendar migration {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>User migration {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Failed to import user: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migration common files</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migration project files</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Couldn't parse {0} archive</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Couldn't parse archives</value>
+  </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Couldn't to add user {0} to group {1}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Couldn't import user</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Couldn't import user files</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Couldn't parse user {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Couldn't to unzip {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Couldn't import common files</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Couldn't import project files</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Create root folder</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Create folder {0}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Couldn't create file {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Couldn't read info file from {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Couldn't share entry {0} to {1}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Create file {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>create share room {0}</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.EF;
 
 [Transient]
-[ElasticsearchType(RelationName = Tables.Folder)]
+[OpenSearchType(RelationName = Tables.Folder)]
 public class DbFolder : IDbFile, IDbSearch, ISearchItem
 {
     public int Id { get; set; }
@@ -44,7 +44,11 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public long Counter { get; set; }
+    
+    [Ignore]
     public DbRoomSettings Settings { get; set; }
+    
+    [Ignore]
     public DbTenant Tenant { get; set; }
 
     [Ignore]

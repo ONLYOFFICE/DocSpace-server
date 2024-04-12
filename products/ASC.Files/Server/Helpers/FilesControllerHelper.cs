@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -41,7 +41,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        IDaoFactory daoFactory,
+        SecurityContext securityContext)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -230,6 +232,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await GetFileInfoAsync(file.Id);
     }
 
+    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
+    {
+        try
+        {
+            var resultFile = await _fileStorageService.SaveAsPdf(fileId, folderId, title);
+            return await _fileDtoHelper.GetAsync(resultFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ItemNotFoundException("File not found", e);
+        }
+    }
+
     public async Task<FileDto<T>> UpdateFileStreamAsync<T>(Stream file, T fileId, string fileExtension, bool encrypted = false, bool forcesave = false)
     {
         try
@@ -260,6 +275,21 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
-            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+        var resultFile = await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+
+        if (FileUtility.GetFileTypeByFileName(resultFile.Title) == FileType.Pdf)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+
+            var form = await fileDao.GetFileAsync((T)Convert.ChangeType(resultFile.Id, typeof(T)));
+            var folder = await folderDao.GetFolderAsync(form.ParentId);
+            if (folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                var count = await _fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                await _socketManager.CreateFormAsync(form, securityContext.CurrentAccount.ID, count <= 1);
+            }
         }
+        return resultFile;
     }
+}

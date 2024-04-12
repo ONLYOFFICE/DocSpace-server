@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -415,7 +415,7 @@ internal abstract class ThirdPartyProviderDao
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT,
+            _ => FolderType.DEFAULT
         };
         return typeFilter;
     }
@@ -551,16 +551,17 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         fileEntry.Error = entry.Error;
     }
 
-    protected void SetFolderType(Folder<string> folder, bool isRoot)
+    protected void ProcessFolderAsRoom(Folder<string> folder)
     {
-        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        folder.ProviderMapped = !string.IsNullOrEmpty(ProviderInfo.FolderId);
+        
+        if (ProviderInfo.FolderId != folder.Id)
         {
-            folder.FolderType = ProviderInfo.RootFolderType;
+            return;
         }
-        else if (ProviderInfo.FolderId == folder.Id)
-        {
-            folder.FolderType = ProviderInfo.FolderType;
-        }
+
+        folder.FolderType = ProviderInfo.FolderType;
+        folder.Title = ProviderInfo.CustomerTitle;
     }
 
     public bool CheckInvalidFilter(FilterType filterType)
@@ -656,7 +657,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                     TenantId = l.TenantId,
                     SourceId = newHashId,
                     LinkedId = l.LinkedId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 dbContext.RemoveRange(filesSourceForDelete);
@@ -669,7 +670,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                     TenantId = l.TenantId,
                     SourceId = l.SourceId,
                     LinkedId = newHashId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 dbContext.RemoveRange(filesLinkedForDelete);

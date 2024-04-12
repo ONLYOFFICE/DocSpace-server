@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -140,15 +140,12 @@ internal class DropboxDaoBase(
 
     public Folder<string> ToFolder(FolderMetadata dropboxFolder)
     {
-        if (dropboxFolder == null)
+        switch (dropboxFolder)
         {
-            return null;
-        }
-
-        if (dropboxFolder is ErrorFolder errorFolder)
-        {
-            //Return error entry
-            return ToErrorFolder(errorFolder);
+            case null:
+                return null;
+            case ErrorFolder errorFolder:
+                return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(dropboxFolder);
@@ -163,7 +160,7 @@ internal class DropboxDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
-        SetFolderType(folder, isRoot);
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -213,15 +210,12 @@ internal class DropboxDaoBase(
 
     public File<string> ToFile(FileMetadata dropboxFile)
     {
-        if (dropboxFile == null)
+        switch (dropboxFile)
         {
-            return null;
-        }
-
-        if (dropboxFile is ErrorFile errorFile)
-        {
-            //Return error entry
-            return ToErrorFile(errorFile);
+            case null:
+                return null;
+            case ErrorFile errorFile:
+                return ToErrorFile(errorFile);
         }
 
         var file = GetFile();
@@ -241,6 +235,11 @@ internal class DropboxDaoBase(
     public async Task<Folder<string>> GetRootFolderAsync()
     {
         return ToFolder(await GetFolderAsync(string.Empty));
+    }
+    
+    public async Task<FolderMetadata> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<FolderMetadata> GetFolderAsync(string folderId)
@@ -282,23 +281,18 @@ internal class DropboxDaoBase(
         var dropboxFolderId = MakeThirdId(parentId);
         var items = await _providerInfo.GetItemsAsync(dropboxFolderId);
 
-        if (folder.HasValue)
+        if (!folder.HasValue)
         {
-            if (folder.Value)
-            {
-                return items.Where(i => i.AsFolder != null).ToList();
-            }
-
-            return items.Where(i => i.AsFile != null).ToList();
+            return items;
         }
 
-        return items;
+        return folder.Value ? items.Where(i => i.AsFolder != null).ToList() : items.Where(i => i.AsFile != null).ToList();
     }
 
-    protected sealed class ErrorFolder : FolderMetadata, IErrorItem
+    private sealed class ErrorFolder : FolderMetadata, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorFolder(Exception e, object id)
         {
@@ -310,10 +304,10 @@ internal class DropboxDaoBase(
         }
     }
 
-    protected sealed class ErrorFile : FileMetadata, IErrorItem
+    private sealed class ErrorFile : FileMetadata, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorFile(Exception e, object id)
         {
@@ -338,9 +332,9 @@ internal class DropboxDaoBase(
         if (!match.Success)
         {
             var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf(".", StringComparison.InvariantCulture) != -1)
+            if (requestTitle.LastIndexOf('.') != -1)
             {
-                insertIndex = requestTitle.LastIndexOf(".", StringComparison.InvariantCulture);
+                insertIndex = requestTitle.LastIndexOf('.');
             }
 
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
@@ -354,11 +348,11 @@ internal class DropboxDaoBase(
         return requestTitle;
     }
 
-    private string MatchEvaluator(Match match)
+    private static string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[string.Format(" ({0})", index).Length..];
+        var staticText = match.Value[$" ({index})".Length..];
 
-        return string.Format(" ({0}){1}", index + 1, staticText);
+        return $" ({index + 1}){staticText}";
     }
 }

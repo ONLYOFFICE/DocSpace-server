@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,54 +26,72 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-record FileMoveCopyOperationData<T>(
-    IEnumerable<T> Folders,
-    IEnumerable<T> Files,
-    int TenantId,
-    JsonElement DestFolderId,
-    bool Copy,
-    FileConflictResolveType ResolveType,
-    bool HoldResult = true,
-    IDictionary<string, string> Headers = null)
-    : FileOperationData<T>(Folders, Files, TenantId, Headers, HoldResult);
+[ProtoContract]
+public record FileMoveCopyOperationData<T> : FileOperationData<T>
+{
+    public FileMoveCopyOperationData()
+    {
+        
+    }
+    
+    public FileMoveCopyOperationData(IEnumerable<T> Folders,
+        IEnumerable<T> Files,
+        int TenantId,
+        JsonElement DestFolderId,
+        bool Copy,
+        FileConflictResolveType ResolveType,
+        bool HoldResult = true,
+        IDictionary<string, string> Headers = null,
+        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+    {
+        this.DestFolderId = DestFolderId.ToString();
+        this.Copy = Copy;
+        this.ResolveType = ResolveType;
+    }
+
+    [ProtoMember(7)]
+    public string DestFolderId { get; init; }
+    
+    [ProtoMember(8)]
+    public bool Copy { get; init; }
+    
+    [ProtoMember(9)]
+    public FileConflictResolveType ResolveType { get; init; }
+}
 
 [Transient]
-class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
+public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
 {
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
-    public override void Init<T>(T data)
+    public void Init(bool holdResult, bool copy)
     {
-        base.Init(data);
+        base.Init(holdResult);
         
-        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
+        if (!copy)
         {
             this[OpType] = (int)FileOperationType.Move;
         }
     }
 
-    public override T Init<T>(string jsonData, string taskId)
+    public override void Init(FileMoveCopyOperationData<int> data, FileMoveCopyOperationData<string> thirdPartyData, string taskId)
     {
-        var data  = base.Init<T>(jsonData, taskId);
+        base.Init(data, thirdPartyData, taskId);
+        var copy = data?.Copy ?? thirdPartyData?.Copy ?? false;
         
-        if (data is FileMoveCopyOperationData<JsonElement> { Copy: false })
+        if (!copy)
         {
             this[OpType] = (int)FileOperationType.Move;
         }
-
-        return data;
     }
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        var data = JsonSerializer.Deserialize<FileMoveCopyOperationData<JsonElement>>((string)this[Data]);
-        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(data.Folders);
-        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(data.Files);
-        
-        DaoOperation =  new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
-        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, data.TenantId, data.DestFolderId, data.Copy, data.ResolveType, data.HoldResult, data.Headers));
-        
+        DaoOperation = new FileMoveCopyOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, ThirdPartyData);
+
         return base.RunJob(distributedTask, cancellationToken);
+
     }
 }
 
@@ -90,23 +108,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         : base(serviceProvider, data)
     {
         var toFolderId = data.DestFolderId;
-        
-        if (toFolderId.ValueKind == JsonValueKind.String)
+
+        if (!int.TryParse(data.DestFolderId, out var i))
         {
-            if (!int.TryParse(toFolderId.GetString(), out var i))
-            {
-                _thirdPartyFolderId = toFolderId.GetString();
-            }
-            else
-            {
-                _daoFolderId = i;
-            }
+            _thirdPartyFolderId = toFolderId;
         }
-        else if (toFolderId.ValueKind == JsonValueKind.Number)
+        else
         {
-            _daoFolderId = toFolderId.GetInt32();
+            _daoFolderId = i;
         }
-        
+    
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 
@@ -635,7 +646,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 }
             }
 
-            ProgressStep(FolderDao.CanCalculateSubitems(folderId) ? default : folderId);
+            await ProgressStep(FolderDao.CanCalculateSubitems(folderId) ? default : folderId);
         }
 
         return needToMark;
@@ -816,7 +827,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 newFile.ConvertedType = file.ConvertedType;
                                 newFile.Comment = FilesCommonResource.CommentOverwrite;
                                 newFile.Encrypted = file.Encrypted;
-                                newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+                                newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry ? Thumbnail.Creating : Thumbnail.Waiting;
 
 
                                 await using (var stream = await FileDao.GetFileStreamAsync(file))
@@ -826,7 +837,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFile = await fileDao.SaveFileAsync(newFile, stream);
                                 }
 
-                                if (file.ThumbnailStatus == Thumbnail.Created)
+                                if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
                                     foreach (var size in _thumbnailSettings.Sizes)
                                     {
@@ -904,7 +915,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 }
             }
 
-            ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
+            await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
         }
 
         this[Res] = sb.ToString();

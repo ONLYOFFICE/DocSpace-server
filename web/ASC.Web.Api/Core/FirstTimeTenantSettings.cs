@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public class FirstTimeTenantSettings(
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && IncorrectAmiId(amiid))
+            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
             {
                 //throw new Exception(Resource.EmailAndPasswordIncorrectAmiId); TODO
             }
@@ -111,14 +111,14 @@ public class FirstTimeTenantSettings(
             tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
             await tenantManager.SaveTenantAsync(tenant);
-            await cspSettingsHelper.SaveAsync(null, true);
+            await cspSettingsHelper.SaveAsync(null);
             
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
             if (subscribeFromSite && tenantExtra.Opensource && !coreBaseSettings.CustomMode)
             {
-                SubscribeFromSite(currentUser);
+                await SubscribeFromSite(currentUser);
             }
 
             await cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id);
@@ -171,7 +171,7 @@ public class FirstTimeTenantSettings(
 
     private static string _amiId;
 
-    private bool IncorrectAmiId(string customAmiId)
+    private async Task<bool> IncorrectAmiId(string customAmiId)
     {
         customAmiId = (customAmiId ?? "").Trim();
         if (string.IsNullOrEmpty(customAmiId))
@@ -190,11 +190,9 @@ public class FirstTimeTenantSettings(
             try
             {
                 var httpClient = clientFactory.CreateClient();
-                using (var response = httpClient.Send(request))
-                using (var responseStream = response.Content.ReadAsStream())
-                using (var reader = new StreamReader(responseStream))
+                using (var response = await httpClient.SendAsync(request))
                 {
-                    _amiId = reader.ReadToEnd();
+                    _amiId = await response.Content.ReadAsStringAsync();
                 }
 
                 logger.DebugInstanceId(_amiId);
@@ -208,7 +206,7 @@ public class FirstTimeTenantSettings(
         return string.IsNullOrEmpty(_amiId) || _amiId != customAmiId;
     }
 
-    private void SubscribeFromSite(UserInfo user)
+    private async Task SubscribeFromSite(UserInfo user)
     {
         try
         {
@@ -234,7 +232,7 @@ public class FirstTimeTenantSettings(
             request.Content = new StringContent(data);
 
             var httpClient = clientFactory.CreateClient();
-            using var response = httpClient.Send(request);
+            using var response = await httpClient.SendAsync(request);
 
             logger.DebugSubscribeResponse(response);//toto write
 

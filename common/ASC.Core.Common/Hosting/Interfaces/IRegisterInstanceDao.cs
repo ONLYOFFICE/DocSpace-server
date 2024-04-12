@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,6 @@ namespace ASC.Core.Common.Hosting.Interfaces;
 public interface IRegisterInstanceDao<T> where T : IHostedService
 {
     Task AddOrUpdateAsync(InstanceRegistration obj);
-    Task<List<InstanceRegistration>> GetAllAsync();
+    Task<List<InstanceRegistration>> GetAllAsync(string workerTypeName);
     Task DeleteAsync(string instanceId);
 }

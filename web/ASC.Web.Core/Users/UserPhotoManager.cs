@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -656,10 +656,10 @@ public class UserPhotoManager(UserManager userManager,
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
 
-        if (_resizeQueue.GetAllTasks<ResizeWorkerItem>().All(r => r["key"] != key))
+        if ((await _resizeQueue.GetAllTasks<ResizeWorkerItem>()).All(r => r["key"] != key))
         {
             //Add
-            _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
+            await _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
         }
         return GetDefaultPhotoAbsoluteWebPath(size);
         //NOTE: return default photo here. Since task will update cache
@@ -802,7 +802,7 @@ public class UserPhotoManager(UserManager userManager,
     {
         try
         {
-            var pattern = string.Format("{0}_size_{1}-{2}.*", userId, size.Width, size.Height);
+            var pattern = $"{userId}_size_{size.Width}-{size.Height}.*";
 
             var fileName = await (await GetDataStoreAsync()).ListFilesRelativeAsync("", "", pattern, false).FirstOrDefaultAsync();
 

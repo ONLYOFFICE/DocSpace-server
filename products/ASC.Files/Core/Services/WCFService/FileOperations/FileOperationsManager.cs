@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,10 +34,10 @@ public class FileOperationsManagerHolder(
     internal const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    public List<FileOperationResult> GetOperationResults(Guid userId)
+    public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
     {
-        var operations = _tasks
-            .GetAllTasks()
+        var operations = (await _tasks
+            .GetAllTasks())
             .Where(t => new Guid(t[FileOperation.Owner]) == userId)
             .ToList();
         
@@ -45,7 +45,7 @@ public class FileOperationsManagerHolder(
         {
             o[FileOperation.Progress] = 100;
 
-            _tasks.DequeueTask(o.Id);
+            await _tasks.DequeueTask(o.Id);
         }
 
         var results = operations
@@ -66,37 +66,32 @@ public class FileOperationsManagerHolder(
         return results;
     }
 
-    public List<FileOperationResult> CancelOperations(Guid userId, string id = null)
+    public async Task<List<FileOperationResult>> CancelOperations(Guid userId, string id = null)
     {
-        var operations = _tasks.GetAllTasks()
+        var operations = (await _tasks.GetAllTasks())
             .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && new Guid(t[FileOperation.Owner]) == userId);
 
         foreach (var o in operations)
         {
-            _tasks.DequeueTask(o.Id);
+            await _tasks.DequeueTask(o.Id);
         }
 
-        return GetOperationResults(userId);
+        return await GetOperationResults(userId);
     }
 
-    public DistributedTask FindById(string taskId)
+    public async Task Enqueue(DistributedTaskProgress task)
     {
-        return _tasks.GetAllTasks().FirstOrDefault(r => r.Id == taskId);
+        await _tasks.EnqueueTask(task);
     }
 
-    public void Enqueue(DistributedTaskProgress task)
-    {
-        _tasks.EnqueueTask(task);
-    }
-
-    public string Publish(DistributedTaskProgress task)
+    public Task<string> Publish(DistributedTaskProgress task)
     {
         return _tasks.PublishTask(task);
     }
 
-    public void CheckRunning(Guid userId, FileOperationType fileOperationType)
+    public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
     {
-        var operations = _tasks.GetAllTasks()
+        var operations = (await _tasks.GetAllTasks())
             .Where(t => new Guid(t[FileOperation.Owner]) == userId)
             .Where(t => (FileOperationType)t[FileOperation.OpType] == fileOperationType);
         
@@ -123,30 +118,26 @@ public class FileOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider)
 {
-    public List<FileOperationResult> GetOperationResults()
+    public async Task<List<FileOperationResult>> GetOperationResults()
     {
-        return fileOperationsManagerHolder.GetOperationResults(GetUserId());
+        return await fileOperationsManagerHolder.GetOperationResults(GetUserId());
     }
 
-    public List<FileOperationResult> CancelOperations(string id = null)
+    public async Task<List<FileOperationResult>> CancelOperations(string id = null)
     {
-        return fileOperationsManagerHolder.CancelOperations(GetUserId(), id);
+        return await fileOperationsManagerHolder.CancelOperations(GetUserId(), id);
     }
-
-    #region MarkAsRead
-
-    public void EnqueueMarkAsRead(string taskId)
+    
+    public async Task Enqueue<T, T1, T2>(string taskId, T1 thirdPartyData, T2 data) 
+        where T: ComposeFileOperation<T1, T2>
+        where T1 : FileOperationData<string>
+        where T2 : FileOperationData<int>
     {
-        var op = fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-            operation.Init<FileMarkAsReadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            fileOperationsManagerHolder.Enqueue(operation);
-        }
+        var operation = fileOperationsManagerHolder.GetService<T>();
+        operation.Init(data, thirdPartyData, taskId);
+        await fileOperationsManagerHolder.Enqueue(operation);
     }
-
+    
     public async Task PublishMarkAsRead(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
     {
         if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
@@ -155,69 +146,52 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
-        op.Init(new FileMarkAsReadOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders()));
+        op.Init(true);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var taskId = fileOperationsManagerHolder.Publish(op);
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
         eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
-    }
-
-    #endregion
-
-    #region Download
-    
-    public void EnqueueDownload(string taskId)
-    {
-        var op = fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-            operation.Init<FileDownloadOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            fileOperationsManagerHolder.Enqueue(operation);
-        }
     }
     
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
-        fileOperationsManagerHolder.CheckRunning(GetUserId(), FileOperationType.Download);
+        await fileOperationsManagerHolder.CheckRunning(GetUserId(), FileOperationType.Download);
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
             return;
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
-        op.Init(new FileDownloadOperationData<JsonElement>(folders, files, tenantId, GetHttpHeaders(), baseUri));
+        op.Init(true);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var taskId = fileOperationsManagerHolder.Publish(op);
+        var (folderIntIds, folderStringIds) = GetIds(folders);
+        var (fileIntIds, fileStringIds) = GetIds(files);
+        
+        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
+        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
         eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
-    }
-
-    #endregion
-
-    #region MoveOrCopy
-
-    public void EnqueueMoveOrCopy(string taskId)
-    {
-        var op = fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-            operation.Init<FileMoveCopyOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            fileOperationsManagerHolder.Enqueue(operation);
-        }
     }
 
     public async Task PublishMoveOrCopyAsync(
@@ -240,36 +214,33 @@ public class FileOperationsManager(
         }
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
-        var toCopyFolderIds = folderIds;
-        var toCopyFilesIds = fileIds;
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
         
         if (content)
         {        
-            var (folderIntIds, folderStringIds) = GetIds(folderIds);
-            var (fileIntIds, fileStringIds) = GetIds(fileIds);
             await GetContent(folderIntIds, fileIntIds);
             await GetContent(folderStringIds, fileStringIds);
-
-            toCopyFilesIds = fileIntIds.Select(r => JsonSerializer.SerializeToElement(r))
-                .Concat(fileStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
-                .ToList();
-            
-            toCopyFolderIds = folderIntIds.Select(r => JsonSerializer.SerializeToElement(r))
-                .Concat(folderStringIds.Select(r => JsonSerializer.SerializeToElement(r)))
-                .ToList();
         }
         
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
-        op.Init(new FileMoveCopyOperationData<JsonElement>(toCopyFolderIds, toCopyFilesIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders()));
+        op.Init(holdResult, copy);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var taskId = fileOperationsManagerHolder.Publish(op);
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
         
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            TaskId = taskId
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
         });
         
+        return;
+
         async Task GetContent<T1>(List<T1> folderForContentIds, List<T1> fileForContentIds)
         {
             var copyFolderIds = folderForContentIds.ToList();
@@ -288,23 +259,7 @@ public class FileOperationsManager(
         }
     }
 
-    #endregion
-
-    #region Delete
-
-    public void EnqueueDelete(string taskId)
-    {
-        var op = fileOperationsManagerHolder.FindById(taskId);
-
-        if (op is DistributedTaskProgress task)
-        {
-            var operation = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-            operation.Init<FileDeleteOperationData<JsonElement>>((string)task[FileOperation.Data], taskId);
-            fileOperationsManagerHolder.Enqueue(operation);
-        }
-    }
-
-    public async Task PublishDelete<T>(
+    public Task PublishDelete<T>(
         IEnumerable<T> folders, 
         IEnumerable<T> files, 
         bool ignoreException, 
@@ -312,45 +267,78 @@ public class FileOperationsManager(
         bool immediately,
         bool isEmptyTrash = false)
     {        
-        var jsonFolders = folders.Select(r => JsonSerializer.SerializeToElement(r));
-        var jsonFiles = files.Select(r => JsonSerializer.SerializeToElement(r));
-        await PublishDelete(jsonFolders, jsonFiles, ignoreException, holdResult, immediately, isEmptyTrash);
-    }
-    
-    public async Task PublishDelete(
-        IEnumerable<JsonElement> folderIds, 
-        IEnumerable<JsonElement> fileIds, 
-        bool ignoreException, 
-        bool holdResult, 
-        bool immediately,
-        bool isEmptyTrash = false)
-    {      
-        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
-            return;
+            return Task.CompletedTask;
         }
         
+        var folderIds = (folders.OfType<int>(), folders.OfType<string>());
+        var fileIds = (files.OfType<int>(), files.OfType<string>());
+        
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+    }
+
+    public Task PublishDelete(
+        IEnumerable<JsonElement> folders, 
+        IEnumerable<JsonElement> files, 
+        bool ignoreException, 
+        bool holdResult,
+        bool immediately,
+        bool isEmptyTrash = false)
+    {        
+        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        {
+            return Task.CompletedTask;
+        }
+        
+        var folderIds = GetIds(folders);
+        var fileIds = GetIds(files);
+
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+    }
+
+    private async Task PublishDelete(
+        (IEnumerable<int>, IEnumerable<string>) folders, 
+        (IEnumerable<int>, IEnumerable<string>) files, 
+        bool ignoreException, 
+        bool holdResult,
+        bool immediately,
+        bool isEmptyTrash = false)
+    {        
+        
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(new FileDeleteOperationData<JsonElement>(folderIds, fileIds, tenantId, GetHttpHeaders(), holdResult, ignoreException, immediately, isEmptyTrash));
+        op.Init(holdResult);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var taskId = fileOperationsManagerHolder.Publish(op);
-
+        
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        
         IntegrationEvent toPublish;
         if (isEmptyTrash)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId };
+            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = taskId, 
+                Data = data,
+                ThirdPartyData = thirdPartyData
+            };
         }
         else
         {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { TaskId = taskId };
+            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = taskId, 
+                Data = data,
+                ThirdPartyData = thirdPartyData
+            };
         }
         
         eventBus.Publish(toPublish);
     }
-
-    #endregion
 
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)
     {
@@ -379,7 +367,7 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    public static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
+    private static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
     {
         var (resultInt, resultString) = (new List<FilesDownloadOperationItem<int>>(), new List<FilesDownloadOperationItem<string>>());
 
@@ -429,8 +417,11 @@ public class FileOperationsManager(
     private Dictionary<string, string> GetHttpHeaders()
     {
         var request = httpContextAccessor?.HttpContext?.Request;
-
-        return MessageSettings.GetHttpHeaders(request).ToDictionary(x => x.Key, x => x.Value.ToString());
+        var headers = MessageSettings.GetHttpHeaders(request);
+        
+        return headers == null 
+            ? new Dictionary<string, string>() 
+            : headers.ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 }
 

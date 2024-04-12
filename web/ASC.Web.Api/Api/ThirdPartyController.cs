@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
         {
             LoginProvider.Google => oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
                 GoogleLoginProvider.GoogleScopeDrive,
-                new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } },
+                GoogleLoginProvider.GoogleAdditionalArgs,
                 additionalStateArgs: additionals),
             LoginProvider.Dropbox => oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
                 additionalArgs: new Dictionary<string, string>

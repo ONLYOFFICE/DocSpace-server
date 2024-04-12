@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,16 +46,17 @@ public class DbSettingsManagerCache
 }
 
 [Scope]
-public class SettingsManager(IServiceProvider serviceProvider,
+public class SettingsManager(
+    IServiceProvider serviceProvider,
     DbSettingsManagerCache dbSettingsManagerCache,
     ILogger<SettingsManager> logger,
     AuthContext authContext,
     TenantManager tenantManager,
     IDbContextFactory<WebstudioDbContext> dbContextFactory)
 {
-    private readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
     private readonly ICache _cache = dbSettingsManagerCache.Cache;
-    private readonly JsonSerializerOptions  _options = new()
+    private static readonly JsonSerializerOptions  _options = new()
     {
         PropertyNameCaseInsensitive = true
     };

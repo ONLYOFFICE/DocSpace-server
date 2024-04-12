@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,11 @@
 namespace ASC.Webhooks.Core;
 
 [Scope]
-public class WebhookPublisher(DbWorker dbWorker,
-        IEventBus eventBus,
-        SecurityContext securityContext,
-        TenantManager tenantManager)
+public class WebhookPublisher(
+    DbWorker dbWorker,
+    IEventBus eventBus,
+    SecurityContext securityContext,
+    TenantManager tenantManager)
     : IWebhookPublisher
 {
     public async Task PublishAsync(int webhookId, string requestPayload)
@@ -40,11 +41,11 @@ public class WebhookPublisher(DbWorker dbWorker,
             return;
         }
 
-        var webhookConfigs = dbWorker.GetWebhookConfigs();
+        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
 
-        await foreach (var config in webhookConfigs.Where(r => r.Enabled))
+        foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(webhookId, requestPayload, config.Id);
+            await PublishAsync(webhookId, requestPayload, config.Id);
         }
     }
 

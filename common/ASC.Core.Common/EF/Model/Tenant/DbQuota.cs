@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -72,11 +72,11 @@ public static class DbQuotaExtension
                 {
                     TenantId = -2,
                     Name = "admin",
-                    Description = null,
+                    Description = "until 01.04.2024",
                     Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                     Price = 15,
                     ProductId = "1002",
-                    Visible = true
+                    Visible = false
                 },
                 new DbQuota
                 {
@@ -137,11 +137,21 @@ public static class DbQuotaExtension
                     Price = 0,
                     ProductId = null,
                     Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -9,
+                    Name = "admin",
+                    Description = "since 01.04.2024",
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                    Price = 20,
+                    ProductId = "1006",
+                    Visible = true
                 }
                 );
         return modelBuilder;
     }
-
+    
     public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbQuota>(entity =>

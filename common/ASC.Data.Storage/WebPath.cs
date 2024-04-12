@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -125,14 +125,13 @@ public class WebPathSettings
 }
 
 [Scope(Additional = typeof(StaticUploaderExtension))]
-public class WebPath(WebPathSettings webPathSettings,
+public class WebPath(
+    WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
     SettingsManager settingsManager,
     StorageSettingsHelper storageSettingsHelper,
-    IHostEnvironment hostEnvironment,
     CoreBaseSettings coreBaseSettings,
-    ILoggerProvider options,
-    IHttpClientFactory clientFactory)
+    ILoggerProvider options)
 {
     private static readonly ConcurrentDictionary<string, bool> _existing = new();
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -147,7 +146,7 @@ public class WebPath(WebPathSettings webPathSettings,
         CoreBaseSettings coreBaseSettings,
         ILoggerProvider options,
         IHttpClientFactory clientFactory)
-            : this(webPathSettings, serviceProvider, settingsManager, storageSettingsHelper, hostEnvironment, coreBaseSettings, options, clientFactory)
+            : this(webPathSettings, serviceProvider, settingsManager, storageSettingsHelper, coreBaseSettings, options)
     {
         _httpContextAccessor = httpContextAccessor;
     }
@@ -177,46 +176,6 @@ public class WebPath(WebPathSettings webPathSettings,
         }
 
         return webPathSettings.GetPath(_httpContextAccessor?.HttpContext, options, relativePath);
-    }
-
-    public async Task<bool> ExistsAsync(string relativePath)
-    {
-        var path = await GetPathAsync(relativePath);
-        if (!_existing.ContainsKey(path))
-        {
-            if (Uri.IsWellFormedUriString(path, UriKind.Relative) && _httpContextAccessor?.HttpContext != null)
-            {
-                //Local
-                _existing[path] = File.Exists(CrossPlatform.PathCombine(hostEnvironment.ContentRootPath, path));
-            }
-            if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
-            {
-                //Make request
-                _existing[path] = CheckWebPath(path);
-            }
-        }
-
-        return _existing[path];
-    }
-
-    private bool CheckWebPath(string path)
-    {
-        try
-        {
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(path),
-                Method = HttpMethod.Head
-            };
-            var httpClient = clientFactory.CreateClient();
-            using var response = httpClient.Send(request);
-
-            return response.StatusCode == HttpStatusCode.OK;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
     }
 }
 

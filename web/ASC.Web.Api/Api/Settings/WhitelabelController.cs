@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,10 +113,6 @@ public class WhitelabelController(ApiContext apiContext,
         }
 
         settings.SetLogoText(inDto.LogoText);
-
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-
-        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenant.Id, tenantLogoManager);
 
         await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
     }
@@ -300,9 +296,14 @@ public class WhitelabelController(ApiContext apiContext,
     /// <collection>list</collection>
     /// <visible>false</visible>
     [HttpGet("whitelabel/logos/isdefault")]
-    public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos()
+    public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
-        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantWhiteLabelSettings = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value
+            ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
+            : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
         yield return new IsDefaultWhiteLabelLogosDto
         {
             Name = "logotext",

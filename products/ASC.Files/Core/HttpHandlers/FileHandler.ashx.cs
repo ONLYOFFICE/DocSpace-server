@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileMarker fileMarker,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
     Global global,
     EmailValidationKeyProvider emailValidationKeyProvider,
@@ -75,13 +74,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory,
     ThumbnailSettings thumbnailSettings,
     ExternalLinkHelper externalLinkHelper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    EntryManager entryManager,
+    FileStorageService fileStorageService)
 {
-    public string FileHandlerPath
-    {
-        get { return filesLinkUtility.FileHandlerPath; }
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         if (await tenantExtra.IsNotPaidAsync())
@@ -266,16 +262,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (!readLink && !await fileSecurity.CanDownloadAsync(file))
+            if (!await fileSecurity.CanDownloadAsync(file))
             {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || FileUtility.GetFileExtension(file.Title) == ".pdf") ||
-                    linkId == Guid.Empty || !await fileSecurity.CanReadAsync(file, linkId))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
             }
 
             if (readLink && linkShare is FileShare.Comment or FileShare.Read && file.DenyDownload)
@@ -295,6 +285,16 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
 
                 return;
+            }
+            
+            if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+                && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
+            {
+                var linkId = await externalShare.GetLinkIdAsync();
+                if (linkId != Guid.Empty)
+                {
+                    await entryManager.MarkAsRecentByLink(file, linkId);
+                }
             }
 
             await fileMarker.RemoveMarkAsNewAsync(file);
@@ -343,8 +343,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 {
                     var title = file.Title;
 
-                    if (file.ContentLength <= setupInfo.AvailableFileSize)
-                    {
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
@@ -410,26 +408,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
 
                         flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
-                    else
-                    {
-                        if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
-                        {
-                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
-                            
-                            context.Response.Redirect(url, true);
 
-                            return;
-                        }
-                        
-                        var fullLength = await fileDao.GetFileSizeAsync(file);
-            
-                        long offset = 0;
-                        var length = ProcessRangeHeader(context, fullLength, ref offset);
-                        fileStream = await fileDao.GetFileStreamAsync(file, offset, length);
-            
-                        flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
                 }
                 catch (ThreadAbortException tae)
                 {
@@ -1218,6 +1197,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             await socketManager.CreateFileAsync(file);
+
+            if (FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf && folder.FolderType == FolderType.FillingFormsRoom)
+            {
+                var count = await fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+            }
         }
         catch (Exception ex)
         {

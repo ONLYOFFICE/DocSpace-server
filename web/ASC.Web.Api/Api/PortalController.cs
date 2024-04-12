@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
 
@@ -324,7 +326,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     [HttpGet("thumb")]
-    public FileResult GetThumb(string url)
+    public async Task<FileResult> GetThumb(string url)
     {
         if (!securityContext.IsAuthenticated || configuration["bookmarking:thumbnail-url"] == null)
         {
@@ -340,10 +342,8 @@ public class PortalController(ILogger<PortalController> logger,
         };
 
         var httpClient = clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
-        using var stream = response.Content.ReadAsStream();
-        var bytes = new byte[stream.Length];
-        _ = stream.Read(bytes, 0, (int)stream.Length);
+        using var response = await httpClient.SendAsync(request);
+        var bytes = await response.Content.ReadAsByteArrayAsync();
 
         var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);
@@ -539,6 +539,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("suspend")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -566,6 +567,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("delete")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

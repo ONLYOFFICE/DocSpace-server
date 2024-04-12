@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class CspSettingsHelper(SettingsManager settingsManager,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
-    public async Task<string> SaveAsync(IEnumerable<string> domains, bool setDefaultIfEmpty)
+    public async Task<string> SaveAsync(IEnumerable<string> domains)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(coreSettings);
@@ -82,7 +82,7 @@ public class CspSettingsHelper(SettingsManager settingsManager,
             }
         }
 
-        var headerValue = await CreateHeaderAsync(domains, setDefaultIfEmpty);
+        var headerValue = await CreateHeaderAsync(domains);
 
         if (!string.IsNullOrEmpty(headerValue))
         {
@@ -96,7 +96,6 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         await settingsManager.ManageAsync<CspSettings>(current =>
         {
             current.Domains = domains;
-            current.SetDefaultIfEmpty = setDefaultIfEmpty;
         });
 
         return headerValue;
@@ -118,19 +117,9 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         }
     }
 
-    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool setDefaultIfEmpty = false, bool currentTenant = true)
+    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
     {
-        if (domains == null || !domains.Any())
-        {
-            if (setDefaultIfEmpty)
-            {
-                domains = Enumerable.Empty<string>();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        domains ??= Enumerable.Empty<string>();
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 

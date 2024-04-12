@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,6 +113,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
+        if (provider == ProviderFilter.Storage)
+        {
+            yield break;
+        }
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -134,11 +138,6 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
-        if (!roomsIds.Any())
-        {
-            yield break;
-        }
-        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -605,10 +604,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.MutableId = providerInfo.MutableEntityId;
         folder.Shared = shared;
         folder.SettingsColor = providerInfo.Color;
+        folder.ProviderMapped = !string.IsNullOrEmpty(providerInfo.FolderId);
 
         return folder;
     }
-
+    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    {
+        throw new NotImplementedException();
+    }
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         var selector = _selectorFactory.GetSelector(entry.Id);

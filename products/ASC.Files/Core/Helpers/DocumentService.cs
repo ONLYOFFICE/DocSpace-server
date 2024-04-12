@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -225,7 +225,15 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        var cancellationTokenSource = new CancellationTokenSource(Timeout);
+        var defaultTimeout = Timeout;
+        var commandTimeout = defaultTimeout;
+
+        if (method == CommandMethod.Version)
+        {
+            commandTimeout = 5000;
+        }
+
+        var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(documentTrackerUrl),
@@ -233,7 +241,7 @@ public static class DocumentService
         };
 
         var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        httpClient.Timeout = TimeSpan.FromMilliseconds(commandTimeout);
 
         var body = new CommandBody
         {
@@ -401,7 +409,7 @@ public static class DocumentService
             RequestUri = new Uri(healthcheckUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient("customHttpClient");
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
 
         using var response = await httpClient.SendAsync(request);

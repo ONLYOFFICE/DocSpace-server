@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -172,8 +172,18 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
                 Id = parentId
             }
         };
+        
+        if (fileStream.CanSeek)
+        {
+            return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
+        }
+        
+        await using var tempBuffer = tempStream.Create();
+        await fileStream.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(0, SeekOrigin.Begin);
 
-        return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
+        return await _boxClient.FilesManager.UploadAsync(boxFileRequest, tempBuffer, _boxFields, setStreamPositionToZero: false);
     }
 
     public async Task DeleteItemAsync(BoxItem boxItem)
@@ -267,9 +277,9 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
     
-    public long GetFileSize(BoxFile file)
+    public Task<long> GetFileSizeAsync(BoxFile file)
     {
-        return file.Size ?? 0;
+        return Task.FromResult(file.Size ?? 0);
     }
     
     public async Task<long> GetMaxUploadSizeAsync()
@@ -285,5 +295,10 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         var boxRepresentation = new BoxRepresentationRequest { FileId = fileId, XRepHints = "[jpg?dimensions=320x320]" };
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }

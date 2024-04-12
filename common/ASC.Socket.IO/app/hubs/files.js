@@ -151,6 +151,20 @@
     filesIO.to(room).emit("s:modify-folder", { cmd, id, type, data });
   }
 
+  function modifyFormRoom(room, cmd, id, type, data, isOneMember) {
+    filesIO.to(room).emit("s:modify-room", { cmd, id, type, data, isOneMember });
+  }
+
+  function createForm({ id, room, data, userIds, isOneMember } = {}) {
+    logger.info(`create new form ${id} in room ${room}`);
+      if (userIds) {
+          userIds.forEach(userId => modifyFormRoom(`${room}-${userId}`, "create-form", id, "file", data, isOneMember));
+      }
+      else {
+          modifyFormRoom(room, "create-form", id, "file", data, isOneMember);
+      }
+  }
+
   function createFile({ id, room, data, userIds } = {}) {
     logger.info(`create new file ${id} in room ${room}`);
 
@@ -284,6 +298,7 @@
     startEdit,
     stopEdit,
     createFile,
+    createForm,
     createFolder,
     deleteFile,
     deleteFolder,

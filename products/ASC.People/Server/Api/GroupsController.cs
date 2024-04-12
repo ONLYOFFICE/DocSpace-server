@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,6 +59,7 @@ public class GroupController(UserManager userManager,
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -97,6 +98,7 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
@@ -211,7 +213,7 @@ public class GroupController(UserManager userManager,
         var group = await GetGroupInfoAsync(id);
 
         await userManager.DeleteGroupAsync(id);
-        await fileSecurity.RemoveSubjectAsync<int>(id, false);
+        await fileSecurity.RemoveSubjectAsync(id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
 

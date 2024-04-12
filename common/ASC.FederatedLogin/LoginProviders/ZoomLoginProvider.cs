@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     public override string Scopes => "";
 
     // used in ZoomService
-    private const string ApiUrl = "https://api.zoom.us/v2";
+    public const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
     
     private readonly RequestHelper _requestHelper;
@@ -89,12 +89,12 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 
     // used in ZoomService
-    private OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
+    public OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
     {
         var clientPair = $"{ClientID}:{ClientSecret}";
         var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));

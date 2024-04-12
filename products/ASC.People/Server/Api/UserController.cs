@@ -1,28 +1,30 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Api.Core.Core;
 
 namespace ASC.People.Api;
 
@@ -51,6 +53,7 @@ public class UserController(ICache cache,
         SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
+        CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
         UserPhotoManager userPhotoManager,
         IHttpClientFactory httpClientFactory,
@@ -334,7 +337,7 @@ public class UserController(ICache cache,
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid:guid}/password")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
     {
@@ -372,6 +375,7 @@ public class UserController(ICache cache,
 
             if (!string.IsNullOrEmpty(inDto.Password))
             {
+                await userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
                 inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
             }
         }
@@ -381,10 +385,10 @@ public class UserController(ICache cache,
             await securityContext.SetUserPasswordHashAsync(userid, inDto.PasswordHash);
             await messageService.SendAsync(MessageAction.UserUpdatedPassword);
 
-            await cookiesManager.ResetUserCookieAsync(userid);
+            await cookiesManager.ResetUserCookieAsync(userid, false);
             await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-        
+
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
@@ -428,6 +432,7 @@ public class UserController(ICache cache,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
+        await fileSecurity.RemoveSubjectAsync(user.Id, true);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
@@ -815,6 +820,7 @@ public class UserController(ICache cache,
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
+            await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
@@ -840,6 +846,7 @@ public class UserController(ICache cache,
     /// <collection>list</collection>
     [AllowNotPayment]
     [HttpPut("invite")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
@@ -903,6 +910,16 @@ public class UserController(ICache cache,
             }
             else
             {
+                if (viewer.Id != user.Id)
+                {
+                    var type = await _userManager.GetUserTypeAsync(user.Id);
+
+                    if (!await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(type), Constants.Action_AddRemoveUser))
+                    {
+                        continue;
+                    }
+                }
+
                 await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
             }
         }
@@ -991,7 +1008,7 @@ public class UserController(ICache cache,
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("email")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
@@ -1083,7 +1100,7 @@ public class UserController(ICache cache,
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
-    [EnableRateLimiting("sensitive_api")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendUserPasswordAsync(MemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
@@ -1098,7 +1115,8 @@ public class UserController(ICache cache,
         var error = await userManagerWrapper.SendUserPasswordAsync(inDto.Email);
         if (string.IsNullOrEmpty(error))
         {
-            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+            var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
+            return string.Format(pattern, inDto.Email);
         }
 
         logger.ErrorPasswordRecovery(inDto.Email, error);
@@ -1494,7 +1512,7 @@ public class UserController(ICache cache,
     public async Task RecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1512,7 +1530,7 @@ public class UserController(ICache cache,
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        return usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1530,6 +1548,11 @@ public class UserController(ICache cache,
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
+        if (!inDto.Quota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
@@ -1539,26 +1562,37 @@ public class UserController(ICache cache,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
         
-        if (maxTotalSize < inDto.Quota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < quota)
+                {
+                    throw new Exception(Resource.QuotaGreaterPortalError);
+                }
+            }
+        }
 
         foreach (var user in users)
-            {
-            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+        {
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, new List<Guid>() { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, new List<Guid> { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
-                }
-            }
+        }
+    }
 
     /// <summary>
     /// Reset a user quota limit with the ID specified in the request from the portal.
@@ -1574,6 +1608,13 @@ public class UserController(ICache cache,
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+        }
+
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
@@ -1586,13 +1627,13 @@ public class UserController(ICache cache,
             {
                 throw new SecurityException();
             }
-            var defaulSettings = settingsManager.GetDefault<UserQuotaSettings>();
-            await settingsManager.SaveAsync(defaulSettings, user);
+            var defaultSettings = settingsManager.GetDefault<UserQuotaSettings>();
+            await settingsManager.SaveAsync(defaultSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid>() { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid> { user.Id });
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

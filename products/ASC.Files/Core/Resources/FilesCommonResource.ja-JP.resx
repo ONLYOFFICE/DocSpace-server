@@ -172,14 +172,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>必要なファイルが見つかりませんでした</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}より大きくファイルが変換されません</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}より大きくファイルがコピーされません</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}より大きくファイルが編集されません</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}より大きくファイルが移動されません</value>

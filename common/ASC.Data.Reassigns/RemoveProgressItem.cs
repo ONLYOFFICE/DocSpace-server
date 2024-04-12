@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,22 +86,22 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
             Percentage = 5;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
 
             Percentage = 10;
-            PublishChanges();
+            await PublishChanges();
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
             Percentage = 30;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
 
             Percentage = 95;
-            PublishChanges();
+            await PublishChanges();
 
             //_mailEraser.ClearUserMail(_userId);
             //await DeleteTalkStorage(storageFactory);
@@ -127,7 +127,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         {
             logger.LogInformation("data deletion is complete");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 

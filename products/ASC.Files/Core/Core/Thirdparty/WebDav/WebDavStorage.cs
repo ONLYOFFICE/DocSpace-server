@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -91,7 +91,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var path = CombinePath(parentId, title);
         var resourceUrl = BuildResourceUrl(path);
         
-        var response = await _client.PutFile(resourceUrl, fileStream);
+        var response = await PutStreamAsync(resourceUrl, fileStream);
         if (!response.IsSuccessful)
         {
             return null;
@@ -180,13 +180,13 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var resourceUrl = BuildResourceUrl(fileId);
         
-        var response = await _client.PutFile(resourceUrl, fileStream);
+        var response = await PutStreamAsync(resourceUrl, fileStream);
         return !response.IsSuccessful ? null : await GetEntryAsync(resourceUrl);
     }
 
-    public long GetFileSize(WebDavEntry file)
+    public Task<long> GetFileSizeAsync(WebDavEntry file)
     {
-        return file.ContentLength ?? 0;
+        return Task.FromResult(file.ContentLength ?? 0);
     }
 
     public Task<WebDavEntry> GetFolderAsync(string folderId)
@@ -272,6 +272,21 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         _client = null;
     }
     
+    private async Task<WebDavResponse> PutStreamAsync(string url, Stream fileStream)
+    {
+        if (fileStream.CanSeek)
+        {
+            return await _client.PutFile(url, fileStream);
+        }
+
+        await using var tempBuffer = tempStream.Create();
+        await fileStream.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(0, SeekOrigin.Begin);
+        
+        return await _client.PutFile(url, tempBuffer);
+    }
+    
     private async Task<WebDavEntry> GetEntryAsync(string url)
     {
         var response = await _client.Propfind(url, new PropfindParameters
@@ -340,5 +355,9 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var index = path.LastIndexOf('/');
         return index <= 0 ? string.Empty : path[..index];
+    }
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }

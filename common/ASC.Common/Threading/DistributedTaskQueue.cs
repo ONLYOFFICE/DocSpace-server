@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -78,12 +78,12 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         }
     }
 
-    public void EnqueueTask(DistributedTaskProgress taskProgress)
+    public async Task EnqueueTask(DistributedTaskProgress taskProgress)
     {
-        EnqueueTask(taskProgress.RunJob, taskProgress);
+        await EnqueueTask(taskProgress.RunJob, taskProgress);
     }
 
-    public void EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
+    public async Task EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
     {
         distributedTask ??= new DistributedTask();
 
@@ -94,9 +94,9 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
             distributedTask.LastModifiedOn = DateTime.UtcNow;
         }
 
-        var cancelation = new CancellationTokenSource();
-        var token = cancelation.Token;
-        _cancelations[distributedTask.Id] = cancelation;
+        var cancellation = new CancellationTokenSource();
+        var token = cancellation.Token;
+        _cancelations[distributedTask.Id] = cancellation;
 
         if (!_subscribed)
         {
@@ -114,16 +114,15 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         var task = new Task(() =>
     {
         var t = action(distributedTask, token);
-        t.ConfigureAwait(false)
-        .GetAwaiter()
-        .OnCompleted(() => OnCompleted(t, distributedTask.Id));
+        t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
+        t.ConfigureAwait(false);
     }, token, TaskCreationOptions.LongRunning);
 
-        task.ConfigureAwait(false);
+        _ = task.ConfigureAwait(false);
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
-        _ = PublishTask(distributedTask);
+        await PublishTask(distributedTask);
 
         task.Start(Scheduler);
 
@@ -131,11 +130,11 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     }
 
-    public List<DistributedTask> GetAllTasks(int? instanceId = null)
+    public async Task<List<DistributedTask>> GetAllTasks(int? instanceId = null)
     {
-        var queueTasks = LoadFromCache();
+        var queueTasks = await LoadFromCache();
 
-        queueTasks = DeleteOrphanCacheItem(queueTasks);
+        queueTasks = await DeleteOrphanCacheItem(queueTasks);
 
         if (instanceId.HasValue)
         {
@@ -150,60 +149,55 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return queueTasks;
     }
 
-    public IEnumerable<T> GetAllTasks<T>() where T : DistributedTask
+    public async Task<IEnumerable<T>> GetAllTasks<T>() where T : DistributedTask
     {
-        return GetAllTasks().Select(x => Map(x, serviceProvider.GetService<T>()));
+        return (await GetAllTasks()).Select(x => Map(x, serviceProvider.GetService<T>())).ToList();
     }
 
-    public T PeekTask<T>(string id) where T : DistributedTask
+    public async Task<T> PeekTask<T>(string id) where T : DistributedTask
     {
-        var taskById = GetAllTasks().FirstOrDefault(x => x.Id == id);
+        var taskById = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
 
-        if (taskById == null)
-        {
-            return null;
-        }
-
-        return Map(taskById, serviceProvider.GetService<T>());
+        return taskById == null ? null : Map(taskById, serviceProvider.GetService<T>());
     }
 
-    public void DequeueTask(string id)
+    public async Task DequeueTask(string id)
     {
-        var queueTasks = GetAllTasks().ToList();
+        var queueTasks = (await GetAllTasks()).ToList();
 
         if (!queueTasks.Exists(x => x.Id == id))
         {
             return;
         }
 
-        cancelTaskNotify.Publish(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
+        await cancelTaskNotify.PublishAsync(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
 
         queueTasks = queueTasks.FindAll(x => x.Id != id);
 
         if (queueTasks.Count == 0)
         {
-            distributedCache.Remove(_name);
+            await distributedCache.RemoveAsync(_name);
         }
         else
         {
-            SaveToCache(queueTasks);
+            await SaveToCache(queueTasks);
         }
 
         logger.TraceEnqueueTask(id, INSTANCE_ID);
 
     }
 
-    public string PublishTask(DistributedTask distributedTask)
+    public async Task<string> PublishTask(DistributedTask distributedTask)
     {
         distributedTask.Publication ??= GetPublication();
-        distributedTask.PublishChanges();
+        await distributedTask.PublishChanges();
 
         return distributedTask.Id;
     }
 
-    private void OnCompleted(Task task, string id)
+    private async Task OnCompleted(Task task, string id)
     {
-        var distributedTask = GetAllTasks().FirstOrDefault(x => x.Id == id);
+        var distributedTask = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
         if (distributedTask != null)
         {
             distributedTask.Status = DistributedTaskStatus.Completed;
@@ -223,33 +217,32 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
             _cancelations.TryRemove(id, out _);
 
-            distributedTask.PublishChanges();
+            await distributedTask.PublishChanges();
         }
     }
 
-    private Action<DistributedTask> GetPublication()
+    private Func<DistributedTask, Task> GetPublication()
     {
-        return task =>
+        return async task =>
         {
-            var allTasks = GetAllTasks().ToList();
+            var allTasks = (await GetAllTasks()).ToList();
             var queueTasks = allTasks.FindAll(x => x.Id != task.Id);
 
             task.LastModifiedOn = DateTime.UtcNow;
 
             queueTasks.Add(task);
 
-            SaveToCache(queueTasks);
-
+            await SaveToCache(queueTasks);
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
         };
     }
 
 
-    private void SaveToCache(IEnumerable<DistributedTask> queueTasks)
+    private async Task SaveToCache(List<DistributedTask> queueTasks)
     {
-        if (!queueTasks.Any())
+        if (queueTasks.Count == 0)
         {
-            distributedCache.Remove(_name);
+            await distributedCache.RemoveAsync(_name);
 
             return;
         }
@@ -258,20 +251,20 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         Serializer.Serialize(ms, queueTasks);
 
-        distributedCache.Set(_name, ms.ToArray(), new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(_name, ms.ToArray(), new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = DateTime.UtcNow.AddDays(1)
         });
 
     }
 
-    private List<DistributedTask> LoadFromCache()
+    private async Task<List<DistributedTask>> LoadFromCache()
     {
-        var serializedObject = distributedCache.Get(_name);
+        var serializedObject = await distributedCache.GetAsync(_name);
 
         if (serializedObject == null)
         {
-            return new List<DistributedTask>();
+            return [];
         }
 
         using var ms = new MemoryStream(serializedObject);
@@ -279,13 +272,13 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return Serializer.Deserialize<List<DistributedTask>>(ms);
     }
 
-    private List<DistributedTask> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
+    private async Task<List<DistributedTask>> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
     {
         var listTasks = queueTasks.ToList();
 
         if (listTasks.RemoveAll(IsOrphanCacheItem) > 0)
         {
-            SaveToCache(listTasks);
+            await SaveToCache(listTasks);
         }
 
         return listTasks;

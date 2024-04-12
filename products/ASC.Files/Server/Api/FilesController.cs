@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,34 +42,12 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         FileOperationsManager fileOperationsManager,
-        ThirdPartySelector thirdPartySelector,
-        DocumentServiceHelper documentServiceHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
-{
-    /// <summary>
-    /// Returns the detailed information about a third-party file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get third-party file information</short>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">File entry information</returns>
-    /// <path>api/2.0/files/file/app-{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/app-{fileId}", Order = 1)]
-    public async Task<FileEntryDto> GetFileInfoThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        return await GetFileEntryWrapperAsync(docParams.File);
-    }
-}
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -228,7 +206,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -479,7 +457,23 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
 
-        return await fileShareDtoHelper.Get(linkAce);
+        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
+
+    /// <summary>
+    /// Saves a file with the identifier specified in the request as a PDF document
+    /// </summary>
+    /// <short>Save as pdf</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
+    /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("file/{id}/saveaspdf")]
+    public async Task<FileDto<T>> SaveAsPdf(T id, SaveAsPdfRequestDto<T> inDto)
+    {
+        return await filesControllerHelper.SaveAsPdf(id, inDto.FolderId, inDto.Title);
     }
 }
 

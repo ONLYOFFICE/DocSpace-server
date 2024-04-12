@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -116,8 +116,8 @@ public class ConnectionsController(UserManager userManager,
                 Page = q.Page,
                 TenantId = q.TenantId,
                 Platform = q.Platform,
-                UserId = q.UserId,
-                
+                UserId = q.UserId
+
             }).ToList()
         };
     }

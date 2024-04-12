@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,9 +74,9 @@ public class RegisterInstanceDao<T>(
         while (saveFailed);
     }
 
-    public async Task<List<InstanceRegistration>> GetAllAsync()
+    public async Task<List<InstanceRegistration>> GetAllAsync(string workerTypeName)
     {
-        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
+        return await Queries.InstanceRegistrationsAsync(_instanceRegistrationContext, workerTypeName).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)

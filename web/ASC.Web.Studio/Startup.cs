@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -89,6 +89,10 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<RemovePortalIntegrationEventHandler>();
         DIHelper.TryAdd<RoomLogoValidator>();
         DIHelper.TryAdd<FileValidator>();
+        DIHelper.TryAdd<MigrationIntegrationEventHandler>();
+
+        MigrationCore.Register(DIHelper);
+        services.RegisterQuotaFeature();
         
         services.AddHttpClient();
 

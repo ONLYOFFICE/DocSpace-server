@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,6 +56,6 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ProductEntryPoint>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration);
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");
     }
 }

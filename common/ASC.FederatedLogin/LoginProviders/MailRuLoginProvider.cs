@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect);
+            var token = Auth(context, out var redirect);
 
             if (redirect)
             {
@@ -81,7 +81,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

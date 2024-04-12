@@ -18,6 +18,7 @@
       "common\\ASC.Feed\\ASC.Feed.csproj",
       "common\\ASC.IPSecurity\\ASC.IPSecurity.csproj",
       "common\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj",
+      "common\\ASC.Migration\\ASC.Migration.Core.csproj",
       "common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj",
       "common\\ASC.Textile\\ASC.Textile.csproj",
       "common\\ASC.Webhooks.Core\\ASC.Webhooks.Core.csproj",

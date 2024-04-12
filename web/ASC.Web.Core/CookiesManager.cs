@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,8 @@ public class CookiesManager(
     DbLoginEventsManager dbLoginEventsManager,
     MessageService messageService,
     IPSecurity.IPSecurity ipSecurity,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    SettingsManager settingsManager)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -63,6 +64,8 @@ public class CookiesManager(
         {
             return;
         }
+
+        var httpContext = httpContextAccessor.HttpContext;
 
         var options = new CookieOptions
         {
@@ -84,18 +87,33 @@ public class CookiesManager(
                 options.SameSite = sameSiteMode.Value;
             }
 
-            var urlRewriter = httpContextAccessor.HttpContext.Request.Url();
-            if (urlRewriter.Scheme == "https")
+            var requestUrlScheme = httpContext.Request.Url().Scheme;
+
+            if (Uri.UriSchemeHttps.Equals(requestUrlScheme, StringComparison.OrdinalIgnoreCase))
             {
                 options.Secure = true;
 
                 if (sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = sameSiteMode.Value;
+                } 
+                else if (!sameSiteMode.HasValue)
+                {
+                    var cspSettings = await settingsManager.LoadAsync<CspSettings>();
+
+                    if (cspSettings.Domains != null && cspSettings.Domains.Any())
+                    {
+                        options.SameSite = SameSiteMode.None;
+                    }
                 }
             }
 
-            if (FromCors(httpContextAccessor.HttpContext.Request))
+            if (options.SameSite == SameSiteMode.Unspecified)
+            {
+                options.SameSite = SameSiteMode.Strict;
+            }
+
+            if (FromCors(httpContext.Request))
             {
                 options.Domain = $".{coreBaseSettings.Basedomain}";
             }
@@ -103,19 +121,7 @@ public class CookiesManager(
 
         var cookieName = GetFullCookiesName(type, itemId);
 
-        httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
-    }
-
-    public string GetCookies(IReadOnlyDictionary<string, string> cookies, CookiesType type, string itemId)
-    {
-        if (cookies == null)
-        {
-            return string.Empty;
-        }
-
-        var name = GetFullCookiesName(type, itemId);
-
-        return cookies.TryGetValue(name, out var value) ? value : string.Empty;
+        httpContext.Response.Cookies.Append(cookieName, value, options);
     }
 
     public string GetCookies(CookiesType type)
@@ -212,7 +218,7 @@ public class CookiesManager(
         return (await tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
     }
 
-    public async Task ResetUserCookieAsync(Guid? userId = null)
+    public async Task ResetUserCookieAsync(Guid? userId = null, bool keepMeAuthenticated = true)
     {
         var targetUserId = userId ?? securityContext.CurrentAccount.ID;
         var tenant = await tenantManager.GetCurrentTenantIdAsync();
@@ -222,7 +228,7 @@ public class CookiesManager(
 
         await dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (targetUserId == securityContext.CurrentAccount.ID)
+        if (keepMeAuthenticated && targetUserId == securityContext.CurrentAccount.ID)
         {
             await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }

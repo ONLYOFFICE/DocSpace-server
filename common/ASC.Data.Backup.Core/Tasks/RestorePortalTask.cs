@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -89,8 +89,10 @@ public class RestorePortalTask(DbFactory dbFactory,
 
                 foreach (var module in modulesToProcess)
                 {
-                    var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider);
-                    restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
+                    var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider)
+                    {
+                        ProgressChanged = (args) => SetCurrentStepProgress(args.Progress)
+                    };
 
                     foreach (var tableName in _ignoredTables)
                     {
@@ -216,7 +218,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         foreach (var u in upgrades.OrderBy(Path.GetFileName, comparer))
         {
             RunMysqlFile(u, true);
-            SetStepCompleted();
+            await SetStepCompleted();
         }
     }
 
@@ -227,7 +229,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         {
             await RunMysqlFile(stream, db);
         }
-        SetStepCompleted();
+        await SetStepCompleted();
 
         options.DebugRestoreFrom(fileName2);
         if (fileName2 != null)
@@ -237,7 +239,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                 await RunMysqlFile(stream, db);
             }
 
-            SetStepCompleted();
+            await SetStepCompleted();
         }
     }
 
@@ -357,12 +359,12 @@ public class RestorePortalTask(DbFactory dbFactory,
                 }
             }
 
-            SetCurrentStepProgress((int)(++groupsProcessed * 100 / (double)fileGroups.Count));
+            await SetCurrentStepProgress((int)(++groupsProcessed * 100 / (double)fileGroups.Count));
         }
 
         if (fileGroups.Count == 0)
         {
-            SetStepCompleted();
+            await SetStepCompleted();
         }
 
         options.DebugEndRestoreStorage();
@@ -397,7 +399,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                     );
                 }
 
-                SetStepCompleted();
+                await SetStepCompleted();
             }
         }
 

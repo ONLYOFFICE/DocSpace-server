@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,8 +113,6 @@ public class MessagesRepository : IDisposable
 
         var now = DateTime.UtcNow;
         var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
-        
-        _logger.LogDebug("AddToCache: {key}, semaphore current {CurrentCount}", key, _semaphore.CurrentCount);
 
         try
         {

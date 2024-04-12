@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,8 +31,9 @@ public class FilesLinkUtility
 {
     public const string FilesBaseVirtualPath = "~/";
     public const string EditorPage = "doceditor";
-    private readonly string _filesUploaderURL;
-
+    public TimeSpan DefaultLinkLifeTime { get; }
+    
+    private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -54,7 +55,8 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
-        _filesUploaderURL = _configuration["files:uploader:url"] ?? "~";
+        _filesUploaderUrl = _configuration["files:uploader:url"] ?? "~";
+        DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
     public string FilesBaseAbsolutePath
@@ -74,7 +76,6 @@ public class FilesLinkUtility
     public const string OutType = "outputtype";
     public const string AuthKey = "stream_auth";
     public const string Anchor = "anchor";
-    public const string Size = "size";
     public const string ShareKey = "share";
 
     public string FileHandlerPath
@@ -424,12 +425,12 @@ public class FilesLinkUtility
 
     public bool IsLocalFileUploader
     {
-        get { return !Regex.IsMatch(_filesUploaderURL, "^http(s)?://\\.*"); }
+        get { return !Regex.IsMatch(_filesUploaderUrl, "^http(s)?://\\.*"); }
     }
 
     private string GetFileUploaderHandlerVirtualPath()
     {
-        return _filesUploaderURL.EndsWith(".ashx") ? _filesUploaderURL : _filesUploaderURL.TrimEnd('/') + "/ChunkedUploader.ashx";
+        return _filesUploaderUrl.EndsWith(".ashx") ? _filesUploaderUrl : _filesUploaderUrl.TrimEnd('/') + "/ChunkedUploader.ashx";
     }
 
     private string GetUrlSetting(string key, out bool isDefault)

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,7 +113,9 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
             return PathPrefix;
         }
 
-        return $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}";
+        return path.StartsWith('/') 
+            ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" 
+            : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(WebDavEntry folder)
@@ -155,7 +157,7 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
-        SetFolderType(folder, isRoot);
+        ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
 
         return folder;
@@ -199,6 +201,11 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
     public async Task<Folder<string>> GetRootFolderAsync()
     {
         return ToFolder(await GetFolderAsync(string.Empty));
+    }
+
+    public async Task<WebDavEntry> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<WebDavEntry> GetFolderAsync(string folderId)

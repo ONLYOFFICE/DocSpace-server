@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage, inDto.Quota);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -106,9 +106,9 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("thirdparty/{id}")]
-    public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateRoomRequestDto inDto)
+    public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -181,9 +181,11 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("roomquota")]
-    public async IAsyncEnumerable<FolderDto<T>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        foreach (var roomId in inDto.RoomIds)
+        var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+
+        foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
 
@@ -203,9 +205,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("resetquota")]
-    public async IAsyncEnumerable<FolderDto<T>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        foreach (var roomId in inDto.RoomIds)
+        var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+        foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
 
@@ -229,7 +232,7 @@ public abstract class VirtualRoomsController<T>(
     {
         await fileOperationsManager.PublishDelete(new List<T> { id }, new List<T>(), false, !inDto.DeleteAfter, true);
         
-        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -250,7 +253,7 @@ public abstract class VirtualRoomsController<T>(
         
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
         
-        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -270,7 +273,7 @@ public abstract class VirtualRoomsController<T>(
         var movableRoom = JsonSerializer.SerializeToElement(id);
         
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
-        return await fileOperationDtoHelper.GetAsync(fileOperationsManager.GetOperationResults().FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -359,7 +362,7 @@ public abstract class VirtualRoomsController<T>(
             _ => throw new InvalidOperationException()
         };
 
-        return await fileShareDtoHelper.Get(linkAce);
+        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 
     /// <summary>
@@ -570,6 +573,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         DocumentBuilderTaskManager documentBuilderTaskManager,
         TenantManager tenantManager,
         IEventBus eventBus,
+        UserManager userManager,
         IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -696,6 +700,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(IFormCollection formCollection)
     {
+        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        if (currentUserType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         var result = new UploadResultDto();
 
         try
@@ -818,7 +829,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         task.Init(baseUri, tenantId, userId, null, null, null);
 
-        var taskProgress = documentBuilderTaskManager.StartTask(task, false);
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri);
 
@@ -833,7 +844,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = documentBuilderTaskManager.GetTask(tenantId, userId);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, userId);
 
         return DocumentBuilderTaskDto.Get(task);
     }

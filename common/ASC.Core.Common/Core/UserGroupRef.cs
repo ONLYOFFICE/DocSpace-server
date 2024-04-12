@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,13 +29,25 @@ using Profile = AutoMapper.Profile;
 namespace ASC.Core;
 
 [DebuggerDisplay("{UserId} - {GroupId}")]
+[ProtoContract]
 public class UserGroupRef : IMapFrom<UserGroup>
 {
+    [ProtoMember(1)]
     public Guid UserId { get; set; }
+    
+    [ProtoMember(2)]
     public Guid GroupId { get; set; }
+    
+    [ProtoMember(3)]
     public bool Removed { get; set; }
+    
+    [ProtoMember(4)]
     public DateTime LastModified { get; set; }
+    
+    [ProtoMember(5)]
     public UserGroupRefType RefType { get; set; }
+    
+    [ProtoMember(6)]
     public int TenantId { get; set; }
 
     public UserGroupRef() { }

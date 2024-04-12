@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,8 @@
 namespace ASC.Web.Studio.Utility;
 
 [Scope]
-public class TenantExtra(TenantManager tenantManager,
+public class TenantExtra(
+    TenantManager tenantManager,
     ITariffService tariffService,
     CoreBaseSettings coreBaseSettings,
     LicenseReader licenseReader,
@@ -61,7 +62,7 @@ public class TenantExtra(TenantManager tenantManager,
         get => tenantExtraConfig.Opensource;
     }
 
-    public async Task<bool> EnterprisePaidAsync(bool withRequestToPaymentSystem = true)
+    private async Task<bool> EnterprisePaidAsync(bool withRequestToPaymentSystem = true)
     {
         return Enterprise && (await GetCurrentTariffAsync(withRequestToPaymentSystem)).State < TariffState.NotPaid;
     }
@@ -101,29 +102,6 @@ public class TenantExtra(TenantManager tenantManager,
         var tariff = await GetCurrentTariffAsync(withRequestToPaymentSystem);
         
         return tariff.State >= TariffState.NotPaid || Enterprise && !(await EnterprisePaidAsync(withRequestToPaymentSystem)) && tariff.LicenseDate == DateTime.MaxValue;
-    }
-
-    /// <summary>
-    /// Max possible file size for not chunked upload. Less or equal than 100 mb.
-    /// </summary>
-    public async Task<long> GetMaxUploadSizeAsync()
-    {
-        return Math.Min(setupInfo.AvailableFileSize, await GetMaxChunkedUploadSizeAsync());
-    }
-
-    /// <summary>
-    /// Max possible file size for chunked upload.
-    /// </summary>
-    public async Task<long> GetMaxChunkedUploadSizeAsync()
-    {
-        var diskQuota = await tenantManager.GetCurrentTenantQuotaAsync();
-        if (diskQuota != null)
-        {
-            var usedSize = await maxTotalSizeStatistic.GetValueAsync();
-            var freeSize = Math.Max(diskQuota.MaxTotalSize - usedSize, 0);
-            return Math.Min(freeSize, diskQuota.MaxFileSize);
-        }
-        return setupInfo.ChunkUploadSize;
     }
 
     public async Task DemandAccessSpacePermissionAsync()

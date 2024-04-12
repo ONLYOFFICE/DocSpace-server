@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,11 +59,17 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 [Scope]
 public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsManager settingsManager)
 {
-    public bool IsVisibleSettings { get; internal set; } = !(configuration["web:hide-settings"] ?? string.Empty)
-        .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-        .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
-
-
+    private bool? _isVisibleSettings;
+    private bool IsVisibleSettings
+    {
+        get
+        {
+            return _isVisibleSettings ??= !(configuration["web:hide-settings"] ?? string.Empty)
+                .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
+        }
+    }
+    
     public async Task<TenantCookieSettings> GetForTenantAsync(int tenantId)
     {
         return IsVisibleSettings

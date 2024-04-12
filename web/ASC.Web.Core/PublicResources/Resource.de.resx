@@ -766,9 +766,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Besitzer</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Der verfügbare Speicherplatz ist überschritten</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Zugang zum Portal</value>
   </data>
@@ -864,9 +861,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} Speicherplatz</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Die verwendete Speichergröße sollte {0} nicht überschreiten</value>

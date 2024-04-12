@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class MessageTarget()
             res.Add(value.ToString());
         }
 
-        return new MessageTarget()
+        return new MessageTarget
         {
             _items = res
         };
@@ -47,7 +47,7 @@ public class MessageTarget()
 
     public MessageTarget  Create<T>(IEnumerable<T> value)
     {
-        var res = new MessageTarget()
+        var res = new MessageTarget
         {
             _items = new List<string>()
         };
@@ -74,7 +74,7 @@ public class MessageTarget()
             return null;
         }
 
-        return new MessageTarget()
+        return new MessageTarget
         {
             _items = items
         };

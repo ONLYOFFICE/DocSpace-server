@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,9 @@ global using System.Security;
 global using System.ServiceModel.Security;
 global using System.Text;
 global using System.Text.Json;
+global using ASC.Api.Core.Core;
+global using ASC.Core.Common.Notify.Engine;
+global using ASC.Migration.Core.Core;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
@@ -71,7 +74,6 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
-global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
@@ -108,6 +110,8 @@ global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
+global using ASC.Migration.Core.Models.Api;
+global using ASC.Migration.Core.Resources;
 global using ASC.Notify.Cron;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api;
@@ -121,6 +125,7 @@ global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
 global using ASC.Web.Core.Notify;
@@ -141,7 +146,6 @@ global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Core.SMS;
 global using ASC.Web.Studio.Core.Statistic;
 global using ASC.Web.Studio.Core.TFA;
-global using ASC.Web.Studio.UserControls.CustomNavigation;
 global using ASC.Web.Studio.UserControls.FirstTime;
 global using ASC.Web.Studio.UserControls.Management;
 global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;

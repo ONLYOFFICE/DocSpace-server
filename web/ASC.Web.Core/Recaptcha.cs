@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,8 +56,7 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 
             var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
-            using var reader = new StreamReader(await httpClientResponse.Content.ReadAsStreamAsync());
-            var resp = await reader.ReadToEndAsync();
+            var resp = await httpClientResponse.Content.ReadAsStringAsync();
             var resObj = JObject.Parse(resp);
 
             if (resObj["success"] != null && resObj.Value<bool>("success"))

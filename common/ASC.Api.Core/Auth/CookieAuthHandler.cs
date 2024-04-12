@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,34 +29,20 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class CookieAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder)
+public class CookieAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    SecurityContext securityContext,
+    CookiesManager cookiesManager,
+    IHttpContextAccessor httpContextAccessor)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    private readonly SecurityContext _securityContext;
-    private readonly CookiesManager _cookiesManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public CookieAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        SecurityContext securityContext,
-        CookiesManager cookiesManager,
-        IHttpContextAccessor httpContextAccessor)
-        : this(options, logger, encoder)
-    {
-        _securityContext = securityContext;
-        _cookiesManager = cookiesManager;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
         {
-            var authorization = _httpContextAccessor.HttpContext.Request.Cookies[_cookiesManager.GetAscCookiesName()] ?? _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString();
+            var authorization = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetAscCookiesName()] ?? httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {
@@ -70,7 +56,7 @@ public class CookieAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> opti
                 authorization = authorization["Bearer ".Length..];
             }
 
-            if (!(await _securityContext.AuthenticateMe(authorization)))
+            if (!(await securityContext.AuthenticateMe(authorization)))
             {
                 throw new AuthenticationException(nameof(HttpStatusCode.Unauthorized));
             }
@@ -82,11 +68,11 @@ public class CookieAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> opti
         }
         finally
         {
-            if (!_securityContext.IsAuthenticated)
+            if (!securityContext.IsAuthenticated)
             {
-                _securityContext.Logout();
-                _cookiesManager.ClearCookies(CookiesType.AuthKey);
-                _cookiesManager.ClearCookies(CookiesType.SocketIO);
+                securityContext.Logout();
+                cookiesManager.ClearCookies(CookiesType.AuthKey);
+                cookiesManager.ClearCookies(CookiesType.SocketIO);
             }
         }
 

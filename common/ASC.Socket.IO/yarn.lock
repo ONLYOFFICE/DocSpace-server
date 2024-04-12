@@ -1104,6 +1104,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@socket.io/redis-adapter@npm:^8.2.1":
+  version: 8.2.1
+  resolution: "@socket.io/redis-adapter@npm:8.2.1"
+  dependencies:
+    debug: "npm:~4.3.1"
+    notepack.io: "npm:~3.0.1"
+    uid2: "npm:1.0.0"
+  peerDependencies:
+    socket.io-adapter: ^2.4.0
+  checksum: 10/a254c5ff46841cc7a587ea23d1e6fb3281de4e2a04c5b285421ec7df87ca68eacb47dd607abbff999e5b8261291e1644f4602251f36748eff48657e6c22f5f5e
+  languageName: node
+  linkType: hard
+
 "@types/cookie@npm:^0.4.1":
   version: 0.4.1
   resolution: "@types/cookie@npm:0.4.1"
@@ -1231,6 +1244,7 @@ __metadata:
   resolution: "asc.socket.io@workspace:."
   dependencies:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
+    "@socket.io/redis-adapter": "npm:^8.2.1"
     axios: "npm:0.24.0"
     connect-redis: "npm:~6.0.0"
     cookie-parser: "npm:~1.4.6"
@@ -2662,6 +2676,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"notepack.io@npm:~3.0.1":
+  version: 3.0.1
+  resolution: "notepack.io@npm:3.0.1"
+  checksum: 10/8c96fc32ea742d28df54f5d3b08b4ad18c513e972c586f02371870dd017e4e0c860df9536f4370cd992c3ef7760f0a1e9a6be68a57f3fefed67f9faa5ec37d4b
+  languageName: node
+  linkType: hard
+
 "object-assign@npm:^4":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -3288,6 +3309,13 @@ __metadata:
   dependencies:
     random-bytes: "npm:~1.0.0"
   checksum: 10/07536043da9a026f4a2bc397543d0ace7587449afa1d9d2c4fd3ce76af8a5263a678788bcc429dff499ef29d45843cd5ee9d05434450fcfc19cc661229f703d1
+  languageName: node
+  linkType: hard
+
+"uid2@npm:1.0.0":
+  version: 1.0.0
+  resolution: "uid2@npm:1.0.0"
+  checksum: 10/7efad0da3839ef2bebc6fae4bd29905702cd64233b3907e3300aa2d7ea1a00c1ae8c41a5e16ca34ac2db2d25c5607d5989673e1df51a2a076fefbeed51605ec3
   languageName: node
   linkType: hard
 
