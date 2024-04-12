@@ -60,7 +60,7 @@ public class StudioNotifyService(UserManager userManager,
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-        
+
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
     }
 
@@ -228,19 +228,30 @@ public class StudioNotifyService(UserManager userManager,
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
     {
-        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType)
-                    + string.Format("&emplType={0}", (int)emplType);
+        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType) + $"&emplType={(int)emplType}";
 
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.InviteLink, inviteUrl),
+            TagValues.OrangeButton(orangeButtonText, inviteUrl)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+
+        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
+        
         await studioNotifyServiceHelper.SendNoticeToAsync(
-                Actions.JoinUsers,
-                   await studioNotifyHelper.RecipientFromEmailAsync(email, true),
-                   [EMailSenderName],
-                new TagValue(Tags.InviteLink, inviteUrl),
-                TagValues.OrangeButton(orangeButtonText, inviteUrl));
+            Actions.JoinUsers,
+            await studioNotifyHelper.RecipientFromEmailAsync(email, true),
+            [EMailSenderName],
+            tags.ToArray());
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)
