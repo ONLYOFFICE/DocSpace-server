@@ -26,12 +26,11 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-[Singleton]
-public class MessageTarget()
+public class MessageTarget
 {
     private IEnumerable<string> _items;
 
-    public MessageTarget Create<T>(T value)
+    public static MessageTarget Create<T>(T value)
     {
         var res = new List<string>(1);
         if (value != null)
@@ -45,7 +44,7 @@ public class MessageTarget()
         };
     }
 
-    public MessageTarget  Create<T>(IEnumerable<T> value)
+    public static MessageTarget  Create<T>(IEnumerable<T> value)
     {
         var res = new MessageTarget
         {
@@ -60,7 +59,7 @@ public class MessageTarget()
         return res;
     }
 
-    public MessageTarget Parse(string value)
+    public static MessageTarget Parse(string value)
     {
         if (string.IsNullOrEmpty(value))
         {

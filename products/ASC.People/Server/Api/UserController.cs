@@ -45,7 +45,6 @@ public class UserController(ICache cache,
         WebItemSecurity webItemSecurity,
         WebItemSecurityCache webItemSecurityCache,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
@@ -272,11 +271,11 @@ public class UserController(ICache cache,
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
-            await messageService.SendAsync(MessageAction.GuestCreated, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageAction.GuestCreated, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserCreated, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
+            await messageService.SendAsync(MessageAction.UserCreated, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -436,7 +435,7 @@ public class UserController(ICache cache,
         var tenant = await tenantManager.GetCurrentTenantAsync();
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
-        await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
+        await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -480,7 +479,7 @@ public class UserController(ICache cache,
 
         await _userManager.UpdateUserInfoAsync(user);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
-        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, messageTarget.Create(user.Id), userName);
+        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, MessageTarget.Create(user.Id), userName);
 
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
@@ -824,7 +823,7 @@ public class UserController(ICache cache,
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
-        await messageService.SendAsync(MessageAction.UsersDeleted, messageTarget.Create(users.Select(x => x.Id)), userNames);
+        await messageService.SendAsync(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);
 
         foreach (var user in users)
         {
@@ -924,7 +923,7 @@ public class UserController(ICache cache,
             }
         }
 
-        await messageService.SendAsync(MessageAction.UsersSentActivationInstructions, messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        await messageService.SendAsync(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
         {
@@ -1212,7 +1211,7 @@ public class UserController(ICache cache,
                 throw;
             }
 
-            await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         }
 
@@ -1363,7 +1362,7 @@ public class UserController(ICache cache,
         {
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-            await messageService.SendAsync(MessageAction.UserUpdated, messageTarget.Create(user.Id),
+            await messageService.SendAsync(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
 
             if (statusChanged && inDto.Disable.HasValue && inDto.Disable.Value)
@@ -1451,7 +1450,7 @@ public class UserController(ICache cache,
             }
         }
 
-        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
         {
@@ -1488,7 +1487,7 @@ public class UserController(ICache cache,
             await userManagerWrapper.UpdateUserTypeAsync(user, type);
         }
 
-        await messageService.SendAsync(MessageAction.UsersUpdatedType, messageTarget.Create(users.Select(x => x.Id)),
+        await messageService.SendAsync(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),
         users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
 
         foreach (var user in users)

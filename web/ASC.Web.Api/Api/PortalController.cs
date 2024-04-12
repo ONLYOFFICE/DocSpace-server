@@ -37,38 +37,38 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class PortalController(ILogger<PortalController> logger,
-        UserManager userManager,
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        CommonLinkUtility commonLinkUtility,
-        IUrlShortener urlShortener,
-        AuthContext authContext,
-        SecurityContext securityContext,
-        SettingsManager settingsManager,
-        IMobileAppInstallRegistrator mobileAppInstallRegistrator,
-        TenantExtra tenantExtra,
-        IConfiguration configuration,
-        CoreBaseSettings coreBaseSettings,
-        LicenseReader licenseReader,
-        SetupInfo setupInfo,
-        DocumentServiceLicense documentServiceLicense,
-        IHttpClientFactory clientFactory,
-        ApiSystemHelper apiSystemHelper,
-        CoreSettings coreSettings,
-        PermissionContext permissionContext,
-        StudioNotifyService studioNotifyService,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor,
-        QuotaHelper quotaHelper,
-        IEventBus eventBus,
-        CspSettingsHelper cspSettingsHelper)
+public class PortalController(
+    ILogger<PortalController> logger,
+    UserManager userManager,
+    TenantManager tenantManager,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    IUrlShortener urlShortener,
+    AuthContext authContext,
+    SecurityContext securityContext,
+    SettingsManager settingsManager,
+    IMobileAppInstallRegistrator mobileAppInstallRegistrator,
+    TenantExtra tenantExtra,
+    IConfiguration configuration,
+    CoreBaseSettings coreBaseSettings,
+    LicenseReader licenseReader,
+    SetupInfo setupInfo,
+    DocumentServiceLicense documentServiceLicense,
+    IHttpClientFactory clientFactory,
+    ApiSystemHelper apiSystemHelper,
+    CoreSettings coreSettings,
+    PermissionContext permissionContext,
+    StudioNotifyService studioNotifyService,
+    MessageService messageService,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor,
+    QuotaHelper quotaHelper,
+    IEventBus eventBus,
+    CspSettingsHelper cspSettingsHelper)
     : ControllerBase
 {
     /// <summary>
@@ -463,7 +463,7 @@ public class PortalController(ILogger<PortalController> logger,
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
 
-            await messageService.SendAsync(MessageAction.PortalRenamed, messageTarget.Create(tenant.Id), oldAlias, newAlias);
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -554,7 +554,7 @@ public class PortalController(ILogger<PortalController> logger,
 
         await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
 
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
