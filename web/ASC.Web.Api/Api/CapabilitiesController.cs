@@ -53,6 +53,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<returns type="ASC.Web.Api.ApiModel.ResponseDto.CapabilitiesDto, ASC.Web.Api">Portal capabilities</returns>
     ///<path>api/2.0/capabilities</path>
     ///<httpMethod>GET</httpMethod>
+    ///<requiresAuthorization>false</requiresAuthorization>
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()

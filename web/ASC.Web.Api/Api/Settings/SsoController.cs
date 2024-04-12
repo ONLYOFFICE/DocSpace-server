@@ -50,6 +50,7 @@ public class SsoController(TenantManager tenantManager,
     /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">SSO settings</returns>
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()

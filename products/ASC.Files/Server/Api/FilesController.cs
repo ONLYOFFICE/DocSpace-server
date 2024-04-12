@@ -260,6 +260,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
     public async Task<FileDto<T>> GetFileInfoAsync(T fileId, int version = -1)
@@ -278,6 +279,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(T fileId)
@@ -368,6 +370,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <httpMethod>PUT</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFileAsync(T fileId, UpdateFileRequestDto inDto)
@@ -557,6 +560,7 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/thumbnails</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)
