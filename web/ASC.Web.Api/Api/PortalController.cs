@@ -697,6 +697,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns></returns>
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)
