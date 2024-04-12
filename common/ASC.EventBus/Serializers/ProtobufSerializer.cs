@@ -66,7 +66,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
     {
         if (item == null)
         {
-            return Array.Empty<byte>();
+            return [];
         }
 
         using var ms = new MemoryStream();

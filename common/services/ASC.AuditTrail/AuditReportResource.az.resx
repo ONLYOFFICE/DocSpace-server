@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Xarici keçid quraşdırıldı: {0}. Rol: {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fayl Dəyişiklik üçün Açıldı: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portalın adı dəyişdirildi</value>
+  </data>
 </root>

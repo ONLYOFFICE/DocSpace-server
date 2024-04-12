@@ -156,4 +156,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Սենյակներ</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Ընթացքի մեջ</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Պատրաստ</value>
+  </data>
 </root>

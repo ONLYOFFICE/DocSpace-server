@@ -792,4 +792,10 @@
   <data name="CountryCol" xml:space="preserve">
     <value>الدولة</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>الملف مفتوح للتغيير: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>تمت إعادة تسمية البوابة</value>
+  </data>
 </root>

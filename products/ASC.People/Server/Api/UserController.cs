@@ -1684,7 +1684,7 @@ public class UserController(ICache cache,
         
         foreach (var userId in userIds)
         {
-            var reassignStatus = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
+            var reassignStatus = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
             if (reassignStatus == null || reassignStatus.IsCompleted)
             {
                 continue;

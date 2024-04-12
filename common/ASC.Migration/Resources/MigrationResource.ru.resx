@@ -150,4 +150,25 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Парсинг базы данных</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Миграция общих документов</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Ошибка при инициализации средства миграции {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Нет такого провайдера миграции</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Миграция не выполняется</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Миграция документов из проектов</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Парсинг еще продолжается</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Миграция уже выполняется</value>
+  </data>
 </root>

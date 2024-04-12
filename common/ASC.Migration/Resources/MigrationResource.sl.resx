@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Migracija uporabnika {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Skupne datoteke za migracijo</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Napaka pri inicializaciji migracijskega programa {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Ni takega ponudnika migracije</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Migracija ne poteka</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migracija projektnih datotek</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Razčlenjevanje je še v teku</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migracija je že v teku</value>
+  </data>
 </root>
