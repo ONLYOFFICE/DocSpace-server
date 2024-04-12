@@ -203,8 +203,6 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         TenantExtra tenantExtra,
         WebItemManager webItemManager,
         TenantLogoManager tenantLogoManager,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         TenantUtil tenantUtil,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
@@ -239,24 +237,27 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             logoText = await tenantLogoManager.GetLogoTextAsync();
         }
 
-        request.Arguments.Add(new TagValue(CommonTags.AuthorID, aid));
-        request.Arguments.Add(new TagValue(CommonTags.AuthorName, aname));
-        request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))));
-        request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
-        request.Arguments.Add(new TagValue(CommonTags.ProductID, product?.ID ?? Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.DateTime, tenantUtil.DateTimeNow()));
-        request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
-        request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())));
-        request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetUnsubscribe())));
-        request.Arguments.Add(new TagValue(CommonTags.HelpLink, await commonLinkUtility.GetHelpLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper, false)));
-        request.Arguments.Add(new TagValue(CommonTags.SalesEmail, commonLinkUtility.GetSalesEmail(additionalWhiteLabelSettingsHelper)));
-        request.Arguments.Add(new TagValue(CommonTags.SiteLink, commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper)));
-        request.Arguments.Add(new TagValue(CommonTags.SupportLink, await commonLinkUtility.GetSupportLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper, false)));
-        request.Arguments.Add(new TagValue(CommonTags.SupportEmail, commonLinkUtility.GetSupportEmail(mailWhiteLabelSettingsHelper)));
-        request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, logoText));
-        request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(settingsManager)));
-        request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));
-        request.Arguments.Add(new TagValue(CommonTags.ImagePath, studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/')));
+        request.Arguments.AddRange(new List<TagValue>
+        {
+            new(CommonTags.AuthorID, aid),
+            new(CommonTags.AuthorName, aname),
+            new(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))),
+            new(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            new(CommonTags.ProductID, product?.ID ?? Guid.Empty),
+            new(CommonTags.DateTime, tenantUtil.DateTimeNow()),
+            new(CommonTags.RecipientID, Context.SysRecipient),
+            new(CommonTags.ProfileUrl, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
+            new(CommonTags.RecipientSubscriptionConfigURL, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetUnsubscribe())),
+            new(CommonTags.HelpLink, await commonLinkUtility.GetHelpLinkAsync(settingsManager, false)),
+            new(CommonTags.SalesEmail, commonLinkUtility.GetSalesEmail()),
+            new(CommonTags.SiteLink, commonLinkUtility.GetSiteLink()),
+            new(CommonTags.SupportLink, await commonLinkUtility.GetSupportLinkAsync(settingsManager, false)),
+            new(CommonTags.SupportEmail, commonLinkUtility.GetSupportEmail()),
+            new(CommonTags.LetterLogoText, logoText),
+            new(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(settingsManager)),
+            new(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name),
+            new(CommonTags.ImagePath, studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/'))
+        });
 
         var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
         if (topGifTag == null || string.IsNullOrEmpty((string)topGifTag.Value))
