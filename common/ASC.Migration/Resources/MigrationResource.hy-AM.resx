@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Օգտվողների միգրացիա {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Ընդհանուր ֆայլերի միգրացիա</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Սխալ {0} միգրատորը սկզբնավորելիս</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Նման միգրացիոն մատակարար չկա</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Ոչ մի միգրացիա չի ընթանում</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Միգրացիոն նախագծի ֆայլեր</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Վերլուծությունը դեռ ընթացքի մեջ է</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Միգրացիան արդեն ընթացքի մեջ է</value>
+  </data>
 </root>

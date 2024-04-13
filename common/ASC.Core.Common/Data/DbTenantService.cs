@@ -81,9 +81,9 @@ public class DbTenantService(
     {
         ArgumentException.ThrowIfNullOrEmpty(login);
 
-        await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
+        //await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();//TODO: remove
-        IQueryable<TenantUserSecurity> Query() => tenantDbContext.Tenants
+        IQueryable<TenantUserSecurity> Query() => userDbContext.Tenants
                 
                 .Where(r => r.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new

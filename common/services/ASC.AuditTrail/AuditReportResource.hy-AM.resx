@@ -792,4 +792,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Արտաքին հղումը թարմացվել է՝ {0}:Դերը՝ {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Փոփոխության համար բացված ֆայլ՝ {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Պորտալը վերանվանվել է</value>
+  </data>
 </root>

@@ -116,8 +116,8 @@ public class ConnectionsController(UserManager userManager,
                 Page = q.Page,
                 TenantId = q.TenantId,
                 Platform = q.Platform,
-                UserId = q.UserId,
-                
+                UserId = q.UserId
+
             }).ToList()
         };
     }

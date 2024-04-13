@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF;
 
 public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : DbContext(dbContextOptions)
 {
+    public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserSecurity> UserSecurity { get; set; }
     public DbSet<UserPhoto> Photos { get; set; }

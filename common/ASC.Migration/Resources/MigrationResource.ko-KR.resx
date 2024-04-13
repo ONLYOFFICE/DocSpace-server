@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>사용자 마이그레이션 {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>마이그레이션 공통 파일</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>{0} 마이그레이션 프로그램을 초기화하는 중 오류가 발생했습니다</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>해당 마이그레이션 제공자가 존재하지 않습니다</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>진행 중인 마이그레이션이 없습니다</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>마이그레이션 프로젝트 파일</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>파싱이 아직 진행 중입니다</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>마이그레이션이 이미 진행 중입니다</value>
+  </data>
 </root>

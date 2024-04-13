@@ -49,7 +49,7 @@ public class WorkspaceMigrator : Migrator
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
     {
-        MigrationInfo = new MigrationInfo() { Name = "Workspace" };
+        MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
@@ -140,19 +140,19 @@ public class WorkspaceMigrator : Migrator
         var progressStep = 50 / data.Rows.Count;
         foreach (var row in data.Rows.Cast<DataRow>())
         {
-            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "true")
+            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "True")
             {
                 continue;
             }
             var key = row["id"].ToString();
             var u = new MigrationUser(DisplayUserSettingsHelper)
             {
-                Info = new UserInfo()
+                Info = new UserInfo
                 {
                     UserName = row["email"].ToString().Split('@').First(),
                     FirstName = row["firstname"].ToString(),
                     LastName = row["lastname"].ToString(),
-                    Email = row["email"].ToString(),
+                    Email = row["email"].ToString()
                 }
             };
 
@@ -227,15 +227,30 @@ public class WorkspaceMigrator : Migrator
         var projectTitle = new Dictionary<string, string>();
         if (storage.Type == FolderType.BUNCH)
         {
+            var projectProjects = new Dictionary<string, string>();
             using var streamProject = _dataReader.GetEntry("databases/projects/projects_projects");
             var dataProject = new DataTable();
             dataProject.ReadXml(streamProject);
             foreach (var row in dataProject.Rows.Cast<DataRow>())
             {
-                projectTitle.Add(row["id"].ToString(), row["title"].ToString());
+                projectProjects.Add(row["id"].ToString(), row["title"].ToString());
             }
             storage.RootKey = "0";
             folderTree.Add("0", -1);
+
+
+            using var streamBunch = _dataReader.GetEntry("databases/files/files_bunch_objects");
+
+            dataProject = new DataTable();
+            dataProject.ReadXml(streamBunch);
+            foreach (var row in dataProject.Rows.Cast<DataRow>())
+            {
+                if (row["right_node"].ToString().StartsWith("projects/project/"))
+                {
+                    var split = row["right_node"].ToString().Split('/');
+                    projectTitle.Add(row["left_node"].ToString(), projectProjects[split.Last()]);
+                }
+            }
         }
         else
         {
@@ -247,15 +262,15 @@ public class WorkspaceMigrator : Migrator
             if (folderTree.ContainsKey(row["id"].ToString()) && row["id"].ToString() != storage.RootKey)
             {
                 var title = row["title"].ToString();
+                var id = row["id"].ToString();
                 if (storage.Type == FolderType.BUNCH)
                 {
                     if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
                     {
                         var split = row["title"].ToString().Split('_');
-                        title = projectTitle[split.Last()];
+                        title = projectTitle[id];
                     }
                 }
-                var id = row["id"].ToString();
                 var folder = new MigrationFolder
                 {
                     Id = int.Parse(id),
@@ -274,13 +289,14 @@ public class WorkspaceMigrator : Migrator
         {
             if (folderTree.ContainsKey(row["folder_id"].ToString()))
             {
-                var file = new MigrationFile()
+                var file = new MigrationFile
                 {
                     Id = int.Parse(row["id"].ToString()),
                     Folder = int.Parse(row["folder_id"].ToString()),
                     Title = row["title"].ToString(),
                     Version = int.Parse(row["version"].ToString()),
-                    VersionGroup = int.Parse(row["version_group"].ToString())
+                    VersionGroup = int.Parse(row["version_group"].ToString()),
+                    Comment = row["comment"].ToString()
                 };
                 file.Path = Path.Combine(_dataReader.GetFolder(),$"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
@@ -305,7 +321,7 @@ public class WorkspaceMigrator : Migrator
             var id = int.Parse(row["entry_id"].ToString());
             if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
             {
-                var security = new MigrationSecurity()
+                var security = new MigrationSecurity
                 {
                     Subject = row["subject"].ToString(),
                     EntryId = id,
@@ -346,17 +362,18 @@ public class WorkspaceMigrator : Migrator
 
         foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
         {
-            if (int.Parse(row["removed"].ToString()) == 0)
+            if (row["removed"].ToString() == "1" || row["removed"].ToString() == "True")
             {
-                var groupId = row["groupid"].ToString();
-                if (MigrationInfo.Groups.ContainsKey(groupId))
+                continue;
+            }
+            var groupId = row["groupid"].ToString();
+            if (MigrationInfo.Groups.ContainsKey(groupId))
+            {
+                var g = MigrationInfo.Groups[groupId];
+                g.UserKeys.Add(row["userid"].ToString());
+                if (string.Equals(row["ref_type"].ToString(), "1"))
                 {
-                    var g = MigrationInfo.Groups[groupId];
-                    g.UserKeys.Add(row["userid"].ToString());
-                    if (string.Equals(row["ref_type"].ToString(), "1"))
-                    {
-                        g.ManagerKey = row["userid"].ToString();
-                    }
+                    g.ManagerKey = row["userid"].ToString();
                 }
             }
         }

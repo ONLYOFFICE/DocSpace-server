@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Перенесення користувача {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Загальні файли перенесення</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Помилка під час ініціалізації засобу перенесення {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Немає такого постачальника перенесення</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Жодне перенесення не виконується</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Файли проєкту перенесення</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Аналіз ще виконується</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Перенесення вже виконується</value>
+  </data>
 </root>

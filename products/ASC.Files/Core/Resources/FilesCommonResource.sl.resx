@@ -422,4 +422,46 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Prevečkrat ste poskušali vnesti geslo. Prosimo, poskusite kasneje</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Mapa</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Avtor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Podjetje</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Ustvarjeno</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Datum generiranja</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Avtor izvoza</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Indeks</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Spremenjeno</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Ime</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Soba</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Indeks sobe</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Velikost (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Skupaj</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
 </root>

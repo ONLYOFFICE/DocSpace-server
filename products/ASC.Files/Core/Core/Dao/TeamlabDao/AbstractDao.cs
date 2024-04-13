@@ -193,7 +193,7 @@ public class AbstractDao
             SearchType.Start => query.Where(r => r.Entry.Title.ToLower().StartsWith(lowerText)),
             SearchType.End => query.Where(r => r.Entry.Title.ToLower().EndsWith(lowerText)),
             SearchType.Any => query.Where(r => r.Entry.Title.ToLower().Contains(lowerText)),
-            _ => query,
+            _ => query
         };
     }
     internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, IEnumerable<string> text, SearchType searchType) 

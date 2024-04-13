@@ -88,7 +88,7 @@ public class ChunkedUploadSessionHolder(
 
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath)
     {
-        await MoveAsync<T>(chunkedUploadSession, newPath, Guid.Empty);
+        await MoveAsync(chunkedUploadSession, newPath, Guid.Empty);
     }
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath, Guid ownerId)
     {

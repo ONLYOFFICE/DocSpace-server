@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Migration de l'utilisateur {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migration fichiers communs</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Erreur lors de l'initialisation de la migration {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Aucun fournisseur de services de migration</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Aucune migration en cours d'exécution</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migration fichiers de projets</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Analyse est encore en cours d'exécution</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migration est déjà en cours d'exécution</value>
+  </data>
 </root>

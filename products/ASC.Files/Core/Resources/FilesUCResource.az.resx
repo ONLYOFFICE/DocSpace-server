@@ -97,4 +97,10 @@
   <data name="Personal" xml:space="preserve">
     <value>Şəxsi</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Prosesdədir</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Hazırdır</value>
+  </data>
 </root>

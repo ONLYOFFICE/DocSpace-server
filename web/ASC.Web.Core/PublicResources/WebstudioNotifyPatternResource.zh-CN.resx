@@ -292,7 +292,7 @@ $TrulyYours
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"门户停用
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户停用
 
 亲爱的$OwnerName,
 
@@ -303,14 +303,14 @@ $OrangeButton
 *注意*：此链接仅7天有效。请在此期限内完成门户停用流程。
 
 您可以随时点击以下链接重新激活门户：
-p=. "重新激活门户":"$ActivateUrl"（此链接无时间限制）
+p=. "重新激活门户":"$ActivateUrl" （此链接无时间限制）
 
 如果您有任何问题或需要帮助，请随时联系"${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}"门户
+    <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}" 门户
 
 亲爱的$OwnerName,
 
@@ -1045,7 +1045,7 @@ $TrulyYours</value>
 
 您好！
 
-您受邀加入在"${__VirtualRootPath}":"${__VirtualRootPath}"的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
+您受邀加入在"${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
 $OrangeButton
 
@@ -1696,5 +1696,24 @@ $OrangeButton
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. 致 &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; 协作空间！
+ 
+ 
+尊敬的 $UserName，您好！
+ 
+您刚创建了 ONLYOFFICE 协作空间。您可以使用它作为文档管理中心，提升与团队、客户、合作伙伴等的协作。其地址是 "${__VirtualRootPath}":"${__VirtualRootPath}".
+ 
+您当前的资费方案是初创版。这个方案完全免费，包括：
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 名管理员/高级用户&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;最多 100 个房间&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB 储存空间&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
+*用新方式开启文档协作！*
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>欢迎使用 ONLYOFFICE 协作空间！</value>
   </data>
 </root>

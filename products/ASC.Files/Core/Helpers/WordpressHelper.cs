@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFactory, OAuth20TokenHelper oAuth20TokenHelper)
+public class WordpressToken(TokenHelper tokenHelper, OAuth20TokenHelper oAuth20TokenHelper)
 {
     public const string AppAttr = "wordpress";
 
@@ -45,7 +45,7 @@ public class WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFac
 
     public async Task<OAuth20Token> SaveTokenFromCodeAsync(string code)
     {
-        var token = oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(consumerFactory, code);
+        var token = oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(code);
         ArgumentNullException.ThrowIfNull(token);
 
         await tokenHelper.SaveTokenAsync(new Token(token, AppAttr));

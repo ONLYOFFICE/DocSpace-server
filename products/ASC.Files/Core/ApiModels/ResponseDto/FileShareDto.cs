@@ -126,7 +126,7 @@ public class FileShareDtoHelper(UserManager userManager,
                     IsExpired = expired,
                     Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink,
                     Internal = aceWrapper.FileShareOptions?.Internal,
-                    RequestToken = aceWrapper.RequestToken,
+                    RequestToken = aceWrapper.RequestToken
                 };
             }
             else
