@@ -156,8 +156,8 @@ public class WorkspaceMigrator : Migrator
                 }
             };
 
-            var drivePath = Directory.Exists(Path.Combine(TmpFolder, _dataReader.GetFolder(), "storage", "userPhotos")) ?
-            Path.Combine(TmpFolder, _dataReader.GetFolder(), "storage", "userPhotos") : null;
+            var drivePath = Directory.Exists(Path.Combine(TmpFolder, _dataReader.GetFolder(), "userPhotos")) ?
+            Path.Combine(TmpFolder, _dataReader.GetFolder(), "userPhotos") : null;
             if (drivePath == null)
             {
                 u.HasPhoto = false;
