@@ -69,6 +69,7 @@ global using ASC.MessagingSystem.Core;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files;

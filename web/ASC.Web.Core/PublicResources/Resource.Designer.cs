@@ -2536,6 +2536,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The password change instruction has been sent to {0} email address..
+        /// </summary>
+        public static string MessagePasswordSendedToEmail {
+            get {
+                return ResourceManager.GetString("MessagePasswordSendedToEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If a user with the {0} email exists, the password change instruction has been sent to this email address..
         /// </summary>
         public static string MessageYourPasswordSendedToEmail {

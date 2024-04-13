@@ -58,6 +58,7 @@ global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Caching.Settings;
+global using ASC.Common.Data;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
@@ -86,6 +87,7 @@ global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.ActiveMQ;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.EventBus.RabbitMQ;
+global using ASC.EventBus.Serializers;
 global using ASC.Feed.Context;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
@@ -102,6 +104,8 @@ global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
+
+global using Apache.NMS;
 
 global using Autofac;
 global using Autofac.Extensions.DependencyInjection;

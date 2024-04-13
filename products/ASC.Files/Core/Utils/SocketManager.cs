@@ -34,12 +34,12 @@ public class SocketManager(
     ITariffService tariffService,
     TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
-    MachinePseudoKeys machinePseudoKeys,
-    IConfiguration configuration,
-    FileDtoHelper filesWrapperHelper,
-    FolderDtoHelper folderDtoHelper,
-    FileSecurity fileSecurity,
-    UserManager userManager)
+        MachinePseudoKeys machinePseudoKeys,
+        IConfiguration configuration,
+        FileDtoHelper filesWrapperHelper,
+        FolderDtoHelper folderDtoHelper,
+        FileSecurity fileSecurity,
+        UserManager userManager)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -59,6 +59,11 @@ public class SocketManager(
     public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
         await MakeRequest("create-file", file, true, users);
+    }
+
+    public async Task CreateFormAsync<T>(File<T> file, Guid user, bool isOneMember)
+    {
+        await MakeCreateFormRequest("create-form", file, user, isOneMember);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
@@ -116,9 +121,22 @@ public class SocketManager(
         
         await MakeRequest("mark-as-new-folder", result);
     }
+    private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, Guid user, bool isOneMember)
+    {
+        var room = await FolderRoomAsync(entry.FolderIdDisplay);
+        var data = await Serialize(entry);
 
+        await base.MakeRequest(method, new
+        {
+            room,
+            entry.Id,
+            data,
+            user,
+            isOneMember
+        });
+    }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
-    {        
+    {
         var room = await FolderRoomAsync(entry.FolderIdDisplay);
         var whoCanRead = users ?? await WhoCanRead(entry);
 
@@ -126,19 +144,19 @@ public class SocketManager(
         {
             await action();
         }
-        
+
         var data = "";
 
         if (withData)
         {
             data = await Serialize(entry);
         }
-        
+
         foreach (var userIds in whoCanRead.Chunk(1000))
-        {             
+        {
             await base.MakeRequest(method, new
             {
-                room, 
+                room,
                 entry.Id,
                 data,
                 userIds
@@ -206,5 +224,5 @@ public class SocketManager(
         _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-    }
 }
+    }

@@ -1581,6 +1581,21 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
+    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var folderId = Convert.ToInt32(entry.ParentId);
+
+        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
+
+        if (parentFolders.Count > 1)
+        {
+            return parentFolders[1].FolderType;
+        }
+
+        return parentFolders[0].FolderType;
+    }
 
     public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
     {

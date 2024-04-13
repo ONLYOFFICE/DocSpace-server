@@ -24,27 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Apache.NMS;
-
-using ASC.Common.Data;
-using ASC.EventBus.Serializers;
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
         var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
-        var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
+        var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
         if (redisConfiguration != null)
         {
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
+            services.AddStackExchangeRedisExtensions<RedisProtobufSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
-        else if (rabbitMQConfiguration != null)
+        else if (rabbitMqConfiguration != null)
         {
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RabbitMQCache<>));
         }
@@ -112,7 +108,7 @@ public static class ServiceCollectionExtension
             });
         }
         
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
         {            
@@ -180,10 +176,10 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
-        var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
-        var activeMQConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
+        var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
+        var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
 
-        if (rabbitMQConfiguration != null)
+        if (rabbitMqConfiguration != null)
         {
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
             {
@@ -191,7 +187,7 @@ public static class ServiceCollectionExtension
 
                 var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
 
-                var connectionFactory = rabbitMQConfiguration.GetConnectionFactory();
+                var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
 
                 var retryCount = 5;
 
@@ -207,10 +203,10 @@ public static class ServiceCollectionExtension
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
 
-                var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
                 var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                 var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
-                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+                var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
                 var serializer = new ProtobufSerializer();
 
@@ -228,10 +224,10 @@ public static class ServiceCollectionExtension
                     retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                 }
 
-                return new EventBusRabbitMQ(rabbitMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, serializer, subscriptionClientName, retryCount);
+                return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
             });
         }
-        else if (activeMQConfiguration != null)
+        else if (activeMqConfiguration != null)
         {
             services.AddSingleton<IActiveMQPersistentConnection>(sp =>
             {
@@ -239,7 +235,7 @@ public static class ServiceCollectionExtension
 
                 var logger = sp.GetRequiredService<ILogger<DefaultActiveMQPersistentConnection>>();
 
-                var factory = new NMSConnectionFactory(activeMQConfiguration.Uri);
+                var factory = new NMSConnectionFactory(activeMqConfiguration.Uri);
 
                 var retryCount = 5;
 
@@ -255,10 +251,10 @@ public static class ServiceCollectionExtension
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
 
-                var activeMQPersistentConnection = sp.GetRequiredService<IActiveMQPersistentConnection>();
+                var activeMqPersistentConnection = sp.GetRequiredService<IActiveMQPersistentConnection>();
                 var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                 var logger = sp.GetRequiredService<ILogger<EventBusActiveMQ>>();
-                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+                var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
                 var serializer = new ProtobufSerializer();
 
@@ -276,7 +272,7 @@ public static class ServiceCollectionExtension
                     retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                 }
 
-                return new EventBusActiveMQ(activeMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, serializer, subscriptionClientName, retryCount);
+                return new EventBusActiveMQ(activeMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
             });
         }
         else
@@ -288,7 +284,7 @@ public static class ServiceCollectionExtension
     }
 
 
-    private static readonly List<string> _registeredActivePassiveHostedService = new();
+    private static readonly List<string> _registeredActivePassiveHostedService = [];
     private static readonly object _locker = new();
 
     /// <remarks>
@@ -305,12 +301,10 @@ public static class ServiceCollectionExtension
         {
             if (_registeredActivePassiveHostedService.Contains(typeName))
             {
-                throw new Exception($"Sevice with name '{typeName}' already registered. Please, rename service name");
+                throw new Exception($"Service with name '{typeName}' already registered. Please, rename service name");
             }
-            else
-            {
-                _registeredActivePassiveHostedService.Add(typeName);
-            }
+
+            _registeredActivePassiveHostedService.Add(typeName);
         }
 
         diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();

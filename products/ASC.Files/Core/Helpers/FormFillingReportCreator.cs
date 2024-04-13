@@ -31,6 +31,8 @@ public class FormFillingReportCreator
 {
     private readonly ExportToCSV _exportToCSV;
     private readonly SocketManager _socketManager;
+    private readonly UserManager _userManager;
+    private readonly SecurityContext _securityContext;
     private readonly IDaoFactory _daoFactory;
     private readonly IHttpClientFactory _clientFactory;
 
@@ -42,11 +44,15 @@ public class FormFillingReportCreator
     public FormFillingReportCreator(
         ExportToCSV exportToCSV,
         SocketManager socketManager,
+        UserManager userManager,
+        SecurityContext securityContext,
         IDaoFactory daoFactory,
         IHttpClientFactory clientFactory)
     {
         _exportToCSV = exportToCSV;
         _socketManager = socketManager;
+        _userManager = userManager;
+        _securityContext = securityContext;
         _daoFactory = daoFactory;
         _clientFactory = clientFactory;
     }
@@ -92,7 +98,21 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        return JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+
+        var name = new List<FormsItemData>()
+        {
+            new FormsItemData()
+            {
+                Key= FilesCommonResource.UnknownFirstName,
+                Value = $"{u.FirstName} {u.LastName}"
+            },
+        };
+
+        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        result.FormsData = name.Concat(result.FormsData);
+
+        return result;
     }
 
 }

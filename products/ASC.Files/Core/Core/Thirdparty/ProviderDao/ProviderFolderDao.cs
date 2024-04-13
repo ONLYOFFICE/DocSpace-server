@@ -608,7 +608,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-
+    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    {
+        throw new NotImplementedException();
+    }
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         var selector = _selectorFactory.GetSelector(entry.Id);

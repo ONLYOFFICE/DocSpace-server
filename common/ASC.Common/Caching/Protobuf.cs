@@ -44,6 +44,20 @@ public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
     }
 }
 
+
+public class RedisProtobufSerializer: ISerializer
+{
+    public byte[] Serialize<T>(T item)
+    {
+        return BaseProtobufSerializer.Serialize(item);
+    }
+
+    public T Deserialize<T>(byte[] serializedObject)
+    {
+        return BaseProtobufSerializer.Deserialize<T>(serializedObject);
+    }
+}
+
 public class BaseProtobufSerializer
 {
     public static byte[] Serialize<T>(T data)

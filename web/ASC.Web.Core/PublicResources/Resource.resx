@@ -1104,6 +1104,9 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Storage quotas &amp; statistic</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>The password change instruction has been sent to {0} email address.</value>
+  </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Invitation limit is exceeded</value>
   </data>

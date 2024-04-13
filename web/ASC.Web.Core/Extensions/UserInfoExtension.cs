@@ -42,4 +42,9 @@ public static class UserInfoExtension
     {
         return await UserPhotoManager.GetSmallPhotoURL(userInfo.Id);
     }
+
+    public static async Task<string> GetMediumPhotoURLAsync(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
+    {
+        return await UserPhotoManager.GetMediumPhotoURL(userInfo.Id);
+    }
 }
