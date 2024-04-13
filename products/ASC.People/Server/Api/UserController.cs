@@ -45,7 +45,7 @@ public class UserController(ICache cache,
         WebItemSecurity webItemSecurity,
         WebItemSecurityCache webItemSecurityCache,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserInvitationSettingsHelper userInvitationSettingsHelper,
+        UserInvitationLimitHelper userInvitationLimitHelper,
         MessageTarget messageTarget,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
@@ -198,7 +198,7 @@ public class UserController(ICache cache,
             }
             else
             {
-                await userInvitationSettingsHelper.IncreaseLimit();
+                await userInvitationLimitHelper.IncreaseLimit();
             }
         }
 

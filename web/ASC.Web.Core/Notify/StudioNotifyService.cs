@@ -39,7 +39,7 @@ public class StudioNotifyService(UserManager userManager,
         CommonLinkUtility commonLinkUtility,
         SetupInfo setupInfo,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserInvitationSettingsHelper userInvitationSettingsHelper,
+        UserInvitationLimitHelper userInvitationLimitHelper,
         SettingsManager settingsManager,
         MessageService messageService,
         MessageTarget messageTarget,
@@ -162,7 +162,7 @@ public class StudioNotifyService(UserManager userManager,
 
         if (limitation)
         {
-            await userInvitationSettingsHelper.ReduceLimit();
+            await userInvitationLimitHelper.ReduceLimit();
         }
     }
 
@@ -190,7 +190,7 @@ public class StudioNotifyService(UserManager userManager,
 
         if (limitation)
         {
-            await userInvitationSettingsHelper.ReduceLimit();
+            await userInvitationLimitHelper.ReduceLimit();
         }
     }
 

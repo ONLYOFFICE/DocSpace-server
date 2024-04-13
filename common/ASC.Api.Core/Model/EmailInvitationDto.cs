@@ -46,17 +46,17 @@ public class MaxEmailInvitationsAttribute : ValidationAttribute
     {
         if (value is IEnumerable<EmailInvitationDto> invitations)
         {
-            var cout = invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+            var count = invitations.Count(x => !string.IsNullOrEmpty(x.Email));
 
-            if (cout == 0)
+            if (count == 0)
             {
                 return ValidationResult.Success;
             }
 
-            var helper = (UserInvitationSettingsHelper)validationContext.GetService(typeof(UserInvitationSettingsHelper));
+            var helper = (UserInvitationLimitHelper)validationContext.GetService(typeof(UserInvitationLimitHelper));
             var limit = helper.GetLimit().Result;
 
-            if (cout > limit)
+            if (count > limit)
             {
                 return new ValidationResult(Resource.ErrorInvitationLimitExceeded);
             }
