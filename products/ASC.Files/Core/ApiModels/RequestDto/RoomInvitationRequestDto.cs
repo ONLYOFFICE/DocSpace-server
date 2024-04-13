@@ -32,7 +32,7 @@ public class RoomInvitationRequestDto
 {
     /// <summary>Collection of invitation parameters</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.RequestDto.RoomInvitation}, System.Collections.Generic</type>
-    [MaxInvitationsCount]
+    [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
     /// <summary>Notifies users about the shared room or not</summary>

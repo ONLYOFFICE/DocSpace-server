@@ -93,6 +93,7 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Engine;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api.Routing;
+global using ASC.Web.Api.Models;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.PublicResources;

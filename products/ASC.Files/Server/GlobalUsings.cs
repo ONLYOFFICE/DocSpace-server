@@ -32,6 +32,7 @@ global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;

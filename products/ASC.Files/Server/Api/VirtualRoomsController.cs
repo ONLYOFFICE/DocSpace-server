@@ -287,6 +287,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/share")]
+    [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<RoomSecurityDto> SetRoomSecurityAsync(T id, RoomInvitationRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);

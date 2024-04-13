@@ -28,18 +28,31 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Api.Models;
 
-public interface IUserInvitation
+public class EmailInvitationsDto
 {
-    string Email { get; set; }
+    public List<EmailInvitationDto> Invitations { get; set; }
 }
 
-public class MaxInvitationsCountAttribute : ValidationAttribute
+public class EmailInvitationDto
+{
+    /// <summary>Email address</summary>
+    /// <type>System.String, System</type>
+    public string Email { get; set; }
+}
+
+public class MaxEmailInvitationsAttribute : ValidationAttribute
 {
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        if (value is IEnumerable<IUserInvitation> invitations)
+        if (value is IEnumerable<EmailInvitationDto> invitations)
         {
             var cout = invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+            if (cout == 0)
+            {
+                return ValidationResult.Success;
+            }
+
             var helper = (UserInvitationSettingsHelper)validationContext.GetService(typeof(UserInvitationSettingsHelper));
             var limit = helper.GetLimit().Result;
 
