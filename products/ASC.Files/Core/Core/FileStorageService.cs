@@ -1161,6 +1161,12 @@ public class FileStorageService //: IFileStorageService
             properties.FormFilling.StartFilling = true;
             await daoFactory.GetFileDao<T>().SaveProperties(fileId, properties);
         }
+        else
+        {
+            var currentProperties = new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+            currentProperties.FormFilling.StartFilling = true;
+            await daoFactory.GetFileDao<T>().SaveProperties(fileId, currentProperties);
+        }
     }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false, string doc = null)
     {
@@ -2136,6 +2142,7 @@ public class FileStorageService //: IFileStorageService
     {
         var (file, configuration, _) = await documentServiceHelper.GetParamsAsync(fileId, version, doc, editPossible, !view, true);
         var validShareLink = !string.IsNullOrEmpty(await fileShareLink.ParseAsync(doc));
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         if (validShareLink)
         {
@@ -2145,7 +2152,8 @@ public class FileStorageService //: IFileStorageService
         if (configuration.EditorConfig.ModeWrite
             && fileUtility.CanWebRestrictedEditing(file.Title)
             && await fileSecurity.CanFillFormsAsync(file)
-            && !await fileSecurity.CanEditAsync(file))
+            && !await fileSecurity.CanEditAsync(file)
+            && (properties != null && properties.FormFilling.StartFilling))
         {
             if (!await entryManager.LinkedForMeAsync(file))
             {
