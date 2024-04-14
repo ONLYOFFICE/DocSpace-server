@@ -106,6 +106,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    public bool? StartFilling { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -191,9 +193,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         {
             var linkDao = daoFactory.GetLinkDao();
             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
             result.HasDraft = linkedId != null;
+            if (properties != null)
+            {
+                result.StartFilling = properties.FormFilling.StartFilling;
+            }
         }
-        
+
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;

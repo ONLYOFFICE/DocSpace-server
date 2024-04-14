@@ -107,6 +107,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone, inDto.Doc);
     }
 
+    [HttpPut("{fileId}/startfilling")]
+    public async Task StartFillingAsync(T fileId)
+    {
+        await fileStorageService.StartFillingAsync(fileId);
+    }
+
     /// <summary>
     /// Tracks file changes when editing.
     /// </summary>

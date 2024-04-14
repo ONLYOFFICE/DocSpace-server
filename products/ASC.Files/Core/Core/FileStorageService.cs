@@ -1153,7 +1153,15 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
-
+    public async Task StartFillingAsync<T>(T fileId)
+    {
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(fileId);
+        if (properties != null)
+        {
+            properties.FormFilling.StartFilling = true;
+            await daoFactory.GetFileDao<T>().SaveProperties(fileId, properties);
+        }
+    }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false, string doc = null)
     {
         try

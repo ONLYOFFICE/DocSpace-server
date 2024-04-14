@@ -73,6 +73,8 @@ public class FormFillingProperties()
     /// <type>System.Boolean, System</type>
     public bool CollectFillForm { get; set; }
 
+    public bool StartFilling { get; set; }
+
     /// <summary>Folder ID where a file will be saved</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
