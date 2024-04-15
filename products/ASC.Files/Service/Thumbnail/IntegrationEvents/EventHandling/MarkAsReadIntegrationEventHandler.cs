@@ -33,8 +33,7 @@ public class MarkAsReadIntegrationEventHandler(
     ILogger<MarkAsReadIntegrationEventHandler> logger,
     FileOperationsManager  fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager)
+    SecurityContext securityContext)
     : IIntegrationEventHandler<MarkAsReadIntegrationEvent>
 {
     public async Task Handle(MarkAsReadIntegrationEvent @event)
@@ -44,7 +43,7 @@ public class MarkAsReadIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
             await fileOperationsManager.Enqueue<FileMarkAsReadOperation, FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }

@@ -27,8 +27,8 @@
 namespace ASC.Api.Core.Security;
 
 [Scope]
-public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
-    MessageTarget messageTarget,
+public class InvitationLinkHelper(
+    IHttpContextAccessor httpContextAccessor,
     MessageService messageService,
     Signature signature,
     IDbContextFactory<MessagesContext> dbContextFactory,
@@ -138,7 +138,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var target = messageTarget.Create(email);
+        var target = MessageTarget.Create(email);
         var description = JsonSerializer.Serialize(new[] { key });
 
         var message = await Queries.AuditEventsAsync(context, tenantId, target.ToString(), description);
@@ -149,7 +149,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
     private async Task SaveLinkVisitMessageAsync(string email, string key)
     {
         var headers = httpContextAccessor?.HttpContext?.Request.Headers;
-        var target = messageTarget.Create(email);
+        var target = MessageTarget.Create(email);
 
         await messageService.SendHeadersMessageAsync(MessageAction.RoomInviteLinkUsed, target, headers, key);
     }

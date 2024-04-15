@@ -83,7 +83,10 @@ public class FolderContentDto<T>
 }
 
 [Scope]
-public class FolderContentDtoHelper(FileSecurity fileSecurity,
+public class FolderContentDtoHelper(
+    FileStorageService fileStorageService,
+    ApiContext apiContext,
+    FileSecurity fileSecurity,
     FileDtoHelper fileWrapperHelper,
     FolderDtoHelper folderWrapperHelper,
     BadgesSettingsHelper badgesSettingsHelper,
@@ -91,6 +94,13 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager)
 {
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null)
+    {
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
+
+        return folderContentWrapper.NotFoundIfNull();
+    }
+    
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
         var files = new List<FileEntry>();
@@ -178,5 +188,20 @@ public class FolderContentDtoHelper(FileSecurity fileSecurity,
                 return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, order1);
             }
         }
+    }
+    
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
+    {
+        OrderBy orderBy = null;
+        if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        {
+            orderBy = new OrderBy(sortBy, !apiContext.SortDescending);
+        }
+
+        var startIndex = Convert.ToInt32(apiContext.StartIndex);
+        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
+            roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea);
+
+        return await GetAsync(folderId, items, startIndex);
     }
 }

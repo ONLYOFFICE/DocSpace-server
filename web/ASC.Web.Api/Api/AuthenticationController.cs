@@ -38,42 +38,42 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
-public class AuthenticationController(UserManager userManager,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        TenantCookieSettingsHelper tenantCookieSettingsHelper,
-        CookiesManager cookiesManager,
-        PasswordHasher passwordHasher,
-        EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-        SetupInfo setupInfo,
-        MessageService messageService,
-        ProviderManager providerManager,
-        AccountLinker accountLinker,
-        CoreBaseSettings coreBaseSettings,
-        StudioNotifyService studioNotifyService,
-        UserManagerWrapper userManagerWrapper,
-        UserHelpTourHelper userHelpTourHelper,
-        Signature signature,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        SettingsManager settingsManager,
-        SmsManager smsManager,
-        TfaManager tfaManager,
-        TimeZoneConverter timeZoneConverter,
-        SmsKeyStorage smsKeyStorage,
-        CommonLinkUtility commonLinkUtility,
-        ApiContext apiContext,
-        AuthContext authContext,
-        CookieStorage cookieStorage,
-        DbLoginEventsManager dbLoginEventsManager,
-        BruteForceLoginManager bruteForceLoginManager,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService,
-        LoginProfileTransport loginProfileTransport,
-        IMapper mapper)
+public class AuthenticationController(
+    UserManager userManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    TenantCookieSettingsHelper tenantCookieSettingsHelper,
+    CookiesManager cookiesManager,
+    PasswordHasher passwordHasher,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    SetupInfo setupInfo,
+    MessageService messageService,
+    ProviderManager providerManager,
+    AccountLinker accountLinker,
+    CoreBaseSettings coreBaseSettings,
+    StudioNotifyService studioNotifyService,
+    UserManagerWrapper userManagerWrapper,
+    UserHelpTourHelper userHelpTourHelper,
+    Signature signature,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    SettingsManager settingsManager,
+    SmsManager smsManager,
+    TfaManager tfaManager,
+    TimeZoneConverter timeZoneConverter,
+    SmsKeyStorage smsKeyStorage,
+    CommonLinkUtility commonLinkUtility,
+    ApiContext apiContext,
+    AuthContext authContext,
+    CookieStorage cookieStorage,
+    DbLoginEventsManager dbLoginEventsManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    ILogger<AuthenticationController> logger,
+    InvitationLinkService invitationLinkService,
+    LoginProfileTransport loginProfileTransport,
+    IMapper mapper)
     : ControllerBase
 {
     /// <summary>
@@ -121,7 +121,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
-                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(user.Id));
+                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                 }
             }
             else
@@ -155,7 +155,7 @@ public class AuthenticationController(UserManager userManager,
             await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), sms
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
-                                messageTarget.Create(user.Id));
+                                MessageTarget.Create(user.Id));
             logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
@@ -365,7 +365,7 @@ public class AuthenticationController(UserManager userManager,
         await apiContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
-        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
+        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
 
         return new AuthenticationTokenDto
         {

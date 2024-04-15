@@ -264,7 +264,7 @@ public class FileConverter(
     FileMarker fileMarker,
     TenantManager tenantManager,
     AuthContext authContext,
-    EntryManager entryManager,
+    LockerManager lockerManager,
     FilesSettingsHelper filesSettingsHelper,
     GlobalFolderHelper globalFolderHelper,
     FilesMessageService filesMessageService,
@@ -511,7 +511,7 @@ public class FileConverter(
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await entryManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;

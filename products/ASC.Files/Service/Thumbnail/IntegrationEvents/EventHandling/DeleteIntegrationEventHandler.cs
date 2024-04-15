@@ -33,8 +33,7 @@ public class DeleteIntegrationEventHandler(
     ILogger<DeleteIntegrationEventHandler> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager) : IIntegrationEventHandler<DeleteIntegrationEvent>
+    SecurityContext securityContext) : IIntegrationEventHandler<DeleteIntegrationEvent>
 {
     public async Task Handle(DeleteIntegrationEvent @event)
     {
@@ -43,7 +42,7 @@ public class DeleteIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
             await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }

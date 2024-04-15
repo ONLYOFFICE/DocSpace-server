@@ -34,13 +34,13 @@ namespace ASC.People.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class GroupController(UserManager userManager,
-        ApiContext apiContext,
-        GroupFullDtoHelper groupFullDtoHelper,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        PermissionContext permissionContext,
-        FileSecurity fileSecurity)
+public class GroupController(
+    UserManager userManager,
+    ApiContext apiContext,
+    GroupFullDtoHelper groupFullDtoHelper,
+    MessageService messageService,
+    PermissionContext permissionContext,
+    FileSecurity fileSecurity)
     : ControllerBase
 {
     /// <summary>
@@ -146,7 +146,7 @@ public class GroupController(UserManager userManager,
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupCreated, messageTarget.Create(group.ID), group.Name);
+        await messageService.SendAsync(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
         return await groupFullDtoHelper.Get(group, true);
     }
@@ -190,7 +190,7 @@ public class GroupController(UserManager userManager,
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupUpdated, messageTarget.Create(id), group.Name);
+        await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(id), group.Name);
 
         return await GetGroupAsync(id);
     }
@@ -215,7 +215,7 @@ public class GroupController(UserManager userManager,
         await userManager.DeleteGroupAsync(id);
         await fileSecurity.RemoveSubjectAsync(id, false);
 
-        await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
+        await messageService.SendAsync(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
 
         return NoContent();
     }

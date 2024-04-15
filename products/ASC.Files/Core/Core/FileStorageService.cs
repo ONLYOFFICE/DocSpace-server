@@ -45,6 +45,8 @@ public class FileStorageService //: IFileStorageService
     SocketManager socketManager,
     IDaoFactory daoFactory,
     FileMarker fileMarker,
+    BreadCrumbsManager breadCrumbsManager,
+    LockerManager lockerManager,
     EntryManager entryManager,
     FilesMessageService filesMessageService,
     DocumentServiceTrackerHelper documentServiceTrackerHelper,
@@ -247,7 +249,7 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
 
-        var breadCrumbsTask = entryManager.GetBreadCrumbsAsync(parentId, folderDao);
+        var breadCrumbsTask = breadCrumbsManager.GetBreadCrumbsAsync(parentId, folderDao);
         var shareableTask = fileSharing.CanSetAccessAsync(parent);
         var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
 
@@ -1165,7 +1167,7 @@ public class FileStorageService //: IFileStorageService
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
                 }
                 
-                    await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, doc, await tenantManager.GetCurrentTenantIdAsync(), true);
+                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, doc, await tenantManager.GetCurrentTenantIdAsync(), true);
 
                 //without StartTrack, track via old scheme
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
@@ -1305,7 +1307,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        if (await entryManager.FileLockedForMeAsync(file.Id))
+        if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
@@ -3152,7 +3154,7 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (await entryManager.FileLockedForMeAsync(file.Id))
+            if (await lockerManager.FileLockedForMeAsync(file.Id))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
             }
