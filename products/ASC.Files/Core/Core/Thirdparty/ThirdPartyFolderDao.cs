@@ -28,16 +28,16 @@ namespace ASC.Files.Core.Core.Thirdparty;
 
 /// <inheritdoc />
 [Scope]
-internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDbContext> dbContextFactory,
-        UserManager userManager,
-        CrossDao crossDao,
-        IDaoSelector<TFile, TFolder, TItem> daoSelector,
-        IFileDao<int> fileDao,
-        IFolderDao<int> folderDao,
-        TempStream tempStream,
-        SetupInfo setupInfo,
-        IDaoBase<TFile, TFolder, TItem> dao,
-        TenantManager tenantManager)
+internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    UserManager userManager,
+    CrossDao crossDao,
+    IDaoSelector<TFile, TFolder, TItem> daoSelector,
+    IFileDao<int> fileDao,
+    IFolderDao<int> folderDao,
+    SetupInfo setupInfo,
+    IDaoBase<TFile, TFolder, TItem> dao,
+    TenantManager tenantManager)
     : BaseFolderDao, IFolderDao<string>
     where TFile : class, TItem
     where TFolder : class, TItem
@@ -481,9 +481,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         return chunkedUpload ? storageMaxUploadSize : Math.Min(storageMaxUploadSize, setupInfo.AvailableFileSize);
     }
 
-    public Task<IDataWriteOperator> CreateDataWriteOperatorAsync(string folderId, CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    public async Task<IDataWriteOperator> CreateDataWriteOperatorAsync(string folderId, CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
     {
-        return Task.FromResult<IDataWriteOperator>(new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder));
+        var storage = await _providerInfo.StorageAsync;
+        return storage.CreateDataWriteOperator(chunkedUploadSession, sessionHolder);
     }
 
     public Task<string> GetBackupExtensionAsync(string folderId)

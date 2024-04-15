@@ -287,7 +287,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var photo = await Queries.PhotoAsync(userDbContext, tenant, id);
 
-        return photo ?? Array.Empty<byte>();
+        return photo ?? [];
     }
 
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
@@ -690,17 +690,10 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
     {
         var q = userDbContext.Users.AsQueryable();
-        var where = false;
 
         if (tenant != Tenant.DefaultTenant)
         {
             q = q.Where(r => r.TenantId == tenant);
-            where = true;
-        }
-
-        if (!where)
-        {
-            q = q.Where(r => 1 == 0);
         }
 
         return q;

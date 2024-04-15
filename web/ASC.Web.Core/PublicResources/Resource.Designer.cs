@@ -1986,7 +1986,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To many input files.
+        ///   Looks up a localized string similar to Too many input files.
         /// </summary>
         public static string ErrorWebPluginToManyInputFiles {
             get {
@@ -2522,6 +2522,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string MessageEmailChangeInstuctionsSentOnEmail {
             get {
                 return ResourceManager.GetString("MessageEmailChangeInstuctionsSentOnEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password change instruction has been sent to {0} email address..
+        /// </summary>
+        public static string MessagePasswordSendedToEmail {
+            get {
+                return ResourceManager.GetString("MessagePasswordSendedToEmail", resourceCulture);
             }
         }
         

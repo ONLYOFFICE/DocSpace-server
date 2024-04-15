@@ -30,7 +30,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         ISubscriptionProvider directSubscriptionProvider)
     : ISubscriptionProvider
 {
-    private readonly string[] _defaultSenderMethods = Array.Empty<string>();
+    private readonly string[] _defaultSenderMethods = [];
     private readonly ISubscriptionProvider _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
     private readonly IRecipientProvider _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));
 
@@ -69,7 +69,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         ArgumentNullException.ThrowIfNull(action);
 
         var recipents = new List<IRecipient>(5);
-        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? Array.Empty<IRecipient>();
+        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? [];
         recipents.AddRange(directRecipients);
 
         return recipents.ToArray();
@@ -165,12 +165,12 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         ArgumentNullException.ThrowIfNull(recipient);
 
         var objects = new List<string>();
-        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscribe) ?? Array.Empty<string>();
+        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscribe) ?? [];
         MergeObjects(objects, direct);
         var parents = await WalkUpAsync(recipient);
         foreach (var parent in parents)
         {
-            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? Array.Empty<string>();
+            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? [];
             if (recipient is IDirectRecipient directRecipient)
             {
                 foreach (var groupsubscr in direct)
@@ -194,7 +194,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
     private async Task<List<IRecipient>> WalkUpAsync(IRecipient recipient)
     {
         var parents = new List<IRecipient>();
-        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? Array.Empty<IRecipientsGroup>();
+        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? [];
         foreach (var group in groups)
         {
             parents.Add(group);

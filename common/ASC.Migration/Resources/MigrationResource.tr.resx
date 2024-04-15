@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Kullanıcı taşıma {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrasyon ortak dosyaları</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>{0} migrasyon aracı başlatılırken hata oluştu</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Böyle bir migrasyon sağlayıcısı yok</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Devam eden bir migrasyon işlemi yok</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrasyon projesi dosyaları</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Ayrıştırma hâlâ devam ediyor</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrasyon hâlihazırda devam ediyor</value>
+  </data>
 </root>

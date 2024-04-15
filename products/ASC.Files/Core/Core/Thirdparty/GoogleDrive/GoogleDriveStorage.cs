@@ -25,11 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Transient]
-internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
+internal class GoogleDriveStorage(
         FileUtility fileUtility,
         ILoggerProvider monitor,
         TempStream tempStream,
@@ -50,7 +51,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
             if (_token.IsExpired)
             {
-                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(consumerFactory, _token);
+                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(_token);
             }
 
             return _token.AccessToken;
@@ -61,6 +62,8 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
     private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
     private DriveService _driveService;
     private OAuth20Token _token;
+    
+    private static readonly Lazy<CachedHttpClientFactory> _cachedHttpClientFactory = new(() => new CachedHttpClientFactory());
 
     public void Open(AuthData authData)
     {
@@ -92,7 +95,8 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         _driveService = new DriveService(new BaseClientService.Initializer
         {
-            HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse)
+            HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse),
+            HttpClientFactory = _cachedHttpClientFactory.Value
         });
 
         IsOpened = true;
@@ -100,8 +104,6 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
     public void Close()
     {
-        _driveService.Dispose();
-
         IsOpened = false;
     }
 
@@ -193,7 +195,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
-            Method = HttpMethod.Get,
+            Method = HttpMethod.Get
         };
         
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
@@ -277,10 +279,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
     }
 
-    public void Dispose()
-    {
-        _driveService?.Dispose();
-    }
+    public void Dispose() { }
 
     public static DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
     {
@@ -426,6 +425,11 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
             googleDriveSession.FileId = responseJson.Value<string>("id");
         }
+    }
+    
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
     }
 
     private async Task<DriveFile> InternalCopyFileAsync(string toFolderId, string originEntryId, string newTitle)
@@ -592,5 +596,20 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    private class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory
+    {
+        private static HttpMessageHandler _handler;
+        
+        protected override HttpMessageHandler CreateHandler(Google.Apis.Http.CreateHttpClientArgs args)
+        {
+            return _handler ??= base.CreateHandler(args);
+        }
+        
+        ~CachedHttpClientFactory()
+        {
+            _handler?.Dispose();
+        }
     }
 }

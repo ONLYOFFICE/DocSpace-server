@@ -243,7 +243,7 @@ public class FileSharingAceHelper(
                     var (filter, maxCount) = w.SubjectType switch
                     {
                         SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                        SubjectType.ExternalLink when room != null => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
+                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
                         SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
                         _ => (ShareFilterType.Link, -1)
                     };
@@ -273,13 +273,13 @@ public class FileSharingAceHelper(
 
             if (socket && room != null)
             {
-                if (share == FileShare.None)
+                if (share == FileShare.None && !await userManager.IsDocSpaceAdminAsync(w.Id))
                 {
-                    await socketManager.DeleteFolder(room, new[] { w.Id });
+                    await socketManager.DeleteFolder(room, [w.Id]);
                 }
                 else if (existedShare == null)
                 {
-                    await socketManager.CreateFolderAsync(room, new[] { w.Id });
+                    await socketManager.CreateFolderAsync(room, [w.Id]);
                 }
             }
 

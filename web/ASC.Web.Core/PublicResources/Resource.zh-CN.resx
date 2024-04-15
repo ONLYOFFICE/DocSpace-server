@@ -1006,4 +1006,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>登录失败的次数过多。请稍后再试</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>无法删除上一个完全访问权限的空间</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>插件存档错误</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>插件已存在</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>文件扩展名错误</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>文件大小超出上限</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>禁止更改系统插件</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>插件名称错误</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>无输入文件</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>找不到插件</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>输入文件过多</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>设置内存配额失败：您设置的内存配额大于门户配额。</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>已超出房间空间配额</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>已超出用户空间配额</value>
+  </data>
 </root>

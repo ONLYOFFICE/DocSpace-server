@@ -415,7 +415,7 @@ internal abstract class ThirdPartyProviderDao
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT,
+            _ => FolderType.DEFAULT
         };
         return typeFilter;
     }
@@ -657,7 +657,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                     TenantId = l.TenantId,
                     SourceId = newHashId,
                     LinkedId = l.LinkedId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 dbContext.RemoveRange(filesSourceForDelete);
@@ -670,7 +670,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                     TenantId = l.TenantId,
                     SourceId = l.SourceId,
                     LinkedId = newHashId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 dbContext.RemoveRange(filesLinkedForDelete);

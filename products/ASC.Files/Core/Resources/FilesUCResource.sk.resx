@@ -97,4 +97,10 @@
   <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
     <value>Súbory budú komprimované do súboru {0}.tar.gz{1}</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>V procese</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Pripravené</value>
+  </data>
 </root>

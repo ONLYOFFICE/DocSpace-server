@@ -97,4 +97,10 @@
   <data name="Favorites" xml:space="preserve">
     <value>즐겨찾기</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>진행 중</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>준비</value>
+  </data>
 </root>

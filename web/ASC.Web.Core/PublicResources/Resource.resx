@@ -1090,7 +1090,7 @@
     <value>Plugin not found</value>
   </data>
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>To many input files</value>
+    <value>Too many input files</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
     <value>The last full access space cannot be deleted</value>
@@ -1103,5 +1103,8 @@
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Storage quotas &amp; statistic</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>The password change instruction has been sent to {0} email address.</value>
   </data>
 </root>

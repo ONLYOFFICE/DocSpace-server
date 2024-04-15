@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Ο εξωτερικός σύνδεσμος ενημερώθηκε: {0}. Ρόλος: {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Αρχείο που ανοίχτηκε για αλλαγή: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Η πύλη μετονομάστηκε</value>
+  </data>
 </root>

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -46,6 +44,7 @@ public class PortalController(ILogger<PortalController> logger,
         CommonLinkUtility commonLinkUtility,
         IUrlShortener urlShortener,
         AuthContext authContext,
+        CookiesManager cookiesManager,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -484,13 +483,19 @@ public class PortalController(ILogger<PortalController> logger,
         }
 
         var rewriter = httpContextAccessor.HttpContext.Request.Url();
-        return string.Format("{0}{1}{2}{3}/{4}",
+        var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
                                 commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
-               );
+        );
+
+        cookiesManager.ClearCookies(CookiesType.AuthKey);
+        cookiesManager.ClearCookies(CookiesType.SocketIO);
+        securityContext.Logout();
+
+        return confirmUrl;
     }
 
     /// <summary>
@@ -692,6 +697,7 @@ public class PortalController(ILogger<PortalController> logger,
     /// <returns></returns>
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)

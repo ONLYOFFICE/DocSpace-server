@@ -141,6 +141,7 @@ public abstract class VirtualRoomsController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfoAsync(T id)
@@ -181,9 +182,11 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("roomquota")]
-    public async IAsyncEnumerable<FolderDto<T>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        foreach (var roomId in inDto.RoomIds)
+        var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+
+        foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
 
@@ -203,9 +206,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("resetquota")]
-    public async IAsyncEnumerable<FolderDto<T>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
-        foreach (var roomId in inDto.RoomIds)
+        var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+        foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
 

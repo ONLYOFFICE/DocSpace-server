@@ -24,64 +24,59 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.MessagingSystem.EF.Model;
 
-[Singleton]
-public class MessageTarget()
+namespace ASC.Web.Core;
+
+public class LogoHandler
 {
-    private IEnumerable<string> _items;
-
-    public MessageTarget Create<T>(T value)
+    public LogoHandler(RequestDelegate _)
     {
-        var res = new List<string>(1);
-        if (value != null)
-        {
-            res.Add(value.ToString());
-        }
-
-        return new MessageTarget
-        {
-            _items = res
-        };
     }
 
-    public MessageTarget  Create<T>(IEnumerable<T> value)
+    public async Task Invoke
+        (HttpContext context,
+        CommonLinkUtility commonLinkUtility,
+        SettingsManager settingsManager,
+        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
     {
-        var res = new MessageTarget
+        var logoTypeStr = context.Request.Query["logotype"].FirstOrDefault();
+        if (!Enum.TryParse(logoTypeStr, out WhiteLabelLogoType logoType))
         {
-            _items = new List<string>()
-        };
-
-        if (value != null)
-        {
-            res._items = value.Where(r=> r != null).Select(r => r.ToString()).ToList();
+            throw new ArgumentException("logotype");
         }
 
-        return res;
+        var defaultStr = context.Request.Query["default"].FirstOrDefault() ?? "false";
+        if (!bool.TryParse(defaultStr, out var isDefault))
+        {
+            throw new ArgumentException("default");
+        }
+
+        var darkStr = context.Request.Query["dark"].FirstOrDefault() ?? "false";
+        if (!bool.TryParse(darkStr, out var dark))
+        {
+            throw new ArgumentException("dark");
+        }
+
+        string path;
+
+        if (isDefault)
+        {
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
+        }
+        else
+        {
+            var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
+        }
+
+        context.Response.Redirect(commonLinkUtility.GetFullAbsolutePath(path));
     }
+}
 
-    public MessageTarget Parse(string value)
+public static class LogoHandlerExtensions
+{
+    public static IApplicationBuilder UseLogoHandler(this IApplicationBuilder builder)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            return null;
-        }
-
-        var items = value.Split(',');
-
-        if (items.Length == 0)
-        {
-            return null;
-        }
-
-        return new MessageTarget
-        {
-            _items = items
-        };
-    }
-    public IEnumerable<string> GetItems() { return _items.ToList(); }
-    public override string ToString()
-    {
-        return _items != null ? string.Join(",", _items) : null;
+        return builder.UseMiddleware<LogoHandler>();
     }
 }

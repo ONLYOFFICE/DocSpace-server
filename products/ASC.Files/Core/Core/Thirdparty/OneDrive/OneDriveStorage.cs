@@ -29,8 +29,7 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Transient]
-internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFactory clientFactory,
-        OAuth20TokenHelper oAuth20TokenHelper)
+internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
     : IThirdPartyStorage<Item, Item, Item>
 {
     private OAuth20Token _token;
@@ -49,7 +48,7 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
                 return _token.AccessToken;
             }
 
-            _token = oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(consumerFactory, _token);
+            _token = oAuth20TokenHelper.RefreshToken<OneDriveLoginProvider>(_token);
             _onedriveClientCache = null;
 
             return _token.AccessToken;
@@ -274,7 +273,6 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             Method = HttpMethod.Put
         };
         
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StreamContent(stream);
 
         request.Content.Headers.ContentRange = new ContentRangeHeaderValue(oneDriveSession.BytesTransferred,
@@ -383,6 +381,11 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
     public Task<long> GetMaxUploadSizeAsync()
     {
         return Task.FromResult(MaxChunkedUploadFileSize);
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }
 

@@ -53,7 +53,7 @@ public class AscDistributedCache(IDistributedCache cache)
 
         await cache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
         {
-            AbsoluteExpiration = absoluteExpiration,
+            AbsoluteExpiration = absoluteExpiration
         });
     }
     

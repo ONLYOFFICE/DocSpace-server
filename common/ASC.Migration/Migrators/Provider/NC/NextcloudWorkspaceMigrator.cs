@@ -52,7 +52,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
     {
-        MigrationInfo = new MigrationInfo() { Name = "Nextcloud" };
+        MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
@@ -65,7 +65,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var files = Directory.GetFiles(path);
         if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
-            throw new Exception("Folder must not be empty and should contain only .zip files.");
+            MigrationInfo.FailedArchives = files.ToList();
+            throw new Exception("Archive must be .zip");
         }
         foreach (var t in files)
         {
@@ -230,7 +231,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup() { Info = new(), UserKeys = new HashSet<string>() };
+            var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
@@ -394,7 +395,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     continue;
                 }
 
-                filesAndFolders.Add(new NCFileCache()
+                filesAndFolders.Add(new NCFileCache
                 {
                     FileId = int.Parse(values[0]),
                     Path = values[2],
@@ -417,7 +418,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     continue;
                 }
 
-                file.Share.Add(new NCShare()
+                file.Share.Add(new NCShare
                 {
                     Id = int.Parse(values[0]),
                     ShareWith = values[2],
@@ -450,7 +451,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     if (attr.HasFlag(FileAttributes.Directory))
                     {
                         var split = entry.Path.Split('/');
-                        var folder = new MigrationFolder()
+                        var folder = new MigrationFolder
                         {
                             Id = entry.FileId,
                             Level = j++,
@@ -465,7 +466,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         var fi = new FileInfo(tmpPath);
                         user.Storage.BytesTotal += fi.Length;
                         var split = entry.Path.Split('/');
-                        var file = new MigrationFile()
+                        var file = new MigrationFile
                         {
                             Id = entry.FileId,
                             Path = tmpPath,
@@ -496,7 +497,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
             var shareType = GetPortalShare(shareInfo.Premissions, isFile);
 
-            var security = new MigrationSecurity()
+            var security = new MigrationSecurity
             {
                 Subject = shareInfo.ShareWith,
                 EntryId = entry.FileId,

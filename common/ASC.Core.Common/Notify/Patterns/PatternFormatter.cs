@@ -85,7 +85,7 @@ public abstract class PatternFormatter : IPatternFormatter
     {
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(_tagSearchPattern))
         {
-            return Array.Empty<string>();
+            return [];
         }
 
         var maches = RegEx.Matches(text);

@@ -17,7 +17,7 @@
     <PackageReference Include="Box.V2.Core" Version="5.7.0" />
     <PackageReference Include="DocuSign.eSign.dll" Version="6.8.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3309" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
