@@ -158,7 +158,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType))
+                && !DocSpaceHelper.IsRoom(folder.FolderType)
+                && ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
