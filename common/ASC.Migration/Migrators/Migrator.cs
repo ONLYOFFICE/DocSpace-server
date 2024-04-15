@@ -353,8 +353,8 @@ public abstract class Migrator : IDisposable
         var orderedFolders = storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
-            if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1)
-                || _matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id != 0)
+            if (!storage.ShouldImportSharedFolders ||
+                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && _matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id != 0)
             {
                 newFolder = await FileStorageService.CreateFolderAsync(_matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
                 Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
@@ -409,17 +409,19 @@ public abstract class Migrator : IDisposable
             return;
         }
 
-        var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
         var aces = new Dictionary<string, AceWrapper>();
         foreach (var security in storage.Securities)
         {
+            var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
             try
             {
                 if (!MigrationInfo.Users.ContainsKey(security.Subject) && !MigrationInfo.Groups.ContainsKey(security.Subject))
                 {
                     continue;
                 }
-                    var entryIsFile = security.EntryType == 2;
+                var access = (Files.Core.Security.FileShare)security.Security;
+
+                var entryIsFile = security.EntryType == 2;
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{_fileKey}-{security.EntryId}";
@@ -429,7 +431,7 @@ public abstract class Migrator : IDisposable
                     {
                         try
                         {
-                            ace = await FileStorageService.SetExternalLinkAsync(_matchingFilesIds[key].Id, FileEntryType.File, Guid.Empty, null, (Files.Core.Security.FileShare)security.Security, requiredAuth: true,
+                            ace = await FileStorageService.SetExternalLinkAsync(_matchingFilesIds[key].Id, FileEntryType.File, Guid.Empty, null, access, requiredAuth: true,
                                 primary: false);
                             aces.Add($"{security.Security}{_matchingFilesIds[key].Id}", ace);
                         }
@@ -537,7 +539,7 @@ public abstract class Migrator : IDisposable
                     {
                         new AceWrapper
                         {
-                            Access = (Files.Core.Security.FileShare)security.Security,
+                            Access = access,
                             Id = MigrationInfo.Users.ContainsKey(security.Subject) 
                                 ? MigrationInfo.Users[security.Subject].Info.Id 
                                 : MigrationInfo.Groups[security.Subject].Info.ID
