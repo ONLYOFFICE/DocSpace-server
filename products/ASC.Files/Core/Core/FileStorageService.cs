@@ -1155,18 +1155,24 @@ public class FileStorageService //: IFileStorageService
     }
     public async Task StartFillingAsync<T>(T fileId)
     {
-        var properties = await daoFactory.GetFileDao<T>().GetProperties(fileId);
-        if (properties != null)
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
+        if(file != null)
         {
-            properties.FormFilling.StartFilling = true;
-            await daoFactory.GetFileDao<T>().SaveProperties(fileId, properties);
+            var properties = await daoFactory.GetFileDao<T>().GetProperties(fileId);
+            if (properties != null)
+            {
+                properties.FormFilling.StartFilling = true;
+                await daoFactory.GetFileDao<T>().SaveProperties(fileId, properties);
+            }
+            else
+            {
+                var currentProperties = new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+                currentProperties.FormFilling.StartFilling = true;
+                await daoFactory.GetFileDao<T>().SaveProperties(fileId, currentProperties);
+            }
+            await socketManager.UpdateFileAsync(file);
         }
-        else
-        {
-            var currentProperties = new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
-            currentProperties.FormFilling.StartFilling = true;
-            await daoFactory.GetFileDao<T>().SaveProperties(fileId, currentProperties);
-        }
+
     }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false, string doc = null)
     {
