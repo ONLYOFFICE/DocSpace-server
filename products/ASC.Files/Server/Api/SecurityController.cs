@@ -322,6 +322,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
@@ -342,6 +343,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

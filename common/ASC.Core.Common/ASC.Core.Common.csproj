@@ -36,14 +36,14 @@
     <Compile Remove="Notify\Jabber\IReverseJabberService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.302.15" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.300.54" />
-    <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.303.13" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.300.73" />
+    <PackageReference Include="FirebaseAdmin" Version="2.4.1" />
     <PackageReference Include="MailKit" Version="4.4.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>

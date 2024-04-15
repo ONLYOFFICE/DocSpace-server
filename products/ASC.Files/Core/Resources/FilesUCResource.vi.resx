@@ -97,4 +97,10 @@
   <data name="Recent" xml:space="preserve">
     <value>Gần đây</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Đang tiến hành</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Sẳn sàng</value>
+  </data>
 </root>

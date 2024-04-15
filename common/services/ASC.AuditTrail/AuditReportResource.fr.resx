@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Lien externe mis à jour : {0}. Rôle : {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fichier ouvert pour modification: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portail est renommé</value>
+  </data>
 </root>

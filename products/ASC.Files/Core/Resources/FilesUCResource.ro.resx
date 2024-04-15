@@ -97,4 +97,10 @@
   <data name="SharedForMe" xml:space="preserve">
     <value>Partajate cu mine</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>În curs de realizare</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Gata</value>
+  </data>
 </root>

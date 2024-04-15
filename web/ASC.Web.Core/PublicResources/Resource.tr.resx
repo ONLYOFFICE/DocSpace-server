@@ -1000,4 +1000,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Son tam erişim alanı silinemez</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Yanlış eklenti arşivi</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Eklenti zaten mevcut</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Yanlış dosya uzantısı</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Dosya boyutu sınırı aşıyor</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Sistem eklentilerinde değişiklik yapılması yasaktır</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Yanlış eklenti adı</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Giriş dosyası yok</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Eklenti bulunamadı</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Çok fazla girdi dosyası</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Bellek kotası ayarlanamadı; ayarladığınız bellek kotası portal kotasından daha fazla.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Oda alanı kotası aşıldı</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Kullanıcı alanı kotası aşıldı</value>
+  </data>
 </root>

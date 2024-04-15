@@ -97,4 +97,7 @@
   <data name="FilesWillBeCompressedZip" xml:space="preserve">
     <value>ファイルは{0}.zipファイル{1}に圧縮されます</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>進行中</value>
+  </data>
 </root>

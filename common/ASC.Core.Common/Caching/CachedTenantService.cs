@@ -326,7 +326,7 @@ class CachedTenantService() : ITenantService
         {
             data = await _service.GetTenantSettingsAsync(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;
@@ -340,7 +340,7 @@ class CachedTenantService() : ITenantService
         {
             data = _service.GetTenantSettings(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;

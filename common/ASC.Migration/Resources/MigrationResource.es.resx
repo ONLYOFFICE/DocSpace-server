@@ -150,4 +150,25 @@
   <data name="Unzipping" xml:space="preserve">
     <value>Descomprimiendo...</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migración de archivos comunes</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Error al inicializar el migrador {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>No existe tal proveedor de migración</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>No hay ninguna migración en curso</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migración de archivos de proyecto</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>El análisis aún está en progreso</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>La migración ya está en marcha</value>
+  </data>
 </root>

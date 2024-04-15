@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>外部リンクが更新されました：{0}．役割：{1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>編集用に開かれているファイル：{0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>ポータル名が変更されました</value>
+  </data>
 </root>

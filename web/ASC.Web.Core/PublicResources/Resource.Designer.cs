@@ -1986,7 +1986,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To many input files.
+        ///   Looks up a localized string similar to Too many input files.
         /// </summary>
         public static string ErrorWebPluginToManyInputFiles {
             get {

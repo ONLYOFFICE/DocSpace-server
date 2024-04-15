@@ -792,4 +792,10 @@
   <data name="CountryCol" xml:space="preserve">
     <value>País</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Arquivo aberto para alteração: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal renomeado</value>
+  </data>
 </root>

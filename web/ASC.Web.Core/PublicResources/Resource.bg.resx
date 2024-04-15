@@ -1000,4 +1000,43 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Твърде много опити за списване. Моля, опитайте отново по-късно</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Последното място за пълен достъп не може да бъде изтрито</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Грешен плъгин архив</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Плъгинът вече съществува</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Грешно файлово разширение</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Размерът на файла надвишава лимита</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Промените в системните плъгини са забранени</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Грешно име на плъгин</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Няма входен файл</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Плъгинът не е открит</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Твърде много входни файлове</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспешно задаване на квотата на паметта - квотата на паметта, която сте задали, е по-голяма от квотата на порталите.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Квотата за пространство в стаята е надвишена</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Квотата за потребителс пространство е надвишена</value>
+  </data>
 </root>

@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Migração do Utilizador {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Arquivos comuns de migração</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Erro ao inicializar o migrador {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nenhum provedor de migração</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Nenhuma migração está em andamento</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Arquivos de projeto de migração</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>A análise ainda está em andamento</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>A migração já está em andamento</value>
+  </data>
 </root>
