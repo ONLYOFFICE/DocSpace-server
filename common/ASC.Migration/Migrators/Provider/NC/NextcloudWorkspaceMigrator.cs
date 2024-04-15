@@ -518,7 +518,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 return ASCShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+            return ASCShare.Editing;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
         }
         else
         {
@@ -527,7 +527,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 return ASCShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
+            return ASCShare.Editing;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
         }
     }
 }

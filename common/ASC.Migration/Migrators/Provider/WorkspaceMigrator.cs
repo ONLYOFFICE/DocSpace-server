@@ -326,7 +326,13 @@ public class WorkspaceMigrator : Migrator
                     Subject = row["subject"].ToString(),
                     EntryId = id,
                     EntryType = int.Parse(row["entry_type"].ToString()),
-                    Security = int.Parse(row["security"].ToString())
+                    Security = int.Parse(row["security"].ToString()) switch
+                    {
+                        1 => (int)Files.Core.Security.FileShare.Editing,
+                        2 => (int)Files.Core.Security.FileShare.Read,
+                        6 => (int)Files.Core.Security.FileShare.Comment,
+                        _ => (int)Files.Core.Security.FileShare.None
+                    }
                 };
                 storage.Securities.Add(security);
             }
