@@ -238,7 +238,8 @@ public class EntryManager(IDaoFactory daoFactory,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    TempStream tempStream)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1353,23 +1354,6 @@ public class EntryManager(IDaoFactory daoFactory,
             file.ConvertedType = null;
         }
 
-        if (file.Forcesave == ForcesaveType.UserSubmit)
-        {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-
-            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
-            if (room.FolderType == FolderType.FillingFormsRoom)
-            {
-                var properties = await formFillingReportCreator.UpdateFormFillingReport(file, formsDataUrl);
-
-                if (properties != null)
-                {
-                    await fileMarker.RemoveMarkAsNewForAllAsync(file);
-                    file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                }
-            }
-        }
 
         using (var tmpStream = new MemoryStream())
         {
@@ -1391,7 +1375,54 @@ public class EntryManager(IDaoFactory daoFactory,
                 await editedFileStream.CopyToAsync(tmpStream);
             }
             tmpStream.Position = 0;
+            if (file.Forcesave == ForcesaveType.UserSubmit)
+            {
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
+                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
+                    if (properties != null)
+                    {
+                        await formFillingReportCreator.UpdateFormFillingReport((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)), formsDataUrl);
+
+                        var pdfFile = serviceProvider.GetService<File<T>>();
+                        pdfFile.Title = file.Title;
+                        pdfFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                        pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
+                        File<T> result;
+
+                        if (tmpStream.CanSeek)
+                        {
+                            pdfFile.ContentLength = tmpStream.Length;
+                            result = await fileDao.SaveFileAsync(pdfFile, tmpStream);
+                        }
+                        else
+                        {
+                            await using var buffered = await tempStream.GetBufferedAsync(tmpStream);
+                            pdfFile.ContentLength = buffered.Length;
+                            result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                        }
+
+                        var linkDao = daoFactory.GetLinkDao();
+                        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+                        var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+
+                        await linkDao.DeleteLinkAsync(sourceId);
+                        await socketManager.UpdateFileAsync(sourceFile);
+
+                        await fileMarker.MarkAsNewAsync(result);
+                        await socketManager.CreateFileAsync(result);
+
+                        await fileDao.DeleteFileAsync(file.Id);
+
+                        return result;
+                    }
+                }
+            }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
             if (replaceVersion)
