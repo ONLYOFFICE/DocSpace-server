@@ -120,47 +120,17 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Análisis de la base de datos</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Contactos de correo</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Calendario</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Calendario</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Contactos</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Correo</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Correo</value>
-  </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>La migración se ha cancelado</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Migración de grupo {0} ({1}/{2})</value>
   </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migración de usuarios {0} ({1}/{2})</value>
   </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migrando contactos de usuario {0} ({1}/{2})</value>
-  </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migrando archivos de usuario {0} ({1}/{2})</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Migración del calendario de usuario {0} ({1}/{2})</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>La migración se ha completado</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Personas</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Preparando la migración</value>
@@ -171,9 +141,6 @@
   <data name="DataProcessing" xml:space="preserve">
     <value>Procesamiento de datos...</value>
   </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Usuarios</value>
-  </data>
   <data name="StartOfDataProcessing" xml:space="preserve">
     <value>Iniciando el procesamiento de datos...</value>
   </data>
@@ -183,22 +150,25 @@
   <data name="Unzipping" xml:space="preserve">
     <value>Descomprimiendo...</value>
   </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Documentos</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migración de archivos comunes</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Échec de l'importation de l'utilisateur : {0} ({1}/{2})</value>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Error al inicializar el migrador {0}</value>
   </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Effacement des données temporaires</value>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>No existe tal proveedor de migración</value>
   </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Fichiers de Google Drive</value>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>No hay ninguna migración en curso</value>
   </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Fichiers de l’utilisateur</value>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migración de archivos de proyecto</value>
   </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Groupes</value>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>El análisis aún está en progreso</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>La migración ya está en marcha</value>
   </data>
 </root>

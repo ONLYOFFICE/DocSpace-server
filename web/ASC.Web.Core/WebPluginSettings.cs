@@ -56,7 +56,7 @@ public class WebPluginConfigSettings
 
     public string[] AssetExtensions
     {
-        get => _assetExtensions ?? Array.Empty<string>();
+        get => _assetExtensions ?? [];
         set => _assetExtensions = value;
     }
 }

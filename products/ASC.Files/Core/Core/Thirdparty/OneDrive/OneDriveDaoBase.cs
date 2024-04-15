@@ -117,15 +117,12 @@ internal class OneDriveDaoBase(
 
     public Folder<string> ToFolder(Item onedriveFolder)
     {
-        if (onedriveFolder == null)
+        switch (onedriveFolder)
         {
-            return null;
-        }
-
-        if (onedriveFolder is ErrorItem item)
-        {
-            //Return error entry
-            return ToErrorFolder(item);
+            case null:
+                return null;
+            case ErrorItem item:
+                return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -140,8 +137,10 @@ internal class OneDriveDaoBase(
         folder.Id = MakeId(isRoot ? string.Empty : onedriveFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
         folder.Title = MakeFolderTitle(onedriveFolder);
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue 
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue 
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
@@ -152,7 +151,7 @@ internal class OneDriveDaoBase(
 
     public bool IsRoot(Item onedriveFolder)
     {
-        return onedriveFolder.ParentReference == null || onedriveFolder.ParentReference.Id == null;
+        return onedriveFolder.ParentReference?.Id == null;
     }
 
     private File<string> ToErrorFile(ErrorItem onedriveFile)
@@ -185,15 +184,12 @@ internal class OneDriveDaoBase(
 
     public File<string> ToFile(Item onedriveFile)
     {
-        if (onedriveFile == null)
+        switch (onedriveFile)
         {
-            return null;
-        }
-
-        if (onedriveFile is ErrorItem item)
-        {
-            //Return error entry
-            return ToErrorFile(item);
+            case null:
+                return null;
+            case ErrorItem item:
+                return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)
@@ -232,6 +228,11 @@ internal class OneDriveDaoBase(
             return new ErrorItem(ex, onedriveId);
         }
     }
+    
+    public async Task<Item> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
+    }
 
     public async Task<Item> GetFolderAsync(string itemId)
     {
@@ -258,23 +259,18 @@ internal class OneDriveDaoBase(
         var onedriveFolderId = MakeThirdId(parentId);
         var items = await _providerInfo.GetItemsAsync(onedriveFolderId);
 
-        if (folder.HasValue)
+        if (!folder.HasValue)
         {
-            if (folder.Value)
-            {
-                return items.Where(i => i.Folder != null).ToList();
-            }
-
-            return items.Where(i => i.File != null).ToList();
+            return items;
         }
 
-        return items;
+        return folder.Value ? items.Where(i => i.Folder != null).ToList() : items.Where(i => i.File != null).ToList();
     }
 
-    public sealed class ErrorItem : Item, IErrorItem
+    private sealed class ErrorItem : Item, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorItem(Exception e, object id)
         {
@@ -300,9 +296,9 @@ internal class OneDriveDaoBase(
         if (!match.Success)
         {
             var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf(".", StringComparison.InvariantCulture) != -1)
+            if (requestTitle.LastIndexOf('.') != -1)
             {
-                insertIndex = requestTitle.LastIndexOf(".", StringComparison.InvariantCulture);
+                insertIndex = requestTitle.LastIndexOf('.');
             }
 
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
@@ -316,11 +312,11 @@ internal class OneDriveDaoBase(
         return requestTitle;
     }
 
-    private string MatchEvaluator(Match match)
+    private static string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[string.Format(" ({0})", index).Length..];
+        var staticText = match.Value[$" ({index})".Length..];
 
-        return string.Format(" ({0}){1}", index + 1, staticText);
+        return $" ({index + 1}){staticText}";
     }
 }

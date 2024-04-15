@@ -331,9 +331,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} yaddaş sahəsi</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>İstifadə olunan yaddaş ölçüsü {0}-dan çox olmamalıdır</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Həddindən artıq giriş cəhdi. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Sonuncu tam giriş sahəsi silinə bilməz</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Yanlış plagin arxivi</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin artıq mövcuddur</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Yanlış fayl uzantısı</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Fayl həcmi limiti keçir</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Sistem plaginlərində dəyişikliklər qadağandır</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Yanlış plagin adı</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Giriş faylı yoxdur</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plagin tapılmadı</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Çoxlu giriş fayllarına</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Yaddaş kvotasını təyin etmək mümkün olmadı- təyin etdiyiniz yaddaş kvotası portal kvotasından böyükdür.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Otaq sahəsi kvota limitini keçib</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>İstifadəçi məkanı kvota limitini keçib</value>
   </data>
 </root>

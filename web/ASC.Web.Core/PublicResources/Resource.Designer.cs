@@ -1986,7 +1986,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To many input files.
+        ///   Looks up a localized string similar to Too many input files.
         /// </summary>
         public static string ErrorWebPluginToManyInputFiles {
             get {
@@ -2526,6 +2526,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The password change instruction has been sent to {0} email address..
+        /// </summary>
+        public static string MessagePasswordSendedToEmail {
+            get {
+                return ResourceManager.GetString("MessagePasswordSendedToEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If a user with the {0} email exists, the password change instruction has been sent to this email address..
         /// </summary>
         public static string MessageYourPasswordSendedToEmail {
@@ -2841,6 +2850,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Storage quotas &amp; statistic.
+        /// </summary>
+        public static string TariffsFeature_statistic {
+            get {
+                return ResourceManager.GetString("TariffsFeature_statistic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Third-party integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
@@ -2850,7 +2868,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} storage space.
+        ///   Looks up a localized string similar to {0} per admin/power user and ability to add space on request.
         /// </summary>
         public static string TariffsFeature_total_size {
             get {

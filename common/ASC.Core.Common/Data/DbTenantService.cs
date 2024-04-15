@@ -32,8 +32,7 @@ public class DbTenantService(
     IDbContextFactory<UserDbContext> userDbContextFactory,
     TenantDomainValidator tenantDomainValidator,
     MachinePseudoKeys machinePseudoKeys,
-    IMapper mapper,
-    IDbContextFactory<WebstudioDbContext> webstudioDbContextFactory)
+    IMapper mapper)
     : ITenantService
 {
     private List<string> _forbiddenDomains;
@@ -48,18 +47,6 @@ public class DbTenantService(
     public void ValidateTenantName(string name)
     {
         tenantDomainValidator.ValidateTenantName(name);
-    }
-
-    public IEnumerable<Tenant> GetTenantsWithCsp()
-    {
-        var cspSettingsId = new CspSettings().ID;
-        using var webstudioDbContext = webstudioDbContextFactory.CreateDbContext();
-        var q = webstudioDbContext.Tenants
-            .Join(webstudioDbContext.WebstudioSettings.DefaultIfEmpty(), r => r.Id, r => r.TenantId, (tenant, settings) => new { settings, tenant })
-            .Where(r => r.settings.Id == cspSettingsId)
-            .Select(r => r.tenant);
-
-        return q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToList();
     }
     
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true)
@@ -94,9 +81,9 @@ public class DbTenantService(
     {
         ArgumentException.ThrowIfNullOrEmpty(login);
 
-        await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
+        //await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();//TODO: remove
-        IQueryable<TenantUserSecurity> Query() => tenantDbContext.Tenants
+        IQueryable<TenantUserSecurity> Query() => userDbContext.Tenants
                 
                 .Where(r => r.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new

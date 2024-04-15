@@ -301,9 +301,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} ストレージスペース</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>使用するストレージのサイズは {0} を超えないこと</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>ログイン試行回数が多すぎます。後で再試行してください</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>最後のフルアクセススペースは削除できません</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>このプラグインアーカイブは正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>このプラグインはすでに存在しています</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>このファイル拡張子は正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>ファイルサイズが制限を超えています</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>システムプラグインの変更は禁止されています</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>このプラグイン名は正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>入力ファイルがありません</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>プラグインが見つかりませんでした</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>入力ファイルが多すぎます</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>メモリ容量制限の設定に失敗しました。設定したメモリ容量制限はポータル容量制限を超えています。</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>ルームの容量制限を超えています</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>ユーザーの容量制限を超えています</value>
   </data>
 </root>

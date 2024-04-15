@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Pagaidu datu dzēšana</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Notiek datu apstrāde...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Datubāzes parsēšana</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Pasta kontaktpersonas</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive faili</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Grupas migrācija {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Notiek lietotāju kontaktpersonu migrēšana {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Notiek lietotāja failu migrēšana {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migrēšana ir atcelta</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migrācija ir pabeigta</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalendārs</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalendārs</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Grupas</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Pasts</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Pasts</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Lietotāji</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kontakti</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Lietotāja faili</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Dokumenti</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Cilvēki</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Notiek sagatavošanās migrācijai</value>
@@ -192,13 +147,28 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Atspiešana ir pabeigta...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Lietotāja kalendāra migrācija {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Lietotāja migrācija {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Neizdevās importēt lietotāju: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrācijas kopīgie faili</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Inicializējot {0} migrētāju, radās kļūda</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nav šāda migrācijas nodrošinātāja</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Migrācija nenotiek</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrācijas projektu faili</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Parsēšana joprojām notiek</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrācija jau notiek</value>
   </data>
 </root>

@@ -30,5 +30,5 @@ public enum QuotaFilter
 {
     All = 0,
     Default = 1,
-    Custom = 2,
+    Custom = 2
 }

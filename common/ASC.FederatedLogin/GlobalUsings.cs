@@ -66,5 +66,4 @@ global using Microsoft.IdentityModel.Tokens;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 
-global using SecurityContext = ASC.Core.SecurityContext;
 global using JsonSerializer = System.Text.Json.JsonSerializer;

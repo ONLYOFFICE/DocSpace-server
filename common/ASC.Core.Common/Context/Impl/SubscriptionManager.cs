@@ -129,7 +129,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
                 methods.FirstOrDefault();
 
-        return m != null ? m.Methods : Array.Empty<string>();
+        return m != null ? m.Methods : [];
     }
 
     public async Task<string[]> GetRecipientsAsync(string sourceID, string actionID, string objectID)

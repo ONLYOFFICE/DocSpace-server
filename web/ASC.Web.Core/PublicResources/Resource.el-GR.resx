@@ -232,9 +232,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>Χώρος αποθήκευσης {0}</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Το μέγεθος του χρησιμοποιούμενου αποθηκευτικού χώρου πρέπει να είναι ίσο ή μικρότερο από {0}</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Πάρα πολλές προσπάθειες σύνδεσης. Προσπαθήστε ξανά αργότερα</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Ο τελευταίος χώρος πλήρους πρόσβασης δεν μπορεί να διαγραφεί</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Λάθος αρχείο πρόσθετων</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Το πρόσθετο υπάρχει ήδη</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Λάθος επέκταση αρχείου</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Το μέγεθος του αρχείου υπερβαίνει το όριο</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Απαγορεύονται οι αλλαγές στα πρόσθετα του συστήματος</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Λάθος όνομα πρόσθετου</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Δεν υπάρχει αρχείο εισόδου</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Το πρόσθετο δεν βρέθηκε</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Πάρα πολλά αρχεία εισόδου</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Απέτυχε ο ορισμός της ποσόστωσης μνήμης – η ποσόστωση μνήμης που ορίσατε είναι μεγαλύτερη από την ποσόστωση των πυλών.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Υπέρβαση της ποσόστωσης χώρου δωματίου</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Υπέρβαση της ποσόστωσης χώρου χρήστη</value>
   </data>
 </root>

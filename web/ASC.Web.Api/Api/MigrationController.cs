@@ -36,16 +36,16 @@ public class MigrationController(
     MigrationCore migrationCore) : ControllerBase
 {
     [HttpGet("list")]
-    public async Task<string[]> ListAsync()
+    public async Task<string[]> List()
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
         return migrationCore.GetAvailableMigrations();
     }
 
     [HttpPost("init/{migratorName}")]
     public async Task UploadAndInitAsync(string migratorName)
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         await migrationCore.StartParseAsync(migratorName);
     }
@@ -53,7 +53,7 @@ public class MigrationController(
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
         try
         {
             var status = await migrationCore.GetStatusAsync();
@@ -79,7 +79,7 @@ public class MigrationController(
     [HttpPost("cancel")]
     public async Task CancelAsync()
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         await migrationCore.StopAsync();
     }
@@ -87,7 +87,7 @@ public class MigrationController(
     [HttpPost("clear")]
     public async Task ClearAsync()
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         await migrationCore.ClearAsync();
     }
@@ -95,7 +95,7 @@ public class MigrationController(
     [HttpPost("migrate")]
     public async Task MigrateAsync(MigrationApiInfo info)
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         await migrationCore.StartAsync(info);
     }
@@ -103,7 +103,7 @@ public class MigrationController(
     [HttpGet("logs")]
     public async Task LogsAsync()
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         var status = await migrationCore.GetStatusAsync();
         if (status == null)
@@ -119,7 +119,7 @@ public class MigrationController(
     [HttpPost("finish")]
     public async Task FinishAsync(FinishDto inDto)
     {
-        await DemandPermission();
+        await DemandPermissionAsync();
 
         if (inDto.IsSendWelcomeEmail)
         {
@@ -128,16 +128,20 @@ public class MigrationController(
             {
                 throw new Exception(MigrationResource.MigrationProgressException);
             }
-            var guidUsers = status.ImportedUsers;
-            foreach (var gu in guidUsers)
+            var emails = status.ImportedUsers;
+            foreach (var email in emails)
             {
-                var u = await userManager.GetUsersAsync(gu);
+                var u = await userManager.GetUserByEmailAsync(email);
+                if (u.IsActive)
+                {
+                    continue;
+                }
                 await studioNotifyService.UserInfoActivationAsync(u);
             }
         }
     }
 
-    private async Task DemandPermission()
+    private async Task DemandPermissionAsync()
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {

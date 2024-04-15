@@ -397,9 +397,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} úložného priestoru</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Použitý objem úložiska by nemal presahovať {0}</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Príliš veľa pokusov o prihlásenie. Prosím, skúste to znova neskôr</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Posledný plný prístupový priestor nie je možné odstrániť</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Nesprávny archív pluginu</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin už existuje</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Nesprávna prípona súboru</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Veľkosť súboru prekračuje limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Zmeny systémových pluginov sú zakázané</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nesprávny názov pluginu</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Žiadny vstupný súbor</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin sa nenašiel</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>K mnohým vstupným súborom</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pamäte – kvóta pamäte, ktorú ste nastavili, je väčšia ako kvóta portálu.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Kvóta priestoru v miestnosti bola prekročená</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Kvóta priestoru v miestnosti bola prekročená</value>
   </data>
 </root>

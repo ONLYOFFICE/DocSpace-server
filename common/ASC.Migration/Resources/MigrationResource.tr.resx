@@ -117,59 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Takvim</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Takvim</value>
-  </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Geçici verileri temizleme</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Kişiler</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Belgeler</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Gruplar</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Posta</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Posta</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>İnsanlar</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Kullanıcılar</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Posta’nın Kişileri</value>
-  </data>
   <data name="DumpParse" xml:space="preserve">
     <value>Veritabanı ayrıştırma</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive Dosyaları</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Kullanıcı içe aktarılamadı: {0} ({1}/{2})</value>
   </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Grup taşıma {0} ({1}/{2})</value>
   </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Kullanıcı kişileri taşınıyor {0} ({1}/{2})</value>
-  </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Kullanıcı dosyaları taşınıyor {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Taşıma iptal edildi</value>
   </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Taşıma tamamlandı</value>
@@ -192,13 +147,28 @@
   <data name="Unzipping" xml:space="preserve">
     <value>Sıkıştırılmış dosyalar açılıyor...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Kullanıcı takvimi taşıma {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Kullanıcı taşıma {0} ({1}/{2})</value>
   </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Kullanıcı Dosyaları</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrasyon ortak dosyaları</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>{0} migrasyon aracı başlatılırken hata oluştu</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Böyle bir migrasyon sağlayıcısı yok</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Devam eden bir migrasyon işlemi yok</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrasyon projesi dosyaları</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Ayrıştırma hâlâ devam ediyor</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Migrasyon hâlihazırda devam ediyor</value>
   </data>
 </root>

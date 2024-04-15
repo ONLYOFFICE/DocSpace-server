@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Limpando dados temporários</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Processamento de dados...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Análise de banco de dados</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Contatos de eMail</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Arquivos do Google Drive</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Migração de grupo {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Migrando contatos do usuário {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Migrando arquivos de usuário {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Migração cancelada</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migração concluída</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Calendário</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Calendário</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Grupos</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Usuários</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Contatos</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Arquivos do usuário</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Documentos</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Pessoas</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Preparando para a migração</value>
@@ -192,13 +147,28 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Descompactação concluída...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Migração da agenda do usuário {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migração de usuário {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Falha ao importar usuário: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Arquivos comuns de migração</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Erro ao inicializar o migrador {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nenhum provedor de migração</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Nenhuma migração está em andamento</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Arquivos de projeto de migração</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>A análise ainda está em andamento</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>A migração já está em andamento</value>
   </data>
 </root>

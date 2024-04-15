@@ -829,9 +829,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} de espacio de almacenamiento</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>El tamaño de almacenamiento utilizado no debe superar {0}</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Demasiados intentos de inicio de sesión. Vuelva a intentarlo más tarde</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>El último espacio de acceso completo no se puede eliminar</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Archivo de plugin incorrecto</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>El plugin ya existe</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Extensión de archivo incorrecta</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>El tamaño del archivo excede el límite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Están prohibidos los cambios en los plugins del sistema</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nombre de complemento incorrecto</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Sin archivo de entrada</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin no encontrado</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Demasiados archivos de entrada</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>No se pudo establecer la cuota de memoria: la cuota de memoria que ha configurado es mayor que la cuota de los portales.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Se ha superado la cuota de espacio de la sala</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Se ha superado la cuota de espacio de usuario</value>
   </data>
 </root>

@@ -33,7 +33,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     StudioNotifyHelper studioNotifyHelper,
     UserManager userManager,
     SecurityContext securityContext,
-    AuthManager authManager,
     CoreSettings coreSettings,
     IConfiguration configuration,
     WorkContext workContext,
@@ -131,7 +130,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew checking subscription complete: {user.Email}");//temp
 
-                await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(tenant.Id, user.Id));
+                await securityContext.AuthenticateMeWithoutCookieAsync(tenant.Id, user.Id);
 
                 var culture = string.IsNullOrEmpty(user.CultureName) ? tenant.GetCulture() : user.GetCulture();
 

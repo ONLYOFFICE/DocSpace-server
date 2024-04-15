@@ -385,9 +385,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} opslagruimte</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>De gebruikte opslagruimte mag niet groter zijn dan {0}</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Te veel aanmeldingspogingen. Probeer het later opnieuw</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>De laatste volledige toegang tot de ruimte kan niet worden verwijderd</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Verkeerd plug-in archief</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plug-in bestaat al</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Verkeerde bestandsextensie</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Bestandsgrootte overschrijdt limiet</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Wijzigingen aan systeem plug-ins zijn verboden</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Verkeerd plug-in naam</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Geen invoerbestand</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plug-in niet gevonden</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Te veel invoerbestanden</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Het geheugenquotum is niet ingesteld - het geheugenquotum dat u heeft ingesteld is groter dan het portaal quota.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Kamer ruimte quota overschreden</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Gebruikersruimte quota overschreden</value>
   </data>
 </root>

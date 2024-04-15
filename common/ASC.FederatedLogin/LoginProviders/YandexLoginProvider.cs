@@ -60,7 +60,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, context.Request.Query["access_type"] == "offline"
+            var token = Auth(context, out var redirect, context.Request.Query["access_type"] == "offline"
                 ? new Dictionary<string, string>
                 {
                         { "force_confirm", "true" }

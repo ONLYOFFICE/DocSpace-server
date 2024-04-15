@@ -349,7 +349,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
 
                             await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
-                            await folderDao.ChangeTreeFolderSizeAsync(virtualRoomsId, file.ContentLength);
 
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
@@ -388,7 +387,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
     private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
     {
-        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
+        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
 
         foreach (var file in files)
@@ -400,7 +399,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 return (true, error);
             }
-            if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
+            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
             {
                 error = FilesCommonResource.ErrorMessage_LockedFile;
 

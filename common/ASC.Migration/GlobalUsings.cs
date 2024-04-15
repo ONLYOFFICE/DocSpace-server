@@ -26,12 +26,13 @@
 
 global using System.Data;
 global using System.IO.Compression;
+global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.Common;
 global using ASC.Common.Log;
-global using ASC.Migration.Core.Core.Providers.ASC.Models;
+global using ASC.Common.Security.Authentication;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -44,30 +45,25 @@ global using ASC.Data.Storage.DiscStorage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.Files.Core;
-global using ASC.Files.Core.Helpers;
-global using ASC.Migration.Core.Core.Providers.ASC.Models.Parse;
-global using ASC.Files.Core.Resources;
-global using ASC.Files.Core.Security;
-global using ASC.Migration.Core;
-global using ASC.Migration.Core.Core;
-global using ASC.Migration.Core.Core.Providers;
-global using ASC.Migration.Core.Core.Providers.Models;
-global using ASC.Migration.Core.Core.Providers.Models.Parse;
-global using ASC.Migration.Core.Models;
-global using ASC.Migration.Core.Models.Api;
-global using ASC.Migration.Core.Resources;
-global using ASC.Migration.GoogleWorkspace;
-global using ASC.Migration.GoogleWorkspace.Models;
-global using ASC.Migration.GoogleWorkspace.Models.Parse;
-global using ASC.Migration.NextcloudWorkspace;
-global using ASC.Migration.NextcloudWorkspace.Models;
-global using ASC.Migration.NextcloudWorkspace.Models.Parse;
-global using ASC.Migration.OwnCloud;
-global using ASC.Migration.OwnCloud.Models;
-global using ASC.Web.Files.Classes;
-global using ASC.Web.Files.Services.WCFService;
 global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
+global using ASC.Files.Core.Helpers;
+global using ASC.Files.Core.Resources;
+global using ASC.Migration.Core.Core;
+global using ASC.Migration.Core.Migrators;
+global using ASC.Migration.Core.Migrators.Model;
+global using ASC.Migration.Core.Migrators.Provider;
+global using ASC.Migration.Core.Migrators.Provider.Google;
+global using ASC.Migration.Core.Migrators.Provider.NC;
+global using ASC.Migration.Core.Models.Api;
+global using ASC.Migration.Core.Resources;
+global using ASC.Migration.GoogleWorkspace.Models.Parse;
+global using ASC.Web.Core.Users;
+global using ASC.Web.Files.Classes;
+global using ASC.Web.Files.Services.WCFService;
+global using ASC.Web.Files.Utils;
+
+global using DotNetOpenAuth.Messaging;
 
 global using HtmlAgilityPack;
 
@@ -76,6 +72,5 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.IdentityModel.Tokens;
 
 global using ProtoBuf;

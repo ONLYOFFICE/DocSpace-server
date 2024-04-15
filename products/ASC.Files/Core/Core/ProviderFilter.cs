@@ -37,5 +37,6 @@ public enum ProviderFilter
     OneDrive,
     SharePoint,
     WebDav,
-    Yandex
+    Yandex,
+    Storage
 }

@@ -127,7 +127,7 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
             }
         }
 
-        return Array.Empty<string>();
+        return [];
     }
 
     /// <summary>

@@ -394,9 +394,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} krātuves vieta</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Izmantotās krātuves lielums nedrīkst pārsniegt {0}</value>
   </data>
@@ -1002,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Pārāk daudz pieteikšanās mēģinājumu. Mēģiniet vēlreiz vēlāk</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Pēdējo pilnās piekļuves vietu nevar izdzēst</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Nepareizs spraudņu arhīvs</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Spraudnis jau pastāv</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Nepareizs faila paplašinājums</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Faila lielums pārsniedz ierobežojumu</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Sistēmas spraudņu izmaiņas ir aizliegtas</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nepareizs spraudņa nosaukums</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nav ievades faila</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Spraudnis nav atrasts</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Daudziem ievades failiem</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Neizdevās iestatīt atmiņas kvotu - jūsu iestatītā atmiņas kvota ir lielāka par portālu kvotu.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Pārsniegta telpas vietas kvota</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Pārsniegta lietotāja vietas kvota</value>
   </data>
 </root>

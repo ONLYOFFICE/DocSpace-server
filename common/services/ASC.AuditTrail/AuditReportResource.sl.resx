@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Zunanja povezava posodobljena: {0}. Vloga: {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Datoteka odprta za spreminjanje: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal preimenovan</value>
+  </data>
 </root>

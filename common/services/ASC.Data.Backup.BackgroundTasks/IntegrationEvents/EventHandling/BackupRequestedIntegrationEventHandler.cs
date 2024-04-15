@@ -34,7 +34,6 @@ public class BackupRequestedIntegrationEventHandler(
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        AuthManager authManager,
         BackupWorker backupWorker)
     : IIntegrationEventHandler<BackupRequestIntegrationEvent>
 {
@@ -51,7 +50,7 @@ public class BackupRequestedIntegrationEventHandler(
             }
 
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
             if (@event.IsScheduled)
             {

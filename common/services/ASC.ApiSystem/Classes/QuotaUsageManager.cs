@@ -27,60 +27,43 @@
 namespace ASC.ApiSystem.Classes;
 
 [Scope]
-public class QuotaUsageManager
+public class QuotaUsageManager(
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings,
+    CoreSettings coreSettings,
+    CountPaidUserStatistic countPaidUserStatistic,
+    CountUserStatistic activeUsersStatistic,
+    CountRoomCheckerStatistic countRoomCheckerStatistic)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CoreSettings _coreSettings;
-    private readonly CountPaidUserStatistic _countPaidUserStatistic;
-    private readonly CountUserStatistic _activeUsersStatistic;
-    private readonly CountRoomCheckerStatistic _countRoomCheckerStatistic;
-
-    public QuotaUsageManager(
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        CountPaidUserStatistic countPaidUserStatistic,
-        CountUserStatistic activeUsersStatistic,
-        CountRoomCheckerStatistic countRoomCheckerStatistic)
-    {
-        _tenantManager = tenantManager;
-        _coreBaseSettings = coreBaseSettings;
-        _coreSettings = coreSettings;
-        _countPaidUserStatistic = countPaidUserStatistic;
-        _activeUsersStatistic = activeUsersStatistic;
-        _countRoomCheckerStatistic = countRoomCheckerStatistic;
-    }
-
     public async Task<QuotaUsageDto> Get(Tenant tenant)
     {
-        _tenantManager.SetCurrentTenant(tenant);
+        tenantManager.SetCurrentTenant(tenant);
 
-        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
 
-        var usedSize = (await _tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
             .Sum(r => r.Counter);
 
-        var roomsCount = await _countRoomCheckerStatistic.GetValueAsync();
+        var roomsCount = await countRoomCheckerStatistic.GetValueAsync();
 
-        var roomAdminCount = await _countPaidUserStatistic.GetValueAsync();
+        var roomAdminCount = await countPaidUserStatistic.GetValueAsync();
 
-        var usersCount = await _activeUsersStatistic.GetValueAsync();
+        var usersCount = await activeUsersStatistic.GetValueAsync();
 
         var result = new QuotaUsageDto
         {
             TenantId = tenant.Id,
             TenantAlias = tenant.Alias,
-            TenantDomain = tenant.GetTenantDomain(_coreSettings),
+            TenantDomain = tenant.GetTenantDomain(coreSettings),
 
             StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
             UsedSize = (ulong)Math.Max(0, usedSize),
             MaxRoomAdminsCount = quota.CountRoomAdmin,
             RoomAdminCount = roomAdminCount,
-            MaxUsers = _coreBaseSettings.Standalone ? -1 : quota.CountUser,
+            MaxUsers = coreBaseSettings.Standalone ? -1 : quota.CountUser,
             UsersCount = usersCount,
-            MaxRoomsCount = _coreBaseSettings.Standalone ? -1 : quota.CountRoom,
+            MaxRoomsCount = coreBaseSettings.Standalone ? -1 : quota.CountRoom,
             RoomsCount = roomsCount
         };
 

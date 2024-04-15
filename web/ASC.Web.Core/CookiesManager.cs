@@ -218,7 +218,7 @@ public class CookiesManager(
         return (await tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
     }
 
-    public async Task ResetUserCookieAsync(Guid? userId = null)
+    public async Task ResetUserCookieAsync(Guid? userId = null, bool keepMeAuthenticated = true)
     {
         var targetUserId = userId ?? securityContext.CurrentAccount.ID;
         var tenant = await tenantManager.GetCurrentTenantIdAsync();
@@ -228,7 +228,7 @@ public class CookiesManager(
 
         await dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (targetUserId == securityContext.CurrentAccount.ID)
+        if (keepMeAuthenticated && targetUserId == securityContext.CurrentAccount.ID)
         {
             await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }

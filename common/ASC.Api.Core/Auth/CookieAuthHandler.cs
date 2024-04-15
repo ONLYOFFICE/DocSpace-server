@@ -56,7 +56,7 @@ public class CookieAuthHandler(
                 authorization = authorization["Bearer ".Length..];
             }
 
-            if (!(await securityContext.AuthenticateMe(authorization)))
+            if (!(await securityContext.AuthenticateMeAsync(authorization)))
             {
                 throw new AuthenticationException(nameof(HttpStatusCode.Unauthorized));
             }

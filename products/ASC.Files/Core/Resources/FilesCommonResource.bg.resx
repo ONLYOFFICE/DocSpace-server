@@ -422,4 +422,46 @@
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Опитахте твърде много пъти да въведете паролата си. Молим да опитате отново по-късно</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Автор</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Създаден</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Генерирана дата</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Изходящ автор</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Индекс</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Обновен</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Име</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Стая</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Индекс на стая</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Размер (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Общо</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Вид</value>
+  </data>
 </root>

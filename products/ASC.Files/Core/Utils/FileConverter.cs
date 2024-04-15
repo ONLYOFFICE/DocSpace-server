@@ -264,7 +264,7 @@ public class FileConverter(
     FileMarker fileMarker,
     TenantManager tenantManager,
     AuthContext authContext,
-    EntryManager entryManager,
+    LockerManager lockerManager,
     FilesSettingsHelper filesSettingsHelper,
     GlobalFolderHelper globalFolderHelper,
     FilesMessageService filesMessageService,
@@ -360,9 +360,9 @@ public class FileConverter(
         };
 
         var httpClient = clientFactory.CreateClient();
-        var response = await httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-        return new ResponseStream(response);
+        return await ResponseStream.FromMessageAsync(response);
     }
 
     public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
@@ -516,7 +516,7 @@ public class FileConverter(
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await entryManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;
@@ -549,8 +549,8 @@ public class FileConverter(
 
         try
         {
-            using var response = await httpClient.SendAsync(request);
-            await using var convertedFileStream = new ResponseStream(response);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
 

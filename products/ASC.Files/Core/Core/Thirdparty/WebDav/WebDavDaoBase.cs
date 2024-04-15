@@ -203,6 +203,11 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         return ToFolder(await GetFolderAsync(string.Empty));
     }
 
+    public async Task<WebDavEntry> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
+    }
+
     public async Task<WebDavEntry> GetFolderAsync(string folderId)
     {
         var id = MakeThirdId(folderId);
