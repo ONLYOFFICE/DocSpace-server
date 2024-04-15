@@ -38,8 +38,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<int> configurationConverter)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
+        ConfigurationConverter<int> configurationConverter,
+        IDaoFactory daoFactory)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,8 +53,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<string> configurationConverter)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
+        ConfigurationConverter<string> configurationConverter,
+        IDaoFactory daoFactory)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -65,7 +67,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<T> configurationConverter)
+        ConfigurationConverter<T> configurationConverter,
+        IDaoFactory daoFactory)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
@@ -155,6 +158,32 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var configuration = docParams.Configuration;
         var file = docParams.File;
         configuration.EditorType = editorType;
+
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        if (fileType == FileType.Pdf)
+        {
+            var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+            if (properties != null && properties.FormFilling.StartFilling)
+            {
+                var linkDao = daoFactory.GetLinkDao();
+                var fileDao = daoFactory.GetFileDao<T>();
+                var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+                File<T> formDraft;
+                if (linkedId != null)
+                {
+                    formDraft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                }
+                else
+                {
+                    (formDraft, _) = await entryManager.GetFillFormDraftAsync(file);
+                }
+                docParams = await _documentServiceHelper.GetParamsAsync(formDraft.Id, 0, null, true, true, true);
+                configuration = docParams.Configuration;
+                file = docParams.File;
+                configuration.EditorType = EditorType.Embedded;
+            }
+        }
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
