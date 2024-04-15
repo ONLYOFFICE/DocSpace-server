@@ -1363,6 +1363,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var httpClient = clientFactory.CreateClient();
                 using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+                }
+
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }

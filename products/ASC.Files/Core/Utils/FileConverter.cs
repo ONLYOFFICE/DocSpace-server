@@ -545,6 +545,12 @@ public class FileConverter(
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+            }
+
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);

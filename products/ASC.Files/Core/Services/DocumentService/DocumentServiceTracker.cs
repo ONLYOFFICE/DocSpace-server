@@ -561,7 +561,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             };
 
             var httpClient = clientFactory.CreateClient();
-            using (var response = await httpClient.SendAsync(request))
+            using var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+            }
+
             await using (var stream = await response.Content.ReadAsStreamAsync())
             await using (var fileStream = new ResponseStream(stream, stream.Length))
             {
