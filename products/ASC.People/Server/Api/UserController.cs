@@ -1113,13 +1113,12 @@ public class UserController(ICache cache,
         }
 
         var error = await userManagerWrapper.SendUserPasswordAsync(inDto.Email);
-        if (string.IsNullOrEmpty(error))
+        if (!string.IsNullOrEmpty(error))
         {
-            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+            logger.ErrorPasswordRecovery(inDto.Email, error);
         }
 
-        logger.ErrorPasswordRecovery(inDto.Email, error);
-        throw new InvalidOperationException(error);
+        return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
     }
 
     /// <summary>
