@@ -312,6 +312,11 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
         bool ValidateUrl(string url)
         {
+            if (string.IsNullOrEmpty(url))
+            {
+                return true;
+            }
+
             var success = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri);
 
             if (uri == null || uri.IsAbsoluteUri && !String.IsNullOrEmpty(uri.Query))
