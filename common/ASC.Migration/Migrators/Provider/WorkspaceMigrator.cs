@@ -224,16 +224,16 @@ public class WorkspaceMigrator : Migrator
             }
         }
 
-        var projectTitle = new Dictionary<string, string>();
+        var projectTitle = new Dictionary<string, ValueTuple<string, bool, string>>();
         if (storage.Type == FolderType.BUNCH)
         {
-            var projectProjects = new Dictionary<string, string>();
+            var projectProjects = new Dictionary<string, ValueTuple<string, bool, string>>();
             using var streamProject = _dataReader.GetEntry("databases/projects/projects_projects");
             var dataProject = new DataTable();
             dataProject.ReadXml(streamProject);
             foreach (var row in dataProject.Rows.Cast<DataRow>())
             {
-                projectProjects.Add(row["id"].ToString(), row["title"].ToString());
+                projectProjects.Add(row["id"].ToString(), (row["title"].ToString(), row["private"].ToString() == "1", row["responsible_id"].ToString()));
             }
             storage.RootKey = "0";
             folderTree.Add("0", -1);
@@ -263,12 +263,16 @@ public class WorkspaceMigrator : Migrator
             {
                 var title = row["title"].ToString();
                 var id = row["id"].ToString();
+                var priv = false;
+                var owner = "";
                 if (storage.Type == FolderType.BUNCH)
                 {
                     if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
                     {
                         var split = row["title"].ToString().Split('_');
-                        title = projectTitle[id];
+                        title = projectTitle[id].Item1;
+                        priv = projectTitle[id].Item2;
+                        owner = projectTitle[id].Item3;
                     }
                 }
                 var folder = new MigrationFolder
@@ -276,7 +280,9 @@ public class WorkspaceMigrator : Migrator
                     Id = int.Parse(id),
                     ParentId = int.Parse(row["parent_id"].ToString()),
                     Title = title,
-                    Level = folderTree[id]
+                    Level = folderTree[id],
+                    Private = priv,
+                    Owner = owner
                 };
                 storage.Folders.Add(folder);
             }
@@ -307,6 +313,48 @@ public class WorkspaceMigrator : Migrator
         if (storage.Type == FolderType.USER)
         {
             DbExtractFilesSecurity(storage, createBy);
+        }
+
+        if (storage.Type == FolderType.BUNCH)
+        {
+            ExtractProjectSecurity(storage);
+        }
+    }
+
+    private void ExtractProjectSecurity(MigrationStorage storage)
+    {
+        using var streamBunch = _dataReader.GetEntry("databases/files/files_bunch_objects");
+
+        var dataProject = new DataTable();
+        dataProject.ReadXml(streamBunch);
+        var mapper = new Dictionary<string, string>();
+        foreach (var row in dataProject.Rows.Cast<DataRow>())
+        {
+            if (row["right_node"].ToString().StartsWith("projects/project/") && storage.Folders.Any(f=> f.Id == int.Parse(row["left_node"].ToString())))
+            {
+                var split = row["right_node"].ToString().Split('/');
+                mapper.Add(split.Last(), row["left_node"].ToString());
+            }
+        }
+
+        using var streamFiles = _dataReader.GetEntry("databases/projects/projects_project_participant");
+        var datafiles = new DataTable();
+        datafiles.ReadXml(streamFiles);
+        foreach (var row in datafiles.Rows.Cast<DataRow>())
+        {
+            if (row["removed"].ToString() == "0" 
+                && mapper.ContainsKey(row["project_id"].ToString()) 
+                && storage.Folders.FirstOrDefault(f=> f.Id == int.Parse(mapper[row["project_id"].ToString()])).Private)
+            {
+                var security = new MigrationSecurity
+                {
+                    Subject = row["participant_id"].ToString(),
+                    EntryId = int.Parse(mapper[row["project_id"].ToString()]),
+                    EntryType = 1,
+                    Security = (int)Files.Core.Security.FileShare.Collaborator
+                };
+                storage.Securities.Add(security);
+            }
         }
     }
     
