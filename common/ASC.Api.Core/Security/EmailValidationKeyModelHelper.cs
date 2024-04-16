@@ -129,7 +129,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
 
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + hash, key, provider.ValidEmailKeyInterval);
                 
-                if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is EmployeeActivationStatus.Pending)
+                if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is not EmployeeActivationStatus.Activated)
                 {
                     await securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
                     
