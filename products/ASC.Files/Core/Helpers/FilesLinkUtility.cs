@@ -146,7 +146,10 @@ public class FilesLinkUtility
                 }
             }
 
-            SetUrlSetting(InternalUrlKey, DocServiceUrlInternal != value ? value : null);
+            if (DocServiceUrlInternal != value)
+            {
+                SetUrlSetting(InternalUrlKey, value);
+            }
         }
     }
 
