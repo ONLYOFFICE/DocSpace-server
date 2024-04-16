@@ -98,7 +98,7 @@ public interface IFolderDao<T>
     /// <param name="roomId"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)

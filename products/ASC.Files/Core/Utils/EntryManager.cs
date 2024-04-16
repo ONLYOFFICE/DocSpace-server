@@ -239,7 +239,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil,
     IDistributedLockProvider distributedLockProvider,
-    TempStream tempStream)
+    TempStream tempStream,
+    FileSharing fileSharing)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -382,7 +383,19 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
-            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId)
+            var containingMyFiles = false;
+            if (parent.FolderType == FolderType.ReadyFormFolder || parent.FolderType == FolderType.InProcessFormFolder)
+            {
+                var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
+                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
+                var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    containingMyFiles = true;
+                }
+            }
+            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
 
             var filesCount = count - folders.Count;
@@ -1417,6 +1430,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileMarker.MarkAsNewAsync(result);
                         await socketManager.CreateFileAsync(result);
 
+                        await fileMarker.RemoveMarkAsNewForAllAsync(file);
                         await fileDao.DeleteFileAsync(file.Id);
 
                         return result;
@@ -1870,6 +1884,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var csvFile = serviceProvider.GetService<File<T>>();
             csvFile.ParentId = resultsFolderId;
             csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+            csvFile.CreateBy = createBy;
 
             var file = await fileDao.SaveFileAsync(csvFile, textStream);
             properties.FormFilling.ResultsFileID = file.Id.ToString();
