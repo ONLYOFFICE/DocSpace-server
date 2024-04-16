@@ -1448,10 +1448,14 @@ public class EntryManager(IDaoFactory daoFactory,
                         await linkDao.DeleteLinkAsync(sourceId);
                         await socketManager.UpdateFileAsync(sourceFile);
 
+                        await fileDao.SaveProperties(result.Id, properties);
                         await fileMarker.MarkAsNewAsync(result);
                         await socketManager.CreateFileAsync(result);
 
                         await fileMarker.RemoveMarkAsNewForAllAsync(file);
+
+                        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                        await fileDao.SaveProperties(file.Id, null);
                         await fileDao.DeleteFileAsync(file.Id);
 
                         return result;
