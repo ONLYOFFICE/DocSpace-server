@@ -871,6 +871,26 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
+        var fileExt = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
+        if (fileType == FileType.Pdf)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var parent = await folderDao.GetFolderAsync(file.ParentId);
+            if (parent.FolderType == FolderType.FillingFormsRoom)
+            {
+                var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+                    if (properties == null || !properties.FormFilling.StartFilling)
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
         return file;
     }
 
@@ -1170,7 +1190,7 @@ public class FileStorageService //: IFileStorageService
                 currentProperties.FormFilling.StartFilling = true;
                 await daoFactory.GetFileDao<T>().SaveProperties(fileId, currentProperties);
             }
-            await socketManager.UpdateFileAsync(file);
+            await socketManager.CreateFileAsync(file);
         }
 
     }

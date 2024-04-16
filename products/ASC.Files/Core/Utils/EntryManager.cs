@@ -404,6 +404,27 @@ public class EntryManager(IDaoFactory daoFactory,
             var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
                 .ToListAsync();
 
+            if (parent.FolderType == FolderType.FillingFormsRoom )
+            {
+                var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    for (var i = files.Count - 1; i >= 0; i--)
+                    {
+                        var fileExt = FileUtility.GetFileExtension(files[i].Title);
+                        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
+
+                        var properties = await daoFactory.GetFileDao<T>().GetProperties(files[i].Id);
+                        if (fileType == FileType.Pdf && (properties == null || !properties.FormFilling.StartFilling))
+                        {
+                            files.Remove(files[i]);
+                        }
+
+                    }
+                }
+            }
+
             entries = new List<FileEntry>(folders.Count + files.Count);
             entries.AddRange(folders);
             entries.AddRange(files);
