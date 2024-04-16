@@ -79,40 +79,7 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
     {
-        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
-
-        if (zooKeeperConfiguration != null)
-        {
-            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
-            {
-                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
-                    options =>
-                {
-                    if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
-                    {
-                        options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
-                    }
-
-                    if (zooKeeperConfiguration.SessionTimeout.HasValue)
-                    {
-                        options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
-                    }
-                });
-            });
-
-            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
-            {
-                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
-                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
-                var cfg = sp.GetRequiredService<IConfiguration>();
-                
-                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
-                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
-                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
-            });
-        }
-        
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
         {            
@@ -145,7 +112,7 @@ public static class ServiceCollectionExtension
                     }
                 });
             });
-
+            
             return services.AddSingleton<IDistributedLockProvider, RedisLockProvider>(sp =>
             {
                 var redisClient = sp.GetRequiredService<IRedisClient>();
@@ -170,6 +137,39 @@ public static class ServiceCollectionExtension
                         opt.MinTimeout(minTimeout);
                     }
                 });
+            });
+        }
+        
+        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
+
+        if (zooKeeperConfiguration != null)
+        {
+            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
+            {
+                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
+                    options =>
+                    {
+                        if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
+                        {
+                            options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
+                        }
+
+                        if (zooKeeperConfiguration.SessionTimeout.HasValue)
+                        {
+                            options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
+                        }
+                    });
+            });
+
+            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
+            {
+                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
+                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
             });
         }
 
