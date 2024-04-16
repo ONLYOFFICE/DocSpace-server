@@ -59,7 +59,8 @@ public class GroupController(UserManager userManager,
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -98,7 +99,8 @@ public class GroupController(UserManager userManager,
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
@@ -116,6 +118,8 @@ public class GroupController(UserManager userManager,
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        
         return (await userManager.GetUserGroupsAsync(userid)).Select(x => new GroupSummaryDto(x, userManager));
     }
 
