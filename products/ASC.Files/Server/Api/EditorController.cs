@@ -173,26 +173,37 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             {
                 case FolderType.FillingFormsRoom:
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+                    var linkDao = daoFactory.GetLinkDao();
+                    var fileDao = daoFactory.GetFileDao<T>();
 
-                    if (properties != null && properties.FormFilling.StartFilling)
+                    if (editForm)
                     {
-                        var linkDao = daoFactory.GetLinkDao();
-                        var fileDao = daoFactory.GetFileDao<T>();
-                        var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
-                        var formDraft = linkedId != null ?
-                            await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
-                            (await entryManager.GetFillFormDraftAsync(file)).file;
-
-                        file = formDraft;
-                        canEdit = false;
-                        canFill = true;
-                        editorType = EditorType.Embedded;
-                    }
-                    else
-                    {
+                        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                        await fileDao.SaveProperties(file.Id, null);
                         canEdit = true;
                         canFill = false;
                     }
+                    else
+                    {
+                        if (properties != null && properties.FormFilling.StartFilling)
+                        {
+                            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+                            var formDraft = linkedId != null ?
+                                await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
+                                (await entryManager.GetFillFormDraftAsync(file)).file;
+
+                            file = formDraft;
+                            canEdit = false;
+                            canFill = true;
+                            editorType = EditorType.Embedded;
+                        }
+                        else
+                        {
+                            canEdit = true;
+                            canFill = false;
+                        }
+                    }
+
                     break;
 
                 case FolderType.FormFillingFolderInProgress:
