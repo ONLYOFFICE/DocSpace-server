@@ -405,7 +405,7 @@ public abstract class Migrator : IDisposable
                 {
                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
                 }
-                if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) || newFile.ParentId != 0)
+                if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) && newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                 }
