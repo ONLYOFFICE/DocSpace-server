@@ -36,8 +36,9 @@ public class MigrationOperation(
     SecurityContext securityContext,
     IServiceProvider serviceProvider,
     StorageFactory storageFactory)
-    : DistributedTaskProgress
+    : DistributedTaskProgress, IDisposable
 {
+    private readonly SemaphoreSlim _semaphore = new(1);
     private string _migratorName;
     private Guid _userId;
 
@@ -170,8 +171,21 @@ public class MigrationOperation(
 
     public async Task CopyLogsAsync(Stream stream)
     {
-        using var logger = serviceProvider.GetService<MigrationLogger>();
-        await logger.InitAsync(LogName);
-        await logger.GetStream().CopyToAsync(stream);
+        try
+        {
+            await _semaphore.WaitAsync();
+            using var logger = serviceProvider.GetService<MigrationLogger>();
+            await logger.InitAsync(LogName);
+            await logger.GetStream().CopyToAsync(stream);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public void Dispose()
+    {
+        _semaphore.Dispose();
     }
 }

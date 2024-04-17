@@ -312,7 +312,7 @@ public abstract class Migrator : IDisposable
                     if (!await UserManager.IsUserInGroupAsync(user.Id, group.Info.ID))
                     {
                         await UserManager.AddUserIntoGroupAsync(user.Id, group.Info.ID);
-                        if (group.ManagerKey == user.Email)
+                        if (group.ManagerKey == userGuid)
                         {
                             await UserManager.SetDepartmentManagerAsync(group.Info.ID, user.Id);
                         }

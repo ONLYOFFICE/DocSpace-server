@@ -118,12 +118,12 @@ public class WorkspaceMigrator : Migrator
             };
             ParseStorage(MigrationInfo.ProjectStorage);
         }
-        catch
+        catch(Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
             await ReportProgressAsync(_lastProgressUpdate, error);
-            throw new Exception(error);
+            throw new Exception(error, e);
         }
         if (reportProgress)
         {

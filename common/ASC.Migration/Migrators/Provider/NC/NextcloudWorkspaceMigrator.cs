@@ -133,7 +133,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
             if (dbFile == null)
             {
-                throw new Exception();
+                throw new Exception("*.bak file not found");
             }
             if (reportProgress)
             {
@@ -205,12 +205,12 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
-        catch
+        catch(Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
             await ReportProgressAsync(100, error);
-            throw new Exception(error);
+            throw new Exception(error, e);
         }
         if (reportProgress)
         {
@@ -346,7 +346,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         else
         {
-            throw new Exception();
+            throw new Exception("accounts_data not found");
         }
 
         var storages = GetDumpChunk("oc_storages", sqlFile);
