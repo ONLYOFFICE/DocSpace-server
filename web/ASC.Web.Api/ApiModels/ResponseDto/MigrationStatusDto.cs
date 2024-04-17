@@ -31,23 +31,19 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 public class MigrationStatusDto
 {
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Migration progress</summary>
+    /// <type>System.Double, System</type>
     public double Progress { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Migration error</summary>
+    /// <type>System.String, System</type>
     public string Error { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Migration API information</summary>
+    /// <type>ASC.Migration.Core.Models.Api.MigrationApiInfo, ASC.Migration</type>
     public MigrationApiInfo ParseResult { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Specifies whether the migration is completed</summary>
+    /// <type>System.Boolean, System</type>
     public bool IsCompleted { get; set; }
 }

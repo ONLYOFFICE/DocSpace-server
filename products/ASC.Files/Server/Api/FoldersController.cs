@@ -121,7 +121,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
-    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
+    /// <param type="ASC.Files.Core.VirtualRooms.SearchArea, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Folder contents</returns>
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
@@ -236,11 +236,11 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     }
 
     /// <summary>
-    /// Returns the used space in root folders.
+    /// Returns the used space of files in the root folders.
     /// </summary>
-    /// <short>Returns the used space in root foldersю</short>
+    /// <short>Get used space of files</short>
     /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space in root folders</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space of files in the root folders</returns>
     /// <path>api/2.0/files/filesusedspace</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("filesusedspace")]
