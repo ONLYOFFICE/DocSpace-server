@@ -357,6 +357,11 @@ public class FileConverter(
         var httpClient = clientFactory.CreateClient();
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+        }
+
         return await ResponseStream.FromMessageAsync(response);
     }
 

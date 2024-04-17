@@ -453,6 +453,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     };
 
                     using (var responseDownload = await httpClient.SendAsync(requestDownload))
+                    {
+                    if (!responseDownload.IsSuccessStatusCode)
+                    {
+                        throw new HttpRequestException($"Response status code: {responseDownload.StatusCode}", null, responseDownload.StatusCode);
+                    }
+
                     await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
                     await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
                     {
@@ -466,6 +472,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                         }
 
                         attach.Position = 0;
+                    }
                     }
 
                     if (string.IsNullOrEmpty(fileData.MailMerge.Title))
@@ -489,10 +496,17 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     };
 
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
+                    {
+                    if (!httpResponse.IsSuccessStatusCode)
+                    {
+                        throw new HttpRequestException($"Response status code: {httpResponse.StatusCode}", null, httpResponse.StatusCode);
+                    }
+
                     await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
                         using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
                         message = await reader.ReadToEndAsync();
+                    }
                     }
 
                     break;
@@ -608,6 +622,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             var httpClient = clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+            }
+
             await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);
         }
