@@ -68,6 +68,7 @@ public static class DocSpaceHelper
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
             RoomType.FormRoom => FolderType.FormRoom,
+            RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
