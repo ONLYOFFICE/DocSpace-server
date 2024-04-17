@@ -163,7 +163,7 @@ public class EmployeeFullDto : EmployeeDto
     public double? UsedSpace { get; set; }
     public bool? Shared { get; set; }
 
-    /// <summary>Specifies if the user has a custom quota or not.</summary>
+    /// <summary>Specifies if the user has a custom quota or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? IsCustomQuota { get; set; }
 
