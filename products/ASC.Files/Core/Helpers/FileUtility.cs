@@ -329,7 +329,7 @@ public class FileUtility(
             {
                 Accessibility.ImageView => CanImageView(fileName),
                 Accessibility.MediaView => CanMediaView(fileName),
-                Accessibility.WebView => CanWebView(fileName),
+                Accessibility.WebView => GetWebViewAccessibility(fileName),
                 Accessibility.WebEdit => CanWebEdit(fileName),
                 Accessibility.WebReview => CanWebReview(fileName),
                 Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
@@ -358,7 +358,11 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
-
+    public bool GetWebViewAccessibility(string fileName)
+    {
+        var ext = GetFileExtension(fileName).ToLower();
+        return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
+    }
     public bool CanWebView(string fileName)
     {
         var ext = GetFileExtension(fileName);
