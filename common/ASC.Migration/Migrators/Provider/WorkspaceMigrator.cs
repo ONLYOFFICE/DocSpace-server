@@ -156,15 +156,20 @@ public class WorkspaceMigrator : Migrator
                 }
             };
 
-            var drivePath = Directory.Exists(Path.Combine(TmpFolder, _dataReader.GetFolder(), "userPhotos")) ?
-            Path.Combine(TmpFolder, _dataReader.GetFolder(), "userPhotos") : null;
+            var drivePath = Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) ?
+            Path.Combine(_dataReader.GetFolder(), "userPhotos") : null;
+
+            if(drivePath == null)
+            {
+                drivePath = Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null;
+            }
             if (drivePath == null)
             {
                 u.HasPhoto = false;
             }
             else
             {
-                u.PathToPhoto = Directory.GetFiles(drivePath).FirstOrDefault(p => Path.GetFileName(p).StartsWith(key + "_orig_"));
+                u.PathToPhoto = Directory.GetFiles(drivePath).FirstOrDefault(p => Path.GetFileName(p).Contains(key + "_orig_"));
                 u.HasPhoto = u.PathToPhoto != null;
             }
 
