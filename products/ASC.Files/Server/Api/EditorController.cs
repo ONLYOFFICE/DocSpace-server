@@ -144,6 +144,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.String, System" name="doc">Shared token</param>
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type</param>
+    /// <param type="System.Boolean, System" name="editForm"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -152,38 +153,74 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType, bool editForm)
     {
-        var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
-        var configuration = docParams.Configuration;
-        var file = docParams.File;
-        configuration.EditorType = editorType;
-
+        (var file, var lastVersion, var linkRight) = await _documentServiceHelper.GetCurFileInfoAsync(fileId, version, doc);
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        (File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom) docParams;
+        Configuration<T> configuration;
+        bool canEdit;
+        bool canFill;
+
         if (fileType == FileType.Pdf)
         {
-            var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            if (properties != null && properties.FormFilling.StartFilling)
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var rootFolder = await folderDao.GetFolderAsync(file.ParentId);
+
+            switch (rootFolder.FolderType)
             {
-                var linkDao = daoFactory.GetLinkDao();
-                var fileDao = daoFactory.GetFileDao<T>();
-                var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
-                File<T> formDraft;
-                if (linkedId != null)
-                {
-                    formDraft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
-                }
-                else
-                {
-                    (formDraft, _) = await entryManager.GetFillFormDraftAsync(file);
-                }
-                docParams = await _documentServiceHelper.GetParamsAsync(formDraft.Id, 0, null, true, true, true);
-                configuration = docParams.Configuration;
-                file = docParams.File;
-                configuration.EditorType = EditorType.Embedded;
+                case FolderType.FillingFormsRoom:
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
+                    if (properties != null && properties.FormFilling.StartFilling)
+                    {
+                        var linkDao = daoFactory.GetLinkDao();
+                        var fileDao = daoFactory.GetFileDao<T>();
+                        var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+                        var formDraft = linkedId != null ?
+                            await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
+                            (await entryManager.GetFillFormDraftAsync(file)).file;
+
+                        file = formDraft;
+                        canEdit = false;
+                        canFill = true;
+                        editorType = EditorType.Embedded;
+                    }
+                    else
+                    {
+                        canEdit = true;
+                        canFill = false;
+                    }
+                    break;
+
+                case FolderType.FormFillingFolderInProgress:
+                    canEdit = false;
+                    canFill = true;
+                    editorType = EditorType.Embedded;
+                    break;
+
+                case FolderType.FormFillingFolderDone:
+                    canEdit = false;
+                    canFill = false;
+                    break;
+
+                default:
+                    canEdit = editForm;
+                    canFill = !editForm;
+                    break;
             }
         }
+        else
+        {
+            canEdit = true;
+            canFill = true;
+        }
+
+        docParams = await _documentServiceHelper.GetParamsAsync(file, lastVersion, linkRight, canEdit, !view, true, canFill, editorType);
+        configuration = docParams.Configuration;
+        file = docParams.File;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {

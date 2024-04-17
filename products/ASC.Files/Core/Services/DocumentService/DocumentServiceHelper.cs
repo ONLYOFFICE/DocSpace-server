@@ -42,7 +42,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         ExternalShare externalShare,
         AuthContext authContext)
     {
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
+
+    public async Task<(File<T> File, bool LastVersion, FileShare LinkRight)> GetCurFileInfoAsync<T>(T fileId, int version, string doc)
     {
         var lastVersion = true;
 
@@ -67,10 +68,23 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
         }
 
-        return await GetParamsAsync(file, lastVersion, linkRight, true, true, editPossible, tryEdit, tryCoauth);
+        return (file, lastVersion, linkRight);
+    }
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, FileShare linkRight, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType)
+    {
+        var docParams = await GetParamsAsync(file, lastVersion, linkRight, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+        docParams.Configuration.EditorType = editorType;
+        return docParams;
     }
 
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, FileShare linkRight, bool rightToRename, bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoauth)
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible)
+    {
+        (var file, var lastVersion, var linkRight) = await GetCurFileInfoAsync(fileId, version, doc);
+
+        return await GetParamsAsync(file, lastVersion, linkRight, true, true, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+    }
+
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, FileShare linkRight, bool rightToRename, bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible)
     {
         if (file == null)
         {
@@ -85,8 +99,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var rightToReview = rightToEdit;
         var reviewPossible = editPossible;
 
-        var rightToFillForms = rightToEdit;
-        var fillFormsPossible = editPossible;
+        var rightToFillForms = fillFormsPossible;
 
         var rightToComment = rightToEdit;
         var commentPossible = editPossible;
