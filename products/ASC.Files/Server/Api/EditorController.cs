@@ -144,7 +144,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.String, System" name="doc">Shared token</param>
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type</param>
-    /// <param type="System.Boolean, System" name="editForm"></param>
+    /// <param type="System.Boolean, System" name="edit"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -153,7 +153,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType, bool editForm)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType, bool edit)
     {
         (var file, var lastVersion, var linkRight) = await _documentServiceHelper.GetCurFileInfoAsync(fileId, version, doc);
         var extension = FileUtility.GetFileExtension(file.Title);
@@ -176,7 +176,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     var linkDao = daoFactory.GetLinkDao();
                     var fileDao = daoFactory.GetFileDao<T>();
 
-                    if (editForm)
+                    if (edit)
                     {
                         await linkDao.DeleteAllLinkAsync(file.Id.ToString());
                         await fileDao.SaveProperties(file.Id, null);
@@ -218,8 +218,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     break;
 
                 default:
-                    canEdit = editForm;
-                    canFill = !editForm;
+                    canEdit = edit;
+                    canFill = !edit;
                     break;
             }
         }
