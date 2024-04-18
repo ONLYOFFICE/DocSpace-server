@@ -65,6 +65,10 @@ public class ConfigurationDto<T>
     /// <summary>Error message</summary>
     /// <type>System.String, System</type>
     public string ErrorMessage { get; set; }
+
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFiling { get; set; }
 }
 
 public class EditorConfigurationDto<T>

@@ -163,7 +163,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         Configuration<T> configuration;
         bool canEdit;
         bool canFill;
-
+        var startEdit = false;
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -192,6 +192,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
                                 (await entryManager.GetFillFormDraftAsync(file)).file;
 
+                            startEdit = true;
                             file = formDraft;
                             canEdit = false;
                             canFill = true;
@@ -262,7 +263,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 await _entryManager.MarkAsRecent(file);
             }
         }
-        
+        if (fileType == FileType.Pdf) result.StartFiling = startEdit;
+
         return result;
     }
 
