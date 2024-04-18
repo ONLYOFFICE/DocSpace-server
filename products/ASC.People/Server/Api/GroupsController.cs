@@ -30,7 +30,6 @@ namespace ASC.People.Api;
 /// Groups API.
 ///</summary>
 ///<name>group</name>
-///<visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]
