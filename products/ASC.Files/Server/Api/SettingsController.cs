@@ -207,6 +207,7 @@ public class SettingsController(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesSettingsDto, ASC.Files.Core">File settings</returns>
     /// <path>api/2.0/files/settings</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("settings")]
     public async Task<FilesSettingsDto> GetFilesSettings()

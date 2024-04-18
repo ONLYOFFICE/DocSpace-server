@@ -223,7 +223,6 @@ public class EntryManager(IDaoFactory daoFactory,
     ThirdpartyConfiguration thirdpartyConfiguration,
     DocumentServiceConnector documentServiceConnector,
     LockerManager lockerManager,
-    BreadCrumbsManager breadCrumbsManager,
     SettingsManager settingsManager,
     IServiceProvider serviceProvider,
     ICache cache,
@@ -1029,16 +1028,6 @@ public class EntryManager(IDaoFactory daoFactory,
         return folder;
     }
 
-    public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId)
-    {
-        return await breadCrumbsManager.GetBreadCrumbsAsync(folderId);
-    }
-
-    public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId, IFolderDao<T> folderDao)
-    {
-        return await breadCrumbsManager.GetBreadCrumbsAsync(folderId, folderDao);
-    }
-
     private async Task CheckFolderIdAsync<T>(IFolderDao<T> folderDao, IEnumerable<FileEntry<T>> entries)
     {
         foreach (var entry in entries)
@@ -1059,11 +1048,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 entry.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
             }
         }
-    }
-
-    public async Task<bool> FileLockedForMeAsync<T>(T fileId, Guid userId = default)
-    {
-        return await lockerManager.FileLockedForMeAsync(fileId, userId);
     }
 
     public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile)
@@ -1088,7 +1072,7 @@ public class EntryManager(IDaoFactory daoFactory,
             linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
             if (linkedFile == null
                 || !await fileSecurity.CanFillFormsAsync(linkedFile)
-                || await FileLockedForMeAsync(linkedFile.Id)
+                    || await lockerManager.FileLockedForMeAsync(linkedFile.Id)
                 || linkedFile.RootFolderType == FolderType.TRASH)
             {
                 await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
@@ -1282,7 +1266,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        if (checkRight && await FileLockedForMeAsync(file.Id))
+        if (checkRight && await lockerManager.FileLockedForMeAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
@@ -1510,7 +1494,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
         
-        if (await FileLockedForMeAsync(file.Id, userId))
+        if (await lockerManager.FileLockedForMeAsync(file.Id, userId))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
@@ -1575,7 +1559,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        if (await FileLockedForMeAsync(file.Id))
+        if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
@@ -1636,7 +1620,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                var CopyThumbnailsAsync = async () =>
+                var copyThumbnailsAsync = async () =>
                 {
                     await using var scope = serviceProvider.CreateAsyncScope();
                         var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
@@ -1653,7 +1637,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
                 };
 
-                _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());
+                _ = Task.Run(() => copyThumbnailsAsync().GetAwaiter().GetResult());
             }
 
 
@@ -1707,7 +1691,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        if (await FileLockedForMeAsync(fileVersion.Id))
+        if (await lockerManager.FileLockedForMeAsync(fileVersion.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
@@ -1765,7 +1749,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFile);
         }
 
-        if (await FileLockedForMeAsync(file.Id))
+        if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }

@@ -422,4 +422,46 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>U hebt te vaak geprobeerd uw wachtwoord in te voeren. Probeer het later opnieuw</value>
   </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Bedrijf</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Gemaakt</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Datum Gegenereerd</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Exporteer Auteur</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Gewijzigd</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Naam</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Kamer</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Kamer index</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Grootte (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Totaal</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
 </root>

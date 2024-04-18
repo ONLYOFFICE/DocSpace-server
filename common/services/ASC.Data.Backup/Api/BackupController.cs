@@ -34,17 +34,17 @@ namespace ASC.Data.Backup.Controllers;
 [DefaultRoute]
 [ApiController]
 public class BackupController(
-        BackupAjaxHandler backupAjaxHandler,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        CoreBaseSettings coreBaseSettings,
-        TenantExtra tenantExtra,
-        IEventBus eventBus,
-        CommonLinkUtility commonLinkUtility,
-        CoreSettings coreSettings)
+    BackupAjaxHandler backupAjaxHandler,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    CoreBaseSettings coreBaseSettings,
+    TenantExtra tenantExtra,
+    IEventBus eventBus,
+    CommonLinkUtility commonLinkUtility,
+    CoreSettings coreSettings)
     : ControllerBase
 {
-    private readonly Guid _currentUserId = securityContext.CurrentAccount.ID;
+    private Guid CurrentUserId => authContext.CurrentAccount.ID;
 
     /// <summary>
     /// Returns the backup schedule of the current portal.
@@ -187,7 +187,7 @@ public class BackupController(
              tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
-             createBy: _currentUserId,
+             createBy: CurrentUserId,
              dump: inDto.Dump,
              taskId: taskId,
              serverBaseUri: serverBaseUri
@@ -300,7 +300,7 @@ public class BackupController(
         
         eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
-                             createBy: _currentUserId,
+                             createBy: CurrentUserId,
                              storageParams: storageParams,
                              storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
                              notify: inDto.Notify,

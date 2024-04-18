@@ -117,58 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ClearingTemporaryData" xml:space="preserve">
+    <value>Se golesc datele temporare</value>
+  </data>
   <data name="DataProcessing" xml:space="preserve">
-    <value>Notiek datu apstrāde...</value>
+    <value>Procesare date...</value>
   </data>
   <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Datu apstrāde ir pabeigta</value>
+    <value>Procesarea datelor s-a terminat</value>
   </data>
   <data name="DumpParse" xml:space="preserve">
-    <value>Datubāzes parsēšana</value>
+    <value>Analiză baza de date</value>
+  </data>
+  <data name="GoogleModuleNameContacts" xml:space="preserve">
+    <value>Contacte Mail</value>
+  </data>
+  <data name="GoogleModuleNameDocuments" xml:space="preserve">
+    <value>Fișiere Google Drive</value>
   </data>
   <data name="GroupMigration" xml:space="preserve">
-    <value>Grupas migrācija {0} ({1}/{2})</value>
+    <value>Migrare de group {0} ({1}/{2})</value>
+  </data>
+  <data name="MigratingUserContacts" xml:space="preserve">
+    <value>Migrare contacte utilizator {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Notiek lietotāja failu migrēšana {0} ({1}/{2})</value>
+    <value>Migrare fișiere utilizator {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrācija ir pabeigta</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Notiek sagatavošanās migrācijai</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Notiek datu apstrādes sākšana...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Notiek atarhivēšana...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Atspiešana ir pabeigta...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Lietotāja migrācija {0} ({1}/{2})</value>
+  <data name="MigrationCanceled" xml:space="preserve">
+    <value>Migrarea a fost anulată</value>
   </data>
   <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migrācijas kopīgie faili</value>
+    <value>Migrare fișiere comune</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migrarea a fost finalizată</value>
   </data>
   <data name="MigrationInitException" xml:space="preserve">
-    <value>Inicializējot {0} migrētāju, radās kļūda</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nav šāda migrācijas nodrošinātāja</value>
+    <value>A intervenit o eroare în timpul inițializării {0} a migratorului</value>
   </data>
   <data name="MigrationProgressException" xml:space="preserve">
-    <value>Migrācija nenotiek</value>
+    <value>Nicio migrare în desfășurare</value>
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migrācijas projektu faili</value>
+    <value>Migrare fișiere de proiect</value>
   </data>
   <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsēšana joprojām notiek</value>
+    <value>Analiză este încă în desfășurare</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nu există un astfel de furnizor de migrare</value>
   </data>
   <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrācija jau notiek</value>
+    <value>Migrare este deja în desfășurare</value>
+  </data>
+  <data name="ModuleNameCalendar" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="ModuleNameGroups" xml:space="preserve">
+    <value>Grupuri</value>
+  </data>
+  <data name="ModuleNameMail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="ModuleNameUsers" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="NextcloudModuleNameContacts" xml:space="preserve">
+    <value>Contacte</value>
+  </data>
+  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
+    <value>Fișierele utilizatorului</value>
+  </data>
+  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
+    <value>Documente</value>
+  </data>
+  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
+    <value>Persoane</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Pregătire pentru migrare</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Pornire procesare de date...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Decomprimare...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Decomprimarea finalizată...</value>
+  </data>
+  <data name="UserCalendarMigration" xml:space="preserve">
+    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
+  </data>
+  <data name="UserSkipped" xml:space="preserve">
+    <value>Import utilizatori nu a reușit: {0} ({1}/{2})</value>
   </data>
 </root>

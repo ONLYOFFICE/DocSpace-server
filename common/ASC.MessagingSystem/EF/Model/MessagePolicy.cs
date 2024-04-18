@@ -30,7 +30,7 @@ namespace ASC.MessagingSystem.EF.Model;
 public class MessagePolicy(IConfiguration configuration)
 {
     private readonly IEnumerable<string> _secretIps = configuration["messaging:secret-ips"] == null
-        ? Array.Empty<string>()
+        ? []
         : configuration["messaging:secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
     public bool Check(EventMessage message)

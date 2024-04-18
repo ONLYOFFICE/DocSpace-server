@@ -27,75 +27,53 @@
 namespace ASC.Files.Service.RoomIndexExport;
 
 [Scope]
-public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
+public class RoomIndexExportIntegrationEventHandler(
+    ILogger<RoomIndexExportIntegrationEventHandler> logger,
+    CommonLinkUtility commonLinkUtility,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    DocumentBuilderScriptHelper documentBuilderScriptHelper,
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
+    : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
 {
-    private readonly ILogger _logger;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthManager _authManager;
-    private readonly SecurityContext _securityContext;
-    private readonly DocumentBuilderScriptHelper _documentBuilderScriptHelper;
-    private readonly DocumentBuilderTaskManager _documentBuilderTaskManager;
-    private readonly IServiceProvider _serviceProvider;
-
-    public RoomIndexExportIntegrationEventHandler(
-        ILogger<RoomIndexExportIntegrationEventHandler> logger,
-        CommonLinkUtility commonLinkUtility,
-        TenantManager tenantManager,
-        AuthManager authManager,
-        SecurityContext securityContext,
-        DocumentBuilderScriptHelper documentBuilderScriptHelper,
-        DocumentBuilderTaskManager documentBuilderTaskManager,
-        IServiceProvider serviceProvider)
-    {
-        _logger = logger;
-        _commonLinkUtility = commonLinkUtility;
-        _tenantManager = tenantManager;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _documentBuilderScriptHelper = documentBuilderScriptHelper;
-        _documentBuilderTaskManager = documentBuilderTaskManager;
-        _serviceProvider = serviceProvider;
-    }
 
     public async Task Handle(RoomIndexExportIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
 
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
             try
             {
                 if (@event.Terminate)
                 {
-                    await _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
                     return;
                 }
 
                 if (!string.IsNullOrEmpty(@event.BaseUri))
                 {
-                    _commonLinkUtility.ServerUri = @event.BaseUri;
+                    commonLinkUtility.ServerUri = @event.BaseUri;
                 }
 
-                await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-                var account = await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy);
+                await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
-                await _securityContext.AuthenticateMeWithoutCookieAsync(account);
+                var (script, tempFileName, outputFileName) = await documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
 
-                var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
-
-                var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
+                var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
 
                 task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
 
-                await _documentBuilderTaskManager.StartTask(task);
+                await documentBuilderTaskManager.StartTask(task);
             }
             catch (Exception ex)
             {
-                _logger.ErrorWithException(ex);
+                logger.ErrorWithException(ex);
             }
         }
     }

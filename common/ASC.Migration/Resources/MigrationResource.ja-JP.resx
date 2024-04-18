@@ -150,4 +150,25 @@
   <data name="UserMigration" xml:space="preserve">
     <value>ユーザー移行 {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>一般的な移行ファイル</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>{0} 移行者の初期化中のエラー</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>このような移行プロバイダーはありません</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>進行中の移行はありません</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>移行プロジェクトファイル</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>解析はまだ進行中です</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>移行はすでに進行中です</value>
+  </data>
 </root>

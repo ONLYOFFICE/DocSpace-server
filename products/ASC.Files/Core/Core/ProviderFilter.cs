@@ -30,7 +30,6 @@ namespace ASC.Files.Core;
 public enum ProviderFilter
 {
     None,
-    Storage,
     Box,
     DropBox,
     GoogleDrive,
@@ -38,5 +37,6 @@ public enum ProviderFilter
     OneDrive,
     SharePoint,
     WebDav,
-    Yandex
+    Yandex,
+    Storage
 }

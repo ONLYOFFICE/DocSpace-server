@@ -97,4 +97,10 @@
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Soukromá místnost</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>V procesu</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Připraveno</value>
+  </data>
 </root>

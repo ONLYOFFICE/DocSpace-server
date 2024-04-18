@@ -293,13 +293,13 @@ public class UserManager(
     {
         if (text == null || text.Trim().Length == 0)
         {
-            return Array.Empty<UserInfo>();
+            return [];
         }
 
         var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (words.Length == 0)
         {
-            return Array.Empty<UserInfo>();
+            return [];
         }
 
         var users = groupId == Guid.Empty ?

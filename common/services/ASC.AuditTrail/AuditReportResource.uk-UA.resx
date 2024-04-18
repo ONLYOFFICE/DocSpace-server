@@ -733,4 +733,10 @@
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Зовнішнє посилання оновлено: {0}. Роль: {1}</value>
   </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Файл відкрито для зміни: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Портал перейменовано</value>
+  </data>
 </root>

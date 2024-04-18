@@ -39,8 +39,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw =
-                JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
+            loginEvent.DescriptionRaw = JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
                 {
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });
