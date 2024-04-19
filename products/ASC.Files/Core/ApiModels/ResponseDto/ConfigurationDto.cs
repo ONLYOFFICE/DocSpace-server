@@ -68,7 +68,7 @@ public class ConfigurationDto<T>
 
     /// <summary>Specifies if the filling has started or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool? StartFiling { get; set; }
+    public bool? StartFilling { get; set; }
 }
 
 public class EditorConfigurationDto<T>

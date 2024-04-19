@@ -68,6 +68,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
         }
 
+        if (file == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
         return (file, lastVersion, linkRight);
     }
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, FileShare linkRight, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType)

@@ -39,8 +39,10 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
-        IDaoFactory daoFactory)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory);
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -54,8 +56,10 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
-        IDaoFactory daoFactory)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory);
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -68,7 +72,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
-        IDaoFactory daoFactory)
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
@@ -192,10 +198,17 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
                                 (await entryManager.GetFillFormDraftAsync(file)).file;
 
-                            file = formDraft;
+
                             canEdit = false;
                             canFill = true;
                             editorType = EditorType.Embedded;
+
+                            await fileMarker.MarkAsNewAsync(formDraft);
+                            await socketManager.CreateFileAsync(formDraft);
+                            await linkDao.AddLinkAsync(fileId.ToString(), formDraft.Id.ToString());
+                            await socketManager.UpdateFileAsync(file);
+
+                            file = formDraft;
                         }
                         else
                         {
@@ -262,7 +275,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 await _entryManager.MarkAsRecent(file);
             }
         }
-        if (fileType == FileType.Pdf) result.StartFiling = canStartEdit;
+        if (fileType == FileType.Pdf) result.StartFilling = canStartEdit;
 
         return result;
     }
