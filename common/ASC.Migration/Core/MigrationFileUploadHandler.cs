@@ -37,7 +37,8 @@ public class MigrationFileUploadHandler
         IConfiguration configuration,
         StorageFactory storageFactory,
         UserManager userManager,
-        AuthContext authContext)
+        AuthContext authContext,
+        ILogger<MigrationFileUploadHandler> logger)
     {
         MigrationFileUploadResult result = null;
         try
@@ -53,11 +54,14 @@ public class MigrationFileUploadHandler
                 
                 try
                 {
+                    logger.Information("start migration upload file");
                     var discStore = await storageFactory.GetStorageAsync(tenantId, "migration", (IQuotaController)null) as DiscDataStore;
                     var folder = discStore.GetPhysicalPath("", "");
                     if (Directory.Exists(folder))
                     {
+                        logger.Information("start delete migration folder");
                         Directory.Delete(folder, true);
+                        logger.Information("end delete migration folder");
                     }
                     Directory.CreateDirectory(folder);
                     int.TryParse(configuration["files:uploader:chunk-size"], out var chunkSize);
