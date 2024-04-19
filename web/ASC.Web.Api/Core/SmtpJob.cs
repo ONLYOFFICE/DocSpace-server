@@ -103,7 +103,7 @@ public class SmtpJob(UserManager userManager,
 
             var bodyBuilder = new BodyBuilder
             {
-                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test
+                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test.Replace("$TrulyYours", WebstudioNotifyPatternResource.TrulyYoursText)
             };
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();
