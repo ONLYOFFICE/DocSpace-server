@@ -1709,22 +1709,13 @@ internal class FileDao(
         return true;
     }
 
-    public async Task MarkFileAsRemovedAsync(File<int> file)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, [file.Id]);
-    }
-
     public async Task MarkFilesAsRemovedAsync(IEnumerable<int> fileIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, fileIds);
+        await Queries.MarkDbFilesAsRemovedAsync(filesDbContext, tenantId, fileIds, DateTime.UtcNow, _authContext.CurrentAccount.ID);
     }
 
     #endregion
@@ -2721,11 +2712,14 @@ static file class Queries
                     .Where(r => r.EntryId == entryId)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> MarkDbFilesAsRemovedAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Guid, Task<int>> MarkDbFilesAsRemovedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime modifiedOn, Guid modifiedBy) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => fileIds.Contains(r.Id))
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
+                    .ExecuteUpdate(q => q
+                        .SetProperty(p => p.Removed, true)
+                        .SetProperty(p => p.ModifiedOn, modifiedOn)
+                        .SetProperty(p => p.ModifiedBy, modifiedBy)));
 }

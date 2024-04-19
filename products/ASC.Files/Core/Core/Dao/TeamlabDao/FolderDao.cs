@@ -1378,22 +1378,13 @@ internal class FolderDao(
         return true;
     }
 
-    public async Task MarkFolderAsRemovedAsync(Folder<int> folder)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, [folder.Id]);
-    }
-
     public async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, folderIds);
+        await Queries.MarkFoldersAsRemovedAsync(filesDbContext, tenantId, folderIds, DateTime.UtcNow, _authContext.CurrentAccount.ID);
     }
 
     #endregion
@@ -2523,11 +2514,14 @@ static file class Queries
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> MarkFoldersAsRemovedAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Guid, Task<int>> MarkFoldersAsRemovedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds, DateTime modifiedOn, Guid modifiedBy) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => folderIds.Contains(r.Id))
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)));
+                    .ExecuteUpdate(q => q
+                        .SetProperty(p => p.Removed, true)
+                        .SetProperty(p => p.ModifiedOn, modifiedOn)
+                        .SetProperty(p => p.ModifiedBy, modifiedBy)));
 }

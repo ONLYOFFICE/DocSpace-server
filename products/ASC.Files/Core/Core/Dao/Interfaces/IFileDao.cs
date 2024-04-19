@@ -345,8 +345,6 @@ public interface IFileDao<T>
 
     bool CanMarkFileAsRemoved(T entryId);
 
-    Task MarkFileAsRemovedAsync(File<T> file);
-
     Task MarkFilesAsRemovedAsync(IEnumerable<T> fileIds);
 
     #endregion

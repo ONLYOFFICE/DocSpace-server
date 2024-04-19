@@ -417,8 +417,6 @@ public interface IFolderDao<T>
 
     bool CanMarkFolderAsRemoved(T entryId);
 
-    Task MarkFolderAsRemovedAsync(Folder<T> folder);
-
     Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds);
 
     #endregion

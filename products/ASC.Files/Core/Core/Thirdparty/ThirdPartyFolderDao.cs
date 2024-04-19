@@ -691,11 +691,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return false;
     }
 
-    public Task MarkFolderAsRemovedAsync(Folder<string> folder)
-    {
-        return Task.CompletedTask;
-    }
-
     public Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
     {
         return Task.CompletedTask;

@@ -565,13 +565,6 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         return fileDao.CanMarkFileAsRemoved(entryId);
     }
 
-    public async Task MarkFileAsRemovedAsync(File<string> file)
-    {
-        var selector = _selectorFactory.GetSelector(file.Id);
-        var fileDao = selector.GetFileDao(file.Id);
-        await fileDao.MarkFileAsRemovedAsync(file);
-    }
-
     public async Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
     {
         foreach (var group in _selectorFactory.GetSelectors(fileIds))
