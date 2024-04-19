@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Benutzerkontingent überschritten</value>
   </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} pro Administrator/Power-User und die Möglichkeit, den Speicherplatz auf Anfrage zu erweitern</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Speicherplatzkontingente &amp; Statistik</value>
+  </data>
 </root>

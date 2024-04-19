@@ -171,4 +171,49 @@
   <data name="MigrationUploadException" xml:space="preserve">
     <value>Миграция уже выполняется</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Не удалось добавить пользователя {0} в группу {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Не удалось создать файл {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Не удалось импортировать общие файлы</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Не удалось импортировать файлы проекта</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Не удалось импортировать пользователя</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Не удалось импортировать файлы пользователя</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Не удалось проанализировать архив {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Не удалось проанализировать архивы</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Не удалось проанализировать пользователя {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Не удалось прочитать информационный файл из {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Не удалось разархивировать {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Создать файл {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Создать папку {0}</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Создать корневую папку</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>создать общую комнату {0}</value>
+  </data>
 </root>
