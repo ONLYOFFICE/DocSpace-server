@@ -224,7 +224,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Duplicate,
                     FilesSecurityActions.SubmitToFormGallery,
                     FilesSecurityActions.Download,
-                    FilesSecurityActions.Convert
+                    FilesSecurityActions.Convert,
+                    FilesSecurityActions.EditForm
                 }
             },
             {
@@ -2151,6 +2152,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         Convert,
         CopySharedLink,
         ReadLinks,
-        Reconnect
+        Reconnect,
+        EditForm
     }
 }

@@ -158,7 +158,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        FileSharing fileSharing)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -194,6 +195,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             var linkDao = daoFactory.GetLinkDao();
             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
             var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T))).NotFoundIfNull();
+            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+            if (ace is { Access: FileShare.FillForms })
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+            }
 
             result.HasDraft = linkedId != null;
             if (properties != null)
