@@ -1203,6 +1203,7 @@ public class FileStorageService //: IFileStorageService
 
             var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
             await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+            await socketManager.CreateFileAsync(file);
         }
     }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false, string doc = null)
