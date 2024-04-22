@@ -178,4 +178,37 @@ Prijavi se na svoj DocuSign nalog za više informacija.</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumenti. Pristup dozvoljen folderu: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName vas je pomenuo u komentaru dokumenta
+
+$__AuthorName vas je pomenuo u komentaru "$DocumentTitle":"$DocumentURL" dokumenta u sobi "$RoomTitle":"$RoomURL":
+
+$Message</value>
+  </data>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Slanje završeno
+
+Ovo je email notifikacija da vas obavesti da ste tražili slanje $MailsCount poruka i proces je sada kompletan. $Message
+
+Uspešno poslate mail poruke sada mogu biti pronađene u vašem "Poslato":"$__VirtualRootPath/addons/mail/#sent" folderu Mail modula.</value>
+  </data>
+  <data name="pattern_ShareDocument" xml:space="preserve">
+    <value>h1. Pristup dozvoljen dokumentu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" dokumentu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
+  </data>
+  <data name="pattern_ShareFolder" xml:space="preserve">
+    <value>h1. Pristup dozvoljen folderu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" folderu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName je izbrisao sobu
+
+$__AuthorName je izbrisao sobu: $RoomTitle</value>
+  </data>
 </root>

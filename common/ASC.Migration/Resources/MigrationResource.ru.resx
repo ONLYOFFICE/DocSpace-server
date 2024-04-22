@@ -216,4 +216,7 @@
   <data name="CreateShareRoom" xml:space="preserve">
     <value>создать общую комнату {0}</value>
   </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Не удалось предоставить права доступа к {0} для {1}</value>
+  </data>
 </root>

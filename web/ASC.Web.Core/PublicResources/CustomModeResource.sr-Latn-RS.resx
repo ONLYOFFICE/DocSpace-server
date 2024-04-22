@@ -136,4 +136,33 @@ Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>Novi portal je registrovan</value>
   </data>
+  <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
+
+* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
+
+* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
+
+* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
+
+* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
+
+$OrangeButton
+
+Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>h3.Novi portal je registrovan
+
+# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
+# Ime: $UserName
+# Prezime: $UserLastName
+# Email: $UserEmail
+# Telefon: $Phone
+# Datum kreiranja: $Date</value>
+  </data>
 </root>

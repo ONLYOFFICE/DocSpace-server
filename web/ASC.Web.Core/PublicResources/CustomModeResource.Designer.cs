@@ -93,7 +93,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h3.New portal has been registered
         ///
-        ///# Portal url: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
+        ///# Portal URL: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///# First name: $UserName
         ///# Last name: $UserLastName
         ///# Email: $UserEmail

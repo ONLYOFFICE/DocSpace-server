@@ -1330,12 +1330,12 @@ ONLYOFFICE™ tim za podršku
 
 Poštovani $OwnerName,
 
-Zahtevali ste da trajno izbrišete svoj prostor "${__VirtualRootPath}":"${__VirtualRootPath}“.
+Zahtevali ste da trajno izbrišete svoj prostor "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 *Važno! Svi podaci uskladišteni u vašem prostoru, kao i vaši podaci o registraciji biće izgubljeni i neće se moći povratiti.*
 
 #if($AutoRenew == "True")
-Pre nego što izbrišete prostor, uverite se da je automatski obračun isključen. Status automatske naplate možete da proverite u svom „Avangate account“: „https://secure.avangate.com/myaccount/“.
+Pre nego što izbrišete prostor, uverite se da je automatski obračun isključen. Status automatske naplate možete da proverite u svom "Avangate account":"https://secure.avangate.com/myaccount/".
 #end
 
 Ako i dalje želite da izbrišete svoj prostor "${__VirtualRootPath}":"${__VirtualRootPath}", pratite link ispod da biste potvrdili operaciju:
@@ -1398,7 +1398,7 @@ Vaša adresa portala $PortalUrl je promenjena u novu "${__VirtualRootPath}":"${_
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Uklanjanje profila sa portala "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Zahtevali ste da trajno izbrišete svoj profil sa portala "${__VirtualRootPath}":"„${__VirtualRootPath}".
+Zahtevali ste da trajno izbrišete svoj profil sa portala "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Ako i dalje želite da izbrišete svoj profil, pratite donji link da biste potvrdili operaciju:
 
@@ -1565,7 +1565,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 
 $TrulyYours
 
-^Da biste promenili tip obaveštenja, upravljajte svojim "podešavanjima pretplate":"„$RecipientSubscriptionConfigURL".^</value>
+^Da biste promenili tip obaveštenja, upravljajte svojim "podešavanjima pretplate":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>h1. Konfigurišite svoj &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -1760,5 +1760,11 @@ $OrangeButton
 Link je validan samo za 7 dana.
 
 Dobićete više saveta o tome kako da koristite svoju veb kancelariju. Možete da otkažete pretplate na stranici profila u bilo kom trenutku, kao i da ih ponovo omogućite.</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Klikni ovde</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText} pomoć oko lozinke</value>
   </data>
 </root>
