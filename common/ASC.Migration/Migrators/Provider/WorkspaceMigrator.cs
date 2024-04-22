@@ -272,7 +272,7 @@ public class WorkspaceMigrator : Migrator
                 var owner = "";
                 if (storage.Type == FolderType.BUNCH)
                 {
-                    if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
+                    if (projectTitle.ContainsKey(id))
                     {
                         var split = row["title"].ToString().Split('_');
                         title = projectTitle[id].Item1;
