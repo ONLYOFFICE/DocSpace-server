@@ -880,7 +880,8 @@ public class FileStorageService //: IFileStorageService
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var parent = await folderDao.GetFolderAsync(file.ParentId);
-            if (parent.FolderType == FolderType.FillingFormsRoom)
+
+            if (parent?.FolderType == FolderType.FillingFormsRoom)
             {
                 var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
                 if (ace is { Access: FileShare.FillForms })
