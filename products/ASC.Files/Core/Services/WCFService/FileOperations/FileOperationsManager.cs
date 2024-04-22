@@ -278,7 +278,7 @@ public class FileOperationsManager(
         var folderIds = (folders.OfType<int>(), folders.OfType<string>());
         var fileIds = (files.OfType<int>(), files.OfType<string>());
 
-        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash, false, null);
+        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash);
     }
 
     public Task PublishDelete(
@@ -296,19 +296,7 @@ public class FileOperationsManager(
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
 
-        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash, false, null);
-    }
-
-    internal Task PublishHiddenDelete<T>(
-        IEnumerable<T> folders,
-        IEnumerable<T> files,
-        bool isEmptyTrash,
-        Dictionary<string, string> headers)
-    {
-        var folderIds = (folders.OfType<int>(), folders.OfType<string>());
-        var fileIds = (files.OfType<int>(), files.OfType<string>());
-
-        return PublishDelete(folderIds, fileIds, false, true, isEmptyTrash, true, headers);
+        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash);
     }
 
     private async Task PublishDelete(
@@ -316,48 +304,68 @@ public class FileOperationsManager(
         (IEnumerable<int>, IEnumerable<string>) files,
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false,
-        bool hiddenOperation = false,
-        Dictionary<string, string> headers = null)
+        bool isEmptyTrash = false)
     {
-        if (!hiddenOperation)
-        {
-            await DemandDeletePermissionAsync(folders.Item1, files.Item1);
-            await DemandDeletePermissionAsync(folders.Item2, files.Item2);
-        }
+        await DemandDeletePermissionAsync(folders.Item1, files.Item1);
+        await DemandDeletePermissionAsync(folders.Item2, files.Item2);
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
-        
+        var headers = GetHttpHeaders();
+
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
-        op.Init(holdResult, hiddenOperation);
+        op.Init(holdResult);
+
+        if (!immediately)
+        {
+            var moveToTrashTaskId = await fileOperationsManagerHolder.Publish(op);
+
+            eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = moveToTrashTaskId,
+                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash),
+                ThirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash)
+            });
+
+            return;
+        }
+
+        var hasData = (folders.Item1?.Any() ?? false) || (files.Item1?.Any() ?? false);
+        var hasThirdPartyData = (folders.Item2?.Any() ?? false) || (files.Item2?.Any() ?? false);
+
+        if (hasData)
+        {
+            var removeMarker = serviceProvider.GetService<RemoveMarker<int>>();
+            await removeMarker.MarkAsRemovedAsync(folders.Item1, files.Item1);
+
+            eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = Guid.NewGuid().ToString(),
+                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true),
+                ThirdPartyData = new FileDeleteOperationData<string>([], [], tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true)
+            });
+
+            if (!hasThirdPartyData)
+            {
+                op[FileOperation.Progress] = 100;
+                op[FileOperation.Finish] = true;
+                op.Percentage = 100;
+                op.IsCompleted = true;
+                op.Status = DistributedTaskStatus.Completed;
+                _ = await fileOperationsManagerHolder.Publish(op);
+
+                return;
+            }
+        }
+
         var taskId = await fileOperationsManagerHolder.Publish(op);
 
-        headers ??= GetHttpHeaders();
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, hiddenOperation); 
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, hiddenOperation);
-        
-        IntegrationEvent toPublish;
-        if (isEmptyTrash)
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-            {
-                TaskId = taskId, 
-                Data = data,
-                ThirdPartyData = thirdPartyData
-            };
-        }
-        else
-        {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-            {
-                TaskId = taskId, 
-                Data = data,
-                ThirdPartyData = thirdPartyData
-            };
-        }
-        
-        eventBus.Publish(toPublish);
+            TaskId = taskId,
+            Data = new FileDeleteOperationData<int>([], [], tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash),
+            ThirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash)
+        });
     }
 
     private async Task DemandDeletePermissionAsync<T>(IEnumerable<T> folderIds, IEnumerable<T> fileIds)
@@ -542,6 +550,64 @@ public class FileOperationsManager(
     }
 }
 
+[Scope]
+public class RemoveMarker<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, SocketManager socketManager)
+{
+    public async Task MarkAsRemovedAsync(IEnumerable<T> folderIds, IEnumerable<T> filesIds)
+    {
+        await MarkFilesAsRemovedAsync(filesIds);
+        await MarkFoldersAsRemovedAsync(folderIds);
+    }
+
+    private async Task MarkFilesAsRemovedAsync(IEnumerable<T> filesIds)
+    {
+        if (!filesIds.Any() || !fileDao.CanMarkFileAsRemoved(filesIds.First()))
+        {
+            return;
+        }
+
+        await fileDao.MarkFilesAsRemovedAsync(filesIds);
+
+        await foreach (var file in fileDao.GetFilesAsync(filesIds))
+        {
+            await socketManager.DeleteFileAsync(file);
+        }
+    }
+
+    private async Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds)
+    {
+        if (!folderIds.Any() || !folderDao.CanMarkFolderAsRemoved(folderIds.First()))
+        {
+            return;
+        }
+
+        await folderDao.MarkFoldersAsRemovedAsync(folderIds);
+
+        foreach (var folderId in folderIds)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId, true);
+
+            await socketManager.DeleteFolder(folder);
+
+            if (folder.RootFolderType != FolderType.TRASH)
+            {
+                await MarkFolderContentAsRemovedAsync(folder);
+            }
+        }
+    }
+
+    private async Task MarkFolderContentAsRemovedAsync(Folder<T> folder)
+    {
+        var filesIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+
+        await MarkFilesAsRemovedAsync(filesIds);
+
+        var subfolderIds = await folderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
+
+        await MarkFoldersAsRemovedAsync(subfolderIds);
+    }
+}
+
 public static class FileOperationsManagerExtension
 {
     public static void Register(DIHelper services)
@@ -555,6 +621,8 @@ public static class FileOperationsManagerExtension
         services.TryAdd<FileDeleteOperation>();
         services.TryAdd<FileMarkAsReadOperation>();
         services.TryAdd<FileMoveCopyOperation>();
+
+        services.TryAdd<RemoveMarker<int>>();
     }
 
     public static void RegisterQueue(this IServiceCollection services, int threadCount = 10)

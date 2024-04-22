@@ -64,13 +64,6 @@ public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFile
 {
     protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
 
-    public void Init(bool holdResult, bool hiddenOperation)
-    {
-        base.Init(holdResult);
-
-        this[Hidden] = hiddenOperation;
-    }
-
     public override void Init(FileDeleteOperationData<int> data, FileDeleteOperationData<string> thirdPartyData, string taskId)
     {
         base.Init(data, thirdPartyData, taskId);
@@ -116,7 +109,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 
-        var canMarkAsRemoved = false;
         Folder<T> root = null;
         if (0 < Folders.Count)
         {
@@ -129,84 +121,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         if (root != null)
         {
             this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
-            canMarkAsRemoved = FolderDao.CanMarkFolderAsRemoved(root.Id);
-        }
-
-        if (!_hiddenOperation && _immediately && canMarkAsRemoved)
-        {
-            var fileOperationsManager = serviceScope.ServiceProvider.GetService<FileOperationsManager>();
-            var socketManager = serviceScope.ServiceProvider.GetService<SocketManager>();
-
-            await MarkFilesAsRemovedAsync(socketManager, Files);
-            await MarkFoldersAsRemovedAsync(socketManager, Folders);
-
-            var headers = Headers.ToDictionary(x => x.Key, x => x.Value.ToString());
-
-            await fileOperationsManager.PublishHiddenDelete(Folders, Files, _isEmptyTrash, headers);
-
-            if (_isEmptyTrash)
-            {
-                var trash = await folderDao.GetFolderAsync(_trashId);
-                await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, Headers);
-            }
-
-            return;
         }
 
         await DeleteFilesAsync(Files, serviceScope, isNeedSendActions: !_isEmptyTrash);
         await DeleteFoldersAsync(Folders, serviceScope, isNeedSendActions: !_isEmptyTrash);
-    }
 
-    private async Task MarkFilesAsRemovedAsync(SocketManager socketManager, IEnumerable<T> filesIds)
-    {
-        if (!filesIds.Any())
+        if (_isEmptyTrash)
         {
-            return;
-        }
-
-        await FileDao.MarkFilesAsRemovedAsync(filesIds);
-
-        await foreach (var file in FileDao.GetFilesAsync(filesIds))
-        {
-            await socketManager.DeleteFileAsync(file);
-            await ProgressStep();
+            var trash = await folderDao.GetFolderAsync(_trashId);
+            await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, Headers);
         }
     }
-
-    private async Task MarkFoldersAsRemovedAsync(SocketManager socketManager, IEnumerable<T> folderIds)
-    {
-        if (!folderIds.Any())
-        {
-            return;
-        }
-
-        await FolderDao.MarkFoldersAsRemovedAsync(folderIds);
-
-        foreach (var folderId in folderIds)
-        {
-            var folder = await FolderDao.GetFolderAsync(folderId, true);
-
-            await socketManager.DeleteFolder(folder);
-            await ProgressStep();
-
-            if (folder.RootFolderType != FolderType.TRASH)
-            {
-                await MarkFolderContentAsRemovedAsync(socketManager, folder);
-            }
-        }
-    }
-
-    private async Task MarkFolderContentAsRemovedAsync(SocketManager socketManager, Folder<T> folder)
-    {
-        var filesIds = await FileDao.GetFilesAsync(folder.Id).ToListAsync();
-
-        await MarkFilesAsRemovedAsync(socketManager, filesIds);
-
-        var subfolderIds = await FolderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
-
-        await MarkFoldersAsRemovedAsync(socketManager, subfolderIds);
-    }
-
 
     private async Task DeleteFoldersAsync(IEnumerable<T> folderIds, IServiceScope scope, bool isNeedSendActions = false)
     {
@@ -237,7 +162,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
-                if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
+                if (folder.ProviderEntry && (folder.Id.Equals(folder.RootId) || isRoom))
                 {
                     if (ProviderDao != null)
                     {
