@@ -26,13 +26,15 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// </summary>
 public class UpdateGroupRequestDto : GroupRequestDtoBase
 {
-    /// <summary>Users ids to add to the group</summary>
+    /// <summary>List of user IDs to add to the group</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
     public IEnumerable<Guid> MembersToAdd { get; set; }
     
-    /// <summary>Users ids to remove from the group</summary>
+    /// <summary>List of user IDs to remove from the group</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
     public IEnumerable<Guid> MembersToRemove { get; set; }
 }

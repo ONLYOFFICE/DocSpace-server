@@ -34,7 +34,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
-    /// <summary>Link type</summary>
+    /// <summary>Link type (Invitation or External)</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
     public LinkType LinkType { get; set; }
 

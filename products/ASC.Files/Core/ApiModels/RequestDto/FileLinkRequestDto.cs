@@ -26,9 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// </summary>
 public class FileLinkRequestDto : LinkRequestDtoBase
 {
-    /// <summary>Scope of the link</summary>
+    /// <summary>Link scope</summary>
     /// <type>System.Boolean, System</type>
     public bool Internal { get; set; }
     
