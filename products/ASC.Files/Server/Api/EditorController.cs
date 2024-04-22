@@ -116,6 +116,14 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone, inDto.Doc);
     }
 
+    /// <summary>
+    /// Starts filling a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Starts filling</short>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <category>Files</category>
+    /// <path>api/2.0/files/file/{fileId}/startfilling</path>
+    /// <httpMethod>PUT</httpMethod>
     [HttpPut("{fileId}/startfilling")]
     public async Task StartFillingAsync(T fileId)
     {

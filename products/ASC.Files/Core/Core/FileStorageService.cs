@@ -87,7 +87,8 @@ public class FileStorageService //: IFileStorageService
     IDistributedLockProvider distributedLockProvider,
     IHttpClientFactory clientFactory,
     TempStream tempStream,
-    MentionWrapperCreator mentionWrapperCreator)
+    MentionWrapperCreator mentionWrapperCreator,
+    SecurityContext securityContext)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1177,24 +1178,31 @@ public class FileStorageService //: IFileStorageService
     }
     public async Task StartFillingAsync<T>(T fileId)
     {
-        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
-        if(file != null)
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
         {
-            var properties = await daoFactory.GetFileDao<T>().GetProperties(fileId);
-            if (properties != null)
-            {
-                properties.FormFilling.StartFilling = true;
-                await daoFactory.GetFileDao<T>().SaveProperties(fileId, properties);
-            }
-            else
-            {
-                var currentProperties = new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
-                currentProperties.FormFilling.StartFilling = true;
-                await daoFactory.GetFileDao<T>().SaveProperties(fileId, currentProperties);
-            }
-            await socketManager.CreateFileAsync(file);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
+        {
+            if (!await fileSecurity.CanEditRoomAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+            }
+
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+            properties.FormFilling.StartFilling = true;
+            await fileDao.SaveProperties(fileId, properties);
+
+            var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+        }
     }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false, string doc = null)
     {
