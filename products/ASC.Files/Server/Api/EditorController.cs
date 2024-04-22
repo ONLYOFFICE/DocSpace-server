@@ -88,7 +88,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     {
         await using var stream = httpContextAccessor.HttpContext.Request.Body;
 
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Doc, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(T fileId, StartEditRequestDto inDto)
     {
-        return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone, inDto.Doc);
+        return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone);
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(T fileId, Guid tabId, string docKeyForTrack, string doc, bool isFinish)
     {
-        return await fileStorageService.TrackEditFileAsync(fileId, tabId, docKeyForTrack, doc, isFinish);
+        return await fileStorageService.TrackEditFileAsync(fileId, tabId, docKeyForTrack, isFinish);
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/openedit")]
     public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view, EditorType editorType)
     {
-        var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
+        var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
         configuration.EditorType = editorType;
