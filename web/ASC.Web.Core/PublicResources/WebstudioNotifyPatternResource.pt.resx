@@ -1421,7 +1421,7 @@ Solicitou uma eliminação permanente do seu espaço "${__VirtualRootPath}":"${_
 *Importante! Todos os dados armazenados no seu espaço, tal como os seus detalhes do registo serão perdidos e não poderão ser recuperados.*
 
 #if($AutoRenew == "True")
-Antes de eliminar o espaço, por favor, verifique que a faturação automática está desativada. Pode verificar o estado da faturação automática na sua “Conta Avangate":"https://secure.avangate.com/myaccount/".
+Antes de eliminar o espaço, por favor, verifique que a faturação automática está desativada. Pode verificar o estado da faturação automática na sua "Conta Avangate":"https://secure.avangate.com/myaccount/".
 #end
 
 Se tem a certeza que quer eliminar o seu espaço "${__VirtualRootPath}":"${__VirtualRootPath}" siga a seguinte ligação para confirmar a operação:

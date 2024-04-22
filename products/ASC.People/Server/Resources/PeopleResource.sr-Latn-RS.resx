@@ -117,106 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Elaborazione dati completata</value>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Otpremljena datoteka ne može biti pronađena</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Elaborazione dati...</value>
+  <data name="ErrorImageSizetLimit" xml:space="preserve">
+    <value>Veličina slike je prevelika</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analisi del database</value>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Veličina datoteke slike je prevelika</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrazione gruppo {0} ({1}/{2})</value>
+  <data name="ErrorUnknownFileImageType" xml:space="preserve">
+    <value>Nepoznati tip datoteke slike</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrazione dei file dell’utente {0} ({1}/{2})</value>
+  <data name="ProductAdminOpportunities" xml:space="preserve">
+    <value>Čini isto kao korisnik|Kreiraj profile i grupe|Uvezi profile|Pozivaj korisnike</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrazione completata</value>
+  <data name="ProductDescription" xml:space="preserve">
+    <value>Dodaj nove korisnike, pozivaj ih ili uvezi. Upravljaj korisnicima i gledaj njihove detaljne informacije.</value>
   </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Preparazione alla migrazione</value>
+  <data name="ProductName" xml:space="preserve">
+    <value>Ljudi</value>
   </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Avvio dell'elaborazione dei dati...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decompressione...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decompressione completata...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrazione dell'utente {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>File comuni di migrazione</value>
-  </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nessun fornitore di migrazione di questo tipo</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Non è in corso alcuna migrazione</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>File di progetto di migrazione</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing è ancora in corso</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migrazione è già in corso</value>
-  </data>
-  <data name="CanNotAddUserInGroup" xml:space="preserve">
-    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
-  </data>
-  <data name="CanNotCreateFile" xml:space="preserve">
-    <value>Impossibile creare il file {0}</value>
-  </data>
-  <data name="CanNotImportUser" xml:space="preserve">
-    <value>Impossibile importare l'utente</value>
-  </data>
-  <data name="CanNotImportUserFiles" xml:space="preserve">
-    <value>Impossibile importare i file dell’utente</value>
-  </data>
-  <data name="CanNotParseArchive" xml:space="preserve">
-    <value>Impossibile analizzare l'archivio {0}</value>
-  </data>
-  <data name="CanNotParseArchives" xml:space="preserve">
-    <value>Impossibile analizzare gli archivi</value>
-  </data>
-  <data name="CanNotParseUser" xml:space="preserve">
-    <value>Impossibile analizzare l'utente {0}</value>
-  </data>
-  <data name="CanNotReadInfoFile" xml:space="preserve">
-    <value>Impossibile leggere il file di informazioni da {0}</value>
-  </data>
-  <data name="CanNotToUnzip" xml:space="preserve">
-    <value>Impossibile decomprimere {0}</value>
-  </data>
-  <data name="CreateFile" xml:space="preserve">
-    <value>Crea file {0}</value>
-  </data>
-  <data name="CreateFolder" xml:space="preserve">
-    <value>Crea cartella {0}</value>
-  </data>
-  <data name="CreateShareRoom" xml:space="preserve">
-    <value>crea stanza condivisa {0}</value>
-  </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Impossibile importare file comuni</value>
-  </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Impossibile importare i file di progetto</value>
-  </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Crea la cartella principale</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Impossibile condividere la voce da {0} a {1}</value>
+  <data name="ProductUserOpportunities" xml:space="preserve">
+    <value>Gledaj profile i grupe</value>
   </data>
 </root>

@@ -1164,7 +1164,8 @@ ONLYOFFICE™ サポートチーム
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"スペースの削除
 
 $OwnerName 様
- "${__VirtualRootPath}":"${__VirtualRootPath}" スペースの永久削除のリクエストがありました。
+ 
+"${__VirtualRootPath}":"${__VirtualRootPath}" スペースの永久削除のリクエストがありました。
 
 *重要！スペースに保存されているすべてのデータ、および登録情報は失われ、回復することはできません。
 
@@ -1684,6 +1685,7 @@ $OrangeButton
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceへようこそ！
+
 
 $UserName 様
 

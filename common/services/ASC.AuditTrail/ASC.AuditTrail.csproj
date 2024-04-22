@@ -85,6 +85,9 @@
     <EmbeddedResource Update="AuditReportResource.sl.resx">
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.sr-Latn-RS.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="AuditReportResource.tr.resx">
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>

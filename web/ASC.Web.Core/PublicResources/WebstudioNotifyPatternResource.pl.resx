@@ -1692,7 +1692,7 @@ $TrulyYours</value>
 
 Witaj, $UserName!
 
-Właśnie utworzyłeś(-łaś) ONLYOFFICE DocSpace – centrum dokumentów, dzięki któremu usprawnisz współpracę  ze swoim zespołem, klientami, partnerami i nie tylko. Jego adres to „${__VirtualRootPath}":"${__VirtualRootPath}”.
+Właśnie utworzyłeś(-łaś) ONLYOFFICE DocSpace – centrum dokumentów, dzięki któremu usprawnisz współpracę  ze swoim zespołem, klientami, partnerami i nie tylko. Jego adres to "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Twój bieżący plan cenowy to STARTUP. Jest absolutnie darmowy i obejmuje:
 

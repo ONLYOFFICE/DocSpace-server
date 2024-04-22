@@ -117,106 +117,103 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Elaborazione dati completata</value>
+  <data name="CommonAddUsers" xml:space="preserve">
+    <value>Dodaj korisnike</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Elaborazione dati...</value>
+  <data name="CommonGroup" xml:space="preserve">
+    <value>Grupa</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analisi del database</value>
+  <data name="CommonGroupHead" xml:space="preserve">
+    <value>Vođa</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrazione gruppo {0} ({1}/{2})</value>
+  <data name="CommonGroups" xml:space="preserve">
+    <value>Grupe</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrazione dei file dell’utente {0} ({1}/{2})</value>
+  <data name="CommonGuest" xml:space="preserve">
+    <value>Gost</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrazione completata</value>
+  <data name="CommonGuests" xml:space="preserve">
+    <value>Gosti</value>
   </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Preparazione alla migrazione</value>
+  <data name="CommonRegDate" xml:space="preserve">
+    <value>Datum registracije</value>
   </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Avvio dell'elaborazione dei dati...</value>
+  <data name="CommonSchemaName" xml:space="preserve">
+    <value>Zajedničko</value>
   </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decompressione...</value>
+  <data name="CommonUser" xml:space="preserve">
+    <value>Korisnik</value>
   </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decompressione completata...</value>
+  <data name="CommonUsers" xml:space="preserve">
+    <value>Korisnici</value>
   </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrazione dell'utente {0} ({1}/{2})</value>
+  <data name="CommonUserTitle" xml:space="preserve">
+    <value>Zvanje</value>
   </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>File comuni di migrazione</value>
+  <data name="DefaultAddUsers" xml:space="preserve">
+    <value>Dodaj zaposlene</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
+  <data name="DefaultGroup" xml:space="preserve">
+    <value>Odeljenje</value>
   </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nessun fornitore di migrazione di questo tipo</value>
+  <data name="DefaultGroupHead" xml:space="preserve">
+    <value>Vođa</value>
   </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Non è in corso alcuna migrazione</value>
+  <data name="DefaultGroups" xml:space="preserve">
+    <value>Odeljenja</value>
   </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>File di progetto di migrazione</value>
+  <data name="DefaultGuest" xml:space="preserve">
+    <value>Gost</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing è ancora in corso</value>
+  <data name="DefaultGuests" xml:space="preserve">
+    <value>Gosti</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migrazione è già in corso</value>
+  <data name="DefaultRegDate" xml:space="preserve">
+    <value>Zaposlen dana</value>
   </data>
-  <data name="CanNotAddUserInGroup" xml:space="preserve">
-    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
+  <data name="DefaultSchemaName" xml:space="preserve">
+    <value>Korporativni</value>
   </data>
-  <data name="CanNotCreateFile" xml:space="preserve">
-    <value>Impossibile creare il file {0}</value>
+  <data name="DefaultUser" xml:space="preserve">
+    <value>Zaposleni</value>
   </data>
-  <data name="CanNotImportUser" xml:space="preserve">
-    <value>Impossibile importare l'utente</value>
+  <data name="DefaultUsers" xml:space="preserve">
+    <value>Zaposleni</value>
   </data>
-  <data name="CanNotImportUserFiles" xml:space="preserve">
-    <value>Impossibile importare i file dell’utente</value>
+  <data name="DefaultUserTitle" xml:space="preserve">
+    <value>Pozicija</value>
   </data>
-  <data name="CanNotParseArchive" xml:space="preserve">
-    <value>Impossibile analizzare l'archivio {0}</value>
+  <data name="EducationAddUsers" xml:space="preserve">
+    <value>Dodaj učitelje/Studente</value>
   </data>
-  <data name="CanNotParseArchives" xml:space="preserve">
-    <value>Impossibile analizzare gli archivi</value>
+  <data name="EducationGroup" xml:space="preserve">
+    <value>Grupa</value>
   </data>
-  <data name="CanNotParseUser" xml:space="preserve">
-    <value>Impossibile analizzare l'utente {0}</value>
+  <data name="EducationGroupHead" xml:space="preserve">
+    <value>Lider Grupe</value>
   </data>
-  <data name="CanNotReadInfoFile" xml:space="preserve">
-    <value>Impossibile leggere il file di informazioni da {0}</value>
+  <data name="EducationGroups" xml:space="preserve">
+    <value>Grupe</value>
   </data>
-  <data name="CanNotToUnzip" xml:space="preserve">
-    <value>Impossibile decomprimere {0}</value>
+  <data name="EducationGuest" xml:space="preserve">
+    <value>Gost</value>
   </data>
-  <data name="CreateFile" xml:space="preserve">
-    <value>Crea file {0}</value>
+  <data name="EducationGuests" xml:space="preserve">
+    <value>Gosti</value>
   </data>
-  <data name="CreateFolder" xml:space="preserve">
-    <value>Crea cartella {0}</value>
+  <data name="EducationRegDate" xml:space="preserve">
+    <value>Datum registracije</value>
   </data>
-  <data name="CreateShareRoom" xml:space="preserve">
-    <value>crea stanza condivisa {0}</value>
+  <data name="EducationSchemaName" xml:space="preserve">
+    <value>Obrazovna Institucija</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Impossibile importare file comuni</value>
+  <data name="EducationUser" xml:space="preserve">
+    <value>Učitelj/Student</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Impossibile importare i file di progetto</value>
+  <data name="EducationUsers" xml:space="preserve">
+    <value>Učitelji/Studenti</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Crea la cartella principale</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Impossibile condividere la voce da {0} a {1}</value>
+  <data name="EducationUserTitle" xml:space="preserve">
+    <value>Zvanje</value>
   </data>
 </root>

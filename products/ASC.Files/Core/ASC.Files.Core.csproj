@@ -115,6 +115,9 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sl.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Latn-RS.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.tr.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -228,6 +231,9 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.sl.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.sr-Latn-RS.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesCommonResource.tr.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -310,6 +316,9 @@
     <EmbeddedResource Update="Resources\FilesJSResource.sl.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.sr-Latn-RS.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.tr.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -390,6 +399,9 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sl.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.sr-Latn-RS.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.tr.resx">
