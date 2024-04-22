@@ -131,7 +131,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
 
     [ProtoContract]
-    record RedisCachePubSubItem<TObject>
+    public record RedisCachePubSubItem<TObject>
     {
         [ProtoMember(1)]
         public Guid Id { get; set; }

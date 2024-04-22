@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Common.Settings;
 
 [Singleton]
@@ -261,26 +263,23 @@ static file class Queries
                     .Where(r => r.UserId == userId)
                     .Select(r => r.Data)
                     .FirstOrDefault());
-
-    public static readonly Func<WebstudioDbContext, int, Guid, Guid, string> Data =
-        Microsoft.EntityFrameworkCore.EF.CompileQuery(
-            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
-                ctx.WebstudioSettings
-                    .Where(r => r.Id == id)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.UserId == userId)
-                    .Select(r => r.Data)
-                    .FirstOrDefault());
-
+    
     public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<DbWebstudioSettings>> WebStudioSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
                 ctx.WebstudioSettings
                     .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
+}
 
-    public static readonly Func<WebstudioDbContext, int, Guid, Guid, DbWebstudioSettings> WebStudioSettings =
-        Microsoft.EntityFrameworkCore.EF.CompileQuery(
-            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
-                ctx.WebstudioSettings
-                    .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
+
+public class WarmupDbSettingsStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebstudioDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.DataAsync(context, int.MaxValue, Guid.Empty, Guid.Empty);
+        await Queries.WebStudioSettingsAsync(context, int.MaxValue, Guid.Empty, Guid.Empty);
+    }
 }

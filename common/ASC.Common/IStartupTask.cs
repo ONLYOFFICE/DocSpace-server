@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,7 @@
 
 namespace ASC.Api.Core.Extensions;
 
-
-
-public static class HostExtension
+public interface IStartupTask
 {
-    public static async Task RunWithTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default)
-    {
-        CustomSynchronizationContext.CreateContext();
-        // Load all tasks from DI
-        var startupTasks = webHost.Services.GetServices<IStartupTask>();
-
-        // Execute all the tasks
-        foreach (var startupTask in startupTasks)
-        {
-            await startupTask.ExecuteAsync(cancellationToken);
-        }
-
-        // Start the tasks as normal
-        await webHost.RunAsync(cancellationToken);
-    }
+    Task ExecuteAsync(CancellationToken cancellationToken = default);
 }

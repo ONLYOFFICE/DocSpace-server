@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Data;
 
 [Scope(Additional = typeof(DbQuotaServiceExtensions))]
@@ -33,8 +35,8 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
-
-        return mapper.Map<List<DbQuota>, List<TenantQuota>>(await coreDbContext.Quotas.ToListAsync());
+        var res = await Queries.AllQuotasAsync(coreDbContext).ToListAsync();
+        return mapper.Map<List<DbQuota>, List<TenantQuota>>(res);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
@@ -127,10 +129,11 @@ public static class DbQuotaServiceExtensions
 
 static file class Queries
 {
-    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = EF.CompileAsyncQuery(
-    (CoreDbContext ctx, int tenantId) =>
-        ctx.Quotas
-            .SingleOrDefault(r => r.TenantId == tenantId));
+    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = 
+        EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Quotas.SingleOrDefault(r => r.TenantId == tenantId));
+
+    public static readonly Func<CoreDbContext, IAsyncEnumerable<DbQuota>> AllQuotasAsync = 
+        EF.CompileAsyncQuery((CoreDbContext ctx) => ctx.Quotas);
 
     public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =
         EF.CompileAsyncQuery(
@@ -140,4 +143,17 @@ static file class Queries
                                 && r.TenantId == tenantId
                                 && r.UserId == userId)
                     .ExecuteUpdate(x => x.SetProperty(p => p.Counter, p => p.Counter + counter)));
+}
+
+public class WarmupQuotaStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<CoreDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.QuotaAsync(context, int.MinValue);
+        await Queries.AllQuotasAsync(context).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.UpdateCounterAsync(context, int.MinValue, Guid.Empty, int.MinValue.ToString(), 0);
+    }
 }

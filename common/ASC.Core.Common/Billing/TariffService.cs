@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -917,4 +919,17 @@ static file class Queries
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
         EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
+}
+
+public class WarmupTariffStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<CoreDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.TariffAsync(context, int.MinValue, Int32.MinValue);
+        await Queries.QuotasAsync(context, Int32.MinValue, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DeleteTariffs(context, int.MinValue);
+    }
 }

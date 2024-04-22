@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Data;
 
 [Scope]
@@ -552,4 +554,26 @@ static file class Queries
                               r.MappedDomain == domain && !(r.Status == TenantStatus.RemovePending ||
                                                            r.Status == TenantStatus.Restoring))
                                                        && r.Id != tenantId));
+}
+
+public class WarmupDbTenantServiceStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<TenantDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.TenantByDomainAsync(context, string.Empty);
+        await Queries.VersionIdAsync(context);
+        await Queries.TenantAsync(context, int.MinValue);
+        await Queries.GetAliasAsync(context, int.MinValue);
+        await Queries.TenantsCountAsync(context, String.Empty);
+        await Queries.TenantVersionsAsync(context).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.SettingValueAsync(context, int.MinValue, string.Empty);
+        Queries.SettingValue(context, int.MinValue, string.Empty);
+        await Queries.CoreSettingsAsync(context, int.MinValue, string.Empty);
+        Queries.CoreSettings(context, int.MinValue, string.Empty);
+        await Queries.AddressAsync(context).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.AnyTenantsAsync(context, int.MinValue, string.Empty);
+    }
 }

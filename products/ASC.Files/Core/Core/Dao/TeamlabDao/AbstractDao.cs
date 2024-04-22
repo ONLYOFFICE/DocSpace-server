@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Files.Core.Data;
 
 public class AbstractDao
@@ -482,4 +484,33 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
+}
+
+public class WarmupAbstractDaoStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        ProtoBuf.Serializer.PrepareSerializer<TrackInfo>();
+        ProtoBuf.Serializer.PrepareSerializer<FileTracker>();
+        ProtoBuf.Serializer.PrepareSerializer<FileTrackerNotify>();
+        ProtoBuf.Serializer.PrepareSerializer<RedisCacheNotify<FileTrackerNotify>.RedisCachePubSubItem<FileTrackerNotify>>();
+        ProtoBuf.Serializer.PrepareSerializer<FileMarkerCacheItem>();
+        ProtoBuf.Serializer.PrepareSerializer<RedisCacheNotify<FileMarkerCacheItem>.RedisCachePubSubItem<FileMarkerCacheItem>>();
+        MessageSettings.GetIP(new Dictionary<string, StringValues>());
+        using var scope = provider.CreateScope();
+        _ = scope.ServiceProvider.GetService<FileUtilityConfiguration>();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.FoldersAsync(context, int.MinValue, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.FilesCountAsync(context, int.MinValue, int.MinValue);
+        await Queries.IdAsync(context, int.MinValue, string.Empty);
+        await Queries.IsIndexingAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
+        await Queries.GetFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
+        await Queries.ClearFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
+        await Queries.GetLastFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
+        await Queries.IncreaseFileOrderAsync(context, int.MinValue, int.MinValue, int.MinValue, int.MinValue);
+        await Queries.DecreaseFileOrderAsync(context, int.MinValue, int.MinValue, int.MinValue, int.MinValue);
+        await Queries.ChangeFilesCountAsync(context, int.MinValue, int.MinValue, int.MinValue);
+        await Queries.ChangeFoldersCountAsync(context, int.MinValue, int.MinValue, int.MinValue);
+    }
 }

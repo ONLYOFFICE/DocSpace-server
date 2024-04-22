@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Files.Core.Data;
 
 [Scope]
@@ -2479,4 +2481,44 @@ static file class Queries
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
 
+}
+
+public class WarmupFolderDaoStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {      
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.DbFolderQueryAsync(context, int.MinValue, int.MinValue);
+        await Queries.FolderAsync(context, int.MinValue, int.MinValue);
+        await Queries.AnyTreeAsync(context, int.MinValue, int.MinValue);
+        await Queries.CountFilesAsync(context, int.MinValue, int.MinValue);
+        await Queries.CountTreesAsync(context, int.MinValue);
+        await Queries.FolderIdAsync(context, int.MinValue, int.MinValue, int.MaxValue);
+        await Queries.ParentIdAsync(context, int.MinValue);
+        await Queries.RightNodeAsync(context, int.MinValue, string.Empty);
+        await Queries.FolderForUpdateAsync(context, int.MinValue, int.MinValue);
+        await Queries.FolderWithSettingsAsync(context, int.MinValue, int.MinValue);
+        await Queries.ParentIdByIdAsync(context, int.MinValue, int.MinValue);
+        await Queries.DbFolderQueryWithSharedAsync(context, int.MinValue, int.MinValue);
+        await Queries.ArrayAsync(context, int.MinValue, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        //await Queries.NodeAsync(context, int.MinValue, []).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.SubfolderAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbFilesAsync(context, int.MinValue, int.MinValue, int.MaxValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.OriginsDataAsync(context, int.MinValue, new [] {int.MaxValue}).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.SubfolderIdsAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbFolderQueriesAsync(context, int.MinValue, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.ParentRoomPairAsync(context, int.MinValue, new [] {int.MaxValue}, new [] { FolderType.BUNCH }).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TreesOrderByLevel(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbFoldersForDeleteAsync(context, int.MinValue,  new [] {int.MaxValue}).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.FolderTypeUsedSpaceAsync(context, int.MinValue, new [] { FolderType.BUNCH }).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.NodeByFolderIdsAsync(context, int.MinValue, [string.Empty]).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.ParentIdTitlePairAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.ParentIdTypePairAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbFolderQueriesByIdsAsync(context, int.MinValue, new[] { int.MaxValue }).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbFolderQueriesByTextAsync(context, int.MinValue, string.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.FolderTreeAsync(context, int.MinValue, int.MaxValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.UpdateFoldersCountAsync(context, int.MinValue, int.MaxValue);
+    }
 }

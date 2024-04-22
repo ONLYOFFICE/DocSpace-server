@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Data;
 
 [Singleton]
@@ -177,8 +179,8 @@ public class DbLoginEventsManager(
 
 static file class Queries
 {
-    public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>>
-        LoginEventsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>> LoginEventsAsync = 
+        EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date) =>
                 ctx.LoginEvents
                     .Where(r => r.TenantId == tenantId
@@ -205,11 +207,7 @@ static file class Queries
                                 && r.Active));
 
     public static readonly Func<MessagesContext, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsByTenantIdAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId
-                                && r.Active));
+        EF.CompileAsyncQuery((MessagesContext ctx, int tenantId) => ctx.LoginEvents.Where(r => r.TenantId == tenantId && r.Active));
 
     public static readonly Func<MessagesContext, int, Guid, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsExceptThisAsync =
         EF.CompileAsyncQuery(
@@ -219,4 +217,19 @@ static file class Queries
                                 && r.UserId == userId
                                 && r.Id != loginEventId
                                 && r.Active));
+}
+
+public class WarmupDbLoginEventsStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.LoginEventsAsync(context, int.MaxValue, Guid.Empty, new List<int>(), DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DeleteLoginEventsAsync(context, int.MinValue, int.MinValue);
+        await Queries.LoginEventsExceptThisAsync(context, int.MinValue, Guid.Empty, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.LoginEventsByTenantIdAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.LoginEventsByUserIdAsync(context, int.MinValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+    }
 }

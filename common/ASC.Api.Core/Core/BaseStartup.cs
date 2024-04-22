@@ -24,12 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Data;
 using ASC.Core.Notify.Socket;
 
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
 
@@ -358,7 +358,6 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
@@ -373,38 +372,38 @@ public abstract class BaseStartup
             options.DefaultScheme = MultiAuthSchemes;
             options.DefaultChallengeScheme = MultiAuthSchemes;
         }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
-          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
-          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-          .AddJwtBearer("Bearer", options =>
-            {
-                options.Authority = _configuration["core:oidc:authority"];
-                options.IncludeErrorDetails = true;
+        .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
+        .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
+        .AddJwtBearer("Bearer", options =>
+          {
+              options.Authority = _configuration["core:oidc:authority"];
+              options.IncludeErrorDetails = true;
 
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateAudience = false
-                };
+              options.TokenValidationParameters = new TokenValidationParameters
+              {
+                  ValidateAudience = false
+              };
 
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = async ctx =>
-                    {
-                        using var scope = ctx.HttpContext.RequestServices.CreateScope();
+              options.Events = new JwtBearerEvents
+              {
+                  OnTokenValidated = async ctx =>
+                  {
+                      using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+                      var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
 
-                        var claimUserId = ctx.Principal.FindFirstValue("userId");
+                      var claimUserId = ctx.Principal.FindFirstValue("userId");
 
-                        if (string.IsNullOrEmpty(claimUserId))
-                        {
-                            throw new Exception("Claim 'UserId' is not present in claim list");
-                        }
+                      if (string.IsNullOrEmpty(claimUserId))
+                      {
+                          throw new Exception("Claim 'UserId' is not present in claim list");
+                      }
 
-                        var userId = new Guid(claimUserId);
+                      var userId = new Guid(claimUserId);
 
-                        await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
-                    }
-                };
+                      await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
+                  }
+              };
             })
           .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
             {
@@ -449,19 +448,24 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         DIHelper.TryAdd<SocketService>();
 
-
-        if (!_hostEnvironment.IsDevelopment())
-        {
-            services.AddStartupTask<WarmupServicesStartupTask>()
-                    .TryAddSingleton(services);
-        }
+        services
+            .AddStartupTask<WarmupServicesStartupTask>()
+            .AddStartupTask<WarmupWebhooksServicesStartupTask>()
+            .AddStartupTask<WarmupQuotaStartupTask>()
+            .AddStartupTask<WarmupTariffStartupTask>()
+            .AddStartupTask<WarmupDbSettingsStartupTask>()
+            .AddStartupTask<WarmupDbLoginEventsStartupTask>()
+            .AddStartupTask<WarmupDbTenantServiceStartupTask>()
+            .AddStartupTask<WarmupDbUserServiceStartupTask>()
+            .AddStartupTask<WarmupDbAzServiceStartupTask>()
+            .AddSingleton(services);
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
@@ -547,4 +551,3 @@ public abstract class BaseStartup
         builder.Register(_configuration);
     }
 }
-

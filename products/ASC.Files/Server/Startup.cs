@@ -25,6 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage;
+using ASC.Files.Core.Data;
+
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Files;
 
@@ -73,6 +76,12 @@ public class Startup : BaseStartup
         services.AddScoped<UsersInRoomStatistic>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient();
+
+        services
+            .AddStartupTask<WarmupFolderDaoStartupTask>()
+            .AddStartupTask<WarmupAbstractDaoStartupTask>()
+            .AddStartupTask<WarmupTagDaoStartupTask>()
+            ;
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

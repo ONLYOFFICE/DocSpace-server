@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Files.Core.Data;
 
 internal abstract class BaseTagDao<T>(
@@ -1077,18 +1079,6 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds) =>
                 ctx.TagLink.Any(r => r.TenantId == tenantId && tagsIds.Contains(r.TagId)));
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFilesTag>> TagsToDeleteAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds) =>
-                ctx.Tag
-                    .Where(r => r.TenantId == tenantId && tagsIds.Contains(r.Id)));
-
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFilesTagLink>>
-        ToDeleteTagLinksAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds) =>
-                ctx.TagLink
-                    .Where(r => r.TenantId == tenantId && tagsIds.Contains(r.TagId)));
-
     public static readonly Func<FilesDbContext, int, Guid, string, TagType, Task<int>> FirstTagIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid owner, string name, TagType type) =>
@@ -1223,4 +1213,43 @@ static file class Queries
                         .SetProperty(p => p.CreateBy, createdBy)
                         .SetProperty(p => p.CreateOn, createOn)
                         .SetProperty(p => p.Count, p => p.Count + 1)));
+}
+
+public class WarmupTagDaoStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {      
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.NewTagsForFilesAsync(context, int.MinValue, Guid.Empty, new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.NewTagsForFoldersAsync(context, int.MinValue, Guid.Empty, new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TmpShareFileTagsAsync(context, int.MinValue, Guid.Empty, FolderType.Projects).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TmpShareFolderTagsAsync(context, int.MinValue, Guid.Empty, FolderType.Projects).ToListAsync(cancellationToken: cancellationToken);
+        //await Queries.TmpShareSBoxTagsAsync(context, int.MinValue, Guid.Empty, new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.ProjectsAsync(context, int.MinValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.NewTagsForSBoxAsync(context, int.MinValue, Guid.Empty, new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.NewTagsThirdpartyRoomsAsync(context, int.MinValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.FolderAsync(context, [int.MinValue], false).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.ThirdpartyAccountAsync(context, int.MinValue, FolderType.Projects, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TagsAsync(context, int.MinValue, TagType.New, new List<string>(), new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.GetTagsByEntryTypeAsync(context, int.MinValue, null, FileEntryType.File, string.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TagsByOwnerAsync(context, int.MinValue, TagType.Custom, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.TagsInfoAsync(context, int.MinValue, new List<string>()).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.MustBeDeletedFilesAsync(context, int.MinValue, DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.AnyTagLinkByIdsAsync(context, int.MinValue, new List<int>());
+        await Queries.FirstTagIdAsync(context, int.MinValue, Guid.Empty, String.Empty, TagType.Custom);
+        await Queries.AnyTagLinkByIdAsync(context, int.MinValue, int.MinValue);
+        await Queries.DeleteTagLinksByTagLinkDataAsync(context, int.MinValue, int.MinValue, String.Empty, FileEntryType.File);
+        await Queries.DeleteTagAsync(context);
+        await Queries.TagIdAsync(context, Guid.Empty,  String.Empty, TagType.Custom);
+        await Queries.UpdateTagLinkAsync(context, int.MinValue, int.MinValue, FileEntryType.File, string.Empty, Guid.Empty, DateTime.MinValue, int.MinValue);
+        await Queries.DeleteTagLinksAsync(context, int.MinValue, new List<int>(), string.Empty, FileEntryType.File);
+        await Queries.DeleteTagLinksByEntryIdAsync(context, int.MinValue, string.Empty, FileEntryType.File, TagType.Custom);
+        await Queries.DeleteTagLinksByTagIdAsync(context, int.MinValue, int.MinValue, String.Empty, FileEntryType.File);
+        await Queries.DeleteTagByIdAsync(context, int.MinValue, int.MinValue);
+        await Queries.TagLinkDataAsync(context, int.MinValue, new List<string>(), new List<int>(), Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DeleteTagsByIdsAsync(context, int.MinValue, new List<int>());
+        await Queries.IncrementNewTagsAsync(context, int.MinValue, new List<int>(), FileEntryType.File, string.Empty, Guid.Empty, DateTime.MinValue);
+    }
 }

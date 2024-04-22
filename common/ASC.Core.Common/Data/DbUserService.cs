@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Data;
@@ -974,40 +976,36 @@ static file class Queries
         EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.Acl
-                    .Where(r => r.TenantId == tenantId
-                                && ids.Any(i => i == r.Subject))
+                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.Subject))
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>>
-        DeleteSubscriptionsByIdsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>> DeleteSubscriptionsByIdsAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, IEnumerable<string> ids) =>
                 ctx.Subscriptions
-                    .Where(r => r.TenantId == tenantId
-                                && ids.Any(i => i == r.Recipient))
+                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.Recipient))
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>>
-        DeleteDbSubscriptionMethodsByIdsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>> DeleteDbSubscriptionMethodsByIdsAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, IEnumerable<string> ids) =>
                 ctx.SubscriptionMethods
                     .Where(r => r.TenantId == tenantId
                                 && ids.Any(i => i == r.Recipient))
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>>
-        DeleteUserGroupsByIdsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> DeleteUserGroupsByIdsAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.UserGroups
-                    .Where(r => r.TenantId == tenantId
-                                && ids.Any(i => i == r.UserGroupId))
+                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.UserGroupId))
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>>
-        UpdateUserGroupsByIdsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> UpdateUserGroupsByIdsAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.UserGroups
-                    .Where(r => r.TenantId == tenantId
-                                && ids.Any(i => i == r.UserGroupId))
+                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.UserGroupId))
                     .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
                                          .SetProperty(p => p.LastModified, DateTime.UtcNow)));
 
@@ -1044,8 +1042,8 @@ static file class Queries
                                 && r.Recipient == id)
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, string, Task<int>>
-        DeleteDbSubscriptionMethodsAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, string, Task<int>> DeleteDbSubscriptionMethodsAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, string id) =>
                 ctx.SubscriptionMethods
                     .Where(r => r.TenantId == tenantId
@@ -1108,8 +1106,8 @@ static file class Queries
                                 && r.UserId == userId)
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>>
-        DeleteUserGroupsByGroupIdAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>> DeleteUserGroupsByGroupIdAsync =
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
                 ctx.UserGroups
                     .Where(r => r.TenantId == tenantId
@@ -1118,8 +1116,8 @@ static file class Queries
                                 && r.RefType == refType)
                     .ExecuteDelete());
 
-    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>>
-        UpdateUserGroupsByGroupIdAsync = EF.CompileAsyncQuery(
+    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>> UpdateUserGroupsByGroupIdAsync = 
+        EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
                 ctx.UserGroups
                     .Where(r => r.TenantId == tenantId
@@ -1176,4 +1174,43 @@ static file class Queries
                  where usersDav.TenantId == tenantId
                  select users.Email)
                 .Distinct());
+}
+
+public class WarmupDbUserServiceStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<UserDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.LastModifiedAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.PhotoAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.TenantIdsAsync(context, DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.GroupIdsAsync(context, int.MaxValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DeleteAclByIdsAsync(context, int.MaxValue, new List<Guid>());
+        await Queries.DeleteSubscriptionsByIdsAsync(context, int.MaxValue, new List<string>());
+        await Queries.DeleteDbSubscriptionMethodsByIdsAsync(context, int.MaxValue, new List<string>());
+        await Queries.DeleteUserGroupsByIdsAsync(context, Int32.MaxValue, new List<Guid>());
+        await Queries.UpdateUserGroupsByIdsAsync(context, int.MaxValue, new List<Guid>());
+        await Queries.DeleteDbGroupsAsync(context, int.MaxValue, new List<Guid>());
+        await Queries.UpdateDbGroupsAsync(context, int.MaxValue, new List<Guid>());
+        await Queries.DeleteAclAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.DeleteSubscriptionsAsync(context, int.MaxValue, string.Empty);
+        await Queries.DeleteDbSubscriptionMethodsAsync(context, int.MaxValue, string.Empty);
+        await Queries.DeleteUserPhotosAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.DeleteAccountLinksAsync(context, string.Empty);
+        await Queries.DeleteUserGroupsAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.UpdateUserGroupsAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.DeleteUsersAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.UpdateUsersAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.DeleteUserSecuritiesAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.DeleteUserGroupsByGroupIdAsync(context, int.MaxValue, Guid.Empty, Guid.Empty, UserGroupRefType.Contains);
+        await Queries.UpdateUserGroupsByGroupIdAsync(context, int.MaxValue, Guid.Empty, Guid.Empty, UserGroupRefType.Contains);
+        //await Queries.UserAsync(context, int.MinValue, Guid.Empty);
+        await Queries.AnyUsersAsync(context, int.MaxValue, string.Empty, Guid.Empty);
+        await Queries.AnyUsersByEmailAsync(context, int.MaxValue, string.Empty, Guid.Empty);
+        await Queries.FirstOrDefaultUserAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.UserPhotoAsync(context, int.MaxValue, Guid.Empty);
+        await Queries.EmailsAsync(context, int.MaxValue).ToListAsync(cancellationToken: cancellationToken);
+    }
 }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Data;
 
 [Scope]
@@ -35,10 +37,8 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         // row with tenant = -1 - common for all tenants, but equal row with tenant != -1 escape common row for the portal
-        var commonAces = await
-            userDbContext.Acl
-            .Where(r => r.TenantId == Tenant.DefaultTenant)
-            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
+        var commonAces = await Queries.AzRecordAsync(userDbContext)
+            .Select(mapper.Map<Acl, AzRecord>)
             .ToDictionaryAsync(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object));
 
         var tenantAces = await
@@ -144,4 +144,22 @@ static file class Queries
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
                     .FirstOrDefault(r => r.AceType == aceType));
+
+    public static readonly Func<UserDbContext, IAsyncEnumerable<Acl>> AzRecordAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx) =>
+                ctx.Acl
+                    .Where(r => r.TenantId == Tenant.DefaultTenant));
+    //.ToDictionary(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object)));
+}
+
+public class WarmupDbAzServiceStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<UserDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.AzRecordAsync(context).ToListAsync(cancellationToken: cancellationToken);
+    }
 }

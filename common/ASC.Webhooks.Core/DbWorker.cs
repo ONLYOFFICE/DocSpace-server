@@ -26,9 +26,12 @@
 
 using System.Security;
 
+using ASC.Api.Core.Extensions;
+
 using AutoMapper;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ASC.Webhooks.Core;
 
@@ -430,4 +433,22 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebhooksDbContext ctx, string method, string routePattern) =>
                 ctx.Webhooks.FirstOrDefault(r => r.Method == method && r.Route == routePattern));
+}
+
+public class WarmupWebhooksServicesStartupTask(IServiceProvider provider) : IStartupTask
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = provider.CreateScope();
+        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebhooksDbContext>>();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await Queries.WebhooksConfigByUriAsync(context, int.MinValue, string.Empty, string.Empty);
+        await Queries.WebhooksConfigWithStatusAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.WebhooksConfigsAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.WebhooksConfigAsync(context, int.MinValue, int.MaxValue);
+        await Queries.WebhooksLogAsync(context, int.MinValue);
+        await Queries.DbWebhooksAsync(context).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.DbWebhookAsync(context, int.MinValue);
+        await Queries.DbWebhookByMethodAsync(context, string.Empty, string.Empty);
+    }
 }
