@@ -117,9 +117,9 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             while (true)
             {
-                var statuses = await fileOperationsManager.GetOperationResults();
+                var statuses = await fileOperationsManager.GetOperationResults(true);
 
-                if (statuses.TrueForAll(r => r.Finished))
+                if (statuses.TrueForAll(r => r.OperationType != FileOperationType.Delete || r.Finished))
                 {
                     break;
                 }

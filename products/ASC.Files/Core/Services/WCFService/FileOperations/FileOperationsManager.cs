@@ -34,7 +34,7 @@ public class FileOperationsManagerHolder(
     internal const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
+    public async Task<List<FileOperationResult>> GetOperationResults(Guid userId, bool includeHiddden = false)
     {
         var operations = (await _tasks
             .GetAllTasks())
@@ -49,7 +49,8 @@ public class FileOperationsManagerHolder(
         }
 
         var results = operations
-            .Where(o => (o[FileOperation.Hold] || o[FileOperation.Progress] != 100) && !(o.HasProperty(FileOperation.Hidden) && o[FileOperation.Hidden]))
+            .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
+            .Where(o => includeHiddden || !(o.HasProperty(FileOperation.Hidden) && o[FileOperation.Hidden]))
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,
@@ -118,9 +119,9 @@ public class FileOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider)
 {
-    public async Task<List<FileOperationResult>> GetOperationResults()
+    public async Task<List<FileOperationResult>> GetOperationResults(bool includeHiddden = false)
     {
-        return await fileOperationsManagerHolder.GetOperationResults(GetUserId());
+        return await fileOperationsManagerHolder.GetOperationResults(GetUserId(), includeHiddden);
     }
 
     public async Task<List<FileOperationResult>> CancelOperations(string id = null)

@@ -56,6 +56,7 @@ global using ASC.Feed.Aggregator.Service;
 global using ASC.Feed.Core;
 global using ASC.Feed.Data;
 global using ASC.Files.AutoCleanUp;
+global using ASC.Files.CleanupMarkedEntries;
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.Core.Entries;
