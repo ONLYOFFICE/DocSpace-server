@@ -194,27 +194,36 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao();
             var folderDao = daoFactory.GetFolderDao<T>();
+            var folder = await folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
 
-            var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
-            var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            var roomTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
-            await Task.WhenAll(linkedIdTask, propertiesTask, roomTask);
-
-            var linkedId = await linkedIdTask;
-            var properties = await propertiesTask;
-            var room = await roomTask;
-
-            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
-
-            if (ace is { Access: FileShare.FillForms })
+            if (folder.FolderType == FolderType.FillingFormsRoom ||
+                folder.FolderType == FolderType.FormFillingFolderDone ||
+                folder.FolderType == FolderType.FormFillingFolderInProgress)
             {
-                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+                var linkDao = daoFactory.GetLinkDao();
+                var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
+                var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
+                await Task.WhenAll(linkedIdTask, propertiesTask);
+
+                var linkedId = await linkedIdTask;
+                var properties = await propertiesTask;
+                var ace = await fileSharing.GetPureSharesAsync(folder, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+                }
+                result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
+                result.HasDraft = linkedId != null;
+            }
+            else
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = true;
+                result.StartFilling = true;
             }
 
-            result.HasDraft = linkedId != null;
-            result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
         }
 
         result.FileExst = extension;
