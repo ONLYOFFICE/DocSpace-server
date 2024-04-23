@@ -346,8 +346,8 @@ public class ThirdpartyController(
     /// </summary>
     /// <short>Get all providers</short>
     /// <category>Third-party integration</category>
-    /// <returns type="System.Collections.Generic.List{System.String}, System.Collections.Generic">List of provider</returns>
-    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
+    /// <returns type="System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.ProviderDto}, System.Collections.Generic">List of provider</returns>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
