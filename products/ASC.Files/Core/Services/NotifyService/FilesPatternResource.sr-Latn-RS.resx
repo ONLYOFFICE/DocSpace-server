@@ -117,106 +117,98 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Elaborazione dati completata</value>
+  <data name="pattern_DocuSignComplete" xml:space="preserve">
+    <value>h1. Svi potpisnici završili $DocumentTitle
+
+Ovo je email notifikacija da vas obavesti da su svi potpisnici završili "$DocumentTitle":"$DocumentURL".</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Elaborazione dati...</value>
+  <data name="pattern_DocuSignStatus" xml:space="preserve">
+    <value>h1. $Message: $DocumentTitle
+
+Prijavi se na svoj DocuSign nalog za više informacija.</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analisi del database</value>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Dokumenti. Svi potpisnici završili $DocumentTitle</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrazione gruppo {0} ({1}/{2})</value>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Svi potpisnici završili $DocumentTitle</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrazione dei file dell’utente {0} ({1}/{2})</value>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Dokumenti. Svi potpisnici završili [$DocumentTitle]($DocumentURL)</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrazione completata</value>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Dokumenti. Status potpisa promenjen</value>
   </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Preparazione alla migrazione</value>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Status potpisa promenjen</value>
   </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Avvio dell'elaborazione dei dati...</value>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>DocSpace notifikacija. Spomenuto u dokumentu</value>
   </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decompressione...</value>
+  <data name="subject_EditorMentions_push" xml:space="preserve">
+    <value>Spomenuto u dokumentu</value>
   </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decompressione completata...</value>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Dokumenti. Slanje je završeno.</value>
   </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrazione dell'utente {0} ({1}/{2})</value>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Slanje je završeno.</value>
   </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>File comuni di migrazione</value>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>DocSpace notifikacija. Soba obrisana</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Dokumenti. Pristup dozvoljen dokumentu: $DocumentTitle</value>
   </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nessun fornitore di migrazione di questo tipo</value>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Pristup dozvoljen dokumentu: $DocumentTitle</value>
   </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Non è in corso alcuna migrazione</value>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Dokumenti. Pristup dozvoljen dokumentu: [$DocumentTitle]($DocumentURL)</value>
   </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>File di progetto di migrazione</value>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Pristup dozvoljen dokumentu: $DocumentTitle</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing è ancora in corso</value>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Dokumenti. Pristup dozvoljen folderu: $DocumentTitle</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migrazione è già in corso</value>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Pristup dozvoljen folderu: $DocumentTitle</value>
   </data>
-  <data name="CanNotAddUserInGroup" xml:space="preserve">
-    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Dokumenti. Pristup dozvoljen folderu: [$DocumentTitle]($DocumentURL)</value>
   </data>
-  <data name="CanNotCreateFile" xml:space="preserve">
-    <value>Impossibile creare il file {0}</value>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName vas je pomenuo u komentaru dokumenta
+
+$__AuthorName vas je pomenuo u komentaru "$DocumentTitle":"$DocumentURL" dokumenta u sobi "$RoomTitle":"$RoomURL":
+
+$Message</value>
   </data>
-  <data name="CanNotImportUser" xml:space="preserve">
-    <value>Impossibile importare l'utente</value>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Slanje završeno
+
+Ovo je email notifikacija da vas obavesti da ste tražili slanje $MailsCount poruka i proces je sada kompletan. $Message
+
+Uspešno poslate mail poruke sada mogu biti pronađene u vašem "Poslato":"$__VirtualRootPath/addons/mail/#sent" folderu Mail modula.</value>
   </data>
-  <data name="CanNotImportUserFiles" xml:space="preserve">
-    <value>Impossibile importare i file dell’utente</value>
+  <data name="pattern_ShareDocument" xml:space="preserve">
+    <value>h1. Pristup dozvoljen dokumentu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" dokumentu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
   </data>
-  <data name="CanNotParseArchive" xml:space="preserve">
-    <value>Impossibile analizzare l'archivio {0}</value>
+  <data name="pattern_ShareFolder" xml:space="preserve">
+    <value>h1. Pristup dozvoljen folderu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" folderu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
   </data>
-  <data name="CanNotParseArchives" xml:space="preserve">
-    <value>Impossibile analizzare gli archivi</value>
-  </data>
-  <data name="CanNotParseUser" xml:space="preserve">
-    <value>Impossibile analizzare l'utente {0}</value>
-  </data>
-  <data name="CanNotReadInfoFile" xml:space="preserve">
-    <value>Impossibile leggere il file di informazioni da {0}</value>
-  </data>
-  <data name="CanNotToUnzip" xml:space="preserve">
-    <value>Impossibile decomprimere {0}</value>
-  </data>
-  <data name="CreateFile" xml:space="preserve">
-    <value>Crea file {0}</value>
-  </data>
-  <data name="CreateFolder" xml:space="preserve">
-    <value>Crea cartella {0}</value>
-  </data>
-  <data name="CreateShareRoom" xml:space="preserve">
-    <value>crea stanza condivisa {0}</value>
-  </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Impossibile importare file comuni</value>
-  </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Impossibile importare i file di progetto</value>
-  </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Crea la cartella principale</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Impossibile condividere la voce da {0} a {1}</value>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName je izbrisao sobu
+
+$__AuthorName je izbrisao sobu: $RoomTitle</value>
   </data>
 </root>

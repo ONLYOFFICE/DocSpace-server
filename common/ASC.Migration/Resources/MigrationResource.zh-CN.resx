@@ -171,4 +171,52 @@
   <data name="MigrationUploadException" xml:space="preserve">
     <value>迁移已在进行中</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>无法将用户 {0} 添加到 {1} 群组</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>无法创建文件 {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>无法导入用户</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>无法导入用户文件</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>无法解析 {0} 存档</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>无法解析存档</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>无法解析用户 {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>无法从 {0} 中读取信息文件</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>无法将条目 {0} 共享给 {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>无法解压缩 {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>创建文件{0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>创建文件夹{0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>创建共享房间 {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>无法导入通用文件</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>无法导入项目文件</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>创建根文件夹</value>
+  </data>
 </root>

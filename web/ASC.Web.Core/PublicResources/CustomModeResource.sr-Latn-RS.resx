@@ -117,106 +117,52 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Elaborazione dati completata</value>
+  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>Dragi $UserName,
+
+Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
+
+Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Elaborazione dati...</value>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analisi del database</value>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Moji dokumenti' odeljku</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrazione gruppo {0} ({1}/{2})</value>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrazione dei file dell’utente {0} ({1}/{2})</value>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Novi portal je registrovan</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrazione completata</value>
+  <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
+
+* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
+
+* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
+
+* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
+
+* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
+
+$OrangeButton
+
+Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Preparazione alla migrazione</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Avvio dell'elaborazione dei dati...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decompressione...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decompressione completata...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrazione dell'utente {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>File comuni di migrazione</value>
-  </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nessun fornitore di migrazione di questo tipo</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Non è in corso alcuna migrazione</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>File di progetto di migrazione</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing è ancora in corso</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migrazione è già in corso</value>
-  </data>
-  <data name="CanNotAddUserInGroup" xml:space="preserve">
-    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
-  </data>
-  <data name="CanNotCreateFile" xml:space="preserve">
-    <value>Impossibile creare il file {0}</value>
-  </data>
-  <data name="CanNotImportUser" xml:space="preserve">
-    <value>Impossibile importare l'utente</value>
-  </data>
-  <data name="CanNotImportUserFiles" xml:space="preserve">
-    <value>Impossibile importare i file dell’utente</value>
-  </data>
-  <data name="CanNotParseArchive" xml:space="preserve">
-    <value>Impossibile analizzare l'archivio {0}</value>
-  </data>
-  <data name="CanNotParseArchives" xml:space="preserve">
-    <value>Impossibile analizzare gli archivi</value>
-  </data>
-  <data name="CanNotParseUser" xml:space="preserve">
-    <value>Impossibile analizzare l'utente {0}</value>
-  </data>
-  <data name="CanNotReadInfoFile" xml:space="preserve">
-    <value>Impossibile leggere il file di informazioni da {0}</value>
-  </data>
-  <data name="CanNotToUnzip" xml:space="preserve">
-    <value>Impossibile decomprimere {0}</value>
-  </data>
-  <data name="CreateFile" xml:space="preserve">
-    <value>Crea file {0}</value>
-  </data>
-  <data name="CreateFolder" xml:space="preserve">
-    <value>Crea cartella {0}</value>
-  </data>
-  <data name="CreateShareRoom" xml:space="preserve">
-    <value>crea stanza condivisa {0}</value>
-  </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Impossibile importare file comuni</value>
-  </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Impossibile importare i file di progetto</value>
-  </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Crea la cartella principale</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Impossibile condividere la voce da {0} a {1}</value>
+  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>h3.Novi portal je registrovan
+
+# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
+# Ime: $UserName
+# Prezime: $UserLastName
+# Email: $UserEmail
+# Telefon: $Phone
+# Datum kreiranja: $Date</value>
   </data>
 </root>

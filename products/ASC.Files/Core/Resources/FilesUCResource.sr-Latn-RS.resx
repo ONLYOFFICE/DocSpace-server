@@ -117,106 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Elaborazione dati completata</value>
+  <data name="Archive" xml:space="preserve">
+    <value>Arhiva</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Elaborazione dati...</value>
+  <data name="CorporateFiles" xml:space="preserve">
+    <value>Zajedničko</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analisi del database</value>
+  <data name="Favorites" xml:space="preserve">
+    <value>Omiljeno</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrazione gruppo {0} ({1}/{2})</value>
+  <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
+    <value>Datoteke će biti kompresovane u {0}.tar.gz datoteku {1}</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrazione dei file dell’utente {0} ({1}/{2})</value>
+  <data name="FilesWillBeCompressedZip" xml:space="preserve">
+    <value>Datoteke će biti kompresovane u {0}.zip datoteku {1}</value>
   </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrazione completata</value>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>U procesu</value>
   </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Preparazione alla migrazione</value>
+  <data name="MyFiles" xml:space="preserve">
+    <value>Moji dokumenti</value>
   </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Avvio dell'elaborazione dei dati...</value>
+  <data name="Personal" xml:space="preserve">
+    <value>Lično</value>
   </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decompressione...</value>
+  <data name="PrivacyRoom" xml:space="preserve">
+    <value>Privatna soba</value>
   </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decompressione completata...</value>
+  <data name="ProjectFiles" xml:space="preserve">
+    <value>U projektima</value>
   </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrazione dell'utente {0} ({1}/{2})</value>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Spremno</value>
   </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>File comuni di migrazione</value>
+  <data name="Recent" xml:space="preserve">
+    <value>Skorašnje</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Errore durante l'inizializzazione del programma di migrazione {0}</value>
+  <data name="SharedForMe" xml:space="preserve">
+    <value>Deljeno sa mnom</value>
   </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nessun fornitore di migrazione di questo tipo</value>
+  <data name="Trash" xml:space="preserve">
+    <value>Otpad</value>
   </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Non è in corso alcuna migrazione</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>File di progetto di migrazione</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing è ancora in corso</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migrazione è già in corso</value>
-  </data>
-  <data name="CanNotAddUserInGroup" xml:space="preserve">
-    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
-  </data>
-  <data name="CanNotCreateFile" xml:space="preserve">
-    <value>Impossibile creare il file {0}</value>
-  </data>
-  <data name="CanNotImportUser" xml:space="preserve">
-    <value>Impossibile importare l'utente</value>
-  </data>
-  <data name="CanNotImportUserFiles" xml:space="preserve">
-    <value>Impossibile importare i file dell’utente</value>
-  </data>
-  <data name="CanNotParseArchive" xml:space="preserve">
-    <value>Impossibile analizzare l'archivio {0}</value>
-  </data>
-  <data name="CanNotParseArchives" xml:space="preserve">
-    <value>Impossibile analizzare gli archivi</value>
-  </data>
-  <data name="CanNotParseUser" xml:space="preserve">
-    <value>Impossibile analizzare l'utente {0}</value>
-  </data>
-  <data name="CanNotReadInfoFile" xml:space="preserve">
-    <value>Impossibile leggere il file di informazioni da {0}</value>
-  </data>
-  <data name="CanNotToUnzip" xml:space="preserve">
-    <value>Impossibile decomprimere {0}</value>
-  </data>
-  <data name="CreateFile" xml:space="preserve">
-    <value>Crea file {0}</value>
-  </data>
-  <data name="CreateFolder" xml:space="preserve">
-    <value>Crea cartella {0}</value>
-  </data>
-  <data name="CreateShareRoom" xml:space="preserve">
-    <value>crea stanza condivisa {0}</value>
-  </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Impossibile importare file comuni</value>
-  </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Impossibile importare i file di progetto</value>
-  </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Crea la cartella principale</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Impossibile condividere la voce da {0} a {1}</value>
+  <data name="VirtualRooms" xml:space="preserve">
+    <value>Sobe</value>
   </data>
 </root>

@@ -103,6 +103,9 @@
     <EmbeddedResource Update="Resources\NotifyTemplateResource.sl.resx">
       <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\NotifyTemplateResource.sr-Latn-RS.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\NotifyTemplateResource.tr.resx">
       <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
     </EmbeddedResource>

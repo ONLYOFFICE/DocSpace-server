@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Превышена квота пространства на пользователя</value>
   </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} на администратора / опытного пользователя и возможность добавлять пространство по запросу</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квота хранилища и статистика</value>
+  </data>
 </root>
