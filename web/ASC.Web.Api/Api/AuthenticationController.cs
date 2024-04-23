@@ -632,10 +632,14 @@ public class AuthenticationController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        var tmp = Guid.Empty;
-        if (linkedProfiles.Any(profileId => Guid.TryParse(profileId, out tmp) && userManager.UserExists(tmp)))
+        
+        foreach (var profileId in linkedProfiles)
         {
-            userId = tmp;
+            if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
+            {
+                userId = tmp;
+                break;
+            }
         }
 
         return (true, userId);

@@ -40,7 +40,7 @@ public class LoginEventsCache
     {
         _cache = cache;
         _cacheNotify = cacheNotify;
-        
+
         _cacheNotify.Subscribe(i =>
         {
             foreach (var id in i.Ids)
@@ -98,7 +98,7 @@ public class DbLoginEventsManager(
         {
             return null;
         }
-        
+
         var loginEvent = cache.Get(id);
         if (loginEvent != null)
         {
@@ -106,13 +106,13 @@ public class DbLoginEventsManager(
         }
 
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
-        loginEvent = await loginEventContext.LoginEvents.SingleOrDefaultAsync(e => e.TenantId == tenantId && e.Id == id);
+        loginEvent = await Queries.LoginEventsByIdAsync(loginEventContext, tenantId, id);
 
         if (loginEvent != null)
         {
             cache.Insert(loginEvent);
         }
-        
+
         return loginEvent;
     }
 
@@ -179,7 +179,7 @@ public class DbLoginEventsManager(
 
 static file class Queries
 {
-    public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>> LoginEventsAsync = 
+    public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>> LoginEventsAsync =
         EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date) =>
                 ctx.LoginEvents
@@ -209,6 +209,9 @@ static file class Queries
     public static readonly Func<MessagesContext, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsByTenantIdAsync =
         EF.CompileAsyncQuery((MessagesContext ctx, int tenantId) => ctx.LoginEvents.Where(r => r.TenantId == tenantId && r.Active));
 
+    public static readonly Func<MessagesContext, int, int, Task<DbLoginEvent>> LoginEventsByIdAsync =
+        EF.CompileAsyncQuery((MessagesContext ctx, int tenantId, int id) => ctx.LoginEvents.SingleOrDefault(e => e.TenantId == tenantId && e.Id == id));
+
     public static readonly Func<MessagesContext, int, Guid, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsExceptThisAsync =
         EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, Guid userId, int loginEventId) =>
@@ -226,10 +229,11 @@ public class WarmupDbLoginEventsStartupTask(IServiceProvider provider) : IStartu
         using var scope = provider.CreateScope();
         var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>();
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await Queries.LoginEventsAsync(context, int.MaxValue, Guid.Empty, new List<int>(), DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.LoginEventsAsync(context, int.MaxValue, Guid.Empty, [], DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
         await Queries.DeleteLoginEventsAsync(context, int.MinValue, int.MinValue);
         await Queries.LoginEventsExceptThisAsync(context, int.MinValue, Guid.Empty, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
         await Queries.LoginEventsByTenantIdAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
         await Queries.LoginEventsByUserIdAsync(context, int.MinValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
+        await Queries.LoginEventsByIdAsync(context, int.MinValue, int.MinValue);
     }
 }

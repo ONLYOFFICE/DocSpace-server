@@ -36,7 +36,6 @@ public class PeopleProduct : Product
     public override ProductContext Context => _context;
     public override string Name => PeopleResource.ProductName;
     public override string Description => PeopleResource.ProductDescription;
-    public override string ExtendedDescription => PeopleResource.ProductDescription;
     public override Guid ProductID => ID;
     public override string StartURL => ProductPath;
     public override string HelpURL => string.Concat(ProductPath, "help.aspx");
