@@ -739,5 +739,23 @@
     <None Update="DocStore\test.docbuilder">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="DocStore\sample\de-DE\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DocStore\sample\en-US\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DocStore\sample\es-ES\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DocStore\sample\fr-FR\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DocStore\sample\it-IT\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DocStore\sample\ru-RU\my\ONLYOFFICE Sample Form.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
