@@ -714,6 +714,12 @@ public static class DocumentServiceHttpClientExtension
             .AddPolicyHandler((_, _) => 
                 HttpPolicyExtensions
                 .HandleTransientHttpError()
+                .OrResult(response =>
+                {
+                    return response.IsSuccessStatusCode
+                        ? false
+                        : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+                })
                 .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }

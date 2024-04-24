@@ -354,13 +354,8 @@ public class FileConverter(
             RequestUri = new Uri(convertUri)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
-        }
 
         return await ResponseStream.FromMessageAsync(response);
     }
@@ -545,17 +540,11 @@ public class FileConverter(
             RequestUri = new Uri(convertedFileUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
-            }
-
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);

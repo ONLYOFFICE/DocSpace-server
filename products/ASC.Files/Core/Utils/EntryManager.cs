@@ -1361,14 +1361,8 @@ public class EntryManager(IDaoFactory daoFactory,
                     RequestUri = new Uri(downloadUri)
                 };
 
-                var httpClient = clientFactory.CreateClient();
+                var httpClient = clientFactory.CreateClient(nameof(DocumentService));
                 using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
-                }
-
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }
