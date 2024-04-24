@@ -42,10 +42,6 @@ public class SaveEditingRequestDto : IModelWithFile
     /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
     public IFormFile File { get; set; }
 
-    /// <summary>Shared token</summary>
-    /// <type>System.String, System</type>
-    public string Doc { get; set; }
-
     /// <summary>Specifies whether to force save a file or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Forcesave { get; set; }
