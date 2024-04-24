@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis.Extensions.Core.Abstractions;
-
 namespace ASC.Web.Core.Users;
 
 [Scope]
@@ -33,7 +31,7 @@ public class UserInvitationLimitHelper(
     SetupInfo setupInfo,
     TenantManager tenantManager,
     QuotaSocketManager quotaSocketManager,
-    IRedisClient redisClient)
+    IDistributedCache distributedCache)
 {
     private bool IsLimitEnabled()
     {
@@ -56,11 +54,9 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = await GetCacheKey();
 
-        var redisDatabase = redisClient.GetDefaultDatabase().Database;
+        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 
-        var cacheKeyExist = await redisDatabase.KeyExistsAsync(cacheKey);
-
-        return cacheKeyExist ? (int)(await redisDatabase.StringGetAsync(cacheKey)) : setupInfo.InvitationLimit;
+        return int.TryParse(cacheValue, out var result) ? result : setupInfo.InvitationLimit;
     }
 
     public async Task IncreaseLimit()
@@ -72,20 +68,16 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = await GetCacheKey();
 
-        var redisDatabase = redisClient.GetDefaultDatabase().Database;
+        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 
-        var cacheKeyExist = await redisDatabase.KeyExistsAsync(cacheKey);
-
-        if (!cacheKeyExist)
+        if (!int.TryParse(cacheValue, out var oldValue))
         {
             return;
         }
 
-        var oldValue = (int)(await redisDatabase.StringGetAsync(cacheKey));
-
         var newValue = int.Min(oldValue + 1, setupInfo.InvitationLimit);
 
-        _ = await redisDatabase.StringSetAsync(cacheKey, newValue);
+        await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
 
         await quotaSocketManager.ChangeInvitationLimitValue(newValue);
     }
@@ -99,17 +91,13 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = await GetCacheKey();
 
-        var redisDatabase = redisClient.GetDefaultDatabase().Database;
+        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 
-        var cacheKeyExist = await redisDatabase.KeyExistsAsync(cacheKey);
-
-        if (cacheKeyExist)
+        if (int.TryParse(cacheValue, out var oldValue))
         {
-            var oldValue = (int)(await redisDatabase.StringGetAsync(cacheKey));
-
             var newValue = int.Max(oldValue - 1, 0);
 
-            _ = await redisDatabase.StringSetAsync(cacheKey, newValue);
+            await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(newValue);
         }
@@ -117,7 +105,7 @@ public class UserInvitationLimitHelper(
         {
             var value = int.Max(setupInfo.InvitationLimit - 1, 0);
 
-            _ = await redisDatabase.StringSetAsync(cacheKey, value);
+            await distributedCache.SetStringAsync(cacheKey, value.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(value);
         }
