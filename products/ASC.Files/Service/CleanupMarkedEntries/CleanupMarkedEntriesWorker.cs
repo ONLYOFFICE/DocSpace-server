@@ -38,29 +38,29 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
             return;
         }
 
-        List<TenantUserMarkedEntries> data;
+        List<MarkedEntries> data;
 
         await using (var scope = serviceScopeFactory.CreateAsyncScope())
         {
             await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(cancellationToken);
-            data = await GetTenantUserMarkedEntriesAsync(dbContext);
+            data = await GetMarkedEntriesAsync(dbContext);
         }
 
-        if (!data.Any())
+        if (data.Count == 0)
         {
             return;
         }
 
-        var grouppedData = data.GroupBy(r => new TenantUserGroupKey(r.TenantId, r.UserId));
+        var groupedData = data.GroupBy(r => new MarkedEntriesGroupKey(r.TenantId, r.UserId));
 
-        logger.InfoFoundUsers(grouppedData.Count());
+        logger.InfoFoundUsers(groupedData.Count());
 
-        await Parallel.ForEachAsync(grouppedData,
+        await Parallel.ForEachAsync(groupedData,
                                     new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = cancellationToken }, //System.Environment.ProcessorCount
                                     DeleteFilesAndFoldersAsync);
     }
 
-    private async ValueTask DeleteFilesAndFoldersAsync(IGrouping<TenantUserGroupKey, TenantUserMarkedEntries> tenantUser, CancellationToken cancellationToken)
+    private async ValueTask DeleteFilesAndFoldersAsync(IGrouping<MarkedEntriesGroupKey, MarkedEntries> groupedData, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
         {
@@ -75,9 +75,9 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
 
-            await tenantManager.SetCurrentTenantAsync(tenantUser.Key.TenantId);
+            await tenantManager.SetCurrentTenantAsync(groupedData.Key.TenantId);
 
-            var userAccount = await authManager.GetAccountByIDAsync(tenantUser.Key.TenantId, tenantUser.Key.UserId);
+            var userAccount = await authManager.GetAccountByIDAsync(groupedData.Key.TenantId, groupedData.Key.UserId);
             if (Equals(userAccount, ASC.Core.Configuration.Constants.Guest))
             {
                 return;
@@ -88,15 +88,15 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
             var foldersList = new List<int>();
             var filesList = new List<int>();
 
-            foreach (var item in tenantUser)
+            foreach (var markedEntries in groupedData)
             {
-                if (item.FileEntryType == FileEntryType.Folder)
+                if (markedEntries.FileEntryType == FileEntryType.Folder)
                 {
-                    foldersList.AddRange(item.EntryIds);
+                    foldersList.AddRange(markedEntries.EntryIds);
                 }
                 else
                 {
-                    filesList.AddRange(item.EntryIds);
+                    filesList.AddRange(markedEntries.EntryIds);
                 }
             }
 
@@ -105,11 +105,11 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
                 return;
             }
 
-            logger.InfoCleanupMarkedEntries(tenantUser.Key.TenantId, tenantUser.Key.UserId, string.Join(',', foldersList), string.Join(',', filesList));
+            logger.InfoCleanupMarkedEntries(groupedData.Key.TenantId, groupedData.Key.UserId, string.Join(',', foldersList), string.Join(',', filesList));
 
             await fileOperationsManager.PublishDelete(foldersList, filesList, true, true);
 
-            logger.InfoCleanupMarkedEntriesWait(tenantUser.Key.TenantId, tenantUser.Key.UserId);
+            logger.InfoCleanupMarkedEntriesWait(groupedData.Key.TenantId, groupedData.Key.UserId);
 
             while (true)
             {
@@ -123,7 +123,7 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
                 await Task.Delay(100, cancellationToken);
             }
 
-            logger.InfoCleanupMarkedEntriesFinish(tenantUser.Key.TenantId, tenantUser.Key.UserId);
+            logger.InfoCleanupMarkedEntriesFinish(groupedData.Key.TenantId, groupedData.Key.UserId);
         }
         catch (Exception ex)
         {
@@ -131,20 +131,20 @@ public class CleanupMarkedEntriesWorker(ILogger<CleanupMarkedEntriesWorker> logg
         }
     }
 
-    private async Task<List<TenantUserMarkedEntries>> GetTenantUserMarkedEntriesAsync(FilesDbContext dbContext)
+    private async Task<List<MarkedEntries>> GetMarkedEntriesAsync(FilesDbContext dbContext)
     {
-        var markedEntries = new List<TenantUserMarkedEntries>();
+        var markedEntries = new List<MarkedEntries>();
         var fromDate = DateTime.UtcNow.AddDays(-1);
-        markedEntries.AddRange(await Queries.TenantUserMarkedFoldersAsync(dbContext, fromDate).ToListAsync());
-        markedEntries.AddRange(await Queries.TenantUserMarkedFilesAsync(dbContext, fromDate).ToListAsync());
+        markedEntries.AddRange(await Queries.GetMarkedFoldersAsync(dbContext, fromDate).ToListAsync());
+        markedEntries.AddRange(await Queries.GetMarkedFilesAsync(dbContext, fromDate).ToListAsync());
         return markedEntries;
     }
 }
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, DateTime, IAsyncEnumerable<TenantUserMarkedEntries>>
-        TenantUserMarkedFoldersAsync = EF.CompileAsyncQuery(
+    public static readonly Func<FilesDbContext, DateTime, IAsyncEnumerable<MarkedEntries>>
+        GetMarkedFoldersAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, DateTime fromDate) =>
                 ctx.Tenants
                     .Join(ctx.Folders, a => a.Id, b => b.TenantId, (tenants, folders) => new { tenants, folders })
@@ -157,7 +157,7 @@ static file class Queries
                         UserId = r.folders.ModifiedBy,
                         EntryId = r.folders.Id
                     })
-                    .GroupBy(r => new TenantUserGroupKey(r.TenantId, r.UserId), (key, group) => new TenantUserMarkedEntries
+                    .GroupBy(r => new MarkedEntriesGroupKey(r.TenantId, r.UserId), (key, group) => new MarkedEntries
                     {
                         TenantId = key.TenantId,
                         UserId = key.UserId,
@@ -165,8 +165,8 @@ static file class Queries
                         EntryIds = group.Select(r => r.EntryId)
                     }));
 
-    public static readonly Func<FilesDbContext, DateTime, IAsyncEnumerable<TenantUserMarkedEntries>>
-    TenantUserMarkedFilesAsync = EF.CompileAsyncQuery(
+    public static readonly Func<FilesDbContext, DateTime, IAsyncEnumerable<MarkedEntries>>
+    GetMarkedFilesAsync = EF.CompileAsyncQuery(
         (FilesDbContext ctx, DateTime fromDate) =>
             ctx.Tenants
                 .Join(ctx.Files, a => a.Id, b => b.TenantId, (tenants, files) => new { tenants, files })
@@ -179,7 +179,7 @@ static file class Queries
                     UserId = r.files.ModifiedBy,
                     EntryId = r.files.Id
                 })
-                .GroupBy(r => new TenantUserGroupKey(r.TenantId, r.UserId), (key, group) => new TenantUserMarkedEntries
+                .GroupBy(r => new MarkedEntriesGroupKey(r.TenantId, r.UserId), (key, group) => new MarkedEntries
                 {
                     TenantId = key.TenantId,
                     UserId = key.UserId,

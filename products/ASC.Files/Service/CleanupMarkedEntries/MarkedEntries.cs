@@ -26,7 +26,7 @@
 
 namespace ASC.Files.CleanupMarkedEntries;
 
-public class TenantUserMarkedEntries
+public class MarkedEntries
 {
     public int TenantId { get; init; }
     public Guid UserId { get; init; }
@@ -34,7 +34,7 @@ public class TenantUserMarkedEntries
     public IEnumerable<int> EntryIds { get; init; }
 }
 
-public class TenantUserGroupKey(int tenantId, Guid userId)
+public class MarkedEntriesGroupKey(int tenantId, Guid userId)
 {
     public int TenantId { get; init; } = tenantId;
     public Guid UserId { get; init; } = userId;
