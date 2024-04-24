@@ -27,21 +27,16 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Id} into {FolderId}")]
-public class ChunkedUploadSession<T> : CommonChunkedUploadSession
+public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChunkedUploadSession(bytesTotal)
 {
     public T FolderId { get; set; }
-    public File<T> File { get; set; }
+    public File<T> File { get; set; } = file;
     public bool Encrypted { get; set; }
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
     [NonSerialized]
     public bool CheckQuota = true;
-    
-    public ChunkedUploadSession(File<T> file, long bytesTotal) : base(bytesTotal)
-    {
-        File = file;
-    }
 
     public override object Clone()
     {
@@ -53,11 +48,11 @@ public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 }
 
 [Scope]
-public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logger, EntryManager entryManager)
+public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logger, BreadCrumbsManager breadCrumbsManager)
 {
     public async Task<object> ToResponseObjectAsync<T>(ChunkedUploadSession<T> session, bool appendBreadCrumbs = false)
     {
-        var breadCrumbs = await entryManager.GetBreadCrumbsAsync(session.FolderId); //todo: check how?
+        var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(session.FolderId); //todo: check how?
         var pathFolder = appendBreadCrumbs
             ? breadCrumbs.Select(f =>
             {

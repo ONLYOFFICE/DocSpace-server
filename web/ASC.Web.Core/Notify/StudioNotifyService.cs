@@ -29,21 +29,21 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifyService(UserManager userManager,
-        StudioNotifyHelper studioNotifyHelper,
-        StudioNotifyServiceHelper studioNotifyServiceHelper,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        SetupInfo setupInfo,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserInvitationLimitHelper userInvitationLimitHelper,
-        SettingsManager settingsManager,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        ILoggerProvider option)
+public class StudioNotifyService(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    StudioNotifyServiceHelper studioNotifyServiceHelper,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    SetupInfo setupInfo,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    SettingsManager settingsManager,
+    MessageService messageService,
+    ILoggerProvider option)
 {
     public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
@@ -99,7 +99,7 @@ public class StudioNotifyService(UserManager userManager,
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
-        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion

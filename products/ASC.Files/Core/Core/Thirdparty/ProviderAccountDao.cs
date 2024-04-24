@@ -45,7 +45,7 @@ internal class ProviderAccountDao(
     TenantUtil tenantUtil,
     TenantManager tenantManager,
     InstanceCrypto instanceCrypto,
-    SecurityContext securityContext,
+    AuthContext authContext,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     OAuth20TokenHelper oAuth20TokenHelper,
     ILogger<ProviderAccountDao> logger)
@@ -111,12 +111,12 @@ internal class ProviderAccountDao(
         try
         {
             var filesDbContext = dbContextFactory.CreateDbContext();
-            return Queries.ThirdPartyAccountsByFilterAsync(filesDbContext, TenantID, linkId, folderType, securityContext.CurrentAccount.ID, GetSearchText(searchText))
+            return Queries.ThirdPartyAccountsByFilterAsync(filesDbContext, TenantID, linkId, folderType, authContext.CurrentAccount.ID, GetSearchText(searchText))
                 .Select(ToProviderInfo);
         }
         catch (Exception e)
         {
-            logger.ErrorGetProvidersInfoInternal(linkId, folderType, securityContext.CurrentAccount.ID, e);
+            logger.ErrorGetProvidersInfoInternal(linkId, folderType, authContext.CurrentAccount.ID, e);
             return new List<IProviderInfo>().ToAsyncEnumerable();
         }
     }
@@ -135,7 +135,7 @@ internal class ProviderAccountDao(
 
         authData = GetEncodedAccessToken(authData, prKey);
 
-        if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+        if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
         {
             throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
@@ -153,7 +153,7 @@ internal class ProviderAccountDao(
             FolderType = folderType,
             CreateOn = now,
             ModifiedOn = now,
-            UserId = securityContext.CurrentAccount.ID,
+            UserId = authContext.CurrentAccount.ID,
             Token = EncryptPassword(authData.RawToken ?? ""),
             Url = authData.Url ?? ""
         };
@@ -186,7 +186,7 @@ internal class ProviderAccountDao(
             var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
             updatedAuthData.Url = forUpdate.Url;
             
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, updatedAuthData, securityContext.CurrentAccount.ID, forUpdate.FolderType, 
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType, 
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
@@ -273,7 +273,7 @@ internal class ProviderAccountDao(
             }
             catch (Exception e)
             {
-                logger.ErrorUpdateProviderInfo(linkId, securityContext.CurrentAccount.ID, e);
+                logger.ErrorUpdateProviderInfo(linkId, authContext.CurrentAccount.ID, e);
                 throw;
             }
 
@@ -293,7 +293,7 @@ internal class ProviderAccountDao(
                 authData = GetEncodedAccessToken(authData, key);
             }
 
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
@@ -348,7 +348,7 @@ internal class ProviderAccountDao(
         }
         catch (Exception e)
         {
-            logger.ErrorUpdateBackupProviderInfo(securityContext.CurrentAccount.ID, e);
+            logger.ErrorUpdateBackupProviderInfo(authContext.CurrentAccount.ID, e);
             throw;
         }
 
@@ -364,7 +364,7 @@ internal class ProviderAccountDao(
                 newAuthData = GetEncodedAccessToken(newAuthData, key);
             }
 
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, newAuthData, securityContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, newAuthData, authContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
@@ -375,7 +375,7 @@ internal class ProviderAccountDao(
             thirdParty.Title = customerTitle;
         }
 
-        thirdParty.UserId = securityContext.CurrentAccount.ID;
+        thirdParty.UserId = authContext.CurrentAccount.ID;
         thirdParty.Provider = providerKey;
 
         if (newAuthData != null && !newAuthData.IsEmpty())
@@ -469,7 +469,7 @@ internal class ProviderAccountDao(
             var box = serviceProvider.GetService<BoxProviderInfo>();
             box.ProviderId = id;
             box.CustomerTitle = providerTitle;
-            box.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+            box.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
             box.ProviderKey = input.Provider;
             box.RootFolderType = rootFolderType;
             box.CreateOn = createOn;
@@ -494,7 +494,7 @@ internal class ProviderAccountDao(
             var drop = serviceProvider.GetService<DropboxProviderInfo>();
             drop.ProviderId = id;
             drop.CustomerTitle = providerTitle;
-            drop.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+            drop.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
             drop.ProviderKey = input.Provider;
             drop.RootFolderType = rootFolderType;
             drop.CreateOn = createOn;
@@ -519,7 +519,7 @@ internal class ProviderAccountDao(
             var sh = serviceProvider.GetService<SharePointProviderInfo>();
             sh.ProviderId = id;
             sh.CustomerTitle = providerTitle;
-            sh.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+            sh.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
             sh.ProviderKey = input.Provider;
             sh.RootFolderType = rootFolderType;
             sh.CreateOn = createOn;
@@ -544,7 +544,7 @@ internal class ProviderAccountDao(
             var gd = serviceProvider.GetService<GoogleDriveProviderInfo>();
             gd.ProviderId = id;
             gd.CustomerTitle = providerTitle;
-            gd.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+            gd.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
             gd.ProviderKey = input.Provider;
             gd.RootFolderType = rootFolderType;
             gd.CreateOn = createOn;
@@ -569,7 +569,7 @@ internal class ProviderAccountDao(
             var od = serviceProvider.GetService<OneDriveProviderInfo>();
             od.ProviderId = id;
             od.CustomerTitle = providerTitle;
-            od.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+            od.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
             od.ProviderKey = input.Provider;
             od.RootFolderType = rootFolderType;
             od.CreateOn = createOn;
@@ -602,7 +602,7 @@ internal class ProviderAccountDao(
         var webDavProviderInfo = serviceProvider.GetService<WebDavProviderInfo>();
         webDavProviderInfo.ProviderId = id;
         webDavProviderInfo.CustomerTitle = providerTitle;
-        webDavProviderInfo.Owner = owner == Guid.Empty ? securityContext.CurrentAccount.ID : owner;
+        webDavProviderInfo.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
         webDavProviderInfo.ProviderKey = input.Provider;
         webDavProviderInfo.RootFolderType = rootFolderType;
         webDavProviderInfo.CreateOn = createOn;
@@ -692,7 +692,7 @@ internal class ProviderAccountDao(
         }
         catch (Exception e)
         {
-            logger.ErrorDecryptPassword(id, securityContext.CurrentAccount.ID, e);
+            logger.ErrorDecryptPassword(id, authContext.CurrentAccount.ID, e);
             return null;
         }
     }

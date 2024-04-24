@@ -146,7 +146,7 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string ZendeskKey { get; set; }
 
-    /// <summary>Tag manager id</summary>
+    /// <summary>Tag manager ID</summary>
     /// <type>System.String, System</type>
     public string TagManagerId { get; set; }
 

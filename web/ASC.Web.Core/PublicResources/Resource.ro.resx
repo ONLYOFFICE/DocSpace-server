@@ -1098,4 +1098,10 @@
   <data name="RoomFreeSpaceException" xml:space="preserve">
     <value>Spațiu de stocare pentru sala  a fost depășit</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cote de stocare și statistici</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per adminastrator/utilizator avansat și posibilitatea de a adăuga mai mult spațiu de stocare la cerere</value>
+  </data>
 </root>

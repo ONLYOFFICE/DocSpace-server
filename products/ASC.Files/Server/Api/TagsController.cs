@@ -178,7 +178,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Removes files with the IDs specified in the request from the recent by links list.
+    /// Removes files with the IDs specified in the request from the "Recent" section.
     /// </summary>
     /// <short>Delete recent files</short>
     /// <category>Files</category>

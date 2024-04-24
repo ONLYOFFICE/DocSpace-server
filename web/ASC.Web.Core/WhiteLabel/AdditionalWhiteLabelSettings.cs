@@ -205,7 +205,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Mail sales URL</summary>
+    /// <summary>Default sales email</summary>
     /// <type>System.String, System</type>
     public string DefaultMailSalesEmail
     {

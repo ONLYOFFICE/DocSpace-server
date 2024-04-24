@@ -219,7 +219,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 }
             }
 
-            return false;
+            return true;
         }
 
         return base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relationList, ref value);

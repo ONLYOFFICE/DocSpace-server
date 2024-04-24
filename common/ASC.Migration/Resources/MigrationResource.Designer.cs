@@ -61,7 +61,7 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t to add user {0} to group {1}.
+        ///   Looks up a localized string similar to Couldn&apos;t add user {0} to group {1}.
         /// </summary>
         public static string CanNotAddUserInGroup {
             get {
@@ -142,7 +142,7 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t to unzip {0}.
+        ///   Looks up a localized string similar to Couldn&apos;t unzip {0}.
         /// </summary>
         public static string CanNotToUnzip {
             get {
@@ -169,7 +169,7 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to create share room {0}.
+        ///   Looks up a localized string similar to create shared room {0}.
         /// </summary>
         public static string CreateShareRoom {
             get {

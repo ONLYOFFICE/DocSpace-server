@@ -30,12 +30,12 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter(UserFormatter userFormatter,
-        AuditActionMapper actionMapper,
-        MessageTarget messageTarget,
-        TenantUtil tenantUtil)
+internal class EventTypeConverter(
+    UserFormatter userFormatter,
+    AuditActionMapper actionMapper,
+    TenantUtil tenantUtil)
     : ITypeConverter<LoginEventQuery, LoginEvent>,
-        ITypeConverter<AuditEventQuery, AuditEvent>
+      ITypeConverter<AuditEventQuery, AuditEvent>
 {
     public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
@@ -89,7 +89,7 @@ internal class EventTypeConverter(UserFormatter userFormatter,
         source.Event.Target = null;
         var result = context.Mapper.Map<AuditEvent>(source.Event);
 
-        result.Target = messageTarget.Parse(target);
+        result.Target = MessageTarget.Parse(target);
 
         if (source.Event.DescriptionRaw != null)
         {

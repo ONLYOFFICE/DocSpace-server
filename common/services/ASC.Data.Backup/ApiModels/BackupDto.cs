@@ -39,8 +39,8 @@ public class BackupDto
     /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Dump</summary>
-    /// <type>System.Bolean, System</type>
+    /// <summary>Specifies if a dump will be created or not</summary>
+    /// <type>System.Boolean, System</type>
     /// <example>true</example>
     public bool Dump { get; set; }
 }

@@ -89,6 +89,8 @@ public class MigrationLogger(
 
     public Stream GetStream()
     {
+        logger.Information($"log path - {_migrationLogPath}");
+        logger.Information($"log Length - {_migration.Length}");
         _migration.Position = 0;
         return _migration;
     }

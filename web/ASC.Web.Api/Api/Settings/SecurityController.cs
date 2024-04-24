@@ -27,26 +27,26 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("security")]
-public class SecurityController(TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        CoreBaseSettings coreBaseSettings,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        AuthContext authContext,
-        WebItemSecurity webItemSecurity,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        MessageTarget messageTarget,
-        IMemoryCache memoryCache,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor,
-        PasswordSettingsConverter passwordSettingsConverter,
-        PasswordSettingsManager passwordSettingsManager)
+public class SecurityController(
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    CoreBaseSettings coreBaseSettings,
+    MessageService messageService,
+    ApiContext apiContext,
+    UserManager userManager,
+    AuthContext authContext,
+    WebItemSecurity webItemSecurity,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EmployeeDtoHelper employeeWrapperHelper,
+    IMemoryCache memoryCache,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor,
+    PasswordSettingsConverter passwordSettingsConverter,
+    PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -371,7 +371,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -379,7 +379,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 
