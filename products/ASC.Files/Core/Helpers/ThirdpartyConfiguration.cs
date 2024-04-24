@@ -83,10 +83,6 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
     public bool SupportYandexInclusion => ThirdPartyProviders.Exists(r => r == "yandex");
 
-    public string DropboxAppKey => DropboxLoginProvider["dropboxappkey"];
-
-    public string DropboxAppSecret => DropboxLoginProvider["dropboxappsecret"];
-
     public bool SupportDocuSignInclusion => ThirdPartyProviders.Exists(r => r == "docusign") && DocuSignLoginProvider.IsEnabled;
 
     public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Exists(r => r == "google") && GoogleLoginProvider.IsEnabled;

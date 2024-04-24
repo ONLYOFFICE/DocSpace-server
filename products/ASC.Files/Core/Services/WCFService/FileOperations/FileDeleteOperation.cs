@@ -405,7 +405,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 return (true, error);
             }
-            if (fileTracker.IsEditing(file.Id))
+            if (await fileTracker.IsEditingAsync(file.Id))
             {
                 error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
 

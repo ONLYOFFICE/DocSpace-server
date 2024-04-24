@@ -214,7 +214,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var rightChangeHistory = rightToEdit && !file.Encrypted;
 
-        if (fileTracker.IsEditing(file.Id))
+        if (await fileTracker.IsEditingAsync(file.Id))
         {
             rightChangeHistory = false;
 
@@ -225,7 +225,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 if (tryEdit)
                 {
-                    var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
+                    var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
                     strError = string.Format(!coauth
                                                  ? FilesCommonResource.ErrorMessage_EditingCoauth
                                                  : FilesCommonResource.ErrorMessage_EditingMobile,
@@ -348,7 +348,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var usersDrop = new List<string>();
 
-        foreach (var uid in fileTracker.GetEditingBy(file.Id))
+        foreach (var uid in await fileTracker.GetEditingByAsync(file.Id))
         {
             if (!await userManager.UserExistsAsync(uid))
             {

@@ -76,7 +76,12 @@ public class StorageController(ILoggerProvider option,
 
         var current = await settingsManager.LoadAsync<StorageSettings>();
         var consumers = consumerFactory.GetAll<DataStoreConsumer>();
-        return consumers.Select(consumer => new StorageDto(consumer, current)).ToList();
+        List<StorageDto> result = [];
+        foreach (var consumer in consumers)
+        {
+            result.Add(await StorageDto.StorageWrapperInit(consumer, current));
+        }
+        return result;
     }
 
     /// <summary>
@@ -322,7 +327,7 @@ public class StorageController(ILoggerProvider option,
             await tenantExtra.DemandAccessSpacePermissionAsync();
 
             var consumer = consumerFactory.GetByKey(inDto.Module);
-            if (!consumer.IsSet)
+            if (!await consumer.GetIsSetAsync())
             {
                 throw new ArgumentException("module");
             }
@@ -396,7 +401,12 @@ public class StorageController(ILoggerProvider option,
 
         var current = await settingsManager.LoadAsync<CdnStorageSettings>();
         var consumers = consumerFactory.GetAll<DataStoreConsumer>().Where(r => r.Cdn != null);
-        return consumers.Select(consumer => new StorageDto(consumer, current)).ToList();
+        List<StorageDto> result = [];
+        foreach (var consumer in consumers)
+        {
+            result.Add(await StorageDto.StorageWrapperInit(consumer, current));
+        }
+        return result;
     }
 
     /// <summary>
@@ -416,7 +426,7 @@ public class StorageController(ILoggerProvider option,
         await tenantExtra.DemandAccessSpacePermissionAsync();
 
         var consumer = consumerFactory.GetByKey(inDto.Module);
-        if (!consumer.IsSet)
+        if (!await consumer.GetIsSetAsync())
         {
             throw new ArgumentException("module");
         }
@@ -433,7 +443,7 @@ public class StorageController(ILoggerProvider option,
         try
         {
             var tenant = await tenantManager.GetCurrentTenantAsync();
-            serviceClient.UploadCdn(tenant.Id, "/", webHostEnvironment.ContentRootPath, settings);
+            await serviceClient.UploadCdnAsync(tenant.Id, "/", webHostEnvironment.ContentRootPath, settings);
         }
         catch (Exception e)
         {
@@ -489,13 +499,18 @@ public class StorageController(ILoggerProvider option,
         }
 
         var consumers = consumerFactory.GetAll<DataStoreConsumer>();
-        return consumers.Select(consumer => new StorageDto(consumer, current)).ToList();
+        List<StorageDto> result = [];
+        foreach (var consumer in consumers)
+        {
+            result.Add(await StorageDto.StorageWrapperInit(consumer, current));
+        }
+        return result;
     }
 
     private async Task StartMigrateAsync(StorageSettings settings)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        serviceClient.Migrate(tenant.Id, settings);
+        await serviceClient.MigrateAsync(tenant.Id, settings);
 
         tenant.SetStatus(TenantStatus.Migrating);
         await tenantManager.SaveTenantAsync(tenant);

@@ -60,9 +60,9 @@ public class LoginEventsCache
         return _cache.Get<DbLoginEvent>(BuildKey(id));
     }
 
-    public void Remove(IEnumerable<int> ids)
+    public async Task RemoveAsync(IEnumerable<int> ids)
     {
-        _cacheNotify.Publish(new LoginEventCacheItem { Ids = ids.ToList() }, CacheNotifyAction.Remove);
+        await _cacheNotify.PublishAsync(new LoginEventCacheItem { Ids = ids.ToList() }, CacheNotifyAction.Remove);
     }
 
     private static string BuildKey(int id)
@@ -133,7 +133,7 @@ public class DbLoginEventsManager(
 
         await Queries.DeleteLoginEventsAsync(loginEventContext, tenantId, loginEventId);
 
-        cache.Remove([loginEventId]);
+        await cache.RemoveAsync([loginEventId]);
     }
 
     public async Task LogOutAllActiveConnectionsAsync(int tenantId, Guid userId)
@@ -165,7 +165,7 @@ public class DbLoginEventsManager(
 
     private async Task InnerLogOutAsync(MessagesContext loginEventContext, List<DbLoginEvent> loginEvents)
     {
-        cache.Remove(loginEvents.Select(e => e.Id));
+        await cache.RemoveAsync(loginEvents.Select(e => e.Id));
 
         foreach (var loginEvent in loginEvents)
         {

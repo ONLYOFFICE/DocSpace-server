@@ -81,13 +81,6 @@ public class CoreSettings
 
             return result;
         }
-        set
-        {
-            if (CoreBaseSettings.Standalone || string.IsNullOrEmpty(CoreBaseSettings.Basedomain))
-            {
-                SaveSetting("BaseDomain", value);
-            }
-        }
     }
 
     private const string LockKey = "core_settings";
@@ -136,19 +129,6 @@ public class CoreSettings
         }
 
         await TenantService.SetTenantSettingsAsync(tenant, key, bytes);
-    }
-
-    public void SaveSetting(string key, string value, int tenant = Tenant.DefaultTenant)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-
-        byte[] bytes = null;
-        if (value != null)
-        {
-            bytes = Crypto.GetV(Encoding.UTF8.GetBytes(value), 2, true);
-        }
-
-        TenantService.SetTenantSettings(tenant, key, bytes);
     }
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)

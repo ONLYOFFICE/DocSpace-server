@@ -1235,7 +1235,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && forcesave is null or ForcesaveType.None && fileTracker.IsEditing(file.Id))
+        if (checkRight && forcesave is null or ForcesaveType.None && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
@@ -1403,9 +1403,9 @@ public class EntryManager(IDaoFactory daoFactory,
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, string doc, int tenantId, bool editingAlone = false)
     {
         bool checkRight;
-        if (fileTracker.GetEditingBy(fileId).Contains(userId))
+        if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1433,10 +1433,10 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
-            fileTracker.ChangeRight(fileId, userId, false);
+            await fileTracker.ChangeRight(fileId, userId, false);
         }
 
         return file;
@@ -1493,7 +1493,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && fileTracker.IsEditing(file.Id))
+        if (checkRight && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
@@ -1647,7 +1647,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else
         {
-            if (!fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
+            if (!await fileTracker.IsEditingAsync(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
                     lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
@@ -1683,7 +1683,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (file.ProviderEntry && fileTracker.IsEditing(file.Id))
+        if (file.ProviderEntry && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }

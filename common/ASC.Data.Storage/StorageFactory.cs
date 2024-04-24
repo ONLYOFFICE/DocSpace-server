@@ -129,10 +129,10 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
         var settings = await settingsManager.LoadAsync<StorageSettings>(tenant.Value);
         //TODO:GetStoreAndCache
-        return GetDataStore(tenantPath, module, storageSettingsHelper.DataStoreConsumer(settings), controller, region);
+        return await GetDataStoreAsync(tenantPath, module, await storageSettingsHelper.DataStoreConsumerAsync(settings), controller, region);
     }
 
-    public IDataStore GetStorageFromConsumer(int? tenant, string module, DataStoreConsumer consumer, string region = "current")
+    public async Task<IDataStore> GetStorageFromConsumerAsync(int? tenant, string module, DataStoreConsumer consumer, string region = "current")
     {
         var tenantPath = tenant != null ? TenantPath.CreatePath(tenant.Value) : TenantPath.CreatePath(DefaultTenantName);
 
@@ -145,7 +145,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
         var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
-        return GetDataStore(tenantPath, module, consumer, tenantQuotaController);
+        return await GetDataStoreAsync(tenantPath, module, consumer, tenantQuotaController);
     }
 
     public async Task QuotaUsedAddAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
@@ -164,7 +164,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
         await tenantQuotaController.QuotaUserUsedDeleteAsync(module, domain, dataTag, size, ownerId);
     }
 
-    private IDataStore GetDataStore(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")
+    private async Task<IDataStore> GetDataStoreAsync(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")
     {
         var storage = storageFactoryConfig.GetStorage(region);
         var moduleElement = storage.GetModuleElement(module);
@@ -179,7 +179,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
         if (coreBaseSettings.Standalone &&
             !moduleElement.DisableMigrate &&
-            consumer.IsSet)
+            await consumer.GetIsSetAsync())
         {
             instanceType = consumer.HandlerType;
             props = consumer;

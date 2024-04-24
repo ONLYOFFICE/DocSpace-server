@@ -207,7 +207,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
                 catch (Exception error)
                 {
@@ -243,7 +243,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
             }
             else if (tenantExtraConfig.Enterprise && tariff.Id == 0 && tariff.LicenseDate == DateTime.MaxValue)
@@ -266,7 +266,7 @@ public class TariffService(
                 };
 
                 await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
-                UpdateCache(tariff.Id);
+                await UpdateCacheAsync(tariff.Id);
             }
         }
         else
@@ -276,9 +276,9 @@ public class TariffService(
 
         return tariff;
 
-        void UpdateCache(int tariffId)
+        async Task UpdateCacheAsync(int tariffId)
         {
-            notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
+            await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
         }
     }
 
@@ -342,7 +342,7 @@ public class TariffService(
                 return false;
             }
 
-            ClearCache(tenantId);
+            await ClearCacheAsync(tenantId);
         }
         catch (Exception error)
         {
@@ -398,9 +398,9 @@ public class TariffService(
     }
 
 
-    private void ClearCache(int tenantId)
+    private async Task ClearCacheAsync(int tenantId)
     {
-        notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
+        await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -663,7 +663,7 @@ public class TariffService(
                 }
             }
 
-            ClearCache(tenant);
+            await ClearCacheAsync(tenant);
 
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
         }
@@ -678,7 +678,7 @@ public class TariffService(
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
         await Queries.DeleteTariffs(coreDbContext, tenant);
 
-        ClearCache(tenant);
+        await ClearCacheAsync(tenant);
     }
 
 

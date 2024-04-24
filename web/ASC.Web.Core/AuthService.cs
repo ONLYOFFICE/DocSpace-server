@@ -44,18 +44,28 @@ public class AuthService
 
     public List<AuthKey> Props { get; private set; }
 
-    public AuthService(Consumer consumer)
+    public static async Task<AuthService> From(Consumer consumer)
     {
-        Consumer = consumer;
-        Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name;
-        Description = ConsumerExtension.GetResourceString(consumer.Name + "Description");
-        Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction");
-        Props = new List<AuthKey>();
-
+        var result = new AuthService
+        {
+            Consumer = consumer,
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
+            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description"),
+            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction"),
+            Props = []
+        };
+        
         foreach (var item in consumer.ManagedKeys)
         {
-            Props.Add(new AuthKey { Name = item, Value = Consumer[item], Title = ConsumerExtension.GetResourceString(item) ?? item });
+            result.Props.Add(new AuthKey
+            {
+                Name = item, 
+                Value = await consumer.GetAsync(item), 
+                Title = ConsumerExtension.GetResourceString(item) ?? item
+            });
         }
+
+        return result;
     }
 }
 

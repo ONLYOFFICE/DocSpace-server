@@ -41,9 +41,9 @@ public class DbSettingsManagerCache
         _notify.Subscribe(i => Cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
-    public void Remove(string key)
+    public async Task RemoveAsync(string key)
     {
-        _notify.Publish(new SettingsCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new SettingsCacheItem { Key = key }, CacheNotifyAction.Remove);
     }
 }
 
@@ -70,7 +70,7 @@ public class SettingsManager(
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
         var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
-        dbSettingsManagerCache.Remove(key);
+        await dbSettingsManagerCache.RemoveAsync(key);
     }
 
     public T GetDefault<T>() where T : class, ISettings<T>
@@ -227,7 +227,7 @@ public class SettingsManager(
                 await context.SaveChangesAsync();
             }
 
-            dbSettingsManagerCache.Remove(key);
+            await dbSettingsManagerCache.RemoveAsync(key);
 
             _cache.Insert(key, settings, _expirationTimeout);
 

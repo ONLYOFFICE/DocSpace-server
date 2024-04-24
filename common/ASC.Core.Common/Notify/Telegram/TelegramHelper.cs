@@ -40,11 +40,11 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         AwaitingConfirmation
     }
 
-    public string RegisterUser(Guid userId, int tenantId)
+    public async Task<string> RegisterUserAsync(Guid userId, int tenantId)
     {
         var token = GenerateToken(userId);
 
-        telegramServiceClient.RegisterUser(userId.ToString(), tenantId, token);
+        await telegramServiceClient.RegisterUserAsync(userId.ToString(), tenantId, token);
 
         return GetLink(token);
     }
@@ -54,12 +54,12 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         telegramServiceClient.SendMessage(msg);
     }
 
-    public bool CreateClient(int tenantId, string token, int tokenLifespan, string proxy)
+    public async Task<bool> CreateClientAsync(int tenantId, string token, int tokenLifespan, string proxy)
     {
         var client = InitClient(token, proxy);
         if (TestingClient(client))
         {
-            telegramServiceClient.CreateOrUpdateClient(tenantId, token, tokenLifespan, proxy);
+            await telegramServiceClient.CreateOrUpdateClientAsync(tenantId, token, tokenLifespan, proxy);
 
             return true;
         }
@@ -83,9 +83,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         return string.IsNullOrEmpty(token) ? string.Empty : GetLink(token);
     }
 
-    public void DisableClient(int tenantId)
+    public async Task DisableClientAsync(int tenantId)
     {
-        telegramServiceClient.DisableClient(tenantId);
+        await telegramServiceClient.DisableClientAsync(tenantId);
     }
 
     public async Task DisconnectAsync(Guid userId, int tenantId)

@@ -150,13 +150,13 @@ public class CspSettingsHelper(SettingsManager settingsManager,
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(filesLinkUtility.DocServiceUrl, UriKind.Absolute))
+        if (Uri.IsWellFormedUriString(filesLinkUtility.GetDocServiceUrl(), UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = [filesLinkUtility.DocServiceUrl],
-                Frame = [filesLinkUtility.DocServiceUrl],
-                Connect = [filesLinkUtility.DocServiceUrl]
+                Script = [filesLinkUtility.GetDocServiceUrl()],
+                Frame = [filesLinkUtility.GetDocServiceUrl()],
+                Connect = [filesLinkUtility.GetDocServiceUrl()]
             });
         }
 

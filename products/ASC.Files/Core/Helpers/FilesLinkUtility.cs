@@ -84,70 +84,70 @@ public class FilesLinkUtility
     }
 
     private const string PublicUrlKey = "public";
-    public string DocServiceUrl
+
+    public string GetDocServiceUrl()
     {
-        get
+        var url = GetUrlSetting(PublicUrlKey, out _);
+        if (!string.IsNullOrEmpty(url) && url != "/")
         {
-            var url = GetUrlSetting(PublicUrlKey, out _);
-            if (!string.IsNullOrEmpty(url) && url != "/")
-            {
-                url = url.TrimEnd('/') + "/";
-            }
-            return url;
+            url = url.TrimEnd('/') + "/";
         }
-        set
+
+        return url;
+    }
+
+    public async Task SetDocServiceUrlAsync(string value)
+    {
+        await SetUrlSettingAsync(ApiUrlKey, null);
+
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
         {
-            SetUrlSetting(ApiUrlKey, null);
-
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)|^\/", RegexOptions.CultureInvariant).IsMatch(value))
             {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)|^\/", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
+                value = "http://" + value;
             }
-
-            SetUrlSetting(PublicUrlKey, value);
         }
+
+        await SetUrlSettingAsync(PublicUrlKey, value);
     }
 
     private const string InternalUrlKey = "internal";
-    public string DocServiceUrlInternal
+
+    public string GetDocServiceUrlInternal()
     {
-        get
+        var url = GetUrlSetting(InternalUrlKey, out _);
+        if (string.IsNullOrEmpty(url))
         {
-            var url = GetUrlSetting(InternalUrlKey, out _);
-            if (string.IsNullOrEmpty(url))
-            {
-                url = DocServiceUrl;
-            }
-            else
-            {
-                url = url.TrimEnd('/') + "/";
-            }
-            return url;
+            url = GetDocServiceUrl();
         }
-        set
+        else
         {
-            SetUrlSetting("converter", null);
-            SetUrlSetting("storage", null);
-            SetUrlSetting("command", null);
-            SetUrlSetting("docbuilder", null);
-
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
-            {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
-            }
-
-            SetUrlSetting(InternalUrlKey, DocServiceUrlInternal != value ? value : null);
+            url = url.TrimEnd('/') + "/";
         }
+
+        return url;
+    }
+
+    public async Task SetDocServiceUrlInternalAsync(string value)
+    {
+        await SetUrlSettingAsync("converter", null);
+        await SetUrlSettingAsync("storage", null);
+        await SetUrlSettingAsync("command", null);
+        await SetUrlSettingAsync("docbuilder", null);
+
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
+        {
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
+            {
+                value = "http://" + value;
+            }
+        }
+
+        await SetUrlSettingAsync(InternalUrlKey, GetDocServiceUrlInternal() != value ? value : null);
     }
 
     private const string ApiUrlKey = "api";
@@ -158,7 +158,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting(ApiUrlKey, out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrl;
+                url = GetDocServiceUrl();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "web-apps/apps/api/documents/api.js";
@@ -175,7 +175,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("converter", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "ConvertService.ashx";
@@ -192,7 +192,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("command", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "coauthoring/CommandService.ashx";
@@ -209,7 +209,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("docbuilder", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "docbuilder";
@@ -226,7 +226,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("healthcheck", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "healthcheck";
@@ -237,23 +237,25 @@ public class FilesLinkUtility
     }
 
     private const string PortalUrlKey = "portal";
-    public string DocServicePortalUrl
-    {
-        get { return GetUrlSetting(PortalUrlKey, out _); }
-        set
-        {
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
-            {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
-            }
 
-            SetUrlSetting(PortalUrlKey, value);
+    public string GetDocServicePortalUrl()
+    {
+        return GetUrlSetting(PortalUrlKey, out _);
+    }
+
+    public async Task SetDocServicePortalUrlAsync(string value)
+    {
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
+        {
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
+            {
+                value = "http://" + value;
+            }
         }
+
+        await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
     public bool IsDefault
@@ -462,7 +464,7 @@ public class FilesLinkUtility
         return value;
     }
 
-    private void SetUrlSetting(string key, string value)
+    private async Task SetUrlSettingAsync(string key, string value)
     {
         if (!_coreBaseSettings.Standalone)
         {
@@ -485,7 +487,7 @@ public class FilesLinkUtility
 
         if (GetUrlSetting(key, out _) != value)
         {
-            _coreSettings.SaveSetting(GetSettingsKey(key), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
         }
     }
 

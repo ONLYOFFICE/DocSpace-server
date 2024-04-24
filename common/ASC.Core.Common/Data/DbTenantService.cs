@@ -292,34 +292,6 @@ public class DbTenantService(
         await tenantDbContext.SaveChangesAsync();
     }
 
-    public void SetTenantSettings(int tenant, string key, byte[] data)
-    {
-        using var tenantDbContext = dbContextFactory.CreateDbContext();
-        if (data == null || data.Length == 0)
-        {
-            var settings = Queries.CoreSettings(tenantDbContext, tenant, key);
-
-            if (settings != null)
-            {
-                tenantDbContext.CoreSettings.Remove(settings);
-            }
-        }
-        else
-        {
-            var settings = new DbCoreSettings
-            {
-                Id = key,
-                TenantId = tenant,
-                Value = data,
-                LastModified = DateTime.UtcNow
-            };
-
-            tenantDbContext.AddOrUpdate(tenantDbContext.CoreSettings, settings);
-        }
-
-        tenantDbContext.SaveChanges();
-    }
-
     private async Task ValidateDomainAsync(string domain, int tenantId, bool validateCharacters)
     {
         // size
@@ -537,11 +509,6 @@ static file class Queries
             (TenantDbContext ctx, int tenantId, string id) =>
                 ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
 
-    public static readonly Func<TenantDbContext, int, string, DbCoreSettings> CoreSettings =
-        EF.CompileQuery(
-            (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
-
     public static readonly Func<TenantDbContext, IAsyncEnumerable<string>> AddressAsync =
         EF.CompileAsyncQuery(
             (TenantDbContext ctx) => ctx.TenantForbiden.Select(r => r.Address));
@@ -572,7 +539,6 @@ public class WarmupDbTenantServiceStartupTask(IServiceProvider provider) : IStar
         await Queries.SettingValueAsync(context, int.MinValue, string.Empty);
         Queries.SettingValue(context, int.MinValue, string.Empty);
         await Queries.CoreSettingsAsync(context, int.MinValue, string.Empty);
-        Queries.CoreSettings(context, int.MinValue, string.Empty);
         await Queries.AddressAsync(context).ToListAsync(cancellationToken: cancellationToken);
         await Queries.AnyTenantsAsync(context, int.MinValue, string.Empty);
     }

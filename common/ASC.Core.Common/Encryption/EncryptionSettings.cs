@@ -71,7 +71,7 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         var settings = Serialize(encryptionSettings);
         await coreConfiguration.SaveSettingAsync(Key, settings);
 
-        ascCacheNotify.ClearCache();
+        await ascCacheNotify.ClearCacheAsync();
     }
 
     public async Task<EncryptionSettings> LoadAsync()
